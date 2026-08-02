@@ -1,0 +1,761 @@
+{
+  "sku": "BA-100-075",
+  "tenant_id": "demo",
+  "brand": "Milwaukee Valve",
+  "class_code": "PLB.VLV.BALL.2PC",
+  "class_name": "Two-Piece Ball Valve",
+  "category_path": [
+    "Plumbing",
+    "Valves",
+    "Ball Valves",
+    "Two-Piece"
+  ],
+  "document_id": "ba100@f7500023",
+  "document_sha256": "f7500023aad5093f9f77c12af5186aa8d4c5a67db25550c5c49a589959bf1da0",
+  "gaps": [
+    {
+      "code": "cv_flow_coefficient",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "ba100@f7500023"
+      ],
+      "required": false,
+      "detail": "deferred to factory; no value stated in source",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "operating_torque",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "ba100@f7500023"
+      ],
+      "required": false,
+      "detail": "value applies to 1/2\" size only; target SKU is 3/4\"",
+      "recommended_action": "human_research"
+    },
+    {
+      "code": "lead_free_compliant",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "ba100@f7500023"
+      ],
+      "required": true,
+      "detail": "source lists NSF/ANSI 61 but not NSF/ANSI 372",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "country_of_origin",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "ba100@f7500023"
+      ],
+      "required": true,
+      "detail": "not stated in source",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "gtin",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "ba100@f7500023"
+      ],
+      "required": false,
+      "detail": "not stated in source",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "each_weight",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "ba100@f7500023"
+      ],
+      "required": false,
+      "detail": "not stated in source",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "case_weight",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "ba100@f7500023"
+      ],
+      "required": false,
+      "detail": "not stated in source",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "selling_uom",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "ba100@f7500023"
+      ],
+      "required": true,
+      "detail": "not stated in source",
+      "recommended_action": "request_from_supplier"
+    }
+  ],
+  "policy": {
+    "epsilon": 0.05,
+    "confidence_level": 0.95,
+    "threshold": 0.6853,
+    "coverage": 1.0,
+    "accepted": 125,
+    "accepted_errors": 0,
+    "observed_error_rate": 0.0,
+    "error_upper_bound": 0.0212,
+    "calibration_size": 125,
+    "achievable": true,
+    "reason": "at threshold 0.685, 100.0% of values are publishable with an error rate of at most 2.1% at 95% confidence"
+  },
+  "quality": {
+    "completeness": 0.75,
+    "verifiability": 1.0,
+    "consistency": 1.0,
+    "richness": 0.0,
+    "composite": 0.8125
+  },
+  "created_at": "2026-08-02T12:38:12.200216+00:00",
+  "decisions": [],
+  "pages": [
+    {
+      "number": 1,
+      "lines": [
+        "MILWAUKEE VALVE - BA-100 SERIES",
+        "Two-Piece Full Port Bronze Ball Valve                          Rev C  2024-08",
+        "",
+        "SPECIFICATIONS",
+        "  Body Material .................. Bronze C84400",
+        "  Ball / Stem .................... Chrome-plated brass / Brass",
+        "  Seat Material .................. RPTFE",
+        "  Pressure Rating ................ 600 PSI WOG @ 73 degF",
+        "  Steam Rating ................... 150 PSI WSP",
+        "  Temperature Range .............. -20 degF to 366 degF",
+        "  End Connection ................. NPT threaded, female both ends",
+        "  Approvals ...................... UL listed, CSA certified, NSF/ANSI 61",
+        "  Operating Torque ............... 18-22 ft-lb (1/2\" size)",
+        "  Flow Coefficient (Cv) .......... Consult factory",
+        "",
+        "ORDERING INFORMATION",
+        "  Part Number      Size        Handle       Carton Qty",
+        "  BA-100-025       1/4\"        Lever        24",
+        "  BA-100-050       1/2\"        Lever        24",
+        "  BA-100-075       3/4\"        Lever        12",
+        "  BA-100-100       1\"          Lever        12",
+        "  BA-100-125       1-1/4\"      Tee          6",
+        "",
+        "  NOTE 1: Sizes 1\" and larger are supplied with a locking lever handle.",
+        "  NOTE 2: Pressure rating derates above 100 degF. See derating chart, page 7.",
+        ""
+      ]
+    }
+  ],
+  "items": [
+    {
+      "attribute_code": "product_series",
+      "attribute_name": "Product Series",
+      "datatype": "string",
+      "value_raw": "BA-100",
+      "value_canonical": "BA-100",
+      "value_display": "BA-100",
+      "score": 0.7194,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.719 >= threshold 0.685",
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "ba100@f7500023",
+          "quote": "MILWAUKEE VALVE - BA-100 SERIES",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": 0,
+          "table_ref": null,
+          "method": "exact_line"
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": null
+    },
+    {
+      "attribute_code": "number_of_pieces",
+      "attribute_name": "Body Construction",
+      "datatype": "enum",
+      "value_raw": "Two-Piece",
+      "value_canonical": "Two-Piece",
+      "value_display": "Two-Piece",
+      "score": 0.7243,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.724 >= threshold 0.685",
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "is_required": true,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "ba100@f7500023",
+          "quote": "Two-Piece Full Port Bronze Ball Valve",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": 1,
+          "table_ref": null,
+          "method": "exact_line"
+        }
+      ],
+      "validations": [],
+      "allowed_values": [
+        "One-Piece",
+        "Two-Piece",
+        "Three-Piece"
+      ],
+      "unit": null
+    },
+    {
+      "attribute_code": "nominal_size",
+      "attribute_name": "Nominal Pipe Size",
+      "datatype": "dimension",
+      "value_raw": "3/4\"",
+      "value_canonical": {
+        "magnitude": 19.05,
+        "unit": "mm"
+      },
+      "value_display": "3/4\"",
+      "score": 0.7868,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.787 >= threshold 0.685",
+      "method": "table_extraction",
+      "model_tier": "volume",
+      "is_required": true,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "ba100@f7500023",
+          "quote": "BA-100-075  | 3/4\"   | Lever  | 12",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": 19,
+          "table_ref": "t1:r3",
+          "method": "table_row"
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": "mm"
+    },
+    {
+      "attribute_code": "pressure_rating_wog",
+      "attribute_name": "Pressure Rating (WOG)",
+      "datatype": "quantity",
+      "value_raw": "600 PSI WOG @ 73 degF",
+      "value_canonical": {
+        "magnitude": 600.0,
+        "unit": "psi"
+      },
+      "value_display": "600 psi",
+      "score": 0.7889,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.789 >= threshold 0.685",
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "is_required": true,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "ba100@f7500023",
+          "quote": "Pressure Rating ................ 600 PSI WOG @ 73 degF",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": 7,
+          "table_ref": null,
+          "method": "exact_line"
+        }
+      ],
+      "validations": [
+        {
+          "layer": "L0",
+          "rule_id": "qualifiers_retained",
+          "verdict": "pass",
+          "reason": "value carries qualifiers preserved from the source",
+          "counterexample": null,
+          "suggested_fix": null,
+          "blocking": false
+        }
+      ],
+      "allowed_values": [],
+      "unit": "psi"
+    },
+    {
+      "attribute_code": "body_material",
+      "attribute_name": "Body Material",
+      "datatype": "enum",
+      "value_raw": "Bronze C84400",
+      "value_canonical": "Bronze C84400",
+      "value_display": "Bronze C84400",
+      "score": 0.7283,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.728 >= threshold 0.685",
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "is_required": true,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "ba100@f7500023",
+          "quote": "Body Material .................. Bronze C84400",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": 4,
+          "table_ref": null,
+          "method": "exact_line"
+        }
+      ],
+      "validations": [],
+      "allowed_values": [
+        "Brass C46500",
+        "Brass C36000",
+        "Brass C69300",
+        "Bronze C84400",
+        "Bronze C89833",
+        "Stainless Steel 316",
+        "Stainless Steel 304",
+        "Carbon Steel",
+        "Ductile Iron",
+        "PVC"
+      ],
+      "unit": null
+    },
+    {
+      "attribute_code": "end_connection",
+      "attribute_name": "End Connection",
+      "datatype": "enum",
+      "value_raw": "NPT threaded, female both ends",
+      "value_canonical": "NPT Threaded",
+      "value_display": "NPT Threaded",
+      "score": 0.6976,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.698 >= threshold 0.685",
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "is_required": true,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "ba100@f7500023",
+          "quote": "End Connection ................. NPT threaded, female both ends",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": 10,
+          "table_ref": null,
+          "method": "exact_line"
+        }
+      ],
+      "validations": [
+        {
+          "layer": "L0",
+          "rule_id": "enum_partial_match",
+          "verdict": "warn",
+          "reason": "attribute 'end_connection' snapped to 'NPT Threaded'; the source carried additional text that is not represented in the canonical value",
+          "counterexample": null,
+          "suggested_fix": null,
+          "blocking": false
+        },
+        {
+          "layer": "L0",
+          "rule_id": "enum_partial_match",
+          "verdict": "warn",
+          "reason": "attribute 'end_connection' snapped to 'NPT Threaded'; the source carried additional text that is not represented in the canonical value",
+          "counterexample": null,
+          "suggested_fix": null,
+          "blocking": false
+        }
+      ],
+      "allowed_values": [
+        "NPT Threaded",
+        "BSPT Threaded",
+        "BSPP Threaded",
+        "Solder",
+        "Press",
+        "Flanged",
+        "Grooved",
+        "Butt Weld",
+        "Socket Weld"
+      ],
+      "unit": null
+    },
+    {
+      "attribute_code": "port_type",
+      "attribute_name": "Port Type",
+      "datatype": "enum",
+      "value_raw": "Full Port",
+      "value_canonical": "Full Port",
+      "value_display": "Full Port",
+      "score": 0.7243,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.724 >= threshold 0.685",
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "is_required": true,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "ba100@f7500023",
+          "quote": "Two-Piece Full Port Bronze Ball Valve",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": 1,
+          "table_ref": null,
+          "method": "exact_line"
+        }
+      ],
+      "validations": [],
+      "allowed_values": [
+        "Full Port",
+        "Standard Port",
+        "Reduced Port"
+      ],
+      "unit": null
+    },
+    {
+      "attribute_code": "seat_material",
+      "attribute_name": "Seat Material",
+      "datatype": "enum",
+      "value_raw": "RPTFE",
+      "value_canonical": "RPTFE",
+      "value_display": "RPTFE",
+      "score": 0.7132,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.713 >= threshold 0.685",
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "is_required": true,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "ba100@f7500023",
+          "quote": "Seat Material .................. RPTFE",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": 6,
+          "table_ref": null,
+          "method": "exact_line"
+        }
+      ],
+      "validations": [],
+      "allowed_values": [
+        "PTFE",
+        "RPTFE",
+        "PEEK",
+        "Nylon",
+        "Buna-N",
+        "EPDM",
+        "Metal Seated"
+      ],
+      "unit": null
+    },
+    {
+      "attribute_code": "stem_material",
+      "attribute_name": "Stem Material",
+      "datatype": "enum",
+      "value_raw": "Chrome-plated brass / Brass",
+      "value_canonical": "Chrome-Plated Brass",
+      "value_display": "Chrome-Plated Brass",
+      "score": 0.695,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.695 >= threshold 0.685",
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "ba100@f7500023",
+          "quote": "Ball / Stem .................... Chrome-plated brass / Brass",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": 5,
+          "table_ref": null,
+          "method": "exact_line"
+        }
+      ],
+      "validations": [
+        {
+          "layer": "L0",
+          "rule_id": "enum_partial_match",
+          "verdict": "warn",
+          "reason": "attribute 'stem_material' snapped to 'Chrome-Plated Brass'; the source carried additional text that is not represented in the canonical value",
+          "counterexample": null,
+          "suggested_fix": null,
+          "blocking": false
+        },
+        {
+          "layer": "L0",
+          "rule_id": "enum_partial_match",
+          "verdict": "warn",
+          "reason": "attribute 'stem_material' snapped to 'Chrome-Plated Brass'; the source carried additional text that is not represented in the canonical value",
+          "counterexample": null,
+          "suggested_fix": null,
+          "blocking": false
+        }
+      ],
+      "allowed_values": [
+        "Brass",
+        "Silicon Bronze",
+        "Bronze",
+        "Stainless Steel 316",
+        "Stainless Steel 304",
+        "Chrome-Plated Brass",
+        "Monel"
+      ],
+      "unit": null
+    },
+    {
+      "attribute_code": "handle_type",
+      "attribute_name": "Handle Type",
+      "datatype": "enum",
+      "value_raw": "Lever",
+      "value_canonical": "Lever",
+      "value_display": "Lever",
+      "score": 0.7897,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.790 >= threshold 0.685",
+      "method": "table_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "ba100@f7500023",
+          "quote": "BA-100-075  | 3/4\"   | Lever  | 12",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": 19,
+          "table_ref": "t1:r3",
+          "method": "table_row"
+        }
+      ],
+      "validations": [],
+      "allowed_values": [
+        "Lever",
+        "Locking Lever",
+        "Tee",
+        "Butterfly",
+        "Oval",
+        "Handwheel"
+      ],
+      "unit": null
+    },
+    {
+      "attribute_code": "temperature_range",
+      "attribute_name": "Temperature Range",
+      "datatype": "range",
+      "value_raw": "-20 degF to 366 degF",
+      "value_canonical": {
+        "minimum": -28.888889,
+        "maximum": 185.555556,
+        "unit": "degC"
+      },
+      "value_display": "-20 to 366 degF",
+      "score": 0.7377,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.738 >= threshold 0.685",
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "is_required": true,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "ba100@f7500023",
+          "quote": "Temperature Range .............. -20 degF to 366 degF",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": 9,
+          "table_ref": null,
+          "method": "exact_line"
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": "degC"
+    },
+    {
+      "attribute_code": "steam_pressure_rating",
+      "attribute_name": "Steam Pressure Rating (WSP)",
+      "datatype": "quantity",
+      "value_raw": "150 PSI WSP",
+      "value_canonical": {
+        "magnitude": 150.0,
+        "unit": "psi"
+      },
+      "value_display": "150 psi",
+      "score": 0.775,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.775 >= threshold 0.685",
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "ba100@f7500023",
+          "quote": "Steam Rating ................... 150 PSI WSP",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": 8,
+          "table_ref": null,
+          "method": "exact_line"
+        }
+      ],
+      "validations": [
+        {
+          "layer": "L0",
+          "rule_id": "qualifiers_retained",
+          "verdict": "pass",
+          "reason": "value carries qualifiers preserved from the source",
+          "counterexample": null,
+          "suggested_fix": null,
+          "blocking": false
+        }
+      ],
+      "allowed_values": [],
+      "unit": "psi"
+    },
+    {
+      "attribute_code": "potable_water_approved",
+      "attribute_name": "Potable Water Approved",
+      "datatype": "boolean",
+      "value_raw": "true",
+      "value_canonical": true,
+      "value_display": "Yes",
+      "score": 0.7057,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.706 >= threshold 0.685",
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "ba100@f7500023",
+          "quote": "Approvals ...................... UL listed, CSA certified, NSF/ANSI 61",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": 11,
+          "table_ref": null,
+          "method": "exact_line"
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": null
+    },
+    {
+      "attribute_code": "approvals",
+      "attribute_name": "Approvals and Listings",
+      "datatype": "multi_enum",
+      "value_raw": "UL listed, CSA certified, NSF/ANSI 61",
+      "value_canonical": [
+        "UL",
+        "CSA",
+        "NSF-61"
+      ],
+      "value_display": "UL, CSA, NSF-61",
+      "score": 0.7529,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.753 >= threshold 0.685",
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "is_required": true,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "ba100@f7500023",
+          "quote": "Approvals ...................... UL listed, CSA certified, NSF/ANSI 61",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": 11,
+          "table_ref": null,
+          "method": "exact_line"
+        }
+      ],
+      "validations": [],
+      "allowed_values": [
+        "UL",
+        "CSA",
+        "ETL",
+        "FM",
+        "NSF-61",
+        "NSF-372",
+        "NSF-14",
+        "CRN",
+        "ASME",
+        "MSS",
+        "ATEX",
+        "IECEx",
+        "WRAS"
+      ],
+      "unit": null
+    },
+    {
+      "attribute_code": "case_quantity",
+      "attribute_name": "Carton Quantity",
+      "datatype": "integer",
+      "value_raw": "12",
+      "value_canonical": 12,
+      "value_display": "12",
+      "score": 0.7809,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.781 >= threshold 0.685",
+      "method": "table_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "ba100@f7500023",
+          "quote": "BA-100-075  | 3/4\"   | Lever  | 12",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": 19,
+          "table_ref": "t1:r3",
+          "method": "table_row"
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": null
+    }
+  ],
+  "queue": []
+}

@@ -1,0 +1,255 @@
+# Valve-specific attributes, shared across ball / gate / check / butterfly classes.
+#
+# `description` and `example_values` are PROMPT INPUT, not documentation. Extraction quality
+# measurably improves when the schema supplies attribute descriptions and example values,
+# so a vague description here is a real defect, not a cosmetic one.
+
+attributes:
+  - code: nominal_size
+    name: Nominal Pipe Size
+    datatype: dimension
+    quantity_kind: length
+    canonical_unit: mm
+    display_preference: imperial_fraction
+    unit_hint: in
+    description: >
+      Nominal pipe size of the valve end connections, as designated by the manufacturer.
+      Expressed as NPS in imperial markets and DN in metric markets. This is a designation,
+      not a measured bore diameter.
+    example_values: ['1/2"', '3/4"', '1"', '1-1/4"', '2"']
+    extraction_hints:
+      - usually the first column of an ordering table
+      - may appear as DN followed by a millimetre figure on metric datasheets
+      - read the row whose part number matches the target SKU
+    tolerance: 0.0
+    plausible_range: [3.0, 1200.0]
+
+  - code: pressure_rating_wog
+    name: Pressure Rating (WOG)
+    datatype: quantity
+    quantity_kind: pressure
+    canonical_unit: psi
+    unit_hint: psi
+    description: >
+      Maximum non-shock working pressure for water, oil and gas service at ambient
+      temperature. WOG is a rating class, not a unit. Capture the reference temperature
+      separately if the source states one.
+    example_values: ["400 PSI", "600 PSI", "1000 PSI"]
+    extraction_hints:
+      - often written "600 PSI WOG @ 73F"
+      - do not confuse with the steam rating (WSP), which is a different, lower figure
+    tolerance: 0.0
+    plausible_range: [25.0, 10000.0]
+
+  - code: steam_pressure_rating
+    name: Steam Pressure Rating (WSP)
+    datatype: quantity
+    quantity_kind: pressure
+    canonical_unit: psi
+    unit_hint: psi
+    description: >
+      Maximum working steam pressure. Distinct from and lower than the WOG rating.
+      Reporting the WOG figure here is a common and consequential extraction error.
+    example_values: ["125 PSI", "150 PSI"]
+    tolerance: 0.0
+    plausible_range: [10.0, 1000.0]
+
+  - code: body_material
+    name: Body Material
+    datatype: enum
+    description: >
+      Primary material of the valve body casting or forging. Capture the specific alloy
+      designation when the source gives one, because lead content and pressure rating both
+      depend on the exact alloy rather than the material family.
+    example_values: ["Bronze C84400", "Brass C46500", "Stainless Steel 316"]
+    allowed_values:
+      - value: Brass C46500
+        aliases: ["naval brass", "C46500", "CW722R"]
+        note: low-lead naval brass
+      - value: Brass C36000
+        aliases: ["free-cutting brass", "C36000", "free machining brass"]
+        note: leaded alloy - incompatible with a lead-free claim
+      - value: Brass C69300
+        aliases: ["C69300", "eco brass", "ecobrass"]
+        note: lead-free silicon brass
+      - value: Bronze C84400
+        aliases: ["C84400", "leaded red brass", "85-5-5-5"]
+        note: leaded alloy - incompatible with a lead-free claim
+      - value: Bronze C89833
+        aliases: ["C89833", "bismuth bronze", "federalloy"]
+        note: lead-free bronze
+      - value: Stainless Steel 316
+        aliases: ["SS316", "316 SS", "316", "CF8M", "A351 CF8M"]
+      - value: Stainless Steel 304
+        aliases: ["SS304", "304 SS", "304", "CF8"]
+      - value: Carbon Steel
+        aliases: ["CS", "A105", "WCB", "A216 WCB"]
+      - value: Ductile Iron
+        aliases: ["DI", "A536", "ductile"]
+      - value: PVC
+        aliases: ["poly vinyl chloride", "u-pvc"]
+
+  - code: seat_material
+    name: Seat Material
+    datatype: enum
+    description: >
+      Material of the valve seats. Governs the temperature and chemical compatibility
+      limits, and is frequently the weakest-rated component in the assembly.
+    example_values: ["PTFE", "RPTFE", "PEEK"]
+    allowed_values:
+      - value: PTFE
+        aliases: ["teflon", "p.t.f.e."]
+      - value: RPTFE
+        aliases: ["reinforced ptfe", "r-ptfe", "glass filled ptfe"]
+      - value: PEEK
+        aliases: ["p.e.e.k."]
+      - value: Nylon
+        aliases: ["polyamide", "pa"]
+      - value: Buna-N
+        aliases: ["nbr", "nitrile", "buna"]
+      - value: EPDM
+        aliases: ["e.p.d.m."]
+      - value: Metal Seated
+        aliases: ["metal seat", "metal-to-metal"]
+
+  - code: stem_material
+    name: Stem Material
+    datatype: enum
+    description: >
+      Material of the valve stem. Relevant to dezincification resistance and to
+      potable-water compliance.
+    example_values: ["Brass", "Silicon Bronze", "Stainless Steel 316"]
+    allowed_values:
+      - value: Brass
+        aliases: ["brass stem"]
+      - value: Silicon Bronze
+        aliases: ["si bronze", "c87600", "silicon bronze stem"]
+        note: common gate-valve stem alloy; dezincification resistant
+      - value: Bronze
+        aliases: ["bronze stem"]
+      - value: Stainless Steel 316
+        aliases: ["SS316", "316 SS"]
+      - value: Stainless Steel 304
+        aliases: ["SS304", "304 SS"]
+      - value: Chrome-Plated Brass
+        aliases: ["chrome plated brass", "cp brass"]
+      - value: Monel
+        aliases: ["monel 400"]
+
+  - code: port_type
+    name: Port Type
+    datatype: enum
+    description: >
+      Whether the valve bore matches the nominal pipe size (full port) or is reduced.
+      Full port valves have a materially higher flow coefficient at the same nominal size.
+    example_values: ["Full Port", "Standard Port"]
+    allowed_values:
+      - value: Full Port
+        aliases: ["full bore", "fullport", "fp"]
+      - value: Standard Port
+        aliases: ["regular port", "conventional port"]
+      - value: Reduced Port
+        aliases: ["reduced bore", "restricted port"]
+
+  - code: end_connection
+    name: End Connection
+    datatype: enum
+    description: >
+      Connection style at the valve ends. NPT and BSPT are NOT interchangeable and must
+      never be normalized into one another; they are both tapered pipe threads with similar
+      nominal designations and they do not seal against each other.
+    example_values: ["NPT Threaded", "Solder", "Press"]
+    allowed_values:
+      - value: NPT Threaded
+        aliases: ["FNPT", "MNPT", "IPS", "threaded", "npt", "female npt", "screwed"]
+      - value: BSPT Threaded
+        aliases: ["BSPT", "R thread", "bspt threaded"]
+        note: tapered, NOT interchangeable with NPT
+      - value: BSPP Threaded
+        aliases: ["BSPP", "G thread", "parallel thread"]
+      - value: Solder
+        aliases: ["sweat", "C x C", "solder cup", "solder end"]
+      - value: Press
+        aliases: ["press-fit", "pressfit", "press connect"]
+      - value: Flanged
+        aliases: ["ANSI 150 flange", "flange", "flanged end"]
+      - value: Grooved
+        aliases: ["groove", "victaulic"]
+      - value: Butt Weld
+        aliases: ["bw", "buttweld"]
+      - value: Socket Weld
+        aliases: ["sw", "socketweld"]
+
+  - code: handle_type
+    name: Handle Type
+    datatype: enum
+    description: >
+      Handle style supplied with this specific part number. Frequently varies by size
+      within one series, so read the ordering-table row rather than the general
+      specification block, and check footnotes for size-dependent substitutions.
+    example_values: ["Lever", "Tee", "Locking Lever"]
+    allowed_values:
+      - value: Lever
+        aliases: ["lever handle", "latch lock lever"]
+      - value: Locking Lever
+        aliases: ["locking handle", "lockable lever"]
+      - value: Tee
+        aliases: ["tee handle", "t-handle", "t handle"]
+      - value: Butterfly
+        aliases: ["butterfly handle", "wing"]
+      - value: Oval
+        aliases: ["oval handle"]
+      - value: Handwheel
+        aliases: ["hand wheel", "wheel"]
+
+  - code: cv_flow_coefficient
+    name: Flow Coefficient (Cv)
+    datatype: number
+    description: >
+      Valve flow coefficient Cv, the flow in US gallons per minute of 60F water that
+      produces a one PSI pressure drop. Dimensionless by convention. Size-dependent, so
+      read the value for the target SKU's size.
+    example_values: ["12.5", "18.0", "45"]
+    tolerance: 0.05
+    plausible_range: [0.01, 50000.0]
+
+  - code: temperature_range
+    name: Temperature Range
+    datatype: range
+    quantity_kind: temperature
+    canonical_unit: degC
+    unit_hint: degF
+    description: >
+      Minimum and maximum service temperature. Bounded by the weakest component, usually
+      the seat rather than the body.
+    example_values: ["-20F to 366F", "-29C to 186C"]
+    tolerance: 0.0
+    plausible_range: [-273.15, 1000.0]
+
+  - code: operating_torque
+    name: Operating Torque
+    datatype: range
+    quantity_kind: torque
+    canonical_unit: N.m
+    unit_hint: ft.lbf
+    description: >
+      Torque required to operate the valve. Often stated for one specific size only, in
+      which case do not assume it applies to the target SKU unless the sizes match.
+    example_values: ["18-22 ft-lb", "24-30 N.m"]
+    tolerance: 0.05
+    plausible_range: [0.1, 20000.0]
+
+  - code: number_of_pieces
+    name: Body Construction
+    datatype: enum
+    description: >
+      Number of body pieces in the valve construction. Determines whether the valve is
+      field-serviceable.
+    example_values: ["Two-Piece", "Three-Piece"]
+    allowed_values:
+      - value: One-Piece
+        aliases: ["1 piece", "1-piece", "single piece"]
+      - value: Two-Piece
+        aliases: ["2 piece", "2-piece", "two piece"]
+      - value: Three-Piece
+        aliases: ["3 piece", "3-piece", "three piece"]

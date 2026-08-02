@@ -1,0 +1,77 @@
+# Named constants referenced by cross-field rules.
+#
+# Kept declarative alongside the rules that use them so a merchandiser can read and correct
+# them without touching code. The alternative — burying "which alloys contain lead" in a
+# Python set — puts a domain fact where no domain expert will ever find it.
+
+sets:
+  # Copper alloys with intentional lead content. A lead-free claim on any of these is
+  # contradictory unless a lead-free certification exists for that specific part number.
+  LEADED_ALLOYS:
+    - Brass C36000
+    - Bronze C84400
+
+  # Alloys formulated as lead-free replacements.
+  LEAD_FREE_ALLOYS:
+    - Brass C69300
+    - Bronze C89833
+    - Stainless Steel 316
+    - Stainless Steel 304
+
+  # Threaded end connections. Note NPT and BSPT both appear: they are both threaded, and
+  # they are still not interchangeable with each other.
+  THREADED_TYPES:
+    - NPT Threaded
+    - BSPT Threaded
+    - BSPP Threaded
+
+  # Certifications that substantiate a potable-water claim.
+  POTABLE_CERTIFICATIONS:
+    - NSF-61
+    - NSF-372
+    - NSF-14
+
+  # Certifications that substantiate a lead-free claim specifically. NSF-61 is deliberately
+  # absent: it covers drinking-water system components, not lead content. Conflating the two
+  # is the single most common compliance error in this category.
+  LEAD_FREE_CERTIFICATIONS:
+    - NSF-372
+
+tables:
+  # Minimum expected flow coefficient for a full-port valve, by nominal size in millimetres.
+  # A full-port valve materially below these figures usually means the Cv was read from a
+  # reduced-port row of the same table.
+  CV_FLOOR_BY_SIZE_MM:
+    "6.35": 3.0     # 1/4"
+    "9.525": 6.0    # 3/8"
+    "12.7": 10.0    # 1/2"
+    "19.05": 22.0   # 3/4"
+    "25.4": 40.0    # 1"
+    "31.75": 75.0   # 1-1/4"
+    "38.1": 110.0   # 1-1/2"
+    "50.8": 200.0   # 2"
+
+  # Maximum working pressure by body material, in PSI. A stated rating above the material's
+  # limit means either the material or the rating was extracted wrongly.
+  MATERIAL_MAX_PRESSURE_PSI:
+    Brass C36000: 600.0
+    Brass C46500: 600.0
+    Brass C69300: 600.0
+    Bronze C84400: 600.0
+    Bronze C89833: 600.0
+    Stainless Steel 304: 1000.0
+    Stainless Steel 316: 1000.0
+    Carbon Steel: 2000.0
+    Ductile Iron: 500.0
+    PVC: 150.0
+
+  # Service temperature limits by seat material, in degrees Celsius. The seat is usually the
+  # weakest component in the assembly, so it bounds the whole valve.
+  SEAT_TEMPERATURE_LIMITS_C:
+    PTFE: 232.0
+    RPTFE: 232.0
+    PEEK: 260.0
+    Nylon: 121.0
+    Buna-N: 100.0
+    EPDM: 149.0
+    Metal Seated: 538.0

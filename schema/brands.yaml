@@ -1,0 +1,76 @@
+# Brand master for the PVF / valves vertical.
+#
+# Brand unification is the least glamorous item on Unilog's data-cleansing service list and
+# one of the most valuable. A catalogue that lists "Sq. D", "Square-D" and "SCHNEIDER/SQUARE D"
+# as three brands has three broken facets, three sets of search results, and no way to report
+# on a supplier line.
+#
+# `mpn_prefixes` are vendor-added prefixes that are NOT part of the manufacturer part number.
+# Distributors prepend their own codes on import and those prefixes then block every attempt
+# to match the item against the manufacturer's own data.
+
+brands:
+  - brand_id: milwaukee_valve
+    name: Milwaukee Valve
+    aliases: ["milwaukee", "milwaukee vlv", "mil valve", "milwaukee valve company"]
+    mpn_prefixes: ["MV-", "MIL-"]
+
+  - brand_id: nibco
+    name: NIBCO
+    aliases: ["nibco inc", "nibco incorporated"]
+    mpn_prefixes: ["NIB-"]
+
+  - brand_id: apollo
+    name: Apollo Valves
+    aliases: ["apollo", "conbraco", "conbraco industries", "apollo conbraco", "apollo/conbraco"]
+    mpn_prefixes: ["APV-", "APOLLO-"]
+
+  - brand_id: watts
+    name: Watts
+    aliases: ["watts water", "watts water technologies", "watts regulator", "watts reg"]
+    mpn_prefixes: ["WAT-"]
+
+  - brand_id: zurn
+    name: Zurn
+    aliases: ["zurn industries", "zurn elkay", "wilkins", "zurn wilkins"]
+
+  - brand_id: mueller
+    name: Mueller
+    aliases: ["mueller industries", "mueller co", "mueller streamline"]
+    mpn_prefixes: ["MUE-"]
+
+  - brand_id: jomar
+    name: Jomar Valve
+    aliases: ["jomar", "jomar international"]
+
+  - brand_id: legend
+    name: Legend Valve
+    aliases: ["legend", "legend valve and fitting", "legend valve & fitting"]
+
+  - brand_id: matco_norca
+    name: Matco-Norca
+    aliases: ["matco norca", "matco", "matconorca"]
+
+  - brand_id: victaulic
+    name: Victaulic
+    aliases: ["victaulic company"]
+
+  - brand_id: anvil
+    name: Anvil International
+    aliases: ["anvil", "anvil intl", "grinnell", "gruvlok"]
+
+  - brand_id: charlotte_pipe
+    name: Charlotte Pipe
+    aliases: ["charlotte", "charlotte pipe and foundry", "charlotte pipe & foundry"]
+
+  - brand_id: viega
+    name: Viega
+    aliases: ["viega llc", "viega propress"]
+
+  - brand_id: kitz
+    name: KITZ
+    aliases: ["kitz corporation", "kitz corp"]
+
+  - brand_id: bonomi
+    name: Bonomi
+    aliases: ["rubinetterie bonomi", "bonomi north america", "valbia bonomi"]

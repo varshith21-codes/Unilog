@@ -1,0 +1,96 @@
+# Identity and packaging attributes, shared across every class.
+#
+# The packaging attributes exist mainly so that L2 cross-field validation has something to
+# check: `case_weight` should be consistent with `each_weight * case_quantity`. When it is
+# not, one of the three is wrong and the arithmetic proves it — no model judgement required.
+# That kind of provable inconsistency is worth far more than another extracted field.
+
+attributes:
+  - code: gtin
+    name: GTIN / UPC
+    datatype: string
+    pattern: '^\d{8}$|^\d{12,14}$'
+    description: >
+      Global Trade Item Number, 8, 12, 13 or 14 digits. The final digit is a modulo-10 check
+      digit, which L0 validation verifies arithmetically — a transposed digit is therefore
+      detectable without any external lookup.
+    example_values: ["012345678905", "00012345678905"]
+    extraction_hints:
+      - may be labelled UPC, EAN, GTIN or barcode
+      - strip spaces and hyphens before recording
+
+  - code: each_weight
+    name: Weight (Each)
+    datatype: quantity
+    quantity_kind: mass
+    canonical_unit: kg
+    unit_hint: lb
+    description: >
+      Shipping weight of a single unit. Distinguish carefully from carton weight; datasheets
+      often place them in adjacent columns with similar headings.
+    example_values: ["0.75 lb", "1.2 kg"]
+    tolerance: 0.02
+    plausible_range: [0.0001, 5000.0]
+
+  - code: case_quantity
+    name: Carton Quantity
+    datatype: integer
+    description: >
+      Number of selling units per carton or master pack for this specific part number.
+      Frequently varies by size within one series, so read the ordering-table row that
+      matches the target SKU.
+    example_values: ["6", "12", "24"]
+    extraction_hints:
+      - often headed "Carton Qty", "Std Pack" or "Master Pack"
+    plausible_range: [1.0, 100000.0]
+
+  - code: case_weight
+    name: Weight (Carton)
+    datatype: quantity
+    quantity_kind: mass
+    canonical_unit: kg
+    unit_hint: lb
+    description: >
+      Gross weight of a full carton. Should be broadly consistent with the each-weight
+      multiplied by the carton quantity, allowing for packaging material.
+    example_values: ["9.5 lb", "4.3 kg"]
+    tolerance: 0.05
+    plausible_range: [0.001, 50000.0]
+
+  - code: selling_uom
+    name: Selling Unit of Measure
+    datatype: enum
+    description: >
+      The unit in which the product is sold, which is not necessarily the unit in which it
+      is priced or stocked. Conflating the three is a classic source of order errors.
+    example_values: ["Each", "Case", "Box"]
+    allowed_values:
+      - value: Each
+        aliases: ["ea", "ea.", "each", "pc", "piece", "unit"]
+      - value: Box
+        aliases: ["bx", "box"]
+      - value: Case
+        aliases: ["cs", "case", "carton", "ctn"]
+      - value: Pair
+        aliases: ["pr", "pair"]
+      - value: Foot
+        aliases: ["ft", "per foot", "lineal foot"]
+      - value: Roll
+        aliases: ["rl", "roll"]
+      - value: Bag
+        aliases: ["bg", "bag"]
+
+  - code: product_series
+    name: Product Series
+    datatype: string
+    description: >
+      Manufacturer's series or family designation only, without the word "series" and without
+      the manufacturer name. The anchor for part-number grammar induction, because the
+      positional encoding of a smart part number is defined per series rather than per
+      manufacturer.
+    example_values: ["BA-100", "T-113", "T-585"]
+    extraction_hints:
+      - usually in the document title or header block
+      - >
+        report the designation alone: from "NIBCO - T-113 SERIES" the value is "T-113", not
+        "T-113 SERIES" and not "NIBCO T-113"

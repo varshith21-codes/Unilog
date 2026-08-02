@@ -1,0 +1,106 @@
+# Compliance and certification attributes.
+#
+# Every attribute here sets `compliance_claim: true` and therefore
+# `evidence_requirement: strict`. That combination is enforced by AttributeDefinition: a
+# legally consequential claim may never be satisfied by inference, only by an explicit
+# certificate, declaration or marking in the source.
+#
+# This is the part of the catalog where a confidently wrong value stops being a data quality
+# problem and becomes a liability problem.
+
+attributes:
+  - code: lead_free_compliant
+    name: Lead-Free Compliant
+    datatype: boolean
+    description: >
+      True only when the source explicitly references a lead-free certification or
+      declaration such as NSF/ANSI 372, or the Safe Drinking Water Act weighted-average
+      lead content requirement. A lead-free claim may never be inferred from the product
+      family, the series name, or the presence of other certifications.
+    example_values: ["NSF/ANSI 372 certified", "lead-free per SDWA"]
+    extraction_hints:
+      - look for an explicit certification reference, not marketing language
+      - "the word 'lead-free' alone is not sufficient without a standard reference"
+    evidence_requirement: strict
+    compliance_claim: true
+
+  - code: potable_water_approved
+    name: Potable Water Approved
+    datatype: boolean
+    description: >
+      True only when the source references an NSF/ANSI 61 certification for drinking-water
+      system components. Do not infer from a lead-free claim; they are different standards
+      covering different things.
+    example_values: ["NSF/ANSI 61 certified"]
+    evidence_requirement: strict
+    compliance_claim: true
+
+  - code: approvals
+    name: Approvals and Listings
+    datatype: multi_enum
+    multivalued: true
+    description: >
+      Third-party certifications, listings and approvals explicitly stated in the source.
+      Record only what is stated. A listing number without a recognised mark is not an
+      approval, and an approval for one size in a series does not extend to the others.
+    example_values: ["UL, CSA, NSF-61", "FM approved"]
+    evidence_requirement: strict
+    compliance_claim: true
+    allowed_values:
+      - value: UL
+        aliases: ["ul listed", "underwriters laboratories", "u.l."]
+      - value: CSA
+        aliases: ["csa certified", "canadian standards association"]
+      - value: ETL
+        aliases: ["etl listed", "intertek"]
+      - value: FM
+        aliases: ["fm approved", "factory mutual", "fm global"]
+      - value: NSF-61
+        aliases: ["nsf/ansi 61", "nsf 61", "nsf/ansi standard 61"]
+      - value: NSF-372
+        aliases: ["nsf/ansi 372", "nsf 372"]
+      - value: NSF-14
+        aliases: ["nsf/ansi 14", "nsf 14"]
+      - value: CRN
+        aliases: ["canadian registration number"]
+      - value: ASME
+        aliases: ["asme certified", "asme b16"]
+      - value: MSS
+        aliases: ["mss sp", "manufacturers standardization society"]
+      - value: ATEX
+        aliases: ["atex certified", "atex marked"]
+      - value: IECEx
+        aliases: ["iecex certified"]
+      - value: WRAS
+        aliases: ["wras approved", "water regulations advisory scheme"]
+
+  - code: rohs_compliant
+    name: RoHS Compliant
+    datatype: boolean
+    description: >
+      True only when the source states RoHS compliance, ideally with the directive version.
+      Incompatible with a declared restricted substance above its threshold concentration.
+    example_values: ["RoHS 3 compliant", "RoHS 2011/65/EU"]
+    evidence_requirement: strict
+    compliance_claim: true
+
+  - code: prop65_warning_required
+    name: California Prop 65 Warning Required
+    datatype: boolean
+    description: >
+      True when the source states that a California Proposition 65 warning applies.
+      Absence of a statement is not evidence of absence of a requirement, so record a gap
+      rather than false when the source is silent.
+    evidence_requirement: strict
+    compliance_claim: true
+
+  - code: country_of_origin
+    name: Country of Origin
+    datatype: string
+    description: >
+      Country where the product is manufactured, as stated by the manufacturer. Drives
+      tariff treatment and trade-agreement eligibility, so a guess here has direct
+      financial consequences.
+    example_values: ["United States", "Taiwan", "Italy", "China"]
+    evidence_requirement: strict
+    compliance_claim: true

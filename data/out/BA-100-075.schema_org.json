@@ -1,0 +1,112 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "sku": "BA-100-075",
+  "name": "Milwaukee Valve BA-100-075 3/4\" Bronze Two-Piece Ball Valve, 600 psi, Full Port",
+  "mpn": "BA-100-075",
+  "brand": {
+    "@type": "Brand",
+    "name": "Milwaukee Valve"
+  },
+  "category": "Plumbing > Valves > Ball Valves > Two-Piece",
+  "additionalProperty": [
+    {
+      "@type": "PropertyValue",
+      "propertyID": "approvals",
+      "name": "Approvals and Listings",
+      "value": [
+        "UL",
+        "CSA",
+        "NSF-61"
+      ]
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "body_material",
+      "name": "Body Material",
+      "value": "Bronze C84400"
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "case_quantity",
+      "name": "Carton Quantity",
+      "value": 12
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "end_connection",
+      "name": "End Connection",
+      "value": "NPT Threaded"
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "handle_type",
+      "name": "Handle Type",
+      "value": "Lever"
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "nominal_size",
+      "name": "Nominal Pipe Size",
+      "value": 19.05,
+      "unitText": "mm"
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "number_of_pieces",
+      "name": "Body Construction",
+      "value": "Two-Piece"
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "port_type",
+      "name": "Port Type",
+      "value": "Full Port"
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "potable_water_approved",
+      "name": "Potable Water Approved",
+      "value": true
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "pressure_rating_wog",
+      "name": "Pressure Rating (WOG)",
+      "value": 600.0,
+      "unitText": "psi"
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "product_series",
+      "name": "Product Series",
+      "value": "BA-100"
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "seat_material",
+      "name": "Seat Material",
+      "value": "RPTFE"
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "steam_pressure_rating",
+      "name": "Steam Pressure Rating (WSP)",
+      "value": 150.0,
+      "unitText": "psi"
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "stem_material",
+      "name": "Stem Material",
+      "value": "Chrome-Plated Brass"
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "temperature_range",
+      "name": "Temperature Range",
+      "value": "-28.8889..185.556",
+      "unitText": "degC"
+    }
+  ]
+}

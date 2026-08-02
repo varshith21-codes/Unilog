@@ -1,0 +1,61 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "axiom"
+version = "0.1.0"
+description = "Verifiable product intelligence for industrial commerce"
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic==2.11.7",
+    "pyyaml==6.0.2",
+    "boto3==1.40.15",
+    "python-dateutil==2.9.0.post0",
+]
+
+[project.optional-dependencies]
+docintel = [
+    # PDF layout extraction. Optional because the text and HTML paths do not need it, and it
+    # is the heaviest dependency in the tree.
+    "pdfplumber==0.11.7",
+]
+api = [
+    "fastapi==0.115.6",
+    "uvicorn==0.34.0",
+]
+dev = [
+    "pytest==8.4.1",
+    "pytest-cov==6.2.1",
+    "ruff==0.12.7",
+    # Required by fastapi.testclient; TestClient drives the app through real ASGI transport.
+    "httpx==0.28.1",
+    # Generates the synthetic PDFs the docintel tests parse.
+    "reportlab==4.2.5",
+]
+
+[tool.setuptools.packages.find]
+where = ["packages"]
+include = ["axiom*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# "." puts the repo root on sys.path so the review-workspace tests can import `apps.api.main`.
+# `apps` is an application, not a library, so it is deliberately not installed into the venv.
+pythonpath = ["packages", "."]
+addopts = "-q --strict-markers"
+markers = [
+    "live: hits real AWS Bedrock endpoints; deselect with -m 'not live'",
+]
+filterwarnings = [
+    "error",
+    # reportlab (test-only dependency) uses ast.NameConstant, removed in 3.14.
+    "ignore:ast.NameConstant is deprecated:DeprecationWarning",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "N", "SIM"]

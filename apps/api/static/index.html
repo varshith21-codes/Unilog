@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="en" class="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AXIOM — Review Workspace</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+          mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Consolas', 'monospace'],
+        },
+      },
+    },
+  };
+</script>
+<style>
+  /* Tight, dense, keyboard-first. A review tool is used for hours; visual noise costs
+     attention that should go to the values. */
+  :root { color-scheme: dark; }
+  body { background: #0a0a0b; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  .src-line { white-space: pre; }
+  .cited { background: rgba(250, 204, 21, 0.13); border-left: 2px solid #facc15; }
+  .quote-hit { background: rgba(250, 204, 21, 0.42); color: #fff; border-radius: 2px; padding: 0 1px; }
+  kbd {
+    font-family: ui-monospace, monospace; font-size: 10px; padding: 1px 5px;
+    border: 1px solid #3f3f46; border-bottom-width: 2px; border-radius: 4px;
+    background: #18181b; color: #a1a1aa;
+  }
+  .fade-in { animation: fade .18s ease-out; }
+  @keyframes fade { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: none; } }
+</style>
+</head>
+<body class="font-sans text-zinc-300 antialiased h-screen overflow-hidden">
+
+<div id="app" class="h-screen flex flex-col">
+
+  <!-- ── header ───────────────────────────────────────────────────────── -->
+  <header class="border-b border-zinc-800 bg-zinc-950/80 backdrop-blur px-4 py-2.5 flex items-center gap-4 shrink-0">
+    <div class="flex items-center gap-2.5">
+      <div class="w-6 h-6 rounded bg-gradient-to-br from-amber-400 to-amber-600 grid place-items-center">
+        <span class="text-[11px] font-bold text-zinc-950">A</span>
+      </div>
+      <div class="leading-none">
+        <div class="text-[13px] font-semibold text-zinc-100">AXIOM</div>
+        <div class="text-[10px] text-zinc-500 mt-0.5">Review Workspace</div>
+      </div>
+    </div>
+
+    <select id="sku-picker"
+            class="bg-zinc-900 border border-zinc-800 rounded px-2 py-1 text-xs text-zinc-300
+                   focus:outline-none focus:border-zinc-600"></select>
+
+    <div id="record-meta" class="text-xs text-zinc-500 flex items-center gap-3 min-w-0"></div>
+
+    <div class="ml-auto flex items-center gap-5">
+      <div class="text-right">
+        <label class="text-[10px] uppercase tracking-wider text-zinc-500 block">Error budget</label>
+        <div class="flex items-center gap-2 mt-0.5">
+          <input id="risk" type="range" min="1" max="20" value="5" step="1" class="w-28 accent-amber-500" />
+          <span id="risk-label" class="text-xs font-mono text-amber-400 w-9 text-right">5%</span>
+        </div>
+      </div>
+      <div id="policy-readout" class="text-xs text-zinc-400 border-l border-zinc-800 pl-5 min-w-[190px]"></div>
+    </div>
+  </header>
+
+  <!-- ── quality strip ────────────────────────────────────────────────── -->
+  <div id="quality-strip" class="border-b border-zinc-800 bg-zinc-900/30 px-4 py-1.5 flex gap-6 text-[11px] shrink-0"></div>
+
+  <!-- ── body: queue | value | evidence ───────────────────────────────── -->
+  <main class="flex-1 grid grid-cols-[280px_minmax(0,1fr)_minmax(0,1.05fr)] overflow-hidden">
+
+    <!-- queue -->
+    <aside class="border-r border-zinc-800 overflow-y-auto">
+      <div class="px-3 py-2 border-b border-zinc-800 flex items-center justify-between sticky top-0 bg-zinc-950 z-10">
+        <span class="text-[10px] uppercase tracking-wider text-zinc-500">Queue</span>
+        <span id="queue-count" class="text-[10px] font-mono text-zinc-400"></span>
+      </div>
+      <div id="queue"></div>
+    </aside>
+
+    <!-- value under review -->
+    <section class="overflow-y-auto border-r border-zinc-800">
+      <div id="detail" class="p-4"></div>
+    </section>
+
+    <!-- evidence -->
+    <section class="overflow-hidden flex flex-col bg-zinc-950/40">
+      <div class="px-3 py-2 border-b border-zinc-800 flex items-center justify-between shrink-0">
+        <span class="text-[10px] uppercase tracking-wider text-zinc-500">Evidence</span>
+        <span id="evidence-locator" class="text-[10px] font-mono text-zinc-500"></span>
+      </div>
+      <div id="evidence" class="flex-1 overflow-y-auto p-3 font-mono text-[11px] leading-[1.65]"></div>
+    </section>
+  </main>
+
+  <!-- ── footer: keyboard map ─────────────────────────────────────────── -->
+  <footer class="border-t border-zinc-800 bg-zinc-950 px-4 py-1.5 flex items-center gap-4 text-[10px] text-zinc-500 shrink-0">
+    <span><kbd>A</kbd> accept</span>
+    <span><kbd>R</kbd> reject</span>
+    <span><kbd>E</kbd> correct</span>
+    <span><kbd>J</kbd>/<kbd>K</kbd> move</span>
+    <span class="ml-auto" id="status-line"></span>
+  </footer>
+</div>
+
+<div id="toast-host" class="fixed bottom-12 right-4 flex flex-col gap-2 items-end z-50"></div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// State
+// ─────────────────────────────────────────────────────────────────────────────
+const state = { session: null, selected: null, order: [], epsilon: 0.05 };
+
+const REASON_LABEL = {
+  auto_accepted:        ['auto-accepted',        'text-emerald-400', 'bg-emerald-500/10'],
+  below_threshold:      ['below threshold',      'text-amber-400',   'bg-amber-500/10'],
+  blocking_validation:  ['validation failed',    'text-red-400',     'bg-red-500/10'],
+  unverified_evidence:  ['evidence unverified',  'text-red-400',     'bg-red-500/10'],
+  inferred_value:       ['inferred',             'text-violet-400',  'bg-violet-500/10'],
+  no_validated_policy:  ['no policy yet',        'text-zinc-400',    'bg-zinc-500/10'],
+  human_accept:         ['approved',             'text-emerald-400', 'bg-emerald-500/10'],
+  human_correct:        ['corrected',            'text-sky-400',     'bg-sky-500/10'],
+  human_reject:         ['rejected',             'text-red-400',     'bg-red-500/10'],
+};
+
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+const fmt = (v) => {
+  if (v === null || v === undefined) return '—';
+  if (typeof v === 'object') {
+    if ('magnitude' in v) return `${v.magnitude} ${v.unit}`;
+    if ('minimum' in v) return `${v.minimum} … ${v.maximum} ${v.unit}`;
+    return JSON.stringify(v);
+  }
+  if (Array.isArray(v)) return v.join(', ');
+  return String(v);
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Boot
+// ─────────────────────────────────────────────────────────────────────────────
+async function boot() {
+  const { sessions } = await (await fetch('/api/sessions')).json();
+  const picker = document.getElementById('sku-picker');
+
+  if (!sessions.length) {
+    document.getElementById('detail').innerHTML = emptyState();
+    return;
+  }
+
+  picker.innerHTML = sessions
+    .map((s) => `<option value="${esc(s.sku)}">${esc(s.sku)} — ${s.pending} pending</option>`)
+    .join('');
+  picker.onchange = () => loadSession(picker.value);
+
+  await loadSession(sessions[0].sku);
+  await refreshPolicy();
+}
+
+function emptyState() {
+  return `
+    <div class="max-w-lg mt-8">
+      <h2 class="text-sm font-semibold text-zinc-200">No review sessions yet</h2>
+      <p class="text-xs text-zinc-500 mt-2 leading-relaxed">
+        Generate one by running the pipeline with <code class="text-zinc-400">--save-session</code>:
+      </p>
+      <pre class="mt-3 bg-zinc-900 border border-zinc-800 rounded p-3 text-[11px] text-zinc-400 overflow-x-auto">python scripts/run_pipeline.py data/samples/ba100.txt \\
+  --sku BA-100-075 --brand "milwaukee vlv" \\
+  --include-optional --risk-budget 0.05 --save-session</pre>
+    </div>`;
+}
+
+async function loadSession(sku) {
+  const session = await (await fetch(`/api/session/${encodeURIComponent(sku)}`)).json();
+  state.session = session;
+  state.order = session.queue.length ? session.queue : session.items.map((i) => i.attribute_code);
+  state.selected = state.order[0] ?? null;
+  renderMeta();
+  renderQuality();
+  renderQueue();
+  renderDetail();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Header + quality
+// ─────────────────────────────────────────────────────────────────────────────
+function renderMeta() {
+  const s = state.session;
+  document.getElementById('record-meta').innerHTML = `
+    <span class="text-zinc-300 font-medium truncate">${esc(s.brand ?? '—')}</span>
+    <span class="text-zinc-600">/</span>
+    <span class="truncate">${esc(s.category_path.join(' › ') || s.class_code || '—')}</span>
+    <span class="text-zinc-600">/</span>
+    <span class="font-mono text-[11px] text-zinc-500 truncate">${esc(s.document_id)}</span>`;
+}
+
+function renderQuality() {
+  const q = state.session.quality ?? {};
+  const cells = [
+    ['completeness', q.completeness],
+    ['verifiability', q.verifiability],
+    ['consistency', q.consistency],
+    ['composite', q.composite],
+  ].filter(([, v]) => typeof v === 'number');
+
+  document.getElementById('quality-strip').innerHTML = cells.map(([label, v]) => {
+    const pct = Math.round(v * 100);
+    const tone = pct >= 90 ? 'text-emerald-400' : pct >= 70 ? 'text-amber-400' : 'text-red-400';
+    return `<span class="text-zinc-500">${label}
+              <span class="${tone} font-mono ml-1">${pct}%</span></span>`;
+  }).join('');
+}
+
+async function refreshPolicy() {
+  const res = await (await fetch(`/api/policy?epsilon=${state.epsilon}`)).json();
+  const el = document.getElementById('policy-readout');
+  if (!res.achievable) {
+    el.innerHTML = `<span class="text-red-400">not achievable</span>
+      <div class="text-[10px] text-zinc-500 mt-0.5 leading-snug">${esc(res.reason ?? '')}</div>`;
+    return;
+  }
+  el.innerHTML = `
+    <span class="text-emerald-400 font-mono">${Math.round(res.coverage * 100)}% coverage</span>
+    <div class="text-[10px] text-zinc-500 mt-0.5 leading-snug">
+      threshold ${res.threshold.toFixed(3)} · error ≤ ${(res.error_upper_bound * 100).toFixed(1)}%
+      · n=${res.calibration_size}
+    </div>`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Queue — grouped by reason code, because working one failure mode at a time
+// beats context-switching per SKU.
+// ─────────────────────────────────────────────────────────────────────────────
+function renderQueue() {
+  const s = state.session;
+  const pending = s.items.filter((i) => !i.accepted);
+  document.getElementById('queue-count').textContent = `${pending.length} / ${s.items.length}`;
+
+  const groups = {};
+  for (const code of state.order) {
+    const item = s.items.find((i) => i.attribute_code === code);
+    if (!item) continue;
+    (groups[item.reason_code] ??= []).push(item);
+  }
+
+  document.getElementById('queue').innerHTML = Object.entries(groups).map(([reason, items]) => {
+    const [label, tone] = REASON_LABEL[reason] ?? [reason, 'text-zinc-400'];
+    return `
+      <div class="px-3 py-1.5 bg-zinc-900/40 border-y border-zinc-800/60 flex justify-between">
+        <span class="text-[10px] uppercase tracking-wide ${tone}">${esc(label)}</span>
+        <span class="text-[10px] font-mono text-zinc-600">${items.length}</span>
+      </div>
+      ${items.map(queueRow).join('')}`;
+  }).join('');
+}
+
+function queueRow(item) {
+  const on = item.attribute_code === state.selected;
+  const pct = Math.round(item.score * 100);
+  const bar = item.score >= 0.8 ? 'bg-emerald-500' : item.score >= 0.7 ? 'bg-amber-500' : 'bg-red-500';
+  return `
+    <button onclick="select('${esc(item.attribute_code)}')"
+      class="w-full text-left px-3 py-2 border-b border-zinc-900 hover:bg-zinc-900/60 transition
+             ${on ? 'bg-zinc-900 border-l-2 border-l-amber-500' : 'border-l-2 border-l-transparent'}">
+      <div class="flex items-center justify-between gap-2">
+        <span class="text-[11px] ${on ? 'text-zinc-100' : 'text-zinc-400'} truncate">
+          ${esc(item.attribute_name)}${item.is_required ? '<span class="text-red-500 ml-0.5">*</span>' : ''}
+        </span>
+        <span class="text-[10px] font-mono text-zinc-500">${pct}</span>
+      </div>
+      <div class="text-[10px] text-zinc-600 font-mono truncate mt-0.5">${esc(fmt(item.value_display ?? item.value_raw))}</div>
+      <div class="h-0.5 bg-zinc-800 rounded mt-1.5 overflow-hidden">
+        <div class="h-full ${bar}" style="width:${pct}%"></div>
+      </div>
+    </button>`;
+}
+
+function select(code) {
+  state.selected = code;
+  renderQueue();
+  renderDetail();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Detail
+// ─────────────────────────────────────────────────────────────────────────────
+function renderDetail() {
+  const item = state.session?.items.find((i) => i.attribute_code === state.selected);
+  const host = document.getElementById('detail');
+  if (!item) { host.innerHTML = emptyState(); renderEvidence(null); return; }
+
+  const [label, tone, bg] = REASON_LABEL[item.reason_code] ?? [item.reason_code, 'text-zinc-400', 'bg-zinc-500/10'];
+
+  host.innerHTML = `
+    <div class="fade-in">
+      <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0">
+          <h2 class="text-sm font-semibold text-zinc-100">${esc(item.attribute_name)}</h2>
+          <div class="text-[11px] font-mono text-zinc-500 mt-0.5">${esc(item.attribute_code)} · ${esc(item.datatype)}</div>
+        </div>
+        <span class="text-[10px] px-2 py-1 rounded ${bg} ${tone} whitespace-nowrap">${esc(label)}</span>
+      </div>
+
+      <div class="mt-4 rounded-lg border border-zinc-800 bg-zinc-900/40 overflow-hidden">
+        <div class="px-3 py-2.5 border-b border-zinc-800">
+          <div class="text-[10px] uppercase tracking-wider text-zinc-500">Proposed value</div>
+          <div class="text-lg font-mono text-zinc-50 mt-1 break-words">${esc(fmt(item.value_display ?? item.value_canonical))}</div>
+        </div>
+        <dl class="divide-y divide-zinc-800/60 text-[11px]">
+          ${row('As written in source', `<span class="font-mono text-zinc-300">${esc(item.value_raw ?? '—')}</span>`)}
+          ${row('Canonical', `<span class="font-mono text-zinc-300">${esc(fmt(item.value_canonical))}</span>`)}
+          ${row('Method', `<span class="font-mono text-zinc-400">${esc(item.method)}</span>
+                            ${item.model_tier ? `<span class="text-zinc-600"> · ${esc(item.model_tier)}</span>` : ''}`)}
+          ${row('Confidence', confidenceBar(item.score))}
+        </dl>
+      </div>
+
+      ${validationsBlock(item)}
+
+      <div class="mt-4 flex items-center gap-2">
+        <button onclick="decide('accept')"
+          class="px-3 py-1.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium transition">
+          Accept <kbd class="ml-1 border-emerald-400/40 bg-emerald-700/40 text-emerald-100">A</kbd>
+        </button>
+        <button onclick="decide('reject')"
+          class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-red-600 text-zinc-200 hover:text-white text-xs transition">
+          Reject <kbd class="ml-1">R</kbd>
+        </button>
+        <button onclick="promptCorrect()"
+          class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-sky-600 text-zinc-200 hover:text-white text-xs transition">
+          Correct <kbd class="ml-1">E</kbd>
+        </button>
+        ${item.allowed_values.length
+          ? `<select id="allowed" onchange="applyAllowed(this.value)"
+               class="ml-auto bg-zinc-900 border border-zinc-800 rounded px-2 py-1.5 text-[11px] text-zinc-400">
+               <option value="">snap to permitted value…</option>
+               ${item.allowed_values.map((v) => `<option>${esc(v)}</option>`).join('')}
+             </select>` : ''}
+      </div>
+    </div>`;
+
+  renderEvidence(item);
+}
+
+const row = (k, v) => `
+  <div class="px-3 py-2 flex gap-3">
+    <dt class="text-zinc-500 w-36 shrink-0">${esc(k)}</dt><dd class="min-w-0 break-words">${v}</dd>
+  </div>`;
+
+function confidenceBar(score) {
+  const pct = Math.round(score * 100);
+  const tone = score >= 0.8 ? 'bg-emerald-500' : score >= 0.7 ? 'bg-amber-500' : 'bg-red-500';
+  return `<div class="flex items-center gap-2">
+      <div class="w-28 h-1 bg-zinc-800 rounded overflow-hidden">
+        <div class="h-full ${tone}" style="width:${pct}%"></div>
+      </div>
+      <span class="font-mono text-zinc-300">${score.toFixed(3)}</span>
+    </div>`;
+}
+
+function validationsBlock(item) {
+  if (!item.validations.length) return '';
+  return `
+    <div class="mt-4">
+      <div class="text-[10px] uppercase tracking-wider text-zinc-500 mb-2">Validation</div>
+      <div class="space-y-1.5">
+        ${item.validations.map((v) => {
+          const tone = v.blocking ? 'border-red-500/40 bg-red-500/5'
+            : v.verdict === 'warn' ? 'border-amber-500/30 bg-amber-500/5'
+            : v.verdict === 'skipped' ? 'border-zinc-800 bg-zinc-900/30'
+            : 'border-emerald-500/20 bg-emerald-500/5';
+          const badge = v.blocking ? 'text-red-400' : v.verdict === 'warn' ? 'text-amber-400'
+            : v.verdict === 'skipped' ? 'text-zinc-500' : 'text-emerald-400';
+          return `
+            <div class="rounded border ${tone} px-2.5 py-2 text-[11px]">
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-[10px] text-zinc-500">${esc(v.layer)}</span>
+                <span class="font-mono text-[10px] text-zinc-400">${esc(v.rule_id)}</span>
+                <span class="${badge} text-[10px] ml-auto uppercase">${esc(v.verdict)}</span>
+              </div>
+              <div class="text-zinc-400 mt-1 leading-snug">${esc(v.reason)}</div>
+              ${v.counterexample ? `<div class="text-[10px] text-red-300/80 mt-1 font-mono">↳ ${esc(v.counterexample)}</div>` : ''}
+              ${v.suggested_fix ? `<div class="text-[10px] text-sky-300/80 mt-1">fix: ${esc(v.suggested_fix)}</div>` : ''}
+            </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Evidence — the whole reason this tool is faster than a PDF and a spreadsheet.
+// ─────────────────────────────────────────────────────────────────────────────
+function renderEvidence(item) {
+  const host = document.getElementById('evidence');
+  const locator = document.getElementById('evidence-locator');
+
+  if (!item || !item.evidence.length) {
+    locator.textContent = '';
+    host.innerHTML = `<div class="text-zinc-600 text-[11px] p-2">No citation for this value.</div>`;
+    return;
+  }
+
+  const ev = item.evidence[0];
+  locator.innerHTML = ev.verified
+    ? `<span class="text-emerald-400">verified</span> · ${esc(ev.locator)}${ev.match_score ? ` · ${ev.match_score.toFixed(2)}` : ''}`
+    : `<span class="text-red-400">UNVERIFIED</span> · quote not locatable`;
+
+  const page = state.session.pages.find((p) => p.number === (ev.page ?? 1)) ?? state.session.pages[0];
+  if (!page) { host.innerHTML = ''; return; }
+
+  const needle = (ev.quote ?? '').trim().toLowerCase();
+  host.innerHTML = page.lines.map((line, index) => {
+    const isCited = index === ev.line_index;
+    const rendered = isCited ? highlight(line, needle) : esc(line) || '&nbsp;';
+    return `<div class="src-line px-2 ${isCited ? 'cited' : ''}"
+                 ${isCited ? 'id="cited-line"' : ''}>${rendered}</div>`;
+  }).join('');
+
+  document.getElementById('cited-line')?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+}
+
+/** Highlight the quoted fragment inside its line, tolerating whitespace differences. */
+function highlight(line, needle) {
+  if (!needle) return esc(line) || '&nbsp;';
+  const hit = line.toLowerCase().indexOf(needle);
+  if (hit >= 0) {
+    return esc(line.slice(0, hit))
+      + `<span class="quote-hit">${esc(line.slice(hit, hit + needle.length))}</span>`
+      + esc(line.slice(hit + needle.length));
+  }
+  // The quote may span a table row rendered with separators, so fall back to marking the
+  // whole line rather than silently showing no highlight at all.
+  return `<span class="quote-hit">${esc(line)}</span>`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Decisions
+// ─────────────────────────────────────────────────────────────────────────────
+async function decide(action, correctedValue) {
+  if (!state.selected) return;
+  const body = { action, reviewer: 'reviewer@local' };
+  if (correctedValue !== undefined) body.corrected_value = correctedValue;
+
+  const res = await fetch(
+    `/api/session/${encodeURIComponent(state.session.sku)}/decision/${encodeURIComponent(state.selected)}`,
+    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+
+  if (!res.ok) { toast('Decision failed', (await res.json()).detail ?? '', 'red'); return; }
+
+  const { outcome, item } = await res.json();
+  Object.assign(state.session.items.find((i) => i.attribute_code === item.attribute_code), item);
+
+  // Make the flywheel visible: a decision moved a prior, which moves future automation.
+  const delta = outcome.prior_after - outcome.prior_before;
+  toast(
+    `${action === 'accept' ? 'Accepted' : action === 'reject' ? 'Rejected' : 'Corrected'} ${outcome.attribute_code}`,
+    `prior ${outcome.prior_before.toFixed(2)} → ${outcome.prior_after.toFixed(2)}` +
+    ` (${delta >= 0 ? '+' : ''}${delta.toFixed(2)}) · n=${outcome.sibling_impact}`,
+    action === 'reject' ? 'amber' : 'emerald');
+
+  advance();
+  renderQueue();
+  renderDetail();
+  refreshPolicy();
+}
+
+function promptCorrect() {
+  const item = state.session?.items.find((i) => i.attribute_code === state.selected);
+  if (!item) return;
+  const value = window.prompt(`Corrected value for ${item.attribute_name}:`, item.value_display ?? '');
+  if (value !== null && value.trim()) decide('correct', value.trim());
+}
+
+function applyAllowed(value) { if (value) decide('correct', value); }
+
+function advance() {
+  const pending = state.session.items.filter((i) => !i.accepted).map((i) => i.attribute_code);
+  state.selected = pending[0] ?? state.selected;
+}
+
+function move(step) {
+  const index = state.order.indexOf(state.selected);
+  const next = state.order[Math.min(Math.max(index + step, 0), state.order.length - 1)];
+  if (next) select(next);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Keyboard — a review tool that needs the mouse is a review tool nobody uses.
+// ─────────────────────────────────────────────────────────────────────────────
+document.addEventListener('keydown', (event) => {
+  if (['INPUT', 'SELECT', 'TEXTAREA'].includes(event.target.tagName)) return;
+  const key = event.key.toLowerCase();
+  const map = {
+    a: () => decide('accept'),
+    r: () => decide('reject'),
+    e: () => promptCorrect(),
+    j: () => move(1),
+    k: () => move(-1),
+    arrowdown: () => move(1),
+    arrowup: () => move(-1),
+  };
+  if (map[key]) { event.preventDefault(); map[key](); }
+});
+
+// risk dial
+const risk = document.getElementById('risk');
+risk.addEventListener('input', () => {
+  state.epsilon = Number(risk.value) / 100;
+  document.getElementById('risk-label').textContent = `${risk.value}%`;
+});
+risk.addEventListener('change', refreshPolicy);
+
+function toast(title, detail, tone) {
+  const colors = { emerald: 'border-emerald-500/40', amber: 'border-amber-500/40', red: 'border-red-500/40' };
+  const node = document.createElement('div');
+  node.className = `fade-in bg-zinc-900 border ${colors[tone] ?? 'border-zinc-700'} rounded-lg px-3 py-2 shadow-xl max-w-xs`;
+  node.innerHTML = `<div class="text-[11px] font-medium text-zinc-100">${esc(title)}</div>
+                    <div class="text-[10px] text-zinc-400 font-mono mt-0.5">${esc(detail)}</div>`;
+  document.getElementById('toast-host').appendChild(node);
+  setTimeout(() => node.remove(), 3600);
+}
+
+boot().catch((error) => {
+  document.getElementById('status-line').textContent = `error: ${error.message}`;
+});
+</script>
+</body>
+</html>

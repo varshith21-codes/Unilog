@@ -1,0 +1,91 @@
+# Bronze Gate Valve.
+#
+# The second class exists to prove the dictionary actually gets reused. Every attribute here
+# except `handwheel_diameter` is shared with the ball valve class, at different requirement
+# levels and weights — a gate valve has no port type and no operating torque worth
+# publishing, but it does have a rising/non-rising stem distinction that ball valves lack.
+#
+# If adding a second class had required duplicating attribute definitions, the schema design
+# would be wrong.
+
+class:
+  code: PLB.VLV.GATE.BRZ
+  name: Bronze Gate Valve
+  version: v1
+
+  browse_path: [Plumbing, Valves, Gate Valves, Bronze]
+
+  mappings:
+    etim: EC002713
+    unspsc: "40141605"
+
+  attributes:
+    - { code: product_series,        requirement: recommended, weight: 1.0 }
+
+    - { code: nominal_size,          requirement: required,    weight: 3.0 }
+    - { code: pressure_rating_wog,   requirement: required,    weight: 3.0 }
+    - { code: body_material,         requirement: required,    weight: 3.0 }
+    - { code: end_connection,        requirement: required,    weight: 3.0 }
+    - { code: stem_material,         requirement: required,    weight: 2.0 }
+    - { code: handle_type,           requirement: recommended, weight: 1.0 }
+
+    - { code: temperature_range,     requirement: required,    weight: 2.0 }
+    - { code: steam_pressure_rating, requirement: required,    weight: 2.0 }
+    - { code: cv_flow_coefficient,   requirement: optional,    weight: 1.0 }
+
+    - { code: lead_free_compliant,   requirement: required,    weight: 3.0 }
+    - { code: potable_water_approved, requirement: recommended, weight: 2.0 }
+    - { code: approvals,             requirement: required,    weight: 2.0 }
+    - { code: country_of_origin,     requirement: required,    weight: 2.0 }
+
+    - { code: gtin,                  requirement: recommended, weight: 1.0 }
+    - { code: each_weight,           requirement: recommended, weight: 1.0 }
+    - { code: case_quantity,         requirement: recommended, weight: 1.0 }
+    - { code: selling_uom,           requirement: required,    weight: 1.0 }
+
+  cross_field_rules:
+    - id: R_LEADFREE_MATERIAL
+      expr: "lead_free_compliant == true implies body_material not in LEADED_ALLOYS"
+      references: [lead_free_compliant, body_material]
+      severity: error
+      message: >
+        A lead-free claim is inconsistent with a leaded copper alloy body (C36000, C84400).
+
+    - id: R_POTABLE_REQUIRES_NSF61
+      expr: "potable_water_approved == true implies 'NSF-61' in approvals"
+      references: [potable_water_approved, approvals]
+      severity: error
+      message: A potable-water claim requires an NSF/ANSI 61 certification reference.
+
+    - id: R_TEMP_ORDER
+      expr: "temperature_range.min < temperature_range.max"
+      references: [temperature_range]
+      severity: error
+      message: Temperature range minimum must be below its maximum.
+
+    - id: R_STEAM_BELOW_WOG
+      expr: "steam_pressure_rating <= pressure_rating_wog"
+      references: [steam_pressure_rating, pressure_rating_wog]
+      severity: error
+      message: >
+        The steam rating (WSP) must not exceed the WOG rating. Gate valves state both
+        prominently and adjacently, which makes this a common extraction swap.
+
+  channel_profiles:
+    - name: cx1_pim
+      title_template: >-
+        {brand} {mpn} {nominal_size} {body_material_short} {class_name},
+        {pressure_rating_wog}
+      max_title_chars: 200
+      unit_system: imperial_primary
+      required:
+        - nominal_size
+        - pressure_rating_wog
+        - body_material
+        - end_connection
+        - selling_uom
+
+    - name: schema_org
+      max_title_chars: 200
+      unit_system: metric_primary
+      required: [nominal_size, body_material]

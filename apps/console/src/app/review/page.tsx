@@ -1,0 +1,201 @@
+import Link from "next/link";
+
+import {
+  AlertIcon,
+  ArrowIcon,
+  EmptyState,
+  Overline,
+  Panel,
+  SectionHeading,
+  Stat,
+  StatusPill,
+} from "@/components/primitives";
+import { attributeRows, listSkus, loadDataset, reviewOrder, reviewRows } from "@/lib/data";
+import { GAP_REASON_LABEL, canonical, count, percent, score } from "@/lib/format";
+
+export const metadata = { title: "Review" };
+
+export default async function ReviewIndexPage() {
+  const dataset = await loadDataset();
+  const skus = reviewOrder(await listSkus());
+
+  const groups = skus.map((bundle) => ({
+    bundle,
+    open: reviewRows(
+      attributeRows(dataset.class_definition.attributes, bundle.values, bundle.gaps),
+    ),
+  }));
+
+  const openTotal = groups.reduce((sum, group) => sum + group.open.length, 0);
+  const valuesOpen = groups.reduce(
+    (sum, group) => sum + group.open.filter((row) => row.value !== null).length,
+    0,
+  );
+  const gapsOpen = openTotal - valuesOpen;
+
+  return (
+    <div className="mx-auto max-w-[var(--container-shell)] px-[var(--spacing-gutter)] pb-24">
+      <header className="py-[var(--spacing-section-lg)]">
+        <Overline>Work list</Overline>
+        <h1 className="mt-4 max-w-[26ch] text-display font-medium tracking-[var(--tracking-display)]">
+          {openTotal === 0 ? "Nothing waiting on review" : "Attributes needing a decision"}
+        </h1>
+        <p className="mt-5 max-w-[58ch] text-body text-[var(--fg-secondary)]">
+          Values that fell below the acceptance threshold, plus required attributes no source
+          could establish. Ordered so blocking failures come first.
+        </p>
+      </header>
+
+      <section className="hairline-t hairline-b grid grid-cols-2 gap-x-6 gap-y-8 py-8 md:grid-cols-4">
+        <Stat
+          label="Open items"
+          value={count(openTotal)}
+          hint={`across ${groups.length} SKUs`}
+          tone={openTotal > 0 ? "warn" : "pass"}
+        />
+        <Stat label="Below threshold" value={count(valuesOpen)} hint="values to confirm" />
+        <Stat label="Required gaps" value={count(gapsOpen)} hint="no value could be read" />
+        <Stat
+          label="Threshold"
+          value={dataset.policy.threshold === null ? "—" : dataset.policy.threshold.toFixed(3)}
+          hint={`${percent(dataset.policy.epsilon)} error budget at ${percent(
+            dataset.policy.confidence_level,
+          )} confidence`}
+        />
+      </section>
+
+      <div className="mt-[var(--spacing-section)] flex flex-col gap-5">
+        {groups.map(({ bundle, open }) => (
+          <Panel key={bundle.sku} className="overflow-hidden p-0">
+            <div className="hairline-b flex flex-wrap items-center justify-between gap-4 bg-[var(--surface-sunken)] px-6 py-4">
+              <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+                <h2 className="text-lg font-medium">
+                  <Link
+                    href={`/review/${bundle.sku}`}
+                    className="rounded-xs transition-colors duration-150 hover:text-[var(--accent)]"
+                  >
+                    {bundle.sku}
+                  </Link>
+                </h2>
+                <p className="text-meta text-[var(--fg-tertiary)]">
+                  {percent(bundle.metrics.fill_rate)} complete ·{" "}
+                  {bundle.validation.failures > 0 ? (
+                    <span className="text-[var(--fail)]">
+                      {bundle.validation.failures} blocking
+                    </span>
+                  ) : bundle.validation.warnings > 0 ? (
+                    <span className="text-[var(--warn)]">
+                      {bundle.validation.warnings} warning
+                      {bundle.validation.warnings === 1 ? "" : "s"}
+                    </span>
+                  ) : (
+                    <span className="text-[var(--pass)]">checks clean</span>
+                  )}
+                </p>
+              </div>
+
+              <Link href={`/review/${bundle.sku}`} className="btn btn-quiet h-7">
+                Open workspace
+                <ArrowIcon />
+              </Link>
+            </div>
+
+            {open.length === 0 ? (
+              <EmptyState
+                title="Fully accepted"
+                detail="Every attribute this class requires cleared the threshold with verified evidence."
+              />
+            ) : (
+              <ul>
+                {open.map((row) => (
+                  <li
+                    key={row.spec.code}
+                    className="grid-row hairline-b grid grid-cols-[1fr_auto] items-center gap-x-5 gap-y-1.5 px-6 py-3.5 last:border-b-0 sm:grid-cols-[16rem_1fr_auto]"
+                  >
+                    <div className="flex min-w-0 items-center gap-2">
+                      <Link
+                        href={`/review/${bundle.sku}`}
+                        className="truncate rounded-xs text-sm font-medium transition-colors duration-150 hover:text-[var(--accent)]"
+                      >
+                        {row.spec.name}
+                      </Link>
+                      {row.spec.compliance_claim ? (
+                        <span className="pill pill-accent shrink-0">Claim</span>
+                      ) : null}
+                    </div>
+
+                    <p className="col-span-2 min-w-0 truncate text-meta text-[var(--fg-tertiary)] sm:col-span-1">
+                      {row.value ? (
+                        <>
+                          {row.value.value_display ?? canonical(row.value.value_canonical)}
+                          <span className="text-[var(--fg-quiet)]">
+                            {" "}
+                            · score {score(row.value.score)}
+                            {row.value.decision ? ` · ${row.value.decision.detail}` : ""}
+                          </span>
+                        </>
+                      ) : row.gap ? (
+                        <>
+                          {GAP_REASON_LABEL[row.gap.reason]}
+                          {row.gap.detail ? (
+                            <span className="text-[var(--fg-quiet)]"> · {row.gap.detail}</span>
+                          ) : null}
+                        </>
+                      ) : (
+                        "No candidate produced"
+                      )}
+                    </p>
+
+                    <div className="row-start-1 justify-self-end sm:row-start-auto">
+                      {row.value ? (
+                        <StatusPill status={row.value.status} />
+                      ) : (
+                        <span className="pill pill-warn">
+                          <AlertIcon />
+                          Gap
+                        </span>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Panel>
+        ))}
+      </div>
+
+      {groups.length === 0 ? (
+        <Panel className="mt-10">
+          <EmptyState
+            title="No SKUs loaded"
+            detail="Run scripts/export_console_fixture.py to generate console data from the pipeline."
+          />
+        </Panel>
+      ) : null}
+
+      <SectionHeading
+        className="mt-[var(--spacing-section)]"
+        title="Why an attribute lands here"
+        detail="Two distinct reasons, worked differently."
+      />
+      <div className="mt-6 grid gap-5 md:grid-cols-2">
+        <Panel className="p-6">
+          <Overline>Below threshold</Overline>
+          <p className="mt-3 text-sm text-[var(--fg-secondary)]">
+            A value exists and its quote verified, but the calibrated score sat under the
+            acceptance threshold. The reviewer confirms or corrects it, and that decision is
+            what later trains the calibrator.
+          </p>
+        </Panel>
+        <Panel className="p-6">
+          <Overline>Required gap</Overline>
+          <p className="mt-3 text-sm text-[var(--fg-secondary)]">
+            No source stated the value. Nothing to confirm, so the work is to obtain it —
+            usually a supplier request, sometimes a better document. The gap records every
+            source already searched so the negative result stays auditable.
+          </p>
+        </Panel>
+      </div>
+    </div>
+  );
+}

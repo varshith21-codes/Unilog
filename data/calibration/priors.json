@@ -1,0 +1,43 @@
+{
+  "attribute_accuracy": {
+    "approvals": 1.0,
+    "body_material": 1.0,
+    "case_quantity": 1.0,
+    "country_of_origin": 1.0,
+    "end_connection": 1.0,
+    "handle_type": 1.0,
+    "lead_free_compliant": 1.0,
+    "nominal_size": 1.0,
+    "number_of_pieces": 1.0,
+    "operating_torque": 1.0,
+    "port_type": 1.0,
+    "potable_water_approved": 1.0,
+    "pressure_rating_wog": 1.0,
+    "product_series": 1.0,
+    "seat_material": 1.0,
+    "steam_pressure_rating": 1.0,
+    "stem_material": 1.0,
+    "temperature_range": 1.0
+  },
+  "sample_counts": {
+    "approvals": 9,
+    "body_material": 9,
+    "case_quantity": 9,
+    "country_of_origin": 4,
+    "end_connection": 9,
+    "handle_type": 7,
+    "lead_free_compliant": 4,
+    "nominal_size": 9,
+    "number_of_pieces": 5,
+    "operating_torque": 1,
+    "port_type": 5,
+    "potable_water_approved": 9,
+    "pressure_rating_wog": 9,
+    "product_series": 9,
+    "seat_material": 5,
+    "steam_pressure_rating": 9,
+    "stem_material": 4,
+    "temperature_range": 9
+  },
+  "source_accuracy": {}
+}

@@ -1,0 +1,627 @@
+@import "tailwindcss";
+
+/*
+ * AXIOM console design system
+ * ---------------------------
+ * Direction: instrument panel. Near-monochrome, typographic, one accent used only where a
+ * decision is required. The product's job is to make provenance legible, so the visual
+ * system stays quiet and lets values, citations and verdicts carry the page.
+ *
+ * Constraints held throughout:
+ *   - No gradients. Depth comes from borders, surface lightness steps and layered shadows.
+ *   - One accent hue (255). Semantic hues are reserved for validation verdicts and are
+ *     never used decoratively.
+ *   - Colour is defined in OKLCH so the lightness ramp is perceptually even.
+ *   - Neutrals carry a trace of the brand hue. A pure-grey ramp reads as unfinished.
+ *
+ * Contrast is verified, not assumed. `scripts/check-contrast.mjs` covers both text pairs
+ * (4.5:1) and non-text pairs (3:1 for control boundaries, graphical objects and focus
+ * rings). Changing any value below without re-running it is a defect.
+ */
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* ---------------------------------------------------------------- typography */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+
+  /*
+   * Dense UI steps. A console is read at arm's length, so the working range is 13-15px.
+   * The band from `meta` to `lg` is deliberately tight — hierarchy inside a data-dense
+   * screen comes from weight and colour, not from a fifth font size. The jump to
+   * `display` and `figure` is where scale contrast lives.
+   */
+  --text-micro: 0.6875rem;
+  --text-micro--line-height: 1.2727;
+  --text-meta: 0.75rem;
+  --text-meta--line-height: 1.3333;
+  --text-sm: 0.8125rem;
+  --text-sm--line-height: 1.5385;
+  --text-base: 0.875rem;
+  --text-base--line-height: 1.5714;
+  --text-body: 0.9375rem;
+  --text-body--line-height: 1.6;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.3889;
+  --text-xl: 1.5rem;
+  --text-xl--line-height: 1.25;
+
+  /* One display step per screen, and only one. */
+  --text-display: clamp(1.875rem, 1.35rem + 1.9vw, 2.625rem);
+  --text-display--line-height: 1.08;
+  --text-figure: clamp(2.25rem, 1.6rem + 2.4vw, 3.25rem);
+  --text-figure--line-height: 1;
+
+  --tracking-display: -0.024em;
+  --tracking-heading: -0.012em;
+  --tracking-overline: 0.085em;
+
+  /* ---------------------------------------------------------------- neutrals */
+  /*
+   * Hue 265 at very low chroma: cool, architectural, never blue-looking.
+   *
+   * Steps are chosen so every step used for text clears 4.5:1 against the darkest surface
+   * it can land on, and every step used for a control boundary or a graphical object
+   * clears 3:1. That constraint is why the mid-range is weighted toward the dark end
+   * rather than spaced evenly.
+   */
+  --color-ink-50: oklch(0.988 0.0015 265);
+  --color-ink-100: oklch(0.972 0.003 265);
+  --color-ink-150: oklch(0.955 0.004 265);
+  --color-ink-175: oklch(0.94 0.005 265);
+  --color-ink-200: oklch(0.928 0.005 265);
+  --color-ink-300: oklch(0.86 0.007 265);
+  --color-ink-350: oklch(0.775 0.01 265);
+  --color-ink-400: oklch(0.7 0.011 265);
+  --color-ink-450: oklch(0.66 0.011 265);
+  --color-ink-475: oklch(0.635 0.012 265);
+  --color-ink-500: oklch(0.605 0.012 265);
+  --color-ink-550: oklch(0.56 0.012 265);
+  --color-ink-600: oklch(0.515 0.011 265);
+  --color-ink-650: oklch(0.465 0.012 265);
+  --color-ink-700: oklch(0.42 0.013 265);
+  --color-ink-800: oklch(0.3 0.01 265);
+  --color-ink-825: oklch(0.26 0.009 265);
+  --color-ink-850: oklch(0.235 0.008 265);
+  --color-ink-900: oklch(0.212 0.007 265);
+  --color-ink-950: oklch(0.163 0.006 265);
+  --color-ink-1000: oklch(0.115 0.005 265);
+
+  /* Shared shadow ink, so the tint is declared once rather than in every layer. */
+  --color-shadow: oklch(0.163 0.006 265);
+
+  /* ---------------------------------------------------------------- accent */
+  --color-accent-100: oklch(0.938 0.028 255);
+  --color-accent-200: oklch(0.878 0.056 255);
+  --color-accent-300: oklch(0.788 0.096 255);
+  --color-accent-400: oklch(0.652 0.148 255);
+  --color-accent-500: oklch(0.576 0.171 255);
+  --color-accent-600: oklch(0.512 0.163 255);
+  --color-accent-700: oklch(0.444 0.139 255);
+
+  /* ------------------------------------------------------- verdict semantics */
+  /* Validation state only. Never decoration. Hue is held constant within each ramp. */
+  --color-pass-100: oklch(0.944 0.038 152);
+  --color-pass-500: oklch(0.548 0.128 152);
+  --color-pass-700: oklch(0.432 0.104 152);
+  --color-pass-300: oklch(0.72 0.13 152);
+  --color-warn-100: oklch(0.958 0.046 74);
+  --color-warn-500: oklch(0.638 0.132 74);
+  --color-warn-700: oklch(0.498 0.108 74);
+  --color-warn-300: oklch(0.79 0.13 74);
+  --color-fail-100: oklch(0.946 0.032 25);
+  --color-fail-500: oklch(0.554 0.196 25);
+  --color-fail-700: oklch(0.462 0.172 25);
+  --color-fail-300: oklch(0.7 0.16 25);
+
+  /* ---------------------------------------------------------------- radii */
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.625rem;
+  --radius-xl: 0.875rem;
+
+  /* ---------------------------------------------------------------- elevation */
+  /* Layered and hue-tinted. A single flat black shadow is the flattest option going. */
+  --shadow-xs: 0 1px 1px -0.5px var(--color-shadow-6);
+  --shadow-sm:
+    0 1px 1px -0.5px var(--color-shadow-6),
+    0 2px 4px -2px var(--color-shadow-5);
+  --shadow-md:
+    0 1px 1px -0.5px var(--color-shadow-5),
+    0 3px 6px -3px var(--color-shadow-6),
+    0 8px 14px -8px var(--color-shadow-5);
+  --shadow-lg:
+    0 1px 2px -1px var(--color-shadow-5),
+    0 6px 12px -6px var(--color-shadow-7),
+    0 18px 30px -14px var(--color-shadow-7);
+
+  /* ---------------------------------------------------------------- motion */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-quart: cubic-bezier(0.5, 0, 0.75, 0);
+
+  --duration-instant: 90ms;
+  --duration-fast: 140ms;
+  --duration-base: 200ms;
+  --duration-slow: 300ms;
+
+  /* Only transform and opacity. Used when the evidence pane swaps between attributes. */
+  --animate-fade-in: fade-in 240ms var(--ease-out-quart) both;
+  --animate-rise: rise 300ms var(--ease-out-expo) both;
+
+  /* ---------------------------------------------------------------- layout */
+  --spacing-gutter: clamp(1.25rem, 3vw, 2.5rem);
+  --container-shell: 100rem;
+  --container-prose: 42rem;
+
+  /* Fluid section rhythm, so desktop gets breathing room without cramping mobile. */
+  --spacing-section: clamp(3rem, 6vw, 5rem);
+  --spacing-section-lg: clamp(4rem, 9vw, 7.5rem);
+}
+
+/*
+ * Semantic aliases. Components reference only these, never the ramps above.
+ *
+ * Light and dark are tuned independently against their own backdrops, which is why the
+ * same role points at different ramp steps in each theme. In dark mode a fill that must
+ * stand out is *lighter* than the canvas, so `sunken` and `inset` describe emphasis, not
+ * literal depth.
+ */
+@layer base {
+  :root {
+    color-scheme: light;
+
+    --canvas: var(--color-ink-150);
+    --surface: oklch(0.995 0.001 265);
+    --surface-raised: oklch(1 0 0);
+    --surface-sunken: var(--color-ink-175);
+    --surface-inset: var(--color-ink-200);
+    --surface-hover: var(--color-ink-200);
+
+    --fg: var(--color-ink-950);
+    --fg-secondary: var(--color-ink-700);
+    --fg-tertiary: var(--color-ink-650);
+    --fg-quiet: var(--color-ink-600);
+    --fg-on-accent: oklch(1 0 0);
+
+    /* Decorative separators. Not a control boundary, so not held to 3:1. */
+    --hairline: oklch(0.163 0.006 265 / 0.1);
+    --hairline-strong: oklch(0.163 0.006 265 / 0.2);
+    --hairline-accent: oklch(0.576 0.171 255 / 0.45);
+
+    /* Interactive control boundary and graphical objects. Both clear 3:1. */
+    --border-control: var(--color-ink-450);
+    --track: var(--color-ink-400);
+
+    --accent: var(--color-accent-600);
+    --accent-hover: var(--color-accent-700);
+    --accent-quiet: oklch(0.576 0.171 255 / 0.1);
+
+    --pass: var(--color-pass-700);
+    --pass-quiet: oklch(0.548 0.128 152 / 0.12);
+    --warn: var(--color-warn-700);
+    --warn-quiet: oklch(0.638 0.132 74 / 0.15);
+    --fail: var(--color-fail-700);
+    --fail-quiet: oklch(0.554 0.196 25 / 0.1);
+
+    --ring: var(--color-accent-500);
+
+    --color-shadow-5: oklch(0.163 0.006 265 / 0.05);
+    --color-shadow-6: oklch(0.163 0.006 265 / 0.07);
+    --color-shadow-7: oklch(0.163 0.006 265 / 0.08);
+  }
+
+  .dark {
+    color-scheme: dark;
+
+    /* Not an inversion. Surfaces get lighter as they rise, accents lose chroma. */
+    --canvas: var(--color-ink-1000);
+    --surface: var(--color-ink-950);
+    --surface-raised: var(--color-ink-900);
+    --surface-sunken: var(--color-ink-850);
+    --surface-inset: var(--color-ink-825);
+    --surface-hover: var(--color-ink-825);
+
+    --fg: var(--color-ink-100);
+    --fg-secondary: var(--color-ink-350);
+    --fg-tertiary: var(--color-ink-450);
+    --fg-quiet: var(--color-ink-475);
+
+    --hairline: oklch(1 0 0 / 0.1);
+    --hairline-strong: oklch(1 0 0 / 0.2);
+    --hairline-accent: oklch(0.652 0.148 255 / 0.5);
+
+    --border-control: var(--color-ink-600);
+    --track: var(--color-ink-600);
+
+    --accent: var(--color-accent-400);
+    --accent-hover: var(--color-accent-300);
+    --accent-quiet: oklch(0.652 0.148 255 / 0.16);
+    --fg-on-accent: var(--color-ink-1000);
+
+    --pass: var(--color-pass-300);
+    --pass-quiet: oklch(0.72 0.13 152 / 0.16);
+    --warn: var(--color-warn-300);
+    --warn-quiet: oklch(0.79 0.13 74 / 0.16);
+    --fail: var(--color-fail-300);
+    --fail-quiet: oklch(0.7 0.16 25 / 0.18);
+
+    --ring: var(--color-accent-400);
+
+    /*
+     * Shadows barely register on a dark canvas, so elevation is carried by the surface
+     * lightness step and a lit top edge. The shadow ink is pushed to near-black and
+     * higher alpha so the little that shows still reads.
+     */
+    --color-shadow-5: oklch(0 0 0 / 0.3);
+    --color-shadow-6: oklch(0 0 0 / 0.4);
+    --color-shadow-7: oklch(0 0 0 / 0.5);
+    --lit-edge: inset 0 1px 0 0 oklch(1 0 0 / 0.05);
+  }
+
+  * {
+    border-color: var(--hairline);
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: var(--canvas);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    font-variant-numeric: tabular-nums;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+    letter-spacing: var(--tracking-heading);
+    font-weight: 500;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Every number in this product sits in a column or updates in place. */
+  td,
+  th,
+  data,
+  [data-numeric] {
+    font-variant-numeric: tabular-nums;
+  }
+
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-xs);
+  }
+
+  ::selection {
+    background: var(--accent-quiet);
+  }
+
+  /* Keep the change, drop the travel. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* ------------------------------------------------------------------ surfaces */
+  .panel {
+    background-color: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-xl);
+  }
+
+  .panel-raised {
+    background-color: var(--surface-raised);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-sm), var(--lit-edge, 0 0 transparent);
+  }
+
+  /*
+   * Sticky top bar. Opaque by default so text over scrolling content is always readable;
+   * the translucent blur is layered on only where `backdrop-filter` is supported.
+   */
+  .app-bar {
+    background-color: var(--canvas);
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+    .app-bar {
+      background-color: color-mix(in oklab, var(--canvas) 85%, transparent);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+    }
+  }
+
+  /*
+   * Horizontally scrollable region for wide tables and the document canvas.
+   *
+   * A table with eight columns cannot fit 360px, and shrinking the type to make it fit is
+   * worse than letting the region scroll. Focusable so a keyboard user can reach the
+   * scrollbar, per WCAG 2.1.1.
+   */
+  .scroll-x {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+  }
+
+  /* ------------------------------------------------------------------ type */
+  .overline {
+    font-size: var(--text-micro);
+    font-weight: 500;
+    letter-spacing: var(--tracking-overline);
+    text-transform: uppercase;
+    color: var(--fg-quiet);
+  }
+
+  .figure {
+    font-size: var(--text-figure);
+    font-weight: 400;
+    letter-spacing: -0.028em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+
+  .mono {
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    letter-spacing: -0.01em;
+  }
+
+  /* ------------------------------------------------------------------ controls */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4375rem;
+    height: 2rem;
+    padding-inline: 0.75rem;
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    white-space: nowrap;
+    /* Composited properties only. `box-shadow` is deliberately not transitioned. */
+    transition:
+      background-color var(--duration-fast) var(--ease-out-quart),
+      border-color var(--duration-fast) var(--ease-out-quart),
+      color var(--duration-fast) var(--ease-out-quart),
+      opacity var(--duration-fast) var(--ease-out-quart),
+      transform var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .btn:active:not(:disabled, [aria-disabled="true"]) {
+    transform: translateY(0.5px) scale(0.99);
+  }
+
+  .btn:disabled,
+  .btn[aria-disabled="true"] {
+    opacity: 0.45;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  .btn[data-loading="true"] {
+    cursor: progress;
+    opacity: 0.7;
+  }
+
+  .btn-primary {
+    background-color: var(--accent);
+    color: var(--fg-on-accent);
+    border: 1px solid transparent;
+    box-shadow: var(--shadow-xs);
+  }
+
+  .btn-primary:hover:not(:disabled, [aria-disabled="true"]) {
+    background-color: var(--accent-hover);
+  }
+
+  .btn-quiet {
+    background-color: var(--surface-raised);
+    color: var(--fg);
+    border: 1px solid var(--border-control);
+  }
+
+  .btn-quiet:hover:not(:disabled, [aria-disabled="true"]) {
+    background-color: var(--surface-hover);
+  }
+
+  /* Destructive confirmation. Must not look like the affirmative action. */
+  .btn-danger {
+    background-color: var(--fail-quiet);
+    color: var(--fail);
+    border: 1px solid var(--fail);
+  }
+
+  .btn-danger:hover:not(:disabled, [aria-disabled="true"]) {
+    background-color: var(--fail);
+    color: var(--surface-raised);
+  }
+
+  .btn-bare {
+    background-color: transparent;
+    color: var(--fg-secondary);
+    border: 1px solid transparent;
+  }
+
+  .btn-bare:hover:not(:disabled, [aria-disabled="true"]) {
+    background-color: var(--surface-hover);
+    color: var(--fg);
+  }
+
+  /*
+   * Touch targets. Visual height stays compact on a pointer device; on a coarse pointer
+   * the hit area is expanded to 44px with a pseudo-element so the layout does not shift.
+   */
+  @media (pointer: coarse) {
+    .btn,
+    .icon-target {
+      position: relative;
+    }
+
+    .btn::after,
+    .icon-target::after {
+      content: "";
+      position: absolute;
+      inset: 50% 0 auto 0;
+      height: 2.75rem;
+      translate: 0 -50%;
+      min-width: 2.75rem;
+    }
+  }
+
+  /* ------------------------------------------------------------------ pills */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3125rem;
+    height: 1.25rem;
+    padding-inline: 0.4375rem;
+    border-radius: var(--radius-xs);
+    font-size: var(--text-micro);
+    font-weight: 500;
+    white-space: nowrap;
+    border: 1px solid transparent;
+  }
+
+  .pill-pass {
+    background-color: var(--pass-quiet);
+    color: var(--pass);
+  }
+
+  .pill-warn {
+    background-color: var(--warn-quiet);
+    color: var(--warn);
+  }
+
+  .pill-fail {
+    background-color: var(--fail-quiet);
+    color: var(--fail);
+  }
+
+  .pill-accent {
+    background-color: var(--accent-quiet);
+    color: var(--accent);
+  }
+
+  .pill-quiet {
+    background-color: var(--surface-inset);
+    color: var(--fg-secondary);
+  }
+
+  /* ------------------------------------------------------------------ tables */
+  .grid-row {
+    transition: background-color var(--duration-instant) var(--ease-out-quart);
+  }
+
+  .grid-row:hover {
+    background-color: var(--surface-hover);
+  }
+
+  .grid-row[data-selected="true"] {
+    background-color: var(--accent-quiet);
+    box-shadow: inset 2px 0 0 0 var(--accent);
+  }
+
+  /*
+   * Document surface for the evidence viewer.
+   *
+   * A query container so glyph size can be expressed in `cqw` and track the rendered page
+   * width exactly. Coordinates arrive as PDF points with the origin top-left; every child
+   * is positioned as a percentage of page width and height, so the whole surface is
+   * resolution-independent and needs no measurement in JavaScript.
+   */
+  .page-canvas {
+    container-type: inline-size;
+    position: relative;
+    overflow: hidden;
+    background-color: var(--surface-raised);
+    border: 1px solid var(--hairline-strong);
+    border-radius: var(--radius-md);
+  }
+
+  .page-line {
+    position: absolute;
+    white-space: pre;
+    font-family: var(--font-mono);
+    color: var(--fg-tertiary);
+    pointer-events: none;
+  }
+
+  .page-highlight {
+    position: absolute;
+    background-color: var(--accent-quiet);
+    box-shadow: inset 0 0 0 1px var(--hairline-accent);
+    border-radius: 1px;
+    pointer-events: none;
+  }
+
+  .page-highlight-secondary {
+    position: absolute;
+    background-color: var(--surface-inset);
+    border-radius: 1px;
+    pointer-events: none;
+  }
+}
+
+@layer utilities {
+  .hairline-b {
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .hairline-t {
+    border-top: 1px solid var(--hairline);
+  }
+
+  .hairline-r {
+    border-right: 1px solid var(--hairline);
+  }
+
+  .hairline-l {
+    border-left: 1px solid var(--hairline);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

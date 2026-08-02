@@ -1,0 +1,281 @@
+# Golden set: PVF valves.
+#
+# Ground truth is written in SOURCE FORM — the string a human reads off the datasheet — and is
+# normalised through the same pipeline the extractor's output goes through. So this file
+# measures *extraction*, not normalisation: a bad conversion factor would corrupt both sides
+# identically and cancel out. Normalisation has its own unit tests, where a wrong factor fails
+# loudly instead of hiding.
+#
+# `absent` is the most valuable key here. Without it, abstention cannot be scored, and a system
+# that fabricates freely would benchmark identically to one that abstains honestly.
+#
+# Genuinely ambiguous attributes are listed in NEITHER `attributes` nor `absent`, so they are
+# not scored at all. Scoring a case where two careful humans would disagree measures the
+# annotator, not the extractor. Each omission is justified in `notes`.
+
+name: pvf_valves_v1
+description: >
+  Two datasheets, nine SKUs. Covers ordering-table row selection, footnote applicability,
+  deferred values, and the NSF-61-is-not-lead-free distinction.
+
+source_documents:
+  - id: ba100
+    path: ../samples/ba100.txt
+    supplier_id: milwaukee
+    brand: Milwaukee Valve
+  - id: gv200
+    path: ../samples/gv200.txt
+    supplier_id: nibco
+    brand: NIBCO
+
+products:
+  # ---------------------------------------------------------------- ball valves
+  - sku: BA-100-025
+    class_code: PLB.VLV.BALL.2PC
+    source: ba100
+    notes: >
+      stem_material omitted: "Ball / Stem ... Chrome-plated brass / Brass" is a paired value
+      and which half is the stem is a judgement call.
+    attributes:
+      product_series: BA-100
+      number_of_pieces: Two-Piece
+      nominal_size: 1/4"
+      case_quantity: "24"
+      handle_type: Lever
+      body_material: Bronze C84400
+      seat_material: RPTFE
+      port_type: Full Port
+      pressure_rating_wog: 600 PSI
+      steam_pressure_rating: 150 PSI
+      temperature_range: -20 degF to 366 degF
+      end_connection: NPT threaded
+      approvals: UL, CSA, NSF/ANSI 61
+      potable_water_approved: "true"
+    absent:
+      # NSF/ANSI 61 covers potable water, not lead content. Claiming lead-free from it is the
+      # most common compliance error in this category, so it is scored explicitly.
+      - lead_free_compliant
+      - cv_flow_coefficient      # "Consult factory"
+      - operating_torque         # stated for the 1/2" size only
+      - gtin
+      - country_of_origin
+      - each_weight
+      - case_weight
+      - selling_uom
+
+  - sku: BA-100-050
+    class_code: PLB.VLV.BALL.2PC
+    source: ba100
+    notes: >
+      The only SKU where operating_torque IS present, because the datasheet qualifies it to
+      the 1/2" size. Directly tests applicability in both directions.
+    attributes:
+      product_series: BA-100
+      number_of_pieces: Two-Piece
+      nominal_size: 1/2"
+      case_quantity: "24"
+      handle_type: Lever
+      body_material: Bronze C84400
+      seat_material: RPTFE
+      port_type: Full Port
+      pressure_rating_wog: 600 PSI
+      steam_pressure_rating: 150 PSI
+      temperature_range: -20 degF to 366 degF
+      end_connection: NPT threaded
+      approvals: UL, CSA, NSF/ANSI 61
+      potable_water_approved: "true"
+      operating_torque: 18-22 ft-lb
+    absent:
+      - lead_free_compliant
+      - cv_flow_coefficient
+      - gtin
+      - country_of_origin
+      - each_weight
+      - case_weight
+      - selling_uom
+
+  - sku: BA-100-075
+    class_code: PLB.VLV.BALL.2PC
+    source: ba100
+    attributes:
+      product_series: BA-100
+      number_of_pieces: Two-Piece
+      nominal_size: 3/4"
+      case_quantity: "12"
+      handle_type: Lever
+      body_material: Bronze C84400
+      seat_material: RPTFE
+      port_type: Full Port
+      pressure_rating_wog: 600 PSI
+      steam_pressure_rating: 150 PSI
+      temperature_range: -20 degF to 366 degF
+      end_connection: NPT threaded
+      approvals: UL, CSA, NSF/ANSI 61
+      potable_water_approved: "true"
+    absent:
+      - lead_free_compliant
+      - cv_flow_coefficient
+      - operating_torque
+      - gtin
+      - country_of_origin
+      - each_weight
+      - case_weight
+      - selling_uom
+
+  - sku: BA-100-100
+    class_code: PLB.VLV.BALL.2PC
+    source: ba100
+    notes: >
+      handle_type omitted: the ordering row says "Lever" but the footnote says sizes 1" and
+      larger ship with a locking lever. The document contradicts itself, so neither answer is
+      defensible ground truth.
+    attributes:
+      product_series: BA-100
+      number_of_pieces: Two-Piece
+      nominal_size: 1"
+      case_quantity: "12"
+      body_material: Bronze C84400
+      seat_material: RPTFE
+      port_type: Full Port
+      pressure_rating_wog: 600 PSI
+      steam_pressure_rating: 150 PSI
+      temperature_range: -20 degF to 366 degF
+      end_connection: NPT threaded
+      approvals: UL, CSA, NSF/ANSI 61
+      potable_water_approved: "true"
+    absent:
+      - lead_free_compliant
+      - cv_flow_coefficient
+      - operating_torque
+      - gtin
+      - country_of_origin
+      - each_weight
+      - case_weight
+      - selling_uom
+
+  - sku: BA-100-125
+    class_code: PLB.VLV.BALL.2PC
+    source: ba100
+    notes: handle_type omitted for the same footnote contradiction as BA-100-100.
+    attributes:
+      product_series: BA-100
+      number_of_pieces: Two-Piece
+      nominal_size: 1-1/4"
+      case_quantity: "6"
+      body_material: Bronze C84400
+      seat_material: RPTFE
+      port_type: Full Port
+      pressure_rating_wog: 600 PSI
+      steam_pressure_rating: 150 PSI
+      temperature_range: -20 degF to 366 degF
+      end_connection: NPT threaded
+      approvals: UL, CSA, NSF/ANSI 61
+      potable_water_approved: "true"
+    absent:
+      - lead_free_compliant
+      - cv_flow_coefficient
+      - operating_torque
+      - gtin
+      - country_of_origin
+      - each_weight
+      - case_weight
+      - selling_uom
+
+  # ---------------------------------------------------------------- gate valves
+  # A different manufacturer, a different table layout, and a lead-free claim that IS
+  # substantiated — the mirror image of the ball valve trap.
+  - sku: T-113-025
+    class_code: PLB.VLV.GATE.BRZ
+    source: gv200
+    attributes:
+      product_series: T-113
+      nominal_size: 1/4"
+      case_quantity: "20"
+      body_material: Bronze C89833
+      stem_material: Silicon Bronze
+      handle_type: Handwheel
+      pressure_rating_wog: 200 PSI
+      steam_pressure_rating: 125 PSI
+      temperature_range: -20 degF to 406 degF
+      end_connection: Solder
+      approvals: UL, MSS
+      lead_free_compliant: "true"
+      potable_water_approved: "true"
+      country_of_origin: United States
+    absent:
+      - cv_flow_coefficient      # "available on request"
+      - gtin
+      - each_weight
+      - selling_uom
+
+  - sku: T-113-050
+    class_code: PLB.VLV.GATE.BRZ
+    source: gv200
+    attributes:
+      product_series: T-113
+      nominal_size: 1/2"
+      case_quantity: "20"
+      body_material: Bronze C89833
+      stem_material: Silicon Bronze
+      handle_type: Handwheel
+      pressure_rating_wog: 200 PSI
+      steam_pressure_rating: 125 PSI
+      temperature_range: -20 degF to 406 degF
+      end_connection: Solder
+      approvals: UL, MSS
+      lead_free_compliant: "true"
+      potable_water_approved: "true"
+      country_of_origin: United States
+    absent:
+      - cv_flow_coefficient
+      - gtin
+      - each_weight
+      - selling_uom
+
+  - sku: T-113-100
+    class_code: PLB.VLV.GATE.BRZ
+    source: gv200
+    attributes:
+      product_series: T-113
+      nominal_size: 1"
+      case_quantity: "10"
+      body_material: Bronze C89833
+      stem_material: Silicon Bronze
+      handle_type: Handwheel
+      pressure_rating_wog: 200 PSI
+      steam_pressure_rating: 125 PSI
+      temperature_range: -20 degF to 406 degF
+      end_connection: Solder
+      approvals: UL, MSS
+      lead_free_compliant: "true"
+      potable_water_approved: "true"
+      country_of_origin: United States
+    absent:
+      - cv_flow_coefficient
+      - gtin
+      - each_weight
+      - selling_uom
+
+  - sku: T-113-200
+    class_code: PLB.VLV.GATE.BRZ
+    source: gv200
+    attributes:
+      product_series: T-113
+      nominal_size: 2"
+      case_quantity: "4"
+      body_material: Bronze C89833
+      stem_material: Silicon Bronze
+      handle_type: Handwheel
+      pressure_rating_wog: 200 PSI
+      steam_pressure_rating: 125 PSI
+      temperature_range: -20 degF to 406 degF
+      end_connection: Solder
+      approvals: UL, MSS
+      lead_free_compliant: "true"
+      potable_water_approved: "true"
+      country_of_origin: United States
+    absent:
+      - cv_flow_coefficient
+      - gtin
+      - each_weight
+      - selling_uom

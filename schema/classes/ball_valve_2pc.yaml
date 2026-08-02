@@ -1,0 +1,136 @@
+# Two-Piece Ball Valve.
+#
+# Attribute definitions live in schema/attributes/ and are referenced by code here. The
+# separation is deliberate: `body_material` means the same thing for a ball valve and a gate
+# valve, and defining it twice is how two definitions drift apart.
+#
+# `weight` drives completeness scoring. A missing pressure rating is not equivalent to a
+# missing handle style, and a flat attribute count hides exactly that difference.
+
+class:
+  code: PLB.VLV.BALL.2PC
+  name: Two-Piece Ball Valve
+  version: v1
+
+  browse_path: [Plumbing, Valves, Ball Valves, Two-Piece]
+
+  # Multi-target classification. The browse path above is how buyers shop; these codes are
+  # what the product *is* and what procurement systems need. Different concerns, kept apart.
+  mappings:
+    etim: EC002714
+    unspsc: "40141607"
+
+  attributes:
+    # --- identity / structure -------------------------------------------------
+    - { code: product_series,       requirement: recommended, weight: 1.0 }
+    - { code: number_of_pieces,     requirement: required,    weight: 1.0 }
+
+    # --- the attributes a buyer actually filters on ---------------------------
+    - { code: nominal_size,         requirement: required,    weight: 3.0 }
+    - { code: pressure_rating_wog,  requirement: required,    weight: 3.0 }
+    - { code: body_material,        requirement: required,    weight: 3.0 }
+    - { code: end_connection,       requirement: required,    weight: 3.0 }
+    - { code: port_type,            requirement: required,    weight: 2.0 }
+    - { code: seat_material,        requirement: required,    weight: 2.0 }
+    - { code: stem_material,        requirement: recommended, weight: 1.0 }
+    - { code: handle_type,          requirement: recommended, weight: 1.0 }
+
+    # --- engineering detail ---------------------------------------------------
+    - { code: cv_flow_coefficient,  requirement: recommended, weight: 1.0 }
+    - { code: temperature_range,    requirement: required,    weight: 2.0 }
+    - { code: operating_torque,     requirement: optional,    weight: 1.0 }
+    - { code: steam_pressure_rating, requirement: optional,   weight: 1.0 }
+
+    # --- compliance ----------------------------------------------------------
+    - { code: lead_free_compliant,  requirement: required,    weight: 3.0 }
+    - { code: potable_water_approved, requirement: recommended, weight: 2.0 }
+    - { code: approvals,            requirement: required,    weight: 2.0 }
+    - { code: country_of_origin,    requirement: required,    weight: 2.0 }
+
+    # --- logistics -----------------------------------------------------------
+    - { code: gtin,                 requirement: recommended, weight: 1.0 }
+    - { code: each_weight,          requirement: recommended, weight: 1.0 }
+    - { code: case_quantity,        requirement: recommended, weight: 1.0 }
+    - { code: case_weight,          requirement: optional,    weight: 1.0 }
+    - { code: selling_uom,          requirement: required,    weight: 1.0 }
+
+  # Deterministic constraints, executed by validation layer L2. `references` is declared
+  # rather than parsed out of `expr` so that a typo fails at schema load rather than
+  # silently disabling the rule at runtime.
+  cross_field_rules:
+    - id: R_LEADFREE_MATERIAL
+      expr: "lead_free_compliant == true implies body_material not in LEADED_ALLOYS"
+      references: [lead_free_compliant, body_material]
+      severity: error
+      message: >
+        A lead-free claim is inconsistent with a leaded copper alloy body (C36000, C84400).
+        Resolve by citing a lead-free certification for this specific part number, or by
+        correcting the material.
+
+    - id: R_POTABLE_REQUIRES_NSF61
+      expr: "potable_water_approved == true implies 'NSF-61' in approvals"
+      references: [potable_water_approved, approvals]
+      severity: error
+      message: >
+        A potable-water claim requires an NSF/ANSI 61 certification reference.
+
+    - id: R_TEMP_ORDER
+      expr: "temperature_range.min < temperature_range.max"
+      references: [temperature_range]
+      severity: error
+      message: Temperature range minimum must be below its maximum.
+
+    - id: R_STEAM_BELOW_WOG
+      expr: "steam_pressure_rating <= pressure_rating_wog"
+      references: [steam_pressure_rating, pressure_rating_wog]
+      severity: error
+      message: >
+        The steam rating (WSP) must not exceed the WOG rating. A violation usually means the
+        WOG figure was extracted into the steam field.
+
+    - id: R_FULLPORT_CV_FLOOR
+      expr: "port_type == 'Full Port' implies cv_flow_coefficient >= cv_floor(nominal_size)"
+      references: [port_type, cv_flow_coefficient, nominal_size]
+      severity: warning
+      message: >
+        A full-port valve has an unexpectedly low Cv for its size. Often indicates the Cv was
+        read from a reduced-port row of the same table.
+
+    - id: R_PACK_WEIGHT
+      expr: "abs(case_weight - each_weight * case_quantity) / case_weight <= 0.15"
+      references: [case_weight, each_weight, case_quantity]
+      severity: warning
+      message: >
+        Carton weight is inconsistent with each-weight times carton quantity. One of the
+        three values is wrong, and the arithmetic proves it.
+
+    - id: R_THREAD_STANDARD_EXPLICIT
+      expr: "end_connection in THREADED_TYPES implies nominal_size is not null"
+      references: [end_connection, nominal_size]
+      severity: error
+      message: A threaded end connection requires a nominal size to be orderable.
+
+  channel_profiles:
+    - name: cx1_pim
+      title_template: >-
+        {brand} {mpn} {nominal_size} {body_material_short} {class_name},
+        {pressure_rating_wog}, {port_type}
+      max_title_chars: 200
+      unit_system: imperial_primary
+      required:
+        - nominal_size
+        - pressure_rating_wog
+        - body_material
+        - end_connection
+        - selling_uom
+
+    - name: google_merchant
+      title_template: "{brand} {mpn} {nominal_size} {class_name}"
+      max_title_chars: 150
+      unit_system: imperial_primary
+      required: [gtin, brand, nominal_size]
+
+    - name: schema_org
+      max_title_chars: 200
+      unit_system: metric_primary
+      required: [nominal_size, body_material]
