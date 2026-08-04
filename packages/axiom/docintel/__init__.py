@@ -15,6 +15,7 @@ from axiom.docintel.models import (
     TableCell,
 )
 from axiom.docintel.pdf_parser import PdfParseError, parse_pdf
+from axiom.docintel.sku import MIN_SKU_CHARS, SkuPresence, find_sku
 from axiom.docintel.spans import (
     DEFAULT_THRESHOLD,
     QuoteLocation,
@@ -48,6 +49,7 @@ def parse_artifact(data: bytes, document, **kwargs) -> ParsedDocument:
 
 __all__ = [
     "DEFAULT_THRESHOLD",
+    "MIN_SKU_CHARS",
     "DocumentType",
     "ParsedDocument",
     "ParsedLine",
@@ -56,8 +58,10 @@ __all__ = [
     "ParsedWord",
     "PdfParseError",
     "QuoteLocation",
+    "SkuPresence",
     "TableCell",
     "build_evidence_span",
+    "find_sku",
     "locate_quote",
     "parse_artifact",
     "parse_pdf",

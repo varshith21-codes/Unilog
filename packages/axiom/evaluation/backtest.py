@@ -41,6 +41,13 @@ class BacktestResult:
     duration_seconds: float = 0.0
     products_run: int = 0
     failures: list[str] = field(default_factory=list)
+    enforce_evidence: bool = True
+    """False marks an ablation run, where the evidence contract was not enforced. Recorded on
+    the result so a control-group measurement can never be mistaken for a real one."""
+
+    @property
+    def arm(self) -> str:
+        return "axiom" if self.enforce_evidence else "no-evidence-contract"
 
     def per_attribute(self) -> dict[str, MetricSet]:
         return self.metrics.by_attribute()
@@ -88,6 +95,8 @@ class BacktestResult:
         scores, _ = self.metrics.calibration_pairs()
         return {
             "golden_set": self.golden_set,
+            "arm": self.arm,
+            "enforce_evidence": self.enforce_evidence,
             "products": self.products_run,
             "comparisons": self.metrics.total,
             "duration_seconds": round(self.duration_seconds, 2),
@@ -110,13 +119,21 @@ def run_backtest(
     start_tier: str = "volume",
     store_root: Path | None = None,
     limit: int | None = None,
+    enforce_evidence: bool = True,
 ) -> BacktestResult:
-    """Run the full pipeline over a golden set and score the results."""
+    """Run the full pipeline over a golden set and score the results.
+
+    ``enforce_evidence=False`` runs the **ablation**: the same prompt against the same model and
+    the same documents, but with the evidence contract not enforced, so values the model could
+    not support with a locatable quote are kept instead of discarded. That is the control group
+    — what a generic enrichment pipeline would publish — and comparing the two is the only way
+    to state what the trust layer actually buys rather than asserting it.
+    """
     calibrator = calibrator or Calibrator()
     priors = priors or Priors()
     store = LocalArtifactStore(store_root or Path("data/cache/artifacts"))
 
-    result = BacktestResult(golden_set=golden.name)
+    result = BacktestResult(golden_set=golden.name, enforce_evidence=enforce_evidence)
     started = time.perf_counter()
 
     # Documents are parsed once and reused across every SKU that cites them. A datasheet with
@@ -134,7 +151,15 @@ def run_backtest(
 
         try:
             comparisons, usage = _score_product(
-                product, parsed, registry, client, cascade, calibrator, priors, start_tier
+                product,
+                parsed,
+                registry,
+                client,
+                cascade,
+                calibrator,
+                priors,
+                start_tier,
+                enforce_evidence=enforce_evidence,
             )
         except Exception as exc:  # noqa: BLE001
             result.failures.append(f"{product.sku}: extraction failed: {exc}")
@@ -169,8 +194,16 @@ def _score_product(
     calibrator: Calibrator,
     priors: Priors,
     start_tier: str,
+    *,
+    enforce_evidence: bool = True,
 ) -> tuple[list[Comparison], UsageLedger]:
-    extractor = Extractor(registry, client, cascade, start_tier=start_tier)
+    extractor = Extractor(
+        registry,
+        client,
+        cascade,
+        start_tier=start_tier,
+        enforce_evidence=enforce_evidence,
+    )
     extraction = extractor.extract(
         parsed,
         class_code=product.class_code,
@@ -238,7 +271,21 @@ def _expected_canonical(product: GoldenProduct, code: str, definition):
 
 
 def write_calibration_artifacts(result: BacktestResult, directory: Path) -> dict[str, Path]:
-    """Persist what the backtest produced for the confidence and policy layers."""
+    """Persist what the backtest produced for the confidence and policy layers.
+
+    Refuses an ablation result. The calibration set governs what publishes without a human, and
+    an ablation deliberately keeps values whose quotes could not be located — training the
+    acceptance threshold on those would raise coverage by teaching the policy that unverifiable
+    values are fine. That is the exact failure this system exists to prevent, so it is blocked
+    here rather than left to the caller to remember.
+    """
+    if not result.enforce_evidence:
+        raise ValueError(
+            "refusing to write calibration artifacts from an ablation run "
+            f"(arm={result.arm!r}): its scores describe a pipeline with the evidence contract "
+            "disabled, and using them would calibrate auto-accept against unverifiable values"
+        )
+
     directory.mkdir(parents=True, exist_ok=True)
     written: dict[str, Path] = {}
 

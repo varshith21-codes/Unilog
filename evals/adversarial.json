@@ -1,0 +1,41 @@
+[
+  {
+    "case": "ball valve SKU against the gate valve datasheet",
+    "document": "gv200.txt",
+    "target_sku": "BA-100-075",
+    "class_code": "PLB.VLV.BALL.2PC",
+    "rationale": "gv200 describes NIBCO bronze gate valves; BA-100-075 is a Milwaukee ball valve and appears nowhere in it",
+    "requested": 23,
+    "abstained": 23,
+    "fabricated": 0,
+    "fabricated_with_verified_quote": 0,
+    "values": [],
+    "cost_usd": 0.0
+  },
+  {
+    "case": "gate valve SKU against the ball valve datasheet",
+    "document": "ba100.txt",
+    "target_sku": "T-113-100",
+    "class_code": "PLB.VLV.GATE.BRZ",
+    "rationale": "ba100 describes Milwaukee ball valves; T-113-100 is a NIBCO gate valve and appears nowhere in it",
+    "requested": 18,
+    "abstained": 18,
+    "fabricated": 0,
+    "fabricated_with_verified_quote": 0,
+    "values": [],
+    "cost_usd": 0.0
+  },
+  {
+    "case": "nonexistent part number in the right family",
+    "document": "ba100.txt",
+    "target_sku": "BA-100-999",
+    "class_code": "PLB.VLV.BALL.2PC",
+    "rationale": "the BA-100 series is described but there is no -999 size; shared family specs are the tempting wrong answer",
+    "requested": 23,
+    "abstained": 23,
+    "fabricated": 0,
+    "fabricated_with_verified_quote": 0,
+    "values": [],
+    "cost_usd": 0.0
+  }
+]

@@ -1,10 +1,11 @@
 /**
  * Domain types mirroring the Python models in `packages/axiom`.
  *
- * These are a hand-maintained projection of Pydantic models, not a generated client. When
- * `apps/api` exists these should be replaced by types generated from its OpenAPI schema.
- * Until then, the source of truth for every shape below is named in its doc comment so a
- * drift is traceable.
+ * These are a hand-maintained projection of Pydantic models, not a generated client. The
+ * server-side shape is assembled by `axiom.console.projection`, which is shared by the API
+ * and the offline fixture exporter so those two cannot drift from each other. This file can
+ * still drift from *both*, so the source of truth for every shape below is named in its doc
+ * comment. Generating these from the API's OpenAPI schema is the eventual fix.
  */
 
 // ---------------------------------------------------------------- evidence
@@ -188,6 +189,14 @@ export interface AttributeValue {
   is_publishable: boolean;
   has_verified_evidence: boolean;
   citation_summary: string[];
+  /**
+   * Present only once a human has ruled on this value. Set by
+   * `axiom.console.projection.overlay_review_decisions`, which joins the review session onto
+   * the pipeline's own output rather than overwriting it. `human_accept` means the model was
+   * right and a reviewer confirmed it; `human_correct` means it was wrong.
+   */
+  review_reason?: string;
+  review_detail?: string;
 }
 
 const EXTRACTION_FAMILY: ReadonlySet<DerivationMethod> = new Set<DerivationMethod>([
@@ -526,6 +535,18 @@ export interface RiskPolicySummary {
   reason: string;
 }
 
+/** One point on the risk–coverage curve. axiom.confidence.policy.RiskCoveragePoint */
+export interface RiskCoveragePoint {
+  threshold: number;
+  coverage: number;
+  error_upper_bound: number;
+}
+
+/** `GET /api/policy?epsilon=` — a summary plus the whole curve behind it. */
+export interface RiskPolicyView extends RiskPolicySummary {
+  curve: RiskCoveragePoint[];
+}
+
 export interface ChannelReadinessSummary {
   channel: string;
   ready: boolean;
@@ -542,6 +563,83 @@ export interface ChannelExport {
   withheld: string[];
   readiness: ChannelReadinessSummary;
   title: string | null;
+}
+
+// ---------------------------------------------------------------- cost
+// axiom.extract.client.UsageLedger + axiom.extract.pricing
+
+export interface PriceSource {
+  region: string;
+  fetched_at: string;
+  source: string;
+  priced_models: number;
+  unpriced_models: string[];
+  age_days: number | null;
+  /** True past 90 days. AWS changes prices; a stale table misstates unit economics. */
+  stale: boolean;
+}
+
+/** axiom.console.projection.serialise_cost */
+export interface CostSummary {
+  calls: number;
+  escalations: number;
+  input_tokens: number;
+  output_tokens: number;
+  latency_ms: number;
+  calls_by_tier: Record<string, number>;
+  /** Tokens are attributed to the tier that burned them, not split by call count. */
+  input_by_tier: Record<string, number>;
+  output_by_tier: Record<string, number>;
+  /**
+   * Null when a tier that was actually used has no published price. Render that as
+   * "unavailable", never as zero — a free-looking SKU reads as a result rather than as a
+   * missing input.
+   */
+  cost_usd: number | null;
+  cost_by_tier: Record<string, number> | null;
+  priced: boolean;
+  price_source: PriceSource | null;
+}
+
+// ---------------------------------------------------------------- review decisions
+// axiom.review.session
+
+export type ReviewAction = "accept" | "reject" | "correct";
+
+/** axiom.review.session.ReviewOutcome */
+export interface ReviewOutcome {
+  sku: string;
+  attribute_code: string;
+  action: ReviewAction;
+  reviewer: string;
+  before: string | null;
+  after: string | null;
+  status: ValueStatus;
+  recorded_at: string;
+  /**
+   * Per-attribute reliability before and after this decision. The pair is the learning
+   * flywheel made visible: an accept raises it, a reject or correction lowers it, and the
+   * auto-accept threshold moves as a result.
+   */
+  prior_before: number;
+  prior_after: number;
+  sibling_impact: number;
+}
+
+/** axiom.review.session.queue_summary */
+export interface QueueSummary {
+  pending: number;
+  accepted: number;
+  total: number;
+  by_reason: Record<string, number>;
+  blocking_failures: number;
+  warnings: number;
+}
+
+export interface DecisionResponse {
+  outcome: ReviewOutcome;
+  summary: QueueSummary;
+  item: Record<string, unknown> | null;
 }
 
 // ---------------------------------------------------------------- aggregates
@@ -577,10 +675,16 @@ export interface SkuMetrics {
   gaps_total: number;
   gaps_required: number;
   conflicts: string[];
+  /** Present once any value on this SKU has been reviewed. */
+  values_reviewed?: number;
 }
 
 export interface SkuBundle {
   sku: string;
+  /** Key into `ConsoleDataset.documents`. */
+  document_id: string;
+  /** Key into `ConsoleDataset.class_definitions`. Null if classification abstained. */
+  class_code: string | null;
   record: ProductRecordSummary;
   classifications: Classification[];
   classification_summary: Record<string, unknown>;
@@ -593,23 +697,45 @@ export interface SkuBundle {
   certificate: EnrichmentCertificate;
   channels: ChannelExport[];
   metrics: SkuMetrics;
+  /** Token spend for this SKU. Absent on bundles written before cost tracking existed. */
+  cost?: CostSummary | null;
+  /** Audit trail of human decisions, present once any have been recorded. */
+  decisions?: ReviewOutcome[];
 }
 
-export interface FixtureMeta {
+/** A source document together with its parsed page geometry. */
+export interface DocumentBundle {
+  document: SourceDocument;
+  pages: ParsedPage[];
+}
+
+export interface DatasetMeta {
   generated_at: string;
   generator: string;
-  pipeline_version: string;
-  source_sample: string;
+  /** True when served live from the API; false for the offline fixture. */
+  live: boolean;
   calibrator: string;
   policy_source: string;
   notes: string;
+  /** Non-fatal problems assembling the dataset, e.g. bundles at mismatched thresholds. */
+  warnings?: string[];
+  source_bundles?: string[];
+  /** Present on the offline fixture only. */
+  pipeline_version?: string;
+  source_sample?: string;
 }
 
+/**
+ * Documents and class definitions are keyed maps rather than fields on each SKU.
+ *
+ * Page geometry dominates the payload size, and several SKUs are routinely cut from one
+ * datasheet — five ball valves off one page would otherwise ship five copies of it. Bundles
+ * reference their document by id and their class by code.
+ */
 export interface ConsoleDataset {
-  meta: FixtureMeta;
-  document: SourceDocument;
-  pages: ParsedPage[];
-  class_definition: ClassDefinition;
+  meta: DatasetMeta;
+  documents: Record<string, DocumentBundle>;
+  class_definitions: Record<string, ClassDefinition>;
   policy: RiskPolicySummary;
   skus: SkuBundle[];
 }

@@ -114,7 +114,15 @@ class ModelCascade:
 
 @dataclass
 class UsageLedger:
-    """Running token and call totals. Feeds the cost-per-SKU meter."""
+    """Running token and call totals. Feeds the cost-per-SKU meter.
+
+    Tokens are tracked **per tier**, not just in total. Apportioning a single total by each
+    tier's share of the call count looks equivalent and is not: escalation re-sends the same
+    prompt to a more expensive model, so one frontier retry after ten cheap calls carries far
+    more than a eleventh of the tokens. Splitting by call count would credit most of those
+    tokens to the cheap tier and understate the cost of escalating — which is exactly the
+    number the cascade design needs to be judged on.
+    """
 
     calls: int = 0
     input_tokens: int = 0
@@ -122,6 +130,8 @@ class UsageLedger:
     escalations: int = 0
     latency_ms: int = 0
     by_tier: dict[str, int] = field(default_factory=dict)
+    input_by_tier: dict[str, int] = field(default_factory=dict)
+    output_by_tier: dict[str, int] = field(default_factory=dict)
 
     def record(self, response: ModelResponse, *, escalated: bool = False) -> None:
         self.calls += 1
@@ -129,26 +139,51 @@ class UsageLedger:
         self.output_tokens += response.output_tokens
         self.latency_ms += response.latency_ms
         self.by_tier[response.tier] = self.by_tier.get(response.tier, 0) + 1
+        self.input_by_tier[response.tier] = (
+            self.input_by_tier.get(response.tier, 0) + response.input_tokens
+        )
+        self.output_by_tier[response.tier] = (
+            self.output_by_tier.get(response.tier, 0) + response.output_tokens
+        )
         if escalated:
             self.escalations += 1
 
     def cost_usd(self, prices: dict[str, tuple[float, float]] | None) -> float | None:
         """Cost, given ``{tier: (usd_per_million_in, usd_per_million_out)}``.
 
-        Returns None when no price table is supplied. Reporting a made-up cost would be
-        worse than reporting none, because a plausible number invites decisions.
+        Returns None when no price table is supplied, or when a tier that was actually used has
+        no price in it. Reporting a made-up or partial cost would be worse than reporting none,
+        because a plausible number invites decisions. A tier that was never called may be
+        missing from the table without consequence.
         """
         if not prices:
             return None
         total = 0.0
-        for tier, calls in self.by_tier.items():
+        for tier in self.by_tier:
             if tier not in prices:
                 return None
-            share = calls / self.calls if self.calls else 0
             per_in, per_out = prices[tier]
-            total += (self.input_tokens * share / 1e6) * per_in
-            total += (self.output_tokens * share / 1e6) * per_out
+            total += (self.input_by_tier.get(tier, 0) / 1e6) * per_in
+            total += (self.output_by_tier.get(tier, 0) / 1e6) * per_out
         return round(total, 6)
+
+    def cost_by_tier(
+        self, prices: dict[str, tuple[float, float]] | None
+    ) -> dict[str, float] | None:
+        """Per-tier cost breakdown, for showing where the money actually went."""
+        if not prices:
+            return None
+        out: dict[str, float] = {}
+        for tier in self.by_tier:
+            if tier not in prices:
+                return None
+            per_in, per_out = prices[tier]
+            out[tier] = round(
+                (self.input_by_tier.get(tier, 0) / 1e6) * per_in
+                + (self.output_by_tier.get(tier, 0) / 1e6) * per_out,
+                6,
+            )
+        return out
 
     def merge(self, other: UsageLedger) -> None:
         self.calls += other.calls
@@ -158,6 +193,10 @@ class UsageLedger:
         self.latency_ms += other.latency_ms
         for tier, count in other.by_tier.items():
             self.by_tier[tier] = self.by_tier.get(tier, 0) + count
+        for tier, count in other.input_by_tier.items():
+            self.input_by_tier[tier] = self.input_by_tier.get(tier, 0) + count
+        for tier, count in other.output_by_tier.items():
+            self.output_by_tier[tier] = self.output_by_tier.get(tier, 0) + count
 
 
 class BedrockModelClient:

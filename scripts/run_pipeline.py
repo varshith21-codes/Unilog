@@ -32,6 +32,14 @@ from axiom.confidence import (
     extract_features,
     select_threshold,
 )
+from axiom.console import (
+    build_bundle,
+    jsonable,
+    serialise_class,
+    serialise_cost,
+    serialise_document,
+    serialise_pages,
+)
 from axiom.core.certificate import build_certificate
 from axiom.core.product import ProductRecord
 from axiom.docintel import parse_artifact
@@ -39,7 +47,9 @@ from axiom.extract import (
     BedrockModelClient,
     Extractor,
     ModelCascade,
+    PriceTable,
     StubModelClient,
+    UsageLedger,
 )
 from axiom.ingest import LocalArtifactStore, ingest_file
 from axiom.normalize import BrandMaster, clean_mpn, normalize_all
@@ -74,7 +84,10 @@ def main() -> int:
     parser.add_argument(
         "--save-session",
         action="store_true",
-        help="write a review session to data/sessions/ for the review workspace",
+        help=(
+            "write a review session to data/sessions/ and a console bundle to data/console/, "
+            "which is what the API serves to the review workspace and the dashboards"
+        ),
     )
     parser.add_argument(
         "--risk-budget",
@@ -94,6 +107,22 @@ def main() -> int:
 
     if not args.source.is_file():
         print(f"not a file: {args.source}", file=sys.stderr)
+        return 2
+
+    # A dry run stubs an empty model response, so it produces a record with no values at all.
+    # Persisting that would overwrite a real session and its bundle with an empty one, silently
+    # destroying whatever the last real run established — the review queue and every dashboard
+    # would go blank with no indication why. Refuse rather than warn: the combination has no
+    # legitimate use, and by the time a warning is read the data is already gone.
+    if args.dry_run and args.save_session:
+        print(
+            "--dry-run cannot be combined with --save-session: a dry run extracts nothing, "
+            "so it would replace the saved session and console bundle for "
+            f"{args.sku} with empty ones.\n"
+            "Drop --save-session to smoke-test the wiring, or drop --dry-run to record a "
+            "real run.",
+            file=sys.stderr,
+        )
         return 2
 
     registry = load_default()
@@ -176,16 +205,28 @@ def main() -> int:
     decisions = apply_policy(record.current_values(), scores, policy)
 
     # --- stage 8: certificate and channel exports ------------------------------
+    # Cost covers classification *and* extraction. Classification is a real model call against
+    # a real prompt, and reporting only extraction would understate the true cost per SKU by
+    # whatever the cheapest stage happens to cost — flattering, and wrong.
+    usage = UsageLedger()
+    usage.merge(classification.usage)
+    usage.merge(result.usage)
+
+    prices = PriceTable.load()
+    tier_prices = prices.tier_prices(cascade) if prices else None
+    cost_usd = usage.cost_usd(tier_prices)
+
     certificate = build_certificate(
         record,
         required_attribute_codes=registry.required_codes(class_code),
         pipeline_version=f"axiom-{__import__('axiom').__version__}",
-        cost_usd=result.usage.cost_usd(None),
-        wall_clock_seconds=round(result.usage.latency_ms / 1000, 2),
+        cost_usd=cost_usd,
+        wall_clock_seconds=round(usage.latency_ms / 1000, 2),
     )
     exports = export_all(record, registry)
 
     session_path = None
+    bundle_path = None
     if args.save_session:
         session = build_session(
             record,
@@ -198,6 +239,35 @@ def main() -> int:
         )
         session_path = session.save(
             REPO_ROOT / "data" / "sessions" / f"{args.sku}.json"
+        )
+
+        # The console bundle is the wider projection: certificate, channel readiness,
+        # classification candidates and the validation report, none of which a review session
+        # carries. Persisting it here rather than recomputing it in the API is what keeps
+        # model calls off the request path — a dashboard that re-ran extraction on every page
+        # load would be both slow and non-deterministic.
+        bundle_path = _save_bundle(
+            registry=registry,
+            record=record,
+            parsed=parsed,
+            artifact=artifact,
+            classification=classification,
+            extraction=result,
+            normalization_issues=norm_issues,
+            validation=report,
+            scores=scores,
+            features={code: f.explain() for code, f in feature_map.items()},
+            decisions=decisions,
+            certificate=certificate,
+            exports=exports,
+            policy=policy,
+            calibrator=calibrator,
+            cost=serialise_cost(
+                usage,
+                cost_usd=cost_usd,
+                cost_by_tier=usage.cost_by_tier(tier_prices),
+                prices=prices,
+            ),
         )
 
     if args.out:
@@ -224,11 +294,136 @@ def main() -> int:
     _report_normalize(normalized, norm_issues)
     _report_validate(report, record, brand)
     _report_decide(decisions, scores, feature_map, policy, calibrator)
+    _report_cost(usage, prices, tier_prices, cost_usd, len(record.current_values()))
     _report_publish(certificate, exports, args.out)
     if session_path:
         print(f"\n  review session: {session_path.relative_to(REPO_ROOT)}")
-        print("  open it with: python -m uvicorn apps.api.main:app --port 8000")
+    if bundle_path:
+        print(f"  console bundle: {bundle_path.relative_to(REPO_ROOT)}")
+    if session_path or bundle_path:
+        print("  serve them:     python -m uvicorn apps.api.main:app --port 8000")
+        print("  console:        cd apps/console; npm run dev")
     return 0
+
+
+def _report_cost(usage, prices, tier_prices, cost_usd, value_count: int) -> None:
+    """The cost-per-SKU meter.
+
+    Extrapolating to a catalogue is the whole point of measuring this: nobody cares about a
+    tenth of a cent, they care whether 500,000 SKUs costs $200 or $200,000.
+    """
+    print("\n" + "=" * 78)
+    print("COST")
+    print("=" * 78)
+
+    print(f"  calls          {usage.calls} ({usage.escalations} escalations)")
+    print(f"  tokens         {usage.input_tokens} in / {usage.output_tokens} out")
+    print(f"  latency        {usage.latency_ms / 1000:.1f}s")
+
+    if prices is None:
+        print("\n  no price table. Fetch one:")
+        print("    python scripts/fetch_bedrock_prices.py --write")
+        return
+
+    if cost_usd is None:
+        used = sorted(usage.by_tier)
+        missing = [tier for tier in used if tier not in (tier_prices or {})]
+        print(
+            f"\n  cost unavailable: no published price for tier(s) {', '.join(missing)}. "
+            "Reporting a partial total would understate it, so none is reported."
+        )
+        return
+
+    breakdown = usage.cost_by_tier(tier_prices) or {}
+    print(f"\n  price list     {prices.region}, effective {_effective_date(prices)}")
+    if prices.is_stale:
+        age = prices.age_days()
+        print(f"  WARNING        price table is {age:.0f} days old; re-run the fetch script")
+
+    print(f"\n  {'tier':<12} {'calls':>6} {'tokens in':>11} {'tokens out':>11} {'USD':>12}")
+    print("  " + "-" * 56)
+    for tier in sorted(usage.by_tier, key=lambda t: -breakdown.get(t, 0)):
+        print(
+            f"  {tier:<12} {usage.by_tier[tier]:>6} "
+            f"{usage.input_by_tier.get(tier, 0):>11} "
+            f"{usage.output_by_tier.get(tier, 0):>11} "
+            f"{breakdown.get(tier, 0):>12.6f}"
+        )
+
+    print(f"\n  cost this SKU  ${cost_usd:.6f}")
+    if value_count:
+        print(f"  per value      ${cost_usd / value_count:.6f} across {value_count} values")
+    for scale, label in ((10_000, "10k"), (100_000, "100k"), (500_000, "500k")):
+        print(f"  at {label:<11} ${cost_usd * scale:,.2f}")
+    print(
+        "\n  Extrapolation assumes this document's size and cascade path are typical. A"
+        "\n  catalogue of larger datasheets, or one that escalates more often, costs more."
+    )
+
+
+def _effective_date(prices) -> str:
+    dates = {
+        price.effective_date for price in prices.models.values() if price.effective_date
+    }
+    return ", ".join(sorted(d[:10] for d in dates)) if dates else "unknown"
+
+
+def _save_bundle(
+    *,
+    registry,
+    record,
+    parsed,
+    artifact,
+    classification,
+    extraction,
+    normalization_issues,
+    validation,
+    scores,
+    features,
+    decisions,
+    certificate,
+    exports,
+    policy,
+    calibrator,
+    cost=None,
+) -> Path:
+    """Write one SKU's console bundle to ``data/console/``.
+
+    The document and class definition travel with the bundle rather than being looked up by
+    the API. A bundle has to stay readable against the schema version it was produced under —
+    if the API resolved the class at read time, editing a YAML file would silently rewrite the
+    history of every run that came before it.
+    """
+    bundle = build_bundle(
+        registry=registry,
+        record=record,
+        artifact=artifact,
+        classification=classification,
+        extraction=extraction,
+        normalization_issues=normalization_issues,
+        validation=validation,
+        cost=cost,
+        scores=scores,
+        features=features,
+        decisions=decisions,
+        certificate=certificate,
+        exports=exports,
+    )
+    payload = {
+        "bundle": bundle,
+        "document": serialise_document(artifact, parsed),
+        "pages": serialise_pages(parsed),
+        "class_definition": (
+            serialise_class(registry, record.class_code) if record.class_code else None
+        ),
+        "policy": jsonable(policy.summary()),
+        "calibrator": "trained" if calibrator.is_trained else "untrained-heuristic",
+    }
+
+    target = REPO_ROOT / "data" / "console" / f"{record.sku}.bundle.json"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
+    return target
 
 
 def _report_publish(certificate, exports, out_dir) -> None:

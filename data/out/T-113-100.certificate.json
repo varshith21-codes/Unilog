@@ -1,0 +1,463 @@
+{
+  "certificate_id": "ec_974f249a983d",
+  "sku": "T-113-100",
+  "tenant_id": "demo",
+  "generated_at": "2026-08-03T18:15:48.359892+00:00",
+  "schema_version": "PLB.VLV.GATE.BRZ@v1",
+  "pipeline_version": "axiom-0.1.0",
+  "classifications": [
+    {
+      "scheme": "internal",
+      "code": "PLB.VLV.GATE.BRZ",
+      "path": [
+        "Plumbing",
+        "Valves",
+        "Gate Valves",
+        "Bronze"
+      ],
+      "confidence": 0.92,
+      "method": "model_adjudicated",
+      "status": "auto",
+      "alternatives": [
+        {
+          "code": "PLB.VLV.BALL.2PC",
+          "score": 0.253326
+        }
+      ]
+    },
+    {
+      "scheme": "ETIM",
+      "code": "EC002713",
+      "path": [],
+      "confidence": 0.874,
+      "method": "schema_mapping",
+      "status": "auto",
+      "alternatives": []
+    },
+    {
+      "scheme": "UNSPSC",
+      "code": "40141605",
+      "path": [],
+      "confidence": 0.874,
+      "method": "schema_mapping",
+      "status": "auto",
+      "alternatives": []
+    }
+  ],
+  "attributes": [
+    {
+      "code": "product_series",
+      "value_canonical": "T-113",
+      "value_display": "T-113",
+      "value_raw": "T-113",
+      "confidence": 0.9,
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "status": "auto_accepted",
+      "evidence": [
+        {
+          "document": "gv200@6e472dd4",
+          "sha256": "6e472dd4\u2026",
+          "page": 1,
+          "bbox": [
+            54.0,
+            54.0,
+            174.0,
+            66.0
+          ],
+          "quote": "NIBCO - T-113 SERIES",
+          "verified": true
+        }
+      ],
+      "validations": []
+    },
+    {
+      "code": "nominal_size",
+      "value_canonical": {
+        "magnitude": 25.4,
+        "unit": "mm"
+      },
+      "value_display": "1\"",
+      "value_raw": "1\"",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "model_tier": "volume",
+      "status": "auto_accepted",
+      "evidence": [
+        {
+          "document": "gv200@6e472dd4",
+          "sha256": "6e472dd4\u2026",
+          "page": 1,
+          "bbox": [
+            66.0,
+            366.0,
+            348.0,
+            378.0
+          ],
+          "quote": "T-113-100  | 1\"   | 2-1/2\"        | 10",
+          "verified": true
+        }
+      ],
+      "validations": []
+    },
+    {
+      "code": "pressure_rating_wog",
+      "value_canonical": {
+        "magnitude": 200.0,
+        "unit": "psi"
+      },
+      "value_display": "200 psi",
+      "value_raw": "200 PSI WOG",
+      "confidence": 0.9,
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "status": "auto_accepted",
+      "evidence": [
+        {
+          "document": "gv200@6e472dd4",
+          "sha256": "6e472dd4\u2026",
+          "page": 1,
+          "bbox": [
+            66.0,
+            186.0,
+            330.0,
+            198.0
+          ],
+          "quote": "Non-Shock Cold Working Pressure  200 PSI WOG",
+          "verified": true
+        }
+      ],
+      "validations": [
+        {
+          "layer": "L0",
+          "rule": "qualifiers_retained",
+          "verdict": "pass",
+          "detail": "rating=WOG"
+        }
+      ]
+    },
+    {
+      "code": "body_material",
+      "value_canonical": "Bronze C89833",
+      "value_display": "Bronze C89833",
+      "value_raw": "Bronze C89833",
+      "confidence": 0.9,
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "status": "auto_accepted",
+      "evidence": [
+        {
+          "document": "gv200@6e472dd4",
+          "sha256": "6e472dd4\u2026",
+          "page": 1,
+          "bbox": [
+            66.0,
+            102.0,
+            342.0,
+            114.0
+          ],
+          "quote": "Body / Bonnet .................. Bronze C89833",
+          "verified": true
+        }
+      ],
+      "validations": []
+    },
+    {
+      "code": "end_connection",
+      "value_canonical": "Solder",
+      "value_display": "Solder",
+      "value_raw": "Solder ends, C x C",
+      "confidence": 0.9,
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "status": "auto_accepted",
+      "evidence": [
+        {
+          "document": "gv200@6e472dd4",
+          "sha256": "6e472dd4\u2026",
+          "page": 1,
+          "bbox": [
+            66.0,
+            246.0,
+            372.0,
+            258.0
+          ],
+          "quote": "End Connection ................. Solder ends, C x C",
+          "verified": true
+        }
+      ],
+      "validations": [
+        {
+          "layer": "L0",
+          "rule": "enum_partial_match",
+          "verdict": "warn",
+          "detail": "matched on 'solder end' within 'Solder ends, C x C'"
+        },
+        {
+          "layer": "L0",
+          "rule": "enum_partial_match",
+          "verdict": "warn",
+          "detail": "matched on 'solder end' within 'Solder ends, C x C'"
+        }
+      ]
+    },
+    {
+      "code": "stem_material",
+      "value_canonical": "Silicon Bronze",
+      "value_display": "Silicon Bronze",
+      "value_raw": "Silicon Bronze",
+      "confidence": 0.9,
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "status": "auto_accepted",
+      "evidence": [
+        {
+          "document": "gv200@6e472dd4",
+          "sha256": "6e472dd4\u2026",
+          "page": 1,
+          "bbox": [
+            66.0,
+            126.0,
+            348.0,
+            138.0
+          ],
+          "quote": "Stem ........................... Silicon Bronze",
+          "verified": true
+        }
+      ],
+      "validations": []
+    },
+    {
+      "code": "handle_type",
+      "value_canonical": "Handwheel",
+      "value_display": "Handwheel",
+      "value_raw": "Handwheel",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "model_tier": "volume",
+      "status": "auto_accepted",
+      "evidence": [
+        {
+          "document": "gv200@6e472dd4",
+          "sha256": "6e472dd4\u2026",
+          "page": 1,
+          "bbox": [
+            66.0,
+            366.0,
+            348.0,
+            378.0
+          ],
+          "quote": "T-113-100  | 1\"   | 2-1/2\"        | 10",
+          "verified": true
+        }
+      ],
+      "validations": []
+    },
+    {
+      "code": "temperature_range",
+      "value_canonical": {
+        "minimum": -28.888889,
+        "maximum": 207.777778,
+        "unit": "degC"
+      },
+      "value_display": "-20 to 406 degF",
+      "value_raw": "-20 degF to 406 degF",
+      "confidence": 0.9,
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "status": "auto_accepted",
+      "evidence": [
+        {
+          "document": "gv200@6e472dd4",
+          "sha256": "6e472dd4\u2026",
+          "page": 1,
+          "bbox": [
+            66.0,
+            210.0,
+            384.0,
+            222.0
+          ],
+          "quote": "Temperature Range .............. -20 degF to 406 degF",
+          "verified": true
+        }
+      ],
+      "validations": []
+    },
+    {
+      "code": "steam_pressure_rating",
+      "value_canonical": {
+        "magnitude": 125.0,
+        "unit": "psi"
+      },
+      "value_display": "125 psi",
+      "value_raw": "125 PSI WSP",
+      "confidence": 0.9,
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "status": "auto_accepted",
+      "evidence": [
+        {
+          "document": "gv200@6e472dd4",
+          "sha256": "6e472dd4\u2026",
+          "page": 1,
+          "bbox": [
+            66.0,
+            198.0,
+            330.0,
+            210.0
+          ],
+          "quote": "Saturated Steam ................ 125 PSI WSP",
+          "verified": true
+        }
+      ],
+      "validations": [
+        {
+          "layer": "L0",
+          "rule": "qualifiers_retained",
+          "verdict": "pass",
+          "detail": "rating=WSP"
+        }
+      ]
+    },
+    {
+      "code": "lead_free_compliant",
+      "value_canonical": true,
+      "value_display": "Yes",
+      "value_raw": "true",
+      "confidence": 0.9,
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "status": "auto_accepted",
+      "evidence": [
+        {
+          "document": "gv200@6e472dd4",
+          "sha256": "6e472dd4\u2026",
+          "page": 1,
+          "bbox": [
+            66.0,
+            270.0,
+            414.0,
+            282.0
+          ],
+          "quote": "Lead Free ...................... Certified to NSF/ANSI 372",
+          "verified": true
+        }
+      ],
+      "validations": []
+    },
+    {
+      "code": "country_of_origin",
+      "value_canonical": "United States",
+      "value_display": "United States",
+      "value_raw": "United States",
+      "confidence": 0.9,
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "status": "auto_accepted",
+      "evidence": [
+        {
+          "document": "gv200@6e472dd4",
+          "sha256": "6e472dd4\u2026",
+          "page": 1,
+          "bbox": [
+            66.0,
+            294.0,
+            342.0,
+            306.0
+          ],
+          "quote": "Country of Origin .............. United States",
+          "verified": true
+        }
+      ],
+      "validations": []
+    },
+    {
+      "code": "case_quantity",
+      "value_canonical": 10,
+      "value_display": "10",
+      "value_raw": "10",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "model_tier": "volume",
+      "status": "auto_accepted",
+      "evidence": [
+        {
+          "document": "gv200@6e472dd4",
+          "sha256": "6e472dd4\u2026",
+          "page": 1,
+          "bbox": [
+            66.0,
+            366.0,
+            348.0,
+            378.0
+          ],
+          "quote": "T-113-100  | 1\"   | 2-1/2\"        | 10",
+          "verified": true
+        }
+      ],
+      "validations": []
+    }
+  ],
+  "gaps": [
+    {
+      "code": "cv_flow_coefficient",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "gv200@6e472dd4"
+      ],
+      "required": false,
+      "detail": "deferred to factory; no value stated in source",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "gtin",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "gv200@6e472dd4"
+      ],
+      "required": false,
+      "detail": "not present in source",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "each_weight",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "gv200@6e472dd4"
+      ],
+      "required": false,
+      "detail": "not present in source",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "selling_uom",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "gv200@6e472dd4"
+      ],
+      "required": true,
+      "detail": "not present in source",
+      "recommended_action": "request_from_supplier"
+    }
+  ],
+  "summary": {
+    "attributes_required": 11,
+    "attributes_populated": 12,
+    "attributes_with_evidence": 12,
+    "attributes_inferred": 0,
+    "auto_accepted": 12,
+    "queued_for_review": 2,
+    "gaps_total": 4,
+    "gaps_required": 1,
+    "quality_index": {
+      "completeness": 0.8182,
+      "verifiability": 1.0,
+      "consistency": 0.8571,
+      "richness": 0.0,
+      "composite": 0.8006
+    },
+    "cost_usd": 0.0008,
+    "wall_clock_seconds": 7.21
+  },
+  "signature": "sha256:a31f42717f68edf3180f6f0b3adf4208f46378fb9b97d0c959a0ec4e6f02af25"
+}

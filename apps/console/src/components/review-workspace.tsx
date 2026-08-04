@@ -29,10 +29,17 @@ import {
   shortHash,
   tableRef,
 } from "@/lib/format";
+import { submitDecision } from "@/lib/actions";
 import type { AttributeRow } from "@/lib/data";
-import type { BoundingBox, EvidenceSpan, ParsedPage, SourceDocument } from "@/lib/types";
+import type {
+  BoundingBox,
+  EvidenceSpan,
+  ParsedPage,
+  ReviewAction,
+  ReviewOutcome,
+  SourceDocument,
+} from "@/lib/types";
 
-type Staged = "approved" | "rejected";
 type Filter = "review" | "all" | "gaps";
 
 const FILTERS: { id: Filter; label: string }[] = [
@@ -45,8 +52,11 @@ export interface ReviewWorkspaceProps {
   sku: string;
   rows: AttributeRow[];
   page: ParsedPage | null;
-  document: SourceDocument;
+  /** Null when the bundle references a document the dataset no longer carries. */
+  document: SourceDocument | null;
   threshold: number | null;
+  /** False when the page is rendering the offline fixture, where decisions cannot persist. */
+  live: boolean;
 }
 
 export function ReviewWorkspace({
@@ -55,12 +65,71 @@ export function ReviewWorkspace({
   page,
   document: sourceDocument,
   threshold,
+  live,
 }: ReviewWorkspaceProps) {
   const [filter, setFilter] = useState<Filter>("review");
-  const [staged, setStaged] = useState<Record<string, Staged>>({});
   const [announcement, setAnnouncement] = useState("");
   const listRef = useRef<HTMLUListElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
+
+  /*
+   * Decisions are recorded, not staged.
+   *
+   * An earlier version accumulated them locally behind a Commit button, because there was no
+   * API to send them to. There is now, and batching was the wrong model anyway: each decision
+   * updates the per-attribute prior, which moves the acceptance threshold, and a reviewer needs
+   * to see that happen while the value is still in front of them. `outcomes` keeps what the
+   * server returned so the prior movement can be shown.
+   */
+  const [outcomes, setOutcomes] = useState<Record<string, ReviewOutcome>>({});
+  const [inFlight, setInFlight] = useState<Set<string>>(new Set());
+  const [error, setError] = useState<string | null>(null);
+
+  const decide = useCallback(
+    async (code: string, action: ReviewAction, name: string, correctedValue?: string) => {
+      if (!live) {
+        setError(
+          "This page is rendering the offline fixture, so a decision has nowhere to go. " +
+            "Start the API and reload to review against real pipeline output.",
+        );
+        return;
+      }
+
+      setError(null);
+      setInFlight((current) => new Set(current).add(code));
+      setAnnouncement(`Recording ${action} for ${name}`);
+
+      const result = await submitDecision({
+        sku,
+        attributeCode: code,
+        action,
+        correctedValue,
+      });
+
+      setInFlight((current) => {
+        const next = new Set(current);
+        next.delete(code);
+        return next;
+      });
+
+      if (!result.ok) {
+        setError(result.error);
+        setAnnouncement(`${name} could not be recorded`);
+        return;
+      }
+
+      const { outcome } = result.data;
+      setOutcomes((current) => ({ ...current, [code]: outcome }));
+
+      const movement = outcome.prior_after - outcome.prior_before;
+      const direction = movement >= 0 ? "raised" : "lowered";
+      setAnnouncement(
+        `${name} recorded as ${action}. Attribute reliability ${direction} to ` +
+          `${outcome.prior_after.toFixed(3)}.`,
+      );
+    },
+    [live, sku],
+  );
 
   const visible = useMemo(() => {
     if (filter === "all") return rows;
@@ -116,28 +185,11 @@ export function ReviewWorkspace({
     [activeIndex, visible],
   );
 
-  const stage = useCallback(
-    (code: string, decision: Staged, name: string) => {
-      setStaged((current) => {
-        const next = { ...current };
-        if (next[code] === decision) {
-          delete next[code];
-          setAnnouncement(`${name} decision cleared`);
-        } else {
-          next[code] = decision;
-          setAnnouncement(`${name} staged as ${decision}`);
-        }
-        return next;
-      });
-    },
-    [],
-  );
-
   /*
    * Keyboard-first triage, scoped to the workspace.
    *
    * A document-level listener would fire `a` and `x` while focus was on the theme toggle or
-   * a nav link, staging decisions the user never asked for. Requiring focus to be inside
+   * a nav link, recording decisions the user never asked for. Requiring focus to be inside
    * the workspace subtree keeps the shortcuts local without forcing the reviewer to click
    * into a specific control first. Arrow keys are handled by the listbox itself, so they
    * are deliberately absent here — intercepting them globally would break page scrolling.
@@ -173,13 +225,25 @@ export function ReviewWorkspace({
         case "a":
           if (active?.value) {
             event.preventDefault();
-            stage(active.spec.code, "approved", active.spec.name);
+            void decide(active.spec.code, "accept", active.spec.name);
           }
           break;
         case "x":
           if (active?.value) {
             event.preventDefault();
-            stage(active.spec.code, "rejected", active.spec.name);
+            void decide(active.spec.code, "reject", active.spec.name);
+          }
+          break;
+        case "e":
+          if (active?.value) {
+            event.preventDefault();
+            const replacement = window.prompt(
+              `Corrected value for ${active.spec.name}`,
+              active.value.value_display ?? active.value.value_raw ?? "",
+            );
+            if (replacement?.trim()) {
+              void decide(active.spec.code, "correct", active.spec.name, replacement.trim());
+            }
           }
           break;
         default:
@@ -189,9 +253,9 @@ export function ReviewWorkspace({
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [active, move, stage]);
+  }, [active, move, decide]);
 
-  const stagedCount = Object.keys(staged).length;
+  const recorded = Object.values(outcomes);
 
   // Every other span on the page, drawn faintly so the highlighted one has context.
   const contextBoxes = useMemo<BoundingBox[]>(() => {
@@ -296,7 +360,8 @@ export function ReviewWorkspace({
 
           {visible.map((row) => {
             const isActive = row.spec.code === selected;
-            const decision = staged[row.spec.code];
+            const outcome = outcomes[row.spec.code];
+            const busy = inFlight.has(row.spec.code);
             const blocking =
               row.value?.validations.some(
                 (v) => v.verdict === "fail" && v.severity === "error",
@@ -332,13 +397,10 @@ export function ReviewWorkspace({
                   </span>
 
                   <span className="flex shrink-0 items-center gap-1.5">
-                    {decision === "approved" ? (
-                      <span className="pill pill-pass">
-                        <CheckIcon />
-                        Staged
-                      </span>
-                    ) : decision === "rejected" ? (
-                      <span className="pill pill-fail">Rejected</span>
+                    {busy ? (
+                      <span className="pill pill-quiet">Saving…</span>
+                    ) : outcome ? (
+                      <StatusPill status={outcome.status} />
                     ) : blocking ? (
                       <span className="pill pill-fail">
                         <AlertIcon />
@@ -365,7 +427,8 @@ export function ReviewWorkspace({
                       )}
                     >
                       {row.value
-                        ? (row.value.value_display ??
+                        ? (outcome?.after ??
+                          row.value.value_display ??
                           canonical(row.value.value_canonical) ??
                           row.value.value_raw)
                         : row.gap
@@ -388,10 +451,13 @@ export function ReviewWorkspace({
             <Kbd>J</Kbd> <Kbd>K</Kbd> move
           </span>
           <span>
-            <Kbd>A</Kbd> approve
+            <Kbd>A</Kbd> accept
           </span>
           <span>
             <Kbd>X</Kbd> reject
+          </span>
+          <span>
+            <Kbd>E</Kbd> correct
           </span>
         </p>
       </div>
@@ -451,8 +517,12 @@ export function ReviewWorkspace({
                 threshold={threshold}
                 contextBoxes={contextBoxes}
                 span={activeSpan}
-                staged={staged[active.spec.code]}
-                onStage={(decision) => stage(active.spec.code, decision, active.spec.name)}
+                outcome={outcomes[active.spec.code]}
+                busy={inFlight.has(active.spec.code)}
+                live={live}
+                onDecide={(action, correctedValue) =>
+                  decide(active.spec.code, action, active.spec.name, correctedValue)
+                }
               />
             ) : (
               <GapDetail row={active} />
@@ -468,49 +538,69 @@ export function ReviewWorkspace({
         )}
       </div>
 
-      {/* ------------------------------------------------------------ staged bar */}
-      {stagedCount > 0 ? (
+      {/* ------------------------------------------------------------ recorded / errors */}
+      {error !== null || recorded.length > 0 ? (
         <div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 flex justify-center p-3 sm:p-4">
           <div
             className="animate-rise panel-raised pointer-events-auto flex max-w-full flex-wrap
                        items-center justify-center gap-x-4 gap-y-2 px-4 py-3 shadow-lg"
           >
-            <p className="text-sm">
-              <span className="font-medium tabular-nums">{stagedCount}</span>{" "}
-              {stagedCount === 1 ? "decision" : "decisions"} staged
-            </p>
-            <span className="pill pill-warn">Not persisted</span>
-            <button
-              type="button"
-              className="btn btn-bare h-7"
-              onClick={() => {
-                setStaged({});
-                setAnnouncement("All staged decisions discarded");
-              }}
-            >
-              Discard
-            </button>
-            {/*
-              Disabled via `aria-disabled` rather than the `disabled` attribute so the
-              control stays in the tab order and can explain itself. A button a keyboard
-              user cannot reach cannot tell them why it is unavailable.
-            */}
-            <button
-              type="button"
-              className="btn btn-primary h-7"
-              aria-disabled
-              aria-describedby="commit-blocked"
-              onClick={(event) => event.preventDefault()}
-            >
-              Commit
-            </button>
-            <span id="commit-blocked" className="sr-only">
-              Committing requires the API, which is not yet built.
-            </span>
+            {error !== null ? (
+              <>
+                <span className="pill pill-fail">
+                  <AlertIcon />
+                  Not recorded
+                </span>
+                <p className="max-w-[60ch] text-sm text-[var(--fg-secondary)]">{error}</p>
+                <button type="button" className="btn btn-bare h-7" onClick={() => setError(null)}>
+                  Dismiss
+                </button>
+              </>
+            ) : (
+              <>
+                <p className="text-sm">
+                  <span className="font-medium tabular-nums">{recorded.length}</span>{" "}
+                  {recorded.length === 1 ? "decision" : "decisions"} recorded
+                </p>
+                <span className="pill pill-pass">
+                  <CheckIcon />
+                  Persisted
+                </span>
+                {/*
+                  The reason a reviewer should care that this persisted: it moved the priors,
+                  which moves what gets auto-accepted next run. Showing the aggregate movement
+                  is what makes the flywheel legible instead of asserted.
+                */}
+                <PriorMovement outcomes={recorded} />
+              </>
+            )}
           </div>
         </div>
       ) : null}
     </div>
+  );
+}
+
+// ---------------------------------------------------------------- prior movement
+
+function PriorMovement({ outcomes }: { outcomes: ReviewOutcome[] }) {
+  const net = outcomes.reduce(
+    (sum, outcome) => sum + (outcome.prior_after - outcome.prior_before),
+    0,
+  );
+  const raised = outcomes.filter((o) => o.prior_after >= o.prior_before).length;
+  const lowered = outcomes.length - raised;
+
+  return (
+    <p className="text-meta text-[var(--fg-quiet)]">
+      Priors {net >= 0 ? "up" : "down"}{" "}
+      <span className="tabular-nums text-[var(--fg-secondary)]">
+        {net >= 0 ? "+" : ""}
+        {net.toFixed(3)}
+      </span>{" "}
+      · {raised} confirmed
+      {lowered > 0 ? `, ${lowered} corrected` : ""}
+    </p>
   );
 }
 
@@ -523,17 +613,21 @@ function ValueDetail({
   threshold,
   contextBoxes,
   span,
-  staged,
-  onStage,
+  outcome,
+  busy,
+  live,
+  onDecide,
 }: {
   row: AttributeRow;
   page: ParsedPage | null;
-  document: SourceDocument;
+  document: SourceDocument | null;
   threshold: number | null;
   contextBoxes: BoundingBox[];
   span: EvidenceSpan | null;
-  staged: Staged | undefined;
-  onStage: (decision: Staged) => void;
+  outcome: ReviewOutcome | undefined;
+  busy: boolean;
+  live: boolean;
+  onDecide: (action: ReviewAction, correctedValue?: string) => void;
 }) {
   const value = row.value;
   if (!value) return null;
@@ -555,7 +649,7 @@ function ValueDetail({
           <Overline>Confidence</Overline>
           <div className="flex items-center gap-2">
             <MethodPill method={value.method} />
-            <StatusPill status={staged === "approved" ? "human_approved" : value.status} />
+            <StatusPill status={outcome?.status ?? value.status} />
           </div>
         </div>
 
@@ -640,7 +734,9 @@ function ValueDetail({
               <div className="mb-2.5 flex items-center gap-2">
                 <AnchorIcon className="text-[var(--fg-quiet)]" />
                 <p className="text-meta text-[var(--fg-quiet)]">
-                  {sourceDocument.revision_label ?? sourceDocument.document_id}
+                  {sourceDocument?.revision_label ??
+                    sourceDocument?.document_id ??
+                    span.document_id}
                   {span.page !== null ? ` · page ${span.page}` : ""}
                 </p>
               </div>
@@ -725,25 +821,68 @@ function ValueDetail({
         <div className="hairline-t mt-6 flex flex-wrap items-center gap-2 pt-5">
           <button
             type="button"
-            className={clsx("btn", staged === "approved" ? "btn-primary" : "btn-quiet")}
-            onClick={() => onStage("approved")}
-            aria-pressed={staged === "approved"}
+            className={clsx("btn", outcome?.action === "accept" ? "btn-primary" : "btn-quiet")}
+            onClick={() => onDecide("accept")}
+            disabled={busy || !live}
+            aria-pressed={outcome?.action === "accept"}
           >
             <CheckIcon />
-            {staged === "approved" ? "Approved" : "Approve"}
+            {outcome?.action === "accept" ? "Accepted" : "Accept"}
           </button>
-          {/* Destructive, so it must not resolve to the same accent fill as Approve. */}
+
+          {/* Destructive, so it must not resolve to the same accent fill as Accept. */}
           <button
             type="button"
-            className={clsx("btn", staged === "rejected" ? "btn-danger" : "btn-quiet")}
-            onClick={() => onStage("rejected")}
-            aria-pressed={staged === "rejected"}
+            className={clsx("btn", outcome?.action === "reject" ? "btn-danger" : "btn-quiet")}
+            onClick={() => onDecide("reject")}
+            disabled={busy || !live}
+            aria-pressed={outcome?.action === "reject"}
           >
-            {staged === "rejected" ? "Rejected" : "Reject"}
+            {outcome?.action === "reject" ? "Rejected" : "Reject"}
           </button>
-          <p className="ml-auto text-meta text-[var(--fg-quiet)]">
-            Decisions stage locally until <span className="mono">apps/api</span> exists.
-          </p>
+
+          <button
+            type="button"
+            className={clsx("btn", outcome?.action === "correct" ? "btn-primary" : "btn-quiet")}
+            onClick={() => {
+              const replacement = window.prompt(
+                `Corrected value for ${row.spec.name}`,
+                outcome?.after ?? value.value_display ?? value.value_raw ?? "",
+              );
+              if (replacement?.trim()) onDecide("correct", replacement.trim());
+            }}
+            disabled={busy || !live}
+            aria-pressed={outcome?.action === "correct"}
+          >
+            {outcome?.action === "correct" ? "Corrected" : "Correct"}
+          </button>
+
+          {busy ? (
+            <span className="text-meta text-[var(--fg-quiet)]" role="status">
+              Saving…
+            </span>
+          ) : null}
+
+          {/*
+            The prior movement, shown next to the value that caused it. A reviewer who cannot
+            see that their decision changed anything has no reason to believe the queue will
+            ever get shorter.
+          */}
+          {outcome ? (
+            <p className="ml-auto text-meta text-[var(--fg-quiet)]">
+              Reliability for <span className="mono">{row.spec.code}</span>{" "}
+              {outcome.prior_after >= outcome.prior_before ? "rose" : "fell"} to{" "}
+              <span className="tabular-nums text-[var(--fg-secondary)]">
+                {outcome.prior_after.toFixed(3)}
+              </span>{" "}
+              from {outcome.prior_before.toFixed(3)} over {outcome.sibling_impact}{" "}
+              {outcome.sibling_impact === 1 ? "sample" : "samples"}
+            </p>
+          ) : !live ? (
+            <p className="ml-auto text-meta text-[var(--warn)]">
+              Offline fixture — start the API to record decisions.
+            </p>
+          ) : null}
         </div>
       </div>
     </>

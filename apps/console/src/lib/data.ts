@@ -1,16 +1,18 @@
 /**
  * Data access layer. This is the seam.
  *
- * Today it reads a JSON fixture produced by `scripts/export_console_fixture.py`, which
- * drives the real Python pipeline and serialises the result. There is no HTTP API yet —
- * the blueprint puts one at `apps/api` (FastAPI) and it has not been built.
+ * Reads from the FastAPI service at `apps/api`, which serves output persisted by real pipeline
+ * runs (`run_pipeline.py --save-session`). No model call happens on a page load: the API reads
+ * bundles off disk, so a dashboard render is cheap and returns the same answer twice.
  *
- * When that lands, only the body of `loadDataset` changes: swap the file read for a
- * `fetch`, keep the return type, and every screen keeps working. Nothing above this module
- * knows where the data came from, and no component imports the fixture directly.
+ * Falls back to the checked-in fixture from `scripts/export_console_fixture.py` when the API is
+ * unreachable. That fallback is deliberately *labelled* rather than silent — `meta.live` is
+ * false and the UI says so. Showing hand-seeded numbers while implying they came from a live
+ * model would be the single most dishonest thing this console could do, so the distinction is
+ * carried in the data itself rather than left to a comment.
  *
- * Server-only. Reading from the filesystem here keeps a ~1 MB payload out of the client
- * bundle entirely; screens pass down only the slices they render.
+ * Server-only. Fetching here keeps a ~400 KB payload out of the client bundle entirely;
+ * screens pass down only the slices they render.
  */
 
 import { readFile } from "node:fs/promises";
@@ -20,19 +22,73 @@ import { cache } from "react";
 import type {
   AttributeSpec,
   AttributeValue,
+  ClassDefinition,
   ConsoleDataset,
+  DocumentBundle,
   Gap,
   ParsedPage,
+  PriceSource,
+  RiskPolicyView,
   SkuBundle,
+  SourceDocument,
 } from "./types";
 
 const FIXTURE_PATH = path.join(process.cwd(), "src", "data", "fixture.json");
 
-/** Memoised per request. Replace the body with a `fetch` when `apps/api` exists. */
+/** Override when the API is not on localhost, e.g. in a container or on a deployed host. */
+export const API_BASE = process.env.AXIOM_API_URL ?? "http://127.0.0.1:8000";
+
+/** Long enough for a cold Python process, short enough not to hang a page render. */
+const FETCH_TIMEOUT_MS = 8000;
+
+/**
+ * Memoised per request.
+ *
+ * `no-store` because review decisions mutate this data — a cached dataset would show a
+ * reviewer their own decision failing to take effect.
+ */
 export const loadDataset = cache(async (): Promise<ConsoleDataset> => {
-  const raw = await readFile(FIXTURE_PATH, "utf8");
-  return JSON.parse(raw) as ConsoleDataset;
+  try {
+    const response = await fetch(`${API_BASE}/api/console/dataset`, {
+      cache: "no-store",
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    });
+    if (!response.ok) {
+      throw new Error(`API returned ${response.status} ${response.statusText}`);
+    }
+    return (await response.json()) as ConsoleDataset;
+  } catch (cause) {
+    return loadFixture(cause);
+  }
 });
+
+async function loadFixture(cause: unknown): Promise<ConsoleDataset> {
+  const reason = cause instanceof Error ? cause.message : String(cause);
+  const raw = await readFile(FIXTURE_PATH, "utf8").catch(() => null);
+
+  if (raw === null) {
+    throw new Error(
+      `Could not reach the AXIOM API at ${API_BASE} (${reason}), and no offline fixture ` +
+        `exists at src/data/fixture.json. Start the API with ` +
+        `"python -m uvicorn apps.api.main:app --port 8000", or generate a fixture with ` +
+        `"python scripts/export_console_fixture.py".`,
+    );
+  }
+
+  const dataset = JSON.parse(raw) as ConsoleDataset;
+  return {
+    ...dataset,
+    meta: {
+      ...dataset.meta,
+      live: false,
+      warnings: [
+        `The API at ${API_BASE} is unreachable (${reason}). Showing the offline fixture, ` +
+          `whose model responses are hand-seeded rather than produced by a real model call.`,
+        ...(dataset.meta.warnings ?? []),
+      ],
+    },
+  };
+}
 
 export async function listSkus(): Promise<SkuBundle[]> {
   const { skus } = await loadDataset();
@@ -44,10 +100,61 @@ export async function getSku(sku: string): Promise<SkuBundle | null> {
   return skus.find((entry) => entry.sku === sku) ?? null;
 }
 
-export async function getPages(): Promise<ParsedPage[]> {
-  const { pages } = await loadDataset();
-  return pages;
+// ------------------------------------------------------------------ resolving the maps
+//
+// Documents and class definitions are stored once and referenced by key, so every screen that
+// needs them goes through these. Each returns null rather than throwing: a bundle whose class
+// abstained legitimately has no definition, and a screen should degrade rather than 500.
+
+export async function getDocumentBundle(bundle: SkuBundle): Promise<DocumentBundle | null> {
+  const { documents } = await loadDataset();
+  return documents[bundle.document_id] ?? null;
 }
+
+export async function getDocument(bundle: SkuBundle): Promise<SourceDocument | null> {
+  return (await getDocumentBundle(bundle))?.document ?? null;
+}
+
+export async function getPages(bundle: SkuBundle): Promise<ParsedPage[]> {
+  return (await getDocumentBundle(bundle))?.pages ?? [];
+}
+
+export async function getClassDefinition(bundle: SkuBundle): Promise<ClassDefinition | null> {
+  const { class_definitions } = await loadDataset();
+  return bundle.class_code ? (class_definitions[bundle.class_code] ?? null) : null;
+}
+
+/** Every distinct source document in the catalog, for the overview's provenance panel. */
+export async function listDocuments(): Promise<DocumentBundle[]> {
+  const { documents } = await loadDataset();
+  return Object.values(documents).sort((a, b) =>
+    a.document.document_id.localeCompare(b.document.document_id),
+  );
+}
+
+/**
+ * The acceptance policy *with* its risk–coverage curve, for the initial server render.
+ *
+ * The dataset carries only the summary of the policy its values were decided under. The curve
+ * behind it is a separate computation over the calibration set, so it is fetched separately and
+ * degrades to a curve-less summary if the API is unavailable — the dial then renders an
+ * explanation instead of an empty chart.
+ */
+export const loadPolicy = cache(async (epsilon: number): Promise<RiskPolicyView> => {
+  const { policy } = await loadDataset();
+  const fallback: RiskPolicyView = { ...policy, epsilon, curve: [] };
+
+  try {
+    const response = await fetch(`${API_BASE}/api/policy?epsilon=${epsilon}`, {
+      cache: "no-store",
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    });
+    if (!response.ok) return fallback;
+    return (await response.json()) as RiskPolicyView;
+  } catch {
+    return fallback;
+  }
+});
 
 /**
  * Review order: the SKUs a reviewer should open first.
@@ -87,6 +194,73 @@ export interface PortfolioTotals {
   meanComposite: number;
   channelsReady: number;
   channelsTotal: number;
+}
+
+/**
+ * Token spend across the catalog, and what it implies at scale.
+ *
+ * `priced` is false when any SKU in the sample could not be costed, because a mean taken over
+ * a subset would be quietly optimistic — the unpriced SKUs are the ones that escalated to an
+ * expensive tier, so dropping them biases the average downward.
+ */
+export interface CostTotals {
+  priced: boolean;
+  skusPriced: number;
+  skusTotal: number;
+  totalUsd: number;
+  meanPerSkuUsd: number;
+  meanPerValueUsd: number;
+  calls: number;
+  escalations: number;
+  inputTokens: number;
+  outputTokens: number;
+  byTierUsd: Record<string, number>;
+  source: PriceSource | null;
+  /** Straight-line extrapolation. Honest only if this sample's documents are typical. */
+  project(skuCount: number): number;
+}
+
+export function costTotals(skus: SkuBundle[]): CostTotals {
+  const costed = skus.filter((bundle) => bundle.cost?.priced && bundle.cost.cost_usd !== null);
+
+  const byTierUsd: Record<string, number> = {};
+  let totalUsd = 0;
+  let values = 0;
+  let calls = 0;
+  let escalations = 0;
+  let inputTokens = 0;
+  let outputTokens = 0;
+
+  for (const bundle of costed) {
+    const cost = bundle.cost!;
+    totalUsd += cost.cost_usd ?? 0;
+    values += bundle.metrics.values_total;
+    calls += cost.calls;
+    escalations += cost.escalations;
+    inputTokens += cost.input_tokens;
+    outputTokens += cost.output_tokens;
+    for (const [tier, usd] of Object.entries(cost.cost_by_tier ?? {})) {
+      byTierUsd[tier] = (byTierUsd[tier] ?? 0) + usd;
+    }
+  }
+
+  const meanPerSkuUsd = costed.length > 0 ? totalUsd / costed.length : 0;
+
+  return {
+    priced: costed.length > 0 && costed.length === skus.length,
+    skusPriced: costed.length,
+    skusTotal: skus.length,
+    totalUsd,
+    meanPerSkuUsd,
+    meanPerValueUsd: values > 0 ? totalUsd / values : 0,
+    calls,
+    escalations,
+    inputTokens,
+    outputTokens,
+    byTierUsd,
+    source: costed[0]?.cost?.price_source ?? null,
+    project: (skuCount: number) => meanPerSkuUsd * skuCount,
+  };
 }
 
 export function portfolioTotals(skus: SkuBundle[]): PortfolioTotals {

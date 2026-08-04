@@ -13,7 +13,7 @@ import {
   Quote,
   SectionHeading,
 } from "@/components/primitives";
-import { getSku, listSkus, loadDataset } from "@/lib/data";
+import { getClassDefinition, getSku, listSkus } from "@/lib/data";
 import {
   ACTION_LABEL,
   GAP_REASON_LABEL,
@@ -45,12 +45,12 @@ export default async function CertificatePage({
   const bundle = await getSku(sku);
   if (!bundle) notFound();
 
-  const dataset = await loadDataset();
+  const definition = await getClassDefinition(bundle);
   const certificate = bundle.certificate;
   const summary = certificate.summary;
   const quality = summary.quality_index;
   const specByCode = new Map(
-    dataset.class_definition.attributes.map((spec) => [spec.code, spec]),
+    (definition?.attributes ?? []).map((spec) => [spec.code, spec] as const),
   );
 
   const dimensions = [

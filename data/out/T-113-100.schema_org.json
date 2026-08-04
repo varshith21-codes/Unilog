@@ -1,111 +1,89 @@
 {
   "@context": "https://schema.org",
   "@type": "Product",
-  "sku": "BA-100-075",
-  "name": "Milwaukee Valve BA-100-075 3/4\" Bronze Two-Piece Ball Valve, 600 psi, Full Port",
-  "mpn": "BA-100-075",
+  "sku": "T-113-100",
+  "name": "NIBCO T-113-100 1\" Bronze Bronze Gate Valve, 200 psi",
+  "mpn": "T-113-100",
   "brand": {
     "@type": "Brand",
-    "name": "Milwaukee Valve"
+    "name": "NIBCO"
   },
-  "category": "Plumbing > Valves > Ball Valves > Two-Piece",
+  "category": "Plumbing > Valves > Gate Valves > Bronze",
   "additionalProperty": [
-    {
-      "@type": "PropertyValue",
-      "propertyID": "approvals",
-      "name": "Approvals and Listings",
-      "value": [
-        "UL",
-        "CSA",
-        "NSF-61"
-      ]
-    },
     {
       "@type": "PropertyValue",
       "propertyID": "body_material",
       "name": "Body Material",
-      "value": "Bronze C84400"
+      "value": "Bronze C89833"
     },
     {
       "@type": "PropertyValue",
       "propertyID": "case_quantity",
       "name": "Carton Quantity",
-      "value": 12
+      "value": 10
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "country_of_origin",
+      "name": "Country of Origin",
+      "value": "United States"
     },
     {
       "@type": "PropertyValue",
       "propertyID": "end_connection",
       "name": "End Connection",
-      "value": "NPT Threaded"
+      "value": "Solder"
     },
     {
       "@type": "PropertyValue",
       "propertyID": "handle_type",
       "name": "Handle Type",
-      "value": "Lever"
+      "value": "Handwheel"
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "lead_free_compliant",
+      "name": "Lead-Free Compliant",
+      "value": true
     },
     {
       "@type": "PropertyValue",
       "propertyID": "nominal_size",
       "name": "Nominal Pipe Size",
-      "value": 19.05,
+      "value": 25.4,
       "unitText": "mm"
-    },
-    {
-      "@type": "PropertyValue",
-      "propertyID": "number_of_pieces",
-      "name": "Body Construction",
-      "value": "Two-Piece"
-    },
-    {
-      "@type": "PropertyValue",
-      "propertyID": "port_type",
-      "name": "Port Type",
-      "value": "Full Port"
-    },
-    {
-      "@type": "PropertyValue",
-      "propertyID": "potable_water_approved",
-      "name": "Potable Water Approved",
-      "value": true
     },
     {
       "@type": "PropertyValue",
       "propertyID": "pressure_rating_wog",
       "name": "Pressure Rating (WOG)",
-      "value": 600.0,
+      "value": 200.0,
       "unitText": "psi"
     },
     {
       "@type": "PropertyValue",
       "propertyID": "product_series",
       "name": "Product Series",
-      "value": "BA-100"
-    },
-    {
-      "@type": "PropertyValue",
-      "propertyID": "seat_material",
-      "name": "Seat Material",
-      "value": "RPTFE"
+      "value": "T-113"
     },
     {
       "@type": "PropertyValue",
       "propertyID": "steam_pressure_rating",
       "name": "Steam Pressure Rating (WSP)",
-      "value": 150.0,
+      "value": 125.0,
       "unitText": "psi"
     },
     {
       "@type": "PropertyValue",
       "propertyID": "stem_material",
       "name": "Stem Material",
-      "value": "Brass"
+      "value": "Silicon Bronze"
     },
     {
       "@type": "PropertyValue",
       "propertyID": "temperature_range",
       "name": "Temperature Range",
-      "value": "-28.8889..185.556",
+      "value": "-28.8889..207.778",
       "unitText": "degC"
     }
   ]

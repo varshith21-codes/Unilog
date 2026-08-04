@@ -42,6 +42,21 @@ attributes:
     example_values: ["6", "12", "24"]
     extraction_hints:
       - often headed "Carton Qty", "Std Pack" or "Master Pack"
+    # Found by the variant explosion report, which flags any ordering-table column no
+    # attribute claimed. "Master Carton" appeared on the NIBCO gate valve datasheet.
+    table_headers:
+      [
+        "carton qty",
+        "carton quantity",
+        "std pack",
+        "standard pack",
+        "master pack",
+        "master carton",
+        "ctn",
+        "ctn qty",
+        "pack",
+        "pack qty",
+      ]
     plausible_range: [1.0, 100000.0]
 
   - code: case_weight

@@ -19,6 +19,16 @@ from axiom.extract.contract import (
     parse_contract,
 )
 from axiom.extract.extractor import ExtractionResult, Extractor
+from axiom.extract.pricing import ModelPrice, PriceTable, load_prices
+from axiom.extract.variants import (
+    SKU_COLUMN_HEADERS,
+    VariantColumn,
+    VariantRow,
+    VariantTable,
+    detect_variant_table,
+    explode,
+    is_size_scoped,
+)
 
 __all__ = [
     "CASCADE_ORDER",
@@ -31,10 +41,20 @@ __all__ = [
     "ModelCascade",
     "ModelClient",
     "ModelError",
+    "SKU_COLUMN_HEADERS",
+    "ModelPrice",
     "ModelResponse",
+    "PriceTable",
     "StubModelClient",
     "UsageLedger",
+    "VariantColumn",
+    "VariantRow",
+    "VariantTable",
     "classify_abstention",
+    "detect_variant_table",
+    "explode",
     "invoke_with_cascade",
+    "is_size_scoped",
+    "load_prices",
     "parse_contract",
 ]

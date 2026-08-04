@@ -1,0 +1,53 @@
+{
+  "golden_set": "pvf_valves_v1",
+  "treatment": {
+    "arm": "axiom",
+    "enforce_evidence": true,
+    "products": 9,
+    "comparisons": 180,
+    "correct": 125,
+    "wrong_value": 0,
+    "missed": 0,
+    "correctly_abstained": 55,
+    "hallucinated": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "hallucination_rate": 0.0,
+    "citation_coverage": 1.0,
+    "cost_usd": 0.006836,
+    "duration_seconds": 56.49
+  },
+  "control": {
+    "arm": "no-evidence-contract",
+    "enforce_evidence": false,
+    "products": 9,
+    "comparisons": 180,
+    "correct": 125,
+    "wrong_value": 0,
+    "missed": 0,
+    "correctly_abstained": 55,
+    "hallucinated": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "hallucination_rate": 0.0,
+    "citation_coverage": 1.0,
+    "cost_usd": 0.006846,
+    "duration_seconds": 56.52
+  },
+  "delta": {
+    "correct": 0,
+    "wrong_value": 0,
+    "missed": 0,
+    "hallucinated": 0,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "citation_coverage": 0.0
+  },
+  "withheld_by_the_contract": {
+    "would_have_been_correct": 0,
+    "would_have_been_wrong_or_fabricated": 0
+  }
+}

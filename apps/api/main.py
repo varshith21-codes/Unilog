@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Literal
 
 from axiom.confidence import Priors, select_threshold
+from axiom.console import build_dataset, dataset_stats, overlay_review_decisions
 from axiom.review import ACCEPT, CORRECT, REJECT, ReviewSession, queue_summary, record_decision
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
@@ -28,6 +29,7 @@ from pydantic import BaseModel, Field
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SESSION_DIR = REPO_ROOT / "data" / "sessions"
+CONSOLE_DIR = REPO_ROOT / "data" / "console"
 CALIBRATION_DIR = REPO_ROOT / "data" / "calibration"
 CONSOLE = Path(__file__).resolve().parent / "static" / "index.html"
 
@@ -75,6 +77,7 @@ def health() -> dict:
     return {
         "status": "ok",
         "sessions": len(list(SESSION_DIR.glob("*.json"))) if SESSION_DIR.exists() else 0,
+        "bundles": len(list(CONSOLE_DIR.glob("*.bundle.json"))) if CONSOLE_DIR.exists() else 0,
         "calibrated": (CALIBRATION_DIR / "calibration_set.json").exists(),
     }
 
@@ -147,6 +150,129 @@ def post_decision(sku: str, attribute_code: str, request: DecisionRequest) -> di
             None,
         ),
     }
+
+
+@app.get("/api/console/dataset")
+def console_dataset() -> dict:
+    """Everything the console dashboards render, assembled from persisted pipeline runs.
+
+    Reads only. The bundles on disk were produced by ``run_pipeline.py --save-session``, which
+    is where the model calls happened; re-running extraction here would make a page load cost
+    money and return a different answer each time.
+
+    The policy reported is the one the bundles were **actually decided under**, not a freshly
+    computed one. Serving a different threshold than the one that produced these accept/queue
+    decisions would make every score badge in the UI disagree with its own explanation.
+    ``/api/policy`` is the separate what-if dial.
+    """
+    if not CONSOLE_DIR.exists():
+        return _empty_dataset("data/console/ does not exist")
+
+    paths = sorted(CONSOLE_DIR.glob("*.bundle.json"))
+    if not paths:
+        return _empty_dataset("no console bundles on disk")
+
+    bundles: list[dict] = []
+    documents: dict[str, dict] = {}
+    class_definitions: dict[str, dict] = {}
+    policies: list[dict] = []
+    calibrators: set[str] = set()
+    unreadable: list[str] = []
+
+    for path in paths:
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            bundle = payload["bundle"]
+        except (OSError, ValueError, KeyError):
+            # One corrupt file must not blank the whole console.
+            unreadable.append(path.name)
+            continue
+
+        # A bundle records what the pipeline produced; the session records what a reviewer
+        # decided since. Joining them here means a decision shows up on the dashboards without
+        # the pipeline's own output being rewritten underneath it.
+        session_path = SESSION_DIR / f"{bundle['sku']}.json"
+        if session_path.is_file():
+            try:
+                bundle = overlay_review_decisions(bundle, ReviewSession.load(session_path))
+            except (OSError, ValueError, KeyError, TypeError):
+                unreadable.append(session_path.name)
+
+        bundles.append(bundle)
+        documents.setdefault(
+            bundle["document_id"],
+            {"document": payload["document"], "pages": payload["pages"]},
+        )
+        definition = payload.get("class_definition")
+        if definition and bundle.get("class_code"):
+            class_definitions.setdefault(bundle["class_code"], definition)
+        if payload.get("policy"):
+            policies.append(payload["policy"])
+        calibrators.add(payload.get("calibrator", "unknown"))
+
+    if not bundles:
+        return _empty_dataset(f"every bundle failed to parse: {', '.join(unreadable)}")
+
+    # Bundles produced at different risk budgets cannot share one threshold badge. Rather than
+    # silently showing whichever was read last, say so.
+    thresholds = {p.get("threshold") for p in policies}
+    warnings = []
+    if len(thresholds) > 1:
+        warnings.append(
+            f"bundles were produced under {len(thresholds)} different acceptance thresholds "
+            f"({sorted(t for t in thresholds if t is not None)}); re-run the pipeline with a "
+            f"single --risk-budget so the dashboard reports one policy"
+        )
+    if unreadable:
+        warnings.append(f"skipped unreadable bundles: {', '.join(unreadable)}")
+
+    return build_dataset(
+        sorted(bundles, key=lambda b: b["sku"]),
+        documents=documents,
+        class_definitions=class_definitions,
+        policy=policies[0] if policies else {},
+        meta={
+            "generator": "apps/api",
+            "live": True,
+            "calibrator": ", ".join(sorted(calibrators)),
+            "policy_source": "data/calibration (backtest)",
+            "source_bundles": [p.name for p in paths],
+            "warnings": warnings,
+            "notes": (
+                "Produced by real model calls through the Bedrock cascade and scored against "
+                "the calibration set written by scripts/run_backtest.py."
+            ),
+        },
+    )
+
+
+def _empty_dataset(reason: str) -> dict:
+    """A valid but empty dataset, so the console renders an explanation rather than crashing."""
+    return build_dataset(
+        [],
+        documents={},
+        class_definitions={},
+        policy={},
+        meta={
+            "generator": "apps/api",
+            "live": True,
+            "calibrator": "none",
+            "policy_source": "none",
+            "source_bundles": [],
+            "warnings": [reason],
+            "notes": (
+                "No pipeline output is available. Generate some with: python "
+                "scripts/run_pipeline.py data/samples/ba100.txt --sku BA-100-075 "
+                "--include-optional --save-session"
+            ),
+        },
+    )
+
+
+@app.get("/api/console/stats")
+def console_stats() -> dict:
+    """Counts only — cheap enough for a nav badge or a poll."""
+    return dataset_stats(console_dataset())
 
 
 @app.get("/api/policy")

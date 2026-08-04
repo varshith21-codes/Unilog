@@ -39,6 +39,31 @@ export function bytes(value: number): string {
   return `${(value / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+/**
+ * Money, at whatever precision the magnitude deserves.
+ *
+ * Per-SKU costs here are fractions of a cent, so a fixed two decimals would render every one
+ * of them as "$0.00" — which reads as free rather than as cheap, and throws away the only
+ * interesting property of the number. Catalogue-scale totals get the usual two.
+ */
+export function usd(value: number): string {
+  if (value === 0) return "$0.00";
+  if (Math.abs(value) < 0.01) {
+    return `$${value.toFixed(6).replace(/0+$/, "").replace(/\.$/, ".0")}`;
+  }
+  return `$${new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value)}`;
+}
+
+/** Compact token counts: 3,779 stays exact, 4,100,000 becomes 4.1M. */
+export function tokens(value: number): string {
+  if (value < 10_000) return count(value);
+  if (value < 1_000_000) return `${(value / 1_000).toFixed(1)}k`;
+  return `${(value / 1_000_000).toFixed(1)}M`;
+}
+
 // ---------------------------------------------------------------- values
 
 function isQuantity(value: unknown): value is Quantity {

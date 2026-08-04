@@ -19,10 +19,19 @@ export default async function ReviewIndexPage() {
   const dataset = await loadDataset();
   const skus = reviewOrder(await listSkus());
 
+  // Each SKU is scored against *its own* class, not one shared definition. A catalog spanning
+  // ball valves and gate valves has different required attributes per class, so joining
+  // against a single class here would invent gaps for attributes the class never declared.
   const groups = skus.map((bundle) => ({
     bundle,
     open: reviewRows(
-      attributeRows(dataset.class_definition.attributes, bundle.values, bundle.gaps),
+      attributeRows(
+        bundle.class_code
+          ? (dataset.class_definitions[bundle.class_code]?.attributes ?? [])
+          : [],
+        bundle.values,
+        bundle.gaps,
+      ),
     ),
   }));
 

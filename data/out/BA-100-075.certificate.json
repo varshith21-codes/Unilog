@@ -1,8 +1,8 @@
 {
-  "certificate_id": "ec_10b78b66b558",
+  "certificate_id": "ec_55853e286a72",
   "sku": "BA-100-075",
   "tenant_id": "demo",
-  "generated_at": "2026-08-02T12:38:12.193935+00:00",
+  "generated_at": "2026-08-03T18:15:20.682963+00:00",
   "schema_version": "PLB.VLV.BALL.2PC@v1",
   "pipeline_version": "axiom-0.1.0",
   "classifications": [
@@ -281,9 +281,9 @@
     },
     {
       "code": "stem_material",
-      "value_canonical": "Chrome-Plated Brass",
-      "value_display": "Chrome-Plated Brass",
-      "value_raw": "Chrome-plated brass / Brass",
+      "value_canonical": "Brass",
+      "value_display": "Brass",
+      "value_raw": "Brass",
       "confidence": 0.9,
       "method": "document_extraction",
       "model_tier": "volume",
@@ -303,20 +303,7 @@
           "verified": true
         }
       ],
-      "validations": [
-        {
-          "layer": "L0",
-          "rule": "enum_partial_match",
-          "verdict": "warn",
-          "detail": "matched on 'Chrome-Plated Brass' within 'Chrome-plated brass / Brass'"
-        },
-        {
-          "layer": "L0",
-          "rule": "enum_partial_match",
-          "verdict": "warn",
-          "detail": "matched on 'Chrome-Plated Brass' within 'Chrome-plated brass / Brass'"
-        }
-      ]
+      "validations": []
     },
     {
       "code": "handle_type",
@@ -444,7 +431,7 @@
         "NSF-61"
       ],
       "value_display": "UL, CSA, NSF-61",
-      "value_raw": "UL listed, CSA certified, NSF/ANSI 61",
+      "value_raw": "UL, CSA, NSF/ANSI 61",
       "confidence": 0.9,
       "method": "document_extraction",
       "model_tier": "volume",
@@ -521,7 +508,7 @@
         "ba100@f7500023"
       ],
       "required": true,
-      "detail": "source lists NSF/ANSI 61 but not NSF/ANSI 372",
+      "detail": "source lists NSF/ANSI 61, not NSF/ANSI 372",
       "recommended_action": "request_from_supplier"
     },
     {
@@ -591,7 +578,8 @@
       "richness": 0.0,
       "composite": 0.8125
     },
-    "wall_clock_seconds": 6.62
+    "cost_usd": 0.001,
+    "wall_clock_seconds": 13.88
   },
-  "signature": "sha256:0010121a51b7a2fd26b3470b0ffa407699287feb8d23194cead08e5463fba5d1"
+  "signature": "sha256:a2a32a5dca81ea235a67bc40a1db66065612ad19c00b857af98afdf71722b42b"
 }

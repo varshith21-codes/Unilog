@@ -10,16 +10,68 @@ import {
   SectionHeading,
   Stat,
 } from "@/components/primitives";
-import { listSkus, loadDataset, portfolioTotals, reviewOrder } from "@/lib/data";
-import { count, dateOnly, percent, shortHash } from "@/lib/format";
+import { RiskDial } from "@/components/risk-dial";
+import {
+  costTotals,
+  listDocuments,
+  listSkus,
+  loadDataset,
+  loadPolicy,
+  portfolioTotals,
+  reviewOrder,
+} from "@/lib/data";
+import { count, dateOnly, percent, shortHash, tokens, usd } from "@/lib/format";
 
 export const metadata = { title: "Overview" };
+
+/** Longest browse-path prefix every class shares, so the masthead can name the vertical. */
+function commonBrowsePath(paths: string[][]): string[] {
+  const first = paths[0];
+  if (!first) return [];
+
+  const shared: string[] = [];
+  for (let i = 0; i < first.length; i += 1) {
+    const segment = first[i];
+    if (segment === undefined) break;
+    if (!paths.every((path) => path[i] === segment)) break;
+    shared.push(segment);
+  }
+  return shared;
+}
 
 export default async function OverviewPage() {
   const dataset = await loadDataset();
   const skus = await listSkus();
   const totals = portfolioTotals(skus);
   const queue = reviewOrder(skus);
+  const sources = await listDocuments();
+  const cost = costTotals(skus);
+  const policyView = await loadPolicy(dataset.policy.epsilon);
+
+  // Dearest tier first: the question this table answers is "what is costing me money", and
+  // alphabetical or cascade order buries the answer.
+  const tierRows = Object.entries(cost.byTierUsd)
+    .map(([tier, tierUsd]) => ({
+      tier,
+      usd: tierUsd,
+      calls: skus.reduce((sum, s) => sum + (s.cost?.calls_by_tier[tier] ?? 0), 0),
+      tokens: skus.reduce(
+        (sum, s) =>
+          sum + (s.cost?.input_by_tier[tier] ?? 0) + (s.cost?.output_by_tier[tier] ?? 0),
+        0,
+      ),
+      share: cost.totalUsd > 0 ? tierUsd / cost.totalUsd : 0,
+    }))
+    .sort((a, b) => b.usd - a.usd);
+
+  const classes = Object.values(dataset.class_definitions);
+  const shared = commonBrowsePath(classes.map((definition) => definition.browse_path));
+  const only = classes.length === 1 ? classes[0] : null;
+
+  // With one class the heading names it. With several, naming one of them would misdescribe
+  // the catalog, so it falls back to the shared vertical and a count.
+  const heading = only?.name ?? (shared.at(-1) ?? "Catalog");
+  const overline = (only ? only.browse_path : shared).join(" / ") || "Catalog";
 
   const dimensions = [
     { label: "Completeness", value: totals.meanCompleteness, weight: 0.35 },
@@ -33,15 +85,15 @@ export default async function OverviewPage() {
       {/* ---------------------------------------------------------------- masthead */}
       <header className="grid gap-10 py-[var(--spacing-section-lg)] lg:grid-cols-12 lg:gap-12">
         <div className="lg:col-span-7">
-          <Overline>
-            {dataset.class_definition.browse_path.join(" / ")}
-          </Overline>
+          <Overline>{overline}</Overline>
           <h1 className="mt-4 max-w-[24ch] text-display font-medium tracking-[var(--tracking-display)]">
-            {dataset.class_definition.name}
+            {heading}
           </h1>
           <p className="mt-5 max-w-[54ch] text-body text-[var(--fg-secondary)]">
-            {count(totals.valuesTotal)} attribute values across {totals.skuCount} SKUs, each
-            traced to a verbatim span in the source datasheet.{" "}
+            {count(totals.valuesTotal)} attribute values across {totals.skuCount} SKUs
+            {classes.length > 1 ? ` in ${classes.length} product classes` : ""}, each traced to
+            a verbatim span in{" "}
+            {sources.length === 1 ? "the source datasheet" : `${sources.length} source documents`}.{" "}
             {totals.needingReview > 0 ? (
               <>
                 {count(totals.needingReview)} need a reviewer before they can publish.
@@ -131,103 +183,210 @@ export default async function OverviewPage() {
         />
       </section>
 
-      {/* ---------------------------------------------------------------- policy + source */}
-      <section className="grid gap-6 py-[var(--spacing-section)] lg:grid-cols-12">
+      {/* ---------------------------------------------------------------- cost meter */}
+      <section className="py-[var(--spacing-section)]">
+        <SectionHeading
+          title="Cost to enrich"
+          detail="Bedrock token spend, priced from the AWS Price List API."
+          action={
+            cost.source ? (
+              <span className={`pill ${cost.source.stale ? "pill-warn" : "pill-quiet"}`}>
+                {cost.source.stale ? "Price table stale" : `Prices ${cost.source.region}`}
+              </span>
+            ) : null
+          }
+        />
+
+        {cost.skusPriced === 0 ? (
+          <Panel className="mt-6 p-7">
+            <p className="text-body text-[var(--fg-secondary)]">
+              No cost recorded. Fetch the price table with{" "}
+              <span className="mono">python scripts/fetch_bedrock_prices.py --write</span> and
+              re-run the pipeline.
+            </p>
+          </Panel>
+        ) : (
+          <>
+            <div className="mt-6 grid gap-6 lg:grid-cols-12">
+              <Panel className="p-7 lg:col-span-5">
+                <Overline>Mean per SKU</Overline>
+                <p className="figure mt-3">{usd(cost.meanPerSkuUsd)}</p>
+                <p className="mt-2 text-meta text-[var(--fg-quiet)]">
+                  {usd(cost.meanPerValueUsd)} per attribute value ·{" "}
+                  {tokens(cost.inputTokens)} in / {tokens(cost.outputTokens)} out ·{" "}
+                  {cost.calls} calls, {cost.escalations} escalations
+                </p>
+
+                {/*
+                  The number a buyer actually needs. A tenth of a cent is not decision-grade;
+                  "what does my whole catalogue cost" is.
+                */}
+                <dl className="hairline-t mt-6 grid grid-cols-3 gap-4 pt-5">
+                  {[10_000, 100_000, 500_000].map((scale) => (
+                    <div key={scale}>
+                      <dt className="text-meta text-[var(--fg-quiet)]">
+                        {count(scale)} SKUs
+                      </dt>
+                      <dd className="mt-1 text-lg tabular-nums">
+                        {usd(cost.project(scale))}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+
+                <p className="mt-5 max-w-[54ch] text-meta text-[var(--fg-quiet)]">
+                  Straight-line extrapolation from {cost.skusPriced}{" "}
+                  {cost.skusPriced === 1 ? "SKU" : "SKUs"}. It holds only if these documents
+                  are typical: longer datasheets cost more, and every escalation to a frontier
+                  model costs several times a first-pass call.
+                </p>
+              </Panel>
+
+              <Panel className="p-7 lg:col-span-7">
+                <Overline>Where the spend went</Overline>
+
+                {/*
+                  Per-tier, because the cascade's entire justification is that most work lands
+                  on the cheapest model. If the frontier tier dominated this table, the tier
+                  ordering would need revisiting rather than defending.
+                */}
+                <table className="mt-5 w-full border-collapse text-sm">
+                  <caption className="sr-only">Cost by model tier</caption>
+                  <thead>
+                    <tr className="text-meta text-[var(--fg-quiet)]">
+                      <th scope="col" className="hairline-b py-2 text-left font-medium">
+                        Tier
+                      </th>
+                      <th scope="col" className="hairline-b py-2 text-right font-medium">
+                        Calls
+                      </th>
+                      <th scope="col" className="hairline-b py-2 text-right font-medium">
+                        Tokens
+                      </th>
+                      <th scope="col" className="hairline-b py-2 text-right font-medium">
+                        Cost
+                      </th>
+                      <th scope="col" className="hairline-b py-2 text-right font-medium">
+                        Share
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {tierRows.map((row) => (
+                      <tr key={row.tier}>
+                        <td className="hairline-b py-2.5">{row.tier}</td>
+                        <td className="hairline-b py-2.5 text-right tabular-nums">
+                          {count(row.calls)}
+                        </td>
+                        <td className="hairline-b py-2.5 text-right tabular-nums">
+                          {tokens(row.tokens)}
+                        </td>
+                        <td className="hairline-b py-2.5 text-right tabular-nums">
+                          {usd(row.usd)}
+                        </td>
+                        <td className="hairline-b py-2.5 text-right tabular-nums text-[var(--fg-tertiary)]">
+                          {percent(row.share, 0)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                {cost.source ? (
+                  <p className="mt-5 text-meta text-[var(--fg-quiet)]">
+                    On-demand rates for {cost.source.priced_models} models, fetched{" "}
+                    {dateOnly(cost.source.fetched_at)} from the {cost.source.source}. Prices are
+                    never hand-entered: an unpriced model reports no cost rather than a guess.
+                  </p>
+                ) : null}
+              </Panel>
+            </div>
+
+            {!cost.priced ? (
+              <p className="mt-4 flex gap-2 text-meta text-[var(--warn)]">
+                <AlertIcon className="mt-0.5 shrink-0" />
+                {cost.skusTotal - cost.skusPriced} of {cost.skusTotal} SKUs could not be
+                costed, so this average is taken over a subset. Unpriced runs are usually the
+                ones that escalated, which biases the figure downward.
+              </p>
+            ) : null}
+          </>
+        )}
+      </section>
+
+      {/* ---------------------------------------------------------------- the risk dial */}
+      <section className="py-[var(--spacing-section)]">
+        <SectionHeading
+          title="Acceptance policy"
+          detail="Choose an error budget; see what it costs in coverage."
+          action={
+            <span className={`pill ${dataset.policy.achievable ? "pill-pass" : "pill-warn"}`}>
+              {dataset.policy.achievable ? "Validated" : "Not validated"}
+            </span>
+          }
+        />
+
+        <div className="mt-6">
+          <RiskDial initial={policyView} />
+        </div>
+
+        {/*
+          The provenance of the policy itself. Stating this plainly matters more than any
+          number above it: a threshold learned from a synthetic set is a demo, not a guarantee.
+        */}
+        <div className="mt-6 flex gap-3 rounded-lg bg-[var(--warn-quiet)] p-3.5">
+          <AlertIcon className="mt-0.5 shrink-0 text-[var(--warn)]" />
+          <p className="max-w-[86ch] text-sm text-[var(--fg-secondary)]">
+            This threshold comes from{" "}
+            <span className="font-medium text-[var(--fg)]">{dataset.meta.policy_source}</span>,
+            and the calibrator is {dataset.meta.calibrator.replace(/-/g, " ")}. Moving the dial
+            is a what-if: it does not reclassify anything already published, and coverage should
+            be earned from real review decisions before these numbers are relied on.
+          </p>
+        </div>
+      </section>
+
+      {/* ---------------------------------------------------------------- sources */}
+      <section className="grid gap-6 pb-[var(--spacing-section)] lg:grid-cols-12">
         <Panel className="p-7 lg:col-span-7">
           <SectionHeading
-            title="Acceptance policy"
-            detail="The threshold above which a value publishes without a reviewer."
-            action={
-              <span
-                className={`pill ${dataset.policy.achievable ? "pill-pass" : "pill-warn"}`}
-              >
-                {dataset.policy.achievable ? "Validated" : "Not validated"}
-              </span>
-            }
-          />
-
-          <p className="mt-6 max-w-[62ch] text-body text-[var(--fg-secondary)]">
-            {dataset.policy.reason.charAt(0).toUpperCase() + dataset.policy.reason.slice(1)}.
-          </p>
-
-          <div className="mt-8">
-            <div className="flex items-baseline justify-between gap-3">
-              <Overline>Coverage at threshold</Overline>
-              <span className="text-sm tabular-nums">
-                {percent(dataset.policy.coverage, 1)}
-              </span>
-            </div>
-            <div className="mt-2">
-              <Meter
-                value={dataset.policy.coverage}
-                threshold={dataset.policy.threshold}
-                tone="accent"
-                label={`Coverage ${percent(dataset.policy.coverage, 1)}`}
-              />
-            </div>
-          </div>
-
-          <dl className="mt-8 grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-4">
-            <KeyValue label="Threshold">
-              {dataset.policy.threshold === null
-                ? "—"
-                : dataset.policy.threshold.toFixed(3)}
-            </KeyValue>
-            <KeyValue label="Error budget">{percent(dataset.policy.epsilon)}</KeyValue>
-            <KeyValue label="Confidence">
-              {percent(dataset.policy.confidence_level)}
-            </KeyValue>
-            <KeyValue label="Calibration set">
-              {count(dataset.policy.calibration_size)}
-            </KeyValue>
-          </dl>
-
-          {/* The provenance of the policy itself. Stating this plainly matters more than
-              the numbers above it. */}
-          <div className="mt-7 flex gap-3 rounded-lg bg-[var(--warn-quiet)] p-3.5">
-            <AlertIcon className="mt-0.5 shrink-0 text-[var(--warn)]" />
-            <p className="text-sm text-[var(--fg-secondary)]">
-              This threshold comes from a{" "}
-              <span className="font-medium text-[var(--fg)]">
-                {dataset.meta.policy_source}
-              </span>{" "}
-              set, not from reviewer outcomes. The calibrator is{" "}
-              {dataset.meta.calibrator.replace(/-/g, " ")}. Automation coverage should be
-              earned from real review decisions before these numbers are trusted.
-            </p>
-          </div>
-        </Panel>
-
-        <Panel className="p-7 lg:col-span-5">
-          <SectionHeading
-            title="Source document"
+            title={sources.length === 1 ? "Source document" : "Source documents"}
             detail="Content-addressed, so every citation stays stable."
           />
 
-          {/* Grid lives on the `dl` itself; an intermediate wrapper would nest a second
-              `div` between the list and its `dt`/`dd` pairs, which is not valid. */}
-          <dl className="mt-7 grid grid-cols-2 gap-x-5 gap-y-5">
-            <KeyValue label="Document" span={2}>
-              {dataset.document.document_id}
-            </KeyValue>
-            <KeyValue label="SHA-256" mono span={2}>
-              {shortHash(dataset.document.sha256, 24)}…
-            </KeyValue>
-            <KeyValue label="Revision">
-              {dataset.document.revision_label ?? "Unlabelled"}
-            </KeyValue>
-            <KeyValue label="Type">
-              {dataset.document.doc_type.replace(/_/g, " ")}
-            </KeyValue>
-            <KeyValue label="Parser">{dataset.document.parser}</KeyValue>
-            <KeyValue label="Retrieved">{dateOnly(dataset.document.fetched_at)}</KeyValue>
-            <KeyValue label="Structure" span={2}>
-              {dataset.document.page_count ?? dataset.pages.length} page
-              {(dataset.document.page_count ?? dataset.pages.length) === 1 ? "" : "s"},{" "}
-              {dataset.document.line_count} lines, {dataset.document.table_count} table
-              {dataset.document.table_count === 1 ? "" : "s"}
-            </KeyValue>
-          </dl>
+          <ul className="mt-7 flex flex-col gap-6">
+            {sources.map(({ document, pages }) => (
+              <li key={document.document_id} className="not-first:hairline-t not-first:pt-6">
+                {/* Grid lives on the `dl` itself; an intermediate wrapper would nest a second
+                    `div` between the list and its `dt`/`dd` pairs, which is not valid. */}
+                <dl className="grid grid-cols-2 gap-x-5 gap-y-5">
+                  <KeyValue label="Document" span={2}>
+                    {document.document_id}
+                  </KeyValue>
+                  <KeyValue label="SHA-256" mono span={2}>
+                    {shortHash(document.sha256, 24)}…
+                  </KeyValue>
+                  <KeyValue label="Revision">
+                    {document.revision_label ?? "Unlabelled"}
+                  </KeyValue>
+                  <KeyValue label="Type">{document.doc_type.replace(/_/g, " ")}</KeyValue>
+                  <KeyValue label="Parser">{document.parser}</KeyValue>
+                  <KeyValue label="Retrieved">{dateOnly(document.fetched_at)}</KeyValue>
+                  <KeyValue label="Structure" span={2}>
+                    {document.page_count ?? pages.length} page
+                    {(document.page_count ?? pages.length) === 1 ? "" : "s"},{" "}
+                    {document.line_count} lines, {document.table_count} table
+                    {document.table_count === 1 ? "" : "s"}
+                  </KeyValue>
+                </dl>
+              </li>
+            ))}
+            {sources.length === 0 ? (
+              <li className="text-sm text-[var(--fg-tertiary)]">
+                No source documents. Run the pipeline to produce some.
+              </li>
+            ) : null}
+          </ul>
         </Panel>
       </section>
 
@@ -354,11 +513,42 @@ export default async function OverviewPage() {
           </table>
         </Panel>
 
-        <p className="mt-4 text-meta text-[var(--fg-quiet)]">
-          Generated {dateOnly(dataset.meta.generated_at)} by {dataset.meta.generator} ·{" "}
-          {dataset.meta.pipeline_version} · schema{" "}
-          {dataset.class_definition.schema_version}
-        </p>
+        {/*
+          Provenance of the page itself.
+
+          `live` distinguishes real model output served by the API from the checked-in
+          fixture, whose model responses are hand-seeded. Anyone reading a number off this
+          screen needs to know which one they are looking at, so it is stated rather than
+          implied.
+        */}
+        <div className="mt-4 flex flex-col gap-2">
+          <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-meta text-[var(--fg-quiet)]">
+            <span className={`pill ${dataset.meta.live ? "pill-pass" : "pill-warn"}`}>
+              {dataset.meta.live ? "Live pipeline output" : "Offline fixture"}
+            </span>
+            <span>
+              Generated {dateOnly(dataset.meta.generated_at)} by {dataset.meta.generator}
+              {dataset.meta.pipeline_version ? ` · ${dataset.meta.pipeline_version}` : ""} ·
+              calibrator {dataset.meta.calibrator}
+            </span>
+            {classes.length > 0 ? (
+              <span className="mono">
+                schema {classes.map((definition) => definition.schema_version).join(", ")}
+              </span>
+            ) : null}
+          </p>
+
+          {(dataset.meta.warnings ?? []).map((warning) => (
+            <p
+              key={warning}
+              className="flex gap-2 text-meta text-[var(--warn)]"
+              role="status"
+            >
+              <AlertIcon className="mt-0.5 shrink-0" />
+              {warning}
+            </p>
+          ))}
+        </div>
       </section>
     </div>
   );

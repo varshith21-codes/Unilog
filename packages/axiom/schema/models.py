@@ -163,6 +163,13 @@ class AttributeDefinition(BaseModel):
         default=(),
         description="Where this typically appears, e.g. 'first column of an ordering table'",
     )
+    table_headers: tuple[str, ...] = Field(
+        default=(),
+        description="Column headings that identify this attribute in an ordering table, e.g. "
+        "'Size' or 'Carton Qty'. Used by variant explosion to bind a column to an attribute "
+        "deterministically. Declarative on purpose: matching headers by guessing at the "
+        "attribute name works until a supplier writes 'Ctn' and then fails silently.",
+    )
 
     quantity_kind: str | None = None
     canonical_unit: str | None = None
@@ -189,7 +196,7 @@ class AttributeDefinition(BaseModel):
         default=None, description="Unit to assume when the source states a bare number"
     )
 
-    @field_validator("example_values", "extraction_hints", mode="before")
+    @field_validator("example_values", "extraction_hints", "table_headers", mode="before")
     @classmethod
     def _coerce_tuple(cls, v):
         if v is None:

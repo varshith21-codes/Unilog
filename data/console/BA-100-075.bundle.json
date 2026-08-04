@@ -1,0 +1,3972 @@
+{
+  "bundle": {
+    "sku": "BA-100-075",
+    "document_id": "ba100@f7500023",
+    "class_code": "PLB.VLV.BALL.2PC",
+    "record": {
+      "tenant_id": "demo",
+      "sku": "BA-100-075",
+      "mpn": "BA-100-075",
+      "mpn_normalized": "BA-100-075",
+      "gtin": null,
+      "brand": "Milwaukee Valve",
+      "brand_id": "milwaukee_valve",
+      "supplier_id": null,
+      "lifecycle_status": "active",
+      "class_code": "PLB.VLV.BALL.2PC",
+      "schema_version": "PLB.VLV.BALL.2PC@v1",
+      "source_document_ids": [
+        "ba100@f7500023"
+      ],
+      "created_at": "2026-08-03T18:15:20.620882+00:00",
+      "updated_at": "2026-08-03T18:15:20.621003+00:00"
+    },
+    "classifications": [
+      {
+        "scheme": "internal",
+        "code": "PLB.VLV.BALL.2PC",
+        "path": [
+          "Plumbing",
+          "Valves",
+          "Ball Valves",
+          "Two-Piece"
+        ],
+        "confidence": 0.92,
+        "level_confidences": [
+          1.0,
+          1.0,
+          0.92,
+          0.92
+        ],
+        "rationale": "The product title explicitly states 'Two-Piece Full Port Bronze Ball Valve'. The body material is Bronze, and the ball/stem material is Chrome-plated brass, which is characteristic of ball valves. The 'Two-Piece' descriptor matches the candidate class code exactly.",
+        "method": "model_adjudicated",
+        "alternatives": [
+          {
+            "code": "PLB.VLV.GATE.BRZ",
+            "score": 0.382408
+          }
+        ],
+        "reviewed_by": null,
+        "reviewed_at": null
+      },
+      {
+        "scheme": "ETIM",
+        "code": "EC002714",
+        "path": [],
+        "confidence": 0.874,
+        "level_confidences": [],
+        "rationale": "derived from internal class PLB.VLV.BALL.2PC via the mapping declared in the schema, not independently classified",
+        "method": "schema_mapping",
+        "alternatives": [],
+        "reviewed_by": null,
+        "reviewed_at": null
+      },
+      {
+        "scheme": "UNSPSC",
+        "code": "40141607",
+        "path": [],
+        "confidence": 0.874,
+        "level_confidences": [],
+        "rationale": "derived from internal class PLB.VLV.BALL.2PC via the mapping declared in the schema, not independently classified",
+        "method": "schema_mapping",
+        "alternatives": [],
+        "reviewed_by": null,
+        "reviewed_at": null
+      }
+    ],
+    "classification_summary": {
+      "class_code": "PLB.VLV.BALL.2PC",
+      "confidence": 0.92,
+      "confident_depth": 4,
+      "schemes": [
+        "internal",
+        "ETIM",
+        "UNSPSC"
+      ],
+      "candidates_considered": 2,
+      "method": "model_adjudicated",
+      "abstained": false,
+      "input_tokens": 554,
+      "output_tokens": 98
+    },
+    "classification_candidates": [
+      {
+        "code": "PLB.VLV.BALL.2PC",
+        "score": 0.4424,
+        "path_text": "Plumbing > Valves > Ball Valves > Two-Piece"
+      },
+      {
+        "code": "PLB.VLV.GATE.BRZ",
+        "score": 0.3824,
+        "path_text": "Plumbing > Valves > Gate Valves > Bronze"
+      }
+    ],
+    "values": [
+      {
+        "attribute_code": "approvals",
+        "value_raw": "UL, CSA, NSF/ANSI 61",
+        "value_canonical": [
+          "UL",
+          "CSA",
+          "NSF-61"
+        ],
+        "value_display": "UL, CSA, NSF-61",
+        "method": "document_extraction",
+        "confidence": 0.9,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "sp_f7500023_16",
+            "document_id": "ba100@f7500023",
+            "document_sha256": "f7500023aad5093f9f77c12af5186aa8d4c5a67db25550c5c49a589959bf1da0",
+            "quote": "Approvals ...................... UL listed, CSA certified, NSF/ANSI 61",
+            "page": 1,
+            "bbox": {
+              "x0": 66.0,
+              "y0": 186.0,
+              "x1": 486.0,
+              "y1": 198.0
+            },
+            "table_ref": null,
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [],
+        "model_id": "zai.glm-4.7-flash",
+        "model_tier": "volume",
+        "prompt_version": "extract.v2",
+        "schema_version": "PLB.VLV.BALL.2PC@v1",
+        "version": 1,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-03T18:15:20.594546Z",
+        "score": 0.7286,
+        "decision": {
+          "attribute_code": "approvals",
+          "score": 0.7286,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.729 >= threshold 0.685"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 0.4,
+          "quote_specificity": 0.2857,
+          "self_reported_certainty": 0.9,
+          "validation_pass_rate": 0.5,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.75,
+          "source_prior": 0.5,
+          "tier_cost": 0.25
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "citation_summary": [
+          "ba100@f7500023 p.1"
+        ]
+      },
+      {
+        "attribute_code": "body_material",
+        "value_raw": "Bronze C84400",
+        "value_canonical": "Bronze C84400",
+        "value_display": "Bronze C84400",
+        "method": "document_extraction",
+        "confidence": 0.9,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "sp_f7500023_4",
+            "document_id": "ba100@f7500023",
+            "document_sha256": "f7500023aad5093f9f77c12af5186aa8d4c5a67db25550c5c49a589959bf1da0",
+            "quote": "Body Material .................. Bronze C84400",
+            "page": 1,
+            "bbox": {
+              "x0": 66.0,
+              "y0": 102.0,
+              "x1": 342.0,
+              "y1": 114.0
+            },
+            "table_ref": null,
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [],
+        "model_id": "zai.glm-4.7-flash",
+        "model_tier": "volume",
+        "prompt_version": "extract.v2",
+        "schema_version": "PLB.VLV.BALL.2PC@v1",
+        "version": 1,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-03T18:15:20.592661Z",
+        "score": 0.7283,
+        "decision": {
+          "attribute_code": "body_material",
+          "score": 0.7283,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.728 >= threshold 0.685"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 0.4,
+          "quote_specificity": 0.2826,
+          "self_reported_certainty": 0.9,
+          "validation_pass_rate": 0.5,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.725,
+          "source_prior": 0.5,
+          "tier_cost": 0.25
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "citation_summary": [
+          "ba100@f7500023 p.1"
+        ]
+      },
+      {
+        "attribute_code": "case_quantity",
+        "value_raw": "12",
+        "value_canonical": 12,
+        "value_display": "12",
+        "method": "table_extraction",
+        "confidence": 0.9,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "sp_f7500023_20",
+            "document_id": "ba100@f7500023",
+            "document_sha256": "f7500023aad5093f9f77c12af5186aa8d4c5a67db25550c5c49a589959bf1da0",
+            "quote": "BA-100-075  | 3/4\"   | Lever  | 12",
+            "page": 1,
+            "bbox": {
+              "x0": 66.0,
+              "y0": 282.0,
+              "x1": 330.0,
+              "y1": 294.0
+            },
+            "table_ref": "t1:r3",
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [],
+        "model_id": "zai.glm-4.7-flash",
+        "model_tier": "volume",
+        "prompt_version": "extract.v2",
+        "schema_version": "PLB.VLV.BALL.2PC@v1",
+        "version": 1,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-03T18:15:20.594713Z",
+        "score": 0.7809,
+        "decision": {
+          "attribute_code": "case_quantity",
+          "score": 0.7809,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.781 >= threshold 0.685"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 0.7,
+          "quote_specificity": 0.0588,
+          "self_reported_certainty": 0.9,
+          "validation_pass_rate": 0.5,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.725,
+          "source_prior": 0.5,
+          "tier_cost": 0.25
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "citation_summary": [
+          "ba100@f7500023 p.1 t1:r3"
+        ]
+      },
+      {
+        "attribute_code": "end_connection",
+        "value_raw": "NPT threaded, female both ends",
+        "value_canonical": "NPT Threaded",
+        "value_display": "NPT Threaded",
+        "method": "document_extraction",
+        "confidence": 0.9,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "sp_f7500023_5",
+            "document_id": "ba100@f7500023",
+            "document_sha256": "f7500023aad5093f9f77c12af5186aa8d4c5a67db25550c5c49a589959bf1da0",
+            "quote": "End Connection ................. NPT threaded, female both ends",
+            "page": 1,
+            "bbox": {
+              "x0": 66.0,
+              "y0": 174.0,
+              "x1": 444.0,
+              "y1": 186.0
+            },
+            "table_ref": null,
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [
+          {
+            "layer": "L0",
+            "rule_id": "enum_partial_match",
+            "verdict": "warn",
+            "severity": "warning",
+            "reason": "attribute 'end_connection' snapped to 'NPT Threaded'; the source carried additional text that is not represented in the canonical value",
+            "counterexample": null,
+            "suggested_fix": null,
+            "detail": "matched on 'NPT Threaded' within 'NPT threaded, female both ends'"
+          },
+          {
+            "layer": "L0",
+            "rule_id": "enum_partial_match",
+            "verdict": "warn",
+            "severity": "warning",
+            "reason": "attribute 'end_connection' snapped to 'NPT Threaded'; the source carried additional text that is not represented in the canonical value",
+            "counterexample": null,
+            "suggested_fix": null,
+            "detail": "matched on 'NPT Threaded' within 'NPT threaded, female both ends'"
+          }
+        ],
+        "model_id": "zai.glm-4.7-flash",
+        "model_tier": "volume",
+        "prompt_version": "extract.v2",
+        "schema_version": "PLB.VLV.BALL.2PC@v1",
+        "version": 1,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-03T18:15:20.592890Z",
+        "score": 0.6976,
+        "decision": {
+          "attribute_code": "end_connection",
+          "score": 0.6976,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.698 >= threshold 0.685"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 0.4,
+          "quote_specificity": 0.4762,
+          "self_reported_certainty": 0.9,
+          "validation_pass_rate": 0.0,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.725,
+          "source_prior": 0.5,
+          "tier_cost": 0.25
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "citation_summary": [
+          "ba100@f7500023 p.1"
+        ]
+      },
+      {
+        "attribute_code": "handle_type",
+        "value_raw": "Lever",
+        "value_canonical": "Lever",
+        "value_display": "Lever",
+        "method": "table_extraction",
+        "confidence": 0.9,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "sp_f7500023_9",
+            "document_id": "ba100@f7500023",
+            "document_sha256": "f7500023aad5093f9f77c12af5186aa8d4c5a67db25550c5c49a589959bf1da0",
+            "quote": "BA-100-075  | 3/4\"   | Lever  | 12",
+            "page": 1,
+            "bbox": {
+              "x0": 66.0,
+              "y0": 282.0,
+              "x1": 330.0,
+              "y1": 294.0
+            },
+            "table_ref": "t1:r3",
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [],
+        "model_id": "zai.glm-4.7-flash",
+        "model_tier": "volume",
+        "prompt_version": "extract.v2",
+        "schema_version": "PLB.VLV.BALL.2PC@v1",
+        "version": 1,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-03T18:15:20.593615Z",
+        "score": 0.7897,
+        "decision": {
+          "attribute_code": "handle_type",
+          "score": 0.7897,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.790 >= threshold 0.685"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 0.7,
+          "quote_specificity": 0.1471,
+          "self_reported_certainty": 0.9,
+          "validation_pass_rate": 0.5,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.675,
+          "source_prior": 0.5,
+          "tier_cost": 0.25
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "citation_summary": [
+          "ba100@f7500023 p.1 t1:r3"
+        ]
+      },
+      {
+        "attribute_code": "nominal_size",
+        "value_raw": "3/4\"",
+        "value_canonical": {
+          "magnitude": 19.05,
+          "unit": "mm"
+        },
+        "value_display": "3/4\"",
+        "method": "table_extraction",
+        "confidence": 0.9,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "sp_f7500023_2",
+            "document_id": "ba100@f7500023",
+            "document_sha256": "f7500023aad5093f9f77c12af5186aa8d4c5a67db25550c5c49a589959bf1da0",
+            "quote": "BA-100-075  | 3/4\"   | Lever  | 12",
+            "page": 1,
+            "bbox": {
+              "x0": 66.0,
+              "y0": 282.0,
+              "x1": 330.0,
+              "y1": 294.0
+            },
+            "table_ref": "t1:r3",
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [],
+        "model_id": "zai.glm-4.7-flash",
+        "model_tier": "volume",
+        "prompt_version": "extract.v2",
+        "schema_version": "PLB.VLV.BALL.2PC@v1",
+        "version": 1,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-03T18:15:20.592261Z",
+        "score": 0.7868,
+        "decision": {
+          "attribute_code": "nominal_size",
+          "score": 0.7868,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.787 >= threshold 0.685"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 0.7,
+          "quote_specificity": 0.1176,
+          "self_reported_certainty": 0.9,
+          "validation_pass_rate": 0.5,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.725,
+          "source_prior": 0.5,
+          "tier_cost": 0.25
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "citation_summary": [
+          "ba100@f7500023 p.1 t1:r3"
+        ]
+      },
+      {
+        "attribute_code": "number_of_pieces",
+        "value_raw": "Two-Piece",
+        "value_canonical": "Two-Piece",
+        "value_display": "Two-Piece",
+        "method": "document_extraction",
+        "confidence": 0.9,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "sp_f7500023_1",
+            "document_id": "ba100@f7500023",
+            "document_sha256": "f7500023aad5093f9f77c12af5186aa8d4c5a67db25550c5c49a589959bf1da0",
+            "quote": "Two-Piece Full Port Bronze Ball Valve",
+            "page": 1,
+            "bbox": {
+              "x0": 54.0,
+              "y0": 66.0,
+              "x1": 276.0,
+              "y1": 78.0
+            },
+            "table_ref": null,
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [],
+        "model_id": "zai.glm-4.7-flash",
+        "model_tier": "volume",
+        "prompt_version": "extract.v2",
+        "schema_version": "PLB.VLV.BALL.2PC@v1",
+        "version": 1,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-03T18:15:20.592065Z",
+        "score": 0.7243,
+        "decision": {
+          "attribute_code": "number_of_pieces",
+          "score": 0.7243,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.724 >= threshold 0.685"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 0.4,
+          "quote_specificity": 0.2432,
+          "self_reported_certainty": 0.9,
+          "validation_pass_rate": 0.5,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.625,
+          "source_prior": 0.5,
+          "tier_cost": 0.25
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "citation_summary": [
+          "ba100@f7500023 p.1"
+        ]
+      },
+      {
+        "attribute_code": "port_type",
+        "value_raw": "Full Port",
+        "value_canonical": "Full Port",
+        "value_display": "Full Port",
+        "method": "document_extraction",
+        "confidence": 0.9,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "sp_f7500023_6",
+            "document_id": "ba100@f7500023",
+            "document_sha256": "f7500023aad5093f9f77c12af5186aa8d4c5a67db25550c5c49a589959bf1da0",
+            "quote": "Two-Piece Full Port Bronze Ball Valve",
+            "page": 1,
+            "bbox": {
+              "x0": 54.0,
+              "y0": 66.0,
+              "x1": 276.0,
+              "y1": 78.0
+            },
+            "table_ref": null,
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [],
+        "model_id": "zai.glm-4.7-flash",
+        "model_tier": "volume",
+        "prompt_version": "extract.v2",
+        "schema_version": "PLB.VLV.BALL.2PC@v1",
+        "version": 1,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-03T18:15:20.593095Z",
+        "score": 0.7243,
+        "decision": {
+          "attribute_code": "port_type",
+          "score": 0.7243,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.724 >= threshold 0.685"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 0.4,
+          "quote_specificity": 0.2432,
+          "self_reported_certainty": 0.9,
+          "validation_pass_rate": 0.5,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.625,
+          "source_prior": 0.5,
+          "tier_cost": 0.25
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "citation_summary": [
+          "ba100@f7500023 p.1"
+        ]
+      },
+      {
+        "attribute_code": "potable_water_approved",
+        "value_raw": "true",
+        "value_canonical": true,
+        "value_display": "Yes",
+        "method": "document_extraction",
+        "confidence": 0.9,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "sp_f7500023_15",
+            "document_id": "ba100@f7500023",
+            "document_sha256": "f7500023aad5093f9f77c12af5186aa8d4c5a67db25550c5c49a589959bf1da0",
+            "quote": "Approvals ...................... UL listed, CSA certified, NSF/ANSI 61",
+            "page": 1,
+            "bbox": {
+              "x0": 66.0,
+              "y0": 186.0,
+              "x1": 486.0,
+              "y1": 198.0
+            },
+            "table_ref": null,
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [],
+        "model_id": "zai.glm-4.7-flash",
+        "model_tier": "volume",
+        "prompt_version": "extract.v2",
+        "schema_version": "PLB.VLV.BALL.2PC@v1",
+        "version": 1,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-03T18:15:20.594320Z",
+        "score": 0.7057,
+        "decision": {
+          "attribute_code": "potable_water_approved",
+          "score": 0.7057,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.706 >= threshold 0.685"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 0.4,
+          "quote_specificity": 0.0571,
+          "self_reported_certainty": 0.9,
+          "validation_pass_rate": 0.5,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.725,
+          "source_prior": 0.5,
+          "tier_cost": 0.25
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "citation_summary": [
+          "ba100@f7500023 p.1"
+        ]
+      },
+      {
+        "attribute_code": "pressure_rating_wog",
+        "value_raw": "600 PSI WOG @ 73 degF",
+        "value_canonical": {
+          "magnitude": 600.0,
+          "unit": "psi"
+        },
+        "value_display": "600 psi",
+        "method": "document_extraction",
+        "confidence": 0.9,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "sp_f7500023_3",
+            "document_id": "ba100@f7500023",
+            "document_sha256": "f7500023aad5093f9f77c12af5186aa8d4c5a67db25550c5c49a589959bf1da0",
+            "quote": "Pressure Rating ................ 600 PSI WOG @ 73 degF",
+            "page": 1,
+            "bbox": {
+              "x0": 66.0,
+              "y0": 138.0,
+              "x1": 390.0,
+              "y1": 150.0
+            },
+            "table_ref": null,
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [
+          {
+            "layer": "L0",
+            "rule_id": "qualifiers_retained",
+            "verdict": "pass",
+            "severity": "error",
+            "reason": "value carries qualifiers preserved from the source",
+            "counterexample": null,
+            "suggested_fix": null,
+            "detail": "rating=WOG; at=73 degF"
+          }
+        ],
+        "model_id": "zai.glm-4.7-flash",
+        "model_tier": "volume",
+        "prompt_version": "extract.v2",
+        "schema_version": "PLB.VLV.BALL.2PC@v1",
+        "version": 1,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-03T18:15:20.592481Z",
+        "score": 0.7889,
+        "decision": {
+          "attribute_code": "pressure_rating_wog",
+          "score": 0.7889,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.789 >= threshold 0.685"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 0.4,
+          "quote_specificity": 0.3889,
+          "self_reported_certainty": 0.9,
+          "validation_pass_rate": 1.0,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.725,
+          "source_prior": 0.5,
+          "tier_cost": 0.25
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "citation_summary": [
+          "ba100@f7500023 p.1"
+        ]
+      },
+      {
+        "attribute_code": "product_series",
+        "value_raw": "BA-100",
+        "value_canonical": "BA-100",
+        "value_display": "BA-100",
+        "method": "document_extraction",
+        "confidence": 0.9,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "sp_f7500023_0",
+            "document_id": "ba100@f7500023",
+            "document_sha256": "f7500023aad5093f9f77c12af5186aa8d4c5a67db25550c5c49a589959bf1da0",
+            "quote": "MILWAUKEE VALVE - BA-100 SERIES",
+            "page": 1,
+            "bbox": {
+              "x0": 54.0,
+              "y0": 54.0,
+              "x1": 240.0,
+              "y1": 66.0
+            },
+            "table_ref": null,
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [],
+        "model_id": "zai.glm-4.7-flash",
+        "model_tier": "volume",
+        "prompt_version": "extract.v2",
+        "schema_version": "PLB.VLV.BALL.2PC@v1",
+        "version": 1,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-03T18:15:20.591565Z",
+        "score": 0.7194,
+        "decision": {
+          "attribute_code": "product_series",
+          "score": 0.7194,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.719 >= threshold 0.685"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 0.4,
+          "quote_specificity": 0.1935,
+          "self_reported_certainty": 0.9,
+          "validation_pass_rate": 0.5,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.725,
+          "source_prior": 0.5,
+          "tier_cost": 0.25
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "citation_summary": [
+          "ba100@f7500023 p.1"
+        ]
+      },
+      {
+        "attribute_code": "seat_material",
+        "value_raw": "RPTFE",
+        "value_canonical": "RPTFE",
+        "value_display": "RPTFE",
+        "method": "document_extraction",
+        "confidence": 0.9,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "sp_f7500023_7",
+            "document_id": "ba100@f7500023",
+            "document_sha256": "f7500023aad5093f9f77c12af5186aa8d4c5a67db25550c5c49a589959bf1da0",
+            "quote": "Seat Material .................. RPTFE",
+            "page": 1,
+            "bbox": {
+              "x0": 66.0,
+              "y0": 126.0,
+              "x1": 294.0,
+              "y1": 138.0
+            },
+            "table_ref": null,
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [],
+        "model_id": "zai.glm-4.7-flash",
+        "model_tier": "volume",
+        "prompt_version": "extract.v2",
+        "schema_version": "PLB.VLV.BALL.2PC@v1",
+        "version": 1,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-03T18:15:20.593263Z",
+        "score": 0.7132,
+        "decision": {
+          "attribute_code": "seat_material",
+          "score": 0.7132,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.713 >= threshold 0.685"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 0.4,
+          "quote_specificity": 0.1316,
+          "self_reported_certainty": 0.9,
+          "validation_pass_rate": 0.5,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.625,
+          "source_prior": 0.5,
+          "tier_cost": 0.25
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "citation_summary": [
+          "ba100@f7500023 p.1"
+        ]
+      },
+      {
+        "attribute_code": "steam_pressure_rating",
+        "value_raw": "150 PSI WSP",
+        "value_canonical": {
+          "magnitude": 150.0,
+          "unit": "psi"
+        },
+        "value_display": "150 psi",
+        "method": "document_extraction",
+        "confidence": 0.9,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "sp_f7500023_13",
+            "document_id": "ba100@f7500023",
+            "document_sha256": "f7500023aad5093f9f77c12af5186aa8d4c5a67db25550c5c49a589959bf1da0",
+            "quote": "Steam Rating ................... 150 PSI WSP",
+            "page": 1,
+            "bbox": {
+              "x0": 66.0,
+              "y0": 150.0,
+              "x1": 330.0,
+              "y1": 162.0
+            },
+            "table_ref": null,
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [
+          {
+            "layer": "L0",
+            "rule_id": "qualifiers_retained",
+            "verdict": "pass",
+            "severity": "error",
+            "reason": "value carries qualifiers preserved from the source",
+            "counterexample": null,
+            "suggested_fix": null,
+            "detail": "rating=WSP"
+          }
+        ],
+        "model_id": "zai.glm-4.7-flash",
+        "model_tier": "volume",
+        "prompt_version": "extract.v2",
+        "schema_version": "PLB.VLV.BALL.2PC@v1",
+        "version": 1,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-03T18:15:20.594069Z",
+        "score": 0.775,
+        "decision": {
+          "attribute_code": "steam_pressure_rating",
+          "score": 0.775,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.775 >= threshold 0.685"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 0.4,
+          "quote_specificity": 0.25,
+          "self_reported_certainty": 0.9,
+          "validation_pass_rate": 1.0,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.725,
+          "source_prior": 0.5,
+          "tier_cost": 0.25
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "citation_summary": [
+          "ba100@f7500023 p.1"
+        ]
+      },
+      {
+        "attribute_code": "stem_material",
+        "value_raw": "Brass",
+        "value_canonical": "Brass",
+        "value_display": "Brass",
+        "method": "document_extraction",
+        "confidence": 0.9,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "sp_f7500023_8",
+            "document_id": "ba100@f7500023",
+            "document_sha256": "f7500023aad5093f9f77c12af5186aa8d4c5a67db25550c5c49a589959bf1da0",
+            "quote": "Ball / Stem .................... Chrome-plated brass / Brass",
+            "page": 1,
+            "bbox": {
+              "x0": 66.0,
+              "y0": 114.0,
+              "x1": 426.0,
+              "y1": 126.0
+            },
+            "table_ref": null,
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [],
+        "model_id": "zai.glm-4.7-flash",
+        "model_tier": "volume",
+        "prompt_version": "extract.v2",
+        "schema_version": "PLB.VLV.BALL.2PC@v1",
+        "version": 1,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-03T18:15:20.593462Z",
+        "score": 0.7083,
+        "decision": {
+          "attribute_code": "stem_material",
+          "score": 0.7083,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.708 >= threshold 0.685"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 0.4,
+          "quote_specificity": 0.0833,
+          "self_reported_certainty": 0.9,
+          "validation_pass_rate": 0.5,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.6,
+          "source_prior": 0.5,
+          "tier_cost": 0.25
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "citation_summary": [
+          "ba100@f7500023 p.1"
+        ]
+      },
+      {
+        "attribute_code": "temperature_range",
+        "value_raw": "-20 degF to 366 degF",
+        "value_canonical": {
+          "minimum": -28.888889,
+          "maximum": 185.555556,
+          "unit": "degC"
+        },
+        "value_display": "-20 to 366 degF",
+        "method": "document_extraction",
+        "confidence": 0.9,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "sp_f7500023_11",
+            "document_id": "ba100@f7500023",
+            "document_sha256": "f7500023aad5093f9f77c12af5186aa8d4c5a67db25550c5c49a589959bf1da0",
+            "quote": "Temperature Range .............. -20 degF to 366 degF",
+            "page": 1,
+            "bbox": {
+              "x0": 66.0,
+              "y0": 162.0,
+              "x1": 384.0,
+              "y1": 174.0
+            },
+            "table_ref": null,
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [],
+        "model_id": "zai.glm-4.7-flash",
+        "model_tier": "volume",
+        "prompt_version": "extract.v2",
+        "schema_version": "PLB.VLV.BALL.2PC@v1",
+        "version": 1,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-03T18:15:20.593845Z",
+        "score": 0.7377,
+        "decision": {
+          "attribute_code": "temperature_range",
+          "score": 0.7377,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.738 >= threshold 0.685"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 0.4,
+          "quote_specificity": 0.3774,
+          "self_reported_certainty": 0.9,
+          "validation_pass_rate": 0.5,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.725,
+          "source_prior": 0.5,
+          "tier_cost": 0.25
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "citation_summary": [
+          "ba100@f7500023 p.1"
+        ]
+      }
+    ],
+    "gaps": [
+      {
+        "attribute_code": "cv_flow_coefficient",
+        "reason": "not_present_in_any_source",
+        "sources_searched": [
+          "ba100@f7500023"
+        ],
+        "detail": "deferred to factory; no value stated in source",
+        "revenue_exposure_usd": null,
+        "recommended_action": "request_from_supplier",
+        "is_required": false,
+        "detected_at": "2026-08-03T18:15:20.593646Z"
+      },
+      {
+        "attribute_code": "operating_torque",
+        "reason": "not_present_in_any_source",
+        "sources_searched": [
+          "ba100@f7500023"
+        ],
+        "detail": "value applies to 1/2\" size only; target SKU is 3/4\"",
+        "revenue_exposure_usd": null,
+        "recommended_action": "human_research",
+        "is_required": false,
+        "detected_at": "2026-08-03T18:15:20.593859Z"
+      },
+      {
+        "attribute_code": "lead_free_compliant",
+        "reason": "not_present_in_any_source",
+        "sources_searched": [
+          "ba100@f7500023"
+        ],
+        "detail": "source lists NSF/ANSI 61, not NSF/ANSI 372",
+        "revenue_exposure_usd": null,
+        "recommended_action": "request_from_supplier",
+        "is_required": true,
+        "detected_at": "2026-08-03T18:15:20.594083Z"
+      },
+      {
+        "attribute_code": "country_of_origin",
+        "reason": "not_present_in_any_source",
+        "sources_searched": [
+          "ba100@f7500023"
+        ],
+        "detail": "not stated in source",
+        "revenue_exposure_usd": null,
+        "recommended_action": "request_from_supplier",
+        "is_required": true,
+        "detected_at": "2026-08-03T18:15:20.594555Z"
+      },
+      {
+        "attribute_code": "gtin",
+        "reason": "not_present_in_any_source",
+        "sources_searched": [
+          "ba100@f7500023"
+        ],
+        "detail": "not stated in source",
+        "revenue_exposure_usd": null,
+        "recommended_action": "request_from_supplier",
+        "is_required": false,
+        "detected_at": "2026-08-03T18:15:20.594563Z"
+      },
+      {
+        "attribute_code": "each_weight",
+        "reason": "not_present_in_any_source",
+        "sources_searched": [
+          "ba100@f7500023"
+        ],
+        "detail": "not stated in source",
+        "revenue_exposure_usd": null,
+        "recommended_action": "request_from_supplier",
+        "is_required": false,
+        "detected_at": "2026-08-03T18:15:20.594570Z"
+      },
+      {
+        "attribute_code": "case_weight",
+        "reason": "not_present_in_any_source",
+        "sources_searched": [
+          "ba100@f7500023"
+        ],
+        "detail": "not stated in source",
+        "revenue_exposure_usd": null,
+        "recommended_action": "request_from_supplier",
+        "is_required": false,
+        "detected_at": "2026-08-03T18:15:20.594722Z"
+      },
+      {
+        "attribute_code": "selling_uom",
+        "reason": "not_present_in_any_source",
+        "sources_searched": [
+          "ba100@f7500023"
+        ],
+        "detail": "not stated in source",
+        "revenue_exposure_usd": null,
+        "recommended_action": "request_from_supplier",
+        "is_required": true,
+        "detected_at": "2026-08-03T18:15:20.594730Z"
+      }
+    ],
+    "extraction": {
+      "requested": 23,
+      "values": 15,
+      "gaps": 8,
+      "rejected_unverifiable": 0,
+      "citation_coverage": 1.0,
+      "input_tokens": 3225,
+      "output_tokens": 1647,
+      "escalations": 0,
+      "latency_ms": 11050
+    },
+    "normalization_issues": [
+      {
+        "layer": "L0",
+        "rule_id": "qualifiers_retained",
+        "verdict": "pass",
+        "severity": "error",
+        "reason": "value carries qualifiers preserved from the source",
+        "counterexample": null,
+        "suggested_fix": null,
+        "detail": "rating=WOG; at=73 degF"
+      },
+      {
+        "layer": "L0",
+        "rule_id": "enum_partial_match",
+        "verdict": "warn",
+        "severity": "warning",
+        "reason": "attribute 'end_connection' snapped to 'NPT Threaded'; the source carried additional text that is not represented in the canonical value",
+        "counterexample": null,
+        "suggested_fix": null,
+        "detail": "matched on 'NPT Threaded' within 'NPT threaded, female both ends'"
+      },
+      {
+        "layer": "L0",
+        "rule_id": "qualifiers_retained",
+        "verdict": "pass",
+        "severity": "error",
+        "reason": "value carries qualifiers preserved from the source",
+        "counterexample": null,
+        "suggested_fix": null,
+        "detail": "rating=WSP"
+      }
+    ],
+    "validation": {
+      "checks": 15,
+      "failures": 0,
+      "warnings": 1,
+      "skipped_rules": 3,
+      "consistency": 0.9167,
+      "results": [
+        {
+          "layer": "L3",
+          "rule_id": "plausible_range",
+          "verdict": "pass",
+          "severity": "error",
+          "reason": "within the expected range [3, 1200]",
+          "counterexample": null,
+          "suggested_fix": null,
+          "detail": null
+        },
+        {
+          "layer": "L0",
+          "rule_id": "qualifiers_retained",
+          "verdict": "pass",
+          "severity": "error",
+          "reason": "value carries qualifiers preserved from the source",
+          "counterexample": null,
+          "suggested_fix": null,
+          "detail": "rating=WOG; at=73 degF"
+        },
+        {
+          "layer": "L3",
+          "rule_id": "plausible_range",
+          "verdict": "pass",
+          "severity": "error",
+          "reason": "within the expected range [25, 10000]",
+          "counterexample": null,
+          "suggested_fix": null,
+          "detail": null
+        },
+        {
+          "layer": "L0",
+          "rule_id": "enum_partial_match",
+          "verdict": "warn",
+          "severity": "warning",
+          "reason": "attribute 'end_connection' snapped to 'NPT Threaded'; the source carried additional text that is not represented in the canonical value",
+          "counterexample": null,
+          "suggested_fix": null,
+          "detail": "matched on 'NPT Threaded' within 'NPT threaded, female both ends'"
+        },
+        {
+          "layer": "L3",
+          "rule_id": "plausible_range",
+          "verdict": "pass",
+          "severity": "error",
+          "reason": "within the expected range [-273.15, 1000]",
+          "counterexample": null,
+          "suggested_fix": null,
+          "detail": null
+        },
+        {
+          "layer": "L0",
+          "rule_id": "qualifiers_retained",
+          "verdict": "pass",
+          "severity": "error",
+          "reason": "value carries qualifiers preserved from the source",
+          "counterexample": null,
+          "suggested_fix": null,
+          "detail": "rating=WSP"
+        },
+        {
+          "layer": "L3",
+          "rule_id": "plausible_range",
+          "verdict": "pass",
+          "severity": "error",
+          "reason": "within the expected range [10, 1000]",
+          "counterexample": null,
+          "suggested_fix": null,
+          "detail": null
+        },
+        {
+          "layer": "L3",
+          "rule_id": "plausible_range",
+          "verdict": "pass",
+          "severity": "error",
+          "reason": "within the expected range [1, 100000]",
+          "counterexample": null,
+          "suggested_fix": null,
+          "detail": null
+        },
+        {
+          "layer": "L2",
+          "rule_id": "R_LEADFREE_MATERIAL",
+          "verdict": "skipped",
+          "severity": "info",
+          "reason": "not evaluated: missing lead_free_compliant",
+          "counterexample": null,
+          "suggested_fix": null,
+          "detail": null
+        },
+        {
+          "layer": "L2",
+          "rule_id": "R_POTABLE_REQUIRES_NSF61",
+          "verdict": "pass",
+          "severity": "error",
+          "reason": "A potable-water claim requires an NSF/ANSI 61 certification reference.",
+          "counterexample": null,
+          "suggested_fix": null,
+          "detail": null
+        },
+        {
+          "layer": "L2",
+          "rule_id": "R_TEMP_ORDER",
+          "verdict": "pass",
+          "severity": "error",
+          "reason": "Temperature range minimum must be below its maximum.",
+          "counterexample": null,
+          "suggested_fix": null,
+          "detail": null
+        },
+        {
+          "layer": "L2",
+          "rule_id": "R_STEAM_BELOW_WOG",
+          "verdict": "pass",
+          "severity": "error",
+          "reason": "The steam rating (WSP) must not exceed the WOG rating. A violation usually means the WOG figure was extracted into the steam field.",
+          "counterexample": null,
+          "suggested_fix": null,
+          "detail": null
+        },
+        {
+          "layer": "L2",
+          "rule_id": "R_FULLPORT_CV_FLOOR",
+          "verdict": "skipped",
+          "severity": "info",
+          "reason": "not evaluated: missing cv_flow_coefficient",
+          "counterexample": null,
+          "suggested_fix": null,
+          "detail": null
+        },
+        {
+          "layer": "L2",
+          "rule_id": "R_PACK_WEIGHT",
+          "verdict": "skipped",
+          "severity": "info",
+          "reason": "not evaluated: missing case_weight, each_weight",
+          "counterexample": null,
+          "suggested_fix": null,
+          "detail": null
+        },
+        {
+          "layer": "L2",
+          "rule_id": "R_THREAD_STANDARD_EXPLICIT",
+          "verdict": "pass",
+          "severity": "error",
+          "reason": "A threaded end connection requires a nominal size to be orderable.",
+          "counterexample": null,
+          "suggested_fix": null,
+          "detail": null
+        }
+      ],
+      "per_attribute": {
+        "end_connection": [
+          {
+            "layer": "L0",
+            "rule_id": "enum_partial_match",
+            "verdict": "warn",
+            "severity": "warning",
+            "reason": "attribute 'end_connection' snapped to 'NPT Threaded'; the source carried additional text that is not represented in the canonical value",
+            "counterexample": null,
+            "suggested_fix": null,
+            "detail": "matched on 'NPT Threaded' within 'NPT threaded, female both ends'"
+          }
+        ]
+      }
+    },
+    "certificate": {
+      "certificate_id": "ec_55853e286a72",
+      "sku": "BA-100-075",
+      "tenant_id": "demo",
+      "generated_at": "2026-08-03T18:15:20.682963Z",
+      "schema_version": "PLB.VLV.BALL.2PC@v1",
+      "pipeline_version": "axiom-0.1.0",
+      "classifications": [
+        {
+          "scheme": "internal",
+          "code": "PLB.VLV.BALL.2PC",
+          "path": [
+            "Plumbing",
+            "Valves",
+            "Ball Valves",
+            "Two-Piece"
+          ],
+          "confidence": 0.92,
+          "method": "model_adjudicated",
+          "status": "auto",
+          "alternatives": [
+            {
+              "code": "PLB.VLV.GATE.BRZ",
+              "score": 0.382408
+            }
+          ]
+        },
+        {
+          "scheme": "ETIM",
+          "code": "EC002714",
+          "path": [],
+          "confidence": 0.874,
+          "method": "schema_mapping",
+          "status": "auto",
+          "alternatives": []
+        },
+        {
+          "scheme": "UNSPSC",
+          "code": "40141607",
+          "path": [],
+          "confidence": 0.874,
+          "method": "schema_mapping",
+          "status": "auto",
+          "alternatives": []
+        }
+      ],
+      "attributes": [
+        {
+          "code": "product_series",
+          "value_canonical": "BA-100",
+          "value_display": "BA-100",
+          "value_raw": "BA-100",
+          "confidence": 0.9,
+          "method": "document_extraction",
+          "model_tier": "volume",
+          "status": "auto_accepted",
+          "evidence": [
+            {
+              "document": "ba100@f7500023",
+              "sha256": "f7500023\u2026",
+              "page": 1,
+              "bbox": [
+                54.0,
+                54.0,
+                240.0,
+                66.0
+              ],
+              "quote": "MILWAUKEE VALVE - BA-100 SERIES",
+              "verified": true
+            }
+          ],
+          "validations": []
+        },
+        {
+          "code": "number_of_pieces",
+          "value_canonical": "Two-Piece",
+          "value_display": "Two-Piece",
+          "value_raw": "Two-Piece",
+          "confidence": 0.9,
+          "method": "document_extraction",
+          "model_tier": "volume",
+          "status": "auto_accepted",
+          "evidence": [
+            {
+              "document": "ba100@f7500023",
+              "sha256": "f7500023\u2026",
+              "page": 1,
+              "bbox": [
+                54.0,
+                66.0,
+                276.0,
+                78.0
+              ],
+              "quote": "Two-Piece Full Port Bronze Ball Valve",
+              "verified": true
+            }
+          ],
+          "validations": []
+        },
+        {
+          "code": "nominal_size",
+          "value_canonical": {
+            "magnitude": 19.05,
+            "unit": "mm"
+          },
+          "value_display": "3/4\"",
+          "value_raw": "3/4\"",
+          "confidence": 0.9,
+          "method": "table_extraction",
+          "model_tier": "volume",
+          "status": "auto_accepted",
+          "evidence": [
+            {
+              "document": "ba100@f7500023",
+              "sha256": "f7500023\u2026",
+              "page": 1,
+              "bbox": [
+                66.0,
+                282.0,
+                330.0,
+                294.0
+              ],
+              "quote": "BA-100-075  | 3/4\"   | Lever  | 12",
+              "verified": true
+            }
+          ],
+          "validations": []
+        },
+        {
+          "code": "pressure_rating_wog",
+          "value_canonical": {
+            "magnitude": 600.0,
+            "unit": "psi"
+          },
+          "value_display": "600 psi",
+          "value_raw": "600 PSI WOG @ 73 degF",
+          "confidence": 0.9,
+          "method": "document_extraction",
+          "model_tier": "volume",
+          "status": "auto_accepted",
+          "evidence": [
+            {
+              "document": "ba100@f7500023",
+              "sha256": "f7500023\u2026",
+              "page": 1,
+              "bbox": [
+                66.0,
+                138.0,
+                390.0,
+                150.0
+              ],
+              "quote": "Pressure Rating ................ 600 PSI WOG @ 73 degF",
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "layer": "L0",
+              "rule": "qualifiers_retained",
+              "verdict": "pass",
+              "detail": "rating=WOG; at=73 degF"
+            }
+          ]
+        },
+        {
+          "code": "body_material",
+          "value_canonical": "Bronze C84400",
+          "value_display": "Bronze C84400",
+          "value_raw": "Bronze C84400",
+          "confidence": 0.9,
+          "method": "document_extraction",
+          "model_tier": "volume",
+          "status": "auto_accepted",
+          "evidence": [
+            {
+              "document": "ba100@f7500023",
+              "sha256": "f7500023\u2026",
+              "page": 1,
+              "bbox": [
+                66.0,
+                102.0,
+                342.0,
+                114.0
+              ],
+              "quote": "Body Material .................. Bronze C84400",
+              "verified": true
+            }
+          ],
+          "validations": []
+        },
+        {
+          "code": "end_connection",
+          "value_canonical": "NPT Threaded",
+          "value_display": "NPT Threaded",
+          "value_raw": "NPT threaded, female both ends",
+          "confidence": 0.9,
+          "method": "document_extraction",
+          "model_tier": "volume",
+          "status": "auto_accepted",
+          "evidence": [
+            {
+              "document": "ba100@f7500023",
+              "sha256": "f7500023\u2026",
+              "page": 1,
+              "bbox": [
+                66.0,
+                174.0,
+                444.0,
+                186.0
+              ],
+              "quote": "End Connection ................. NPT threaded, female both ends",
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "layer": "L0",
+              "rule": "enum_partial_match",
+              "verdict": "warn",
+              "detail": "matched on 'NPT Threaded' within 'NPT threaded, female both ends'"
+            },
+            {
+              "layer": "L0",
+              "rule": "enum_partial_match",
+              "verdict": "warn",
+              "detail": "matched on 'NPT Threaded' within 'NPT threaded, female both ends'"
+            }
+          ]
+        },
+        {
+          "code": "port_type",
+          "value_canonical": "Full Port",
+          "value_display": "Full Port",
+          "value_raw": "Full Port",
+          "confidence": 0.9,
+          "method": "document_extraction",
+          "model_tier": "volume",
+          "status": "auto_accepted",
+          "evidence": [
+            {
+              "document": "ba100@f7500023",
+              "sha256": "f7500023\u2026",
+              "page": 1,
+              "bbox": [
+                54.0,
+                66.0,
+                276.0,
+                78.0
+              ],
+              "quote": "Two-Piece Full Port Bronze Ball Valve",
+              "verified": true
+            }
+          ],
+          "validations": []
+        },
+        {
+          "code": "seat_material",
+          "value_canonical": "RPTFE",
+          "value_display": "RPTFE",
+          "value_raw": "RPTFE",
+          "confidence": 0.9,
+          "method": "document_extraction",
+          "model_tier": "volume",
+          "status": "auto_accepted",
+          "evidence": [
+            {
+              "document": "ba100@f7500023",
+              "sha256": "f7500023\u2026",
+              "page": 1,
+              "bbox": [
+                66.0,
+                126.0,
+                294.0,
+                138.0
+              ],
+              "quote": "Seat Material .................. RPTFE",
+              "verified": true
+            }
+          ],
+          "validations": []
+        },
+        {
+          "code": "stem_material",
+          "value_canonical": "Brass",
+          "value_display": "Brass",
+          "value_raw": "Brass",
+          "confidence": 0.9,
+          "method": "document_extraction",
+          "model_tier": "volume",
+          "status": "auto_accepted",
+          "evidence": [
+            {
+              "document": "ba100@f7500023",
+              "sha256": "f7500023\u2026",
+              "page": 1,
+              "bbox": [
+                66.0,
+                114.0,
+                426.0,
+                126.0
+              ],
+              "quote": "Ball / Stem .................... Chrome-plated brass / Brass",
+              "verified": true
+            }
+          ],
+          "validations": []
+        },
+        {
+          "code": "handle_type",
+          "value_canonical": "Lever",
+          "value_display": "Lever",
+          "value_raw": "Lever",
+          "confidence": 0.9,
+          "method": "table_extraction",
+          "model_tier": "volume",
+          "status": "auto_accepted",
+          "evidence": [
+            {
+              "document": "ba100@f7500023",
+              "sha256": "f7500023\u2026",
+              "page": 1,
+              "bbox": [
+                66.0,
+                282.0,
+                330.0,
+                294.0
+              ],
+              "quote": "BA-100-075  | 3/4\"   | Lever  | 12",
+              "verified": true
+            }
+          ],
+          "validations": []
+        },
+        {
+          "code": "temperature_range",
+          "value_canonical": {
+            "minimum": -28.888889,
+            "maximum": 185.555556,
+            "unit": "degC"
+          },
+          "value_display": "-20 to 366 degF",
+          "value_raw": "-20 degF to 366 degF",
+          "confidence": 0.9,
+          "method": "document_extraction",
+          "model_tier": "volume",
+          "status": "auto_accepted",
+          "evidence": [
+            {
+              "document": "ba100@f7500023",
+              "sha256": "f7500023\u2026",
+              "page": 1,
+              "bbox": [
+                66.0,
+                162.0,
+                384.0,
+                174.0
+              ],
+              "quote": "Temperature Range .............. -20 degF to 366 degF",
+              "verified": true
+            }
+          ],
+          "validations": []
+        },
+        {
+          "code": "steam_pressure_rating",
+          "value_canonical": {
+            "magnitude": 150.0,
+            "unit": "psi"
+          },
+          "value_display": "150 psi",
+          "value_raw": "150 PSI WSP",
+          "confidence": 0.9,
+          "method": "document_extraction",
+          "model_tier": "volume",
+          "status": "auto_accepted",
+          "evidence": [
+            {
+              "document": "ba100@f7500023",
+              "sha256": "f7500023\u2026",
+              "page": 1,
+              "bbox": [
+                66.0,
+                150.0,
+                330.0,
+                162.0
+              ],
+              "quote": "Steam Rating ................... 150 PSI WSP",
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "layer": "L0",
+              "rule": "qualifiers_retained",
+              "verdict": "pass",
+              "detail": "rating=WSP"
+            }
+          ]
+        },
+        {
+          "code": "potable_water_approved",
+          "value_canonical": true,
+          "value_display": "Yes",
+          "value_raw": "true",
+          "confidence": 0.9,
+          "method": "document_extraction",
+          "model_tier": "volume",
+          "status": "auto_accepted",
+          "evidence": [
+            {
+              "document": "ba100@f7500023",
+              "sha256": "f7500023\u2026",
+              "page": 1,
+              "bbox": [
+                66.0,
+                186.0,
+                486.0,
+                198.0
+              ],
+              "quote": "Approvals ...................... UL listed, CSA certified, NSF/ANSI 61",
+              "verified": true
+            }
+          ],
+          "validations": []
+        },
+        {
+          "code": "approvals",
+          "value_canonical": [
+            "UL",
+            "CSA",
+            "NSF-61"
+          ],
+          "value_display": "UL, CSA, NSF-61",
+          "value_raw": "UL, CSA, NSF/ANSI 61",
+          "confidence": 0.9,
+          "method": "document_extraction",
+          "model_tier": "volume",
+          "status": "auto_accepted",
+          "evidence": [
+            {
+              "document": "ba100@f7500023",
+              "sha256": "f7500023\u2026",
+              "page": 1,
+              "bbox": [
+                66.0,
+                186.0,
+                486.0,
+                198.0
+              ],
+              "quote": "Approvals ...................... UL listed, CSA certified, NSF/ANSI 61",
+              "verified": true
+            }
+          ],
+          "validations": []
+        },
+        {
+          "code": "case_quantity",
+          "value_canonical": 12,
+          "value_display": "12",
+          "value_raw": "12",
+          "confidence": 0.9,
+          "method": "table_extraction",
+          "model_tier": "volume",
+          "status": "auto_accepted",
+          "evidence": [
+            {
+              "document": "ba100@f7500023",
+              "sha256": "f7500023\u2026",
+              "page": 1,
+              "bbox": [
+                66.0,
+                282.0,
+                330.0,
+                294.0
+              ],
+              "quote": "BA-100-075  | 3/4\"   | Lever  | 12",
+              "verified": true
+            }
+          ],
+          "validations": []
+        }
+      ],
+      "gaps": [
+        {
+          "code": "cv_flow_coefficient",
+          "reason": "not_present_in_any_source",
+          "sources_searched": [
+            "ba100@f7500023"
+          ],
+          "required": false,
+          "detail": "deferred to factory; no value stated in source",
+          "recommended_action": "request_from_supplier"
+        },
+        {
+          "code": "operating_torque",
+          "reason": "not_present_in_any_source",
+          "sources_searched": [
+            "ba100@f7500023"
+          ],
+          "required": false,
+          "detail": "value applies to 1/2\" size only; target SKU is 3/4\"",
+          "recommended_action": "human_research"
+        },
+        {
+          "code": "lead_free_compliant",
+          "reason": "not_present_in_any_source",
+          "sources_searched": [
+            "ba100@f7500023"
+          ],
+          "required": true,
+          "detail": "source lists NSF/ANSI 61, not NSF/ANSI 372",
+          "recommended_action": "request_from_supplier"
+        },
+        {
+          "code": "country_of_origin",
+          "reason": "not_present_in_any_source",
+          "sources_searched": [
+            "ba100@f7500023"
+          ],
+          "required": true,
+          "detail": "not stated in source",
+          "recommended_action": "request_from_supplier"
+        },
+        {
+          "code": "gtin",
+          "reason": "not_present_in_any_source",
+          "sources_searched": [
+            "ba100@f7500023"
+          ],
+          "required": false,
+          "detail": "not stated in source",
+          "recommended_action": "request_from_supplier"
+        },
+        {
+          "code": "each_weight",
+          "reason": "not_present_in_any_source",
+          "sources_searched": [
+            "ba100@f7500023"
+          ],
+          "required": false,
+          "detail": "not stated in source",
+          "recommended_action": "request_from_supplier"
+        },
+        {
+          "code": "case_weight",
+          "reason": "not_present_in_any_source",
+          "sources_searched": [
+            "ba100@f7500023"
+          ],
+          "required": false,
+          "detail": "not stated in source",
+          "recommended_action": "request_from_supplier"
+        },
+        {
+          "code": "selling_uom",
+          "reason": "not_present_in_any_source",
+          "sources_searched": [
+            "ba100@f7500023"
+          ],
+          "required": true,
+          "detail": "not stated in source",
+          "recommended_action": "request_from_supplier"
+        }
+      ],
+      "summary": {
+        "attributes_required": 12,
+        "attributes_populated": 15,
+        "attributes_with_evidence": 15,
+        "attributes_inferred": 0,
+        "auto_accepted": 15,
+        "queued_for_review": 0,
+        "gaps_total": 8,
+        "gaps_required": 3,
+        "quality_index": {
+          "completeness": 0.75,
+          "verifiability": 1.0,
+          "consistency": 1.0,
+          "richness": 0.0,
+          "weights": {
+            "completeness": 0.35,
+            "verifiability": 0.3,
+            "consistency": 0.25,
+            "richness": 0.1
+          }
+        },
+        "cost_usd": 0.000963,
+        "wall_clock_seconds": 13.88
+      },
+      "signature": "sha256:a2a32a5dca81ea235a67bc40a1db66065612ad19c00b857af98afdf71722b42b",
+      "signature_verified": true
+    },
+    "channels": [
+      {
+        "name": "cx1_pim",
+        "published": false,
+        "value_count": 0,
+        "withheld": [],
+        "readiness": {
+          "channel": "cx1_pim",
+          "ready": false,
+          "missing": [
+            "selling_uom"
+          ],
+          "not_publishable": [],
+          "warnings": []
+        },
+        "title": null
+      },
+      {
+        "name": "schema_org",
+        "published": true,
+        "value_count": 15,
+        "withheld": [],
+        "readiness": {
+          "channel": "schema_org",
+          "ready": true,
+          "missing": [],
+          "not_publishable": [],
+          "warnings": []
+        },
+        "title": null
+      }
+    ],
+    "metrics": {
+      "fill_rate": 0.75,
+      "verifiability": 1.0,
+      "values_total": 15,
+      "values_publishable": 15,
+      "values_needing_review": 0,
+      "gaps_total": 8,
+      "gaps_required": 3,
+      "conflicts": []
+    },
+    "cost": {
+      "calls": 2,
+      "escalations": 0,
+      "input_tokens": 3779,
+      "output_tokens": 1745,
+      "latency_ms": 13878,
+      "calls_by_tier": {
+        "volume": 2
+      },
+      "input_by_tier": {
+        "volume": 3779
+      },
+      "output_by_tier": {
+        "volume": 1745
+      },
+      "cost_usd": 0.000963,
+      "cost_by_tier": {
+        "volume": 0.000963
+      },
+      "priced": true,
+      "price_source": {
+        "region": "us-east-2",
+        "fetched_at": "2026-08-03T05:28:42.224923+00:00",
+        "source": "AWS Price List Query API (AmazonBedrock)",
+        "priced_models": 5,
+        "unpriced_models": [],
+        "age_days": 0.5,
+        "stale": false
+      }
+    }
+  },
+  "document": {
+    "document_id": "ba100@f7500023",
+    "uri": "local://f7/50/f7500023aad5093f9f77c12af5186aa8d4c5a67db25550c5c49a589959bf1da0.txt",
+    "sha256": "f7500023aad5093f9f77c12af5186aa8d4c5a67db25550c5c49a589959bf1da0",
+    "doc_type": "spec_sheet",
+    "fetched_at": "2026-08-03T18:15:00.484976Z",
+    "page_count": 1,
+    "revision_label": null,
+    "supplier_id": null,
+    "license_note": null,
+    "parser": "text",
+    "line_count": 26,
+    "table_count": 1,
+    "warnings": [],
+    "size_bytes": 1175,
+    "storage_uri": "local://f7/50/f7500023aad5093f9f77c12af5186aa8d4c5a67db25550c5c49a589959bf1da0.txt"
+  },
+  "pages": [
+    {
+      "number": 1,
+      "width": 612.0,
+      "height": 792.0,
+      "lines": [
+        {
+          "line_index": 0,
+          "text": "MILWAUKEE VALVE - BA-100 SERIES",
+          "bbox": [
+            54.0,
+            54.0,
+            240.0,
+            66.0
+          ]
+        },
+        {
+          "line_index": 1,
+          "text": "Two-Piece Full Port Bronze Ball Valve                          Rev C  2024-08",
+          "bbox": [
+            54.0,
+            66.0,
+            516.0,
+            78.0
+          ]
+        },
+        {
+          "line_index": 2,
+          "text": "",
+          "bbox": [
+            54.0,
+            78.0,
+            60.0,
+            90.0
+          ]
+        },
+        {
+          "line_index": 3,
+          "text": "SPECIFICATIONS",
+          "bbox": [
+            54.0,
+            90.0,
+            138.0,
+            102.0
+          ]
+        },
+        {
+          "line_index": 4,
+          "text": "  Body Material .................. Bronze C84400",
+          "bbox": [
+            54.0,
+            102.0,
+            342.0,
+            114.0
+          ]
+        },
+        {
+          "line_index": 5,
+          "text": "  Ball / Stem .................... Chrome-plated brass / Brass",
+          "bbox": [
+            54.0,
+            114.0,
+            426.0,
+            126.0
+          ]
+        },
+        {
+          "line_index": 6,
+          "text": "  Seat Material .................. RPTFE",
+          "bbox": [
+            54.0,
+            126.0,
+            294.0,
+            138.0
+          ]
+        },
+        {
+          "line_index": 7,
+          "text": "  Pressure Rating ................ 600 PSI WOG @ 73 degF",
+          "bbox": [
+            54.0,
+            138.0,
+            390.0,
+            150.0
+          ]
+        },
+        {
+          "line_index": 8,
+          "text": "  Steam Rating ................... 150 PSI WSP",
+          "bbox": [
+            54.0,
+            150.0,
+            330.0,
+            162.0
+          ]
+        },
+        {
+          "line_index": 9,
+          "text": "  Temperature Range .............. -20 degF to 366 degF",
+          "bbox": [
+            54.0,
+            162.0,
+            384.0,
+            174.0
+          ]
+        },
+        {
+          "line_index": 10,
+          "text": "  End Connection ................. NPT threaded, female both ends",
+          "bbox": [
+            54.0,
+            174.0,
+            444.0,
+            186.0
+          ]
+        },
+        {
+          "line_index": 11,
+          "text": "  Approvals ...................... UL listed, CSA certified, NSF/ANSI 61",
+          "bbox": [
+            54.0,
+            186.0,
+            486.0,
+            198.0
+          ]
+        },
+        {
+          "line_index": 12,
+          "text": "  Operating Torque ............... 18-22 ft-lb (1/2\" size)",
+          "bbox": [
+            54.0,
+            198.0,
+            402.0,
+            210.0
+          ]
+        },
+        {
+          "line_index": 13,
+          "text": "  Flow Coefficient (Cv) .......... Consult factory",
+          "bbox": [
+            54.0,
+            210.0,
+            354.0,
+            222.0
+          ]
+        },
+        {
+          "line_index": 14,
+          "text": "",
+          "bbox": [
+            54.0,
+            222.0,
+            60.0,
+            234.0
+          ]
+        },
+        {
+          "line_index": 15,
+          "text": "ORDERING INFORMATION",
+          "bbox": [
+            54.0,
+            234.0,
+            174.0,
+            246.0
+          ]
+        },
+        {
+          "line_index": 16,
+          "text": "  Part Number      Size        Handle       Carton Qty",
+          "bbox": [
+            54.0,
+            246.0,
+            378.0,
+            258.0
+          ]
+        },
+        {
+          "line_index": 17,
+          "text": "  BA-100-025       1/4\"        Lever        24",
+          "bbox": [
+            54.0,
+            258.0,
+            330.0,
+            270.0
+          ]
+        },
+        {
+          "line_index": 18,
+          "text": "  BA-100-050       1/2\"        Lever        24",
+          "bbox": [
+            54.0,
+            270.0,
+            330.0,
+            282.0
+          ]
+        },
+        {
+          "line_index": 19,
+          "text": "  BA-100-075       3/4\"        Lever        12",
+          "bbox": [
+            54.0,
+            282.0,
+            330.0,
+            294.0
+          ]
+        },
+        {
+          "line_index": 20,
+          "text": "  BA-100-100       1\"          Lever        12",
+          "bbox": [
+            54.0,
+            294.0,
+            330.0,
+            306.0
+          ]
+        },
+        {
+          "line_index": 21,
+          "text": "  BA-100-125       1-1/4\"      Tee          6",
+          "bbox": [
+            54.0,
+            306.0,
+            324.0,
+            318.0
+          ]
+        },
+        {
+          "line_index": 22,
+          "text": "",
+          "bbox": [
+            54.0,
+            318.0,
+            60.0,
+            330.0
+          ]
+        },
+        {
+          "line_index": 23,
+          "text": "  NOTE 1: Sizes 1\" and larger are supplied with a locking lever handle.",
+          "bbox": [
+            54.0,
+            330.0,
+            480.0,
+            342.0
+          ]
+        },
+        {
+          "line_index": 24,
+          "text": "  NOTE 2: Pressure rating derates above 100 degF. See derating chart, page 7.",
+          "bbox": [
+            54.0,
+            342.0,
+            516.0,
+            354.0
+          ]
+        },
+        {
+          "line_index": 25,
+          "text": "",
+          "bbox": [
+            54.0,
+            354.0,
+            60.0,
+            366.0
+          ]
+        }
+      ],
+      "tables": [
+        {
+          "table_id": "t1",
+          "page": 1,
+          "row_count": 6,
+          "col_count": 4,
+          "bbox": [
+            66.0,
+            246.0,
+            378.0,
+            318.0
+          ],
+          "rows": [
+            [
+              "Part Number",
+              "Size",
+              "Handle",
+              "Carton Qty"
+            ],
+            [
+              "BA-100-025",
+              "1/4\"",
+              "Lever",
+              "24"
+            ],
+            [
+              "BA-100-050",
+              "1/2\"",
+              "Lever",
+              "24"
+            ],
+            [
+              "BA-100-075",
+              "3/4\"",
+              "Lever",
+              "12"
+            ],
+            [
+              "BA-100-100",
+              "1\"",
+              "Lever",
+              "12"
+            ],
+            [
+              "BA-100-125",
+              "1-1/4\"",
+              "Tee",
+              "6"
+            ]
+          ],
+          "cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Part Number",
+              "bbox": [
+                66.0,
+                246.0,
+                132.0,
+                258.0
+              ]
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Size",
+              "bbox": [
+                168.0,
+                246.0,
+                204.0,
+                258.0
+              ]
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Handle",
+              "bbox": [
+                240.0,
+                246.0,
+                276.0,
+                258.0
+              ]
+            },
+            {
+              "row": 0,
+              "col": 3,
+              "text": "Carton Qty",
+              "bbox": [
+                318.0,
+                246.0,
+                378.0,
+                258.0
+              ]
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "BA-100-025",
+              "bbox": [
+                66.0,
+                258.0,
+                132.0,
+                270.0
+              ]
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "1/4\"",
+              "bbox": [
+                168.0,
+                258.0,
+                204.0,
+                270.0
+              ]
+            },
+            {
+              "row": 1,
+              "col": 2,
+              "text": "Lever",
+              "bbox": [
+                240.0,
+                258.0,
+                276.0,
+                270.0
+              ]
+            },
+            {
+              "row": 1,
+              "col": 3,
+              "text": "24",
+              "bbox": [
+                318.0,
+                258.0,
+                330.0,
+                270.0
+              ]
+            },
+            {
+              "row": 2,
+              "col": 0,
+              "text": "BA-100-050",
+              "bbox": [
+                66.0,
+                270.0,
+                132.0,
+                282.0
+              ]
+            },
+            {
+              "row": 2,
+              "col": 1,
+              "text": "1/2\"",
+              "bbox": [
+                168.0,
+                270.0,
+                204.0,
+                282.0
+              ]
+            },
+            {
+              "row": 2,
+              "col": 2,
+              "text": "Lever",
+              "bbox": [
+                240.0,
+                270.0,
+                276.0,
+                282.0
+              ]
+            },
+            {
+              "row": 2,
+              "col": 3,
+              "text": "24",
+              "bbox": [
+                318.0,
+                270.0,
+                330.0,
+                282.0
+              ]
+            },
+            {
+              "row": 3,
+              "col": 0,
+              "text": "BA-100-075",
+              "bbox": [
+                66.0,
+                282.0,
+                132.0,
+                294.0
+              ]
+            },
+            {
+              "row": 3,
+              "col": 1,
+              "text": "3/4\"",
+              "bbox": [
+                168.0,
+                282.0,
+                204.0,
+                294.0
+              ]
+            },
+            {
+              "row": 3,
+              "col": 2,
+              "text": "Lever",
+              "bbox": [
+                240.0,
+                282.0,
+                276.0,
+                294.0
+              ]
+            },
+            {
+              "row": 3,
+              "col": 3,
+              "text": "12",
+              "bbox": [
+                318.0,
+                282.0,
+                330.0,
+                294.0
+              ]
+            },
+            {
+              "row": 4,
+              "col": 0,
+              "text": "BA-100-100",
+              "bbox": [
+                66.0,
+                294.0,
+                132.0,
+                306.0
+              ]
+            },
+            {
+              "row": 4,
+              "col": 1,
+              "text": "1\"",
+              "bbox": [
+                168.0,
+                294.0,
+                204.0,
+                306.0
+              ]
+            },
+            {
+              "row": 4,
+              "col": 2,
+              "text": "Lever",
+              "bbox": [
+                240.0,
+                294.0,
+                276.0,
+                306.0
+              ]
+            },
+            {
+              "row": 4,
+              "col": 3,
+              "text": "12",
+              "bbox": [
+                318.0,
+                294.0,
+                330.0,
+                306.0
+              ]
+            },
+            {
+              "row": 5,
+              "col": 0,
+              "text": "BA-100-125",
+              "bbox": [
+                66.0,
+                306.0,
+                132.0,
+                318.0
+              ]
+            },
+            {
+              "row": 5,
+              "col": 1,
+              "text": "1-1/4\"",
+              "bbox": [
+                168.0,
+                306.0,
+                204.0,
+                318.0
+              ]
+            },
+            {
+              "row": 5,
+              "col": 2,
+              "text": "Tee",
+              "bbox": [
+                240.0,
+                306.0,
+                276.0,
+                318.0
+              ]
+            },
+            {
+              "row": 5,
+              "col": 3,
+              "text": "6",
+              "bbox": [
+                318.0,
+                306.0,
+                324.0,
+                318.0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "class_definition": {
+    "code": "PLB.VLV.BALL.2PC",
+    "name": "Two-Piece Ball Valve",
+    "version": "v1",
+    "schema_version": "PLB.VLV.BALL.2PC@v1",
+    "browse_path": [
+      "Plumbing",
+      "Valves",
+      "Ball Valves",
+      "Two-Piece"
+    ],
+    "mappings": {
+      "etim": "EC002714",
+      "unspsc": "40141607"
+    },
+    "required_codes": [
+      "number_of_pieces",
+      "nominal_size",
+      "pressure_rating_wog",
+      "body_material",
+      "end_connection",
+      "port_type",
+      "seat_material",
+      "temperature_range",
+      "lead_free_compliant",
+      "approvals",
+      "country_of_origin",
+      "selling_uom"
+    ],
+    "attributes": [
+      {
+        "code": "product_series",
+        "requirement": "recommended",
+        "weight": 1.0,
+        "name": "Product Series",
+        "datatype": "string",
+        "description": "Manufacturer's series or family designation only, without the word \"series\" and without the manufacturer name. The anchor for part-number grammar induction, because the positional encoding of a smart part number is defined per series rather than per manufacturer.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "BA-100",
+          "T-113",
+          "T-585"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "number_of_pieces",
+        "requirement": "required",
+        "weight": 1.0,
+        "name": "Body Construction",
+        "datatype": "enum",
+        "description": "Number of body pieces in the valve construction. Determines whether the valve is field-serviceable.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Two-Piece",
+          "Three-Piece"
+        ],
+        "allowed_values": [
+          {
+            "value": "One-Piece",
+            "aliases": [
+              "1 piece",
+              "1-piece",
+              "single piece"
+            ],
+            "note": null
+          },
+          {
+            "value": "Two-Piece",
+            "aliases": [
+              "2 piece",
+              "2-piece",
+              "two piece"
+            ],
+            "note": null
+          },
+          {
+            "value": "Three-Piece",
+            "aliases": [
+              "3 piece",
+              "3-piece",
+              "three piece"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "nominal_size",
+        "requirement": "required",
+        "weight": 3.0,
+        "name": "Nominal Pipe Size",
+        "datatype": "dimension",
+        "description": "Nominal pipe size of the valve end connections, as designated by the manufacturer. Expressed as NPS in imperial markets and DN in metric markets. This is a designation, not a measured bore diameter.\n",
+        "canonical_unit": "mm",
+        "display_preference": "imperial_fraction",
+        "quantity_kind": "length",
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "1/2\"",
+          "3/4\"",
+          "1\"",
+          "1-1/4\"",
+          "2\""
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          3.0,
+          1200.0
+        ]
+      },
+      {
+        "code": "pressure_rating_wog",
+        "requirement": "required",
+        "weight": 3.0,
+        "name": "Pressure Rating (WOG)",
+        "datatype": "quantity",
+        "description": "Maximum non-shock working pressure for water, oil and gas service at ambient temperature. WOG is a rating class, not a unit. Capture the reference temperature separately if the source states one.\n",
+        "canonical_unit": "psi",
+        "display_preference": null,
+        "quantity_kind": "pressure",
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "400 PSI",
+          "600 PSI",
+          "1000 PSI"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          25.0,
+          10000.0
+        ]
+      },
+      {
+        "code": "body_material",
+        "requirement": "required",
+        "weight": 3.0,
+        "name": "Body Material",
+        "datatype": "enum",
+        "description": "Primary material of the valve body casting or forging. Capture the specific alloy designation when the source gives one, because lead content and pressure rating both depend on the exact alloy rather than the material family.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Bronze C84400",
+          "Brass C46500",
+          "Stainless Steel 316"
+        ],
+        "allowed_values": [
+          {
+            "value": "Brass C46500",
+            "aliases": [
+              "naval brass",
+              "C46500",
+              "CW722R"
+            ],
+            "note": "low-lead naval brass"
+          },
+          {
+            "value": "Brass C36000",
+            "aliases": [
+              "free-cutting brass",
+              "C36000",
+              "free machining brass"
+            ],
+            "note": "leaded alloy - incompatible with a lead-free claim"
+          },
+          {
+            "value": "Brass C69300",
+            "aliases": [
+              "C69300",
+              "eco brass",
+              "ecobrass"
+            ],
+            "note": "lead-free silicon brass"
+          },
+          {
+            "value": "Bronze C84400",
+            "aliases": [
+              "C84400",
+              "leaded red brass",
+              "85-5-5-5"
+            ],
+            "note": "leaded alloy - incompatible with a lead-free claim"
+          },
+          {
+            "value": "Bronze C89833",
+            "aliases": [
+              "C89833",
+              "bismuth bronze",
+              "federalloy"
+            ],
+            "note": "lead-free bronze"
+          },
+          {
+            "value": "Stainless Steel 316",
+            "aliases": [
+              "SS316",
+              "316 SS",
+              "316",
+              "CF8M",
+              "A351 CF8M"
+            ],
+            "note": null
+          },
+          {
+            "value": "Stainless Steel 304",
+            "aliases": [
+              "SS304",
+              "304 SS",
+              "304",
+              "CF8"
+            ],
+            "note": null
+          },
+          {
+            "value": "Carbon Steel",
+            "aliases": [
+              "CS",
+              "A105",
+              "WCB",
+              "A216 WCB"
+            ],
+            "note": null
+          },
+          {
+            "value": "Ductile Iron",
+            "aliases": [
+              "DI",
+              "A536",
+              "ductile"
+            ],
+            "note": null
+          },
+          {
+            "value": "PVC",
+            "aliases": [
+              "poly vinyl chloride",
+              "u-pvc"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "end_connection",
+        "requirement": "required",
+        "weight": 3.0,
+        "name": "End Connection",
+        "datatype": "enum",
+        "description": "Connection style at the valve ends. NPT and BSPT are NOT interchangeable and must never be normalized into one another; they are both tapered pipe threads with similar nominal designations and they do not seal against each other.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "NPT Threaded",
+          "Solder",
+          "Press"
+        ],
+        "allowed_values": [
+          {
+            "value": "NPT Threaded",
+            "aliases": [
+              "FNPT",
+              "MNPT",
+              "IPS",
+              "threaded",
+              "npt",
+              "female npt",
+              "screwed"
+            ],
+            "note": null
+          },
+          {
+            "value": "BSPT Threaded",
+            "aliases": [
+              "BSPT",
+              "R thread",
+              "bspt threaded"
+            ],
+            "note": "tapered, NOT interchangeable with NPT"
+          },
+          {
+            "value": "BSPP Threaded",
+            "aliases": [
+              "BSPP",
+              "G thread",
+              "parallel thread"
+            ],
+            "note": null
+          },
+          {
+            "value": "Solder",
+            "aliases": [
+              "sweat",
+              "C x C",
+              "solder cup",
+              "solder end"
+            ],
+            "note": null
+          },
+          {
+            "value": "Press",
+            "aliases": [
+              "press-fit",
+              "pressfit",
+              "press connect"
+            ],
+            "note": null
+          },
+          {
+            "value": "Flanged",
+            "aliases": [
+              "ANSI 150 flange",
+              "flange",
+              "flanged end"
+            ],
+            "note": null
+          },
+          {
+            "value": "Grooved",
+            "aliases": [
+              "groove",
+              "victaulic"
+            ],
+            "note": null
+          },
+          {
+            "value": "Butt Weld",
+            "aliases": [
+              "bw",
+              "buttweld"
+            ],
+            "note": null
+          },
+          {
+            "value": "Socket Weld",
+            "aliases": [
+              "sw",
+              "socketweld"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "port_type",
+        "requirement": "required",
+        "weight": 2.0,
+        "name": "Port Type",
+        "datatype": "enum",
+        "description": "Whether the valve bore matches the nominal pipe size (full port) or is reduced. Full port valves have a materially higher flow coefficient at the same nominal size.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Full Port",
+          "Standard Port"
+        ],
+        "allowed_values": [
+          {
+            "value": "Full Port",
+            "aliases": [
+              "full bore",
+              "fullport",
+              "fp"
+            ],
+            "note": null
+          },
+          {
+            "value": "Standard Port",
+            "aliases": [
+              "regular port",
+              "conventional port"
+            ],
+            "note": null
+          },
+          {
+            "value": "Reduced Port",
+            "aliases": [
+              "reduced bore",
+              "restricted port"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "seat_material",
+        "requirement": "required",
+        "weight": 2.0,
+        "name": "Seat Material",
+        "datatype": "enum",
+        "description": "Material of the valve seats. Governs the temperature and chemical compatibility limits, and is frequently the weakest-rated component in the assembly.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "PTFE",
+          "RPTFE",
+          "PEEK"
+        ],
+        "allowed_values": [
+          {
+            "value": "PTFE",
+            "aliases": [
+              "teflon",
+              "p.t.f.e."
+            ],
+            "note": null
+          },
+          {
+            "value": "RPTFE",
+            "aliases": [
+              "reinforced ptfe",
+              "r-ptfe",
+              "glass filled ptfe"
+            ],
+            "note": null
+          },
+          {
+            "value": "PEEK",
+            "aliases": [
+              "p.e.e.k."
+            ],
+            "note": null
+          },
+          {
+            "value": "Nylon",
+            "aliases": [
+              "polyamide",
+              "pa"
+            ],
+            "note": null
+          },
+          {
+            "value": "Buna-N",
+            "aliases": [
+              "nbr",
+              "nitrile",
+              "buna"
+            ],
+            "note": null
+          },
+          {
+            "value": "EPDM",
+            "aliases": [
+              "e.p.d.m."
+            ],
+            "note": null
+          },
+          {
+            "value": "Metal Seated",
+            "aliases": [
+              "metal seat",
+              "metal-to-metal"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "stem_material",
+        "requirement": "recommended",
+        "weight": 1.0,
+        "name": "Stem Material",
+        "datatype": "enum",
+        "description": "Material of the valve stem. Relevant to dezincification resistance and to potable-water compliance.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Brass",
+          "Silicon Bronze",
+          "Stainless Steel 316"
+        ],
+        "allowed_values": [
+          {
+            "value": "Brass",
+            "aliases": [
+              "brass stem"
+            ],
+            "note": null
+          },
+          {
+            "value": "Silicon Bronze",
+            "aliases": [
+              "si bronze",
+              "c87600",
+              "silicon bronze stem"
+            ],
+            "note": "common gate-valve stem alloy; dezincification resistant"
+          },
+          {
+            "value": "Bronze",
+            "aliases": [
+              "bronze stem"
+            ],
+            "note": null
+          },
+          {
+            "value": "Stainless Steel 316",
+            "aliases": [
+              "SS316",
+              "316 SS"
+            ],
+            "note": null
+          },
+          {
+            "value": "Stainless Steel 304",
+            "aliases": [
+              "SS304",
+              "304 SS"
+            ],
+            "note": null
+          },
+          {
+            "value": "Chrome-Plated Brass",
+            "aliases": [
+              "chrome plated brass",
+              "cp brass"
+            ],
+            "note": null
+          },
+          {
+            "value": "Monel",
+            "aliases": [
+              "monel 400"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "handle_type",
+        "requirement": "recommended",
+        "weight": 1.0,
+        "name": "Handle Type",
+        "datatype": "enum",
+        "description": "Handle style supplied with this specific part number. Frequently varies by size within one series, so read the ordering-table row rather than the general specification block, and check footnotes for size-dependent substitutions.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Lever",
+          "Tee",
+          "Locking Lever"
+        ],
+        "allowed_values": [
+          {
+            "value": "Lever",
+            "aliases": [
+              "lever handle",
+              "latch lock lever"
+            ],
+            "note": null
+          },
+          {
+            "value": "Locking Lever",
+            "aliases": [
+              "locking handle",
+              "lockable lever"
+            ],
+            "note": null
+          },
+          {
+            "value": "Tee",
+            "aliases": [
+              "tee handle",
+              "t-handle",
+              "t handle"
+            ],
+            "note": null
+          },
+          {
+            "value": "Butterfly",
+            "aliases": [
+              "butterfly handle",
+              "wing"
+            ],
+            "note": null
+          },
+          {
+            "value": "Oval",
+            "aliases": [
+              "oval handle"
+            ],
+            "note": null
+          },
+          {
+            "value": "Handwheel",
+            "aliases": [
+              "hand wheel",
+              "wheel"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "cv_flow_coefficient",
+        "requirement": "recommended",
+        "weight": 1.0,
+        "name": "Flow Coefficient (Cv)",
+        "datatype": "number",
+        "description": "Valve flow coefficient Cv, the flow in US gallons per minute of 60F water that produces a one PSI pressure drop. Dimensionless by convention. Size-dependent, so read the value for the target SKU's size.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "12.5",
+          "18.0",
+          "45"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          0.01,
+          50000.0
+        ]
+      },
+      {
+        "code": "temperature_range",
+        "requirement": "required",
+        "weight": 2.0,
+        "name": "Temperature Range",
+        "datatype": "range",
+        "description": "Minimum and maximum service temperature. Bounded by the weakest component, usually the seat rather than the body.\n",
+        "canonical_unit": "degC",
+        "display_preference": null,
+        "quantity_kind": "temperature",
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "-20F to 366F",
+          "-29C to 186C"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          -273.15,
+          1000.0
+        ]
+      },
+      {
+        "code": "operating_torque",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Operating Torque",
+        "datatype": "range",
+        "description": "Torque required to operate the valve. Often stated for one specific size only, in which case do not assume it applies to the target SKU unless the sizes match.\n",
+        "canonical_unit": "N.m",
+        "display_preference": null,
+        "quantity_kind": "torque",
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "18-22 ft-lb",
+          "24-30 N.m"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          0.1,
+          20000.0
+        ]
+      },
+      {
+        "code": "steam_pressure_rating",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Steam Pressure Rating (WSP)",
+        "datatype": "quantity",
+        "description": "Maximum working steam pressure. Distinct from and lower than the WOG rating. Reporting the WOG figure here is a common and consequential extraction error.\n",
+        "canonical_unit": "psi",
+        "display_preference": null,
+        "quantity_kind": "pressure",
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "125 PSI",
+          "150 PSI"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          10.0,
+          1000.0
+        ]
+      },
+      {
+        "code": "lead_free_compliant",
+        "requirement": "required",
+        "weight": 3.0,
+        "name": "Lead-Free Compliant",
+        "datatype": "boolean",
+        "description": "True only when the source explicitly references a lead-free certification or declaration such as NSF/ANSI 372, or the Safe Drinking Water Act weighted-average lead content requirement. A lead-free claim may never be inferred from the product family, the series name, or the presence of other certifications.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": true,
+        "evidence_requirement": "strict",
+        "example_values": [
+          "NSF/ANSI 372 certified",
+          "lead-free per SDWA"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "potable_water_approved",
+        "requirement": "recommended",
+        "weight": 2.0,
+        "name": "Potable Water Approved",
+        "datatype": "boolean",
+        "description": "True only when the source references an NSF/ANSI 61 certification for drinking-water system components. Do not infer from a lead-free claim; they are different standards covering different things.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": true,
+        "evidence_requirement": "strict",
+        "example_values": [
+          "NSF/ANSI 61 certified"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "approvals",
+        "requirement": "required",
+        "weight": 2.0,
+        "name": "Approvals and Listings",
+        "datatype": "multi_enum",
+        "description": "Third-party certifications, listings and approvals explicitly stated in the source. Record only what is stated. A listing number without a recognised mark is not an approval, and an approval for one size in a series does not extend to the others.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": true,
+        "compliance_claim": true,
+        "evidence_requirement": "strict",
+        "example_values": [
+          "UL, CSA, NSF-61",
+          "FM approved"
+        ],
+        "allowed_values": [
+          {
+            "value": "UL",
+            "aliases": [
+              "ul listed",
+              "underwriters laboratories",
+              "u.l."
+            ],
+            "note": null
+          },
+          {
+            "value": "CSA",
+            "aliases": [
+              "csa certified",
+              "canadian standards association"
+            ],
+            "note": null
+          },
+          {
+            "value": "ETL",
+            "aliases": [
+              "etl listed",
+              "intertek"
+            ],
+            "note": null
+          },
+          {
+            "value": "FM",
+            "aliases": [
+              "fm approved",
+              "factory mutual",
+              "fm global"
+            ],
+            "note": null
+          },
+          {
+            "value": "NSF-61",
+            "aliases": [
+              "nsf/ansi 61",
+              "nsf 61",
+              "nsf/ansi standard 61"
+            ],
+            "note": null
+          },
+          {
+            "value": "NSF-372",
+            "aliases": [
+              "nsf/ansi 372",
+              "nsf 372"
+            ],
+            "note": null
+          },
+          {
+            "value": "NSF-14",
+            "aliases": [
+              "nsf/ansi 14",
+              "nsf 14"
+            ],
+            "note": null
+          },
+          {
+            "value": "CRN",
+            "aliases": [
+              "canadian registration number"
+            ],
+            "note": null
+          },
+          {
+            "value": "ASME",
+            "aliases": [
+              "asme certified",
+              "asme b16"
+            ],
+            "note": null
+          },
+          {
+            "value": "MSS",
+            "aliases": [
+              "mss sp",
+              "manufacturers standardization society"
+            ],
+            "note": null
+          },
+          {
+            "value": "ATEX",
+            "aliases": [
+              "atex certified",
+              "atex marked"
+            ],
+            "note": null
+          },
+          {
+            "value": "IECEx",
+            "aliases": [
+              "iecex certified"
+            ],
+            "note": null
+          },
+          {
+            "value": "WRAS",
+            "aliases": [
+              "wras approved",
+              "water regulations advisory scheme"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "country_of_origin",
+        "requirement": "required",
+        "weight": 2.0,
+        "name": "Country of Origin",
+        "datatype": "string",
+        "description": "Country where the product is manufactured, as stated by the manufacturer. Drives tariff treatment and trade-agreement eligibility, so a guess here has direct financial consequences.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": true,
+        "evidence_requirement": "strict",
+        "example_values": [
+          "United States",
+          "Taiwan",
+          "Italy",
+          "China"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "gtin",
+        "requirement": "recommended",
+        "weight": 1.0,
+        "name": "GTIN / UPC",
+        "datatype": "string",
+        "description": "Global Trade Item Number, 8, 12, 13 or 14 digits. The final digit is a modulo-10 check digit, which L0 validation verifies arithmetically \u2014 a transposed digit is therefore detectable without any external lookup.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "012345678905",
+          "00012345678905"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "each_weight",
+        "requirement": "recommended",
+        "weight": 1.0,
+        "name": "Weight (Each)",
+        "datatype": "quantity",
+        "description": "Shipping weight of a single unit. Distinguish carefully from carton weight; datasheets often place them in adjacent columns with similar headings.\n",
+        "canonical_unit": "kg",
+        "display_preference": null,
+        "quantity_kind": "mass",
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "0.75 lb",
+          "1.2 kg"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          0.0001,
+          5000.0
+        ]
+      },
+      {
+        "code": "case_quantity",
+        "requirement": "recommended",
+        "weight": 1.0,
+        "name": "Carton Quantity",
+        "datatype": "integer",
+        "description": "Number of selling units per carton or master pack for this specific part number. Frequently varies by size within one series, so read the ordering-table row that matches the target SKU.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "6",
+          "12",
+          "24"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          1.0,
+          100000.0
+        ]
+      },
+      {
+        "code": "case_weight",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Weight (Carton)",
+        "datatype": "quantity",
+        "description": "Gross weight of a full carton. Should be broadly consistent with the each-weight multiplied by the carton quantity, allowing for packaging material.\n",
+        "canonical_unit": "kg",
+        "display_preference": null,
+        "quantity_kind": "mass",
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "9.5 lb",
+          "4.3 kg"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          0.001,
+          50000.0
+        ]
+      },
+      {
+        "code": "selling_uom",
+        "requirement": "required",
+        "weight": 1.0,
+        "name": "Selling Unit of Measure",
+        "datatype": "enum",
+        "description": "The unit in which the product is sold, which is not necessarily the unit in which it is priced or stocked. Conflating the three is a classic source of order errors.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Each",
+          "Case",
+          "Box"
+        ],
+        "allowed_values": [
+          {
+            "value": "Each",
+            "aliases": [
+              "ea",
+              "ea.",
+              "each",
+              "pc",
+              "piece",
+              "unit"
+            ],
+            "note": null
+          },
+          {
+            "value": "Box",
+            "aliases": [
+              "bx",
+              "box"
+            ],
+            "note": null
+          },
+          {
+            "value": "Case",
+            "aliases": [
+              "cs",
+              "case",
+              "carton",
+              "ctn"
+            ],
+            "note": null
+          },
+          {
+            "value": "Pair",
+            "aliases": [
+              "pr",
+              "pair"
+            ],
+            "note": null
+          },
+          {
+            "value": "Foot",
+            "aliases": [
+              "ft",
+              "per foot",
+              "lineal foot"
+            ],
+            "note": null
+          },
+          {
+            "value": "Roll",
+            "aliases": [
+              "rl",
+              "roll"
+            ],
+            "note": null
+          },
+          {
+            "value": "Bag",
+            "aliases": [
+              "bg",
+              "bag"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      }
+    ],
+    "cross_field_rules": [
+      {
+        "id": "R_LEADFREE_MATERIAL",
+        "expr": "lead_free_compliant == true implies body_material not in LEADED_ALLOYS",
+        "severity": "error",
+        "message": "A lead-free claim is inconsistent with a leaded copper alloy body (C36000, C84400). Resolve by citing a lead-free certification for this specific part number, or by correcting the material.",
+        "references": [
+          "lead_free_compliant",
+          "body_material"
+        ]
+      },
+      {
+        "id": "R_POTABLE_REQUIRES_NSF61",
+        "expr": "potable_water_approved == true implies 'NSF-61' in approvals",
+        "severity": "error",
+        "message": "A potable-water claim requires an NSF/ANSI 61 certification reference.",
+        "references": [
+          "potable_water_approved",
+          "approvals"
+        ]
+      },
+      {
+        "id": "R_TEMP_ORDER",
+        "expr": "temperature_range.min < temperature_range.max",
+        "severity": "error",
+        "message": "Temperature range minimum must be below its maximum.",
+        "references": [
+          "temperature_range"
+        ]
+      },
+      {
+        "id": "R_STEAM_BELOW_WOG",
+        "expr": "steam_pressure_rating <= pressure_rating_wog",
+        "severity": "error",
+        "message": "The steam rating (WSP) must not exceed the WOG rating. A violation usually means the WOG figure was extracted into the steam field.",
+        "references": [
+          "steam_pressure_rating",
+          "pressure_rating_wog"
+        ]
+      },
+      {
+        "id": "R_FULLPORT_CV_FLOOR",
+        "expr": "port_type == 'Full Port' implies cv_flow_coefficient >= cv_floor(nominal_size)",
+        "severity": "warning",
+        "message": "A full-port valve has an unexpectedly low Cv for its size. Often indicates the Cv was read from a reduced-port row of the same table.",
+        "references": [
+          "port_type",
+          "cv_flow_coefficient",
+          "nominal_size"
+        ]
+      },
+      {
+        "id": "R_PACK_WEIGHT",
+        "expr": "abs(case_weight - each_weight * case_quantity) / case_weight <= 0.15",
+        "severity": "warning",
+        "message": "Carton weight is inconsistent with each-weight times carton quantity. One of the three values is wrong, and the arithmetic proves it.",
+        "references": [
+          "case_weight",
+          "each_weight",
+          "case_quantity"
+        ]
+      },
+      {
+        "id": "R_THREAD_STANDARD_EXPLICIT",
+        "expr": "end_connection in THREADED_TYPES implies nominal_size is not null",
+        "severity": "error",
+        "message": "A threaded end connection requires a nominal size to be orderable.",
+        "references": [
+          "end_connection",
+          "nominal_size"
+        ]
+      }
+    ],
+    "channel_profiles": [
+      {
+        "name": "cx1_pim",
+        "title_template": "{brand} {mpn} {nominal_size} {body_material_short} {class_name}, {pressure_rating_wog}, {port_type}",
+        "max_title_chars": 200,
+        "unit_system": "imperial_primary",
+        "required": [
+          "nominal_size",
+          "pressure_rating_wog",
+          "body_material",
+          "end_connection",
+          "selling_uom"
+        ]
+      },
+      {
+        "name": "google_merchant",
+        "title_template": "{brand} {mpn} {nominal_size} {class_name}",
+        "max_title_chars": 150,
+        "unit_system": "imperial_primary",
+        "required": [
+          "gtin",
+          "brand",
+          "nominal_size"
+        ]
+      },
+      {
+        "name": "schema_org",
+        "title_template": null,
+        "max_title_chars": 200,
+        "unit_system": "metric_primary",
+        "required": [
+          "nominal_size",
+          "body_material"
+        ]
+      }
+    ]
+  },
+  "policy": {
+    "epsilon": 0.05,
+    "confidence_level": 0.95,
+    "threshold": 0.6853,
+    "coverage": 1.0,
+    "accepted": 125,
+    "accepted_errors": 0,
+    "observed_error_rate": 0.0,
+    "error_upper_bound": 0.0212,
+    "calibration_size": 125,
+    "achievable": true,
+    "reason": "at threshold 0.685, 100.0% of values are publishable with an error rate of at most 2.1% at 95% confidence"
+  },
+  "calibrator": "untrained-heuristic"
+}

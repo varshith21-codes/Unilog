@@ -40,7 +40,7 @@
         "ba100@f7500023"
       ],
       "required": true,
-      "detail": "source lists NSF/ANSI 61 but not NSF/ANSI 372",
+      "detail": "source lists NSF/ANSI 61, not NSF/ANSI 372",
       "recommended_action": "request_from_supplier"
     },
     {
@@ -114,7 +114,7 @@
     "richness": 0.0,
     "composite": 0.8125
   },
-  "created_at": "2026-08-02T12:38:12.200216+00:00",
+  "created_at": "2026-08-03T18:15:20.689765+00:00",
   "decisions": [],
   "pages": [
     {
@@ -474,13 +474,13 @@
       "attribute_code": "stem_material",
       "attribute_name": "Stem Material",
       "datatype": "enum",
-      "value_raw": "Chrome-plated brass / Brass",
-      "value_canonical": "Chrome-Plated Brass",
-      "value_display": "Chrome-Plated Brass",
-      "score": 0.695,
+      "value_raw": "Brass",
+      "value_canonical": "Brass",
+      "value_display": "Brass",
+      "score": 0.7083,
       "status": "auto_accepted",
       "reason_code": "auto_accepted",
-      "detail": "score 0.695 >= threshold 0.685",
+      "detail": "score 0.708 >= threshold 0.685",
       "method": "document_extraction",
       "model_tier": "volume",
       "is_required": false,
@@ -497,26 +497,7 @@
           "method": "exact_line"
         }
       ],
-      "validations": [
-        {
-          "layer": "L0",
-          "rule_id": "enum_partial_match",
-          "verdict": "warn",
-          "reason": "attribute 'stem_material' snapped to 'Chrome-Plated Brass'; the source carried additional text that is not represented in the canonical value",
-          "counterexample": null,
-          "suggested_fix": null,
-          "blocking": false
-        },
-        {
-          "layer": "L0",
-          "rule_id": "enum_partial_match",
-          "verdict": "warn",
-          "reason": "attribute 'stem_material' snapped to 'Chrome-Plated Brass'; the source carried additional text that is not represented in the canonical value",
-          "counterexample": null,
-          "suggested_fix": null,
-          "blocking": false
-        }
-      ],
+      "validations": [],
       "allowed_values": [
         "Brass",
         "Silicon Bronze",
@@ -680,17 +661,17 @@
       "attribute_code": "approvals",
       "attribute_name": "Approvals and Listings",
       "datatype": "multi_enum",
-      "value_raw": "UL listed, CSA certified, NSF/ANSI 61",
+      "value_raw": "UL, CSA, NSF/ANSI 61",
       "value_canonical": [
         "UL",
         "CSA",
         "NSF-61"
       ],
       "value_display": "UL, CSA, NSF-61",
-      "score": 0.7529,
+      "score": 0.7286,
       "status": "auto_accepted",
       "reason_code": "auto_accepted",
-      "detail": "score 0.753 >= threshold 0.685",
+      "detail": "score 0.729 >= threshold 0.685",
       "method": "document_extraction",
       "model_tier": "volume",
       "is_required": true,

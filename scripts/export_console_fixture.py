@@ -32,8 +32,6 @@ import argparse
 import json
 import random
 import sys
-from dataclasses import asdict, is_dataclass
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -51,6 +49,15 @@ from axiom.confidence import (  # noqa: E402
     extract_features,
     select_threshold,
 )
+from axiom.console import (  # noqa: E402
+    build_bundle,
+    build_dataset,
+    dataset_stats,
+    jsonable,
+    serialise_class,
+    serialise_document,
+    serialise_pages,
+)
 from axiom.core.certificate import build_certificate  # noqa: E402
 from axiom.core.product import ProductRecord  # noqa: E402
 from axiom.docintel import parse_artifact  # noqa: E402
@@ -60,7 +67,6 @@ from axiom.normalize import BrandMaster, clean_mpn, normalize_all  # noqa: E402
 from axiom.schema import load_default  # noqa: E402
 from axiom.syndicate import export_all  # noqa: E402
 from axiom.validate import Validator  # noqa: E402
-from pydantic import BaseModel  # noqa: E402
 
 CLASS_CODE = "PLB.VLV.BALL.2PC"
 TENANT = "demo"
@@ -199,137 +205,6 @@ def synthetic_calibration(seed: int = 7) -> tuple[list[float], list[int]]:
     return scores, labels
 
 
-def jsonable(obj: Any) -> Any:
-    """Recursively convert Pydantic models, dataclasses and enums to plain JSON types."""
-    if isinstance(obj, BaseModel):
-        return jsonable(obj.model_dump(mode="json"))
-    if is_dataclass(obj) and not isinstance(obj, type):
-        return jsonable(asdict(obj))
-    if isinstance(obj, dict):
-        return {str(k): jsonable(v) for k, v in obj.items()}
-    if isinstance(obj, list | tuple | set):
-        return [jsonable(v) for v in obj]
-    if isinstance(obj, datetime):
-        return obj.isoformat()
-    if hasattr(obj, "value") and type(obj).__mro__[1] is not object:
-        return obj.value
-    return obj
-
-
-def serialise_pages(parsed) -> list[dict[str, Any]]:
-    """Pages with line geometry, so the evidence viewer can position highlights.
-
-    Coordinates are PDF points with the origin at top-left (see
-    ``axiom.core.evidence.BoundingBox``). Page width and height travel with them so the
-    client can scale into CSS pixels without guessing.
-    """
-    pages = []
-    for page in parsed.pages:
-        pages.append(
-            {
-                "number": page.number,
-                "width": page.width,
-                "height": page.height,
-                "lines": [
-                    {
-                        "line_index": line.line_index,
-                        "text": line.text,
-                        "bbox": line.bbox.as_list(),
-                    }
-                    for line in page.lines
-                ],
-                "tables": [
-                    {
-                        "table_id": table.table_id,
-                        "page": table.page,
-                        "row_count": table.row_count,
-                        "col_count": table.col_count,
-                        "bbox": table.bbox.as_list(),
-                        "rows": table.rows(),
-                        "cells": [
-                            {
-                                "row": cell.row,
-                                "col": cell.col,
-                                "text": cell.text,
-                                "bbox": cell.bbox.as_list(),
-                            }
-                            for cell in table.cells
-                        ],
-                    }
-                    for table in page.tables
-                ],
-            }
-        )
-    return pages
-
-
-def serialise_class(registry, class_code: str) -> dict[str, Any]:
-    """The class definition joined to its attribute dictionary entries.
-
-    The console needs both halves together: the binding supplies requirement and weight,
-    the definition supplies name, datatype, unit and permitted values. Joining server-side
-    keeps that logic out of the UI.
-    """
-    cls = registry.product_class(class_code)
-    attributes = []
-    for binding in cls.attributes:
-        definition = registry.attribute(binding.code)
-        attributes.append(
-            {
-                "code": binding.code,
-                "requirement": binding.requirement.value,
-                "weight": binding.weight,
-                "name": definition.name,
-                "datatype": definition.datatype.value,
-                "description": definition.description,
-                "canonical_unit": definition.canonical_unit,
-                "display_preference": definition.display_preference,
-                "quantity_kind": definition.quantity_kind,
-                "multivalued": definition.multivalued,
-                "compliance_claim": definition.compliance_claim,
-                "evidence_requirement": definition.evidence_requirement.value,
-                "example_values": list(definition.example_values),
-                "allowed_values": [
-                    {"value": a.value, "aliases": list(a.aliases), "note": a.note}
-                    for a in definition.allowed_values
-                ],
-                "plausible_range": (
-                    list(definition.plausible_range) if definition.plausible_range else None
-                ),
-            }
-        )
-    return {
-        "code": cls.code,
-        "name": cls.name,
-        "version": cls.version,
-        "schema_version": cls.schema_version,
-        "browse_path": list(cls.browse_path),
-        "mappings": dict(cls.mappings),
-        "required_codes": list(cls.required_codes),
-        "attributes": attributes,
-        "cross_field_rules": [
-            {
-                "id": rule.id,
-                "expr": rule.expr,
-                "severity": rule.severity.value,
-                "message": " ".join(rule.message.split()),
-                "references": list(rule.references),
-            }
-            for rule in cls.cross_field_rules
-        ],
-        "channel_profiles": [
-            {
-                "name": profile.name,
-                "title_template": profile.title_template,
-                "max_title_chars": profile.max_title_chars,
-                "unit_system": profile.unit_system,
-                "required": list(profile.required),
-            }
-            for profile in cls.channel_profiles
-        ],
-    }
-
-
 def run_sku(sku: str, *, registry, parsed, artifact, policy, calibrator, priors) -> dict[str, Any]:
     """Drive the real pipeline for one SKU and project the result for the console."""
     cascade = ModelCascade.load()
@@ -383,92 +258,34 @@ def run_sku(sku: str, *, registry, parsed, artifact, policy, calibrator, priors)
         scores[value.attribute_code] = calibrator.predict(features)
 
     decisions = apply_policy(record.current_values(), scores, policy)
-    by_code = {d.attribute_code: d for d in decisions}
 
-    # apply_policy sets status on each value; re-read them after the decision.
+    # No cost is reported here, deliberately. The token counts come from StubModelClient, so
+    # pricing them would produce a real-looking dollar figure derived from fabricated usage —
+    # precisely the kind of confident-but-meaningless number the rest of this system refuses to
+    # emit. The console renders "no cost recorded" instead, and the live API path carries the
+    # real figure. See scripts/fetch_bedrock_prices.py.
     certificate = build_certificate(
         record,
         required_attribute_codes=registry.required_codes(class_code),
         pipeline_version=f"axiom-{axiom.__version__}",
-        cost_usd=result.usage.cost_usd(None),
+        cost_usd=None,
         wall_clock_seconds=round(result.usage.latency_ms / 1000, 2),
     )
-    exports = export_all(record, registry)
 
-    values_out = []
-    for value in sorted(record.current_values(), key=lambda v: v.attribute_code):
-        decision = by_code.get(value.attribute_code)
-        values_out.append(
-            {
-                **jsonable(value),
-                "score": round(scores.get(value.attribute_code, 0.0), 4),
-                "decision": jsonable(decision) if decision else None,
-                "features": features_by_code.get(value.attribute_code, {}),
-                "is_publishable": value.is_publishable,
-                "has_verified_evidence": value.has_verified_evidence,
-                "citation_summary": value.citation_summary(),
-            }
-        )
-
-    return {
-        "sku": sku,
-        "record": {
-            "tenant_id": record.tenant_id,
-            "sku": record.sku,
-            "mpn": record.mpn,
-            "mpn_normalized": record.mpn_normalized,
-            "gtin": record.gtin,
-            "brand": record.brand,
-            "brand_id": record.brand_id,
-            "supplier_id": record.supplier_id,
-            "lifecycle_status": record.lifecycle_status.value,
-            "class_code": record.class_code,
-            "schema_version": record.schema_version,
-            "source_document_ids": list(record.source_document_ids),
-            "created_at": record.created_at.isoformat(),
-            "updated_at": record.updated_at.isoformat(),
-        },
-        "classifications": jsonable(record.classifications),
-        "classification_summary": jsonable(classification.summary()),
-        "classification_candidates": [
-            {"code": c.code, "score": round(c.score, 4), "path_text": c.path_text}
-            for c in classification.candidates
-        ],
-        "values": values_out,
-        "gaps": jsonable(record.gaps),
-        "extraction": jsonable(result.summary()),
-        "normalization_issues": jsonable(norm_issues),
-        "validation": {
-            **jsonable(report.summary()),
-            "results": jsonable(report.results),
-            "per_attribute": {k: jsonable(v) for k, v in report.per_attribute.items()},
-        },
-        "certificate": {
-            **jsonable(certificate),
-            "signature_verified": certificate.verify_signature(),
-        },
-        "channels": [
-            {
-                "name": name,
-                "published": export.published,
-                "value_count": export.value_count,
-                "withheld": list(export.withheld),
-                "readiness": jsonable(export.readiness.summary()),
-                "title": getattr(export, "title", None),
-            }
-            for name, export in exports.items()
-        ],
-        "metrics": {
-            "fill_rate": round(record.fill_rate(registry.required_codes(class_code)), 4),
-            "verifiability": round(record.verifiability(), 4),
-            "values_total": len(record.current_values()),
-            "values_publishable": len(record.publishable_values()),
-            "values_needing_review": len(record.values_needing_review()),
-            "gaps_total": len(record.gaps),
-            "gaps_required": sum(1 for g in record.gaps if g.is_required),
-            "conflicts": sorted(record.conflicts().keys()),
-        },
-    }
+    return build_bundle(
+        registry=registry,
+        record=record,
+        artifact=artifact,
+        classification=classification,
+        extraction=result,
+        normalization_issues=norm_issues,
+        validation=report,
+        scores=scores,
+        features=features_by_code,
+        decisions=decisions,
+        certificate=certificate,
+        exports=export_all(record, registry),
+    )
 
 
 def main() -> int:
@@ -505,61 +322,45 @@ def main() -> int:
         for sku in ROWS
     ]
 
-    fixture = {
-        "meta": {
-            "generated_at": datetime.now(UTC).isoformat(),
+    document_id = artifact.document.document_id
+    fixture = build_dataset(
+        skus,
+        documents={
+            document_id: {
+                "document": serialise_document(artifact, parsed),
+                "pages": serialise_pages(parsed),
+            }
+        },
+        class_definitions={CLASS_CODE: serialise_class(registry, CLASS_CODE)},
+        policy=jsonable(policy.summary()),
+        meta={
             "generator": "scripts/export_console_fixture.py",
             "pipeline_version": f"axiom-{axiom.__version__}",
             "source_sample": str(args.sample.relative_to(REPO_ROOT)).replace("\\", "/"),
             "calibrator": "untrained-heuristic",
             "policy_source": "synthetic-dev-calibration",
+            "live": False,
             "notes": (
                 "Values, evidence spans, bounding boxes, validation verdicts and gaps are "
                 "produced by the real pipeline. The model response is a seeded contract "
                 "quoting the sample datasheet verbatim, and the acceptance threshold comes "
-                "from a synthetic calibration set because no reviewer outcomes exist yet."
+                "from a synthetic calibration set because no reviewer outcomes exist yet. "
+                "For live data from real model calls, run the API instead: this fixture is "
+                "the offline fallback."
             ),
         },
-        "document": {
-            **jsonable(artifact.document),
-            "parser": parsed.parser,
-            "page_count": parsed.page_count,
-            "line_count": len(parsed.all_lines()),
-            "table_count": len(parsed.all_tables()),
-            "warnings": list(parsed.warnings),
-            "size_bytes": artifact.size_bytes,
-            "storage_uri": artifact.storage_uri,
-        },
-        "pages": serialise_pages(parsed),
-        "class_definition": serialise_class(registry, CLASS_CODE),
-        "policy": jsonable(policy.summary()),
-        "skus": skus,
-    }
+    )
 
     args.out.mkdir(parents=True, exist_ok=True)
     target = args.out / "fixture.json"
     target.write_text(json.dumps(fixture, indent=2, default=str), encoding="utf-8")
 
-    total_values = sum(len(s["values"]) for s in skus)
-    total_gaps = sum(len(s["gaps"]) for s in skus)
-    accepted = sum(
-        1 for s in skus for v in s["values"] if v["status"] == "auto_accepted"
-    )
-    queued = sum(
-        1 for s in skus for v in s["values"] if v["status"] == "queued_for_review"
-    )
-    verified = sum(1 for s in skus for v in s["values"] if v["has_verified_evidence"])
-
+    stats = dataset_stats(fixture)
     print(f"wrote {target.relative_to(REPO_ROOT)}")
-    print(f"  skus            {len(skus)}")
-    print(f"  values          {total_values} ({verified} with verified evidence)")
-    print(f"  auto-accepted   {accepted}")
-    print(f"  queued          {queued}")
-    print(f"  gaps            {total_gaps}")
-    print(f"  policy          threshold={policy.summary().get('threshold')} "
+    for key, value in stats.items():
+        print(f"  {key:<15} {value}")
+    print(f"  {'policy':<15} threshold={policy.summary().get('threshold')} "
           f"achievable={policy.achievable}")
-    print(f"  pages           {parsed.page_count} "
-          f"({len(parsed.all_lines())} lines, {len(parsed.all_tables())} tables)")
     return 0
 
 

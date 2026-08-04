@@ -21,6 +21,7 @@ attributes:
       - usually the first column of an ordering table
       - may appear as DN followed by a millimetre figure on metric datasheets
       - read the row whose part number matches the target SKU
+    table_headers: ["size", "nominal size", "nps", "dn", "valve size", "pipe size"]
     tolerance: 0.0
     plausible_range: [3.0, 1200.0]
 
@@ -201,6 +202,7 @@ attributes:
         aliases: ["oval handle"]
       - value: Handwheel
         aliases: ["hand wheel", "wheel"]
+    table_headers: ["handle", "handle type", "handwheel", "operator"]
 
   - code: cv_flow_coefficient
     name: Flow Coefficient (Cv)

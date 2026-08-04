@@ -3,7 +3,14 @@ import { notFound } from "next/navigation";
 
 import { ArrowIcon, Meter } from "@/components/primitives";
 import { ReviewWorkspace } from "@/components/review-workspace";
-import { attributeRows, getSku, listSkus, loadDataset } from "@/lib/data";
+import {
+  attributeRows,
+  getClassDefinition,
+  getDocumentBundle,
+  getSku,
+  listSkus,
+  loadDataset,
+} from "@/lib/data";
 import { percent } from "@/lib/format";
 
 export async function generateStaticParams() {
@@ -26,18 +33,17 @@ export default async function ReviewSkuPage({
   if (!bundle) notFound();
 
   const dataset = await loadDataset();
-  const rows = attributeRows(
-    dataset.class_definition.attributes,
-    bundle.values,
-    bundle.gaps,
-  );
+  const definition = await getClassDefinition(bundle);
+  const source = await getDocumentBundle(bundle);
+  const rows = attributeRows(definition?.attributes ?? [], bundle.values, bundle.gaps);
+  const className = definition?.name ?? bundle.class_code ?? "Unclassified";
 
   // Every span in this corpus resolves to page 1; take the page a span actually names so
   // this keeps working when a multi-page PDF arrives.
   const citedPage =
     bundle.values.flatMap((value) => value.evidence).find((span) => span.page !== null)
       ?.page ?? 1;
-  const page = dataset.pages.find((candidate) => candidate.number === citedPage) ?? null;
+  const page = source?.pages.find((candidate) => candidate.number === citedPage) ?? null;
 
   const size = bundle.values.find((value) => value.attribute_code === "nominal_size");
   const quality = bundle.certificate.summary.quality_index;
@@ -54,7 +60,7 @@ export default async function ReviewSkuPage({
               </Link>
             </li>
             <li aria-hidden>/</li>
-            <li>{dataset.class_definition.name}</li>
+            <li>{className}</li>
             <li aria-hidden>/</li>
             <li className="text-[var(--fg-secondary)]">{bundle.sku}</li>
           </ol>
@@ -72,7 +78,7 @@ export default async function ReviewSkuPage({
               </span>
               <span>
                 {size?.value_display ?? size?.value_raw ?? "size unknown"}{" "}
-                {dataset.class_definition.name.toLowerCase()}
+                {className.toLowerCase()}
               </span>
               <span aria-hidden className="text-[var(--fg-quiet)]">
                 ·
@@ -167,8 +173,9 @@ export default async function ReviewSkuPage({
         sku={bundle.sku}
         rows={rows}
         page={page}
-        document={dataset.document}
+        document={source?.document ?? null}
         threshold={dataset.policy.threshold}
+        live={dataset.meta.live}
       />
     </div>
   );
