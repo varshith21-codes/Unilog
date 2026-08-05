@@ -1,0 +1,191 @@
+# Formal verification policy for Bedrock Automated Reasoning (validation layer L6).
+#
+# Compiled to an Automated Reasoning policy by scripts/deploy_reasoning_policy.py and evaluated
+# by an SMT solver, not by a model. Where L2 evaluates cross-field rules against already-
+# structured values, L6 answers a different question: given a passage of **natural language**
+# about a product, is what it asserts logically consistent with these rules?
+#
+# That is the gap it closes. A claim can be perfectly traceable to a verified attribute and still
+# be a contradiction — "lead-free bronze" beside a C84400 body is both cited and false. The claim
+# checker in axiom.generate proves a statement came from somewhere; this proves it is not
+# self-contradictory.
+#
+# ---------------------------------------------------------------------------------------------
+# WHAT THIS CANNOT DO, and why the rules below look the way they do
+#
+# Automated Reasoning policies are **enum-only**. Every variable must reference a type declared
+# here; there are no Int, Real or Bool sorts (verified against the live API — declaring a
+# variable of type Int is rejected with "uses a type that is not defined", and `Bool` is a
+# reserved name that cannot be redeclared).
+#
+# So numeric rules cannot be expressed here at all. "Steam rating must not exceed the WOG
+# rating" and "Cv must clear the full-port floor for this size" stay in L2, where the AST
+# evaluator has real arithmetic. Attempting to encode them as enum bands would silently lose
+# precision, and a formal proof over the wrong model is worse than no proof.
+#
+# Expressions are SMT-LIB S-expressions. Confirmed operators: (= x y), (not p), (and ...),
+# (or ...), (=> p q), (ite c a b). `distinct` and infix forms are rejected.
+#
+# Rule ids must match [A-Z][0-9A-Z]{11} — exactly twelve characters, uppercase and digits only.
+# ---------------------------------------------------------------------------------------------
+
+name: axiom-pvf-compliance
+description: >
+  Compliance and material-compatibility rules for bronze and brass valves. Proves that a
+  natural-language product claim does not contradict what the alloy, certification and
+  connection facts permit.
+
+types:
+  - name: Alloy
+    description: Body alloy of the valve, as designated by the manufacturer
+    values:
+      - value: BrassC36000
+        description: Free-cutting brass, an intentionally leaded alloy
+      - value: BrassC46500
+        description: Naval brass, low lead
+      - value: BrassC69300
+        description: Lead-free brass formulated as a replacement alloy
+      - value: BronzeC84400
+        description: Leaded red brass, contains approximately 6 percent lead
+      - value: BronzeC89833
+        description: Lead-free bronze formulated as a replacement alloy
+      - value: StainlessSteel316
+        description: Austenitic stainless steel, contains no lead
+      - value: StainlessSteel304
+        description: Austenitic stainless steel, contains no lead
+      - value: AlloyUnknown
+        description: The alloy was not established from any source
+
+  - name: Assertion
+    description: >
+      Whether a passage of copy asserts something. Modelled as an enum because Automated
+      Reasoning has no boolean sort.
+    values:
+      - value: Asserted
+        description: The copy states this
+      - value: Denied
+        description: The copy states the opposite
+      - value: Unstated
+        description: The copy is silent on this
+
+  - name: Certification
+    description: Whether a specific certification is held for this part number
+    values:
+      - value: Held
+        description: A certificate names this part number
+      - value: NotHeld
+        description: No certificate was established
+
+  - name: EndConnection
+    description: How the valve joins the pipe
+    values:
+      - value: NptThreaded
+        description: Tapered pipe thread, NPT
+      - value: BsptThreaded
+        description: Tapered pipe thread, BSPT, not interchangeable with NPT
+      - value: BsppThreaded
+        description: Parallel pipe thread, BSPP
+      - value: Solder
+        description: Solder or sweat socket
+      - value: Press
+        description: Press-fit
+      - value: Flanged
+        description: Bolted flange
+
+variables:
+  - name: body_alloy
+    type: Alloy
+    description: The alloy the valve body is made from
+
+  - name: end_connection
+    type: EndConnection
+    description: The end connection type of the valve
+
+  - name: nsf372_certification
+    type: Certification
+    description: >
+      Whether the part number holds NSF-372, the standard that governs lead content
+
+  - name: nsf61_certification
+    type: Certification
+    description: >
+      Whether the part number holds NSF-61, which governs drinking-water system components and
+      says nothing about lead content
+
+  - name: lead_free_claim
+    type: Assertion
+    description: Whether the copy claims the product is lead-free
+
+  - name: potable_water_claim
+    type: Assertion
+    description: Whether the copy claims the product is suitable for potable or drinking water
+
+  - name: solder_connection_claim
+    type: Assertion
+    description: Whether the copy claims the valve has solder or sweat end connections
+
+  - name: threaded_connection_claim
+    type: Assertion
+    description: Whether the copy claims the valve has threaded end connections
+
+rules:
+  # A leaded alloy cannot be described as lead-free. This is the single most consequential
+  # contradiction in this category and the one a fluent model is most likely to produce,
+  # because "bronze" and "lead-free bronze" are both idiomatic.
+  - id: RLEADEDALLOY
+    description: A leaded alloy contradicts a lead-free claim
+    expression: >
+      (=> (or (= body_alloy BronzeC84400) (= body_alloy BrassC36000))
+          (not (= lead_free_claim Asserted)))
+
+  # NSF-61 does not substantiate a lead-free claim. Conflating the two is the most common
+  # compliance error in this category: 61 covers drinking-water components, 372 covers lead.
+  - id: RLEADFREECRT
+    description: A lead-free claim requires NSF-372, not NSF-61
+    expression: >
+      (=> (= lead_free_claim Asserted) (= nsf372_certification Held))
+
+  # A potable-water claim needs a drinking-water certification of its own.
+  - id: RPOTABLECERT
+    description: A potable-water claim requires NSF-61 or NSF-372
+    expression: >
+      (=> (= potable_water_claim Asserted)
+          (or (= nsf61_certification Held) (= nsf372_certification Held)))
+
+  # A leaded alloy is not acceptable in a potable-water system without a certification that
+  # specifically addresses lead.
+  - id: RPOTABLELEAD
+    description: A leaded alloy in a potable-water claim requires NSF-372
+    expression: >
+      (=> (and (= potable_water_claim Asserted)
+               (or (= body_alloy BronzeC84400) (= body_alloy BrassC36000)))
+          (= nsf372_certification Held))
+
+  # End connections are mutually exclusive. A valve is threaded or soldered, never both, and
+  # copy that claims both has described two different products.
+  - id: RCONNEXCLUS1
+    description: Solder and threaded connection claims are mutually exclusive
+    expression: >
+      (not (and (= solder_connection_claim Asserted)
+                (= threaded_connection_claim Asserted)))
+
+  - id: RSOLDERMATCH
+    description: A solder claim contradicts a threaded end connection
+    expression: >
+      (=> (or (= end_connection NptThreaded)
+              (= end_connection BsptThreaded)
+              (= end_connection BsppThreaded))
+          (not (= solder_connection_claim Asserted)))
+
+  - id: RTHREADMATCH
+    description: A threaded claim contradicts a solder end connection
+    expression: >
+      (=> (or (= end_connection Solder) (= end_connection Press))
+          (not (= threaded_connection_claim Asserted)))
+
+  # An unestablished alloy cannot support a lead-free claim. Absence of evidence is not
+  # evidence of absence, and this is where an enthusiastic generator reaches.
+  - id: RUNKNOWNALLY
+    description: An unknown alloy cannot substantiate a lead-free claim
+    expression: >
+      (=> (= body_alloy AlloyUnknown) (not (= lead_free_claim Asserted)))

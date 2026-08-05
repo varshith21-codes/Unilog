@@ -49,7 +49,7 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -e ".[dev,api,docintel]"
 
-pytest -q                      # 753 tests, no AWS credentials needed
+pytest -q                      # 815 tests, no AWS credentials needed
 ruff check .
 ```
 
@@ -259,6 +259,144 @@ is not a filter that catches a misbehaving model, it is a **guarantee that bound
 case**. Its value is in the tail, and this corpus has no tail. A harder one — scanned PDFs,
 values stated only in prose — would exercise it properly.
 
+### L6: formal verification of claims, by an SMT solver
+
+```powershell
+python scripts/deploy_reasoning_policy.py --write
+```
+
+Compiles `schema/reasoning_policy.yaml` into a live Bedrock Automated Reasoning policy, attaches
+it to a guardrail, and pins the ARNs to a generated config. **Deployed and working** in us-east-2.
+
+This answers a question no other layer can. L2 evaluates cross-field rules against already-
+structured values. The claim checker proves a sentence *came from* a verified attribute. L6 proves
+a sentence is not *self-contradictory* — and returns the identifier of the rule it violated, which
+is a proof rather than a score.
+
+Against a real record (Bronze C84400 body, NSF-61 held, NSF-372 not held, NPT threaded):
+
+| Claim | Verdict | Rule |
+|---|---|---|
+| "This valve is lead-free." | **invalid** | `RLEADEDALLOY` |
+| "This valve has solder end connections." | **invalid** | `RSOLDERMATCH` |
+| "This valve has NPT threaded end connections." | satisfiable | — |
+| "This valve is approved for potable drinking water." | **invalid** | `RPOTABLELEAD` |
+
+That last one is a compound inference across three premises — leaded alloy, potable claim, no
+NSF-372 — and it is worth being precise about what it means, because the obvious reading is wrong.
+
+The extractor is **correct**: the datasheet states NSF/ANSI 61, NSF-61 *is* the drinking-water
+components standard, so `potable_water_approved: true` faithfully records what the source asserts.
+The golden set is also correct to list `lead_free_compliant` as absent, since NSF-61 says nothing
+about lead content.
+
+What L6 flags is that **the source's own combination is regulatorily questionable**. A C84400 body
+is roughly 6% lead, and US potable-water law has required ≤0.25% since 2014, so a leaded bronze
+valve marketed for potable service without NSF-372 is a real problem — with the manufacturer's
+data, not with the extraction of it.
+
+That is the layer earning its place. L0–L3 check internal consistency; L6 checks the claim against
+the outside world and disagrees with the datasheet. A pipeline that only ever agreed with its
+sources could never surface this.
+
+Premises are rendered **deterministically** from publishable values only. A queued value is stated
+as unestablished rather than assumed, because a formal proof resting on an unverified premise is
+worse than no proof: it looks exactly as sound as a real one.
+
+**Honest limitation.** Automated Reasoning policies are **enum-only** — there are no `Int`, `Real`
+or `Bool` sorts (verified against the live API; declaring one is rejected, and `Bool` is reserved).
+So numeric rules cannot be expressed here at all. "Steam rating must not exceed the WOG rating"
+stays in L2, which has real arithmetic. Encoding it as enum bands would lose precision, and a
+sound proof over the wrong model is worse than no proof.
+
+None of the API surface is guessable, so it is recorded in the policy YAML's own header. Learned
+by probing:
+
+- Rule expressions are **SMT-LIB S-expressions**: `(= x y)`, `(not p)`, `(and ..)`, `(or ..)`,
+  `(=> p q)`, `(ite c a b)`. Infix `a == b` and `distinct` are rejected.
+- Rule ids must match `[A-Z][0-9A-Z]{11}` — exactly twelve characters, no underscores.
+- Premises and claims must **both** be in *guarded* content. Facts sent with a
+  `grounding_source` qualifier are silently ignored by this policy type; coverage metrics show
+  them excluded and every claim then returns trivially `satisfiable`. This cost the longest
+  detour of the session.
+- The guardrail requires a cross-Region profile (`us.guardrail.v1:0`) or creation is refused,
+  and guardrail profiles are not discoverable through `list_inference_profiles`.
+- Every content error is reported as the same opaque `Policy is not valid.`, so the deploy script
+  validates locally first and names the offending rule. That immediately caught one of my own
+  rule ids being eleven characters.
+
+A verdict of `translationAmbiguous`, `tooComplex` or `noTranslations` is recorded as **skipped,
+never passed**. The solver failing to form an opinion is not the claim being verified, and the
+confidence features count a skipped check differently from a passing one.
+
+### Generated copy, and proving it stayed inside the facts
+
+Extraction and generation are separate subsystems. Specs are extracted and proven; prose is
+generated and then **checked**.
+
+```powershell
+python scripts/generate_copy.py --sku BA-100-075 --audit
+```
+
+The generator never sees a product record. It sees a fact sheet built only from **publishable**
+values — anything queued for review, inferred, or absent is withheld, including the *list* of
+what could not be established, since showing a model its own gaps invites it to fill them in.
+
+Then every checkable assertion in the output is verified:
+
+| Claim type | How it is checked |
+|---|---|
+| Quantities | Arithmetic, after unit conversion, 1% relative tolerance |
+| Standards references | `UL`, `NSF/ANSI 61`, `MSS SP-110` must appear verbatim in a verified value |
+| Material designations | `C84400`, `RPTFE`, `316` must match a verified value |
+| Regulated claims | "lead-free" requires the attribute present, verified **and true** |
+| Comparatives and guarantees | Rejected on sight — no fact sheet can substantiate them |
+
+**Not an LLM judge.** A second model shares the writer's failure mode: both fluent, neither
+checkable, and a disagreement between them is unresolvable. Editorial policy lives in
+`schema/copy_policy.yaml`, because "never write 'lifetime guarantee'" is a legal position and
+belongs where counsel can read it.
+
+One unsupported claim fails the whole piece. Not a score — one invented pressure rating makes a
+description wrong, and averaging it against nine correct sentences hides exactly the thing worth
+finding. A failed piece gets one regeneration attempt with the offending claims fed back.
+
+Measured on BA-100-075: copy passed on the **first attempt**, 21 claims all supported, each naming
+the attribute that substantiates it, at **$0.000939**. And the audit — ten deliberately fabricated
+descriptions — was refused **10/10**, with honest copy passing as the control:
+
+```
+caught  inflated pressure rating           '1200 psi'
+caught  plausible nearby figure            '650 psi'
+caught  invented standard                  'MSS SP-110', 'ASME B16.34'
+caught  wrong number on a real standard    'NSF/ANSI 372'
+caught  invented alloy                     'C89833'
+caught  unsupported compliance claim       'lead-free'
+caught  comparative claim                  'best'
+caught  promissory claim                   'guaranteed'
+caught  extended temperature range         '-40 degF', '500 degF'
+caught  invented stem grade                '316'
+```
+
+The audit is the point. A checker that never rejects anything is indistinguishable from no
+checker, so `--audit` exists to try to get something past it on every run.
+
+Copy is generated as part of the pipeline with `--generate-copy`, persisted into the console
+bundle, and shown on the certificate page **always beside its claim check** — with each supported
+claim naming the attribute that backs it. Prose without the verdict would be making a claim this
+system does not support; prose shown as verified when the check failed would be worse. Failed copy
+is rendered rather than hidden, because a merchandiser needs to see which sentence was rejected.
+
+Two bugs its own tests caught, both of which would have been invisible in production:
+
+- **Negative numbers were not captured.** `-20 degF` parsed as `20`, so every sub-zero
+  temperature silently became its positive twin and then failed to match the real, negative,
+  verified bound. Fixed with a sign that is distinguished from a range dash, so `18-22 ft-lb`
+  still reads correctly.
+- **Sentence punctuation rejected honest copy.** `ASME B16.34` legitimately contains a dot, so the
+  pattern must allow one — which meant a sentence ending in `NSF/ANSI 61.` captured the full stop
+  and failed to match the very standard the product holds.
+
 ### Variant explosion: one datasheet, every part number
 
 An industrial datasheet almost never describes one product. It describes a series — a shared
@@ -375,7 +513,9 @@ axiom/
 │   ├── attributes/            # reusable attribute dictionary
 │   ├── classes/               # class bindings, cross-field rules, channel profiles
 │   ├── brands.yaml            # brand master with alias resolution
-│   └── constants.yaml         # domain facts referenced by rules
+│   ├── constants.yaml         # domain facts referenced by rules
+│   ├── copy_policy.yaml       # banned phrases, regulated claims — for counsel, not engineers
+│   └── reasoning_policy.yaml  # L6 formal policy, compiled to SMT-LIB for Bedrock
 ├── packages/axiom/
 │   ├── core/                  # domain models, evidence, gaps, certificate builder
 │   ├── ingest/                # content-addressed artifact store
@@ -386,6 +526,7 @@ axiom/
 │   ├── normalize/             # unit registry, datasheet value parsers, MPN cleaning
 │   ├── validate/              # validation layers L0–L3 + AST rule evaluator
 │   ├── confidence/            # features, calibration, Wilson risk policy
+│   ├── generate/              # constrained copy generation + deterministic claim check
 │   ├── review/                # review sessions, decisions, prior updates
 │   ├── console/               # projection of pipeline output for the UI (presentation only)
 │   ├── syndicate/             # channel pre-flight, exporters, publication gate
@@ -401,8 +542,10 @@ axiom/
 │   ├── run_pipeline.py        # one SKU, end to end, fully reported
 │   ├── run_backtest.py        # the numbers above; writes calibration artifacts
 │   ├── explode_variants.py    # one datasheet -> a record per orderable part number
+│   ├── generate_copy.py       # constrained copy + claim check; --audit tries to break it
 │   ├── run_ablation.py        # same model, trust layer off — what does the gate buy?
 │   ├── run_adversarial.py     # wrong-document negative control; exits non-zero on fabrication
+│   ├── deploy_reasoning_policy.py # compile the L6 policy and deploy it to Bedrock
 │   ├── bootstrap_lite.ps1     # CDK staging bucket without the bootstrap IAM roles
 │   └── export_console_fixture.py
 ├── data/
@@ -412,7 +555,7 @@ axiom/
 │   ├── sessions/              # review state: what humans decided
 │   ├── console/               # pipeline output: what the machine produced
 │   └── cache/                 # content-addressed artifact store
-└── tests/                     # 753 tests
+└── tests/                     # 815 tests
 ```
 
 Adding an attribute means editing YAML in `schema/`. No Python change, no prompt change — the
@@ -502,11 +645,11 @@ Tracked against blueprint Part 12.
 - [ ] **Tier 2 — differentiators.** In progress:
       - [x] Cost-per-SKU meter, priced from the AWS Price List API, surfaced in the console
       - [x] Ablation harness and adversarial negative control (found and fixed the targeting bug)
-      - [ ] Automated Reasoning (L6) via Bedrock Guardrails
+      - [x] Automated Reasoning (L6) — formal verification via Bedrock Guardrails, deployed live
       - [x] Risk–coverage curve as an interactive dial in the console (hand-drawn SVG, no
             charting dependency)
       - [x] Variant table explosion with parent-child linkage
-      - [ ] Constrained copy generation with a claim-check pass
+      - [x] Constrained copy generation with a deterministic claim-check pass
       - [ ] Quality Index dashboard with a before/after cohort
 - [ ] **Tier 3 — scale and polish.** Batch orchestration, multi-source cross-validation (L4),
       before/after cohort study.
@@ -521,9 +664,12 @@ Storage infrastructure is deployed (see above). Compute is not — the pipeline 
   the fixture exporter share one projection so they cannot drift from each other, but the
   TypeScript can still drift from both. Generating it from the OpenAPI schema is the fix.
 - The golden set is 9 SKUs against a blueprint target of 100–300 (see the caveats above).
-- L4 (cross-source agreement) and L6 (formal verification) exist only as members of the
-  `ValidationLayer` enum. No validator implements them, so they produce no results at all —
-  the layer list in the blueprint is ahead of the code here, and certificates reflect L0–L3.
+- L4 (cross-source agreement) is still only a member of the `ValidationLayer` enum — no validator
+  implements it, because it needs two independent sources per SKU and the corpus has one.
+- L6 is implemented and deployed but **not yet wired into the pipeline run**. It is callable via
+  `axiom.validate.ReasoningChecker` and verified end to end; hooking it onto generated copy
+  automatically is the next step.
+- L6 is enum-only by construction, so numeric rules stay in L2 (see above).
 - HTS classification is deliberately never auto-published: published benchmarks put accuracy
   near 40% at the 10-digit level, which is not publishable at any confidence this system can
   honestly assign.

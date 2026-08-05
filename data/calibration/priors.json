@@ -20,7 +20,7 @@
     "temperature_range": 1.0
   },
   "sample_counts": {
-    "approvals": 10,
+    "approvals": 11,
     "body_material": 9,
     "case_quantity": 9,
     "country_of_origin": 4,

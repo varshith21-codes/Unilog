@@ -481,3 +481,68 @@ def test_variants_cover_plausible_spellings():
 def test_variants_of_an_absent_mpn_are_empty():
     assert mpn_variants(None) == set()
     assert mpn_variants("///") == set()
+
+
+# ------------------------------------------------------- metric size designations
+
+
+@pytest.mark.parametrize(
+    ("dn", "nps"),
+    [
+        ("DN15", '1/2"'),
+        ("DN20", '3/4"'),
+        ("DN25", '1"'),
+        ("DN32", '1-1/4"'),
+        ("DN 50", '2"'),
+        ("DN65", '2-1/2"'),
+        ("DN100", '4"'),
+    ],
+)
+def test_dn_normalises_identically_to_its_nps_twin(registry, dn, nps):
+    """DN and NPS name the same pipe, so they must reach one canonical value.
+
+    They are not arithmetically related: DN15 is 1/2" by designation, while 15 mm converts to
+    0.59". If DN were read as a millimetre measurement, the metric and imperial datasheets for
+    a single valve would normalise to two different sizes, and comparison and de-duplication
+    would both break without ever raising an error.
+    """
+    metric = normalize(registry, "nominal_size", dn)
+    imperial = normalize(registry, "nominal_size", nps)
+
+    assert metric.value.value_canonical.magnitude == pytest.approx(
+        imperial.value.value_canonical.magnitude
+    )
+    assert metric.value.value_display == imperial.value.value_display == nps
+
+
+def test_dn_is_not_read_as_inches(registry):
+    """The regression this guards: DN15 parsed as fifteen inches.
+
+    With ``unit_hint: in`` on the attribute, a bare ``15`` reads as inches — 381 mm, a 25x
+    error that sits comfortably inside the plausible range and so passes every downstream
+    check, then renders as ``15"`` on a half-inch valve.
+    """
+    outcome = normalize(registry, "nominal_size", "DN15")
+    assert outcome.value.value_canonical.magnitude == pytest.approx(12.7)
+    assert outcome.value.value_canonical.magnitude != pytest.approx(381.0)
+
+
+def test_a_real_millimetre_measurement_is_not_remapped(registry):
+    """Only the DN *designation* is table-resolved; an explicit mm value is taken at face value."""
+    outcome = normalize(registry, "nominal_size", "15 mm")
+    assert outcome.value.value_canonical.magnitude == pytest.approx(15.0)
+
+
+def test_unlisted_dn_size_falls_back_to_millimetres(registry):
+    """An off-standard DN is still metric. Reading it as inches would be the 25x error again."""
+    outcome = normalize(registry, "nominal_size", "DN37")
+    assert outcome.value.value_canonical.magnitude == pytest.approx(37.0)
+
+
+def test_dn_table_is_declarative():
+    """The designation table is a domain fact, so it lives in YAML a merchandiser can correct."""
+    from axiom.validate.constants import RuleConstants
+
+    table = RuleConstants.load().tables["DN_TO_NPS_INCHES"]
+    assert table["15"] == pytest.approx(0.5)
+    assert table["50"] == pytest.approx(2.0)

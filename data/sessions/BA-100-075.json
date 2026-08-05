@@ -40,7 +40,7 @@
         "ba100@f7500023"
       ],
       "required": true,
-      "detail": "source lists NSF/ANSI 61, not NSF/ANSI 372",
+      "detail": "source lists NSF/ANSI 61 but not NSF/ANSI 372",
       "recommended_action": "request_from_supplier"
     },
     {
@@ -114,7 +114,7 @@
     "richness": 0.0,
     "composite": 0.8125
   },
-  "created_at": "2026-08-03T18:15:20.689765+00:00",
+  "created_at": "2026-08-05T03:16:03.931734+00:00",
   "decisions": [],
   "pages": [
     {
@@ -661,17 +661,17 @@
       "attribute_code": "approvals",
       "attribute_name": "Approvals and Listings",
       "datatype": "multi_enum",
-      "value_raw": "UL, CSA, NSF/ANSI 61",
+      "value_raw": "UL listed, CSA certified, NSF/ANSI 61",
       "value_canonical": [
         "UL",
         "CSA",
         "NSF-61"
       ],
       "value_display": "UL, CSA, NSF-61",
-      "score": 0.7286,
+      "score": 0.7529,
       "status": "auto_accepted",
       "reason_code": "auto_accepted",
-      "detail": "score 0.729 >= threshold 0.685",
+      "detail": "score 0.753 >= threshold 0.685",
       "method": "document_extraction",
       "model_tier": "volume",
       "is_required": true,

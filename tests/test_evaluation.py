@@ -52,9 +52,9 @@ def definition(registry, code: str):
 
 
 def test_golden_set_loads(golden: GoldenSet):
-    assert len(golden) == 9
-    assert golden.comparison_count == 180
-    assert golden.absent_count == 55
+    assert len(golden) == 15
+    assert golden.comparison_count == 312
+    assert golden.absent_count == 85
 
 
 def test_absent_attributes_are_a_substantial_share(golden: GoldenSet):
@@ -63,8 +63,25 @@ def test_absent_attributes_are_a_substantial_share(golden: GoldenSet):
 
 
 def test_both_classes_are_represented(golden: GoldenSet):
-    assert len(golden.by_class(BALL_VALVE)) == 5
+    # Ball valves come from two suppliers and two file formats; the Apollo block is the PDF.
+    assert len(golden.by_class(BALL_VALVE)) == 11
     assert len(golden.by_class("PLB.VLV.GATE.BRZ")) == 4
+
+
+def test_a_pdf_source_is_covered(golden: GoldenSet):
+    """Accuracy has to be measured on a PDF, not only on text.
+
+    Table reconstruction from word coordinates is the least reliable step in the pipeline. If
+    every scored product came from a text file, the numbers would describe the easy half of
+    the corpus.
+    """
+    from_pdf = [p for p in golden.products if golden.document_for(p).suffix == ".pdf"]
+    assert len(from_pdf) == 6
+
+
+def test_a_discontinued_part_is_not_a_product(golden: GoldenSet):
+    """77C-102 appears in the source only to be withdrawn, so it must never be scored."""
+    assert all(p.sku != "77C-102" for p in golden.products)
 
 
 def test_source_documents_resolve(golden: GoldenSet):

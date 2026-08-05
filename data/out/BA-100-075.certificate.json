@@ -1,8 +1,8 @@
 {
-  "certificate_id": "ec_55853e286a72",
+  "certificate_id": "ec_a1f30568a25c",
   "sku": "BA-100-075",
   "tenant_id": "demo",
-  "generated_at": "2026-08-03T18:15:20.682963+00:00",
+  "generated_at": "2026-08-05T03:16:01.227989+00:00",
   "schema_version": "PLB.VLV.BALL.2PC@v1",
   "pipeline_version": "axiom-0.1.0",
   "classifications": [
@@ -431,7 +431,7 @@
         "NSF-61"
       ],
       "value_display": "UL, CSA, NSF-61",
-      "value_raw": "UL, CSA, NSF/ANSI 61",
+      "value_raw": "UL listed, CSA certified, NSF/ANSI 61",
       "confidence": 0.9,
       "method": "document_extraction",
       "model_tier": "volume",
@@ -508,7 +508,7 @@
         "ba100@f7500023"
       ],
       "required": true,
-      "detail": "source lists NSF/ANSI 61, not NSF/ANSI 372",
+      "detail": "source lists NSF/ANSI 61 but not NSF/ANSI 372",
       "recommended_action": "request_from_supplier"
     },
     {
@@ -579,7 +579,7 @@
       "composite": 0.8125
     },
     "cost_usd": 0.001,
-    "wall_clock_seconds": 13.88
+    "wall_clock_seconds": 10.65
   },
-  "signature": "sha256:a2a32a5dca81ea235a67bc40a1db66065612ad19c00b857af98afdf71722b42b"
+  "signature": "sha256:a48214d91b67d6bf727f6dee5fea17ad97262be317e44450c968f80ea1633e4c"
 }

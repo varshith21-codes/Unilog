@@ -15,8 +15,10 @@
 
 name: pvf_valves_v1
 description: >
-  Two datasheets, nine SKUs. Covers ordering-table row selection, footnote applicability,
-  deferred values, and the NSF-61-is-not-lead-free distinction.
+  Three datasheets, fifteen SKUs, two file formats. Covers ordering-table row selection,
+  footnote applicability, footnote override, deferred values, metric size designations, a
+  discontinued row that must not become a product, and the NSF-61-is-not-lead-free distinction
+  together with its mirror image where lead-free IS substantiated.
 
 source_documents:
   - id: ba100
@@ -27,6 +29,12 @@ source_documents:
     path: ../samples/gv200.txt
     supplier_id: nibco
     brand: NIBCO
+  # A PDF rather than text, so the aligned-table reconstruction and page geometry are exercised
+  # by the accuracy measurement rather than only by unit tests.
+  - id: ap77c
+    path: ../samples/ap77c.pdf
+    supplier_id: apollo
+    brand: Apollo Valves
 
 products:
   # ---------------------------------------------------------------- ball valves
@@ -278,4 +286,208 @@ products:
       - cv_flow_coefficient
       - gtin
       - each_weight
+      - selling_uom
+  # ------------------------------------------------- ball valves, PDF source (Apollo 77C)
+  #
+  # This block earns its place by testing things the two text datasheets cannot:
+  #
+  #   * The source is a PDF, so the ordering table has to be reconstructed from word
+  #     coordinates before any row can be read.
+  #   * Sizes are given as DN designations. Reading DN15 as fifteen inches is a 25x error that
+  #     lands inside the plausible range and passes every downstream check.
+  #   * NOTE 1 *overrides* the prose instead of contradicting it: the description says every
+  #     valve ships with a lever, then the note replaces that with a tee handle for DN25 and
+  #     up. So handle_type is determinable for all six SKUs, and an extractor that reads only
+  #     the prose gets four of them wrong. This is the opposite case to BA-100-100, where the
+  #     document genuinely contradicts itself and no answer is defensible.
+  #   * Reduced-port SKUs share a nominal size with their full-port twin and differ only in
+  #     Cv. Selecting the row by size instead of by catalog number returns a value that is
+  #     really present in the document and wrong for the part, which quote verification cannot
+  #     catch.
+  #   * end_connection is never stated. Every other datasheet in this set states it, so a model
+  #     that pattern-matches the category will fabricate one.
+  #   * 77C-102 appears only to be declared discontinued. It must never surface as a product.
+  - sku: 77C-103
+    class_code: PLB.VLV.BALL.2PC
+    source: ap77c
+    notes: >
+      operating_torque omitted from both lists: the sheet gives "between 14 and 19 ft-lb
+      depending on size and seat wear; no single figure is published". That is a cross-size
+      envelope, not a per-SKU spec, so recording it against this SKU would assert something
+      the document declines to state. Unlike BA-100-050, where the range IS qualified to one
+      size and is therefore real ground truth.
+    attributes:
+      product_series: 77C
+      number_of_pieces: Two-Piece
+      nominal_size: 1/2"
+      case_quantity: "24"
+      handle_type: Lever          # DN15 is below the NOTE 1 threshold, so the prose stands
+      body_material: Bronze C89833
+      seat_material: RPTFE
+      stem_material: Silicon Bronze
+      port_type: Full Port
+      cv_flow_coefficient: "15.0"
+      pressure_rating_wog: 400 PSI
+      steam_pressure_rating: 125 PSI
+      temperature_range: -20 degF to 365 degF
+      approvals: NSF/ANSI 61, NSF/ANSI 372
+      lead_free_compliant: "true"
+      potable_water_approved: "true"
+      country_of_origin: Taiwan
+    absent:
+      - end_connection           # never stated anywhere on the sheet
+      - gtin
+      - each_weight              # "available on request"
+      - case_weight
+      - selling_uom
+
+  - sku: 77C-104
+    class_code: PLB.VLV.BALL.2PC
+    source: ap77c
+    notes: operating_torque omitted for the same cross-size-envelope reason as 77C-103.
+    attributes:
+      product_series: 77C
+      number_of_pieces: Two-Piece
+      nominal_size: 3/4"
+      case_quantity: "20"
+      handle_type: Lever
+      body_material: Bronze C89833
+      seat_material: RPTFE
+      stem_material: Silicon Bronze
+      port_type: Full Port
+      cv_flow_coefficient: "28.0"
+      pressure_rating_wog: 400 PSI
+      steam_pressure_rating: 125 PSI
+      temperature_range: -20 degF to 365 degF
+      approvals: NSF/ANSI 61, NSF/ANSI 372
+      lead_free_compliant: "true"
+      potable_water_approved: "true"
+      country_of_origin: Taiwan
+    absent:
+      - end_connection
+      - gtin
+      - each_weight
+      - case_weight
+      - selling_uom
+
+  - sku: 77C-105
+    class_code: PLB.VLV.BALL.2PC
+    source: ap77c
+    notes: >
+      First SKU at or above the NOTE 1 threshold, so handle_type is Tee and not the Lever the
+      description promises. Shares its nominal size with 77C-105R and differs only in port and
+      Cv.
+    attributes:
+      product_series: 77C
+      number_of_pieces: Two-Piece
+      nominal_size: 1"
+      case_quantity: "12"
+      handle_type: Tee           # NOTE 1 replaces the lever at DN25 and above
+      body_material: Bronze C89833
+      seat_material: RPTFE
+      stem_material: Silicon Bronze
+      port_type: Full Port
+      cv_flow_coefficient: "49.0"
+      pressure_rating_wog: 400 PSI
+      steam_pressure_rating: 125 PSI
+      temperature_range: -20 degF to 365 degF
+      approvals: NSF/ANSI 61, NSF/ANSI 372
+      lead_free_compliant: "true"
+      potable_water_approved: "true"
+      country_of_origin: Taiwan
+    absent:
+      - end_connection
+      - gtin
+      - each_weight
+      - case_weight
+      - selling_uom
+
+  - sku: 77C-105R
+    class_code: PLB.VLV.BALL.2PC
+    source: ap77c
+    notes: >
+      Same DN25 / 1" size as 77C-105. Only the catalog number distinguishes them, and getting
+      the row wrong swaps Cv 21.0 for 49.0 — a number that is genuinely on the page.
+    attributes:
+      product_series: 77C
+      number_of_pieces: Two-Piece
+      nominal_size: 1"
+      case_quantity: "12"
+      handle_type: Tee
+      body_material: Bronze C89833
+      seat_material: RPTFE
+      stem_material: Silicon Bronze
+      port_type: Reduced Port
+      cv_flow_coefficient: "21.0"
+      # NOTE 3: reduced port does not reduce the pressure rating, only the flow coefficient.
+      pressure_rating_wog: 400 PSI
+      steam_pressure_rating: 125 PSI
+      temperature_range: -20 degF to 365 degF
+      approvals: NSF/ANSI 61, NSF/ANSI 372
+      lead_free_compliant: "true"
+      potable_water_approved: "true"
+      country_of_origin: Taiwan
+    absent:
+      - end_connection
+      - gtin
+      - each_weight
+      - case_weight
+      - selling_uom
+
+  - sku: 77C-106
+    class_code: PLB.VLV.BALL.2PC
+    source: ap77c
+    notes: DN32 resolves to 1-1/4", not to 32 mm converted arithmetically.
+    attributes:
+      product_series: 77C
+      number_of_pieces: Two-Piece
+      nominal_size: 1-1/4"
+      case_quantity: "6"
+      handle_type: Tee
+      body_material: Bronze C89833
+      seat_material: RPTFE
+      stem_material: Silicon Bronze
+      port_type: Full Port
+      cv_flow_coefficient: "88.0"
+      pressure_rating_wog: 400 PSI
+      steam_pressure_rating: 125 PSI
+      temperature_range: -20 degF to 365 degF
+      approvals: NSF/ANSI 61, NSF/ANSI 372
+      lead_free_compliant: "true"
+      potable_water_approved: "true"
+      country_of_origin: Taiwan
+    absent:
+      - end_connection
+      - gtin
+      - each_weight
+      - case_weight
+      - selling_uom
+
+  - sku: 77C-106R
+    class_code: PLB.VLV.BALL.2PC
+    source: ap77c
+    notes: Reduced-port twin of 77C-106, same size, lower Cv.
+    attributes:
+      product_series: 77C
+      number_of_pieces: Two-Piece
+      nominal_size: 1-1/4"
+      case_quantity: "6"
+      handle_type: Tee
+      body_material: Bronze C89833
+      seat_material: RPTFE
+      stem_material: Silicon Bronze
+      port_type: Reduced Port
+      cv_flow_coefficient: "37.0"
+      pressure_rating_wog: 400 PSI
+      steam_pressure_rating: 125 PSI
+      temperature_range: -20 degF to 365 degF
+      approvals: NSF/ANSI 61, NSF/ANSI 372
+      lead_free_compliant: "true"
+      potable_water_approved: "true"
+      country_of_origin: Taiwan
+    absent:
+      - end_connection
+      - gtin
+      - each_weight
+      - case_weight
       - selling_uom

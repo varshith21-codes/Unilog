@@ -320,8 +320,10 @@ def test_verified_value_becomes_an_attribute_value(registry, cascade, parsed_dat
 
 
 def test_value_from_a_table_is_marked_as_table_extraction(registry, cascade, parsed_datasheet):
+    # The quote is the carton-quantity cell itself, not the part-number cell. A citation has to
+    # land on the text that states the value, or the entailment gate discards it.
     payload = json.dumps(
-        [item("case_quantity", value_raw="12", evidence_quote="BA-100-075", evidence_page=1)]
+        [item("case_quantity", value_raw="12", evidence_quote="12", evidence_page=1)]
     )
     result = _extractor(registry, cascade, [payload]).extract(
         parsed_datasheet,
@@ -331,7 +333,7 @@ def test_value_from_a_table_is_marked_as_table_extraction(registry, cascade, par
     )
     value = result.values[0]
     assert value.method is DerivationMethod.TABLE_EXTRACTION
-    assert value.evidence[0].table_ref == "t1:r3:c0"
+    assert value.evidence[0].table_ref == "t1:r3:c3"
 
 
 def test_unlocatable_quote_is_discarded_and_becomes_a_gap(registry, cascade, parsed_datasheet):
@@ -455,7 +457,7 @@ def test_extraction_does_not_normalise_values(registry, cascade, parsed_datashee
             item(
                 "nominal_size",
                 value_raw='3/4"',
-                evidence_quote="BA-100-075",
+                evidence_quote='3/4"',
                 evidence_page=1,
             )
         ]

@@ -601,6 +601,55 @@ export interface CostSummary {
   price_source: PriceSource | null;
 }
 
+// ---------------------------------------------------------------- generated copy
+// axiom.generate
+
+export type ClaimKind = "quantity" | "standard" | "designation" | "regulated" | "banned";
+export type ClaimVerdict = "supported" | "unsupported" | "banned";
+
+/** axiom.generate.claims.Claim */
+export interface Claim {
+  kind: ClaimKind;
+  text: string;
+  verdict: ClaimVerdict;
+  reason: string;
+  field: string;
+  /** Attribute code that substantiates the claim, when one does. */
+  supported_by: string | null;
+}
+
+export interface ClaimCheckSummary {
+  claims: number;
+  supported: number;
+  unsupported: number;
+  banned: number;
+  /** True only with zero unsupported and zero banned. Not a score — one bad claim fails. */
+  passed: boolean;
+}
+
+/**
+ * axiom.generate.copy.GeneratedCopy
+ *
+ * The claim check travels with the prose, always. Copy shown without its verdict is just text,
+ * and the whole argument for generating it is that every assertion was checked against an
+ * already-publishable attribute.
+ */
+export interface GeneratedCopy {
+  sku: string;
+  published: boolean;
+  headline: string;
+  short_description: string;
+  long_description: string;
+  bullets: string[];
+  attempts: number;
+  prompt_version: string;
+  model_id: string | null;
+  model_tier: string | null;
+  error: string | null;
+  claim_check: ClaimCheckSummary;
+  claims: Claim[];
+}
+
 // ---------------------------------------------------------------- review decisions
 // axiom.review.session
 
@@ -699,6 +748,8 @@ export interface SkuBundle {
   metrics: SkuMetrics;
   /** Token spend for this SKU. Absent on bundles written before cost tracking existed. */
   cost?: CostSummary | null;
+  /** Generated copy and its claim check. Null unless the run passed --generate-copy. */
+  copy?: GeneratedCopy | null;
   /** Audit trail of human decisions, present once any have been recorded. */
   decisions?: ReviewOutcome[];
 }

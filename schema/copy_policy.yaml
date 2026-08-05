@@ -1,0 +1,144 @@
+# Editorial and compliance policy for generated marketing copy.
+#
+# Declarative for the same reason the validation rules are: the people who should own this are
+# merchandisers and counsel, not engineers. "Never write 'lifetime guarantee'" is a legal
+# position, and burying it in a Python list puts it where the person responsible for it will
+# never see it.
+#
+# Every rule here is enforced *after* generation by a deterministic checker, not asked for in
+# the prompt. A prompt is a request; this is a gate. Models comply with prompts most of the
+# time, and "most of the time" is not a compliance posture.
+
+# ----------------------------------------------------------------- banned outright
+#
+# Claims that cannot be substantiated by any product datum, because they are comparative,
+# absolute, or promissory. No fact sheet can support them, so they are rejected on sight
+# rather than checked.
+banned_phrases:
+  # Comparative or superlative — requires evidence about competitors we do not have.
+  - best
+  - best-in-class
+  - best in class
+  - world class
+  - world-class
+  - industry leading
+  - industry-leading
+  - unmatched
+  - unbeatable
+  - superior
+  - finest
+  - highest quality
+  - top quality
+  - premium quality
+
+  # Absolute reliability — unfalsifiable and legally hazardous.
+  - guaranteed
+  - guarantee
+  - lifetime warranty
+  - lifetime guarantee
+  - never fails
+  - never fail
+  - failproof
+  - fail-proof
+  - maintenance free
+  - maintenance-free
+  - permanent
+  - indestructible
+
+  # Absolute safety or compliance — must always be tied to a specific certification.
+  - completely safe
+  - totally safe
+  - fully compliant
+  - meets all standards
+  - meets all codes
+  - approved for all applications
+  - suitable for all applications
+
+  # Vague quantification that reads as a specification without being one.
+  - virtually
+  - up to 100%
+  - nearly unlimited
+
+# ----------------------------------------------------------------- regulated claims
+#
+# Phrases that are legitimate *only* when a specific attribute substantiates them. The
+# attribute must be present, verified, and (for booleans) true.
+#
+# `requires_any` is satisfied by any one of the listed attributes. `requires_true` means a
+# boolean attribute must be present and True, not merely present.
+regulated_claims:
+  - phrase: lead-free
+    aliases: ["lead free", "leadfree", "no lead", "zero lead"]
+    requires_true: [lead_free_compliant]
+    note: >
+      NSF-61 does not substantiate this. It covers drinking-water system components, not lead
+      content; NSF-372 is the lead-content standard. Conflating them is the most common
+      compliance error in this category.
+
+  - phrase: potable water
+    aliases: ["drinking water", "potable-water", "safe for drinking water"]
+    requires_true: [potable_water_approved]
+
+  - phrase: nsf certified
+    aliases: ["nsf listed", "nsf approved"]
+    requires_any: [approvals]
+
+  - phrase: ul listed
+    aliases: ["ul certified", "ul approved"]
+    requires_any: [approvals]
+
+  - phrase: csa certified
+    aliases: ["csa listed", "csa approved"]
+    requires_any: [approvals]
+
+  - phrase: rohs compliant
+    aliases: ["rohs"]
+    requires_true: [rohs_compliant]
+
+  - phrase: made in usa
+    aliases: ["usa made", "american made", "domestically manufactured"]
+    requires_any: [country_of_origin]
+    note: A country-of-origin claim is a customs declaration, not marketing.
+
+# ----------------------------------------------------------------- technical tokens
+#
+# Prefixes that mark a standards or certification reference. Any token in generated copy
+# starting with one of these must appear verbatim in a verified attribute value — a plausible
+# but absent standard number is the most damaging thing copy can invent, because it reads as
+# authoritative and is trivially disprovable by a buyer.
+standards_prefixes:
+  - UL
+  - CSA
+  - NSF
+  - ANSI
+  - MSS
+  - ASME
+  - ASTM
+  - API
+  - AWWA
+  - FM
+  - IAPMO
+  - WRAS
+  - ISO
+  - EN
+  - DIN
+  - JIS
+
+# Patterns for material and alloy designations. A specific alloy is a specification, so an
+# invented one is a specification error dressed as prose.
+designation_patterns:
+  - '\bC\d{5}\b' # copper alloy UNS, e.g. C84400
+  - '\b(?:UNS\s*)?[SC]\d{5}\b' # UNS stainless or copper
+  - '\bR?PTFE\b'
+  - '\bPEEK\b'
+  - '\bBuna-?N\b'
+  - '\bEPDM\b'
+  - '\b3(?:04|16)L?\b' # stainless grades
+  - '\bSCH\s*(?:40|80|160)\b' # pipe schedule
+
+# ----------------------------------------------------------------- numeric tolerance
+#
+# A quantity in copy is matched against verified values after unit conversion. The tolerance is
+# relative and deliberately tight: rounding "600 psi" to "600" is fine, turning it into "650" is
+# not, and there is no editorial reason for copy to restate a number imprecisely.
+quantity_tolerance: 0.01

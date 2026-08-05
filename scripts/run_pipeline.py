@@ -36,6 +36,7 @@ from axiom.console import (
     build_bundle,
     jsonable,
     serialise_class,
+    serialise_copy,
     serialise_cost,
     serialise_document,
     serialise_pages,
@@ -51,6 +52,7 @@ from axiom.extract import (
     StubModelClient,
     UsageLedger,
 )
+from axiom.generate import ClaimVerdict, CopyGenerator, build_fact_sheet, load_policy
 from axiom.ingest import LocalArtifactStore, ingest_file
 from axiom.normalize import BrandMaster, clean_mpn, normalize_all
 from axiom.review import build_session
@@ -96,6 +98,14 @@ def main() -> int:
         help=(
             "maximum acceptable error rate on auto-published values, e.g. 0.05 for 5%%. "
             "This is the risk dial: a tighter budget publishes less."
+        ),
+    )
+    parser.add_argument(
+        "--generate-copy",
+        action="store_true",
+        help=(
+            "also generate marketing copy from the publishable values and claim-check it. "
+            "Costs one extra model call; copy that fails the check is reported, not published."
         ),
     )
     parser.add_argument("--tier", default="volume", help="cheapest tier to start the cascade")
@@ -225,6 +235,17 @@ def main() -> int:
     )
     exports = export_all(record, registry)
 
+    # --- stage 9: constrained copy generation ----------------------------------
+    # Runs last, and only from values that already survived every earlier gate. Generating
+    # before the acceptance decision would let a queued value into a product description.
+    generated = None
+    if args.generate_copy:
+        sheet = build_fact_sheet(record, registry)
+        generator = CopyGenerator(client, ModelCascade.load(), load_policy(), tier="mid")
+        generated = generator.generate(sheet)
+        usage.merge(generated.usage)
+        cost_usd = usage.cost_usd(tier_prices)
+
     session_path = None
     bundle_path = None
     if args.save_session:
@@ -268,6 +289,7 @@ def main() -> int:
                 cost_by_tier=usage.cost_by_tier(tier_prices),
                 prices=prices,
             ),
+            copy=serialise_copy(generated),
         )
 
     if args.out:
@@ -295,6 +317,8 @@ def main() -> int:
     _report_validate(report, record, brand)
     _report_decide(decisions, scores, feature_map, policy, calibrator)
     _report_cost(usage, prices, tier_prices, cost_usd, len(record.current_values()))
+    if generated is not None:
+        _report_copy(generated)
     _report_publish(certificate, exports, args.out)
     if session_path:
         print(f"\n  review session: {session_path.relative_to(REPO_ROOT)}")
@@ -361,6 +385,38 @@ def _report_cost(usage, prices, tier_prices, cost_usd, value_count: int) -> None
     )
 
 
+def _report_copy(generated) -> None:
+    print("\n" + "=" * 78)
+    print("GENERATED COPY")
+    print("=" * 78)
+
+    if generated.error:
+        print(f"  not generated: {generated.error}")
+        return
+
+    summary = generated.report.summary()
+    print(f"  model      {generated.model_id} ({generated.model_tier})")
+    print(f"  attempts   {generated.attempts}")
+    print(
+        f"  claims     {summary['claims']} checked — {summary['supported']} supported, "
+        f"{summary['unsupported']} unsupported, {summary['banned']} banned"
+    )
+    print(f"\n  {generated.headline}")
+    if generated.short_description:
+        print(f"  {generated.short_description}")
+
+    for claim in generated.report.claims:
+        if claim.verdict is not ClaimVerdict.SUPPORTED:
+            mark = "BANNED" if claim.verdict is ClaimVerdict.BANNED else "UNSUPPORTED"
+            print(f"    {mark:<12}[{claim.kind.value}] {claim.text!r} — {claim.reason}")
+
+    print()
+    if generated.published:
+        print("  publishable: every checkable assertion traces to a verified attribute")
+    else:
+        print("  BLOCKED: copy is withheld while any claim is unsupported")
+
+
 def _effective_date(prices) -> str:
     dates = {
         price.effective_date for price in prices.models.values() if price.effective_date
@@ -386,6 +442,7 @@ def _save_bundle(
     policy,
     calibrator,
     cost=None,
+    copy=None,
 ) -> Path:
     """Write one SKU's console bundle to ``data/console/``.
 
@@ -403,6 +460,7 @@ def _save_bundle(
         normalization_issues=normalization_issues,
         validation=validation,
         cost=cost,
+        copy=copy,
         scores=scores,
         features=features,
         decisions=decisions,

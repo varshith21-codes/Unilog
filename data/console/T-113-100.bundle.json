@@ -18,8 +18,8 @@
       "source_document_ids": [
         "gv200@6e472dd4"
       ],
-      "created_at": "2026-08-03T18:15:48.351960+00:00",
-      "updated_at": "2026-08-03T18:15:48.352112+00:00"
+      "created_at": "2026-08-05T03:16:58.149266+00:00",
+      "updated_at": "2026-08-05T03:16:58.149423+00:00"
     },
     "classifications": [
       {
@@ -38,7 +38,7 @@
           0.92,
           0.92
         ],
-        "rationale": "The product title explicitly states 'Bronze Gate Valve', and the material specifications confirm the body and wedge are made of Bronze. This matches the class definition for Bronze Gate Valves.",
+        "rationale": "The product title explicitly identifies it as a 'Bronze Gate Valve', and the material specifications confirm the body and wedge are made of bronze, matching the class definition.",
         "method": "model_adjudicated",
         "alternatives": [
           {
@@ -87,7 +87,7 @@
       "method": "model_adjudicated",
       "abstained": false,
       "input_tokens": 566,
-      "output_tokens": 80
+      "output_tokens": 77
     },
     "classification_candidates": [
       {
@@ -118,10 +118,10 @@
             "span_id": "sp_6e472dd4_12",
             "document_id": "gv200@6e472dd4",
             "document_sha256": "6e472dd48f1020ef4f05c5f66e2f5852341c75d9dc03375471ea95edf617ae1b",
-            "quote": "Approvals ...................... UL listed, MSS SP-80",
+            "quote": "UL listed, MSS SP-80",
             "page": 1,
             "bbox": {
-              "x0": 66.0,
+              "x0": 264.0,
               "y0": 258.0,
               "x1": 384.0,
               "y1": 270.0
@@ -152,11 +152,11 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-03T18:15:48.340913Z",
-        "score": 0.5377,
+        "created_at": "2026-08-05T03:16:58.138735Z",
+        "score": 0.6,
         "decision": {
           "attribute_code": "approvals",
-          "score": 0.5377,
+          "score": 0.6,
           "accepted": false,
           "status": "queued_for_review",
           "reason_code": "blocking_validation",
@@ -166,14 +166,14 @@
           "evidence_match_score": 1.0,
           "evidence_verified": 1.0,
           "citation_precision": 0.4,
-          "quote_specificity": 0.3774,
+          "quote_specificity": 1.0,
           "self_reported_certainty": 0.9,
           "validation_pass_rate": 0.0,
           "validation_clean": 0.0,
           "is_extraction": 1.0,
           "is_inference": 0.0,
           "normalized": 1.0,
-          "attribute_prior": 0.75,
+          "attribute_prior": 0.775,
           "source_prior": 0.5,
           "tier_cost": 0.25
         },
@@ -196,10 +196,10 @@
             "span_id": "sp_6e472dd4_3",
             "document_id": "gv200@6e472dd4",
             "document_sha256": "6e472dd48f1020ef4f05c5f66e2f5852341c75d9dc03375471ea95edf617ae1b",
-            "quote": "Body / Bonnet .................. Bronze C89833",
+            "quote": "Bronze C89833",
             "page": 1,
             "bbox": {
-              "x0": 66.0,
+              "x0": 264.0,
               "y0": 102.0,
               "x1": 342.0,
               "y1": 114.0
@@ -219,21 +219,21 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-03T18:15:48.338764Z",
-        "score": 0.7283,
+        "created_at": "2026-08-05T03:16:58.136877Z",
+        "score": 0.8,
         "decision": {
           "attribute_code": "body_material",
-          "score": 0.7283,
+          "score": 0.8,
           "accepted": true,
           "status": "auto_accepted",
           "reason_code": "auto_accepted",
-          "detail": "score 0.728 >= threshold 0.685"
+          "detail": "score 0.800 >= threshold 0.685"
         },
         "features": {
           "evidence_match_score": 1.0,
           "evidence_verified": 1.0,
           "citation_precision": 0.4,
-          "quote_specificity": 0.2826,
+          "quote_specificity": 1.0,
           "self_reported_certainty": 0.9,
           "validation_pass_rate": 0.5,
           "validation_clean": 1.0,
@@ -263,15 +263,15 @@
             "span_id": "sp_6e472dd4_16",
             "document_id": "gv200@6e472dd4",
             "document_sha256": "6e472dd48f1020ef4f05c5f66e2f5852341c75d9dc03375471ea95edf617ae1b",
-            "quote": "T-113-100  | 1\"   | 2-1/2\"        | 10",
+            "quote": "10",
             "page": 1,
             "bbox": {
-              "x0": 66.0,
+              "x0": 336.0,
               "y0": 366.0,
               "x1": 348.0,
               "y1": 378.0
             },
-            "table_ref": "t1:r3",
+            "table_ref": "t1:r3:c3",
             "quote_verified": true,
             "match_score": 1.0
           }
@@ -286,21 +286,21 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-03T18:15:48.341470Z",
-        "score": 0.7803,
+        "created_at": "2026-08-05T03:16:58.139092Z",
+        "score": 0.95,
         "decision": {
           "attribute_code": "case_quantity",
-          "score": 0.7803,
+          "score": 0.95,
           "accepted": true,
           "status": "auto_accepted",
           "reason_code": "auto_accepted",
-          "detail": "score 0.780 >= threshold 0.685"
+          "detail": "score 0.950 >= threshold 0.685"
         },
         "features": {
           "evidence_match_score": 1.0,
           "evidence_verified": 1.0,
-          "citation_precision": 0.7,
-          "quote_specificity": 0.0526,
+          "citation_precision": 1.0,
+          "quote_specificity": 1.0,
           "self_reported_certainty": 0.9,
           "validation_pass_rate": 0.5,
           "validation_clean": 1.0,
@@ -314,7 +314,7 @@
         "is_publishable": true,
         "has_verified_evidence": true,
         "citation_summary": [
-          "gv200@6e472dd4 p.1 t1:r3"
+          "gv200@6e472dd4 p.1 t1:r3:c3"
         ]
       },
       {
@@ -330,10 +330,10 @@
             "span_id": "sp_6e472dd4_13",
             "document_id": "gv200@6e472dd4",
             "document_sha256": "6e472dd48f1020ef4f05c5f66e2f5852341c75d9dc03375471ea95edf617ae1b",
-            "quote": "Country of Origin .............. United States",
+            "quote": "United States",
             "page": 1,
             "bbox": {
-              "x0": 66.0,
+              "x0": 264.0,
               "y0": 294.0,
               "x1": 342.0,
               "y1": 306.0
@@ -353,21 +353,21 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-03T18:15:48.341279Z",
-        "score": 0.7283,
+        "created_at": "2026-08-05T03:16:58.139001Z",
+        "score": 0.8,
         "decision": {
           "attribute_code": "country_of_origin",
-          "score": 0.7283,
+          "score": 0.8,
           "accepted": true,
           "status": "auto_accepted",
           "reason_code": "auto_accepted",
-          "detail": "score 0.728 >= threshold 0.685"
+          "detail": "score 0.800 >= threshold 0.685"
         },
         "features": {
           "evidence_match_score": 1.0,
           "evidence_verified": 1.0,
           "citation_precision": 0.4,
-          "quote_specificity": 0.2826,
+          "quote_specificity": 1.0,
           "self_reported_certainty": 0.9,
           "validation_pass_rate": 0.5,
           "validation_clean": 1.0,
@@ -397,10 +397,10 @@
             "span_id": "sp_6e472dd4_4",
             "document_id": "gv200@6e472dd4",
             "document_sha256": "6e472dd48f1020ef4f05c5f66e2f5852341c75d9dc03375471ea95edf617ae1b",
-            "quote": "End Connection ................. Solder ends, C x C",
+            "quote": "Solder ends, C x C",
             "page": 1,
             "bbox": {
-              "x0": 66.0,
+              "x0": 264.0,
               "y0": 246.0,
               "x1": 372.0,
               "y1": 258.0
@@ -441,21 +441,21 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-03T18:15:48.338976Z",
-        "score": 0.6853,
+        "created_at": "2026-08-05T03:16:58.137135Z",
+        "score": 0.75,
         "decision": {
           "attribute_code": "end_connection",
-          "score": 0.6853,
+          "score": 0.75,
           "accepted": true,
           "status": "auto_accepted",
           "reason_code": "auto_accepted",
-          "detail": "score 0.685 >= threshold 0.685"
+          "detail": "score 0.750 >= threshold 0.685"
         },
         "features": {
           "evidence_match_score": 1.0,
           "evidence_verified": 1.0,
           "citation_precision": 0.4,
-          "quote_specificity": 0.3529,
+          "quote_specificity": 1.0,
           "self_reported_certainty": 0.9,
           "validation_pass_rate": 0.0,
           "validation_clean": 1.0,
@@ -485,15 +485,15 @@
             "span_id": "sp_6e472dd4_6",
             "document_id": "gv200@6e472dd4",
             "document_sha256": "6e472dd48f1020ef4f05c5f66e2f5852341c75d9dc03375471ea95edf617ae1b",
-            "quote": "T-113-100  | 1\"   | 2-1/2\"        | 10",
+            "quote": "Handwheel",
             "page": 1,
             "bbox": {
-              "x0": 66.0,
-              "y0": 366.0,
-              "x1": 348.0,
-              "y1": 378.0
+              "x0": 240.00000000000003,
+              "y0": 330.0,
+              "x1": 318.0,
+              "y1": 342.0
             },
-            "table_ref": "t1:r3",
+            "table_ref": "t1:r0:c2",
             "quote_verified": true,
             "match_score": 1.0
           }
@@ -508,21 +508,21 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-03T18:15:48.339299Z",
-        "score": 0.7987,
+        "created_at": "2026-08-05T03:16:58.137423Z",
+        "score": 0.95,
         "decision": {
           "attribute_code": "handle_type",
-          "score": 0.7987,
+          "score": 0.95,
           "accepted": true,
           "status": "auto_accepted",
           "reason_code": "auto_accepted",
-          "detail": "score 0.799 >= threshold 0.685"
+          "detail": "score 0.950 >= threshold 0.685"
         },
         "features": {
           "evidence_match_score": 1.0,
           "evidence_verified": 1.0,
-          "citation_precision": 0.7,
-          "quote_specificity": 0.2368,
+          "citation_precision": 1.0,
+          "quote_specificity": 1.0,
           "self_reported_certainty": 0.9,
           "validation_pass_rate": 0.5,
           "validation_clean": 1.0,
@@ -536,7 +536,7 @@
         "is_publishable": true,
         "has_verified_evidence": true,
         "citation_summary": [
-          "gv200@6e472dd4 p.1 t1:r3"
+          "gv200@6e472dd4 p.1 t1:r0:c2"
         ]
       },
       {
@@ -552,10 +552,10 @@
             "span_id": "sp_6e472dd4_10",
             "document_id": "gv200@6e472dd4",
             "document_sha256": "6e472dd48f1020ef4f05c5f66e2f5852341c75d9dc03375471ea95edf617ae1b",
-            "quote": "Lead Free ...................... Certified to NSF/ANSI 372",
+            "quote": "Certified to NSF/ANSI 372",
             "page": 1,
             "bbox": {
-              "x0": 66.0,
+              "x0": 264.0,
               "y0": 270.0,
               "x1": 414.0,
               "y1": 282.0
@@ -575,21 +575,21 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-03T18:15:48.340130Z",
-        "score": 0.7069,
+        "created_at": "2026-08-05T03:16:58.138209Z",
+        "score": 0.716,
         "decision": {
           "attribute_code": "lead_free_compliant",
-          "score": 0.7069,
+          "score": 0.716,
           "accepted": true,
           "status": "auto_accepted",
           "reason_code": "auto_accepted",
-          "detail": "score 0.707 >= threshold 0.685"
+          "detail": "score 0.716 >= threshold 0.685"
         },
         "features": {
           "evidence_match_score": 1.0,
           "evidence_verified": 1.0,
           "citation_precision": 0.4,
-          "quote_specificity": 0.069,
+          "quote_specificity": 0.16,
           "self_reported_certainty": 0.9,
           "validation_pass_rate": 0.5,
           "validation_clean": 1.0,
@@ -622,15 +622,15 @@
             "span_id": "sp_6e472dd4_1",
             "document_id": "gv200@6e472dd4",
             "document_sha256": "6e472dd48f1020ef4f05c5f66e2f5852341c75d9dc03375471ea95edf617ae1b",
-            "quote": "T-113-100  | 1\"   | 2-1/2\"        | 10",
+            "quote": "1\"",
             "page": 1,
             "bbox": {
-              "x0": 66.0,
+              "x0": 168.0,
               "y0": 366.0,
-              "x1": 348.0,
+              "x1": 192.0,
               "y1": 378.0
             },
-            "table_ref": "t1:r3",
+            "table_ref": "t1:r3:c1",
             "quote_verified": true,
             "match_score": 1.0
           }
@@ -645,21 +645,21 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-03T18:15:48.338111Z",
-        "score": 0.7803,
+        "created_at": "2026-08-05T03:16:58.136377Z",
+        "score": 0.95,
         "decision": {
           "attribute_code": "nominal_size",
-          "score": 0.7803,
+          "score": 0.95,
           "accepted": true,
           "status": "auto_accepted",
           "reason_code": "auto_accepted",
-          "detail": "score 0.780 >= threshold 0.685"
+          "detail": "score 0.950 >= threshold 0.685"
         },
         "features": {
           "evidence_match_score": 1.0,
           "evidence_verified": 1.0,
-          "citation_precision": 0.7,
-          "quote_specificity": 0.0526,
+          "citation_precision": 1.0,
+          "quote_specificity": 1.0,
           "self_reported_certainty": 0.9,
           "validation_pass_rate": 0.5,
           "validation_clean": 1.0,
@@ -673,7 +673,7 @@
         "is_publishable": true,
         "has_verified_evidence": true,
         "citation_summary": [
-          "gv200@6e472dd4 p.1 t1:r3"
+          "gv200@6e472dd4 p.1 t1:r3:c1"
         ]
       },
       {
@@ -689,10 +689,10 @@
             "span_id": "sp_6e472dd4_11",
             "document_id": "gv200@6e472dd4",
             "document_sha256": "6e472dd48f1020ef4f05c5f66e2f5852341c75d9dc03375471ea95edf617ae1b",
-            "quote": "Potable Water .................. NSF/ANSI 61 certified",
+            "quote": "NSF/ANSI 61 certified",
             "page": 1,
             "bbox": {
-              "x0": 66.0,
+              "x0": 264.0,
               "y0": 282.0,
               "x1": 390.0,
               "y1": 294.0
@@ -723,11 +723,11 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-03T18:15:48.340561Z",
-        "score": 0.5074,
+        "created_at": "2026-08-05T03:16:58.138478Z",
+        "score": 0.519,
         "decision": {
           "attribute_code": "potable_water_approved",
-          "score": 0.5074,
+          "score": 0.519,
           "accepted": false,
           "status": "queued_for_review",
           "reason_code": "blocking_validation",
@@ -737,7 +737,7 @@
           "evidence_match_score": 1.0,
           "evidence_verified": 1.0,
           "citation_precision": 0.4,
-          "quote_specificity": 0.0741,
+          "quote_specificity": 0.1905,
           "self_reported_certainty": 0.9,
           "validation_pass_rate": 0.0,
           "validation_clean": 0.0,
@@ -770,10 +770,10 @@
             "span_id": "sp_6e472dd4_2",
             "document_id": "gv200@6e472dd4",
             "document_sha256": "6e472dd48f1020ef4f05c5f66e2f5852341c75d9dc03375471ea95edf617ae1b",
-            "quote": "Non-Shock Cold Working Pressure  200 PSI WOG",
+            "quote": "200 PSI WOG",
             "page": 1,
             "bbox": {
-              "x0": 66.0,
+              "x0": 264.0,
               "y0": 186.0,
               "x1": 330.0,
               "y1": 198.0
@@ -804,21 +804,21 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-03T18:15:48.338533Z",
-        "score": 0.775,
+        "created_at": "2026-08-05T03:16:58.136647Z",
+        "score": 0.85,
         "decision": {
           "attribute_code": "pressure_rating_wog",
-          "score": 0.775,
+          "score": 0.85,
           "accepted": true,
           "status": "auto_accepted",
           "reason_code": "auto_accepted",
-          "detail": "score 0.775 >= threshold 0.685"
+          "detail": "score 0.850 >= threshold 0.685"
         },
         "features": {
           "evidence_match_score": 1.0,
           "evidence_verified": 1.0,
           "citation_precision": 0.4,
-          "quote_specificity": 0.25,
+          "quote_specificity": 1.0,
           "self_reported_certainty": 0.9,
           "validation_pass_rate": 1.0,
           "validation_clean": 1.0,
@@ -871,7 +871,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-03T18:15:48.337820Z",
+        "created_at": "2026-08-05T03:16:58.136281Z",
         "score": 0.725,
         "decision": {
           "attribute_code": "product_series",
@@ -918,10 +918,10 @@
             "span_id": "sp_6e472dd4_8",
             "document_id": "gv200@6e472dd4",
             "document_sha256": "6e472dd48f1020ef4f05c5f66e2f5852341c75d9dc03375471ea95edf617ae1b",
-            "quote": "Saturated Steam ................ 125 PSI WSP",
+            "quote": "125 PSI WSP",
             "page": 1,
             "bbox": {
-              "x0": 66.0,
+              "x0": 264.0,
               "y0": 198.0,
               "x1": 330.0,
               "y1": 210.0
@@ -952,21 +952,21 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-03T18:15:48.339666Z",
-        "score": 0.775,
+        "created_at": "2026-08-05T03:16:58.137907Z",
+        "score": 0.85,
         "decision": {
           "attribute_code": "steam_pressure_rating",
-          "score": 0.775,
+          "score": 0.85,
           "accepted": true,
           "status": "auto_accepted",
           "reason_code": "auto_accepted",
-          "detail": "score 0.775 >= threshold 0.685"
+          "detail": "score 0.850 >= threshold 0.685"
         },
         "features": {
           "evidence_match_score": 1.0,
           "evidence_verified": 1.0,
           "citation_precision": 0.4,
-          "quote_specificity": 0.25,
+          "quote_specificity": 1.0,
           "self_reported_certainty": 0.9,
           "validation_pass_rate": 1.0,
           "validation_clean": 1.0,
@@ -996,10 +996,10 @@
             "span_id": "sp_6e472dd4_5",
             "document_id": "gv200@6e472dd4",
             "document_sha256": "6e472dd48f1020ef4f05c5f66e2f5852341c75d9dc03375471ea95edf617ae1b",
-            "quote": "Stem ........................... Silicon Bronze",
+            "quote": "Silicon Bronze",
             "page": 1,
             "bbox": {
-              "x0": 66.0,
+              "x0": 264.0,
               "y0": 126.0,
               "x1": 348.0,
               "y1": 138.0
@@ -1019,21 +1019,21 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-03T18:15:48.339136Z",
-        "score": 0.7298,
+        "created_at": "2026-08-05T03:16:58.137350Z",
+        "score": 0.8,
         "decision": {
           "attribute_code": "stem_material",
-          "score": 0.7298,
+          "score": 0.8,
           "accepted": true,
           "status": "auto_accepted",
           "reason_code": "auto_accepted",
-          "detail": "score 0.730 >= threshold 0.685"
+          "detail": "score 0.800 >= threshold 0.685"
         },
         "features": {
           "evidence_match_score": 1.0,
           "evidence_verified": 1.0,
           "citation_precision": 0.4,
-          "quote_specificity": 0.2979,
+          "quote_specificity": 1.0,
           "self_reported_certainty": 0.9,
           "validation_pass_rate": 0.5,
           "validation_clean": 1.0,
@@ -1067,10 +1067,10 @@
             "span_id": "sp_6e472dd4_7",
             "document_id": "gv200@6e472dd4",
             "document_sha256": "6e472dd48f1020ef4f05c5f66e2f5852341c75d9dc03375471ea95edf617ae1b",
-            "quote": "Temperature Range .............. -20 degF to 406 degF",
+            "quote": "-20 degF to 406 degF",
             "page": 1,
             "bbox": {
-              "x0": 66.0,
+              "x0": 264.0,
               "y0": 210.0,
               "x1": 384.0,
               "y1": 222.0
@@ -1090,21 +1090,21 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-03T18:15:48.339494Z",
-        "score": 0.7377,
+        "created_at": "2026-08-05T03:16:58.137674Z",
+        "score": 0.8,
         "decision": {
           "attribute_code": "temperature_range",
-          "score": 0.7377,
+          "score": 0.8,
           "accepted": true,
           "status": "auto_accepted",
           "reason_code": "auto_accepted",
-          "detail": "score 0.738 >= threshold 0.685"
+          "detail": "score 0.800 >= threshold 0.685"
         },
         "features": {
           "evidence_match_score": 1.0,
           "evidence_verified": 1.0,
           "citation_precision": 0.4,
-          "quote_specificity": 0.3774,
+          "quote_specificity": 1.0,
           "self_reported_certainty": 0.9,
           "validation_pass_rate": 0.5,
           "validation_clean": 1.0,
@@ -1133,7 +1133,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "request_from_supplier",
         "is_required": false,
-        "detected_at": "2026-08-03T18:15:48.339702Z"
+        "detected_at": "2026-08-05T03:16:58.137940Z"
       },
       {
         "attribute_code": "gtin",
@@ -1145,7 +1145,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "request_from_supplier",
         "is_required": false,
-        "detected_at": "2026-08-03T18:15:48.341314Z"
+        "detected_at": "2026-08-05T03:16:58.139017Z"
       },
       {
         "attribute_code": "each_weight",
@@ -1157,7 +1157,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "request_from_supplier",
         "is_required": false,
-        "detected_at": "2026-08-03T18:15:48.341323Z"
+        "detected_at": "2026-08-05T03:16:58.139028Z"
       },
       {
         "attribute_code": "selling_uom",
@@ -1169,7 +1169,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "request_from_supplier",
         "is_required": true,
-        "detected_at": "2026-08-03T18:15:48.341480Z"
+        "detected_at": "2026-08-05T03:16:58.139105Z"
       }
     ],
     "extraction": {
@@ -1179,9 +1179,11 @@
       "rejected_unverifiable": 0,
       "citation_coverage": 1.0,
       "input_tokens": 2853,
-      "output_tokens": 1294,
+      "output_tokens": 1182,
       "escalations": 0,
-      "latency_ms": 5413
+      "latency_ms": 5196,
+      "sku_found_in_document": true,
+      "targeting_failed": false
     },
     "normalization_issues": [
       {
@@ -1383,10 +1385,10 @@
       }
     },
     "certificate": {
-      "certificate_id": "ec_974f249a983d",
+      "certificate_id": "ec_5610568c77cd",
       "sku": "T-113-100",
       "tenant_id": "demo",
-      "generated_at": "2026-08-03T18:15:48.359892Z",
+      "generated_at": "2026-08-05T03:16:58.166895Z",
       "schema_version": "PLB.VLV.GATE.BRZ@v1",
       "pipeline_version": "axiom-0.1.0",
       "classifications": [
@@ -1473,12 +1475,12 @@
               "sha256": "6e472dd4\u2026",
               "page": 1,
               "bbox": [
-                66.0,
+                168.0,
                 366.0,
-                348.0,
+                192.0,
                 378.0
               ],
-              "quote": "T-113-100  | 1\"   | 2-1/2\"        | 10",
+              "quote": "1\"",
               "verified": true
             }
           ],
@@ -1502,12 +1504,12 @@
               "sha256": "6e472dd4\u2026",
               "page": 1,
               "bbox": [
-                66.0,
+                264.0,
                 186.0,
                 330.0,
                 198.0
               ],
-              "quote": "Non-Shock Cold Working Pressure  200 PSI WOG",
+              "quote": "200 PSI WOG",
               "verified": true
             }
           ],
@@ -1535,12 +1537,12 @@
               "sha256": "6e472dd4\u2026",
               "page": 1,
               "bbox": [
-                66.0,
+                264.0,
                 102.0,
                 342.0,
                 114.0
               ],
-              "quote": "Body / Bonnet .................. Bronze C89833",
+              "quote": "Bronze C89833",
               "verified": true
             }
           ],
@@ -1561,12 +1563,12 @@
               "sha256": "6e472dd4\u2026",
               "page": 1,
               "bbox": [
-                66.0,
+                264.0,
                 246.0,
                 372.0,
                 258.0
               ],
-              "quote": "End Connection ................. Solder ends, C x C",
+              "quote": "Solder ends, C x C",
               "verified": true
             }
           ],
@@ -1600,12 +1602,12 @@
               "sha256": "6e472dd4\u2026",
               "page": 1,
               "bbox": [
-                66.0,
+                264.0,
                 126.0,
                 348.0,
                 138.0
               ],
-              "quote": "Stem ........................... Silicon Bronze",
+              "quote": "Silicon Bronze",
               "verified": true
             }
           ],
@@ -1626,12 +1628,12 @@
               "sha256": "6e472dd4\u2026",
               "page": 1,
               "bbox": [
-                66.0,
-                366.0,
-                348.0,
-                378.0
+                240.00000000000003,
+                330.0,
+                318.0,
+                342.0
               ],
-              "quote": "T-113-100  | 1\"   | 2-1/2\"        | 10",
+              "quote": "Handwheel",
               "verified": true
             }
           ],
@@ -1656,12 +1658,12 @@
               "sha256": "6e472dd4\u2026",
               "page": 1,
               "bbox": [
-                66.0,
+                264.0,
                 210.0,
                 384.0,
                 222.0
               ],
-              "quote": "Temperature Range .............. -20 degF to 406 degF",
+              "quote": "-20 degF to 406 degF",
               "verified": true
             }
           ],
@@ -1685,12 +1687,12 @@
               "sha256": "6e472dd4\u2026",
               "page": 1,
               "bbox": [
-                66.0,
+                264.0,
                 198.0,
                 330.0,
                 210.0
               ],
-              "quote": "Saturated Steam ................ 125 PSI WSP",
+              "quote": "125 PSI WSP",
               "verified": true
             }
           ],
@@ -1718,12 +1720,12 @@
               "sha256": "6e472dd4\u2026",
               "page": 1,
               "bbox": [
-                66.0,
+                264.0,
                 270.0,
                 414.0,
                 282.0
               ],
-              "quote": "Lead Free ...................... Certified to NSF/ANSI 372",
+              "quote": "Certified to NSF/ANSI 372",
               "verified": true
             }
           ],
@@ -1744,12 +1746,12 @@
               "sha256": "6e472dd4\u2026",
               "page": 1,
               "bbox": [
-                66.0,
+                264.0,
                 294.0,
                 342.0,
                 306.0
               ],
-              "quote": "Country of Origin .............. United States",
+              "quote": "United States",
               "verified": true
             }
           ],
@@ -1770,12 +1772,12 @@
               "sha256": "6e472dd4\u2026",
               "page": 1,
               "bbox": [
-                66.0,
+                336.0,
                 366.0,
                 348.0,
                 378.0
               ],
-              "quote": "T-113-100  | 1\"   | 2-1/2\"        | 10",
+              "quote": "10",
               "verified": true
             }
           ],
@@ -1845,10 +1847,10 @@
             "richness": 0.1
           }
         },
-        "cost_usd": 0.000789,
-        "wall_clock_seconds": 7.21
+        "cost_usd": 0.000743,
+        "wall_clock_seconds": 7.46
       },
-      "signature": "sha256:a31f42717f68edf3180f6f0b3adf4208f46378fb9b97d0c959a0ec4e6f02af25",
+      "signature": "sha256:344720120074de72a8a83db033a36568f5e7da5ffd4f81bcacb199655ac3d592",
       "signature_verified": true
     },
     "channels": [
@@ -1900,23 +1902,27 @@
       "conflicts": []
     },
     "cost": {
-      "calls": 2,
+      "calls": 3,
       "escalations": 0,
-      "input_tokens": 3419,
-      "output_tokens": 1374,
-      "latency_ms": 7208,
+      "input_tokens": 3939,
+      "output_tokens": 1505,
+      "latency_ms": 10095,
       "calls_by_tier": {
-        "volume": 2
+        "volume": 2,
+        "mid": 1
       },
       "input_by_tier": {
-        "volume": 3419
+        "volume": 3419,
+        "mid": 520
       },
       "output_by_tier": {
-        "volume": 1374
+        "volume": 1259,
+        "mid": 246
       },
-      "cost_usd": 0.000789,
+      "cost_usd": 0.001596,
       "cost_by_tier": {
-        "volume": 0.000789
+        "volume": 0.000743,
+        "mid": 0.000853
       },
       "priced": true,
       "price_source": {
@@ -1925,9 +1931,150 @@
         "source": "AWS Price List Query API (AmazonBedrock)",
         "priced_models": 5,
         "unpriced_models": [],
-        "age_days": 0.5,
+        "age_days": 1.9,
         "stale": false
       }
+    },
+    "copy": {
+      "sku": "T-113-100",
+      "published": true,
+      "headline": "NIBCO T-113 1\" Bronze Gate Valve",
+      "short_description": "This 1\" NIBCO bronze gate valve features solder end connections and a handwheel handle. It is rated for 200 psi WOG and 125 psi WSP.",
+      "long_description": "The NIBCO T-113 series gate valve is designed for flow control in plumbing systems. It features a body made of Bronze C89833 and a silicon bronze stem. The valve operates with a handwheel handle and utilizes solder end connections for installation.\n\nThis valve is rated for 200 psi WOG and 125 psi WSP. It operates within a temperature range of -20 to 406 degF. The product is lead-free compliant and manufactured in the United States.",
+      "bullets": [
+        "Body Material: Bronze C89833",
+        "End Connection: Solder",
+        "Pressure Rating: 200 psi WOG",
+        "Steam Pressure Rating: 125 psi WSP",
+        "Temperature Range: -20 to 406 degF",
+        "Lead-Free Compliant: Yes"
+      ],
+      "attempts": 1,
+      "prompt_version": "copy@v1",
+      "model_id": "zai.glm-4.7",
+      "model_tier": "mid",
+      "error": null,
+      "claim_check": {
+        "claims": 14,
+        "supported": 14,
+        "unsupported": 0,
+        "banned": 0,
+        "passed": true
+      },
+      "claims": [
+        {
+          "kind": "quantity",
+          "text": "1\"",
+          "verdict": "supported",
+          "reason": "matches verified 'nominal_size'",
+          "field": "headline",
+          "supported_by": "nominal_size"
+        },
+        {
+          "kind": "quantity",
+          "text": "1\"",
+          "verdict": "supported",
+          "reason": "matches verified 'nominal_size'",
+          "field": "short_description",
+          "supported_by": "nominal_size"
+        },
+        {
+          "kind": "quantity",
+          "text": "200 psi",
+          "verdict": "supported",
+          "reason": "matches verified 'pressure_rating_wog'",
+          "field": "short_description",
+          "supported_by": "pressure_rating_wog"
+        },
+        {
+          "kind": "quantity",
+          "text": "125 psi",
+          "verdict": "supported",
+          "reason": "matches verified 'steam_pressure_rating'",
+          "field": "short_description",
+          "supported_by": "steam_pressure_rating"
+        },
+        {
+          "kind": "regulated",
+          "text": "lead-free",
+          "verdict": "supported",
+          "reason": "substantiated by verified attribute 'lead_free_compliant'",
+          "field": "long_description",
+          "supported_by": "lead_free_compliant"
+        },
+        {
+          "kind": "quantity",
+          "text": "200 psi",
+          "verdict": "supported",
+          "reason": "matches verified 'pressure_rating_wog'",
+          "field": "long_description",
+          "supported_by": "pressure_rating_wog"
+        },
+        {
+          "kind": "quantity",
+          "text": "125 psi",
+          "verdict": "supported",
+          "reason": "matches verified 'steam_pressure_rating'",
+          "field": "long_description",
+          "supported_by": "steam_pressure_rating"
+        },
+        {
+          "kind": "quantity",
+          "text": "406 degF",
+          "verdict": "supported",
+          "reason": "matches verified 'temperature_range'",
+          "field": "long_description",
+          "supported_by": "temperature_range"
+        },
+        {
+          "kind": "designation",
+          "text": "C89833",
+          "verdict": "supported",
+          "reason": "appears in verified attribute 'body_material'",
+          "field": "long_description",
+          "supported_by": "body_material"
+        },
+        {
+          "kind": "regulated",
+          "text": "lead-free",
+          "verdict": "supported",
+          "reason": "substantiated by verified attribute 'lead_free_compliant'",
+          "field": "bullets",
+          "supported_by": "lead_free_compliant"
+        },
+        {
+          "kind": "quantity",
+          "text": "200 psi",
+          "verdict": "supported",
+          "reason": "matches verified 'pressure_rating_wog'",
+          "field": "bullets",
+          "supported_by": "pressure_rating_wog"
+        },
+        {
+          "kind": "quantity",
+          "text": "125 psi",
+          "verdict": "supported",
+          "reason": "matches verified 'steam_pressure_rating'",
+          "field": "bullets",
+          "supported_by": "steam_pressure_rating"
+        },
+        {
+          "kind": "quantity",
+          "text": "406 degF",
+          "verdict": "supported",
+          "reason": "matches verified 'temperature_range'",
+          "field": "bullets",
+          "supported_by": "temperature_range"
+        },
+        {
+          "kind": "designation",
+          "text": "C89833",
+          "verdict": "supported",
+          "reason": "appears in verified attribute 'body_material'",
+          "field": "bullets",
+          "supported_by": "body_material"
+        }
+      ]
     }
   },
   "document": {
@@ -1935,7 +2082,7 @@
     "uri": "local://6e/47/6e472dd48f1020ef4f05c5f66e2f5852341c75d9dc03375471ea95edf617ae1b.txt",
     "sha256": "6e472dd48f1020ef4f05c5f66e2f5852341c75d9dc03375471ea95edf617ae1b",
     "doc_type": "spec_sheet",
-    "fetched_at": "2026-08-03T18:15:40.568478Z",
+    "fetched_at": "2026-08-05T03:16:50.312381Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": null,

@@ -144,13 +144,17 @@ attributes:
       Whether the valve bore matches the nominal pipe size (full port) or is reduced.
       Full port valves have a materially higher flow coefficient at the same nominal size.
     example_values: ["Full Port", "Standard Port"]
+    # The bare "Full" / "Reduced" aliases are what ordering tables actually print. A column
+    # headed "Port" holding the cell "Full" is unambiguous in context, and without these the
+    # value normalises to nothing and the attribute is reported absent on a datasheet that
+    # states it plainly.
     allowed_values:
       - value: Full Port
-        aliases: ["full bore", "fullport", "fp"]
+        aliases: ["full bore", "fullport", "fp", "full"]
       - value: Standard Port
-        aliases: ["regular port", "conventional port"]
+        aliases: ["regular port", "conventional port", "standard", "std"]
       - value: Reduced Port
-        aliases: ["reduced bore", "restricted port"]
+        aliases: ["reduced bore", "restricted port", "reduced"]
 
   - code: end_connection
     name: End Connection

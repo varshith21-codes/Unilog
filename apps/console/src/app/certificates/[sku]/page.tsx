@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { GeneratedCopyPanel } from "@/components/generated-copy";
 import {
   AlertIcon,
   ArrowIcon,
@@ -462,6 +463,13 @@ export default async function CertificatePage({
           ))}
         </div>
       </section>
+
+      {/* ---------------------------------------------------------------- generated copy */}
+      {bundle.copy ? (
+        <div className="mt-16">
+          <GeneratedCopyPanel copy={bundle.copy} />
+        </div>
+      ) : null}
 
       {/* ---------------------------------------------------------------- locator legend */}
       <section className="mt-16">

@@ -1,8 +1,8 @@
 {
-  "certificate_id": "ec_974f249a983d",
+  "certificate_id": "ec_5610568c77cd",
   "sku": "T-113-100",
   "tenant_id": "demo",
-  "generated_at": "2026-08-03T18:15:48.359892+00:00",
+  "generated_at": "2026-08-05T03:16:58.166895+00:00",
   "schema_version": "PLB.VLV.GATE.BRZ@v1",
   "pipeline_version": "axiom-0.1.0",
   "classifications": [
@@ -89,12 +89,12 @@
           "sha256": "6e472dd4\u2026",
           "page": 1,
           "bbox": [
-            66.0,
+            168.0,
             366.0,
-            348.0,
+            192.0,
             378.0
           ],
-          "quote": "T-113-100  | 1\"   | 2-1/2\"        | 10",
+          "quote": "1\"",
           "verified": true
         }
       ],
@@ -118,12 +118,12 @@
           "sha256": "6e472dd4\u2026",
           "page": 1,
           "bbox": [
-            66.0,
+            264.0,
             186.0,
             330.0,
             198.0
           ],
-          "quote": "Non-Shock Cold Working Pressure  200 PSI WOG",
+          "quote": "200 PSI WOG",
           "verified": true
         }
       ],
@@ -151,12 +151,12 @@
           "sha256": "6e472dd4\u2026",
           "page": 1,
           "bbox": [
-            66.0,
+            264.0,
             102.0,
             342.0,
             114.0
           ],
-          "quote": "Body / Bonnet .................. Bronze C89833",
+          "quote": "Bronze C89833",
           "verified": true
         }
       ],
@@ -177,12 +177,12 @@
           "sha256": "6e472dd4\u2026",
           "page": 1,
           "bbox": [
-            66.0,
+            264.0,
             246.0,
             372.0,
             258.0
           ],
-          "quote": "End Connection ................. Solder ends, C x C",
+          "quote": "Solder ends, C x C",
           "verified": true
         }
       ],
@@ -216,12 +216,12 @@
           "sha256": "6e472dd4\u2026",
           "page": 1,
           "bbox": [
-            66.0,
+            264.0,
             126.0,
             348.0,
             138.0
           ],
-          "quote": "Stem ........................... Silicon Bronze",
+          "quote": "Silicon Bronze",
           "verified": true
         }
       ],
@@ -242,12 +242,12 @@
           "sha256": "6e472dd4\u2026",
           "page": 1,
           "bbox": [
-            66.0,
-            366.0,
-            348.0,
-            378.0
+            240.00000000000003,
+            330.0,
+            318.0,
+            342.0
           ],
-          "quote": "T-113-100  | 1\"   | 2-1/2\"        | 10",
+          "quote": "Handwheel",
           "verified": true
         }
       ],
@@ -272,12 +272,12 @@
           "sha256": "6e472dd4\u2026",
           "page": 1,
           "bbox": [
-            66.0,
+            264.0,
             210.0,
             384.0,
             222.0
           ],
-          "quote": "Temperature Range .............. -20 degF to 406 degF",
+          "quote": "-20 degF to 406 degF",
           "verified": true
         }
       ],
@@ -301,12 +301,12 @@
           "sha256": "6e472dd4\u2026",
           "page": 1,
           "bbox": [
-            66.0,
+            264.0,
             198.0,
             330.0,
             210.0
           ],
-          "quote": "Saturated Steam ................ 125 PSI WSP",
+          "quote": "125 PSI WSP",
           "verified": true
         }
       ],
@@ -334,12 +334,12 @@
           "sha256": "6e472dd4\u2026",
           "page": 1,
           "bbox": [
-            66.0,
+            264.0,
             270.0,
             414.0,
             282.0
           ],
-          "quote": "Lead Free ...................... Certified to NSF/ANSI 372",
+          "quote": "Certified to NSF/ANSI 372",
           "verified": true
         }
       ],
@@ -360,12 +360,12 @@
           "sha256": "6e472dd4\u2026",
           "page": 1,
           "bbox": [
-            66.0,
+            264.0,
             294.0,
             342.0,
             306.0
           ],
-          "quote": "Country of Origin .............. United States",
+          "quote": "United States",
           "verified": true
         }
       ],
@@ -386,12 +386,12 @@
           "sha256": "6e472dd4\u2026",
           "page": 1,
           "bbox": [
-            66.0,
+            336.0,
             366.0,
             348.0,
             378.0
           ],
-          "quote": "T-113-100  | 1\"   | 2-1/2\"        | 10",
+          "quote": "10",
           "verified": true
         }
       ],
@@ -456,8 +456,8 @@
       "richness": 0.0,
       "composite": 0.8006
     },
-    "cost_usd": 0.0008,
-    "wall_clock_seconds": 7.21
+    "cost_usd": 0.0007,
+    "wall_clock_seconds": 7.46
   },
-  "signature": "sha256:a31f42717f68edf3180f6f0b3adf4208f46378fb9b97d0c959a0ec4e6f02af25"
+  "signature": "sha256:344720120074de72a8a83db033a36568f5e7da5ffd4f81bcacb199655ac3d592"
 }

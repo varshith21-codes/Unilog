@@ -21,16 +21,28 @@ from axiom.validate.expressions import (
     desugar,
     evaluate,
 )
+from axiom.validate.reasoning import (
+    ReasoningChecker,
+    ReasoningConfig,
+    ReasoningFinding,
+    ReasoningReport,
+    describe_record,
+)
 from axiom.validate.validator import ValidationReport, Validator
 
 __all__ = [
     "GTIN_LENGTHS",
     "ExpressionError",
     "Missing",
+    "ReasoningChecker",
+    "ReasoningConfig",
+    "ReasoningFinding",
+    "ReasoningReport",
     "RuleConstants",
     "SkipRule",
     "ValidationReport",
     "Validator",
+    "describe_record",
     "check_plausible_range",
     "compile_expression",
     "desugar",

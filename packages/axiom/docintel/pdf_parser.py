@@ -80,6 +80,12 @@ def _parse_page(page, number: int, table_counter: int) -> tuple[ParsedPage, int,
 
     tables, table_counter = _extract_tables(page, number, table_counter)
 
+    # Ruled lines are the reliable signal, so they win outright. Only when a page has none does
+    # geometry get a turn — a page with real rules and a stray aligned block should not acquire a
+    # second, overlapping table whose cell references contradict the first.
+    if not tables:
+        tables, table_counter = _extract_aligned_tables(lines, words, number, table_counter)
+
     return (
         ParsedPage(
             number=number, width=width, height=height, lines=tuple(lines), tables=tables
@@ -162,14 +168,32 @@ def _cluster_words_into_lines(words: list[ParsedWord], number: int) -> list[Pars
     return lines
 
 
-def _extract_tables(page, number: int, counter: int) -> tuple[tuple[ParsedTable, ...], int]:
-    tables: list[ParsedTable] = []
-    try:
-        found = page.find_tables()
-    except Exception:  # noqa: BLE001 - table finding is best-effort
-        return (), counter
+MIN_ALIGNED_ROWS = 3
+MIN_ALIGNED_COLS = 3
 
-    for table in found:
+COLUMN_GAP_MULTIPLE = 1.8
+"""A column gap must exceed this multiple of the page's typical single-space width.
+
+The text parser's rule is "two or more spaces separate columns, one space separates words", and
+this is its geometric equivalent. Getting it wrong in the lenient direction is not a near miss:
+if the threshold falls below one space width, every inter-word gap in a *sentence* looks like a
+column boundary, prose joins the candidate block, and its words then occupy so many x positions
+that no vertical band is unanimously blank — which collapses the real table into a single column.
+That was the observed failure, not a hypothetical one.
+"""
+
+MIN_COLUMN_GAP_FLOOR_PT = 6.0
+"""Absolute floor, for pages too sparse to estimate a space width from."""
+
+
+def _extract_tables(page, number: int, counter: int) -> tuple[tuple[ParsedTable, ...], int]:
+    """Ruled tables only. Whitespace-aligned tables are handled separately.
+
+    Order matters: ruled-line detection is unambiguous where rules exist, so it is never
+    second-guessed.
+    """
+    tables: list[ParsedTable] = []
+    for table in _find_ruled(page):
         try:
             grid = table.extract()
         except Exception:  # noqa: BLE001
@@ -198,6 +222,7 @@ def _extract_tables(page, number: int, counter: int) -> tuple[tuple[ParsedTable,
                     )
                 )
         if not cells:
+            counter -= 1
             continue
 
         tables.append(
@@ -211,6 +236,216 @@ def _extract_tables(page, number: int, counter: int) -> tuple[tuple[ParsedTable,
             )
         )
     return tuple(tables), counter
+
+
+def _find_ruled(page):
+    try:
+        return page.find_tables()
+    except Exception:  # noqa: BLE001 - table finding is best-effort
+        return []
+
+
+# ---------------------------------------------------------------- aligned tables
+
+
+def _extract_aligned_tables(
+    lines: list[ParsedLine], words: list[ParsedWord], number: int, counter: int
+) -> tuple[tuple[ParsedTable, ...], int]:
+    """Detect whitespace-aligned tables from word geometry.
+
+    Most supplier ordering tables are laid out with spaces and carry no ruled lines at all, so
+    ``find_tables`` returns nothing for them. Losing the table costs every value in it its
+    cell-level citation — the difference between citing ``t1:r4:c2`` and citing a line that
+    happens to contain the right number.
+
+    pdfplumber's own ``vertical_strategy="text"`` is not usable here: applied to a page it treats
+    every inter-word gap as a column boundary, returning one enormous table with words split
+    mid-token. Bogus cells are worse than no cells in this architecture, because
+    ``confidence.features`` scores a cell reference at maximum citation precision — garbage
+    references would inflate confidence on precisely the least trustworthy values.
+
+    So this ports the algorithm the text parser already uses successfully: group *consecutive*
+    candidate rows, then keep only the column boundaries that are blank on **every** row of the
+    block. Unanimity is what stops a value containing a space from splitting its own cell.
+    """
+    words_by_line = _group_words_by_line(lines, words)
+    gap_threshold = _column_gap_threshold(words_by_line)
+
+    tables: list[ParsedTable] = []
+    block: list[tuple[ParsedLine, list[ParsedWord]]] = []
+
+    def flush() -> None:
+        nonlocal counter, block
+        if len(block) >= MIN_ALIGNED_ROWS:
+            table = _build_aligned_table(block, number, counter + 1, gap_threshold)
+            if table is not None:
+                counter += 1
+                tables.append(table)
+        block = []
+
+    for line in lines:
+        line_words = words_by_line.get(line.line_index, [])
+        if _has_column_gaps(line_words, gap_threshold):
+            block.append((line, line_words))
+        else:
+            flush()
+    flush()
+
+    return tuple(tables), counter
+
+
+def _column_gap_threshold(words_by_line: dict[int, list[ParsedWord]]) -> float:
+    """Derive the column-gap threshold from this page's own typical word spacing.
+
+    Measured rather than assumed, because it has to hold across font sizes: a hardcoded value
+    tuned for 9pt Courier is below one space width at 12pt and the detection inverts.
+    """
+    gaps: list[float] = []
+    for line_words in words_by_line.values():
+        for previous, following in zip(line_words, line_words[1:], strict=False):
+            gap = following.bbox.x0 - previous.bbox.x1
+            if 0 < gap < 40:  # ignore column-sized gaps when estimating a word-sized one
+                gaps.append(gap)
+
+    if not gaps:
+        return MIN_COLUMN_GAP_FLOOR_PT
+
+    gaps.sort()
+    median = gaps[len(gaps) // 2]
+    return max(median * COLUMN_GAP_MULTIPLE, MIN_COLUMN_GAP_FLOOR_PT)
+
+
+def _group_words_by_line(
+    lines: list[ParsedLine], words: list[ParsedWord]
+) -> dict[int, list[ParsedWord]]:
+    """Assign each word to the line whose vertical band contains it."""
+    grouped: dict[int, list[ParsedWord]] = {line.line_index: [] for line in lines}
+    for word in words:
+        centre = (word.bbox.y0 + word.bbox.y1) / 2
+        for line in lines:
+            if line.bbox.y0 - 1 <= centre <= line.bbox.y1 + 1:
+                grouped[line.line_index].append(word)
+                break
+    for line_words in grouped.values():
+        line_words.sort(key=lambda w: w.bbox.x0)
+    return grouped
+
+
+def _has_column_gaps(words: list[ParsedWord], threshold: float) -> bool:
+    """Whether a row has enough wide gaps to be a table row rather than a sentence."""
+    if len(words) < MIN_ALIGNED_COLS:
+        return False
+    gaps = sum(
+        1
+        for previous, following in zip(words, words[1:], strict=False)
+        if following.bbox.x0 - previous.bbox.x1 >= threshold
+    )
+    return gaps >= MIN_ALIGNED_COLS - 1
+
+
+def _build_aligned_table(
+    block: list[tuple[ParsedLine, list[ParsedWord]]],
+    number: int,
+    table_number: int,
+    gap_threshold: float,
+) -> ParsedTable | None:
+    """Split a block of aligned rows into cells on unanimously blank vertical bands."""
+    boundaries = _unanimous_column_bands(block, gap_threshold)
+    if len(boundaries) < MIN_ALIGNED_COLS:
+        return None
+
+    cells: list[TableCell] = []
+    for row_index, (_, line_words) in enumerate(block):
+        for col_index, (left, right) in enumerate(boundaries):
+            in_column = [
+                word
+                for word in line_words
+                if left <= (word.bbox.x0 + word.bbox.x1) / 2 <= right
+            ]
+            if not in_column:
+                continue
+            text = " ".join(word.text for word in in_column).strip()
+            if not text:
+                continue
+            cells.append(
+                TableCell(
+                    text=text,
+                    row=row_index,
+                    col=col_index,
+                    bbox=BoundingBox(
+                        x0=min(w.bbox.x0 for w in in_column),
+                        y0=min(w.bbox.y0 for w in in_column),
+                        x1=max(w.bbox.x1 for w in in_column),
+                        y1=max(w.bbox.y1 for w in in_column),
+                    ),
+                )
+            )
+
+    if not cells:
+        return None
+
+    populated_rows = {cell.row for cell in cells}
+    if len(populated_rows) < MIN_ALIGNED_ROWS:
+        return None
+
+    return ParsedTable(
+        table_id=f"t{table_number}",
+        page=number,
+        cells=tuple(cells),
+        row_count=len(block),
+        col_count=len(boundaries),
+        bbox=BoundingBox(
+            x0=min(c.bbox.x0 for c in cells),
+            y0=min(c.bbox.y0 for c in cells),
+            x1=max(c.bbox.x1 for c in cells),
+            y1=max(c.bbox.y1 for c in cells),
+        ),
+    )
+
+
+def _unanimous_column_bands(
+    block: list[tuple[ParsedLine, list[ParsedWord]]], gap_threshold: float
+) -> list[tuple[float, float]]:
+    """Column x-ranges, derived from vertical bands blank on every row of the block.
+
+    The x-axis equivalent of the text parser's character-position check. A band only separates
+    columns if no row has a word crossing it, which is what keeps ``Locking Lever`` in one cell
+    while still splitting the columns either side of it.
+    """
+    occupied: list[tuple[float, float]] = [
+        (word.bbox.x0, word.bbox.x1) for _, line_words in block for word in line_words
+    ]
+    if not occupied:
+        return []
+
+    left = min(x0 for x0, _ in occupied)
+    right = max(x1 for _, x1 in occupied)
+
+    # Sample on a fine grid; a coarse one merges narrow columns.
+    step = 1.0
+    blank: list[bool] = []
+    position = left
+    while position <= right:
+        blank.append(not any(x0 - 0.5 <= position <= x1 + 0.5 for x0, x1 in occupied))
+        position += step
+
+    bands: list[tuple[float, float]] = []
+    start: float | None = None
+    for index, is_blank in enumerate(blank):
+        x = left + index * step
+        if not is_blank and start is None:
+            start = x
+        elif is_blank and start is not None:
+            run = 0
+            while index + run < len(blank) and blank[index + run]:
+                run += 1
+            if run * step >= gap_threshold:
+                bands.append((start, x))
+                start = None
+    if start is not None:
+        bands.append((start, right))
+
+    return bands
 
 
 def _bbox(x0, top, x1, bottom) -> BoundingBox:

@@ -33,6 +33,7 @@ from axiom.extract.contract import (
     classify_abstention,
     parse_contract,
 )
+from axiom.extract.entailment import Support, check_entailment
 from axiom.schema import Requirement, SchemaRegistry, build_extraction_prompt
 
 _ABSTENTION_REASONS = {
@@ -49,9 +50,14 @@ class ExtractionResult:
     values: list[AttributeValue] = field(default_factory=list)
     gaps: list[Gap] = field(default_factory=list)
     rejected: list[ContractItem] = field(default_factory=list)
-    """Claims discarded because their quote could not be located. Kept because a silent
-    drop is untraceable, and a pattern of rejections is a signal about the source or the
-    prompt rather than about one SKU."""
+    """Claims discarded because their quote could not be located, or because the quote that was
+    located does not support the value. Kept because a silent drop is untraceable, and a pattern
+    of rejections is a signal about the source or the prompt rather than about one SKU."""
+
+    corrections: list[str] = field(default_factory=list)
+    """Values rewritten to agree with their own citation — an under-read enum, or a list with an
+    unmentioned member pruned. Recorded rather than applied quietly: a correction means the
+    model and its evidence disagreed, which is worth seeing even when the resolution is right."""
 
     usage: UsageLedger = field(default_factory=UsageLedger)
     response: ModelResponse | None = None
@@ -93,6 +99,7 @@ class ExtractionResult:
             "values": len(self.values),
             "gaps": len(self.gaps),
             "rejected_unverifiable": len(self.rejected),
+            "corrected_to_match_evidence": len(self.corrections),
             "citation_coverage": round(self.citation_coverage, 4),
             "input_tokens": self.usage.input_tokens,
             "output_tokens": self.usage.output_tokens,
@@ -360,10 +367,41 @@ class Extractor:
                 # downstream can mistake it for checked evidence.
                 result.rejected.append(item)
 
+            # A located quote proves the text exists. It does not prove the text says this.
+            value_raw = item.value_raw
+            if self._enforce_evidence:
+                verdict = check_entailment(
+                    item.value_raw,
+                    span.quote,
+                    self._registry.attribute(code),
+                    table_ref=span.table_ref,
+                )
+                if verdict.support is Support.UNSUPPORTED:
+                    result.rejected.append(item)
+                    result.gaps.append(
+                        self._gap(
+                            code,
+                            class_code,
+                            parsed,
+                            GapReason.EXTRACTED_BUT_UNVERIFIABLE,
+                            detail=(
+                                f"citation does not support the value: {verdict.detail}"
+                            ),
+                            action=RecommendedAction.HUMAN_RESEARCH,
+                        )
+                    )
+                    continue
+                if verdict.support is Support.CORRECTED:
+                    # The evidence outranks the model's reading of it.
+                    value_raw = verdict.value_raw
+                    result.corrections.append(
+                        f"{code}: {item.value_raw!r} -> {value_raw!r} ({verdict.detail})"
+                    )
+
             result.values.append(
                 AttributeValue(
                     attribute_code=code,
-                    value_raw=item.value_raw,
+                    value_raw=value_raw,
                     method=(
                         DerivationMethod.TABLE_EXTRACTION
                         if span.table_ref

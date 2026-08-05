@@ -74,7 +74,7 @@
     "richness": 0.0,
     "composite": 0.8006
   },
-  "created_at": "2026-08-03T18:15:48.363037+00:00",
+  "created_at": "2026-08-05T03:17:00.825459+00:00",
   "decisions": [],
   "pages": [
     {
@@ -157,10 +157,10 @@
         "unit": "mm"
       },
       "value_display": "1\"",
-      "score": 0.7803,
+      "score": 0.95,
       "status": "auto_accepted",
       "reason_code": "auto_accepted",
-      "detail": "score 0.780 >= threshold 0.685",
+      "detail": "score 0.950 >= threshold 0.685",
       "method": "table_extraction",
       "model_tier": "volume",
       "is_required": true,
@@ -168,13 +168,13 @@
       "evidence": [
         {
           "document_id": "gv200@6e472dd4",
-          "quote": "T-113-100  | 1\"   | 2-1/2\"        | 10",
+          "quote": "1\"",
           "verified": true,
           "match_score": 1.0,
           "page": 1,
           "line_index": 26,
-          "table_ref": "t1:r3",
-          "method": "table_row"
+          "table_ref": "t1:r3:c1",
+          "method": "table_cell"
         }
       ],
       "validations": [],
@@ -191,10 +191,10 @@
         "unit": "psi"
       },
       "value_display": "200 psi",
-      "score": 0.775,
+      "score": 0.85,
       "status": "auto_accepted",
       "reason_code": "auto_accepted",
-      "detail": "score 0.775 >= threshold 0.685",
+      "detail": "score 0.850 >= threshold 0.685",
       "method": "document_extraction",
       "model_tier": "volume",
       "is_required": true,
@@ -202,7 +202,7 @@
       "evidence": [
         {
           "document_id": "gv200@6e472dd4",
-          "quote": "Non-Shock Cold Working Pressure  200 PSI WOG",
+          "quote": "200 PSI WOG",
           "verified": true,
           "match_score": 1.0,
           "page": 1,
@@ -232,10 +232,10 @@
       "value_raw": "Bronze C89833",
       "value_canonical": "Bronze C89833",
       "value_display": "Bronze C89833",
-      "score": 0.7283,
+      "score": 0.8,
       "status": "auto_accepted",
       "reason_code": "auto_accepted",
-      "detail": "score 0.728 >= threshold 0.685",
+      "detail": "score 0.800 >= threshold 0.685",
       "method": "document_extraction",
       "model_tier": "volume",
       "is_required": true,
@@ -243,7 +243,7 @@
       "evidence": [
         {
           "document_id": "gv200@6e472dd4",
-          "quote": "Body / Bonnet .................. Bronze C89833",
+          "quote": "Bronze C89833",
           "verified": true,
           "match_score": 1.0,
           "page": 1,
@@ -274,10 +274,10 @@
       "value_raw": "Solder ends, C x C",
       "value_canonical": "Solder",
       "value_display": "Solder",
-      "score": 0.6853,
+      "score": 0.75,
       "status": "auto_accepted",
       "reason_code": "auto_accepted",
-      "detail": "score 0.685 >= threshold 0.685",
+      "detail": "score 0.750 >= threshold 0.685",
       "method": "document_extraction",
       "model_tier": "volume",
       "is_required": true,
@@ -285,7 +285,7 @@
       "evidence": [
         {
           "document_id": "gv200@6e472dd4",
-          "quote": "End Connection ................. Solder ends, C x C",
+          "quote": "Solder ends, C x C",
           "verified": true,
           "match_score": 1.0,
           "page": 1,
@@ -334,10 +334,10 @@
       "value_raw": "Silicon Bronze",
       "value_canonical": "Silicon Bronze",
       "value_display": "Silicon Bronze",
-      "score": 0.7298,
+      "score": 0.8,
       "status": "auto_accepted",
       "reason_code": "auto_accepted",
-      "detail": "score 0.730 >= threshold 0.685",
+      "detail": "score 0.800 >= threshold 0.685",
       "method": "document_extraction",
       "model_tier": "volume",
       "is_required": true,
@@ -345,7 +345,7 @@
       "evidence": [
         {
           "document_id": "gv200@6e472dd4",
-          "quote": "Stem ........................... Silicon Bronze",
+          "quote": "Silicon Bronze",
           "verified": true,
           "match_score": 1.0,
           "page": 1,
@@ -373,10 +373,10 @@
       "value_raw": "Handwheel",
       "value_canonical": "Handwheel",
       "value_display": "Handwheel",
-      "score": 0.7987,
+      "score": 0.95,
       "status": "auto_accepted",
       "reason_code": "auto_accepted",
-      "detail": "score 0.799 >= threshold 0.685",
+      "detail": "score 0.950 >= threshold 0.685",
       "method": "table_extraction",
       "model_tier": "volume",
       "is_required": false,
@@ -384,13 +384,13 @@
       "evidence": [
         {
           "document_id": "gv200@6e472dd4",
-          "quote": "T-113-100  | 1\"   | 2-1/2\"        | 10",
+          "quote": "Handwheel",
           "verified": true,
           "match_score": 1.0,
           "page": 1,
-          "line_index": 26,
-          "table_ref": "t1:r3",
-          "method": "table_row"
+          "line_index": 23,
+          "table_ref": "t1:r0:c2",
+          "method": "table_cell"
         }
       ],
       "validations": [],
@@ -415,10 +415,10 @@
         "unit": "degC"
       },
       "value_display": "-20 to 406 degF",
-      "score": 0.7377,
+      "score": 0.8,
       "status": "auto_accepted",
       "reason_code": "auto_accepted",
-      "detail": "score 0.738 >= threshold 0.685",
+      "detail": "score 0.800 >= threshold 0.685",
       "method": "document_extraction",
       "model_tier": "volume",
       "is_required": true,
@@ -426,7 +426,7 @@
       "evidence": [
         {
           "document_id": "gv200@6e472dd4",
-          "quote": "Temperature Range .............. -20 degF to 406 degF",
+          "quote": "-20 degF to 406 degF",
           "verified": true,
           "match_score": 1.0,
           "page": 1,
@@ -449,10 +449,10 @@
         "unit": "psi"
       },
       "value_display": "125 psi",
-      "score": 0.775,
+      "score": 0.85,
       "status": "auto_accepted",
       "reason_code": "auto_accepted",
-      "detail": "score 0.775 >= threshold 0.685",
+      "detail": "score 0.850 >= threshold 0.685",
       "method": "document_extraction",
       "model_tier": "volume",
       "is_required": true,
@@ -460,7 +460,7 @@
       "evidence": [
         {
           "document_id": "gv200@6e472dd4",
-          "quote": "Saturated Steam ................ 125 PSI WSP",
+          "quote": "125 PSI WSP",
           "verified": true,
           "match_score": 1.0,
           "page": 1,
@@ -490,10 +490,10 @@
       "value_raw": "true",
       "value_canonical": true,
       "value_display": "Yes",
-      "score": 0.7069,
+      "score": 0.716,
       "status": "auto_accepted",
       "reason_code": "auto_accepted",
-      "detail": "score 0.707 >= threshold 0.685",
+      "detail": "score 0.716 >= threshold 0.685",
       "method": "document_extraction",
       "model_tier": "volume",
       "is_required": true,
@@ -501,7 +501,7 @@
       "evidence": [
         {
           "document_id": "gv200@6e472dd4",
-          "quote": "Lead Free ...................... Certified to NSF/ANSI 372",
+          "quote": "Certified to NSF/ANSI 372",
           "verified": true,
           "match_score": 1.0,
           "page": 1,
@@ -521,7 +521,7 @@
       "value_raw": "true",
       "value_canonical": true,
       "value_display": "Yes",
-      "score": 0.5074,
+      "score": 0.519,
       "status": "queued_for_review",
       "reason_code": "blocking_validation",
       "detail": "R_POTABLE_REQUIRES_NSF61",
@@ -532,7 +532,7 @@
       "evidence": [
         {
           "document_id": "gv200@6e472dd4",
-          "quote": "Potable Water .................. NSF/ANSI 61 certified",
+          "quote": "NSF/ANSI 61 certified",
           "verified": true,
           "match_score": 1.0,
           "page": 1,
@@ -565,7 +565,7 @@
         "MSS"
       ],
       "value_display": "UL, MSS",
-      "score": 0.5377,
+      "score": 0.6,
       "status": "queued_for_review",
       "reason_code": "blocking_validation",
       "detail": "R_POTABLE_REQUIRES_NSF61",
@@ -576,7 +576,7 @@
       "evidence": [
         {
           "document_id": "gv200@6e472dd4",
-          "quote": "Approvals ...................... UL listed, MSS SP-80",
+          "quote": "UL listed, MSS SP-80",
           "verified": true,
           "match_score": 1.0,
           "page": 1,
@@ -620,10 +620,10 @@
       "value_raw": "United States",
       "value_canonical": "United States",
       "value_display": "United States",
-      "score": 0.7283,
+      "score": 0.8,
       "status": "auto_accepted",
       "reason_code": "auto_accepted",
-      "detail": "score 0.728 >= threshold 0.685",
+      "detail": "score 0.800 >= threshold 0.685",
       "method": "document_extraction",
       "model_tier": "volume",
       "is_required": true,
@@ -631,7 +631,7 @@
       "evidence": [
         {
           "document_id": "gv200@6e472dd4",
-          "quote": "Country of Origin .............. United States",
+          "quote": "United States",
           "verified": true,
           "match_score": 1.0,
           "page": 1,
@@ -651,10 +651,10 @@
       "value_raw": "10",
       "value_canonical": 10,
       "value_display": "10",
-      "score": 0.7803,
+      "score": 0.95,
       "status": "auto_accepted",
       "reason_code": "auto_accepted",
-      "detail": "score 0.780 >= threshold 0.685",
+      "detail": "score 0.950 >= threshold 0.685",
       "method": "table_extraction",
       "model_tier": "volume",
       "is_required": false,
@@ -662,13 +662,13 @@
       "evidence": [
         {
           "document_id": "gv200@6e472dd4",
-          "quote": "T-113-100  | 1\"   | 2-1/2\"        | 10",
+          "quote": "10",
           "verified": true,
           "match_score": 1.0,
           "page": 1,
           "line_index": 26,
-          "table_ref": "t1:r3",
-          "method": "table_row"
+          "table_ref": "t1:r3:c3",
+          "method": "table_cell"
         }
       ],
       "validations": [],

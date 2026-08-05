@@ -197,6 +197,19 @@ def serialise_values(
     return out
 
 
+def serialise_copy(generated) -> dict[str, Any] | None:
+    """Generated marketing copy together with the claim check that gated it.
+
+    The verdict travels with the prose, always. Copy shown without its claim check is just text,
+    and the entire argument for generating it at all is that every assertion in it was verified
+    against an already-publishable attribute. A UI that displayed one without the other would be
+    making a claim this system does not support.
+    """
+    if generated is None:
+        return None
+    return generated.to_dict()
+
+
 def serialise_cost(
     usage,
     *,
@@ -241,6 +254,7 @@ def build_bundle(
     certificate,
     exports,
     cost: dict[str, Any] | None = None,
+    copy: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Project one SKU's pipeline run.
 
@@ -314,6 +328,7 @@ def build_bundle(
             "conflicts": sorted(record.conflicts().keys()),
         },
         "cost": cost,
+        "copy": copy,
     }
 
 

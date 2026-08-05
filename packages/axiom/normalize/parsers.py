@@ -23,6 +23,9 @@ import re
 from dataclasses import dataclass, field
 from enum import Enum
 from fractions import Fraction
+from functools import lru_cache
+
+import yaml
 
 from axiom.normalize.units import QuantityKind, registry
 
@@ -196,6 +199,72 @@ def _extract_rating_class(text: str) -> tuple[str | None, str]:
     return None, text
 
 
+# Metric and imperial size designations. The prefix *is* the unit, and it overrides any hint.
+#
+# `DN` is "diamètre nominal" and its number is already millimetres: DN15 is a 15 mm bore, which
+# is the metric designation for a 1/2" valve. `NPS` and `NB` in imperial usage are inch
+# designations.
+#
+# Without this, a nominal_size attribute carrying `unit_hint: in` reads DN15 as fifteen *inches*
+# — 381 mm, a 25x error that lands comfortably inside the attribute's plausible range and so
+# passes every downstream check. It renders as `15"` on a half-inch valve. Found by adding a
+# metric ordering table to the golden set, not by review.
+_SIZE_DESIGNATIONS: tuple[tuple[re.Pattern[str], str], ...] = (
+    (re.compile(r"^\s*NPS\s*(?=[\d.])", re.IGNORECASE), "in"),
+    (re.compile(r"^\s*NB\s*(?=[\d.])", re.IGNORECASE), "in"),
+)
+
+
+_DN_PREFIX = re.compile(r"^\s*DN\s*(?=[\d.])", re.IGNORECASE)
+
+
+@lru_cache(maxsize=1)
+def _dn_to_nps_inches() -> dict[str, float]:
+    """DN-to-inch designation table, loaded from the declarative constants.
+
+    Imported lazily to avoid a circular import: ``axiom.validate`` reaches back into normalize
+    to evaluate rule expressions. Cached because this is otherwise a YAML parse per parsed value.
+
+    A missing or unreadable constants file degrades to an empty table, which reads DN as
+    millimetres — wrong by one fraction step, but not wrong by 25x. It does not raise, because a
+    parser that throws on a malformed side-file turns a data problem into an outage.
+    """
+    from axiom.validate.constants import RuleConstants
+
+    try:
+        constants = RuleConstants.load()
+    except (OSError, yaml.YAMLError):
+        return {}
+    return dict(constants.tables.get("DN_TO_NPS_INCHES", {}))
+
+
+def _extract_size_designation(text: str) -> tuple[str | None, str]:
+    """Strip a leading size designation, returning the unit it implies.
+
+    ``DN`` is resolved through a designation table rather than treated as millimetres, because
+    DN and NPS name the same pipe without being arithmetically related. Converting DN15 as
+    "15 mm" yields 9/16", which is not a size any plumbing catalogue lists — and worse, it makes
+    the metric and imperial descriptions of one valve normalise to two different values.
+    """
+    dn = _DN_PREFIX.match(text)
+    if dn:
+        remainder = text[dn.end() :]
+        number = re.match(r"\s*(\d+(?:\.\d+)?)", remainder)
+        if number:
+            inches = _dn_to_nps_inches().get(str(int(float(number.group(1)))))
+            if inches is not None:
+                # Substitute the equivalent inch designation for the DN number.
+                return "in", f"{inches}{remainder[number.end() :]}"
+        # An unlisted DN size still means millimetres, which beats reading it as inches.
+        return "mm", remainder
+
+    for pattern, unit in _SIZE_DESIGNATIONS:
+        match = pattern.match(text)
+        if match:
+            return unit, text[match.end() :]
+    return None, text
+
+
 def _resolve_unit(remainder: str, unit_hint: str | None) -> tuple[str | None, str]:
     """Find a known unit in the leftover text. Falls back to the hint."""
     cleaned = remainder.strip(" \t.,;:")
@@ -237,6 +306,11 @@ def parse_quantity(text: str, *, unit_hint: str | None = None) -> ParsedValue:
     note, working = _extract_parenthetical(working)
     rating, working = _extract_rating_class(working)
     qualifier, working = _extract_qualifier(working)
+
+    # A size designation names its own unit, so it takes precedence over the caller's hint.
+    designated_unit, working = _extract_size_designation(working)
+    if designated_unit is not None:
+        unit_hint = designated_unit
 
     match = _MAGNITUDE_RE.search(working)
     if match is None:

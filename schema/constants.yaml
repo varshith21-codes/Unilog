@@ -38,6 +38,33 @@ sets:
     - NSF-372
 
 tables:
+  # Metric DN designation to its imperial NPS equivalent, in inches.
+  #
+  # This is a lookup, not a conversion, and the distinction matters. DN15 and NPS 1/2 name the
+  # *same pipe*; the numbers are not arithmetically related (15 mm is 0.59", not 0.5"). Since
+  # nominal_size is explicitly a designation rather than a measured bore, DN15 and 1/2" must
+  # normalise to one canonical value — otherwise the same physical valve gets two different
+  # sizes depending on which market's datasheet described it, and comparison and de-duplication
+  # both silently break.
+  DN_TO_NPS_INCHES:
+    "6": 0.125     # 1/8"
+    "8": 0.25      # 1/4"
+    "10": 0.375    # 3/8"
+    "15": 0.5      # 1/2"
+    "20": 0.75     # 3/4"
+    "25": 1.0      # 1"
+    "32": 1.25     # 1-1/4"
+    "40": 1.5      # 1-1/2"
+    "50": 2.0      # 2"
+    "65": 2.5      # 2-1/2"
+    "80": 3.0      # 3"
+    "100": 4.0     # 4"
+    "125": 5.0     # 5"
+    "150": 6.0     # 6"
+    "200": 8.0     # 8"
+    "250": 10.0    # 10"
+    "300": 12.0    # 12"
+
   # Minimum expected flow coefficient for a full-port valve, by nominal size in millimetres.
   # A full-port valve materially below these figures usually means the Cv was read from a
   # reduced-port row of the same table.

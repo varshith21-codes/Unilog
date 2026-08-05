@@ -18,8 +18,8 @@
       "source_document_ids": [
         "ba100@f7500023"
       ],
-      "created_at": "2026-08-03T18:15:20.620882+00:00",
-      "updated_at": "2026-08-03T18:15:20.621003+00:00"
+      "created_at": "2026-08-05T03:16:01.204821+00:00",
+      "updated_at": "2026-08-05T03:16:01.204935+00:00"
     },
     "classifications": [
       {
@@ -38,7 +38,7 @@
           0.92,
           0.92
         ],
-        "rationale": "The product title explicitly states 'Two-Piece Full Port Bronze Ball Valve'. The body material is Bronze, and the ball/stem material is Chrome-plated brass, which is characteristic of ball valves. The 'Two-Piece' descriptor matches the candidate class code exactly.",
+        "rationale": "The product title explicitly states 'Two-Piece Full Port Bronze Ball Valve', and the body material is listed as Bronze C84400. This matches the 'Two-Piece Ball Valve' class.",
         "method": "model_adjudicated",
         "alternatives": [
           {
@@ -87,7 +87,7 @@
       "method": "model_adjudicated",
       "abstained": false,
       "input_tokens": 554,
-      "output_tokens": 98
+      "output_tokens": 84
     },
     "classification_candidates": [
       {
@@ -104,7 +104,7 @@
     "values": [
       {
         "attribute_code": "approvals",
-        "value_raw": "UL, CSA, NSF/ANSI 61",
+        "value_raw": "UL listed, CSA certified, NSF/ANSI 61",
         "value_canonical": [
           "UL",
           "CSA",
@@ -142,21 +142,21 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-03T18:15:20.594546Z",
-        "score": 0.7286,
+        "created_at": "2026-08-05T03:16:01.191448Z",
+        "score": 0.7529,
         "decision": {
           "attribute_code": "approvals",
-          "score": 0.7286,
+          "score": 0.7529,
           "accepted": true,
           "status": "auto_accepted",
           "reason_code": "auto_accepted",
-          "detail": "score 0.729 >= threshold 0.685"
+          "detail": "score 0.753 >= threshold 0.685"
         },
         "features": {
           "evidence_match_score": 1.0,
           "evidence_verified": 1.0,
           "citation_precision": 0.4,
-          "quote_specificity": 0.2857,
+          "quote_specificity": 0.5286,
           "self_reported_certainty": 0.9,
           "validation_pass_rate": 0.5,
           "validation_clean": 1.0,
@@ -209,7 +209,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-03T18:15:20.592661Z",
+        "created_at": "2026-08-05T03:16:01.188188Z",
         "score": 0.7283,
         "decision": {
           "attribute_code": "body_material",
@@ -276,7 +276,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-03T18:15:20.594713Z",
+        "created_at": "2026-08-05T03:16:01.191743Z",
         "score": 0.7809,
         "decision": {
           "attribute_code": "case_quantity",
@@ -364,7 +364,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-03T18:15:20.592890Z",
+        "created_at": "2026-08-05T03:16:01.188580Z",
         "score": 0.6976,
         "decision": {
           "attribute_code": "end_connection",
@@ -431,7 +431,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-03T18:15:20.593615Z",
+        "created_at": "2026-08-05T03:16:01.189826Z",
         "score": 0.7897,
         "decision": {
           "attribute_code": "handle_type",
@@ -501,7 +501,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-03T18:15:20.592261Z",
+        "created_at": "2026-08-05T03:16:01.187479Z",
         "score": 0.7868,
         "decision": {
           "attribute_code": "nominal_size",
@@ -568,7 +568,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-03T18:15:20.592065Z",
+        "created_at": "2026-08-05T03:16:01.187154Z",
         "score": 0.7243,
         "decision": {
           "attribute_code": "number_of_pieces",
@@ -635,7 +635,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-03T18:15:20.593095Z",
+        "created_at": "2026-08-05T03:16:01.188951Z",
         "score": 0.7243,
         "decision": {
           "attribute_code": "port_type",
@@ -702,7 +702,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-03T18:15:20.594320Z",
+        "created_at": "2026-08-05T03:16:01.191045Z",
         "score": 0.7057,
         "decision": {
           "attribute_code": "potable_water_approved",
@@ -783,7 +783,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-03T18:15:20.592481Z",
+        "created_at": "2026-08-05T03:16:01.187868Z",
         "score": 0.7889,
         "decision": {
           "attribute_code": "pressure_rating_wog",
@@ -850,7 +850,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-03T18:15:20.591565Z",
+        "created_at": "2026-08-05T03:16:01.186595Z",
         "score": 0.7194,
         "decision": {
           "attribute_code": "product_series",
@@ -917,7 +917,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-03T18:15:20.593263Z",
+        "created_at": "2026-08-05T03:16:01.189241Z",
         "score": 0.7132,
         "decision": {
           "attribute_code": "seat_material",
@@ -998,7 +998,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-03T18:15:20.594069Z",
+        "created_at": "2026-08-05T03:16:01.190596Z",
         "score": 0.775,
         "decision": {
           "attribute_code": "steam_pressure_rating",
@@ -1065,7 +1065,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-03T18:15:20.593462Z",
+        "created_at": "2026-08-05T03:16:01.189578Z",
         "score": 0.7083,
         "decision": {
           "attribute_code": "stem_material",
@@ -1136,7 +1136,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-03T18:15:20.593845Z",
+        "created_at": "2026-08-05T03:16:01.190233Z",
         "score": 0.7377,
         "decision": {
           "attribute_code": "temperature_range",
@@ -1179,7 +1179,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "request_from_supplier",
         "is_required": false,
-        "detected_at": "2026-08-03T18:15:20.593646Z"
+        "detected_at": "2026-08-05T03:16:01.189878Z"
       },
       {
         "attribute_code": "operating_torque",
@@ -1191,7 +1191,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "human_research",
         "is_required": false,
-        "detected_at": "2026-08-03T18:15:20.593859Z"
+        "detected_at": "2026-08-05T03:16:01.190274Z"
       },
       {
         "attribute_code": "lead_free_compliant",
@@ -1199,11 +1199,11 @@
         "sources_searched": [
           "ba100@f7500023"
         ],
-        "detail": "source lists NSF/ANSI 61, not NSF/ANSI 372",
+        "detail": "source lists NSF/ANSI 61 but not NSF/ANSI 372",
         "revenue_exposure_usd": null,
         "recommended_action": "request_from_supplier",
         "is_required": true,
-        "detected_at": "2026-08-03T18:15:20.594083Z"
+        "detected_at": "2026-08-05T03:16:01.190622Z"
       },
       {
         "attribute_code": "country_of_origin",
@@ -1215,7 +1215,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "request_from_supplier",
         "is_required": true,
-        "detected_at": "2026-08-03T18:15:20.594555Z"
+        "detected_at": "2026-08-05T03:16:01.191468Z"
       },
       {
         "attribute_code": "gtin",
@@ -1227,7 +1227,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "request_from_supplier",
         "is_required": false,
-        "detected_at": "2026-08-03T18:15:20.594563Z"
+        "detected_at": "2026-08-05T03:16:01.191482Z"
       },
       {
         "attribute_code": "each_weight",
@@ -1239,7 +1239,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "request_from_supplier",
         "is_required": false,
-        "detected_at": "2026-08-03T18:15:20.594570Z"
+        "detected_at": "2026-08-05T03:16:01.191493Z"
       },
       {
         "attribute_code": "case_weight",
@@ -1251,7 +1251,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "request_from_supplier",
         "is_required": false,
-        "detected_at": "2026-08-03T18:15:20.594722Z"
+        "detected_at": "2026-08-05T03:16:01.191763Z"
       },
       {
         "attribute_code": "selling_uom",
@@ -1263,7 +1263,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "request_from_supplier",
         "is_required": true,
-        "detected_at": "2026-08-03T18:15:20.594730Z"
+        "detected_at": "2026-08-05T03:16:01.191775Z"
       }
     ],
     "extraction": {
@@ -1273,9 +1273,11 @@
       "rejected_unverifiable": 0,
       "citation_coverage": 1.0,
       "input_tokens": 3225,
-      "output_tokens": 1647,
+      "output_tokens": 1649,
       "escalations": 0,
-      "latency_ms": 11050
+      "latency_ms": 7022,
+      "sku_found_in_document": true,
+      "targeting_failed": false
     },
     "normalization_issues": [
       {
@@ -1483,10 +1485,10 @@
       }
     },
     "certificate": {
-      "certificate_id": "ec_55853e286a72",
+      "certificate_id": "ec_a1f30568a25c",
       "sku": "BA-100-075",
       "tenant_id": "demo",
-      "generated_at": "2026-08-03T18:15:20.682963Z",
+      "generated_at": "2026-08-05T03:16:01.227989Z",
       "schema_version": "PLB.VLV.BALL.2PC@v1",
       "pipeline_version": "axiom-0.1.0",
       "classifications": [
@@ -1915,7 +1917,7 @@
             "NSF-61"
           ],
           "value_display": "UL, CSA, NSF-61",
-          "value_raw": "UL, CSA, NSF/ANSI 61",
+          "value_raw": "UL listed, CSA certified, NSF/ANSI 61",
           "confidence": 0.9,
           "method": "document_extraction",
           "model_tier": "volume",
@@ -1992,7 +1994,7 @@
             "ba100@f7500023"
           ],
           "required": true,
-          "detail": "source lists NSF/ANSI 61, not NSF/ANSI 372",
+          "detail": "source lists NSF/ANSI 61 but not NSF/ANSI 372",
           "recommended_action": "request_from_supplier"
         },
         {
@@ -2067,10 +2069,10 @@
             "richness": 0.1
           }
         },
-        "cost_usd": 0.000963,
-        "wall_clock_seconds": 13.88
+        "cost_usd": 0.000958,
+        "wall_clock_seconds": 10.65
       },
-      "signature": "sha256:a2a32a5dca81ea235a67bc40a1db66065612ad19c00b857af98afdf71722b42b",
+      "signature": "sha256:a48214d91b67d6bf727f6dee5fea17ad97262be317e44450c968f80ea1633e4c",
       "signature_verified": true
     },
     "channels": [
@@ -2116,23 +2118,27 @@
       "conflicts": []
     },
     "cost": {
-      "calls": 2,
+      "calls": 3,
       "escalations": 0,
-      "input_tokens": 3779,
-      "output_tokens": 1745,
-      "latency_ms": 13878,
+      "input_tokens": 4343,
+      "output_tokens": 1991,
+      "latency_ms": 13319,
       "calls_by_tier": {
-        "volume": 2
+        "volume": 2,
+        "mid": 1
       },
       "input_by_tier": {
-        "volume": 3779
+        "volume": 3779,
+        "mid": 564
       },
       "output_by_tier": {
-        "volume": 1745
+        "volume": 1733,
+        "mid": 258
       },
-      "cost_usd": 0.000963,
+      "cost_usd": 0.001864,
       "cost_by_tier": {
-        "volume": 0.000963
+        "volume": 0.000958,
+        "mid": 0.000906
       },
       "priced": true,
       "price_source": {
@@ -2141,9 +2147,174 @@
         "source": "AWS Price List Query API (AmazonBedrock)",
         "priced_models": 5,
         "unpriced_models": [],
-        "age_days": 0.5,
+        "age_days": 1.9,
         "stale": false
       }
+    },
+    "copy": {
+      "sku": "BA-100-075",
+      "published": true,
+      "headline": "Milwaukee Valve BA-100 3/4\" Bronze Two-Piece Ball Valve",
+      "short_description": "This 3/4 inch two-piece ball valve features a bronze body, full port design, and NPT threaded connections.",
+      "long_description": "The Milwaukee Valve BA-100 series two-piece ball valve is constructed from Bronze C84400 with a full port design. It utilizes a lever handle and RPTFE seat material with a brass stem. The valve has a pressure rating of 600 psi WOG and a steam pressure rating of 150 psi WSP.\n\nThis unit operates within a temperature range of -20 to 366 degF. It is designed with NPT threaded end connections for installation. The valve is UL, CSA, and NSF-61 listed and is approved for potable water applications.",
+      "bullets": [
+        "Nominal Pipe Size: 3/4\"",
+        "Body Material: Bronze C84400",
+        "Pressure Rating (WOG): 600 psi",
+        "End Connection: NPT Threaded",
+        "Port Type: Full Port",
+        "Approvals: UL, CSA, NSF-61"
+      ],
+      "attempts": 1,
+      "prompt_version": "copy@v1",
+      "model_id": "zai.glm-4.7",
+      "model_tier": "mid",
+      "error": null,
+      "claim_check": {
+        "claims": 17,
+        "supported": 17,
+        "unsupported": 0,
+        "banned": 0,
+        "passed": true
+      },
+      "claims": [
+        {
+          "kind": "quantity",
+          "text": "3/4\"",
+          "verdict": "supported",
+          "reason": "matches verified 'nominal_size'",
+          "field": "headline",
+          "supported_by": "nominal_size"
+        },
+        {
+          "kind": "quantity",
+          "text": "3/4 inch",
+          "verdict": "supported",
+          "reason": "matches verified 'nominal_size'",
+          "field": "short_description",
+          "supported_by": "nominal_size"
+        },
+        {
+          "kind": "regulated",
+          "text": "potable water",
+          "verdict": "supported",
+          "reason": "substantiated by verified attribute 'potable_water_approved'",
+          "field": "long_description",
+          "supported_by": "potable_water_approved"
+        },
+        {
+          "kind": "quantity",
+          "text": "600 psi",
+          "verdict": "supported",
+          "reason": "matches verified 'pressure_rating_wog'",
+          "field": "long_description",
+          "supported_by": "pressure_rating_wog"
+        },
+        {
+          "kind": "quantity",
+          "text": "150 psi",
+          "verdict": "supported",
+          "reason": "matches verified 'steam_pressure_rating'",
+          "field": "long_description",
+          "supported_by": "steam_pressure_rating"
+        },
+        {
+          "kind": "quantity",
+          "text": "366 degF",
+          "verdict": "supported",
+          "reason": "matches verified 'temperature_range'",
+          "field": "long_description",
+          "supported_by": "temperature_range"
+        },
+        {
+          "kind": "standard",
+          "text": "UL",
+          "verdict": "supported",
+          "reason": "appears in verified attribute 'approvals'",
+          "field": "long_description",
+          "supported_by": "approvals"
+        },
+        {
+          "kind": "standard",
+          "text": "CSA",
+          "verdict": "supported",
+          "reason": "appears in verified attribute 'approvals'",
+          "field": "long_description",
+          "supported_by": "approvals"
+        },
+        {
+          "kind": "standard",
+          "text": "NSF",
+          "verdict": "supported",
+          "reason": "appears in verified attribute 'approvals'",
+          "field": "long_description",
+          "supported_by": "approvals"
+        },
+        {
+          "kind": "designation",
+          "text": "C84400",
+          "verdict": "supported",
+          "reason": "appears in verified attribute 'body_material'",
+          "field": "long_description",
+          "supported_by": "body_material"
+        },
+        {
+          "kind": "designation",
+          "text": "RPTFE",
+          "verdict": "supported",
+          "reason": "appears in verified attribute 'seat_material'",
+          "field": "long_description",
+          "supported_by": "seat_material"
+        },
+        {
+          "kind": "quantity",
+          "text": "3/4\"",
+          "verdict": "supported",
+          "reason": "matches verified 'nominal_size'",
+          "field": "bullets",
+          "supported_by": "nominal_size"
+        },
+        {
+          "kind": "quantity",
+          "text": "600 psi",
+          "verdict": "supported",
+          "reason": "matches verified 'pressure_rating_wog'",
+          "field": "bullets",
+          "supported_by": "pressure_rating_wog"
+        },
+        {
+          "kind": "standard",
+          "text": "UL",
+          "verdict": "supported",
+          "reason": "appears in verified attribute 'approvals'",
+          "field": "bullets",
+          "supported_by": "approvals"
+        },
+        {
+          "kind": "standard",
+          "text": "CSA",
+          "verdict": "supported",
+          "reason": "appears in verified attribute 'approvals'",
+          "field": "bullets",
+          "supported_by": "approvals"
+        },
+        {
+          "kind": "standard",
+          "text": "NSF",
+          "verdict": "supported",
+          "reason": "appears in verified attribute 'approvals'",
+          "field": "bullets",
+          "supported_by": "approvals"
+        },
+        {
+          "kind": "designation",
+          "text": "C84400",
+          "verdict": "supported",
+          "reason": "appears in verified attribute 'body_material'",
+          "field": "bullets",
+          "supported_by": "body_material"
+        }
+      ]
     }
   },
   "document": {
@@ -2151,7 +2322,7 @@
     "uri": "local://f7/50/f7500023aad5093f9f77c12af5186aa8d4c5a67db25550c5c49a589959bf1da0.txt",
     "sha256": "f7500023aad5093f9f77c12af5186aa8d4c5a67db25550c5c49a589959bf1da0",
     "doc_type": "spec_sheet",
-    "fetched_at": "2026-08-03T18:15:00.484976Z",
+    "fetched_at": "2026-08-05T03:15:49.608515Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": null,

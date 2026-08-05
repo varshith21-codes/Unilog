@@ -1,0 +1,197 @@
+{
+  "sku": "BA-100-075",
+  "published": true,
+  "headline": "Milwaukee Valve BA-100 3/4\" Bronze Two-Piece Ball Valve",
+  "short_description": "This 3/4 inch two-piece ball valve features a bronze body, full port design, and NPT threaded connections. Rated for 600 psi WOG and 150 psi WSP.",
+  "long_description": "The Milwaukee Valve BA-100 series two-piece ball valve is constructed from Bronze C84400 with a brass stem and RPTFE seat material. It features a full port design and a lever handle for operation. The NPT threaded end connections facilitate installation in piping systems.\n\nThis valve is rated for 600 psi WOG and 150 psi WSP, with a temperature range of -20 to 366 degF. It is approved for potable water applications and holds UL, CSA, and NSF-61 listings.",
+  "bullets": [
+    "Bronze C84400 body construction with brass stem",
+    "Full port design with RPTFE seat material",
+    "NPT threaded end connections",
+    "Lever handle for manual operation",
+    "Pressure rating: 600 psi WOG, 150 psi WSP",
+    "UL, CSA, and NSF-61 listed for potable water"
+  ],
+  "attempts": 1,
+  "prompt_version": "copy@v1",
+  "model_id": "zai.glm-4.7",
+  "model_tier": "mid",
+  "error": null,
+  "claim_check": {
+    "claims": 21,
+    "supported": 21,
+    "unsupported": 0,
+    "banned": 0,
+    "passed": true
+  },
+  "claims": [
+    {
+      "kind": "quantity",
+      "text": "3/4\"",
+      "verdict": "supported",
+      "reason": "matches verified 'nominal_size'",
+      "field": "headline",
+      "supported_by": "nominal_size"
+    },
+    {
+      "kind": "quantity",
+      "text": "3/4 inch",
+      "verdict": "supported",
+      "reason": "matches verified 'nominal_size'",
+      "field": "short_description",
+      "supported_by": "nominal_size"
+    },
+    {
+      "kind": "quantity",
+      "text": "600 psi",
+      "verdict": "supported",
+      "reason": "matches verified 'pressure_rating_wog'",
+      "field": "short_description",
+      "supported_by": "pressure_rating_wog"
+    },
+    {
+      "kind": "quantity",
+      "text": "150 psi",
+      "verdict": "supported",
+      "reason": "matches verified 'steam_pressure_rating'",
+      "field": "short_description",
+      "supported_by": "steam_pressure_rating"
+    },
+    {
+      "kind": "regulated",
+      "text": "potable water",
+      "verdict": "supported",
+      "reason": "substantiated by verified attribute 'potable_water_approved'",
+      "field": "long_description",
+      "supported_by": "potable_water_approved"
+    },
+    {
+      "kind": "quantity",
+      "text": "600 psi",
+      "verdict": "supported",
+      "reason": "matches verified 'pressure_rating_wog'",
+      "field": "long_description",
+      "supported_by": "pressure_rating_wog"
+    },
+    {
+      "kind": "quantity",
+      "text": "150 psi",
+      "verdict": "supported",
+      "reason": "matches verified 'steam_pressure_rating'",
+      "field": "long_description",
+      "supported_by": "steam_pressure_rating"
+    },
+    {
+      "kind": "quantity",
+      "text": "366 degF",
+      "verdict": "supported",
+      "reason": "matches verified 'temperature_range'",
+      "field": "long_description",
+      "supported_by": "temperature_range"
+    },
+    {
+      "kind": "standard",
+      "text": "UL",
+      "verdict": "supported",
+      "reason": "appears in verified attribute 'approvals'",
+      "field": "long_description",
+      "supported_by": "approvals"
+    },
+    {
+      "kind": "standard",
+      "text": "CSA",
+      "verdict": "supported",
+      "reason": "appears in verified attribute 'approvals'",
+      "field": "long_description",
+      "supported_by": "approvals"
+    },
+    {
+      "kind": "standard",
+      "text": "NSF",
+      "verdict": "supported",
+      "reason": "appears in verified attribute 'approvals'",
+      "field": "long_description",
+      "supported_by": "approvals"
+    },
+    {
+      "kind": "designation",
+      "text": "C84400",
+      "verdict": "supported",
+      "reason": "appears in verified attribute 'body_material'",
+      "field": "long_description",
+      "supported_by": "body_material"
+    },
+    {
+      "kind": "designation",
+      "text": "RPTFE",
+      "verdict": "supported",
+      "reason": "appears in verified attribute 'seat_material'",
+      "field": "long_description",
+      "supported_by": "seat_material"
+    },
+    {
+      "kind": "regulated",
+      "text": "potable water",
+      "verdict": "supported",
+      "reason": "substantiated by verified attribute 'potable_water_approved'",
+      "field": "bullets",
+      "supported_by": "potable_water_approved"
+    },
+    {
+      "kind": "quantity",
+      "text": "600 psi",
+      "verdict": "supported",
+      "reason": "matches verified 'pressure_rating_wog'",
+      "field": "bullets",
+      "supported_by": "pressure_rating_wog"
+    },
+    {
+      "kind": "quantity",
+      "text": "150 psi",
+      "verdict": "supported",
+      "reason": "matches verified 'steam_pressure_rating'",
+      "field": "bullets",
+      "supported_by": "steam_pressure_rating"
+    },
+    {
+      "kind": "standard",
+      "text": "UL",
+      "verdict": "supported",
+      "reason": "appears in verified attribute 'approvals'",
+      "field": "bullets",
+      "supported_by": "approvals"
+    },
+    {
+      "kind": "standard",
+      "text": "CSA",
+      "verdict": "supported",
+      "reason": "appears in verified attribute 'approvals'",
+      "field": "bullets",
+      "supported_by": "approvals"
+    },
+    {
+      "kind": "standard",
+      "text": "NSF",
+      "verdict": "supported",
+      "reason": "appears in verified attribute 'approvals'",
+      "field": "bullets",
+      "supported_by": "approvals"
+    },
+    {
+      "kind": "designation",
+      "text": "C84400",
+      "verdict": "supported",
+      "reason": "appears in verified attribute 'body_material'",
+      "field": "bullets",
+      "supported_by": "body_material"
+    },
+    {
+      "kind": "designation",
+      "text": "RPTFE",
+      "verdict": "supported",
+      "reason": "appears in verified attribute 'seat_material'",
+      "field": "bullets",
+      "supported_by": "seat_material"
+    }
+  ]
+}
