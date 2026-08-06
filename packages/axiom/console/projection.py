@@ -334,6 +334,77 @@ def build_bundle(
 
 PUBLISHABLE_STATUSES = frozenset({"auto_accepted", "human_approved"})
 
+# The weights a certificate written before richness was observable used.
+_LEGACY_WEIGHTS = {
+    "completeness": 0.35,
+    "verifiability": 0.30,
+    "consistency": 0.25,
+    "richness": 0.10,
+}
+
+
+def normalise_quality_index(bundle: dict[str, Any]) -> dict[str, Any]:
+    """Bring an older certificate's quality index up to the current shape, on read.
+
+    A bundle written before richness became observable recorded ``richness: 0.0`` and no
+    ``composite``. That zero was never a measurement — nothing computed it, the field simply
+    defaulted — so it is reinterpreted here as *unmeasured*, and the composite is renormalised over
+    the three dimensions that were genuinely scored.
+
+    Done at read time, deliberately, and only to the projection. The certificate's signature covers
+    its summary, so rewriting the stored bytes would invalidate the very attestation that makes the
+    document worth having. The signed original stays exactly as it was; what the console renders is
+    a view of it.
+
+    A bundle already carrying ``measured_dimensions`` is returned untouched.
+    """
+    certificate = bundle.get("certificate")
+    if not isinstance(certificate, dict):
+        return bundle
+
+    summary = certificate.get("summary")
+    if not isinstance(summary, dict):
+        return bundle
+
+    quality = summary.get("quality_index")
+    if not isinstance(quality, dict) or "measured_dimensions" in quality:
+        return bundle
+
+    weights = quality.get("weights") or _LEGACY_WEIGHTS
+    scored = {
+        name: float(quality[name])
+        for name in ("completeness", "verifiability", "consistency")
+        if isinstance(quality.get(name), int | float)
+    }
+    total = sum(weights.get(name, 0.0) for name in scored)
+    composite = (
+        round(sum(value * weights.get(name, 0.0) for name, value in scored.items()) / total, 4)
+        if total > 0
+        else 0.0
+    )
+
+    return {
+        **bundle,
+        "certificate": {
+            **certificate,
+            "summary": {
+                **summary,
+                "quality_index": {
+                    **quality,
+                    "richness": None,
+                    "composite": composite,
+                    "measured_dimensions": sorted(scored),
+                    # So a reader is not left wondering why this certificate looks different.
+                    "reinterpreted": (
+                        "written before richness was observable; its recorded 0.0 was a default "
+                        "rather than a measurement, so the composite is renormalised over the "
+                        "three dimensions that were scored"
+                    ),
+                },
+            },
+        },
+    }
+
 
 def overlay_review_decisions(bundle: dict[str, Any], session) -> dict[str, Any]:
     """Fold a review session's human decisions onto a projected bundle.

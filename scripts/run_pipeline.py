@@ -310,13 +310,6 @@ def main() -> int:
     tier_prices = prices.tier_prices(cascade) if prices else None
     cost_usd = usage.cost_usd(tier_prices)
 
-    certificate = build_certificate(
-        record,
-        required_attribute_codes=registry.required_codes(class_code),
-        pipeline_version=f"axiom-{__import__('axiom').__version__}",
-        cost_usd=cost_usd,
-        wall_clock_seconds=round(usage.latency_ms / 1000, 2),
-    )
     exports = export_all(record, registry)
 
     # --- stage 9: constrained copy generation ----------------------------------
@@ -356,6 +349,23 @@ def main() -> int:
                     reasoning_config,
                 )
                 generated.formal = checker.verify_copy(record, generated.fields())
+
+    # --- stage 10: certificate -------------------------------------------------
+    # Built last, after the exports and the copy exist, because the Quality Index's richness
+    # dimension is observed from them: channel readiness from the pre-flight results, copy depth
+    # from the generated prose. Building the certificate first — as this script used to — left
+    # richness permanently unmeasured, which dragged every composite down by a tenth for a reason
+    # unrelated to the data.
+    serialised_copy = serialise_copy(generated)
+    certificate = build_certificate(
+        record,
+        required_attribute_codes=registry.required_codes(class_code),
+        pipeline_version=f"axiom-{__import__('axiom').__version__}",
+        cost_usd=cost_usd,
+        wall_clock_seconds=round(usage.latency_ms / 1000, 2),
+        exports=exports,
+        copy=serialised_copy,
+    )
 
     session_path = None
     bundle_path = None
@@ -400,7 +410,7 @@ def main() -> int:
                 cost_by_tier=usage.cost_by_tier(tier_prices),
                 prices=prices,
             ),
-            copy=serialise_copy(generated),
+            copy=serialised_copy,
         )
 
     if args.out:

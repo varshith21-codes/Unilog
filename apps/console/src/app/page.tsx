@@ -77,8 +77,10 @@ export default async function OverviewPage() {
     { label: "Completeness", value: totals.meanCompleteness, weight: 0.35 },
     { label: "Verifiability", value: totals.meanVerifiability, weight: 0.3 },
     { label: "Consistency", value: totals.meanConsistency, weight: 0.25 },
-    { label: "Richness", value: 0, weight: 0.1 },
-  ];
+    // Null when no SKU in the portfolio has a richness score. Rendered as unmeasured rather than
+    // as zero, because the two look identical in a bar chart and mean opposite things.
+    { label: "Richness", value: totals.meanRichness, weight: 0.1 },
+  ] satisfies { label: string; value: number | null; weight: number }[];
 
   return (
     <div className="mx-auto max-w-[var(--container-shell)] px-[var(--spacing-gutter)] pb-24">
@@ -138,21 +140,33 @@ export default async function OverviewPage() {
                     ×{dimension.weight}
                   </span>
                 </dt>
-                <dd className="text-sm tabular-nums">{percent(dimension.value, 1)}</dd>
+                <dd className="text-sm tabular-nums">
+                  {dimension.value === null ? (
+                    <span className="text-[var(--fg-quiet)]">&mdash;</span>
+                  ) : (
+                    percent(dimension.value, 1)
+                  )}
+                </dd>
                 <dd className="col-span-2">
-                  <Meter
-                    value={dimension.value}
-                    tone={dimension.value === 0 ? "quiet" : "accent"}
-                    label={`${dimension.label} ${percent(dimension.value, 1)}`}
-                  />
+                  {dimension.value !== null ? (
+                    <Meter
+                      value={dimension.value}
+                      tone={dimension.value === 0 ? "quiet" : "accent"}
+                      label={`${dimension.label} ${percent(dimension.value, 1)}`}
+                    />
+                  ) : null}
                 </dd>
               </div>
             ))}
           </dl>
 
-          <p className="mt-6 text-meta text-[var(--fg-quiet)]">
-            Richness scores generated marketing copy, which this run did not produce.
-          </p>
+          {totals.meanRichness === null ? (
+            <p className="mt-6 text-meta text-[var(--fg-quiet)]">
+              Richness is scored from channel readiness and copy depth. No SKU in this portfolio has
+              either, so it is excluded from the composite rather than counted as zero — the figure
+              above spans the three dimensions that were measured.
+            </p>
+          ) : null}
         </Panel>
       </header>
 

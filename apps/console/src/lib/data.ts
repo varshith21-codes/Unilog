@@ -19,6 +19,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { cache } from "react";
 
+import { composite } from "./types";
 import type {
   AttributeSpec,
   AttributeValue,
@@ -175,22 +176,10 @@ export const loadCohort = cache(async (): Promise<CohortStudy> => {
     trustworthy: false,
     control_drift: null,
     drifted_dimensions: [],
-    lift: { completeness: 0, verifiability: 0, consistency: 0, richness: 0, composite: 0 },
+    lift: { completeness: 0, verifiability: 0, consistency: 0, composite: 0 },
     field_presence: { before: 0, after: 0 },
-    treatment_before: {
-      completeness: 0,
-      verifiability: 0,
-      consistency: 0,
-      richness: 0,
-      composite: 0,
-    },
-    treatment_after: {
-      completeness: 0,
-      verifiability: 0,
-      consistency: 0,
-      richness: 0,
-      composite: 0,
-    },
+    treatment_before: { completeness: 0, verifiability: 0, consistency: 0, composite: 0 },
+    treatment_after: { completeness: 0, verifiability: 0, consistency: 0, composite: 0 },
     notes: [],
     members: [],
   });
@@ -248,6 +237,14 @@ export interface PortfolioTotals {
   meanCompleteness: number;
   meanVerifiability: number;
   meanConsistency: number;
+  /**
+   * Mean over the SKUs that actually have a richness score, or null when none do.
+   *
+   * Averaged across the scored subset rather than the whole portfolio. Treating an unmeasured
+   * richness as a zero in the denominator would report a catalogue as asset-poor when the truth is
+   * that nobody generated copy for it.
+   */
+  meanRichness: number | null;
   meanComposite: number;
   channelsReady: number;
   channelsTotal: number;
@@ -324,6 +321,8 @@ export function portfolioTotals(skus: SkuBundle[]): PortfolioTotals {
   const n = Math.max(skus.length, 1);
   const mean = (pick: (bundle: SkuBundle) => number) =>
     skus.reduce((sum, bundle) => sum + pick(bundle), 0) / n;
+  const meanOf = (values: number[]) =>
+    values.length > 0 ? values.reduce((sum, v) => sum + v, 0) / values.length : null;
 
   return {
     skuCount: skus.length,
@@ -337,16 +336,13 @@ export function portfolioTotals(skus: SkuBundle[]): PortfolioTotals {
     meanCompleteness: mean((s) => s.certificate.summary.quality_index.completeness),
     meanVerifiability: mean((s) => s.certificate.summary.quality_index.verifiability),
     meanConsistency: mean((s) => s.certificate.summary.quality_index.consistency),
-    meanComposite: mean((s) => {
-      const q = s.certificate.summary.quality_index;
-      const w = q.weights;
-      return (
-        q.completeness * (w.completeness ?? 0) +
-        q.verifiability * (w.verifiability ?? 0) +
-        q.consistency * (w.consistency ?? 0) +
-        q.richness * (w.richness ?? 0)
-      );
-    }),
+    meanRichness: meanOf(
+      skus
+        .map((s) => s.certificate.summary.quality_index.richness)
+        .filter((value): value is number => value !== null),
+    ),
+    // The pipeline's own composite, not a third reimplementation of the weighting.
+    meanComposite: mean((s) => composite(s.certificate.summary.quality_index)),
     channelsReady: skus.reduce(
       (sum, s) => sum + s.channels.filter((c) => c.published).length,
       0,

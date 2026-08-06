@@ -112,10 +112,16 @@ class CohortScore:
         }
 
 
-DIMENSIONS = ("completeness", "verifiability", "consistency", "richness", "composite")
-"""The scored dimensions compared across arms. ``richness`` is currently unimplemented and is
-0.0 on both sides, so it cannot bias a delta — but it is reported rather than hidden, because a
-silently-zero weighted dimension understates every composite by up to its weight."""
+DIMENSIONS = ("completeness", "verifiability", "consistency", "composite")
+"""The scored dimensions compared across arms.
+
+``richness`` is absent by design. It is observed from channel pre-flight results and generated
+copy, and neither arm of a cohort has them: the before-state is an item master with no exports,
+and the after-state is reconstructed from a bundle rather than re-run. So richness is left
+unmeasured on both sides and the composite renormalises over the three dimensions that were
+measured — which is why the composite here is comparable between arms but not directly comparable
+to a certificate's, where richness usually *is* observed.
+"""
 
 
 @dataclass(frozen=True)
@@ -151,7 +157,10 @@ class CohortMember:
 def _dimension(score: CohortScore, name: str) -> float:
     if name == "composite":
         return score.quality.composite
-    return float(getattr(score.quality, name))
+    value = getattr(score.quality, name)
+    # An unmeasured dimension reads as 0.0 here only so the arithmetic has something to work with.
+    # It is kept out of DIMENSIONS precisely so that never reaches a report.
+    return 0.0 if value is None else float(value)
 
 
 @dataclass
@@ -514,12 +523,13 @@ def format_study(study: CohortStudy) -> str:
                 *(f"    {rule}" for rule in newly_failing),
             ]
 
-    if summary["lift"]["richness"] == 0 and summary["treatment_after"]["richness"] == 0:
-        lines += [
-            "",
-            "  richness is not implemented and reads 0.0 on both arms. It carries 10% of the",
-            "  composite weight, so every composite here is understated by up to 10 points.",
-        ]
+    lines += [
+        "",
+        "  richness is not scored here. It is observed from channel pre-flight and generated copy,",
+        "  and neither arm has them — so the composite above is a weighted mean over the three",
+        "  dimensions that were measured, renormalised. Comparable between arms, but not directly",
+        "  comparable to a certificate's composite, where richness usually is observed.",
+    ]
 
     worst = sorted(study.treatment, key=lambda m: m.deltas()["composite"])[:3]
     if worst:

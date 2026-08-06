@@ -12,6 +12,12 @@ import {
 import { percent } from "@/lib/format";
 import type { CohortDimension, CohortMember, CohortStudy } from "@/lib/types";
 
+/**
+ * The dimensions a cohort compares. Richness is absent by design, not by omission: it is scored
+ * from channel pre-flight results and generated copy, and neither arm of a cohort has them — the
+ * before-state is an item master with no exports, and the after-state is reconstructed from a
+ * bundle rather than re-run. Both arms therefore renormalise over these three.
+ */
 const DIMENSIONS: { key: CohortDimension; label: string; detail: string }[] = [
   {
     key: "completeness",
@@ -27,11 +33,6 @@ const DIMENSIONS: { key: CohortDimension; label: string; detail: string }[] = [
     key: "consistency",
     label: "Consistency",
     detail: "Values with no blocking validation failure",
-  },
-  {
-    key: "richness",
-    label: "Richness",
-    detail: "Not implemented — reads zero on both arms, so it cannot bias the lift",
   },
 ];
 
@@ -117,7 +118,7 @@ export function CohortPanel({ study }: { study: CohortStudy }) {
             <Stat
               label="Composite before"
               value={percent(before.composite)}
-              hint="Weighted: completeness 35%, verifiability 30%, consistency 25%, richness 10%"
+              hint="Weighted across the three dimensions measured here, renormalised: completeness 35%, verifiability 30%, consistency 25%"
             />
           </Panel>
           <Panel className="p-7">
@@ -127,7 +128,7 @@ export function CohortPanel({ study }: { study: CohortStudy }) {
             <Stat
               label="Lift"
               value={`${study.lift.composite >= 0 ? "+" : ""}${percent(study.lift.composite)}`}
-              hint="Richness is unimplemented and contributes zero on both sides, so every composite here is understated by up to 10 points."
+              hint="Comparable between arms, but not to a certificate's composite — that one usually includes richness, which a cohort cannot observe."
               tone={study.lift.composite > 0 ? "pass" : "warn"}
             />
           </Panel>

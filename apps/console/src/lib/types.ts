@@ -428,12 +428,26 @@ export interface ParsedPage {
 // ---------------------------------------------------------------- certificate
 // axiom.core.certificate
 
+/**
+ * axiom.core.certificate.QualityIndex
+ *
+ * `richness` is `null` when nothing about it could be observed, which is emphatically not zero. It
+ * is scored from channel pre-flight results and generated copy, so a run that produced neither
+ * leaves it unmeasured — and `composite` then renormalises over the dimensions that *were*
+ * measured rather than dragging the score down by richness's weight.
+ *
+ * `composite` is served by the API, not recomputed here. It used to be reimplemented in this file,
+ * which meant the weighting existed twice and could disagree with itself the moment either side
+ * changed. Read `measured_dimensions` to know how many dimensions it spans.
+ */
 export interface QualityIndex {
   completeness: number;
   verifiability: number;
   consistency: number;
-  richness: number;
-  weights: Record<string, number>;
+  richness: number | null;
+  composite: number;
+  measured_dimensions: string[];
+  weights?: Record<string, number>;
 }
 
 export interface CertificateSummary {
@@ -511,15 +525,16 @@ export interface EnrichmentCertificate {
   signature_verified: boolean;
 }
 
-/** Weighted composite. Mirrors `QualityIndex.composite`. */
+/**
+ * The composite, as the pipeline computed it.
+ *
+ * A reader rather than a calculation, deliberately. This function used to reimplement the weighting
+ * in TypeScript, which put the same formula in two languages — and when richness became an
+ * optionally-unmeasured dimension requiring renormalisation, the two would have silently disagreed.
+ * The Python is the single source of truth and serialises the result.
+ */
 export function composite(index: QualityIndex): number {
-  const w = index.weights;
-  return (
-    index.completeness * (w.completeness ?? 0) +
-    index.verifiability * (w.verifiability ?? 0) +
-    index.consistency * (w.consistency ?? 0) +
-    index.richness * (w.richness ?? 0)
-  );
+  return index.composite;
 }
 
 // ---------------------------------------------------------------- policy & channels
@@ -847,12 +862,16 @@ export interface ConsoleDataset {
 
 export type CohortArm = "treatment" | "control";
 
-/** The scored dimensions, plus the composite. `richness` is not yet implemented and reads 0. */
+/**
+ * The dimensions a cohort compares, plus the composite.
+ *
+ * `richness` is deliberately not among them: it is scored from channel pre-flight and generated
+ * copy, and neither cohort arm has those. Both arms renormalise the composite over these three.
+ */
 export type CohortDimension =
   | "completeness"
   | "verifiability"
   | "consistency"
-  | "richness"
   | "composite";
 
 /** axiom.evaluation.cohort.CohortScore — one SKU at one point in time. */
@@ -860,7 +879,8 @@ export interface CohortScore {
   completeness: number;
   verifiability: number;
   consistency: number;
-  richness: number;
+  /** Null on both arms: a cohort has no channel exports or copy to score it from. */
+  richness: number | null;
   composite: number;
   /**
    * Share of required fields holding *any* value, publishable or not.

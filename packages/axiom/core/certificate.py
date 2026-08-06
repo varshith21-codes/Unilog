@@ -12,12 +12,87 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Mapping
+from dataclasses import dataclass
 from datetime import UTC, datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from axiom.core.product import ProductRecord
 from axiom.core.values import ValueStatus
+
+
+@dataclass(frozen=True)
+class RichnessComponents:
+    """What the blueprint means by richness: "assets, relationships, copy depth, channel
+    readiness" (Part 5, M11).
+
+    Each component is ``None`` when this build cannot observe it, and that is deliberately not the
+    same as ``0.0``. Two of the four depend on modules that do not exist yet — there is no asset
+    intelligence and no relationship graph — and scoring them zero would report a data-quality
+    deficit where the truth is a missing feature. It is the same distinction the validation layers
+    draw between SKIPPED and FAIL, for the same reason.
+    """
+
+    channel_readiness: float | None = None
+    """Share of output channels that passed pre-flight. Always observable once exports are built."""
+
+    copy_depth: float | None = None
+    """Share of copy fields populated, once copy has cleared its gates.
+
+    ``None`` when copy was never attempted, ``0.0`` when it was attempted and produced nothing
+    publishable. Those are different facts: the first is a pipeline option nobody selected, the
+    second is a real absence of usable prose.
+    """
+
+    relationships: float | None = None
+    """Parent-child and cross-reference density. ``None`` until M9 exists."""
+
+    assets: float | None = None
+    """Image and document coverage. ``None`` until M10 exists."""
+
+    def score(self) -> float | None:
+        """Mean of the observable components, or None when none of them are.
+
+        An unweighted mean over what is present, rather than fixed weights over four slots. With
+        two of four permanently unobservable, fixed weights would cap richness at half regardless
+        of how good the data was.
+        """
+        present = [
+            value
+            for value in (
+                self.channel_readiness,
+                self.copy_depth,
+                self.relationships,
+                self.assets,
+            )
+            if value is not None
+        ]
+        if not present:
+            return None
+        return round(sum(present) / len(present), 4)
+
+    def observed(self) -> list[str]:
+        return [
+            name
+            for name, value in (
+                ("channel_readiness", self.channel_readiness),
+                ("copy_depth", self.copy_depth),
+                ("relationships", self.relationships),
+                ("assets", self.assets),
+            )
+            if value is not None
+        ]
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "channel_readiness": self.channel_readiness,
+            "copy_depth": self.copy_depth,
+            "relationships": self.relationships,
+            "assets": self.assets,
+            "score": self.score(),
+            "observed": self.observed(),
+        }
 
 
 class QualityIndex(BaseModel):
@@ -28,7 +103,13 @@ class QualityIndex(BaseModel):
     completeness: float = Field(ge=0.0, le=1.0)
     verifiability: float = Field(ge=0.0, le=1.0)
     consistency: float = Field(ge=0.0, le=1.0)
-    richness: float = Field(ge=0.0, le=1.0)
+    richness: float | None = Field(default=None, ge=0.0, le=1.0)
+    """None when nothing about richness could be observed — not zero.
+
+    This distinction is the whole point. Richness carries a tenth of the composite weight, so
+    treating an unmeasured dimension as a zero understated every composite this system reported by
+    up to ten points, for a reason that had nothing to do with the data.
+    """
 
     weights: dict[str, float] = Field(
         default_factory=lambda: {
@@ -40,22 +121,43 @@ class QualityIndex(BaseModel):
     )
 
     @property
-    def composite(self) -> float:
-        return round(
-            self.completeness * self.weights["completeness"]
-            + self.verifiability * self.weights["verifiability"]
-            + self.consistency * self.weights["consistency"]
-            + self.richness * self.weights["richness"],
-            4,
-        )
+    def measured(self) -> dict[str, float]:
+        """The dimensions that actually hold a value."""
+        scored = {
+            "completeness": self.completeness,
+            "verifiability": self.verifiability,
+            "consistency": self.consistency,
+        }
+        if self.richness is not None:
+            scored["richness"] = self.richness
+        return scored
 
-    def to_dict(self) -> dict[str, float]:
+    @property
+    def composite(self) -> float:
+        """Weighted mean over the dimensions that were measured, renormalised.
+
+        Renormalisation is what makes an absent dimension harmless. Multiplying an unmeasured
+        richness by 0.10 and adding zero does not leave the composite alone — it drags it down by
+        a tenth, which is indistinguishable from a product with genuinely no assets, no copy and
+        no channel readiness. Dividing by the weight actually applied says instead: this is the
+        score across what we could see.
+        """
+        scored = self.measured
+        total = sum(self.weights.get(name, 0.0) for name in scored)
+        if total <= 0:
+            return 0.0
+        weighted = sum(value * self.weights.get(name, 0.0) for name, value in scored.items())
+        return round(weighted / total, 4)
+
+    def to_dict(self) -> dict[str, float | None | list[str]]:
         return {
             "completeness": round(self.completeness, 4),
             "verifiability": round(self.verifiability, 4),
             "consistency": round(self.consistency, 4),
-            "richness": round(self.richness, 4),
+            "richness": None if self.richness is None else round(self.richness, 4),
             "composite": self.composite,
+            # So a reader can tell a composite over four dimensions from one over three.
+            "measured_dimensions": sorted(self.measured),
         }
 
 
@@ -141,11 +243,52 @@ def _sign(payload: dict) -> str:
     return "sha256:" + hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
+def richness_for(
+    record: ProductRecord,
+    *,
+    exports: Mapping[str, object] | None = None,
+    copy: Mapping[str, object] | None = None,
+) -> RichnessComponents:
+    """Observe what can be observed about richness.
+
+    ``exports`` is the channel map from ``axiom.syndicate.export_all``; ``copy`` is a serialised
+    :class:`axiom.generate.GeneratedCopy`. Both are passed as plain mappings rather than imported
+    types so that ``core`` stays at the bottom of the dependency graph — syndicate and generate both
+    sit above it, and importing either here would invert the layering.
+    """
+    channel_readiness: float | None = None
+    if exports:
+        published = sum(1 for export in exports.values() if getattr(export, "published", False))
+        channel_readiness = round(published / len(exports), 4)
+
+    copy_depth: float | None = None
+    if copy is not None:
+        if copy.get("published"):
+            fields = ("headline", "short_description", "long_description", "bullets")
+            filled = sum(1 for name in fields if copy.get(name))
+            copy_depth = round(filled / len(fields), 4)
+        else:
+            # Attempted and withheld. A real absence of publishable prose, unlike never trying.
+            copy_depth = 0.0
+
+    del record  # reserved for relationship density once M9 exists
+
+    return RichnessComponents(
+        channel_readiness=channel_readiness,
+        copy_depth=copy_depth,
+        # Left unobserved rather than zeroed. A standalone product legitimately has no parent, so
+        # `parent_sku is None` is not evidence of thin data, and there is no cross-reference graph
+        # to measure density against until M9 exists.
+        relationships=None,
+        assets=None,
+    )
+
+
 def quality_index_for(
     record: ProductRecord,
     required_attribute_codes: list[str],
     *,
-    richness: float = 0.0,
+    richness: float | None = None,
 ) -> QualityIndex:
     """Score one record's quality index.
 
@@ -176,15 +319,24 @@ def build_certificate(
     pipeline_version: str,
     cost_usd: float | None = None,
     wall_clock_seconds: float | None = None,
-    richness: float = 0.0,
+    richness: float | None = None,
+    exports: Mapping[str, object] | None = None,
+    copy: Mapping[str, object] | None = None,
 ) -> EnrichmentCertificate:
     """Assemble a certificate from a product record.
 
     Only *publishable* values are certified. Candidates and queued values are counted in
     the summary but are not presented as certified facts, which is the whole point.
+
+    Pass ``exports`` and ``copy`` to have richness observed from them. Passing ``richness``
+    directly overrides that, which is what the cohort does — it has neither, and needs the
+    dimension left unmeasured rather than inferred from their absence.
     """
     current = record.current_values()
     publishable = record.publishable_values()
+
+    if richness is None and (exports is not None or copy is not None):
+        richness = richness_for(record, exports=exports, copy=copy).score()
 
     quality = quality_index_for(record, required_attribute_codes, richness=richness)
 

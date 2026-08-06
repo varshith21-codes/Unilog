@@ -21,7 +21,12 @@ from pathlib import Path
 from typing import Literal
 
 from axiom.confidence import Priors, select_threshold
-from axiom.console import build_dataset, dataset_stats, overlay_review_decisions
+from axiom.console import (
+    build_dataset,
+    dataset_stats,
+    normalise_quality_index,
+    overlay_review_decisions,
+)
 from axiom.review import ACCEPT, CORRECT, REJECT, ReviewSession, queue_summary, record_decision
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
@@ -188,6 +193,11 @@ def console_dataset() -> dict:
             # One corrupt file must not blank the whole console.
             unreadable.append(path.name)
             continue
+
+        # A certificate written before richness was observable recorded a defaulted 0.0 and no
+        # composite. Reinterpreted on read so the console renders one shape; the signed bytes on
+        # disk are left alone, because the signature is the point of having them.
+        bundle = normalise_quality_index(bundle)
 
         # A bundle records what the pipeline produced; the session records what a reviewer
         # decided since. Joining them here means a decision shows up on the dashboards without

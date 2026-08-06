@@ -54,12 +54,18 @@ export default async function CertificatePage({
     (definition?.attributes ?? []).map((spec) => [spec.code, spec] as const),
   );
 
+  const weights = quality.weights ?? {};
+
+  // Richness carries a null when nothing about it could be observed, and that is not zero. Rendering
+  // it as 0% would report a data deficit where the truth is that this run produced no channel
+  // exports and no copy to score — so it is shown as unmeasured, and the composite beside it is
+  // renormalised over the dimensions that do have values.
   const dimensions = [
-    { label: "Completeness", value: quality.completeness, weight: quality.weights.completeness ?? 0 },
-    { label: "Verifiability", value: quality.verifiability, weight: quality.weights.verifiability ?? 0 },
-    { label: "Consistency", value: quality.consistency, weight: quality.weights.consistency ?? 0 },
-    { label: "Richness", value: quality.richness, weight: quality.weights.richness ?? 0 },
-  ];
+    { label: "Completeness", value: quality.completeness, weight: weights.completeness ?? 0 },
+    { label: "Verifiability", value: quality.verifiability, weight: weights.verifiability ?? 0 },
+    { label: "Consistency", value: quality.consistency, weight: weights.consistency ?? 0 },
+    { label: "Richness", value: quality.richness, weight: weights.richness ?? 0 },
+  ] satisfies { label: string; value: number | null; weight: number }[];
 
   return (
     <div className="mx-auto max-w-[var(--container-shell)] px-[var(--spacing-gutter)] pb-24">
@@ -103,7 +109,8 @@ export default async function CertificatePage({
           <Overline>Quality index</Overline>
           <p className="figure mt-3">{percent(composite(quality), 1)}</p>
           <p className="mt-2 text-meta text-[var(--fg-quiet)]">
-            Weighted composite of the four dimensions below
+            Weighted composite of the {quality.measured_dimensions.length} dimensions that were
+            measured, renormalised
           </p>
 
           <dl className="mt-8 flex flex-col gap-4">
@@ -115,16 +122,33 @@ export default async function CertificatePage({
                 <dt className="text-sm text-[var(--fg-secondary)]">
                   {dimension.label}
                   <span className="ml-1.5 text-meta text-[var(--fg-quiet)]">
-                    ×{dimension.weight}
+                    {dimension.value === null ? "not scored" : `×${dimension.weight}`}
                   </span>
                 </dt>
-                <dd className="text-sm tabular-nums">{percent(dimension.value, 1)}</dd>
+                <dd className="text-sm tabular-nums">
+                  {dimension.value === null ? (
+                    <span className="text-[var(--fg-quiet)]">&mdash;</span>
+                  ) : (
+                    percent(dimension.value, 1)
+                  )}
+                </dd>
                 <dd className="col-span-2">
-                  <Meter
-                    value={dimension.value}
-                    tone={dimension.value === 0 ? "quiet" : "accent"}
-                    label={`${dimension.label} ${percent(dimension.value, 1)}`}
-                  />
+                  {dimension.value === null ? (
+                    /*
+                     * No bar at all. A zero-width meter and an unmeasured dimension look
+                     * identical, and they mean opposite things.
+                     */
+                    <p className="text-meta text-[var(--fg-quiet)]">
+                      Scored from channel readiness and copy depth; this run produced neither, so
+                      it is excluded from the composite rather than counted as zero.
+                    </p>
+                  ) : (
+                    <Meter
+                      value={dimension.value}
+                      tone={dimension.value === 0 ? "quiet" : "accent"}
+                      label={`${dimension.label} ${percent(dimension.value, 1)}`}
+                    />
+                  )}
                 </dd>
               </div>
             ))}
