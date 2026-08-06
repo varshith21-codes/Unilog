@@ -24,6 +24,7 @@ from axiom.console import (
     build_dataset,
     dataset_stats,
     jsonable,
+    overlay_cross_source,
     overlay_review_decisions,
     serialise_class,
     serialise_document,
@@ -643,3 +644,152 @@ def test_dataset_reflects_a_recorded_decision(client):
     handle = next(v for v in after["skus"][0]["values"] if v["attribute_code"] == "handle_type")
     assert handle["status"] == "human_approved"
     assert handle["review_reason"] == "human_accept"
+
+
+# ===================================================== the L4 overlay
+#
+# Cross-source findings reach the console the same way review decisions do: as a separate artifact
+# joined at read time, never by rewriting the bundle. The bundle is the immutable record of what a
+# *single-source* run produced, and folding a later multi-source analysis into it would destroy the
+# ability to ask what that run said on its own.
+
+
+def cross_source_payload(**overrides) -> dict:
+    payload = {
+        "sku": "BA-100-075",
+        "generated_at": "2026-08-06T00:00:00+00:00",
+        "dry_run": False,
+        "sources": [
+            {
+                "source": "data/samples/ba100.txt",
+                "document_id": "ba100",
+                "revision_label": "Rev C 2024-08",
+                "revision_method": "letter_and_date",
+                "supplier_id": "milwaukee",
+                "values": 5,
+                "parser": "text",
+            },
+            {
+                "source": "data/samples/ba100-catalog.txt",
+                "document_id": "catalog",
+                "revision_label": "Rev A 2022-03",
+                "revision_method": "letter_and_date",
+                "supplier_id": "acme",
+                "values": 6,
+                "parser": "text",
+            },
+        ],
+        "report": {
+            "applicable": True,
+            "documents": 2,
+            "corroborated": 1,
+            "disagreements": 1,
+            "unresolved": 0,
+            "single_source": 1,
+            "passed": True,
+            "corroborated_attributes": ["body_material"],
+            "single_source_attributes": ["country_of_origin"],
+            "conflicts": [
+                {
+                    "attribute_code": "pressure_rating_wog",
+                    "resolved": True,
+                    "reason": "ba100 is the newer revision (Rev C 2024-08)",
+                    "winner": "'600 psi' (ba100 Rev C 2024-08)",
+                    "observations": [
+                        {
+                            "document_id": "ba100",
+                            "revision_label": "Rev C 2024-08",
+                            "supplier_id": "milwaukee",
+                            "value_display": "600 psi",
+                        },
+                        {
+                            "document_id": "catalog",
+                            "revision_label": "Rev A 2022-03",
+                            "supplier_id": "acme",
+                            "value_display": "400 psi",
+                        },
+                    ],
+                }
+            ],
+        },
+    }
+    payload.update(overrides)
+    return payload
+
+
+def bundle_with_values(*codes: str) -> dict:
+    return {
+        "sku": "BA-100-075",
+        "values": [{"attribute_code": code, "value_raw": "x"} for code in codes],
+    }
+
+
+def test_the_report_is_attached_to_the_bundle():
+    bundle = overlay_cross_source(bundle_with_values("body_material"), cross_source_payload())
+
+    assert bundle["cross_source"]["documents"] == 2
+    assert bundle["cross_source"]["corroborated"] == 1
+    assert len(bundle["cross_source"]["sources"]) == 2
+
+
+def test_each_value_gets_its_own_verdict():
+    """The level a reviewer acts at. A record-level summary cannot tell them which attribute to
+    look at."""
+    bundle = overlay_cross_source(
+        bundle_with_values("body_material", "pressure_rating_wog", "country_of_origin"),
+        cross_source_payload(),
+    )
+    states = {v["attribute_code"]: v["cross_source"]["state"] for v in bundle["values"]}
+
+    assert states == {
+        "body_material": "corroborated",
+        "pressure_rating_wog": "superseded",
+        "country_of_origin": "single_source",
+    }
+
+
+def test_an_unresolved_conflict_is_marked_differently_from_a_resolved_one():
+    """They look similar in a summary and mean opposite things: one is stale data, the other is
+    two contradictory answers the system refused to choose between."""
+    payload = cross_source_payload()
+    payload["report"]["conflicts"][0]["resolved"] = False
+    payload["report"]["unresolved"] = 1
+    payload["report"]["passed"] = False
+
+    bundle = overlay_cross_source(bundle_with_values("pressure_rating_wog"), payload)
+
+    assert bundle["values"][0]["cross_source"]["state"] == "conflict"
+    assert bundle["cross_source"]["passed"] is False
+
+
+def test_a_value_no_source_spoke_to_is_left_unmarked():
+    """Absence of a verdict is not a verdict. Marking every value would imply L4 had an opinion
+    about attributes it never saw."""
+    bundle = overlay_cross_source(bundle_with_values("handle_type"), cross_source_payload())
+
+    assert bundle["values"][0].get("cross_source") is None
+
+
+def test_the_dry_run_flag_survives_the_join():
+    """Findings from scripted responses must not be presentable as a measurement, so the console
+    needs to be able to say so."""
+    bundle = overlay_cross_source(
+        bundle_with_values("body_material"), cross_source_payload(dry_run=True)
+    )
+
+    assert bundle["cross_source"]["dry_run"] is True
+
+
+def test_a_payload_with_no_report_leaves_the_bundle_alone():
+    """A malformed artifact must not blank the workspace."""
+    original = bundle_with_values("body_material")
+    assert overlay_cross_source(original, {"sku": "BA-100-075"}) == original
+
+
+def test_the_overlay_does_not_mutate_the_bundle_it_was_given():
+    """The bundle is read from disk and may be served to other callers in the same request."""
+    original = bundle_with_values("body_material")
+    overlay_cross_source(original, cross_source_payload())
+
+    assert "cross_source" not in original
+    assert original["values"][0].get("cross_source") is None

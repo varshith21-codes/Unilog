@@ -264,12 +264,20 @@ def run_sku(sku: str, *, registry, parsed, artifact, policy, calibrator, priors)
     # precisely the kind of confident-but-meaningless number the rest of this system refuses to
     # emit. The console renders "no cost recorded" instead, and the live API path carries the
     # real figure. See scripts/fetch_bedrock_prices.py.
+    # Built once and shared, so the certificate's channel-readiness component cannot disagree with
+    # the channel table rendered beside it.
+    exports = export_all(record, registry)
+
     certificate = build_certificate(
         record,
         required_attribute_codes=registry.required_codes(class_code),
         pipeline_version=f"axiom-{axiom.__version__}",
         cost_usd=None,
         wall_clock_seconds=round(result.usage.latency_ms / 1000, 2),
+        exports=exports,
+        # No copy in the fixture path: this exporter drives the pipeline with a stub client, and
+        # generating prose from scripted responses would put invented marketing text in front of
+        # a reader. So copy depth stays unobserved rather than scored as zero.
     )
 
     return build_bundle(
@@ -284,7 +292,7 @@ def run_sku(sku: str, *, registry, parsed, artifact, policy, calibrator, priors)
         features=features_by_code,
         decisions=decisions,
         certificate=certificate,
-        exports=export_all(record, registry),
+        exports=exports,
     )
 
 

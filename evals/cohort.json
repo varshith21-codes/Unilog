@@ -7,7 +7,6 @@
     "completeness": 0.0,
     "verifiability": 0.0,
     "consistency": 0.0,
-    "richness": 0.0,
     "composite": 0.0
   },
   "drifted_dimensions": [],
@@ -15,8 +14,7 @@
     "completeness": 0.75,
     "verifiability": 1.0,
     "consistency": 0.0,
-    "richness": 0.0,
-    "composite": 0.5625
+    "composite": 0.625
   },
   "field_presence": {
     "before": 0.3333,
@@ -26,15 +24,13 @@
     "completeness": 0.0,
     "verifiability": 0.0,
     "consistency": 1.0,
-    "richness": 0.0,
-    "composite": 0.25
+    "composite": 0.2778
   },
   "treatment_after": {
     "completeness": 0.75,
     "verifiability": 1.0,
     "consistency": 1.0,
-    "richness": 0.0,
-    "composite": 0.8125
+    "composite": 0.9028
   },
   "notes": [
     "16 item-master row(s) had no enriched counterpart and were excluded rather than counted as zero-improvement treatments \u2014 a run that never happened is not a null result. Excluded: 77C-103, 77C-104, 77C-105, 77C-105-DUP, 77C-105R, 77C-106 and 10 more"
@@ -47,8 +43,13 @@
         "completeness": 0.0,
         "verifiability": 0.0,
         "consistency": 1.0,
-        "richness": 0.0,
-        "composite": 0.25,
+        "richness": null,
+        "composite": 0.2778,
+        "measured_dimensions": [
+          "completeness",
+          "consistency",
+          "verifiability"
+        ],
         "field_presence": 0.3333,
         "values_present": 6,
         "values_publishable": 0,
@@ -62,8 +63,13 @@
         "completeness": 0.75,
         "verifiability": 1.0,
         "consistency": 1.0,
-        "richness": 0.0,
-        "composite": 0.8125,
+        "richness": null,
+        "composite": 0.9028,
+        "measured_dimensions": [
+          "completeness",
+          "consistency",
+          "verifiability"
+        ],
         "field_presence": 0.75,
         "values_present": 15,
         "values_publishable": 15,
@@ -77,8 +83,7 @@
         "completeness": 0.75,
         "verifiability": 1.0,
         "consistency": 0.0,
-        "richness": 0.0,
-        "composite": 0.5625,
+        "composite": 0.625,
         "field_presence": 0.4167
       }
     },
@@ -89,8 +94,13 @@
         "completeness": 0.0,
         "verifiability": 0.0,
         "consistency": 1.0,
-        "richness": 0.0,
-        "composite": 0.25,
+        "richness": null,
+        "composite": 0.2778,
+        "measured_dimensions": [
+          "completeness",
+          "consistency",
+          "verifiability"
+        ],
         "field_presence": 0.3333,
         "values_present": 6,
         "values_publishable": 0,
@@ -104,8 +114,13 @@
         "completeness": 0.0,
         "verifiability": 0.0,
         "consistency": 1.0,
-        "richness": 0.0,
-        "composite": 0.25,
+        "richness": null,
+        "composite": 0.2778,
+        "measured_dimensions": [
+          "completeness",
+          "consistency",
+          "verifiability"
+        ],
         "field_presence": 0.3333,
         "values_present": 6,
         "values_publishable": 0,
@@ -119,7 +134,6 @@
         "completeness": 0.0,
         "verifiability": 0.0,
         "consistency": 0.0,
-        "richness": 0.0,
         "composite": 0.0,
         "field_presence": 0.0
       }

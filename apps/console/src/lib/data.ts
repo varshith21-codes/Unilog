@@ -202,15 +202,27 @@ export const loadCohort = cache(async (): Promise<CohortStudy> => {
   }
 });
 
+/** Unresolved cross-source conflicts on a SKU. Zero when no L4 run has been saved for it. */
+export function unresolvedConflicts(bundle: SkuBundle): number {
+  return bundle.cross_source?.unresolved ?? 0;
+}
+
 /**
  * Review order: the SKUs a reviewer should open first.
  *
- * Blocking validation failures outrank everything, then required gaps, then queued values.
- * Sorting by a single composite score would bury a compliance failure behind a pile of
- * missing carton weights, which is exactly the wrong triage.
+ * Unresolved cross-source conflicts come first, then blocking validation failures, then required
+ * gaps, then queued values. Sorting by a single composite score would bury a compliance failure
+ * behind a pile of missing carton weights, which is exactly the wrong triage.
+ *
+ * L4 leads because it is the only finding where the system is holding two contradictory answers and
+ * has deliberately refused to choose. Everything below it is one answer the pipeline is unsure
+ * about; this is two answers it cannot reconcile, and it blocks publication until a human rules.
  */
 export function reviewOrder(skus: SkuBundle[]): SkuBundle[] {
   return [...skus].sort((a, b) => {
+    const conflicts = unresolvedConflicts(b) - unresolvedConflicts(a);
+    if (conflicts !== 0) return conflicts;
+
     if (a.validation.failures !== b.validation.failures) {
       return b.validation.failures - a.validation.failures;
     }

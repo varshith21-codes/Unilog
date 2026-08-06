@@ -8,6 +8,7 @@ discipline, because discipline does not survive a hackathon.
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from types import SimpleNamespace
 
 import pytest
 from axiom.core import (
@@ -25,7 +26,12 @@ from axiom.core import (
     ValueRange,
     ValueStatus,
 )
-from axiom.core.certificate import build_certificate
+from axiom.core.certificate import (
+    QualityIndex,
+    RichnessComponents,
+    build_certificate,
+    richness_for,
+)
 from axiom.core.evidence import BoundingBox, DocumentType
 from axiom.core.product import ClassificationScheme
 from axiom.core.validation import Severity
@@ -421,3 +427,129 @@ def test_certificate_signature_detects_tampering():
     )
     tampered = cert.model_copy(update={"sku": "X2"})
     assert tampered.verify_signature() is False
+
+
+# ============================================ richness, and the unmeasured/zero distinction
+#
+# Richness carries a tenth of the composite weight. For most of this project's life it was
+# hardcoded to 0.0, so every composite the system reported was understated by up to ten
+# points for a reason that had nothing to do with the data. These guard the fix, and the fix
+# rests entirely on one distinction: a dimension nobody could observe is not a dimension that
+# scored badly.
+
+
+def channel(published: bool):
+    """Minimal stand-in for a syndicate export. `richness_for` reads only `.published`."""
+    return SimpleNamespace(published=published)
+
+
+def test_an_unmeasured_richness_is_none_not_zero():
+    components = RichnessComponents()
+
+    assert components.score() is None
+    assert components.observed() == []
+
+
+def test_channel_readiness_is_the_share_that_passed_preflight():
+    components = richness_for(
+        ProductRecord(tenant_id="t", sku="S"),
+        exports={"pim": channel(False), "schema_org": channel(True)},
+    )
+
+    assert components.channel_readiness == 0.5
+    assert components.score() == 0.5
+    assert components.observed() == ["channel_readiness"]
+
+
+def test_copy_that_was_never_attempted_is_unobserved():
+    """Not zero. A pipeline option nobody selected is not an absence of usable prose."""
+    components = richness_for(ProductRecord(tenant_id="t", sku="S"), copy=None)
+
+    assert components.copy_depth is None
+
+
+def test_copy_that_was_withheld_scores_zero():
+    """Attempted and blocked *is* a real absence of publishable prose, unlike never trying."""
+    components = richness_for(
+        ProductRecord(tenant_id="t", sku="S"),
+        copy={"published": False, "headline": "Bronze ball valve"},
+    )
+
+    assert components.copy_depth == 0.0
+    assert components.score() == 0.0
+
+
+def test_copy_depth_is_the_share_of_fields_populated():
+    components = richness_for(
+        ProductRecord(tenant_id="t", sku="S"),
+        copy={
+            "published": True,
+            "headline": "Bronze ball valve",
+            "short_description": "A valve.",
+            "long_description": "",
+            "bullets": [],
+        },
+    )
+
+    assert components.copy_depth == 0.5
+
+
+def test_relationships_and_assets_stay_unobserved():
+    """Both depend on modules that do not exist. Scoring them zero would report a data-quality
+    deficit where the truth is a missing feature — the same reason a validation layer reports
+    SKIPPED rather than FAIL when its precondition is absent."""
+    components = richness_for(
+        ProductRecord(tenant_id="t", sku="S"), exports={"pim": channel(True)}
+    )
+
+    assert components.relationships is None
+    assert components.assets is None
+    assert components.score() == 1.0, "the mean is over what was observed, not over four slots"
+
+
+# ------------------------------------------------------------------ the composite
+
+
+def index(**overrides) -> QualityIndex:
+    values = {"completeness": 0.8, "verifiability": 1.0, "consistency": 1.0}
+    values.update(overrides)
+    return QualityIndex(**values)
+
+
+def test_an_unmeasured_richness_does_not_drag_the_composite_down():
+    """The bug this fixes. Multiplying an absent richness by 0.10 and adding zero does not leave
+    the composite alone — it removes a tenth of it, which is indistinguishable from a product with
+    genuinely no assets, no copy and no channel readiness."""
+    unmeasured = index(richness=None)
+    scored_zero = index(richness=0.0)
+
+    assert unmeasured.composite > scored_zero.composite
+    # Renormalised over the three measured dimensions rather than divided by a weight never applied.
+    expected = (0.8 * 0.35 + 1.0 * 0.30 + 1.0 * 0.25) / 0.90
+    assert unmeasured.composite == pytest.approx(round(expected, 4))
+
+
+def test_a_measured_zero_still_counts_against_the_composite():
+    """The mirror of the above. Observing that nothing is publishable to any channel is a real
+    finding and must not be discarded along with the unmeasured case."""
+    assert index(richness=0.0).composite < index(richness=1.0).composite
+
+
+def test_the_composite_reports_which_dimensions_it_spans():
+    assert index(richness=None).measured_dimensions == [
+        "completeness",
+        "consistency",
+        "verifiability",
+    ]
+    assert len(index(richness=0.4).measured_dimensions) == 4
+
+
+def test_the_composite_is_serialised_rather_than_left_to_the_client():
+    """It used to be a bare property, so `model_dump` dropped it and the console reimplemented the
+    weighting in TypeScript. The formula then existed in two languages and would have disagreed
+    with itself the moment richness became optional."""
+    dumped = index(richness=0.5).model_dump(mode="json")
+
+    assert "composite" in dumped
+    assert "measured_dimensions" in dumped
+    assert dumped["composite"] == index(richness=0.5).composite

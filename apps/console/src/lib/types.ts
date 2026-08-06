@@ -199,6 +199,80 @@ export interface AttributeValue {
    */
   review_reason?: string;
   review_detail?: string;
+  /**
+   * Validation layer L4's verdict on this attribute, when a cross-source run has been saved for
+   * this SKU. Joined at read time by `axiom.console.projection.overlay_cross_source`.
+   */
+  cross_source?: CrossSourceVerdict | null;
+}
+
+/** One source's statement about an attribute, as L4 recorded it. */
+export interface CrossSourceObservation {
+  document_id: string;
+  revision_label: string | null;
+  supplier_id: string | null;
+  value_display: string | null;
+}
+
+/**
+ * What a second source did to one attribute.
+ *
+ * The four states are genuinely different positions and the UI must not blur them:
+ *
+ * - `corroborated` — two independent documents state the same value. The strongest evidence this
+ *   system produces; a single citation proves a value was printed, two prove it was not a typo.
+ * - `superseded` — they disagree and a revision marker ordered them. The older figure is stale
+ *   rather than wrong, which is a currency problem, not a quality one.
+ * - `conflict` — they disagree and nothing could order them. Blocks publication, because picking
+ *   a side on no evidence is the thing L4 exists to prevent.
+ * - `single_source` — only one document mentions it. Weaker than corroboration, and recorded
+ *   rather than omitted so a reviewer can see which values rest on one reading.
+ */
+export interface CrossSourceVerdict {
+  state: "corroborated" | "superseded" | "conflict" | "single_source";
+  reason: string | null;
+  winner?: string | null;
+  observations: CrossSourceObservation[];
+}
+
+/** axiom.validate.cross_source.Disagreement */
+export interface CrossSourceConflict {
+  attribute_code: string;
+  resolved: boolean;
+  reason: string;
+  winner: string | null;
+  observations: CrossSourceObservation[];
+}
+
+/**
+ * axiom.validate.cross_source.CrossSourceReport, as joined onto a bundle.
+ *
+ * `applicable` is false with fewer than two documents, and that is not a pass — one document
+ * cannot corroborate itself. `dry_run` marks findings derived from scripted responses, which must
+ * never be presented as a measurement.
+ */
+export interface CrossSourceView {
+  generated_at: string | null;
+  dry_run: boolean;
+  sources: {
+    source: string;
+    document_id: string;
+    revision_label: string | null;
+    revision_method: string | null;
+    supplier_id: string | null;
+    values: number;
+    parser: string;
+  }[];
+  applicable: boolean;
+  documents: number;
+  corroborated: number;
+  disagreements: number;
+  unresolved: number;
+  single_source: number;
+  passed: boolean;
+  corroborated_attributes: string[];
+  single_source_attributes: string[];
+  conflicts: CrossSourceConflict[];
 }
 
 const EXTRACTION_FAMILY: ReadonlySet<DerivationMethod> = new Set<DerivationMethod>([
@@ -818,6 +892,11 @@ export interface SkuBundle {
   copy?: GeneratedCopy | null;
   /** Audit trail of human decisions, present once any have been recorded. */
   decisions?: ReviewOutcome[];
+  /**
+   * Validation layer L4. Present only for SKUs a cross-source run has been saved for, because it
+   * needs a second document describing the same part and most SKUs have one source.
+   */
+  cross_source?: CrossSourceView | null;
 }
 
 /** A source document together with its parsed page geometry. */

@@ -16,7 +16,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import UTC, datetime
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, computed_field
 
 from axiom.core.product import ProductRecord
 from axiom.core.values import ValueStatus
@@ -132,6 +132,22 @@ class QualityIndex(BaseModel):
             scored["richness"] = self.richness
         return scored
 
+    @computed_field
+    @property
+    def measured_dimensions(self) -> list[str]:
+        """Which dimensions the composite spans.
+
+        Serialised so a reader can tell a score over three dimensions from one over four.
+        """
+        return sorted(self.measured)
+
+    # A computed field rather than a plain property, so `model_dump` carries it.
+    #
+    # This is the fix for a real duplication: because `composite` was a bare property, pydantic
+    # left it out of the serialised bundle, and the console reimplemented the weighting in
+    # TypeScript to get it back. The formula therefore existed in two languages and could disagree
+    # with itself — which it would have, the moment richness became optionally unmeasured.
+    @computed_field
     @property
     def composite(self) -> float:
         """Weighted mean over the dimensions that were measured, renormalised.

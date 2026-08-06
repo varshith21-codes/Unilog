@@ -1,0 +1,84 @@
+{
+  "sku": "BA-100-075",
+  "generated_at": "2026-08-06T18:55:23.429962+00:00",
+  "dry_run": true,
+  "sources": [
+    {
+      "source": "data/samples/ba100.txt",
+      "document_id": "ba100@f7500023",
+      "revision_label": "Rev C 2024-08",
+      "revision_method": "letter_and_date",
+      "supplier_id": null,
+      "values": 5,
+      "parser": "text"
+    },
+    {
+      "source": "data/samples/ba100-catalog.txt",
+      "document_id": "ba100-catalog@a67b3b65",
+      "revision_label": "Rev A 2022-03",
+      "revision_method": "letter_and_date",
+      "supplier_id": null,
+      "values": 6,
+      "parser": "text"
+    }
+  ],
+  "report": {
+    "applicable": true,
+    "documents": 2,
+    "corroborated": 3,
+    "disagreements": 2,
+    "unresolved": 0,
+    "single_source": 1,
+    "passed": true,
+    "corroborated_attributes": [
+      "body_material",
+      "end_connection",
+      "seat_material"
+    ],
+    "single_source_attributes": [
+      "country_of_origin"
+    ],
+    "conflicts": [
+      {
+        "attribute_code": "case_quantity",
+        "resolved": true,
+        "reason": "ba100@f7500023 is the newer revision (Rev C 2024-08)",
+        "winner": "'12' (ba100@f7500023 Rev C 2024-08)",
+        "observations": [
+          {
+            "document_id": "ba100@f7500023",
+            "revision_label": "Rev C 2024-08",
+            "supplier_id": null,
+            "value_display": "12"
+          },
+          {
+            "document_id": "ba100-catalog@a67b3b65",
+            "revision_label": "Rev A 2022-03",
+            "supplier_id": null,
+            "value_display": "10"
+          }
+        ]
+      },
+      {
+        "attribute_code": "pressure_rating_wog",
+        "resolved": true,
+        "reason": "ba100@f7500023 is the newer revision (Rev C 2024-08)",
+        "winner": "'600 psi' (ba100@f7500023 Rev C 2024-08)",
+        "observations": [
+          {
+            "document_id": "ba100@f7500023",
+            "revision_label": "Rev C 2024-08",
+            "supplier_id": null,
+            "value_display": "600 psi"
+          },
+          {
+            "document_id": "ba100-catalog@a67b3b65",
+            "revision_label": "Rev A 2022-03",
+            "supplier_id": null,
+            "value_display": "400 psi"
+          }
+        ]
+      }
+    ]
+  }
+}

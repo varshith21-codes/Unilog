@@ -29,6 +29,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from datetime import UTC, datetime
 from pathlib import Path
 
 from axiom.core.product import ProductRecord
@@ -173,6 +174,14 @@ def main() -> int:
             "candidates current so they stay visible in the review queue."
         ),
     )
+    parser.add_argument(
+        "--save",
+        action="store_true",
+        help=(
+            "write the findings to data/cross-source/<SKU>.json, which the API joins onto the "
+            "console bundle at read time so a reviewer sees the disagreement in the workspace"
+        ),
+    )
     parser.add_argument("--tier", default="volume")
     parser.add_argument("--include-optional", action="store_true")
     parser.add_argument("--profile", default=None)
@@ -280,6 +289,10 @@ def main() -> int:
     if args.promote:
         promoted = promote_resolved(record, report)
 
+    saved_path = None
+    if args.save:
+        saved_path = _save(args.sku, per_source, report, dry_run=args.dry_run)
+
     # L0-L3 still run. L4 answers a different question and replaces none of them.
     single = Validator(registry).validate(record)
 
@@ -293,6 +306,7 @@ def main() -> int:
                     "cross_source": report.to_dict(),
                     "single_source_validation": single.summary(),
                     "promoted": promoted,
+                    "saved": str(saved_path) if saved_path else None,
                 },
                 indent=2,
                 default=str,
@@ -300,10 +314,44 @@ def main() -> int:
         )
     else:
         _report(args, per_source, report, single, promoted, usage)
+        if saved_path:
+            print(f"\n  written: {saved_path.relative_to(REPO_ROOT)}")
+            print("  the API joins this onto the console bundle for this SKU")
 
     # An unresolved conflict is a blocking failure: the system must not choose between two
     # contradicting sources silently, and a non-zero exit is how a batch driver learns that.
     return 1 if report.unresolved else 0
+
+
+def _save(sku: str, sources: list[dict], report, *, dry_run: bool) -> Path:
+    """Write the L4 findings for one SKU, for the API to join onto its bundle.
+
+    A separate artifact rather than a rewrite of the console bundle, following the same pattern as
+    review sessions: the bundle is the immutable record of what a *single-source* pipeline run
+    produced, and folding a later multi-source analysis into it would destroy the ability to ask
+    what that run actually said. The join happens at read time.
+
+    ``dry_run`` is recorded in the payload. Findings derived from scripted responses must not be
+    presentable as a real measurement, and the console reads this flag to say so.
+    """
+    target = REPO_ROOT / "data" / "cross-source" / f"{sku}.json"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(
+        json.dumps(
+            {
+                "sku": sku,
+                "generated_at": datetime.now(UTC).isoformat(),
+                "dry_run": dry_run,
+                "sources": sources,
+                "report": report.to_dict(),
+            },
+            indent=2,
+            default=str,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    return target
 
 
 def _ingest(source: str, store, supplier: str | None):

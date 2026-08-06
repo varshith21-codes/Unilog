@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { CrossSourcePanel } from "@/components/cross-source-panel";
 import { ArrowIcon, Meter } from "@/components/primitives";
 import { ReviewWorkspace } from "@/components/review-workspace";
 import {
@@ -177,6 +178,18 @@ export default async function ReviewSkuPage({
         threshold={dataset.policy.threshold}
         live={dataset.meta.live}
       />
+
+      {/*
+        L4 sits below the workspace rather than inside it. The workspace is a per-value queue driven
+        by confidence; a cross-source finding is a statement about the *record* against another
+        document, and an unresolved conflict is its own kind of review task. Absent for most SKUs,
+        because it needs a second source and most have one.
+      */}
+      {bundle.cross_source?.applicable ? (
+        <div className="mt-16">
+          <CrossSourcePanel view={bundle.cross_source} />
+        </div>
+      ) : null}
     </div>
   );
 }

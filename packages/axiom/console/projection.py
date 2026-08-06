@@ -464,6 +464,64 @@ def overlay_review_decisions(bundle: dict[str, Any], session) -> dict[str, Any]:
     }
 
 
+def overlay_cross_source(bundle: dict[str, Any], payload: dict[str, Any]) -> dict[str, Any]:
+    """Fold validation layer L4's findings onto a projected bundle.
+
+    Separate from the bundle for the same reason a review session is: the bundle records what a
+    *single-source* run produced, and a later multi-source analysis rewriting it would destroy the
+    ability to ask what that run said on its own. So the join is computed at read time.
+
+    Two things are attached. A ``cross_source`` block carrying the whole report, and a per-value
+    ``cross_source`` verdict so the review workspace can mark an individual attribute as
+    corroborated by a second document, superseded by a newer one, or in unresolved conflict —
+    which is the level a reviewer actually acts at.
+    """
+    report = payload.get("report")
+    if not isinstance(report, dict):
+        return bundle
+
+    corroborated = set(report.get("corroborated_attributes") or ())
+    single_source = set(report.get("single_source_attributes") or ())
+
+    conflicts: dict[str, dict[str, Any]] = {}
+    for conflict in report.get("conflicts") or ():
+        if isinstance(conflict, dict) and conflict.get("attribute_code"):
+            conflicts[str(conflict["attribute_code"])] = conflict
+
+    values: list[dict[str, Any]] = []
+    for value in bundle.get("values", []):
+        code = value.get("attribute_code")
+        verdict: dict[str, Any] | None = None
+
+        if code in conflicts:
+            conflict = conflicts[code]
+            verdict = {
+                "state": "superseded" if conflict.get("resolved") else "conflict",
+                "reason": conflict.get("reason"),
+                "winner": conflict.get("winner"),
+                "observations": conflict.get("observations") or [],
+            }
+        elif code in corroborated:
+            verdict = {"state": "corroborated", "reason": None, "observations": []}
+        elif code in single_source:
+            # Recorded rather than omitted. "Only one source mentions this" is a weaker position
+            # than "two sources agree", and a reviewer deciding what to trust needs to see which.
+            verdict = {"state": "single_source", "reason": None, "observations": []}
+
+        values.append({**value, "cross_source": verdict} if verdict else value)
+
+    return {
+        **bundle,
+        "values": values,
+        "cross_source": {
+            "generated_at": payload.get("generated_at"),
+            "dry_run": bool(payload.get("dry_run")),
+            "sources": payload.get("sources") or [],
+            **report,
+        },
+    }
+
+
 def build_dataset(
     bundles: list[dict[str, Any]],
     *,

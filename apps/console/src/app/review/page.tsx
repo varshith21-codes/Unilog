@@ -3,6 +3,7 @@ import Link from "next/link";
 import {
   AlertIcon,
   ArrowIcon,
+  CheckIcon,
   EmptyState,
   Overline,
   Panel,
@@ -10,7 +11,14 @@ import {
   Stat,
   StatusPill,
 } from "@/components/primitives";
-import { attributeRows, listSkus, loadDataset, reviewOrder, reviewRows } from "@/lib/data";
+import {
+  attributeRows,
+  listSkus,
+  loadDataset,
+  reviewOrder,
+  reviewRows,
+  unresolvedConflicts,
+} from "@/lib/data";
 import { GAP_REASON_LABEL, canonical, count, percent, score } from "@/lib/format";
 
 export const metadata = { title: "Review" };
@@ -101,6 +109,23 @@ export default async function ReviewIndexPage() {
                     <span className="text-[var(--pass)]">checks clean</span>
                   )}
                 </p>
+                {/*
+                  L4 gets its own badge rather than folding into the failure count. An unresolved
+                  conflict is not one value the pipeline is unsure about — it is two contradictory
+                  answers it refused to choose between, and it sorts to the top of this queue.
+                */}
+                {unresolvedConflicts(bundle) > 0 ? (
+                  <span className="pill pill-fail">
+                    <AlertIcon />
+                    {unresolvedConflicts(bundle)} source conflict
+                    {unresolvedConflicts(bundle) === 1 ? "" : "s"}
+                  </span>
+                ) : bundle.cross_source?.applicable ? (
+                  <span className="pill pill-pass">
+                    <CheckIcon />
+                    {bundle.cross_source.corroborated} corroborated
+                  </span>
+                ) : null}
               </div>
 
               <Link href={`/review/${bundle.sku}`} className="btn btn-quiet h-7">

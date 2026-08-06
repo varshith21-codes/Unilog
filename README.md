@@ -281,7 +281,7 @@ collapsing them would be the easy way to manufacture a big delta:
 | **field presence** — required fields holding anything | 33.3% | 75.0% |
 | **publishable** — required fields holding something citable | 0.0% | 75.0% |
 | verifiability | 0.0% | 100.0% |
-| composite quality index | 25.0% | 81.2% |
+| composite quality index | 27.8% | 90.3% |
 
 The headline is not the lift. It is the *first column*: an item master that reports itself a third
 complete and is 0% verifiable. That gap is what legacy catalogue data actually looks like — the
@@ -296,8 +296,10 @@ and the control arm is one SKU, because only two SKUs have persisted pipeline ou
 the limit here, not the harness. The control held at zero on every dimension, so the scorer did not
 move between the two readings — but a control that was never enriched detects *scorer drift* rather
 than isolating a placebo effect, which is a narrower claim than "control group" normally implies and
-the one this design supports. `richness` is unimplemented and reads zero on both arms, so every
-composite above is understated by up to ten points.
+the one this design supports. The composite spans three dimensions rather than four: richness is
+scored from channel pre-flight results and generated copy, and a cohort has neither, so it is left
+unmeasured on both arms and the weighting renormalises. That makes these composites comparable to
+each other but *not* to a certificate's, where richness usually is observed.
 
 On a wider run the picture is less tidy in a way worth keeping. With both SKUs in the treatment arm,
 consistency *falls* from 100% to 92.9% while completeness rises — which reads as a regression and is
@@ -769,6 +771,7 @@ axiom/
 │   ├── samples/               # demo datasheets, a product page, and a supplier flat file
 │   │                          #   degraded to look like a real ERP item master
 │   ├── ingest/                # per-supplier column mappings, confirmed once and reused
+│   ├── cross-source/          # L4 findings, joined onto a bundle at read time
 │   ├── sessions/              # review state: what humans decided
 │   ├── console/               # pipeline output: what the machine produced
 │   └── cache/                 # content-addressed artifact store
@@ -809,7 +812,11 @@ Two layers sit outside this single-SKU flow because they need inputs it does not
 
 - **L4, cross-source agreement** — `scripts/cross_validate.py` extracts the same SKU from two or
   more documents and compares them. It needs a second source, which is why it is a separate
-  entry point rather than a stage.
+  entry point rather than a stage. With `--save` the findings land in `data/cross-source/` and the
+  API joins them onto the SKU's bundle at read time, so an unresolved conflict shows up in the
+  review workspace and sorts to the top of the queue. Same join pattern as review decisions, and
+  for the same reason: a bundle records what a *single-source* run produced, and rewriting it with
+  a later multi-source analysis would destroy the ability to ask what that run said on its own.
 - **The quality cohort** — `scripts/run_cohort.py` scores the item master a catalogue started
   from against the enriched output, both through one scorer.
 
@@ -930,14 +937,15 @@ Storage infrastructure is deployed (see above). Compute is not — the pipeline 
   sizes DN25 and up. Applying a size-scoped override is reasoning the extractor does not do
   reliably. `variants.py` already has size-scoped note logic for variant explosion; the fix is
   probably to share it with extraction rather than to escalate a tier.
-- L4 findings do not reach the console. `cross_validate.py` reports them and exits non-zero on an
-  unresolved conflict, but it writes no console bundle, so a reviewer cannot see a cross-source
-  disagreement in the review workspace yet. The layer label already exists in the UI; what is
-  missing is the projection.
 - L4's corpus is two sources for one SKU family, not for the whole golden set. The layer is
   exercised end to end and unit-tested against agreement, revision precedence, supplier trust and
   the unresolvable case — but the *measured* numbers in this README still come from single-source
   runs, so nothing here quantifies what L4 catches at scale.
+- The committed L4 artifact (`data/cross-source/BA-100-075.json`) comes from a `--dry-run`, so its
+  extracted values are hand-written while the comparison logic that judged them is real. It is
+  checked in so the review workspace demonstrates the layer on a fresh clone, and `dry_run: true`
+  travels in the payload — the panel says so in prose rather than leaving a reader to assume the
+  numbers were measured. Same contract as the offline console fixture.
 - L6 is enum-only by construction, so numeric rules stay in L2 (see above).
 - L6 verification costs one `ApplyGuardrail` call per sentence, which is why it is opt-in rather
   than always on. A contradiction is also not retried: it is nearly always a property of the
@@ -947,9 +955,13 @@ Storage infrastructure is deployed (see above). Compute is not — the pipeline 
   have persisted pipeline output. The harness handles any number; the corpus is the constraint.
   Its control arm detects scorer drift rather than isolating a placebo effect — a narrower claim
   than "control group" usually implies, and the one the design supports.
-- `richness` is a declared Quality Index dimension carrying 10% of the composite weight and is
-  not implemented, so every composite figure is understated by up to ten points. It reads zero on
-  both cohort arms, so it cannot bias the lift.
+- `richness` is scored from two of the four things the blueprint names for it — channel readiness
+  and copy depth. The other two, assets and relationships, depend on modules that do not exist
+  (M10, M9), so they are recorded as *unobserved* rather than zero and the composite renormalises
+  over what was measured. That distinction matters: hardcoding richness to 0.0 previously
+  understated every composite this system reported by up to ten points. A certificate written
+  before the change is reinterpreted on read rather than rewritten, because its signature covers
+  the original summary.
 - The regression gate's metrics job needs AWS credentials, so it runs on demand, weekly, and on
   pull requests that touch the prompts, the extractor, the schema or the golden set — not on every
   push. It fails loudly rather than skipping when credentials are absent, because a gate you

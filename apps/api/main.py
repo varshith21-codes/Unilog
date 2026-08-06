@@ -25,6 +25,7 @@ from axiom.console import (
     build_dataset,
     dataset_stats,
     normalise_quality_index,
+    overlay_cross_source,
     overlay_review_decisions,
 )
 from axiom.review import ACCEPT, CORRECT, REJECT, ReviewSession, queue_summary, record_decision
@@ -36,6 +37,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 SESSION_DIR = REPO_ROOT / "data" / "sessions"
 CONSOLE_DIR = REPO_ROOT / "data" / "console"
 CALIBRATION_DIR = REPO_ROOT / "data" / "calibration"
+CROSS_SOURCE_DIR = REPO_ROOT / "data" / "cross-source"
 COHORT_PATH = REPO_ROOT / "evals" / "cohort.json"
 CONSOLE = Path(__file__).resolve().parent / "static" / "index.html"
 
@@ -208,6 +210,18 @@ def console_dataset() -> dict:
                 bundle = overlay_review_decisions(bundle, ReviewSession.load(session_path))
             except (OSError, ValueError, KeyError, TypeError):
                 unreadable.append(session_path.name)
+
+        # L4's findings arrive the same way, and for the same reason: the bundle is what a
+        # single-source run produced, and a multi-source analysis is a later, separate reading of
+        # the same SKU. Written by scripts/cross_validate.py --save.
+        cross_path = CROSS_SOURCE_DIR / f"{bundle['sku']}.json"
+        if cross_path.is_file():
+            try:
+                bundle = overlay_cross_source(
+                    bundle, json.loads(cross_path.read_text(encoding="utf-8"))
+                )
+            except (OSError, ValueError, KeyError, TypeError):
+                unreadable.append(cross_path.name)
 
         bundles.append(bundle)
         documents.setdefault(
