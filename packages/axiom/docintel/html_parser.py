@@ -54,6 +54,20 @@ _BLOCK = frozenset(
 
 _TABLE_CELLS = frozenset({"td", "th"})
 
+# Inline elements whose close emits a soft space.
+#
+# Real product pages build specification rows out of adjacent spans with no whitespace between the
+# tags: `<span>Body Material</span><span>Bronze C84400</span>`. A browser renders those
+# concatenated, and reproducing that faithfully yields "Body MaterialBronze C84400" — which makes
+# the *value* unlocatable as a quote and so unextractable.
+#
+# The trade is deliberate and one-sided. Quote matching squashes whitespace (see
+# `axiom.docintel.spans.squash`), so an extra space costs nothing, while a missing one loses the
+# value entirely. Erring toward separation is therefore strictly safer than erring toward fidelity.
+_INLINE_BOUNDARY = frozenset(
+    {"span", "a", "b", "strong", "em", "i", "u", "small", "label", "abbr", "code", "dfn"}
+)
+
 # Two spaces is what the text parser reads as a column gap, so cells are padded to a shared width
 # and joined with exactly that. Aligning the whole table rather than each row is what makes the
 # gap columns unanimous, which is the condition the boundary detector actually tests.
@@ -157,6 +171,12 @@ class _Renderer(HTMLParser):
 
         if tag in _BLOCK:
             self._break_line()
+            return
+
+        if tag in _INLINE_BOUNDARY:
+            target = self._cell if self._cell is not None else self._line
+            if target and not str(target[-1]).endswith(" "):
+                target.append(" ")
 
     def handle_data(self, data: str) -> None:
         if self._discard_depth:

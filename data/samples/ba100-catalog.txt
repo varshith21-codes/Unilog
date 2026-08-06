@@ -1,0 +1,26 @@
+ACME INDUSTRIAL SUPPLY - MASTER CATALOG
+Section 14: Bronze Ball Valves                                  Rev A  2022-03
+
+MILWAUKEE BA-100 SERIES
+Two-Piece Bronze Ball Valve, Full Port, Threaded
+
+  Body Material .................. Bronze C84400
+  Seat Material .................. RPTFE
+  Pressure Rating ................ 400 PSI WOG
+  Steam Rating ................... 150 PSI WSP
+  End Connection ................. NPT threaded
+  Temperature Range .............. -20 degF to 366 degF
+  Approvals ...................... UL listed, CSA certified, NSF/ANSI 61
+  Country of Origin .............. Taiwan
+
+ORDERING
+
+  Part Number      Size        Handle       Carton Qty
+  BA-100-025       1/4"        Lever        24
+  BA-100-050       1/2"        Lever        24
+  BA-100-075       3/4"        Lever        10
+  BA-100-100       1"          Lever        12
+  BA-100-125       1-1/4"      Lever        6
+
+  Prices and specifications subject to change without notice.
+  Confirm current ratings with the manufacturer before specifying.
