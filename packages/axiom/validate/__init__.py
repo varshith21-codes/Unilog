@@ -18,6 +18,14 @@ from axiom.validate.checks import (
     validate_gtin,
 )
 from axiom.validate.constants import RuleConstants
+from axiom.validate.cross_source import (
+    CrossSourceReport,
+    CrossSourceValidator,
+    Disagreement,
+    Observation,
+    promote_resolved,
+    revision_rank,
+)
 from axiom.validate.expressions import (
     ExpressionError,
     Missing,
@@ -41,8 +49,12 @@ from axiom.validate.validator import ValidationReport, Validator
 __all__ = [
     "GTIN_LENGTHS",
     "INDETERMINATE_KINDS",
+    "CrossSourceReport",
+    "CrossSourceValidator",
+    "Disagreement",
     "ExpressionError",
     "Missing",
+    "Observation",
     "ReasoningChecker",
     "ReasoningConfig",
     "ReasoningFinding",
@@ -58,6 +70,8 @@ __all__ = [
     "evaluate",
     "gtin_check_digit",
     "guardrail_runtime",
+    "promote_resolved",
+    "revision_rank",
     "split_claims",
     "validate_gtin",
 ]

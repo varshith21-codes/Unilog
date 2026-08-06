@@ -165,6 +165,7 @@ export const METHOD_LABEL: Record<DerivationMethod, string> = {
   statistical_default: "Statistical default",
   human_entry: "Human entry",
   human_correction: "Human correction",
+  legacy_record: "Legacy record",
 };
 
 export const VERDICT_LABEL: Record<Verdict, string> = {

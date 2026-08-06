@@ -31,6 +31,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 SESSION_DIR = REPO_ROOT / "data" / "sessions"
 CONSOLE_DIR = REPO_ROOT / "data" / "console"
 CALIBRATION_DIR = REPO_ROOT / "data" / "calibration"
+COHORT_PATH = REPO_ROOT / "evals" / "cohort.json"
 CONSOLE = Path(__file__).resolve().parent / "static" / "index.html"
 
 app = FastAPI(
@@ -273,6 +274,36 @@ def _empty_dataset(reason: str) -> dict:
 def console_stats() -> dict:
     """Counts only — cheap enough for a nav badge or a poll."""
     return dataset_stats(console_dataset())
+
+
+@app.get("/api/cohort")
+def cohort() -> dict:
+    """The before/after quality cohort, as written by ``scripts/run_cohort.py --write``.
+
+    Read from disk rather than recomputed, for the same reason the dataset is: the study joins an
+    item master against persisted pipeline output, and recomputing it per request would make a
+    page load depend on files that may be mid-rewrite.
+
+    ``available: false`` rather than a 404 when no study exists. A missing cohort is a normal state
+    — nobody has run it yet — and the console needs to explain that rather than render an error.
+    """
+    if not COHORT_PATH.is_file():
+        return {
+            "available": False,
+            "reason": (
+                "no cohort study on disk. Build the before state with "
+                "scripts/ingest_supplier_file.py --out data/ingest, then run "
+                "scripts/run_cohort.py --write"
+            ),
+        }
+    try:
+        payload = json.loads(COHORT_PATH.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        return {"available": False, "reason": f"cohort study could not be read: {exc}"}
+
+    if not isinstance(payload, dict):
+        return {"available": False, "reason": "cohort study is not a JSON object"}
+    return {"available": True, **payload}
 
 
 @app.get("/api/policy")

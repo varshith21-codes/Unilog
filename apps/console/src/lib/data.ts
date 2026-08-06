@@ -23,6 +23,7 @@ import type {
   AttributeSpec,
   AttributeValue,
   ClassDefinition,
+  CohortStudy,
   ConsoleDataset,
   DocumentBundle,
   Gap,
@@ -153,6 +154,62 @@ export const loadPolicy = cache(async (epsilon: number): Promise<RiskPolicyView>
     return (await response.json()) as RiskPolicyView;
   } catch {
     return fallback;
+  }
+});
+
+/**
+ * The before/after quality cohort.
+ *
+ * Absent by default, because it needs an item master to compare against and most installations
+ * will not have supplied one. That is reported as `available: false` with a reason rather than as
+ * an error: "nobody has run this yet" and "this is broken" are different states and the page says
+ * which one it is.
+ */
+export const loadCohort = cache(async (): Promise<CohortStudy> => {
+  const unavailable = (reason: string): CohortStudy => ({
+    available: false,
+    reason,
+    schema_version: null,
+    treatment_skus: 0,
+    control_skus: 0,
+    trustworthy: false,
+    control_drift: null,
+    drifted_dimensions: [],
+    lift: { completeness: 0, verifiability: 0, consistency: 0, richness: 0, composite: 0 },
+    field_presence: { before: 0, after: 0 },
+    treatment_before: {
+      completeness: 0,
+      verifiability: 0,
+      consistency: 0,
+      richness: 0,
+      composite: 0,
+    },
+    treatment_after: {
+      completeness: 0,
+      verifiability: 0,
+      consistency: 0,
+      richness: 0,
+      composite: 0,
+    },
+    notes: [],
+    members: [],
+  });
+
+  try {
+    const response = await fetch(`${API_BASE}/api/cohort`, {
+      cache: "no-store",
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    });
+    if (!response.ok) {
+      return unavailable(`the API returned ${response.status} ${response.statusText}`);
+    }
+    return (await response.json()) as CohortStudy;
+  } catch (cause) {
+    const reason = cause instanceof Error ? cause.message : String(cause);
+    return unavailable(
+      `the AXIOM API at ${API_BASE} is unreachable (${reason}), and the cohort study is served ` +
+        `from it rather than checked into the console bundle.`,
+    );
   }
 });
 

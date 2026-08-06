@@ -16,6 +16,7 @@ from axiom.docintel.models import (
     TableCell,
 )
 from axiom.docintel.pdf_parser import PdfParseError, parse_pdf
+from axiom.docintel.revision import RevisionMarker, find_revision
 from axiom.docintel.sku import MIN_SKU_CHARS, SkuPresence, find_sku
 from axiom.docintel.spans import (
     DEFAULT_THRESHOLD,
@@ -67,9 +68,11 @@ __all__ = [
     "ParsedWord",
     "PdfParseError",
     "QuoteLocation",
+    "RevisionMarker",
     "SkuPresence",
     "TableCell",
     "build_evidence_span",
+    "find_revision",
     "find_sku",
     "html_to_text",
     "locate_quote",

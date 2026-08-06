@@ -174,6 +174,21 @@ class ProductRecord(BaseModel):
         self.attribute_values.append(value)
         self.updated_at = datetime.now(UTC)
 
+    def add_candidate(self, value: AttributeValue) -> None:
+        """Append a competing value **without** superseding what is already there.
+
+        The counterpart to :meth:`add_value`, and the reason attribute values are held as a list.
+        When two independent sources each state a value, superseding one with the other would
+        resolve the disagreement by arrival order — the last document read would silently win, and
+        :meth:`conflicts` would report nothing to resolve.
+
+        So cross-source candidates accumulate, validation layer L4 compares them, and only then is
+        one promoted. Which is the correct sequence: a conflict has to be *visible* before it can
+        be adjudicated.
+        """
+        self.attribute_values.append(value)
+        self.updated_at = datetime.now(UTC)
+
     def add_gap(self, gap: Gap) -> None:
         self.gaps.append(gap)
         self.updated_at = datetime.now(UTC)

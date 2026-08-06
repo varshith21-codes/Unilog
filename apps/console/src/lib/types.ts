@@ -111,6 +111,8 @@ export type DerivationMethod =
   | "part_number_grammar"
   | "family_inference"
   | "statistical_default"
+  // legacy: present in the item master, of unknown origin, never publishable without evidence
+  | "legacy_record"
   // human
   | "human_entry"
   | "human_correction";
@@ -838,4 +840,77 @@ export interface ConsoleDataset {
   class_definitions: Record<string, ClassDefinition>;
   policy: RiskPolicySummary;
   skus: SkuBundle[];
+}
+
+// ---------------------------------------------------------------- quality cohort
+// axiom.evaluation.cohort
+
+export type CohortArm = "treatment" | "control";
+
+/** The scored dimensions, plus the composite. `richness` is not yet implemented and reads 0. */
+export type CohortDimension =
+  | "completeness"
+  | "verifiability"
+  | "consistency"
+  | "richness"
+  | "composite";
+
+/** axiom.evaluation.cohort.CohortScore — one SKU at one point in time. */
+export interface CohortScore {
+  completeness: number;
+  verifiability: number;
+  consistency: number;
+  richness: number;
+  composite: number;
+  /**
+   * Share of required fields holding *any* value, publishable or not.
+   *
+   * Reported beside `completeness` rather than instead of it. An item master's fields are
+   * populated; they are just unsourced, and collapsing those two facts into one number would
+   * let "unverifiable" read as "empty" — a claim a distributor would rightly reject.
+   */
+  field_presence: number;
+  values_present: number;
+  values_publishable: number;
+  values_with_evidence: number;
+  validation_failures: number;
+  required_total: number;
+  /** Denominator behind `consistency`. Not constant across arms, so a ratio change needs it. */
+  checks_run: number;
+  /** Which rules failed. Named rather than counted, so a drop is a work item not a worry. */
+  failed_rules: string[];
+}
+
+export interface CohortMember {
+  sku: string;
+  arm: CohortArm;
+  before: CohortScore;
+  after: CohortScore;
+  delta: Record<CohortDimension | "field_presence", number>;
+}
+
+/**
+ * axiom.evaluation.cohort.CohortStudy
+ *
+ * `available: false` is a normal state, not an error — it means nobody has run the study yet.
+ *
+ * `trustworthy` is the field to read before quoting any of these numbers. It requires a control
+ * arm that did not move: if untouched SKUs appear to have changed, the *scorer* changed between
+ * the two measurements and the lift cannot be attributed to enrichment.
+ */
+export interface CohortStudy {
+  available: boolean;
+  reason?: string;
+  schema_version: string | null;
+  treatment_skus: number;
+  control_skus: number;
+  trustworthy: boolean;
+  control_drift: Record<CohortDimension, number> | null;
+  drifted_dimensions: string[];
+  lift: Record<CohortDimension, number>;
+  field_presence: { before: number; after: number };
+  treatment_before: Record<CohortDimension, number>;
+  treatment_after: Record<CohortDimension, number>;
+  notes: string[];
+  members: CohortMember[];
 }

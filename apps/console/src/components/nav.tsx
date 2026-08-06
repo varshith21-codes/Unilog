@@ -8,6 +8,7 @@ const SECTIONS = [
   { href: "/", label: "Overview" },
   { href: "/review", label: "Review" },
   { href: "/certificates", label: "Certificates" },
+  { href: "/quality", label: "Quality Index" },
 ] as const;
 
 export function Nav() {

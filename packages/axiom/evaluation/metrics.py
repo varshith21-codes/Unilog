@@ -14,7 +14,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 
-from axiom.core.values import Quantity, ValueRange
+from axiom.core import compare
 from axiom.schema.models import AttributeDefinition
 
 DEFAULT_TOLERANCE = 0.0
@@ -128,74 +128,14 @@ def match_kind(
 ) -> str | None:
     """Strongest match between two canonical values, or None.
 
-    Tried in decreasing strictness so the report can distinguish an exact match from one that
-    only passed inside a tolerance. Blending them would let a loosely-toleranced attribute
-    inflate the headline accuracy figure.
+    A thin wrapper over :func:`axiom.core.compare.match`, which validation layer L4 also uses to
+    decide whether two independent sources agree. Sharing the primitive is deliberate: if
+    "matches ground truth" and "agrees with the other source" could drift apart, a value could be
+    correct against the golden set and in conflict between two sources that both stated it.
     """
-    if _exact(expected, actual):
-        return "exact"
-
     tolerance = definition.tolerance if definition.tolerance is not None else DEFAULT_TOLERANCE
-    if tolerance > 0 and _within_tolerance(expected, actual, tolerance):
-        return "tolerance"
-
-    if _normalized_equal(expected, actual):
-        return "normalized"
-    return None
-
-
-def _exact(expected: object, actual: object) -> bool:
-    # Booleans are compared type-strictly. `True == 1.0` in Python, so without this a compliance
-    # flag that normalised to a float instead of a bool would be scored correct — hiding a type
-    # confusion in exactly the field where type confusion matters most.
-    if isinstance(expected, bool) != isinstance(actual, bool):
-        return False
-
-    if isinstance(expected, Quantity) and isinstance(actual, Quantity):
-        return expected.unit == actual.unit and expected.magnitude == actual.magnitude
-    if isinstance(expected, ValueRange) and isinstance(actual, ValueRange):
-        return (
-            expected.unit == actual.unit
-            and expected.minimum == actual.minimum
-            and expected.maximum == actual.maximum
-        )
-    if isinstance(expected, list) and isinstance(actual, list):
-        return sorted(map(str, expected)) == sorted(map(str, actual))
-    return expected == actual
-
-
-def _normalized_equal(expected: object, actual: object) -> bool:
-    """Case- and whitespace-insensitive comparison for text values."""
-    if isinstance(expected, str) and isinstance(actual, str):
-        return " ".join(expected.split()).casefold() == " ".join(actual.split()).casefold()
-    return False
-
-
-def _within_tolerance(expected: object, actual: object, tolerance: float) -> bool:
-    if isinstance(expected, Quantity) and isinstance(actual, Quantity):
-        if expected.unit != actual.unit:
-            return False
-        return _close(expected.magnitude, actual.magnitude, tolerance)
-    if isinstance(expected, ValueRange) and isinstance(actual, ValueRange):
-        if expected.unit != actual.unit:
-            return False
-        return _close(expected.minimum, actual.minimum, tolerance) and _close(
-            expected.maximum, actual.maximum, tolerance
-        )
-    if isinstance(expected, int | float) and isinstance(actual, int | float):
-        if isinstance(expected, bool) or isinstance(actual, bool):
-            return False
-        return _close(float(expected), float(actual), tolerance)
-    return False
-
-
-def _close(a: float, b: float, tolerance: float) -> bool:
-    if a == b:
-        return True
-    scale = max(abs(a), abs(b))
-    if scale == 0:
-        return True
-    return abs(a - b) / scale <= tolerance
+    kind = compare.match(expected, actual, tolerance=tolerance)
+    return kind.value if kind is not None else None
 
 
 @dataclass

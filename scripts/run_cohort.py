@@ -34,6 +34,7 @@ from axiom.core.evidence import BoundingBox, EvidenceSpan
 from axiom.core.product import ProductRecord
 from axiom.core.values import AttributeValue, DerivationMethod, ValueStatus
 from axiom.evaluation import build_study, format_study, load_records
+from axiom.evaluation.cohort import JOIN_KEYS
 from axiom.schema import load_default
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -79,6 +80,16 @@ def main() -> int:
         ),
     )
     parser.add_argument(
+        "--join",
+        choices=JOIN_KEYS,
+        default="mpn",
+        help=(
+            "which item-master field links a row to an enriched record. Defaults to the "
+            "manufacturer part number, because that is what run_pipeline.py --sku names; an item "
+            "master's own sku column is usually the distributor's internal id."
+        ),
+    )
+    parser.add_argument(
         "--out", type=Path, default=DEFAULT_OUT, help="where to write the study"
     )
     parser.add_argument(
@@ -101,7 +112,7 @@ def main() -> int:
         )
         return 2
 
-    before = load_records(rows, registry, class_code=args.class_code)
+    before = load_records(rows, registry, class_code=args.class_code, key=args.join)
 
     after = _load_bundles(args.bundles, registry)
     if not after:
@@ -130,9 +141,15 @@ def main() -> int:
     )
 
     if not study.treatment:
+        # Showing both key sets rather than just saying "no overlap", because the cause is almost
+        # always that the two sides are keyed on different identifiers and the fix is one flag.
+        other = next(k for k in JOIN_KEYS if k != args.join)
         print(
-            "no SKU appears in both the item master and the enriched output, so there is "
-            "nothing to compare. The before and after states must overlap on SKU.",
+            f"no identifier appears in both the item master (joined on {args.join!r}) and the "
+            f"enriched output, so there is nothing to compare.\n"
+            f"  item master keys: {', '.join(sorted(before)[:4])}\n"
+            f"  enriched keys:    {', '.join(sorted(after)[:4])}\n"
+            f"If those are the same parts under different identifiers, try --join {other}.",
             file=sys.stderr,
         )
         return 1

@@ -50,7 +50,7 @@ from enum import Enum
 from axiom.core.certificate import QualityIndex, quality_index_for
 from axiom.core.product import ProductRecord
 from axiom.core.values import AttributeValue, DerivationMethod, ValueStatus
-from axiom.normalize import normalize_value
+from axiom.normalize import normalize_all
 from axiom.schema import SchemaRegistry
 from axiom.validate import Validator
 
@@ -81,6 +81,23 @@ class CohortScore:
     validation_failures: int
     required_total: int
 
+    checks_run: int = 0
+    """How many validation checks actually evaluated.
+
+    Carried because it is the denominator behind ``consistency``, and it is *not* constant across
+    the two arms: a rule only evaluates when the values it needs are present and canonical, so a
+    sparse item master of unparsed strings gets a different set of checks than an enriched record
+    does. Reporting consistency without it invites reading a ratio change as a data change.
+    """
+
+    failed_rules: tuple[str, ...] = ()
+    """Which rules produced a blocking failure.
+
+    Named rather than counted, because a consistency drop is only interpretable if you can see
+    what failed. "Consistency fell 7 points" is a worrying number; "case_weight contradicts
+    each_weight x case_quantity" is a work item.
+    """
+
     def to_dict(self) -> dict[str, object]:
         return {
             **self.quality.to_dict(),
@@ -90,6 +107,8 @@ class CohortScore:
             "values_with_evidence": self.values_with_evidence,
             "validation_failures": self.validation_failures,
             "required_total": self.required_total,
+            "checks_run": self.checks_run,
+            "failed_rules": list(self.failed_rules),
         }
 
 
@@ -263,11 +282,8 @@ def legacy_record(
     )
 
     known = set(registry.attribute_codes)
-    for code, raw in attributes.items():
-        if code not in known or not str(raw).strip():
-            continue
-
-        value = AttributeValue(
+    values = [
+        AttributeValue(
             attribute_code=code,
             value_raw=str(raw),
             value_display=str(raw),
@@ -275,10 +291,21 @@ def legacy_record(
             # Not AUTO_ACCEPTED: nothing accepted it. The item master simply asserts it, which
             # is exactly the state being measured.
             status=ValueStatus.CANDIDATE,
-            confidence=None,
+            # Zero, not a default like 0.5. There is no basis on which to be confident in a value
+            # of unknown origin, and inventing one would put a number on the before-state that the
+            # before-state did not earn.
+            confidence=0.0,
         )
-        normalised, _issues = normalize_value(value, registry)
-        record.add_value(normalised or value)
+        for code, raw in attributes.items()
+        if code in known and str(raw).strip()
+    ]
+
+    # `normalize_all` is the batch entry point the pipeline itself calls. Using the same one means
+    # the before-state gets the same unit registry, the same enum snapping and the same fraction
+    # handling — so a delta cannot be an artefact of one arm being normalised more carefully.
+    normalised, _issues = normalize_all(values, registry)
+    for value in normalised:
+        record.add_value(value)
 
     return record
 
@@ -299,8 +326,10 @@ def score(
     code = class_code or record.class_code
     required = list(registry.required_codes(code)) if code else []
 
+    checks_run = 0
     if validate:
         report = Validator(registry).validate(record)
+        checks_run = int(report.summary().get("checks", 0) or 0)
         for value in record.current_values():
             findings = report.per_attribute.get(value.attribute_code, [])
             if findings:
@@ -321,6 +350,10 @@ def score(
         values_with_evidence=sum(1 for v in current if v.has_verified_evidence),
         validation_failures=sum(len(v.failed_validations()) for v in current),
         required_total=len(required),
+        checks_run=checks_run,
+        failed_rules=tuple(
+            sorted({f.rule_id for v in current for f in v.failed_validations()})
+        ),
     )
 
 
@@ -340,6 +373,7 @@ def build_study(
     """
     control = set(control_skus)
     study = CohortStudy(schema_version=schema_version)
+    unenriched: list[str] = []
 
     for sku in sorted(before):
         base = before[sku]
@@ -351,29 +385,49 @@ def build_study(
             # nobody touched.
             enriched = base
         elif enriched is None:
-            study.notes.append(
-                f"{sku}: no enriched record found, so it was excluded rather than counted as a "
-                f"zero-improvement treatment — a missing run is not a null result"
-            )
+            unenriched.append(sku)
             continue
+
+        # Both arms are scored against the class the *pipeline* determined, not against whatever
+        # the item master's category column said. The class is a property of the product;
+        # enrichment discovers it rather than changing it. Scoring the before-state against a
+        # different class would compare it to a different required-attribute set — and since
+        # mis-assigned categories are part of what the before-state gets wrong, that is exactly
+        # the SKU where the two arms would silently diverge.
+        scoring_class = enriched.class_code or base.class_code
 
         study.members.append(
             CohortMember(
                 sku=sku,
                 arm=arm,
-                before=score(base, registry, class_code=base.class_code),
-                after=score(enriched, registry, class_code=enriched.class_code),
+                before=score(base, registry, class_code=scoring_class),
+                after=score(enriched, registry, class_code=scoring_class),
             )
+        )
+
+    # One aggregated note rather than one per SKU. On a real catalogue the unenriched set is the
+    # large majority, and a per-SKU line would bury every other finding in the report.
+    if unenriched:
+        study.notes.append(
+            f"{len(unenriched)} item-master row(s) had no enriched counterpart and were excluded "
+            f"rather than counted as zero-improvement treatments — a run that never happened is "
+            f"not a null result. Excluded: {_abbreviate(unenriched)}"
         )
 
     unmatched = sorted(set(after) - set(before))
     if unmatched:
         study.notes.append(
             "enriched SKUs with no item-master row, excluded from the cohort because they have "
-            f"no before-state to improve on: {', '.join(unmatched)}"
+            f"no before-state to improve on: {_abbreviate(unmatched)}"
         )
 
     return study
+
+
+def _abbreviate(items: Sequence[str], limit: int = 6) -> str:
+    if len(items) <= limit:
+        return ", ".join(items)
+    return f"{', '.join(items[:limit])} and {len(items) - limit} more"
 
 
 def format_study(study: CohortStudy) -> str:
@@ -429,6 +483,37 @@ def format_study(study: CohortStudy) -> str:
             f"  {dimension:<18} {before:>8.1%} {after:>8.1%} {study.lift(dimension):>+8.1%}"
         )
 
+    # Consistency falling while completeness rises is the one line in this table that reads as a
+    # regression and probably is not. What follows is deliberately the *facts* — the denominators
+    # and the rule ids — rather than a causal story: the mechanism varies by corpus, and asserting
+    # a tidy explanation that the numbers do not support would be worse than reporting none.
+    if study.lift("consistency") < 0 < study.lift("completeness"):
+        checks_before = sum(m.before.checks_run for m in study.treatment)
+        checks_after = sum(m.after.checks_run for m in study.treatment)
+        newly_failing = sorted(
+            {rule for m in study.treatment for rule in m.after.failed_rules}
+            - {rule for m in study.treatment for rule in m.before.failed_rules}
+        )
+        lines += [
+            "",
+            "  Consistency is a ratio, and its denominator is not the same on both sides:",
+            f"    values scored      {sum(m.before.values_present for m in study.treatment)}"
+            f" before -> {sum(m.after.values_present for m in study.treatment)} after",
+            f"    checks evaluated   {checks_before} before -> {checks_after} after",
+            "  A rule only evaluates where the values it references are present and canonical, so",
+            "  an item master of unparsed strings is scored against a different set of checks than",
+            "  an enriched record. The before-state's 100% is 100% of what could be checked, which",
+            "  is not the same claim as being consistent.",
+        ]
+        if newly_failing:
+            lines += [
+                "",
+                "  Rules failing after enrichment that did not fail before — these are findings,",
+                "  and each is a real contradiction in the source data rather than damage done to"
+                " it:",
+                *(f"    {rule}" for rule in newly_failing),
+            ]
+
     if summary["lift"]["richness"] == 0 and summary["treatment_after"]["richness"] == 0:
         lines += [
             "",
@@ -454,30 +539,43 @@ def format_study(study: CohortStudy) -> str:
     return "\n".join(lines)
 
 
+JOIN_KEYS = ("mpn", "sku")
+"""Fields that can link an item-master row to an enriched record.
+
+``mpn`` first because that is what the pipeline is driven by: ``run_pipeline.py --sku BA-100-075``
+names the *manufacturer* part number, while an item master's own ``sku`` column is usually the
+distributor's internal id (``MIL-BA100-075``). Joining on the wrong one yields an empty cohort,
+which is why the key is a parameter rather than a guess.
+"""
+
+
 def load_records(
     rows: Sequence[Mapping[str, object]],
     registry: SchemaRegistry,
     *,
     class_code: str,
+    key: str = "mpn",
     default_brand: str | None = None,
 ) -> dict[str, ProductRecord]:
-    """Build before-state records from mapped supplier rows.
+    """Build before-state records from mapped supplier rows, keyed for the join.
 
     Takes the output of ``scripts/ingest_supplier_file.py --out``, which is the item master in
-    canonical field names. Rows sharing a SKU keep the first, because a duplicate row with a
+    canonical field names. Rows sharing a key keep the first, because a duplicate row with a
     variant spelling is a defect in the *source*, and silently merging them would repair the
-    before-state for free.
+    before-state for free — the duplicates are part of what the study is measuring.
     """
     records: dict[str, ProductRecord] = {}
+    fallback = next((k for k in JOIN_KEYS if k != key), "sku")
+
     for row in rows:
-        sku = str(row.get("sku") or row.get("mpn") or "").strip()
-        if not sku or sku in records:
+        identity = str(row.get(key) or row.get(fallback) or "").strip()
+        if not identity or identity in records:
             continue
         attributes = row.get("attributes") or {}
         if not isinstance(attributes, Mapping):
             continue
-        records[sku] = legacy_record(
-            sku,
+        records[identity] = legacy_record(
+            identity,
             {str(k): str(v) for k, v in attributes.items()},
             registry,
             class_code=class_code,
