@@ -21,6 +21,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from dataclasses import replace
 from pathlib import Path
 
 from axiom.classify import Classifier
@@ -43,7 +44,7 @@ from axiom.console import (
 )
 from axiom.core.certificate import build_certificate
 from axiom.core.product import ProductRecord
-from axiom.docintel import parse_artifact
+from axiom.docintel import find_revision, parse_artifact
 from axiom.extract import (
     BedrockModelClient,
     Extractor,
@@ -216,6 +217,17 @@ def main() -> int:
     # --- stage 2: parse --------------------------------------------------------
     raw = store.get(artifact.storage_uri)
     parsed = parse_artifact(raw, artifact.document)
+
+    # Revision awareness (M2). The marker is printed on the page, so it is read from the parsed
+    # text rather than from the filesystem: when a copy was downloaded says nothing about when the
+    # specification was written. Nothing in a single-source run needs it, but it travels with the
+    # document into the certificate, and cross_validate.py orders conflicting sources by it.
+    if (marker := find_revision(parsed.full_text)) and not artifact.document.revision_label:
+        artifact = replace(
+            artifact,
+            document=artifact.document.model_copy(update={"revision_label": marker.label}),
+        )
+        parsed = replace(parsed, document=artifact.document)
 
     # --- model client ----------------------------------------------------------
     cascade = ModelCascade.load()
@@ -816,6 +828,9 @@ def _report(artifact, parsed, result, registry, class_code) -> None:
     print(f"  size       {artifact.size_bytes:,} bytes")
     cached = "yes (identical bytes already stored)" if artifact.was_already_stored else "no"
     print(f"  cached     {cached}")
+    # Which edition of the specification this is. It decides who wins when two sources disagree,
+    # so a run that could not determine it should say so rather than leave the line out.
+    print(f"  revision   {artifact.document.revision_label or 'no marker found in the document'}")
     # For a fetched source the URI is the citation. Showing the store path instead would hide
     # the only part of the provenance an auditor cannot reconstruct.
     if not artifact.document.uri.startswith("local://"):
