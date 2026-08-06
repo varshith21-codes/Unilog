@@ -33,6 +33,8 @@ Discovered by probing the live API, because none of it is guessable:
 
 from __future__ import annotations
 
+import re
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -46,6 +48,14 @@ from axiom.core.values import Quantity, ValueRange
 DEFAULT_CONFIG = Path(__file__).resolve().parents[1] / "config" / "reasoning.yaml"
 
 L6 = ValidationLayer.L6_FORMAL
+
+INDETERMINATE_KINDS = frozenset({"translationAmbiguous", "tooComplex", "noTranslations"})
+"""Verdicts in which the solver declined to form an opinion.
+
+Recorded as SKIPPED, never as PASS. The distinction is the whole reason this layer is
+trustworthy: a claim the solver could not translate is unverified, and reporting it as verified
+would be worse than not checking it at all, because it arrives wearing a badge it did not earn.
+"""
 
 
 @dataclass(frozen=True)
@@ -171,6 +181,62 @@ def _approval_text(value) -> str:
     return str(canonical or value.value_raw or "")
 
 
+# A sentence boundary is terminal punctuation followed by whitespace and the start of something
+# new. Requiring an uppercase letter or an opening quote after the space is what keeps standards
+# references intact: "ASME B16.34" has no space after its dot, and "approx. 600 psi" is followed
+# by a digit, so neither is split. Getting this wrong is the same class of bug the claim checker
+# already had to fix once — punctuation inside a specification is not punctuation between
+# sentences.
+_SENTENCE_BOUNDARY = re.compile(r"(?<=[.!?])\s+(?=[A-Z(\u201c\"])")
+
+# Bullet and list markers only. Deliberately not digits: a bullet reading "600 psi WOG" would
+# otherwise be stripped down to "psi WOG" and lose the very figure worth verifying.
+_LIST_MARKER = re.compile(r"^[\s\-\u2013\u2014*\u2022]+")
+
+MIN_CLAIM_CHARS = 12
+"""Below this a fragment carries no assertion worth sending to a solver.
+
+Tuned to drop artifacts of splitting rather than real sentences. Short industrial bullets like
+"Full port design" are 16 characters and do survive.
+"""
+
+
+def split_claims(text: str) -> list[str]:
+    """Split prose into the individual assertions to verify, in order, without duplicates.
+
+    Per-sentence rather than whole-passage, because the solver reports *that* a passage
+    contradicts the policy, not *which* clause did. One call per sentence is what turns
+    "this description is invalid" into "this sentence is invalid, and here is the rule" —
+    which is the difference between a verdict a reviewer can act on and one they cannot.
+
+    That granularity costs one ``ApplyGuardrail`` call per sentence, which is the reason this
+    is opt-in on the pipeline rather than always on.
+
+    Deduplicated case-insensitively: a headline is routinely restated in the short description,
+    and paying twice to prove the same sentence twice is waste. Over-splitting degrades safely —
+    a fragment the solver cannot translate comes back ``noTranslations`` and is recorded as
+    SKIPPED, never as a pass.
+    """
+    claims: list[str] = []
+    seen: set[str] = set()
+
+    for line in text.splitlines():
+        stripped = _LIST_MARKER.sub("", line).strip()
+        if not stripped:
+            continue
+        for part in _SENTENCE_BOUNDARY.split(stripped):
+            claim = part.strip()
+            if len(claim) < MIN_CLAIM_CHARS or not any(c.isalpha() for c in claim):
+                continue
+            key = claim.casefold()
+            if key in seen:
+                continue
+            seen.add(key)
+            claims.append(claim)
+
+    return claims
+
+
 @dataclass
 class ReasoningFinding:
     """One verdict the solver returned."""
@@ -188,6 +254,22 @@ class ReasoningFinding:
     @property
     def is_proven(self) -> bool:
         return self.kind == "valid"
+
+    @property
+    def is_indeterminate(self) -> bool:
+        """The solver returned no opinion. Not a pass, and not a failure either."""
+        return self.kind in INDETERMINATE_KINDS
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "kind": self.kind,
+            "rules": list(self.rules),
+            "confidence": self.confidence,
+            "claims": list(self.claims),
+            "detail": self.detail,
+            "contradiction": self.is_contradiction,
+            "indeterminate": self.is_indeterminate,
+        }
 
 
 class ReasoningChecker:
