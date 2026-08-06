@@ -1,0 +1,164 @@
+# The fast gate. Runs on every push and pull request, needs no credentials, and must stay fast
+# enough that nobody is tempted to skip it.
+#
+# Deliberately split from regression.yml. This job proves the code does what it says; that one
+# proves the model pipeline still performs as well as it did, which costs money and needs AWS. A
+# single workflow would mean either running the backtest on every typo fix, or having the whole
+# gate silently skip on a fork.
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+# A new push makes an in-flight run redundant. Cancelling keeps queue time honest.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    name: lint and test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          # 3.12 is the blueprint's choice; the package declares >=3.11.
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install
+        # The docintel extra is not optional here even though it is optional in the package: the
+        # PDF parsing tests are among the most valuable in the suite, and skipping them in CI
+        # would leave the aligned-table reconstruction untested.
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev,docintel,ingest,api]"
+
+      - name: Ruff
+        run: python -m ruff check .
+
+      - name: Tests
+        # `not live` excludes the tests that hit real Bedrock endpoints. Everything else runs,
+        # including the FastAPI routes and the golden-set consistency checks.
+        run: python -m pytest -m "not live" --junit-xml=junit.xml
+
+      - name: Schema integrity
+        # The registry refuses to load an internally inconsistent schema. Loading it here means a
+        # bad YAML edit fails CI even if no test happens to touch that class.
+        run: python -c "from axiom.schema import load_default; r = load_default(); print(f'{len(r.attribute_codes)} attributes, {len(r.class_codes)} classes')"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit
+          path: junit.xml
+          if-no-files-found: warn
+
+  console:
+    name: console typecheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: apps/console
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: apps/console/package-lock.json
+
+      - run: npm ci
+
+      - name: Typecheck
+        # types.ts is a hand-maintained mirror of the Python models, so this is the only thing
+        # standing between a renamed field and a runtime crash in the console.
+        run: npm run typecheck
+
+      - name: Contrast
+        # Accessibility is a build failure, not a review comment. The script checks every
+        # foreground/background pair in the theme against the WCAG ratios.
+        run: npm run check:contrast
+
+      - name: Build
+        run: npm run build
+
+  gate-config:
+    name: regression baseline is intact
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - run: python -m pip install -e ".[dev]"
+
+      # The regression gate itself needs AWS to measure anything, but its *configuration* can be
+      # checked for free — and a broken or baselined-to-the-ablation-arm config would make the
+      # real gate pass vacuously. This is the guard on the guard.
+      - name: Baseline is present, well-formed, and on the treatment arm
+        run: |
+          python - <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          from axiom.evaluation import TRACKED, check_regression
+
+          baseline = json.loads(Path("evals/baseline.json").read_text(encoding="utf-8"))
+          problems = []
+
+          if baseline.get("arm") != "axiom":
+              problems.append(
+                  f"baseline arm is {baseline.get('arm')!r}; the no-evidence-contract arm is the "
+                  f"ablation control group and baselining against it inverts the gate"
+              )
+          if baseline.get("enforce_evidence") is not True:
+              problems.append("baseline was measured with the evidence contract disabled")
+          if baseline.get("hallucinated") not in (0, 0.0):
+              problems.append(
+                  f"baseline records {baseline.get('hallucinated')} hallucinations; that is not a "
+                  f"number to normalise"
+              )
+
+          missing = sorted({g.metric for g in TRACKED} - set(baseline))
+          if missing:
+              problems.append(f"baseline is missing tracked metrics: {', '.join(missing)}")
+
+          # A baseline must judge itself clean, or the gate can never pass.
+          report = check_regression(baseline, baseline)
+          if not report.passed:
+              problems.append(
+                  "the baseline does not pass its own gate: "
+                  + "; ".join(c.reason for c in report.comparisons if c.verdict.blocks)
+                  + "".join(f" {r}" for r in report.fatal)
+              )
+
+          for problem in problems:
+              print(f"FAIL: {problem}", file=sys.stderr)
+          if problems:
+              sys.exit(1)
+          print(
+              f"baseline ok: {baseline['golden_set']} arm={baseline['arm']} "
+              f"prompt={baseline.get('prompt_version')} "
+              f"({len(TRACKED)} tracked metrics)"
+          )
+          PY

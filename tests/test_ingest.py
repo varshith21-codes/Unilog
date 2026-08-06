@@ -14,14 +14,19 @@ import pytest
 from axiom.core.evidence import DocumentType
 from axiom.ingest import (
     ColumnMapping,
+    FetchedResource,
     IngestError,
     LocalArtifactStore,
     MappingMemory,
+    UrlFetchError,
     detect_document_type,
+    filename_for,
     fold_header,
     infer_mapping,
     ingest_bytes,
     ingest_file,
+    ingest_url,
+    is_url,
     read_flat_file,
     sha256_bytes,
 )
@@ -321,3 +326,350 @@ def test_mapping_memory_merges_rather_than_replaces(tmp_path: Path):
 
 def test_empty_mapping_has_zero_coverage():
     assert ColumnMapping(matches=()).coverage() == 0.0
+
+
+# ===================================================== the supplier-file entry point
+#
+# scripts/ingest_supplier_file.py is the reachable path for everything above. The inference and
+# the memory were already covered; what these guard is the projection from a mapped file into
+# canonical records, and the validation that stops a typo being persisted as a mapping.
+
+from scripts.ingest_supplier_file import (  # noqa: E402 - a script, imported for its logic
+    _apply_mapping,
+    _identity_resolved,
+    _parse_overrides,
+)
+
+SAMPLE_FEED = Path(__file__).resolve().parents[1] / "data" / "samples" / "supplier-feed.csv"
+
+
+@pytest.fixture
+def feed() -> object:
+    return read_flat_file(SAMPLE_FEED.read_bytes(), filename=SAMPLE_FEED.name)
+
+
+def test_the_checked_in_sample_feed_reads(feed):
+    """The sample exists so the entry point is runnable with no arguments to invent."""
+    assert len(feed) == 18
+    assert "PN" in feed.headers
+    assert "WT/EA (lb)" in feed.headers
+
+
+def test_the_sample_feed_maps_most_of_its_columns(feed):
+    """A realistically messy header row should mostly resolve without human help.
+
+    Not all of it: `Category` has no canonical target and `WT/EA (lb)` folds too far from any
+    synonym to clear the fuzzy bar. Those are the columns an operator confirms once.
+    """
+    mapping = infer_mapping(list(feed.headers))
+
+    assert mapping.resolved["mpn"] == "PN"
+    assert mapping.resolved["sku"] == "Our Part #"
+    assert mapping.resolved["nominal_size"] == "Size"
+    assert mapping.resolved["case_quantity"] == "QTY/CS"
+    assert mapping.resolved["selling_uom"] == "U/M"
+    assert mapping.coverage() >= 0.75
+    assert "Category" in mapping.unmapped
+
+
+def test_a_unit_in_the_header_is_captured(feed):
+    """Supplier files routinely put the unit in the header and a bare number in the cell.
+    Losing it makes the number dimensionless."""
+    mapping = infer_mapping(list(feed.headers))
+    by_header = {m.header: m for m in mapping.matches}
+
+    assert by_header["PRESSURE (psi)"].unit_hint == "psi"
+    assert by_header["WT/EA (lb)"].unit_hint == "lb"
+
+
+def test_mapped_rows_keep_raw_strings(feed):
+    """No normalisation here, deliberately. Extraction observes the same separation so that a
+    bad unit conversion can never masquerade as a bad mapping."""
+    mapping = infer_mapping(list(feed.headers), known={"each_weight": "WT/EA (lb)"})
+    rows = _apply_mapping(feed, mapping)
+
+    first = rows[0]
+    assert first["mpn"] == "BA-100-025"
+    assert first["attributes"]["nominal_size"] == '1/4"', "not converted to 0.25 in"
+    assert first["attributes"]["each_weight"] == "0.45", "still a string, still in lb"
+
+
+def test_empty_cells_become_gaps_not_empty_values(feed):
+    """A mapped-but-blank column has to read as absent. Carrying "" would count as coverage
+    and deliver nothing, which is the exact trap non_empty_ratio exists to expose."""
+    mapping = infer_mapping(list(feed.headers))
+    rows = _apply_mapping(feed, mapping)
+
+    # UPC is mapped to gtin and is empty for every row in the sample.
+    assert mapping.resolved.get("gtin") == "UPC"
+    assert all("gtin" not in row["attributes"] for row in rows)
+
+
+def test_unmapped_columns_are_carried_not_discarded(feed):
+    """The operator who has to resolve an unmapped column needs to see what was in it."""
+    mapping = infer_mapping(list(feed.headers))
+    rows = _apply_mapping(feed, mapping)
+
+    assert rows[0]["unmapped"]["Category"] == "Valves"
+
+
+def test_an_override_target_must_exist_in_the_schema(feed):
+    """A typo'd target would otherwise be persisted by --confirm and silently map a column
+    to an attribute the schema has never heard of."""
+    with pytest.raises(ValueError, match="neither a schema attribute nor a record field"):
+        _parse_overrides(["Category=nonesuch"], feed, {"each_weight"})
+
+
+def test_an_override_header_must_exist_in_the_file(feed):
+    """A typo'd header maps nothing at all, which is worse than an error because it looks
+    like it worked."""
+    with pytest.raises(ValueError, match="not in this file"):
+        _parse_overrides(["Nope=sku"], feed, {"sku"})
+
+
+def test_a_record_field_is_a_valid_override_target(feed):
+    """`sku` and `mpn` are product-record fields rather than schema attributes, and both are
+    legitimate mapping targets."""
+    assert _parse_overrides(["Cat No=mpn"], feed, set()) == {"mpn": "Cat No"}
+
+
+def test_a_file_with_no_identity_column_is_rejected():
+    """Rows with no sku and no mpn cannot be joined to anything, so ingesting them is not a
+    partial success — it is a failure that would otherwise be logged as fine."""
+    flat = read_flat_file(b"Colour,Notes\nred,none\n", filename="junk.csv")
+    mapping = infer_mapping(list(flat.headers))
+
+    assert _identity_resolved(mapping) is False
+    assert _identity_resolved(infer_mapping(["Part #"])) is True
+
+
+def test_a_confirmed_mapping_survives_a_round_trip(tmp_path: Path, feed):
+    """The feature an operator actually feels: map a supplier once, and the next file from them
+    maps itself at full confidence with no human step."""
+    memory = MappingMemory(tmp_path / "mappings.json")
+    first = infer_mapping(
+        list(feed.headers), known={"each_weight": "WT/EA (lb)"}, supplier_id="milwaukee"
+    )
+    memory.remember("milwaukee", first.resolved)
+
+    replayed = infer_mapping(
+        list(feed.headers), known=MappingMemory(tmp_path / "mappings.json").get("milwaukee")
+    )
+    remembered = [m for m in replayed.matches if m.method == "supplier_memory"]
+
+    assert len(remembered) >= 12
+    assert all(m.confidence == 1.0 for m in remembered)
+    assert replayed.resolved["each_weight"] == "WT/EA (lb)", "the hand-fixed column persisted"
+
+
+# ===================================================================== URL ingestion
+#
+# The fetcher is injected throughout. A test that needs the internet to check filename derivation
+# or scheme validation is a test that gets skipped, and then this code rots.
+
+
+def stub_fetch(
+    data: bytes = b"<html><body><p>600 PSI WOG</p></body></html>",
+    *,
+    url: str = "https://example.com/docs/ba100.html",
+    content_type: str = "text/html; charset=utf-8",
+    last_modified: str | None = None,
+):
+    calls: list[dict] = []
+
+    def fetch(target: str, *, timeout: float, max_bytes: int) -> FetchedResource:
+        calls.append({"url": target, "timeout": timeout, "max_bytes": max_bytes})
+        return FetchedResource(
+            data=data,
+            url=url,
+            content_type=content_type,
+            last_modified=last_modified,
+        )
+
+    fetch.calls = calls  # type: ignore[attr-defined]
+    return fetch
+
+
+def test_a_fetched_page_is_stored_and_cited_by_url(tmp_path: Path):
+    """The URL, not the store path, becomes the document's uri. A web citation that cannot say
+    where on the internet the claim came from is not provenance."""
+    store = LocalArtifactStore(tmp_path / "artifacts")
+    artifact = ingest_url(
+        "https://example.com/docs/ba100.html", store, fetcher=stub_fetch(), supplier_id="milwaukee"
+    )
+
+    assert artifact.document.uri == "https://example.com/docs/ba100.html"
+    assert artifact.document.doc_type is DocumentType.WEB_PAGE
+    assert artifact.document.supplier_id == "milwaukee"
+    assert artifact.sha256 == sha256_bytes(b"<html><body><p>600 PSI WOG</p></body></html>")
+    assert store.exists(artifact.storage_uri), "the original bytes are retrievable"
+
+
+def test_the_redirect_target_is_what_gets_cited(tmp_path: Path):
+    """Recording where the operator was pointed rather than where the bytes came from would make
+    the citation unresolvable."""
+    store = LocalArtifactStore(tmp_path / "artifacts")
+    fetch = stub_fetch(
+        url="https://cdn.example.com/final/ba100.pdf", content_type="application/pdf"
+    )
+    artifact = ingest_url("https://example.com/redirect", store, fetcher=fetch)
+
+    assert artifact.document.uri == "https://cdn.example.com/final/ba100.pdf"
+    assert artifact.original_filename == "ba100.pdf"
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "file:///etc/passwd",
+        "file://C:/Windows/win.ini",
+        "ftp://example.com/x.pdf",
+        "data:text/html,<h1>hi</h1>",
+        "gopher://example.com/",
+    ],
+)
+def test_only_http_schemes_are_fetchable(tmp_path: Path, url: str):
+    """A URL arriving in a spreadsheet cell must not be able to read the local disk."""
+    store = LocalArtifactStore(tmp_path / "artifacts")
+    with pytest.raises(UrlFetchError, match="scheme"):
+        ingest_url(url, store, fetcher=stub_fetch())
+
+
+def test_plain_http_is_refused_by_default(tmp_path: Path):
+    """Hashing bytes that arrived with no integrity guarantee and calling it provenance would
+    defeat the point of hashing them."""
+    store = LocalArtifactStore(tmp_path / "artifacts")
+    with pytest.raises(UrlFetchError, match="integrity"):
+        ingest_url("http://example.com/x.html", store, fetcher=stub_fetch())
+
+
+def test_plain_http_is_recorded_when_explicitly_allowed(tmp_path: Path):
+    """Opting in is fine. Forgetting six months later is not, so the document says so."""
+    store = LocalArtifactStore(tmp_path / "artifacts")
+    artifact = ingest_url(
+        "http://example.com/x.html",
+        store,
+        fetcher=stub_fetch(url="http://example.com/x.html"),
+        allow_insecure_http=True,
+    )
+
+    assert "not integrity-protected" in (artifact.document.license_note or "")
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "https://localhost/x.html",
+        "https://127.0.0.1/x.html",
+        "https://10.0.0.5/x.html",
+        "https://192.168.1.1/x.html",
+        "https://169.254.169.254/latest/meta-data/",
+    ],
+)
+def test_loopback_and_private_addresses_are_refused(tmp_path: Path, url: str):
+    """Includes the EC2 metadata address, which is the one that actually gets attacked."""
+    store = LocalArtifactStore(tmp_path / "artifacts")
+    with pytest.raises(UrlFetchError):
+        ingest_url(url, store, fetcher=stub_fetch())
+
+
+def test_an_unexpected_content_type_is_refused(tmp_path: Path):
+    """A login wall stored as a datasheet is worse than a failed fetch, because it gets cited."""
+    store = LocalArtifactStore(tmp_path / "artifacts")
+    fetch = stub_fetch(data=b"\x00\x01binary", content_type="application/x-shockwave-flash")
+
+    with pytest.raises(UrlFetchError, match="not an ingestable document type"):
+        ingest_url("https://example.com/x", store, fetcher=fetch)
+
+    # Overridable, because octet-stream portals are real and so is operator judgement.
+    artifact = ingest_url(
+        "https://example.com/x", store, fetcher=fetch, allow_any_content_type=True
+    )
+    assert artifact.size_bytes == len(b"\x00\x01binary")
+
+
+def test_an_empty_body_is_refused(tmp_path: Path):
+    store = LocalArtifactStore(tmp_path / "artifacts")
+    with pytest.raises(UrlFetchError, match="empty body"):
+        ingest_url("https://example.com/x.html", store, fetcher=stub_fetch(data=b""))
+
+
+def test_last_modified_becomes_the_revision_label(tmp_path: Path):
+    """Revision awareness is how a newer datasheet wins over an older one when sources conflict,
+    and for a web source the header is the only revision signal available."""
+    store = LocalArtifactStore(tmp_path / "artifacts")
+    artifact = ingest_url(
+        "https://example.com/docs/ba100.html",
+        store,
+        fetcher=stub_fetch(last_modified="Tue, 05 Aug 2025 10:00:00 GMT"),
+    )
+
+    assert artifact.document.revision_label == "Tue, 05 Aug 2025 10:00:00 GMT"
+
+
+@pytest.mark.parametrize(
+    ("url", "media", "expected"),
+    [
+        ("https://x.com/docs/ba100.pdf", "application/pdf", "ba100.pdf"),
+        # No extension in the path: the declared media type supplies one, because the suffix is
+        # what routes the parser downstream.
+        ("https://x.com/docs/ba100", "application/pdf", "ba100.pdf"),
+        ("https://x.com/feed", "text/csv", "feed.csv"),
+        # Nothing usable in the path at all, so the host stands in.
+        ("https://x.com/", "text/html", "x.com.html"),
+        ("https://x.com/a%20b/c%20d.pdf", "application/pdf", "c-d.pdf"),
+    ],
+)
+def test_a_filename_is_derived_so_the_suffix_routes_the_parser(url, media, expected):
+    """The suffix is load-bearing: read_flat_file and parse_artifact both consult it."""
+    assert filename_for(url, media) == expected
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "https://x.com/p/../..%2Fetc%2Fpasswd",
+        "https://x.com/%2e%2e%2f%2e%2e%2fetc%2fshadow",
+        "https://x.com/dir%5Cwin.ini",
+        "https://x.com/....//x.pdf",
+    ],
+)
+def test_a_derived_filename_cannot_escape_a_directory(url: str):
+    """This name reaches the filesystem, so traversal has to be gone rather than merely encoded.
+
+    Two independent defences: only the final path component survives, and anything outside
+    ``[A-Za-z0-9._-]`` is replaced. Asserting the property rather than an exact string keeps this
+    honest across platforms — Windows and POSIX disagree about whether a backslash is a separator.
+    """
+    name = filename_for(url, "text/html")
+
+    assert "/" not in name
+    assert "\\" not in name
+    assert ".." not in name
+    assert not name.startswith(".")
+    assert name, "a name is still produced rather than an empty string"
+
+
+def test_is_url_does_not_mistake_a_windows_path_for_a_url():
+    """`C:\\feeds\\x.csv` parses with a one-letter scheme, so a naive check misroutes it."""
+    assert is_url("https://example.com/x.pdf") is True
+    assert is_url("http://example.com/x.pdf") is True
+    assert is_url(r"C:\feeds\x.csv") is False
+    assert is_url("data/samples/ba100.txt") is False
+    assert is_url("file:///etc/passwd") is False
+
+
+def test_the_fetcher_receives_the_ceiling_and_the_timeout(tmp_path: Path):
+    """Both are the defence against a hostile endpoint, so they have to actually arrive."""
+    store = LocalArtifactStore(tmp_path / "artifacts")
+    fetch = stub_fetch()
+    ingest_url(
+        "https://example.com/docs/ba100.html",
+        store,
+        fetcher=fetch,
+        timeout=5.0,
+        max_bytes=1024,
+    )
+
+    assert fetch.calls[0]["timeout"] == 5.0
+    assert fetch.calls[0]["max_bytes"] == 1024

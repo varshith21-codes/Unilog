@@ -1,0 +1,48 @@
+{
+  "_comment": [
+    "Committed baseline for the regression gate. Compared against by scripts/check_regression.py.",
+    "",
+    "These are MEASURED numbers from a real backtest against data/golden/pvf_valves.yaml, not",
+    "targets. Editing them to make a failing gate pass is the one change that defeats the whole",
+    "mechanism, so rebaselining goes through `scripts/check_regression.py --update`, which refuses",
+    "to lower a metric unless --accept-regression is also passed.",
+    "",
+    "Regenerate with:",
+    "  $env:AWS_PROFILE = \"axiom\"",
+    "  python scripts/run_backtest.py --json > evals/candidate.json",
+    "  python scripts/check_regression.py evals/candidate.json --update",
+    "",
+    "`arm` must stay `axiom`. The `no-evidence-contract` arm is the ablation control group and is",
+    "deliberately worse; baselining against it would invert the gate."
+  ],
+
+  "measured_at": "2026-08-05",
+  "golden_set": "pvf_valves_v1",
+  "arm": "axiom",
+  "enforce_evidence": true,
+  "prompt_version": "extract.v2",
+  "model_ids": [
+    "zai.glm-4.7-flash",
+    "zai.glm-4.7",
+    "zai.glm-5"
+  ],
+
+  "products": 15,
+  "comparisons": 312,
+  "calibration_samples": 227,
+  "model_calls": 15,
+
+  "correct": 222,
+  "wrong_value": 2,
+  "missed": 3,
+  "correctly_abstained": 85,
+  "hallucinated": 0,
+
+  "precision": 0.991,
+  "recall": 0.978,
+  "f1": 0.984,
+  "abstention_correctness": 1.0,
+  "hallucination_rate": 0.0,
+  "exact_match_rate": 0.9505,
+  "citation_coverage": 1.0
+}

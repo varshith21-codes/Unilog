@@ -17,8 +17,14 @@ dependencies = [
 [project.optional-dependencies]
 docintel = [
     # PDF layout extraction. Optional because the text and HTML paths do not need it, and it
-    # is the heaviest dependency in the tree.
+    # is the heaviest dependency in the tree. HTML needs nothing: html.parser is stdlib.
     "pdfplumber==0.11.7",
+]
+ingest = [
+    # XLSX reading for supplier flat files. Optional on the same principle as pdfplumber: CSV
+    # and TSV go through the csv module, so a deployment that only ever sees delimited files
+    # does not need this. `read_flat_file` imports it lazily and only for .xlsx/.xls.
+    "openpyxl==3.1.5",
 ]
 api = [
     "fastapi==0.115.6",
@@ -32,6 +38,9 @@ dev = [
     "httpx==0.28.1",
     # Generates the synthetic PDFs the docintel tests parse.
     "reportlab==4.2.5",
+    # The flat-file tests build a real workbook rather than a fixture, so this is not optional
+    # for a test run even though it is optional for the library.
+    "openpyxl==3.1.5",
 ]
 
 [tool.setuptools.packages.find]

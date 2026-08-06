@@ -1,0 +1,119 @@
+# The metrics gate. Measures the pipeline against the golden set and blocks a change that made
+# any tracked number worse.
+#
+# This is module M15, and the honest thing to say about it is that it cannot run on every push:
+# it makes real Bedrock calls, so it costs money and needs credentials a fork does not have.
+# So it runs on demand, on a schedule, and on pull requests that touch the parts that can
+# actually move the numbers — the prompts, the extractor, the schema, or the golden set itself.
+#
+# The failure mode this design avoids: a gate that silently skips when credentials are absent
+# and reports green. If the trigger fires and there is no way to authenticate, the job FAILS. A
+# gate you cannot tell apart from a gate that did not run is not a gate.
+name: Regression gate
+
+on:
+  workflow_dispatch:
+    inputs:
+      update_baseline:
+        description: "Rebaseline on success (holds an improvement)"
+        type: boolean
+        default: false
+  schedule:
+    # Weekly. Model endpoints drift underneath a pinned model id, and a scheduled run is the only
+    # thing that notices when nobody has touched the code.
+    - cron: "0 6 * * 1"
+  pull_request:
+    paths:
+      - "packages/axiom/extract/**"
+      - "packages/axiom/normalize/**"
+      - "packages/axiom/schema/**"
+      - "packages/axiom/evaluation/**"
+      - "packages/axiom/confidence/**"
+      - "schema/**"
+      - "data/golden/**"
+      - "evals/baseline.json"
+
+concurrency:
+  # Not cancel-in-progress: a half-finished backtest has already spent the tokens, and killing it
+  # wastes them without producing a verdict.
+  group: regression-${{ github.ref }}
+
+permissions:
+  contents: read
+  id-token: write # for OIDC role assumption; no long-lived keys in the repo
+
+jobs:
+  backtest:
+    name: measure and compare
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      AWS_REGION: us-east-2
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev,docintel,ingest]"
+
+      - name: Require a way to authenticate
+        # Explicit and first, so the reason for failing is one line rather than a Bedrock
+        # AccessDenied forty lines into a traceback.
+        env:
+          ROLE: ${{ secrets.AWS_ROLE_ARN }}
+        run: |
+          if [ -z "$ROLE" ]; then
+            echo "::error::AWS_ROLE_ARN is not configured, so the backtest cannot run and the" \
+                 "gate cannot pass. Configure the secret, or trigger this workflow only from a" \
+                 "branch that has access. Skipping silently would report green for a gate that" \
+                 "never ran."
+            exit 1
+          fi
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-2
+
+      - name: Measure
+        # Not --write. The calibration artifacts govern what publishes without a human, and a CI
+        # run must not quietly move that threshold; rebaselining calibration is a deliberate local
+        # step. This only measures.
+        run: python scripts/run_backtest.py --json > evals/candidate.json
+
+      - name: Compare against the baseline
+        run: python scripts/check_regression.py evals/candidate.json
+
+      - name: Rebaseline
+        if: ${{ success() && inputs.update_baseline }}
+        run: |
+          python scripts/check_regression.py evals/candidate.json --update
+          git diff --stat evals/baseline.json
+
+      - name: Publish the measurement
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backtest-${{ github.run_number }}
+          path: |
+            evals/candidate.json
+            evals/baseline.json
+          if-no-files-found: warn
+
+      - name: Summary
+        if: always()
+        # Puts the table in the run summary rather than making a reviewer open the log.
+        run: |
+          {
+            echo '## Regression gate'
+            echo
+            echo '```'
+            python scripts/check_regression.py evals/candidate.json || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

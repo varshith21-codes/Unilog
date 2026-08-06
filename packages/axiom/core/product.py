@@ -213,5 +213,11 @@ class ProductRecord(BaseModel):
 
 
 _EVIDENCE_EXPECTED = frozenset(
-    m for m in DerivationMethod if m.requires_evidence or m.is_inference
+    m for m in DerivationMethod if m.requires_evidence or m.is_inference or m.is_unsourced
 )
+"""Methods for which absent evidence means unverified.
+
+Legacy values belong here for the reason that makes the cohort study worth running: an item
+master row is not verified merely because it exists, and crediting it would report a catalogue as
+provenance-complete on the strength of data nobody can trace.
+"""

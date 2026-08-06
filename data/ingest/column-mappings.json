@@ -1,0 +1,16 @@
+{
+  "milwaukee": {
+    "body_material": "Material",
+    "brand": "MFR",
+    "case_quantity": "QTY/CS",
+    "country_of_origin": "COO",
+    "description": "DESCR1",
+    "each_weight": "WT/EA (lb)",
+    "gtin": "UPC",
+    "mpn": "PN",
+    "nominal_size": "Size",
+    "pressure_rating_wog": "PRESSURE (psi)",
+    "selling_uom": "U/M",
+    "sku": "Our Part #"
+  }
+}

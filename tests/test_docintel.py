@@ -15,8 +15,11 @@ from axiom.core.evidence import SourceDocument
 from axiom.docintel import (
     ParsedDocument,
     build_evidence_span,
+    html_to_text,
     locate_quote,
+    looks_like_html,
     parse_artifact,
+    parse_html,
     parse_pdf,
     parse_text,
     squash,
@@ -501,3 +504,170 @@ def test_parse_artifact_survives_cp1252_bytes(source_document: SourceDocument):
     data = "Size 3/4\u201d valve".encode("cp1252")
     parsed = parse_artifact(data, source_document)
     assert "valve" in parsed.full_text
+
+
+# ===================================================================== HTML parsing
+#
+# A manufacturer product page is often the only source for a new part. The property that matters is
+# that markup never reaches the extractable text: a quote containing `<td>` fails verification
+# against the human-readable page, so the extractor would abstain on values that are genuinely
+# printed there.
+
+PRODUCT_PAGE = """\
+<!DOCTYPE html>
+<html><head>
+  <title>BA-100 Series</title>
+  <style>.spec { color: red }</style>
+  <script>var price = 41.99; document.write("600 PSI");</script>
+</head>
+<body>
+  <h1>BA-100 Two-Piece Bronze Ball Valve</h1>
+  <div class="spec"><span>Body Material</span> <span>Bronze C84400</span></div>
+  <p>Pressure Rating: 600 PSI WOG @ 73&deg;F</p>
+  <table class="ordering">
+    <tr><th>Part Number</th><th>Size</th><th>Handle</th><th>Carton Qty</th></tr>
+    <tr><td>BA-100-025</td><td>1/4"</td><td>Lever</td><td>24</td></tr>
+    <tr><td>BA-100-075</td><td>3/4"</td><td>Lever</td><td>12</td></tr>
+    <tr><td>BA-100-125</td><td>1-1/4"</td><td>Tee</td><td>6</td></tr>
+  </table>
+  <noscript>Enable JavaScript</noscript>
+</body></html>
+"""
+
+
+@pytest.fixture
+def product_page(source_document: SourceDocument) -> ParsedDocument:
+    return parse_html(PRODUCT_PAGE, source_document)
+
+
+def test_markup_never_reaches_the_extractable_text(product_page: ParsedDocument):
+    text = product_page.full_text
+
+    for fragment in ("<div", "<td", "<span", "class=", "<table", "<p>"):
+        assert fragment not in text, f"{fragment!r} leaked into the text the model will see"
+
+
+def test_scripts_and_styles_are_discarded_entirely(product_page: ParsedDocument):
+    """Not just their tags — their contents. An inline script's `600 PSI` string is not a
+    specification, and a model given it would cite something no human can read on the page."""
+    text = product_page.full_text
+
+    assert "document.write" not in text
+    assert "var price" not in text
+    assert "41.99" not in text
+    assert "color: red" not in text
+    assert "Enable JavaScript" not in text
+
+
+def test_visible_content_survives(product_page: ParsedDocument):
+    text = product_page.full_text
+
+    assert "BA-100 Two-Piece Bronze Ball Valve" in text
+    assert "Bronze C84400" in text
+    assert "600 PSI WOG" in text
+
+
+def test_html_entities_are_decoded(product_page: ParsedDocument):
+    """`&deg;` has to become a degree sign, or a quote containing it never verifies."""
+    assert "73\u00b0F" in product_page.full_text
+
+
+def test_an_html_table_is_reconstructed_with_addressable_cells(product_page: ParsedDocument):
+    """The whole reason to render rather than strip. Ordering tables are where the SKUs are, so
+    reusing the text parser's column detection is what makes them citable."""
+    tables = product_page.all_tables()
+    assert tables, "the ordering table was not detected"
+
+    table = tables[0]
+    assert table.header[0] == "Part Number"
+    assert table.col_count == 4
+
+    rows = table.rows()
+    assert ["BA-100-075", '3/4"', "Lever", "12"] in rows
+
+
+def test_a_cell_value_is_locatable_as_a_quote(product_page: ParsedDocument):
+    """End to end: the value a model would return has to verify against the rendered page.
+
+    This is the property the whole render-rather-than-strip decision exists to protect. If markup
+    survived into the text, a quote a model read off the page would fail to locate and the
+    extractor would abstain on a value that is genuinely printed there.
+    """
+    location = locate_quote("BA-100-075", product_page)
+
+    assert location is not None
+    assert location.is_exact is True
+    assert location.table_ref is not None, "located in the ordering table, not loose text"
+
+
+def test_the_parser_is_named_html_not_text(product_page: ParsedDocument):
+    """A citation should say which route produced it: the difference explains why a quote's
+    whitespace may not match the original bytes."""
+    assert product_page.parser == "html"
+
+
+def test_a_layout_table_is_not_treated_as_data():
+    """Single-column tables are layout wrappers. Reporting one as a table would invite the
+    column detector to find structure that is not there."""
+    assert html_to_text("<table><tr><td>Just a wrapper</td></tr></table>") == "Just a wrapper"
+
+
+def test_an_unclosed_table_still_yields_its_rows():
+    """Real pages are malformed. Dropping the rows because a tag was missing would lose exactly
+    the ordering table this parser exists to recover."""
+    text = html_to_text("<table><tr><td>BA-100-025</td><td>1/4\"</td>")
+
+    assert "BA-100-025" in text
+    assert '1/4"' in text
+
+
+def test_a_nested_table_does_not_terminate_its_parent():
+    """Layout tables nest constantly. A naive implementation loses the outer rows."""
+    text = html_to_text(
+        "<table><tr><td>Outer A</td><td><table><tr><td>Inner</td></tr></table></td></tr>"
+        "<tr><td>Outer B</td><td>second</td></tr></table>"
+    )
+
+    assert "Outer A" in text
+    assert "Outer B" in text, "the inner table swallowed the rest of the outer one"
+    assert "Inner" in text
+
+
+def test_block_elements_become_separate_lines():
+    """`parse_text` works line by line. One 4,000-character line would give every value on the
+    page identical coordinates, making the evidence viewer useless."""
+    text = html_to_text("<p>First</p><p>Second</p><div>Third</div>")
+
+    assert text.splitlines() == ["First", "Second", "Third"]
+
+
+def test_a_br_breaks_a_line():
+    assert html_to_text("<p>First<br>Second</p>").splitlines() == ["First", "Second"]
+
+
+@pytest.mark.parametrize(
+    ("data", "expected"),
+    [
+        (b"<!DOCTYPE html><html><body>x</body></html>", True),
+        (b"<html lang='en'>", True),
+        (b"  \n  <HTML>", True),
+        (b"<head><meta charset='utf-8'>", True),
+        (b"MILWAUKEE VALVE - BA-100 SERIES\n  Body Material ... Bronze", False),
+        (b"%PDF-1.7", False),
+        (b"Part #,Size\nBA-1,3/4", False),
+        (b"", False),
+    ],
+)
+def test_html_is_sniffed_from_content_not_from_a_header(data: bytes, expected: bool):
+    """Supplier portals serve HTML as octet-stream and saved pages keep a .txt name, so neither
+    the Content-Type nor the extension can be trusted to route the parser."""
+    assert looks_like_html(data) is expected
+
+
+def test_parse_artifact_routes_html_without_being_told(source_document: SourceDocument):
+    """The dispatch that makes URL ingestion actually work rather than nominally work."""
+    parsed = parse_artifact(PRODUCT_PAGE.encode("utf-8"), source_document)
+
+    assert parsed.parser == "html"
+    assert "<td" not in parsed.full_text
+    assert parsed.all_tables(), "the ordering table survived the round trip through dispatch"

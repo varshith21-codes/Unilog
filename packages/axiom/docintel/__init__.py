@@ -6,6 +6,7 @@ filename and a promise.
 """
 
 from axiom.core.evidence import DocumentType
+from axiom.docintel.html_parser import html_to_text, looks_like_html, parse_html
 from axiom.docintel.models import (
     ParsedDocument,
     ParsedLine,
@@ -30,8 +31,13 @@ from axiom.docintel.text_parser import parse_text
 def parse_artifact(data: bytes, document, **kwargs) -> ParsedDocument:
     """Parse an artifact, dispatching on its detected type.
 
-    Callers should not need to know whether a source was a PDF or text — the parsed shape is
-    identical either way, which is what lets the extraction layer stay source-agnostic.
+    Callers should not need to know whether a source was a PDF, a crawled page or plain text —
+    the parsed shape is identical either way, which is what lets the extraction layer stay
+    source-agnostic.
+
+    Dispatch is on **content**, not on the filename or a Content-Type header. Both are wrong
+    often enough to matter, and routing HTML to the text parser leaves markup in the extractable
+    text, where it burns tokens and breaks quote verification.
     """
     if data.startswith(b"%PDF-"):
         return parse_pdf(data, document)
@@ -44,6 +50,9 @@ def parse_artifact(data: bytes, document, **kwargs) -> ParsedDocument:
             continue
     else:
         content = data.decode("utf-8", errors="replace")
+
+    if looks_like_html(data):
+        return parse_html(content, document, **kwargs)
     return parse_text(content, document, **kwargs)
 
 
@@ -62,8 +71,11 @@ __all__ = [
     "TableCell",
     "build_evidence_span",
     "find_sku",
+    "html_to_text",
     "locate_quote",
+    "looks_like_html",
     "parse_artifact",
+    "parse_html",
     "parse_pdf",
     "parse_text",
     "squash",

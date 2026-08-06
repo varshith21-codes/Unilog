@@ -51,8 +51,29 @@ class DerivationMethod(str, Enum):
     HUMAN_ENTRY = "human_entry"
     HUMAN_CORRECTION = "human_correction"
 
+    # --- legacy: present, but of unknown origin ---
+    LEGACY_RECORD = "legacy_record"
+    """A value that was already in the item master when AXIOM arrived.
+
+    Every customer's starting state, and the one provenance case the other families cannot
+    express. It is not an extraction, because nobody knows what document it came from. It is not
+    an inference, because nothing derived it. And it is emphatically not a human entry: that
+    family counts as verified on the grounds that a named person is an accountable source, and
+    the defining property of a legacy row is that the person is not named.
+
+    So it requires no evidence — there is none to be had — and is **never publishable** without
+    one. That is not a technicality, it is the thesis: a value nobody can source is a gap wearing
+    a value's clothing, and the before/after cohort exists to put a number on how many of them a
+    catalogue contains.
+    """
+
     @property
     def requires_evidence(self) -> bool:
+        """Whether construction must be refused without an evidence span.
+
+        False for legacy values even though they are unsourced, because refusing to *model* the
+        state a catalogue is already in would leave it unmeasurable.
+        """
         return self in _EXTRACTION_FAMILY
 
     @property
@@ -62,6 +83,11 @@ class DerivationMethod(str, Enum):
     @property
     def is_human(self) -> bool:
         return self in {DerivationMethod.HUMAN_ENTRY, DerivationMethod.HUMAN_CORRECTION}
+
+    @property
+    def is_unsourced(self) -> bool:
+        """Constructible without evidence, but not publishable without it."""
+        return self is DerivationMethod.LEGACY_RECORD
 
 
 _EXTRACTION_FAMILY = frozenset(
@@ -308,6 +334,11 @@ class AttributeValue(BaseModel):
         if not self.status.is_publishable:
             return False
         if self.method.requires_evidence and not self.has_verified_evidence:
+            return False
+        # A legacy row is constructible without evidence, so that the state a catalogue starts in
+        # can be measured, but it must never publish on that basis. If it cannot be sourced it is
+        # a gap, whatever it looks like in the item master.
+        if self.method.is_unsourced and not self.has_verified_evidence:
             return False
         return not self.failed_validations()
 

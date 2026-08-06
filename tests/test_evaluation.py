@@ -8,14 +8,19 @@ extraction is scored as binary correct/incorrect.
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 import pytest
 from axiom.core.values import Quantity, ValueRange
 from axiom.evaluation import (
+    TRACKED,
+    GateVerdict,
     GoldenSet,
     MetricSet,
     Outcome,
+    check_regression,
     compare_value,
+    format_regression_report,
     format_report,
     mask,
     match_kind,
@@ -25,6 +30,7 @@ from axiom.evaluation import (
 from axiom.evaluation.backtest import BacktestResult
 from axiom.extract import ModelCascade, StubModelClient
 from axiom.schema import load_default
+from axiom.schema.prompts import PROMPT_VERSION
 
 BALL_VALVE = "PLB.VLV.BALL.2PC"
 
@@ -418,3 +424,211 @@ def test_summary_is_json_serialisable(registry):
     result = BacktestResult(golden_set="t")
     result.metrics = _metrics([Outcome.CORRECT] * 3, registry)
     json.dumps(result.summary())
+
+
+# ===================================================================== the regression gate
+#
+# M15. Every accuracy figure in the README is one careless prompt edit away from being false and
+# no other test here would notice, so what these guard is the gate's *defeat conditions*: the ways
+# a regression could slip through while the build stays green.
+
+BASELINE_PATH = Path(__file__).resolve().parents[1] / "evals" / "baseline.json"
+
+
+def summary(**overrides) -> dict:
+    """A backtest summary shaped like `BacktestResult.summary()`, at the committed baseline."""
+    payload = {
+        "golden_set": "pvf_valves_v1",
+        "arm": "axiom",
+        "enforce_evidence": True,
+        "prompt_version": "extract.v2",
+        "products": 15,
+        "comparisons": 312,
+        "correct": 222,
+        "wrong_value": 2,
+        "missed": 3,
+        "correctly_abstained": 85,
+        "hallucinated": 0,
+        "precision": 0.991,
+        "recall": 0.978,
+        "f1": 0.984,
+        "abstention_correctness": 1.0,
+        "hallucination_rate": 0.0,
+        "exact_match_rate": 0.9505,
+        "citation_coverage": 1.0,
+    }
+    payload.update(overrides)
+    return payload
+
+
+def test_an_identical_run_passes():
+    assert check_regression(summary(), summary()).passed is True
+
+
+def test_a_hallucination_fails_against_zero_not_against_the_baseline():
+    """The bound is absolute on purpose. A relative gate would let the first fabrication become
+    the new normal, and then the second."""
+    report = check_regression(summary(), summary(hallucinated=1, hallucination_rate=0.0045))
+
+    assert report.passed is False
+    blocked = {c.guard.metric for c in report.regressed}
+    assert "hallucinated" in blocked
+    assert "hallucination_rate" in blocked
+
+
+def test_documented_run_to_run_recall_drift_does_not_fail_the_gate():
+    """The README records recall moving 96.5% <-> 97.8% across two runs of identical code, as the
+    model resolves handle_type differently.
+
+    A gate that fires on that cries wolf, and a gate that cries wolf gets disabled — which is
+    strictly worse than no gate at all.
+    """
+    assert check_regression(summary(recall=0.978), summary(recall=0.965)).passed is True
+
+
+def test_a_real_recall_loss_does_fail_the_gate():
+    """The band has to be narrow enough to still catch something. Five points is not drift."""
+    report = check_regression(summary(), summary(recall=0.928))
+
+    assert report.passed is False
+    assert [c.guard.metric for c in report.regressed] == ["recall"]
+
+
+def test_a_precision_loss_fails_on_a_tighter_band():
+    """Precision has been stable at 99%+, so it does not get recall's latitude."""
+    assert check_regression(summary(), summary(precision=0.97)).passed is False
+    assert check_regression(summary(), summary(precision=0.985)).passed is True
+
+
+def test_a_citation_coverage_drop_fails_at_zero_tolerance():
+    """Coverage is enforced structurally — a value whose quote cannot be located is discarded. A
+    drop means the evidence contract stopped working, not that the model had an off day."""
+    assert check_regression(summary(), summary(citation_coverage=0.99)).passed is False
+
+
+def test_deleting_a_metric_does_not_pass_the_gate():
+    """The most obvious way to defeat a gate is to stop reporting the number it checks."""
+    candidate = summary()
+    del candidate["precision"]
+    report = check_regression(summary(), candidate)
+
+    assert report.passed is False
+    assert [c.guard.metric for c in report.not_comparable] == ["precision"]
+    assert "missing from the candidate report" in report.not_comparable[0].reason
+
+
+def test_a_different_golden_set_is_not_comparable():
+    """Swapping the corpus moves every count for a reason the gate cannot distinguish from a code
+    change, so it must refuse rather than guess."""
+    report = check_regression(summary(), summary(golden_set="pvf_valves_v2"))
+
+    assert report.passed is False
+    assert any("not comparable" in reason for reason in report.fatal)
+
+
+def test_the_ablation_arm_cannot_be_compared_against_a_treatment_baseline():
+    """The no-evidence-contract arm is a control group and is deliberately worse. Comparing them
+    would report a regression on every single run."""
+    report = check_regression(
+        summary(), summary(arm="no-evidence-contract", enforce_evidence=False)
+    )
+
+    assert report.passed is False
+    assert any("control group" in reason for reason in report.fatal)
+
+
+def test_counts_are_skipped_when_the_corpus_grows_but_rates_are_not():
+    """A golden set growing from 15 SKUs to 40 legitimately changes every count. Comparing
+    `correct: 222` across different corpora would fail on an improvement."""
+    grown = summary(comparisons=800, products=40, correct=600, wrong_value=6)
+    report = check_regression(summary(), grown)
+
+    assert report.counts_compared is False
+    assert report.passed is True, "more wrong values on a bigger corpus is not a regression"
+
+    by_metric = {c.guard.metric: c for c in report.comparisons}
+    assert by_metric["wrong_value"].verdict is GateVerdict.PASS
+    assert "not compared" in by_metric["wrong_value"].reason
+    # The absolute bound still applies, because it needs no baseline.
+    assert by_metric["hallucinated"].verdict is GateVerdict.PASS
+
+
+def test_a_hallucination_still_fails_on_a_grown_corpus():
+    """The point of an absolute bound: it survives the one situation that disables count
+    comparison."""
+    report = check_regression(summary(), summary(comparisons=800, hallucinated=3))
+
+    assert report.counts_compared is False
+    assert report.passed is False
+    assert "hallucinated" in {c.guard.metric for c in report.regressed}
+
+
+def test_an_improvement_is_reported_so_it_can_be_held():
+    """An unrecorded gain gets given back silently the next time somebody edits the prompt."""
+    report = check_regression(summary(), summary(wrong_value=0, missed=0, recall=0.999))
+
+    assert report.passed is True
+    improved = {c.guard.metric for c in report.improved}
+    assert {"wrong_value", "recall"} <= improved
+    assert any("Update the baseline" in c.reason for c in report.improved)
+
+
+def test_a_missing_baseline_metric_blocks_rather_than_skips():
+    """Gating on a metric nobody recorded would be theatre."""
+    baseline = summary()
+    del baseline["f1"]
+    report = check_regression(baseline, summary())
+
+    assert report.passed is False
+    assert [c.guard.metric for c in report.not_comparable] == ["f1"]
+
+
+def test_the_report_renders_without_raising():
+    """It is printed into a CI log where an exception would be reported as a gate failure for the
+    wrong reason."""
+    text = format_regression_report(check_regression(summary(), summary(recall=0.9)))
+
+    assert "REGRESSION GATE" in text
+    assert "recall" in text
+    assert "FAIL" in text
+
+
+# --------------------------------------------------------------- the committed baseline itself
+
+
+def test_the_committed_baseline_exists_and_covers_every_tracked_metric():
+    """A gate whose baseline is missing a number silently stops checking it."""
+    baseline = json.loads(BASELINE_PATH.read_text(encoding="utf-8"))
+    missing = sorted({guard.metric for guard in TRACKED} - set(baseline))
+
+    assert not missing, f"evals/baseline.json is missing: {', '.join(missing)}"
+
+
+def test_the_committed_baseline_is_on_the_treatment_arm():
+    """Baselining against the ablation control group would invert the gate: every real run would
+    look like a huge improvement and nothing would ever fail."""
+    baseline = json.loads(BASELINE_PATH.read_text(encoding="utf-8"))
+
+    assert baseline["arm"] == "axiom"
+    assert baseline["enforce_evidence"] is True
+    assert baseline["hallucinated"] == 0, "zero fabrications is not a number to normalise"
+
+
+def test_the_committed_baseline_passes_its_own_gate():
+    """If it does not, the gate can never pass and would be turned off within a day."""
+    baseline = json.loads(BASELINE_PATH.read_text(encoding="utf-8"))
+    report = check_regression(baseline, baseline)
+
+    assert report.passed is True, report.summary()
+
+
+def test_the_committed_baseline_matches_the_current_prompt_version():
+    """Numbers measured under a different prompt are not a baseline for this one. This fails
+    loudly when the prompt is bumped without re-measuring, which is exactly the change the gate
+    exists to catch."""
+    baseline = json.loads(BASELINE_PATH.read_text(encoding="utf-8"))
+
+    assert baseline["prompt_version"] == PROMPT_VERSION, (
+        f"baseline was measured under {baseline['prompt_version']} but the extractor now uses "
+        f"{PROMPT_VERSION}; re-run scripts/run_backtest.py and rebaseline"
+    )

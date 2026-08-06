@@ -141,6 +141,34 @@ def _sign(payload: dict) -> str:
     return "sha256:" + hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
+def quality_index_for(
+    record: ProductRecord,
+    required_attribute_codes: list[str],
+    *,
+    richness: float = 0.0,
+) -> QualityIndex:
+    """Score one record's quality index.
+
+    Split out of :func:`build_certificate` so the before/after cohort scores an un-enriched item
+    master through *this* function rather than a parallel one. Two implementations of the same
+    index would drift, and a cohort comparison whose two arms were scored by different code would
+    be measuring the code rather than the enrichment.
+    """
+    current = record.current_values()
+
+    consistency = 1.0
+    if current:
+        clean = sum(1 for v in current if not v.failed_validations())
+        consistency = clean / len(current)
+
+    return QualityIndex(
+        completeness=record.fill_rate(required_attribute_codes),
+        verifiability=record.verifiability(),
+        consistency=consistency,
+        richness=richness,
+    )
+
+
 def build_certificate(
     record: ProductRecord,
     *,
@@ -158,17 +186,7 @@ def build_certificate(
     current = record.current_values()
     publishable = record.publishable_values()
 
-    consistency = 1.0
-    if current:
-        clean = sum(1 for v in current if not v.failed_validations())
-        consistency = clean / len(current)
-
-    quality = QualityIndex(
-        completeness=record.fill_rate(required_attribute_codes),
-        verifiability=record.verifiability(),
-        consistency=consistency,
-        richness=richness,
-    )
+    quality = quality_index_for(record, required_attribute_codes, richness=richness)
 
     summary = CertificateSummary(
         attributes_required=len(required_attribute_codes),

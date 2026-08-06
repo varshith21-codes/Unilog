@@ -49,8 +49,14 @@ def parse_text(
     *,
     detect_tables: bool = True,
     lines_per_page: int = LINES_PER_PAGE,
+    parser: str = "text",
 ) -> ParsedDocument:
-    """Parse text into pages with lines, synthetic coordinates and detected tables."""
+    """Parse text into pages with lines, synthetic coordinates and detected tables.
+
+    ``parser`` names the route that produced ``content``. The HTML path renders markup to aligned
+    text and then comes through here, and a citation should say which of the two it came from —
+    the difference explains why a quote's whitespace may not match the original bytes.
+    """
     raw_lines = content.replace("\r\n", "\n").replace("\r", "\n").split("\n")
     pages: list[ParsedPage] = []
     table_counter = 0
@@ -78,7 +84,7 @@ def parse_text(
             )
         )
 
-    return ParsedDocument(document=document, pages=tuple(pages), parser="text")
+    return ParsedDocument(document=document, pages=tuple(pages), parser=parser)
 
 
 def _build_line(text: str, page: int, offset: int) -> ParsedLine:

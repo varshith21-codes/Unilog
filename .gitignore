@@ -37,6 +37,14 @@ data/samples/**/*.jpg
 data/cache/
 evals/results/*.local.json
 
+# Per-run backtest output. evals/baseline.json IS committed — it is the regression gate's
+# reference point, and a gate whose baseline is not in version control cannot be reviewed.
+evals/candidate.json
+
+# Mapped supplier rows are derived output and scale with the feed; the per-supplier column
+# mapping beside them is learned state and IS committed, like data/calibration/priors.json.
+data/ingest/*.rows.json
+
 # --- os / editor ---
 Thumbs.db
 Desktop.ini

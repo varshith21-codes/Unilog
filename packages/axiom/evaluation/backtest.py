@@ -29,6 +29,7 @@ from axiom.extract import Extractor, ModelCascade, ModelClient, UsageLedger
 from axiom.ingest import LocalArtifactStore, ingest_file
 from axiom.normalize import normalize_value
 from axiom.schema import SchemaRegistry
+from axiom.schema.prompts import PROMPT_VERSION
 
 
 @dataclass
@@ -44,6 +45,12 @@ class BacktestResult:
     enforce_evidence: bool = True
     """False marks an ablation run, where the evidence contract was not enforced. Recorded on
     the result so a control-group measurement can never be mistaken for a real one."""
+
+    prompt_version: str | None = None
+    model_ids: list[str] = field(default_factory=list)
+    """What produced these numbers. The regression gate blocks a change that degrades a metric,
+    and its report is only actionable if it can name the prompt and the models involved —
+    "recall fell" is a bug report, "recall fell when the prompt went to v3" is a diagnosis."""
 
     @property
     def arm(self) -> str:
@@ -104,6 +111,8 @@ class BacktestResult:
             "input_tokens": self.usage.input_tokens,
             "output_tokens": self.usage.output_tokens,
             "model_calls": self.usage.calls,
+            "prompt_version": self.prompt_version,
+            "model_ids": list(self.model_ids),
             **self.metrics.summary(),
         }
 
@@ -133,7 +142,14 @@ def run_backtest(
     priors = priors or Priors()
     store = LocalArtifactStore(store_root or Path("data/cache/artifacts"))
 
-    result = BacktestResult(golden_set=golden.name, enforce_evidence=enforce_evidence)
+    result = BacktestResult(
+        golden_set=golden.name,
+        enforce_evidence=enforce_evidence,
+        prompt_version=PROMPT_VERSION,
+        # Every tier that could be reached from the starting one, because the cascade escalates
+        # and the gate needs to know which models were in play, not just the first.
+        model_ids=[cascade.model_for(tier) for tier in cascade.escalation_path(start_tier)],
+    )
     started = time.perf_counter()
 
     # Documents are parsed once and reused across every SKU that cites them. A datasheet with

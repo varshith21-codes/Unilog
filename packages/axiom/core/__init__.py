@@ -6,7 +6,12 @@ See `axiom.core.values.AttributeValue`: any value produced by an extraction-fami
 method is rejected at construction time unless it carries at least one evidence span.
 """
 
-from axiom.core.certificate import CertificateSummary, EnrichmentCertificate, QualityIndex
+from axiom.core.certificate import (
+    CertificateSummary,
+    EnrichmentCertificate,
+    QualityIndex,
+    quality_index_for,
+)
 from axiom.core.evidence import EvidenceSpan, SourceDocument
 from axiom.core.gaps import Gap, GapReason
 from axiom.core.product import Classification, ProductRecord
@@ -31,6 +36,7 @@ __all__ = [
     "ProductRecord",
     "Quantity",
     "QualityIndex",
+    "quality_index_for",
     "SourceDocument",
     "ValidationLayer",
     "ValidationResult",

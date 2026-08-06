@@ -53,7 +53,7 @@ from axiom.extract import (
     UsageLedger,
 )
 from axiom.generate import ClaimVerdict, CopyGenerator, build_fact_sheet, load_policy
-from axiom.ingest import LocalArtifactStore, ingest_file
+from axiom.ingest import IngestError, LocalArtifactStore, ingest_file, ingest_url, is_url
 from axiom.normalize import BrandMaster, clean_mpn, normalize_all
 from axiom.review import build_session
 from axiom.schema import load_default
@@ -71,7 +71,13 @@ DEFAULT_STORE = REPO_ROOT / "data" / "cache" / "artifacts"
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("source", type=Path, help="datasheet to process (.txt or .pdf)")
+    parser.add_argument(
+        "source",
+        help=(
+            "datasheet to process: a local path (.txt, .pdf, .html) or an https:// URL. A URL is "
+            "fetched into the same content-addressed store, so a citation resolves either way."
+        ),
+    )
     parser.add_argument("--sku", required=True, help="target SKU within the document")
     parser.add_argument("--class-code", default="PLB.VLV.BALL.2PC")
     parser.add_argument("--supplier", default=None)
@@ -127,10 +133,28 @@ def main() -> int:
     parser.add_argument("--profile", default=None)
     parser.add_argument("--dry-run", action="store_true", help="no model call; stub response")
     parser.add_argument("--json", action="store_true", help="emit machine-readable output")
+    parser.add_argument(
+        "--allow-insecure-http",
+        action="store_true",
+        help=(
+            "permit a plain http:// source. Off by default: hashing bytes that arrived without an "
+            "integrity guarantee and calling it provenance defeats the point. When used, the "
+            "source document records that it happened."
+        ),
+    )
+    parser.add_argument(
+        "--license-note",
+        default=None,
+        help=(
+            "licensing terms for this source, recorded in the certificate. Worth filling in for "
+            "crawled manufacturer content, which carries terms a supplier-sent PDF does not."
+        ),
+    )
     args = parser.parse_args()
 
-    if not args.source.is_file():
-        print(f"not a file: {args.source}", file=sys.stderr)
+    source_is_url = is_url(args.source)
+    if not source_is_url and not Path(args.source).is_file():
+        print(f"not a file and not a fetchable URL: {args.source}", file=sys.stderr)
         return 2
 
     # A dry run stubs an empty model response, so it produces a record with no values at all.
@@ -162,8 +186,32 @@ def main() -> int:
     registry = load_default()
 
     # --- stage 1: ingest -------------------------------------------------------
+    # A URL and a local file converge here into the same hashed artifact. Everything downstream —
+    # parsing, quote verification, the certificate — is unaware of which channel it arrived on,
+    # which is the entire point of normalising the entry point.
     store = LocalArtifactStore(DEFAULT_STORE)
-    artifact = ingest_file(args.source, store, supplier_id=args.supplier)
+    try:
+        if source_is_url:
+            artifact = ingest_url(
+                args.source,
+                store,
+                supplier_id=args.supplier,
+                allow_insecure_http=args.allow_insecure_http,
+                license_note=args.license_note,
+            )
+        else:
+            artifact = ingest_file(
+                Path(args.source),
+                store,
+                supplier_id=args.supplier,
+                license_note=args.license_note,
+            )
+    except IngestError as exc:
+        print(f"ingest failed: {exc}", file=sys.stderr)
+        # The library names its own keyword argument; a CLI user needs the flag.
+        if "allow_insecure_http" in str(exc):
+            print("From this script, that flag is --allow-insecure-http.", file=sys.stderr)
+        return 1
 
     # --- stage 2: parse --------------------------------------------------------
     raw = store.get(artifact.storage_uri)
@@ -768,6 +816,12 @@ def _report(artifact, parsed, result, registry, class_code) -> None:
     print(f"  size       {artifact.size_bytes:,} bytes")
     cached = "yes (identical bytes already stored)" if artifact.was_already_stored else "no"
     print(f"  cached     {cached}")
+    # For a fetched source the URI is the citation. Showing the store path instead would hide
+    # the only part of the provenance an auditor cannot reconstruct.
+    if not artifact.document.uri.startswith("local://"):
+        print(f"  source     {artifact.document.uri}")
+    if artifact.document.license_note:
+        print(f"  licence    {artifact.document.license_note}")
 
     print(f"\n{'=' * 78}\nPARSE\n{'=' * 78}")
     print(f"  parser     {parsed.parser}")
