@@ -47,13 +47,29 @@ Requires Python 3.11+ (Node 20+ only for the CDK app and the Next.js dashboards)
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-pip install -e ".[dev,api,docintel]"
+pip install -e ".[dev,api,docintel,ingest]"
 
-pytest -q                      # 863 tests, no AWS credentials needed
+pytest -m "not live"           # 1,008 tests, no AWS credentials needed
 ruff check .
 ```
 
-Everything above runs offline. The pipeline itself needs Bedrock:
+Everything above runs offline, and so do three of the entry points — supplier-file ingestion,
+the quality cohort, and the regression gate make no model calls at all:
+
+```powershell
+# a messy supplier spreadsheet -> canonical fields, with the mapping remembered per supplier
+python scripts/ingest_supplier_file.py data/samples/supplier-feed.csv `
+  --supplier milwaukee --map "WT/EA (lb)=each_weight" --confirm --out data/ingest
+
+# what enrichment changed about the catalogue, against the item master it started from
+python scripts/run_cohort.py --write
+
+# cross-source agreement, with scripted responses so the mechanism is visible for free
+python scripts/cross_validate.py `
+  data/samples/ba100.txt data/samples/ba100-catalog.txt --sku BA-100-075 --dry-run
+```
+
+The pipeline itself needs Bedrock:
 
 ```powershell
 $env:AWS_PROFILE = "axiom"
@@ -66,6 +82,9 @@ python scripts/run_pipeline.py data/samples/ba100.txt `
   --sku BA-100-075 --brand "milwaukee vlv" `
   --include-optional --risk-budget 0.05 --save-session --out data/out
 ```
+
+The source argument accepts a local path or an `https://` URL, and routes `.txt`, `.pdf` and
+HTML to the right parser by sniffing content rather than trusting the extension.
 
 That prints every stage — classification, extraction with quotes, normalization, validation
 verdicts, the accept/queue decision per value with the feature that drove it, and the channel
@@ -128,10 +147,16 @@ npm install
 npm run dev          # http://localhost:3000
 ```
 
-Four screens: a portfolio overview (quality scoreboard, cost meter, interactive risk dial), the
-review queue, the per-SKU review workspace with the evidence viewer, and the enrichment
-certificate. All of it renders **real pipeline output** — the API serves bundles written by
-`run_pipeline.py --save-session`, and decisions made in the workspace post back and persist.
+Five screens: a portfolio overview (quality scoreboard, cost meter, interactive risk dial), the
+review queue, the per-SKU review workspace with the evidence viewer, the enrichment certificate,
+and the Quality Index page carrying the before/after cohort. All of it renders **real pipeline
+output** — the API serves bundles written by `run_pipeline.py --save-session`, and decisions made
+in the workspace post back and persist.
+
+The Quality Index page is the one screen with no offline fixture behind it, deliberately. Every
+other page degrades to hand-seeded data when the API is down; a hand-written before/after
+comparison would be a marketing claim rather than a measurement, so that page says the study has
+not been run and prints the two commands that would run it.
 
 `apps/api/static/index.html` is a second, dependency-free review console served at
 `http://127.0.0.1:8000/`. It exists so the review workspace is demonstrable with nothing but
@@ -166,6 +191,12 @@ data rather than left to a comment.
 
 The backtest hides known-correct values from the golden set, runs the real pipeline against the
 source documents alone, and scores what comes back. Latest run on `pvf_valves_v1`:
+
+Every figure below is now committed to `evals/baseline.json` and guarded by the regression gate, so
+a prompt or model change that degrades one of them fails the build rather than quietly rewriting
+this table. Tolerances are derived from measured run-to-run variance, not chosen for comfort —
+recall carries a two-point band because 1.3 points of drift on this corpus is documented below,
+while citation coverage carries none because the evidence contract enforces it structurally.
 
 ```powershell
 $env:AWS_PROFILE = "axiom"
@@ -229,6 +260,53 @@ to 2.1% at 100%. That is not a bug. With no observed errors, a stricter threshol
 the accepted sample, and a Wilson bound on a smaller sample is wider. What buys a tighter
 guarantee is more reviewed data, not more caution — which is the same reason the review workspace
 folds every decision back into the priors.
+
+### What enrichment did to the catalogue
+
+The before/after cohort (`scripts/run_cohort.py`) scores the ERP item master a catalogue starts
+from against the enriched output, both through the same scorer — `quality_index_for` is called on
+each arm, which is why it was split out of the certificate builder in the first place.
+
+The "before" state is not invented. It is `data/samples/supplier-feed.csv`, a supplier flat file
+degraded the way blueprint 12.4 prescribes — descriptions truncated to industrial abbreviations,
+most attributes dropped, a pressure figure left in bar under a header that says psi, two SKUs
+duplicated under variant spellings, a handful of categories mis-assigned. It is read through the
+same column-mapping inference an operator would use.
+
+Two completeness numbers are reported side by side, because they answer different questions and
+collapsing them would be the easy way to manufacture a big delta:
+
+| | before | after |
+|---|---|---|
+| **field presence** — required fields holding anything | 33.3% | 75.0% |
+| **publishable** — required fields holding something citable | 0.0% | 75.0% |
+| verifiability | 0.0% | 100.0% |
+| composite quality index | 25.0% | 81.2% |
+
+The headline is not the lift. It is the *first column*: an item master that reports itself a third
+complete and is 0% verifiable. That gap is what legacy catalogue data actually looks like — the
+fields are populated, and none of it can be traced to a source. Quoting a "0% → 75%" completeness
+figure without the presence number beside it would be a strawman a distributor would rightly reject
+about their own data. That is also why item-master values are modelled as
+`DerivationMethod.LEGACY_RECORD`: constructible without evidence, so the state a catalogue starts in
+can be measured at all, and never publishable without it.
+
+**Caveats, since this is the measurement most likely to be quoted.** The treatment arm is one SKU
+and the control arm is one SKU, because only two SKUs have persisted pipeline output; the corpus is
+the limit here, not the harness. The control held at zero on every dimension, so the scorer did not
+move between the two readings — but a control that was never enriched detects *scorer drift* rather
+than isolating a placebo effect, which is a narrower claim than "control group" normally implies and
+the one this design supports. `richness` is unimplemented and reads zero on both arms, so every
+composite above is understated by up to ten points.
+
+On a wider run the picture is less tidy in a way worth keeping. With both SKUs in the treatment arm,
+consistency *falls* from 100% to 92.9% while completeness rises — which reads as a regression and is
+not one. Consistency is a ratio whose denominator differs between arms: a cross-field rule only
+evaluates where the values it references are present and canonical, so a sparse item master of
+unparsed strings is scored against a different set of checks, and its 100% is 100% of what could be
+checked. One rule newly fails, `R_POTABLE_REQUIRES_NSF61`, and that is a real contradiction in the
+source data that was previously invisible rather than damage done to it. The report names the rule
+instead of offering a causal story, because the check counts do not support a tidy one.
 
 ### Cost to enrich
 
@@ -631,6 +709,9 @@ Stated plainly, because a benchmark oversold is worse than no benchmark:
 
 ```
 axiom/
+├── .github/workflows/
+│   ├── ci.yml                 # ruff, tests, typecheck, contrast, baseline integrity — every push
+│   └── regression.yml         # the metrics gate; blocks a change that degrades a tracked number
 ├── docs/
 │   ├── AXIOM-Product-Intelligence-Blueprint.md   # the design document
 │   └── AWS-SETUP.md
@@ -644,19 +725,22 @@ axiom/
 │   └── reasoning_policy.yaml  # L6 formal policy, compiled to SMT-LIB for Bedrock
 ├── packages/axiom/
 │   ├── core/                  # domain models, evidence, gaps, certificate builder
-│   ├── ingest/                # content-addressed artifact store
-│   ├── docintel/              # document parsing, quote location, span resolution
+│   │                          #   compare.py: one definition of "these two values agree",
+│   │                          #   shared by the backtest and L4 so they cannot disagree
+│   ├── ingest/                # content-addressed store, flat files, column mapping, URL fetch
+│   ├── docintel/              # PDF/text/HTML parsing, quote location, revision markers
 │   ├── schema/                # schema loader, integrity checks, prompt generation
 │   ├── classify/              # class assignment + derived ETIM / UNSPSC
 │   ├── extract/               # model cascade, evidence-bound extraction, entailment gate
 │   ├── normalize/             # unit registry, datasheet value parsers, MPN cleaning
-│   ├── validate/              # validation layers L0–L3 + AST rule evaluator
+│   ├── validate/              # validation layers L0–L4 and L6 + AST rule evaluator
 │   ├── confidence/            # features, calibration, Wilson risk policy
 │   ├── generate/              # constrained copy generation + deterministic claim check
 │   ├── review/                # review sessions, decisions, prior updates
 │   ├── console/               # projection of pipeline output for the UI (presentation only)
 │   ├── syndicate/             # channel pre-flight, exporters, publication gate
-│   ├── evaluation/            # backtest harness, five-outcome scoring
+│   ├── evaluation/            # backtest harness, five-outcome scoring, before/after cohort,
+│   │                          #   and the regression gate the CI workflow runs
 │   └── config/                # models.yaml (generated by the preflight script)
 ├── apps/
 │   ├── api/                   # FastAPI: review + console dataset, plus a no-build console
@@ -666,7 +750,11 @@ axiom/
 │   ├── fetch_bedrock_prices.py# pin real token prices from the AWS Price List API
 │   ├── smoke_extraction.py    # prove the evidence contract holds against live models
 │   ├── run_pipeline.py        # one SKU, end to end, fully reported
+│   ├── ingest_supplier_file.py# a messy spreadsheet -> canonical fields, mapping remembered
+│   ├── cross_validate.py      # L4: same SKU from several sources, compared
+│   ├── run_cohort.py          # before/after quality index against the original item master
 │   ├── run_backtest.py        # the numbers above; writes calibration artifacts
+│   ├── check_regression.py    # the CI gate: fail the build if a tracked metric got worse
 │   ├── explode_variants.py    # one datasheet -> a record per orderable part number
 │   ├── generate_copy.py       # constrained copy + claim check; --audit tries to break it
 │   ├── run_ablation.py        # same model, trust layer off — what does the gate buy?
@@ -678,11 +766,18 @@ axiom/
 │   ├── golden/                # ground truth — the highest-value directory here
 │   │                          #   15 SKUs / 3 datasheets, written to be adversarial
 │   ├── calibration/           # calibration set + learned priors (governs auto-accept)
-│   ├── samples/               # demo datasheets
+│   ├── samples/               # demo datasheets, a product page, and a supplier flat file
+│   │                          #   degraded to look like a real ERP item master
+│   ├── ingest/                # per-supplier column mappings, confirmed once and reused
 │   ├── sessions/              # review state: what humans decided
 │   ├── console/               # pipeline output: what the machine produced
 │   └── cache/                 # content-addressed artifact store
-└── tests/                     # 863 tests
+├── evals/
+│   ├── baseline.json          # the measured numbers the regression gate compares against
+│   ├── cohort.json            # the before/after study the console's Quality Index page reads
+│   ├── ablation.json          # trust layer on vs off
+│   └── adversarial.json       # wrong-document negative control
+└── tests/                     # 1,008 tests
 ```
 
 Adding an attribute means editing YAML in `schema/`. No Python change, no prompt change — the
@@ -694,17 +789,29 @@ that is internally inconsistent.
 `scripts/run_pipeline.py` is the clearest read of the whole flow. It runs:
 
 1. **ingest** — content-addressed store, SHA-256 keyed, so every citation is anchored to an
-   immutable document version
-2. **parse** — pages, lines with bounding boxes, and tables with addressable cells
+   immutable document version. A path, a URL or a supplier flat file all land here identically
+2. **parse** — pages, lines with bounding boxes, and tables with addressable cells. HTML is
+   rendered to aligned text first, so the ordering table on a product page is reconstructed by
+   the same column detector a PDF's is, and the revision marker is read off the page
 3. **classify** — the class decides which attributes to ask for, so it must run first
 4. **extract** — cascade of models, `value_raw` plus a verbatim quote and nothing else
 5. **normalize** — units, enums, ranges to canonical form
 6. **validate** — L0 type/format, L1 dimension, L2 cross-field rules, L3 plausibility
 7. **score and decide** — confidence features, calibrator, risk policy, accept or queue
 8. **certificate and channel exports** — signed certificate, pre-flight gate, per-channel payloads
+9. **generate and formally verify** — constrained copy, the deterministic claim check, then L6
+   against the deployed Automated Reasoning policy with `--verify-claims`
 
 Extraction never normalises and never validates. Keeping those separate is what makes a
 failure attributable: a bad unit conversion cannot masquerade as a bad extraction.
+
+Two layers sit outside this single-SKU flow because they need inputs it does not have:
+
+- **L4, cross-source agreement** — `scripts/cross_validate.py` extracts the same SKU from two or
+  more documents and compares them. It needs a second source, which is why it is a separate
+  entry point rather than a stage.
+- **The quality cohort** — `scripts/run_cohort.py` scores the item master a catalogue started
+  from against the enriched output, both through one scorer.
 
 ## AWS configuration
 
@@ -769,7 +876,13 @@ Tracked against blueprint Part 12.
       classification, confidence calibration, Wilson risk policy, channel pre-flight and
       exporters, signed certificates, backtest harness, review workspace, and a console served
       from live pipeline output.
-- [ ] **Tier 2 — differentiators.** In progress:
+
+      Item 1 asks for CSV/XLSX *plus* PDF *plus* URL. All three are now reachable from an entry
+      point: `ingest_supplier_file.py` for flat files with column-mapping inference, and
+      `run_pipeline.py` for a path or an `https://` URL. Until recently the flat-file reader and
+      the mapping inference were implemented and tested but had no caller, which is a state worth
+      naming rather than checking off — code nothing invokes is not a shipped capability.
+- [x] **Tier 2 — differentiators.** Complete:
       - [x] Cost-per-SKU meter, priced from the AWS Price List API, surfaced in the console
       - [x] Ablation harness and adversarial negative control (found and fixed the targeting bug)
       - [x] Hardened golden set: a third datasheet as a PDF with DN sizing, an overriding
@@ -780,13 +893,28 @@ Tracked against blueprint Part 12.
       - [x] Withdrawn-part targeting — refuse a part the source mentions only to discontinue it
             (12 fabrications with 12 verifiable quotes → 0)
       - [x] Automated Reasoning (L6) — formal verification via Bedrock Guardrails, deployed live
+            and now **wired into the pipeline**: `run_pipeline.py --verify-claims` checks each
+            sentence of generated copy against the policy, and a proven contradiction withholds
+            the copy and names the rule it violated
       - [x] Risk–coverage curve as an interactive dial in the console (hand-drawn SVG, no
             charting dependency)
       - [x] Variant table explosion with parent-child linkage
       - [x] Constrained copy generation with a deterministic claim-check pass
-      - [ ] Quality Index dashboard with a before/after cohort
-- [ ] **Tier 3 — scale and polish.** Batch orchestration, multi-source cross-validation (L4),
-      before/after cohort study.
+      - [x] Quality Index dashboard with a before/after cohort and a control arm
+- [ ] **Tier 3 — pick one or two.** The blueprint's own instruction, so this is not meant to be
+      finished:
+      - [x] **Multi-source cross-validation (L4)**, with revision-aware precedence. Two sources
+            that agree are the strongest evidence this system can produce; two that disagree are
+            ordered by the revision marker printed on the page, and left for a human when they
+            cannot be
+      - [ ] Batch orchestration on the deployed storage stack
+      - [ ] Part-number grammar induction, cross-reference/equivalence, MCP server, DPP panel,
+            image consistency, spec drift — not started, and deliberately so
+
+Beyond the tiers, blueprint module M15's **CI regression gate** is in place: `ci.yml` runs lint,
+tests, typecheck and contrast on every push, and `regression.yml` measures the pipeline against
+the golden set and blocks a change that degrades any tracked metric. The blueprint rates that
+above shipping another feature, and it was the largest thing missing.
 
 Storage infrastructure is deployed (see above). Compute is not — the pipeline runs locally.
 
@@ -802,12 +930,30 @@ Storage infrastructure is deployed (see above). Compute is not — the pipeline 
   sizes DN25 and up. Applying a size-scoped override is reasoning the extractor does not do
   reliably. `variants.py` already has size-scoped note logic for variant explosion; the fix is
   probably to share it with extraction rather than to escalate a tier.
-- L4 (cross-source agreement) is still only a member of the `ValidationLayer` enum — no validator
-  implements it, because it needs two independent sources per SKU and the corpus has one.
-- L6 is implemented and deployed but **not yet wired into the pipeline run**. It is callable via
-  `axiom.validate.ReasoningChecker` and verified end to end; hooking it onto generated copy
-  automatically is the next step.
+- L4 findings do not reach the console. `cross_validate.py` reports them and exits non-zero on an
+  unresolved conflict, but it writes no console bundle, so a reviewer cannot see a cross-source
+  disagreement in the review workspace yet. The layer label already exists in the UI; what is
+  missing is the projection.
+- L4's corpus is two sources for one SKU family, not for the whole golden set. The layer is
+  exercised end to end and unit-tested against agreement, revision precedence, supplier trust and
+  the unresolvable case — but the *measured* numbers in this README still come from single-source
+  runs, so nothing here quantifies what L4 catches at scale.
 - L6 is enum-only by construction, so numeric rules stay in L2 (see above).
+- L6 verification costs one `ApplyGuardrail` call per sentence, which is why it is opt-in rather
+  than always on. A contradiction is also not retried: it is nearly always a property of the
+  source data rather than the wording, so regenerating would spend another call to re-derive the
+  same finding.
+- The before/after cohort runs on one treatment SKU and one control SKU, because only two SKUs
+  have persisted pipeline output. The harness handles any number; the corpus is the constraint.
+  Its control arm detects scorer drift rather than isolating a placebo effect — a narrower claim
+  than "control group" usually implies, and the one the design supports.
+- `richness` is a declared Quality Index dimension carrying 10% of the composite weight and is
+  not implemented, so every composite figure is understated by up to ten points. It reads zero on
+  both cohort arms, so it cannot bias the lift.
+- The regression gate's metrics job needs AWS credentials, so it runs on demand, weekly, and on
+  pull requests that touch the prompts, the extractor, the schema or the golden set — not on every
+  push. It fails loudly rather than skipping when credentials are absent, because a gate you
+  cannot distinguish from a gate that did not run is not a gate.
 - HTS classification is deliberately never auto-published: published benchmarks put accuracy
   near 40% at the 10-digit level, which is not publishable at any confidence this system can
   honestly assign.

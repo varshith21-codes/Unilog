@@ -1,20 +1,26 @@
 {
   "schema_version": "PLB.VLV.BALL.2PC@v1",
-  "treatment_skus": 2,
-  "control_skus": 0,
-  "trustworthy": false,
-  "control_drift": null,
+  "treatment_skus": 1,
+  "control_skus": 1,
+  "trustworthy": true,
+  "control_drift": {
+    "completeness": 0.0,
+    "verifiability": 0.0,
+    "consistency": 0.0,
+    "richness": 0.0,
+    "composite": 0.0
+  },
   "drifted_dimensions": [],
   "lift": {
-    "completeness": 0.7841,
+    "completeness": 0.75,
     "verifiability": 1.0,
-    "consistency": -0.0714,
+    "consistency": 0.0,
     "richness": 0.0,
-    "composite": 0.5565
+    "composite": 0.5625
   },
   "field_presence": {
-    "before": 0.3485,
-    "after": 0.8295
+    "before": 0.3333,
+    "after": 0.75
   },
   "treatment_before": {
     "completeness": 0.0,
@@ -24,11 +30,11 @@
     "composite": 0.25
   },
   "treatment_after": {
-    "completeness": 0.7841,
+    "completeness": 0.75,
     "verifiability": 1.0,
-    "consistency": 0.9286,
+    "consistency": 1.0,
     "richness": 0.0,
-    "composite": 0.8065
+    "composite": 0.8125
   },
   "notes": [
     "16 item-master row(s) had no enriched counterpart and were excluded rather than counted as zero-improvement treatments \u2014 a run that never happened is not a null result. Excluded: 77C-103, 77C-104, 77C-105, 77C-105-DUP, 77C-105R, 77C-106 and 10 more"
@@ -78,46 +84,44 @@
     },
     {
       "sku": "T-113-100",
-      "arm": "treatment",
+      "arm": "control",
       "before": {
         "completeness": 0.0,
         "verifiability": 0.0,
         "consistency": 1.0,
         "richness": 0.0,
         "composite": 0.25,
-        "field_presence": 0.3636,
+        "field_presence": 0.3333,
         "values_present": 6,
         "values_publishable": 0,
         "values_with_evidence": 0,
         "validation_failures": 0,
-        "required_total": 11,
+        "required_total": 12,
         "checks_run": 11,
         "failed_rules": []
       },
       "after": {
-        "completeness": 0.8182,
-        "verifiability": 1.0,
-        "consistency": 0.8571,
+        "completeness": 0.0,
+        "verifiability": 0.0,
+        "consistency": 1.0,
         "richness": 0.0,
-        "composite": 0.8006,
-        "field_presence": 0.9091,
-        "values_present": 14,
-        "values_publishable": 12,
-        "values_with_evidence": 14,
-        "validation_failures": 2,
-        "required_total": 11,
-        "checks_run": 9,
-        "failed_rules": [
-          "R_POTABLE_REQUIRES_NSF61"
-        ]
+        "composite": 0.25,
+        "field_presence": 0.3333,
+        "values_present": 6,
+        "values_publishable": 0,
+        "values_with_evidence": 0,
+        "validation_failures": 0,
+        "required_total": 12,
+        "checks_run": 11,
+        "failed_rules": []
       },
       "delta": {
-        "completeness": 0.8182,
-        "verifiability": 1.0,
-        "consistency": -0.1429,
+        "completeness": 0.0,
+        "verifiability": 0.0,
+        "consistency": 0.0,
         "richness": 0.0,
-        "composite": 0.5506,
-        "field_presence": 0.5455
+        "composite": 0.0,
+        "field_presence": 0.0
       }
     }
   ]
