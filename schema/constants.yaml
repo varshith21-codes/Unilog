@@ -7,6 +7,31 @@
 sets:
   # Copper alloys with intentional lead content. A lead-free claim on any of these is
   # contradictory unless a lead-free certification exists for that specific part number.
+  # Phrases that withdraw a part rather than describe it.
+  #
+  # A datasheet that names a part number only to retire it is the hardest targeting case there
+  # is, because the part number *is* present: the presence check passes, a model call is made,
+  # and every shared specification in the surrounding prose reads as though it applies. The
+  # adversarial harness produced a complete, confident, perfectly-cited record for a superseded
+  # valve this way — twelve values, twelve verifiable quotes, one part nobody can buy.
+  #
+  # This lives in YAML because it is a wording question, not a logic question. Manufacturers
+  # phrase withdrawal differently and a merchandiser who meets a new phrasing should be able to
+  # add it without touching Python.
+  WITHDRAWAL_MARKERS:
+    - discontinued
+    - superseded
+    - supersedes
+    - obsolete
+    - withdrawn
+    - "no longer available"
+    - "no longer offered"
+    - "no longer supplied"
+    - "do not order"
+    - "not for new design"
+    - "replaced by"
+    - delisted
+
   LEADED_ALLOYS:
     - Brass C36000
     - Bronze C84400

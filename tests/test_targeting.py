@@ -261,3 +261,123 @@ def test_summary_exposes_the_targeting_outcome(registry, cascade, gate_document)
     assert summary["targeting_failed"] is True
     assert summary["sku_found_in_document"] is False
     assert summary["values"] == 0
+
+
+# ================================================================= withdrawn part numbers
+#
+# The hardest targeting case, and the only one the presence check above cannot answer. The part
+# number *is* in the document — it appears once, in a note retiring it — so the gate opens and a
+# model call is made. Every shared specification in the surrounding prose reads as though it
+# applies to it.
+#
+# Measured, not hypothetical: scripts/run_adversarial.py returned 12 values for a superseded
+# valve, all 12 carrying verifiable quotes, before this was handled.
+
+WITHDRAWAL_DATASHEET = """\
+APOLLO 77C SERIES
+Bronze Ball Valve                                       Rev D  2025-11
+
+DESCRIPTION
+  The 77C is a two-piece bronze ball valve. The body is cast from lead-free
+  bronze alloy C89833 and carries 400 PSI WOG. Seats are reinforced PTFE.
+
+ORDERING INFORMATION
+  Catalog No    DN      Size      Port      Cv      Ctn Qty
+  77C-103       DN15    1/2"      Full      15.0    24
+  77C-104       DN20    3/4"      Full      28.0    20
+
+  NOTE 2: Catalog No 77C-102 (DN10) is discontinued and superseded by
+  77C-103. Do not order.
+"""
+
+
+@pytest.fixture
+def withdrawal_document():
+    return parse_text(WITHDRAWAL_DATASHEET, document("ap77c"))
+
+
+def test_a_withdrawn_part_is_found_but_not_offered(withdrawal_document):
+    presence = find_sku(withdrawal_document, "77C-102")
+    assert presence.found is True, "the part number really is in the document"
+    assert presence.is_absent is False, "so the absence gate cannot catch it"
+    assert presence.is_not_offered is True
+    assert presence.is_extractable is False
+    assert "discontinued" in (presence.withdrawal_quote or "")
+
+
+def test_absent_and_withdrawn_are_not_the_same_state(withdrawal_document):
+    """The remedies differ and are not interchangeable.
+
+    An absent part number means someone attached the wrong file: go and find the right one. A
+    withdrawn one means the file is correct and the part is dead: delist it. Collapsing the two
+    would send a merchandiser hunting for a datasheet that does not exist.
+    """
+    withdrawn = find_sku(withdrawal_document, "77C-102")
+    absent = find_sku(withdrawal_document, "77C-999")
+
+    assert withdrawn.is_not_offered and not withdrawn.is_absent
+    assert absent.is_absent and not absent.is_not_offered
+    assert not withdrawn.is_extractable and not absent.is_extractable
+
+
+def test_an_ordering_row_outranks_a_withdrawal_note(withdrawal_document):
+    """77C-103 is named *inside* the note, as the replacement.
+
+    A substring check on the note would retire the very part being introduced. A row in the
+    ordering table is the strongest evidence a document offers something, so it wins.
+    """
+    presence = find_sku(withdrawal_document, "77C-103")
+    assert presence.listed_in_table is True
+    assert presence.withdrawn is False
+    assert presence.is_extractable is True
+
+
+def test_an_ordinary_part_is_unaffected(withdrawal_document):
+    presence = find_sku(withdrawal_document, "77C-104")
+    assert presence.is_extractable is True
+    assert presence.withdrawn is False
+
+
+def test_extraction_is_refused_for_a_withdrawn_part(registry, cascade, withdrawal_document):
+    """No model call, every attribute a gap, and the remedy says delist rather than research."""
+    client = StubModelClient(["[]"])
+    extractor = Extractor(registry, client, cascade, start_tier="volume")
+
+    result = extractor.extract(
+        withdrawal_document, class_code=BALL_CLASS, target_sku="77C-102"
+    )
+
+    assert result.values == []
+    assert result.targeting_failed is True
+    assert result.gaps, "every requested attribute must be accounted for"
+    assert len(client.calls) == 0, "a withdrawn part must not cost a model call"
+
+    for gap in result.gaps:
+        assert gap.reason is GapReason.NO_SOURCE_AVAILABLE
+        assert gap.recommended_action is RecommendedAction.DELIST_PRODUCT
+        assert "withdraw" in gap.detail
+    assert any("discontinued" in gap.detail for gap in result.gaps)
+
+
+def test_extraction_proceeds_for_the_replacement_part(registry, cascade, withdrawal_document):
+    """The gate must not take the whole ordering table down with the retired row."""
+    client = StubModelClient(["[]"])
+    extractor = Extractor(registry, client, cascade, start_tier="volume")
+
+    result = extractor.extract(
+        withdrawal_document, class_code=BALL_CLASS, target_sku="77C-103"
+    )
+
+    assert result.targeting_failed is False
+    # At least one — the stub returns nothing, which makes the cascade escalate a tier. The
+    # point is only that the gate let extraction happen at all.
+    assert len(client.calls) >= 1
+
+
+def test_withdrawal_markers_are_declarative():
+    """Withdrawal is a wording question, so the phrasings live where a merchandiser can add one."""
+    from axiom.validate.constants import RuleConstants
+
+    markers = RuleConstants.load().sets["WITHDRAWAL_MARKERS"]
+    assert "discontinued" in markers
+    assert "do not order" in markers

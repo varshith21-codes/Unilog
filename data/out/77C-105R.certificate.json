@@ -1,0 +1,589 @@
+{
+  "certificate_id": "ec_be649707ced0",
+  "sku": "77C-105R",
+  "tenant_id": "demo",
+  "generated_at": "2026-08-06T05:39:10.807747+00:00",
+  "schema_version": "PLB.VLV.BALL.2PC@v1",
+  "pipeline_version": "axiom-0.1.0",
+  "classifications": [
+    {
+      "scheme": "internal",
+      "code": "PLB.VLV.BALL.2PC",
+      "path": [
+        "Plumbing",
+        "Valves",
+        "Ball Valves",
+        "Two-Piece"
+      ],
+      "confidence": 0.7348,
+      "method": "retrieval_decisive",
+      "status": "auto",
+      "alternatives": [
+        {
+          "code": "PLB.VLV.GATE.BRZ",
+          "score": 0.240756
+        }
+      ]
+    },
+    {
+      "scheme": "ETIM",
+      "code": "EC002714",
+      "path": [],
+      "confidence": 0.698,
+      "method": "schema_mapping",
+      "status": "auto",
+      "alternatives": []
+    },
+    {
+      "scheme": "UNSPSC",
+      "code": "40141607",
+      "path": [],
+      "confidence": 0.698,
+      "method": "schema_mapping",
+      "status": "auto",
+      "alternatives": []
+    }
+  ],
+  "attributes": [
+    {
+      "code": "product_series",
+      "value_canonical": "77C",
+      "value_display": "77C",
+      "value_raw": "77C",
+      "confidence": 0.9,
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "status": "auto_accepted",
+      "evidence": [
+        {
+          "document": "ap77c@6edfe1ea",
+          "sha256": "6edfe1ea\u2026",
+          "page": 1,
+          "bbox": [
+            54.0,
+            43.940000000000055,
+            204.0,
+            53.940000000000055
+          ],
+          "quote": "APOLLO VALVE - 77C SERIES",
+          "verified": true
+        }
+      ],
+      "validations": []
+    },
+    {
+      "code": "number_of_pieces",
+      "value_canonical": "Two-Piece",
+      "value_display": "Two-Piece",
+      "value_raw": "Two-Piece",
+      "confidence": 0.9,
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "status": "auto_accepted",
+      "evidence": [
+        {
+          "document": "ap77c@6edfe1ea",
+          "sha256": "6edfe1ea\u2026",
+          "page": 1,
+          "bbox": [
+            54.0,
+            93.74599999999998,
+            269.9999999999998,
+            102.74599999999998
+          ],
+          "quote": "The 77C is a two-piece bronze ball valve",
+          "verified": true
+        }
+      ],
+      "validations": []
+    },
+    {
+      "code": "nominal_size",
+      "value_canonical": {
+        "magnitude": 25.4,
+        "unit": "mm"
+      },
+      "value_display": "1\"",
+      "value_raw": "DN25",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "model_tier": "volume",
+      "status": "auto_accepted",
+      "evidence": [
+        {
+          "document": "ap77c@6edfe1ea",
+          "sha256": "6edfe1ea\u2026",
+          "page": 1,
+          "bbox": [
+            145.8,
+            312.246,
+            167.40000000000006,
+            321.246
+          ],
+          "quote": "DN25",
+          "verified": true
+        }
+      ],
+      "validations": []
+    },
+    {
+      "code": "pressure_rating_wog",
+      "value_canonical": {
+        "magnitude": 400.0,
+        "unit": "psi"
+      },
+      "value_display": "400 psi",
+      "value_raw": "400 PSI",
+      "confidence": 0.9,
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "status": "auto_accepted",
+      "evidence": [
+        {
+          "document": "ap77c@6edfe1ea",
+          "sha256": "6edfe1ea\u2026",
+          "page": 1,
+          "bbox": [
+            54.0,
+            105.24599999999998,
+            448.1999999999996,
+            137.24599999999998
+          ],
+          "quote": "maximum working pressure of 400 PSI WOG",
+          "verified": true
+        }
+      ],
+      "validations": []
+    },
+    {
+      "code": "body_material",
+      "value_canonical": "Bronze C89833",
+      "value_display": "Bronze C89833",
+      "value_raw": "Bronze C89833",
+      "confidence": 0.9,
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "status": "auto_accepted",
+      "evidence": [
+        {
+          "document": "ap77c@6edfe1ea",
+          "sha256": "6edfe1ea\u2026",
+          "page": 1,
+          "bbox": [
+            54.0,
+            82.24599999999998,
+            442.7999999999996,
+            125.74599999999998
+          ],
+          "quote": "body is cast from lead-free bronze alloy C89833",
+          "verified": true
+        }
+      ],
+      "validations": []
+    },
+    {
+      "code": "port_type",
+      "value_canonical": "Reduced Port",
+      "value_display": "Reduced Port",
+      "value_raw": "Reduced Port",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "model_tier": "volume",
+      "status": "auto_accepted",
+      "evidence": [
+        {
+          "document": "ap77c@6edfe1ea",
+          "sha256": "6edfe1ea\u2026",
+          "page": 1,
+          "bbox": [
+            264.60000000000014,
+            323.746,
+            302.40000000000015,
+            332.746
+          ],
+          "quote": "Reduced",
+          "verified": true
+        }
+      ],
+      "validations": []
+    },
+    {
+      "code": "seat_material",
+      "value_canonical": "RPTFE",
+      "value_display": "RPTFE",
+      "value_raw": "reinforced ptfe",
+      "confidence": 0.9,
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "status": "auto_accepted",
+      "evidence": [
+        {
+          "document": "ap77c@6edfe1ea",
+          "sha256": "6edfe1ea\u2026",
+          "page": 1,
+          "bbox": [
+            188.99999999999986,
+            139.74599999999998,
+            323.9999999999997,
+            148.74599999999998
+          ],
+          "quote": "Seats are reinforced PTFE",
+          "verified": true
+        }
+      ],
+      "validations": []
+    },
+    {
+      "code": "stem_material",
+      "value_canonical": "Silicon Bronze",
+      "value_display": "Silicon Bronze",
+      "value_raw": "Silicon Bronze",
+      "confidence": 0.9,
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "status": "auto_accepted",
+      "evidence": [
+        {
+          "document": "ap77c@6edfe1ea",
+          "sha256": "6edfe1ea\u2026",
+          "page": 1,
+          "bbox": [
+            54.0,
+            139.74599999999998,
+            448.1999999999996,
+            160.24599999999998
+          ],
+          "quote": "stem is silicon bronze",
+          "verified": true
+        }
+      ],
+      "validations": []
+    },
+    {
+      "code": "handle_type",
+      "value_canonical": "Tee",
+      "value_display": "Tee",
+      "value_raw": "Tee",
+      "confidence": 0.9,
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "status": "auto_accepted",
+      "evidence": [
+        {
+          "document": "ap77c@6edfe1ea",
+          "sha256": "6edfe1ea\u2026",
+          "page": 1,
+          "bbox": [
+            54.0,
+            335.246,
+            448.1999999999996,
+            390.246
+          ],
+          "quote": "NOTE 1: Sizes DN25 and larger are furnished with a tee handle in place of the lever handle described above.",
+          "verified": true
+        }
+      ],
+      "validations": []
+    },
+    {
+      "code": "cv_flow_coefficient",
+      "value_canonical": 21.0,
+      "value_display": "21",
+      "value_raw": "21.0",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "model_tier": "volume",
+      "status": "auto_accepted",
+      "evidence": [
+        {
+          "document": "ap77c@6edfe1ea",
+          "sha256": "6edfe1ea\u2026",
+          "page": 1,
+          "bbox": [
+            340.20000000000005,
+            323.746,
+            361.79999999999995,
+            332.746
+          ],
+          "quote": "21.0",
+          "verified": true
+        }
+      ],
+      "validations": []
+    },
+    {
+      "code": "temperature_range",
+      "value_canonical": {
+        "minimum": -28.888889,
+        "maximum": 185.0,
+        "unit": "degC"
+      },
+      "value_display": "-20 to 365 degF",
+      "value_raw": "-20 degF to 365 degF",
+      "confidence": 0.9,
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "status": "auto_accepted",
+      "evidence": [
+        {
+          "document": "ap77c@6edfe1ea",
+          "sha256": "6edfe1ea\u2026",
+          "page": 1,
+          "bbox": [
+            54.0,
+            162.74599999999998,
+            453.59999999999957,
+            206.24599999999998
+          ],
+          "quote": "Operating temperature is rated from -20 degF to 365 degF continuous.",
+          "verified": true
+        }
+      ],
+      "validations": []
+    },
+    {
+      "code": "steam_pressure_rating",
+      "value_canonical": {
+        "magnitude": 125.0,
+        "unit": "psi"
+      },
+      "value_display": "125 psi",
+      "value_raw": "125 PSI",
+      "confidence": 0.9,
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "status": "auto_accepted",
+      "evidence": [
+        {
+          "document": "ap77c@6edfe1ea",
+          "sha256": "6edfe1ea\u2026",
+          "page": 1,
+          "bbox": [
+            54.0,
+            116.74599999999998,
+            448.1999999999996,
+            148.74599999999998
+          ],
+          "quote": "falling to 125 PSI WSP in saturated steam service",
+          "verified": true
+        }
+      ],
+      "validations": []
+    },
+    {
+      "code": "lead_free_compliant",
+      "value_canonical": true,
+      "value_display": "Yes",
+      "value_raw": "true",
+      "confidence": 0.9,
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "status": "auto_accepted",
+      "evidence": [
+        {
+          "document": "ap77c@6edfe1ea",
+          "sha256": "6edfe1ea\u2026",
+          "page": 1,
+          "bbox": [
+            54.0,
+            116.74599999999998,
+            210.59999999999985,
+            125.74599999999998
+          ],
+          "quote": "lead-free bronze alloy C89833",
+          "verified": true
+        }
+      ],
+      "validations": []
+    },
+    {
+      "code": "potable_water_approved",
+      "value_canonical": true,
+      "value_display": "Yes",
+      "value_raw": "true",
+      "confidence": 0.9,
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "status": "auto_accepted",
+      "evidence": [
+        {
+          "document": "ap77c@6edfe1ea",
+          "sha256": "6edfe1ea\u2026",
+          "page": 1,
+          "bbox": [
+            54.0,
+            151.24599999999998,
+            453.59999999999957,
+            194.74599999999998
+          ],
+          "quote": "Valves are certified to NSF/ANSI 61 and NSF/ANSI 372 for potable water and are marked accordingly",
+          "verified": true
+        }
+      ],
+      "validations": []
+    },
+    {
+      "code": "approvals",
+      "value_canonical": [
+        "NSF-61",
+        "NSF-372"
+      ],
+      "value_display": "NSF-61, NSF-372",
+      "value_raw": "NSF-61, NSF-372",
+      "confidence": 0.9,
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "status": "auto_accepted",
+      "evidence": [
+        {
+          "document": "ap77c@6edfe1ea",
+          "sha256": "6edfe1ea\u2026",
+          "page": 1,
+          "bbox": [
+            113.39999999999995,
+            174.24599999999998,
+            334.7999999999997,
+            183.24599999999998
+          ],
+          "quote": "certified to NSF/ANSI 61 and NSF/ANSI 372",
+          "verified": true
+        }
+      ],
+      "validations": []
+    },
+    {
+      "code": "country_of_origin",
+      "value_canonical": "Taiwan",
+      "value_display": "Taiwan",
+      "value_raw": "Taiwan",
+      "confidence": 0.9,
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "status": "auto_accepted",
+      "evidence": [
+        {
+          "document": "ap77c@6edfe1ea",
+          "sha256": "6edfe1ea\u2026",
+          "page": 1,
+          "bbox": [
+            54.0,
+            450.246,
+            189.00000000000006,
+            459.246
+          ],
+          "quote": "Country of origin: Taiwan",
+          "verified": true
+        }
+      ],
+      "validations": []
+    },
+    {
+      "code": "case_quantity",
+      "value_canonical": 12,
+      "value_display": "12",
+      "value_raw": "12",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "model_tier": "volume",
+      "status": "auto_accepted",
+      "evidence": [
+        {
+          "document": "ap77c@6edfe1ea",
+          "sha256": "6edfe1ea\u2026",
+          "page": 1,
+          "bbox": [
+            383.39999999999986,
+            312.246,
+            394.1999999999998,
+            321.246
+          ],
+          "quote": "12",
+          "verified": true
+        }
+      ],
+      "validations": []
+    }
+  ],
+  "gaps": [
+    {
+      "code": "end_connection",
+      "reason": "extracted_but_unverifiable",
+      "sources_searched": [
+        "ap77c@6edfe1ea"
+      ],
+      "required": true,
+      "detail": "citation does not support the value: quote 'DN25' does not state 'NPT Threaded' and names none of this attribute's allowed values",
+      "recommended_action": "human_research"
+    },
+    {
+      "code": "operating_torque",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "ap77c@6edfe1ea"
+      ],
+      "required": false,
+      "detail": "Source states 'Torque to open... falls between 14 and 19 ft-lb depending on size and seat wear; no single figure is published.'",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "gtin",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "ap77c@6edfe1ea"
+      ],
+      "required": false,
+      "detail": "No GTIN, UPC, EAN, or barcode data present in source.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "each_weight",
+      "reason": "referred_elsewhere",
+      "sources_searched": [
+        "ap77c@6edfe1ea"
+      ],
+      "required": false,
+      "detail": "Source states 'Weights and packaging data available on request'.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "case_weight",
+      "reason": "referred_elsewhere",
+      "sources_searched": [
+        "ap77c@6edfe1ea"
+      ],
+      "required": false,
+      "detail": "Source states 'Weights and packaging data available on request'.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "selling_uom",
+      "reason": "extracted_but_unverifiable",
+      "sources_searched": [
+        "ap77c@6edfe1ea"
+      ],
+      "required": true,
+      "detail": "citation does not support the value: quote 'Catalog No | DN   | Size   | Port    | Cv   | Ctn Qty' does not state 'Each' (it names ['Case'] instead)",
+      "recommended_action": "human_research"
+    }
+  ],
+  "summary": {
+    "attributes_required": 12,
+    "attributes_populated": 17,
+    "attributes_with_evidence": 17,
+    "attributes_inferred": 0,
+    "auto_accepted": 17,
+    "queued_for_review": 0,
+    "gaps_total": 6,
+    "gaps_required": 2,
+    "quality_index": {
+      "completeness": 0.8333,
+      "verifiability": 1.0,
+      "consistency": 1.0,
+      "richness": 0.0,
+      "composite": 0.8417
+    },
+    "cost_usd": 0.0009,
+    "wall_clock_seconds": 9.06
+  },
+  "signature": "sha256:c3866cde161cfc800e196874ed251bfde13b13e0a0243064d540859a08f06dbf"
+}

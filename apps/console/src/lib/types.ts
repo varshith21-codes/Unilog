@@ -242,7 +242,8 @@ export type RecommendedAction =
   | "human_research"
   | "human_review"
   | "retry_with_better_source"
-  | "accept_as_not_applicable";
+  | "accept_as_not_applicable"
+  | "delist_product";
 
 export interface Gap {
   attribute_code: string;

@@ -1,0 +1,123 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "sku": "77C-105R",
+  "name": "Apollo Valves 77C-105R 1\" Bronze Two-Piece Ball Valve, 400 psi, Reduced Port",
+  "mpn": "77C-105R",
+  "brand": {
+    "@type": "Brand",
+    "name": "Apollo Valves"
+  },
+  "category": "Plumbing > Valves > Ball Valves > Two-Piece",
+  "additionalProperty": [
+    {
+      "@type": "PropertyValue",
+      "propertyID": "approvals",
+      "name": "Approvals and Listings",
+      "value": [
+        "NSF-61",
+        "NSF-372"
+      ]
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "body_material",
+      "name": "Body Material",
+      "value": "Bronze C89833"
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "case_quantity",
+      "name": "Carton Quantity",
+      "value": 12
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "country_of_origin",
+      "name": "Country of Origin",
+      "value": "Taiwan"
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "cv_flow_coefficient",
+      "name": "Flow Coefficient (Cv)",
+      "value": 21.0
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "handle_type",
+      "name": "Handle Type",
+      "value": "Tee"
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "lead_free_compliant",
+      "name": "Lead-Free Compliant",
+      "value": true
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "nominal_size",
+      "name": "Nominal Pipe Size",
+      "value": 25.4,
+      "unitText": "mm"
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "number_of_pieces",
+      "name": "Body Construction",
+      "value": "Two-Piece"
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "port_type",
+      "name": "Port Type",
+      "value": "Reduced Port"
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "potable_water_approved",
+      "name": "Potable Water Approved",
+      "value": true
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "pressure_rating_wog",
+      "name": "Pressure Rating (WOG)",
+      "value": 400.0,
+      "unitText": "psi"
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "product_series",
+      "name": "Product Series",
+      "value": "77C"
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "seat_material",
+      "name": "Seat Material",
+      "value": "RPTFE"
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "steam_pressure_rating",
+      "name": "Steam Pressure Rating (WSP)",
+      "value": 125.0,
+      "unitText": "psi"
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "stem_material",
+      "name": "Stem Material",
+      "value": "Silicon Bronze"
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "temperature_range",
+      "name": "Temperature Range",
+      "value": "-28.8889..185",
+      "unitText": "degC"
+    }
+  ]
+}

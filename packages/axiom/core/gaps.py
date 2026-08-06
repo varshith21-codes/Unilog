@@ -56,6 +56,11 @@ class RecommendedAction(str, Enum):
     HUMAN_REVIEW = "human_review"
     RETRY_WITH_BETTER_SOURCE = "retry_with_better_source"
     ACCEPT_AS_NOT_APPLICABLE = "accept_as_not_applicable"
+    DELIST_PRODUCT = "delist_product"
+    """The source says this part is withdrawn. There is no better document to find and no
+    question to put to the supplier — the answer already arrived, and it is that the part is
+    dead. Sending someone to look for a datasheet would waste the one piece of information the
+    document actually gave us."""
 
 
 class Gap(BaseModel):

@@ -75,8 +75,12 @@ class ExtractionResult:
 
     @property
     def targeting_failed(self) -> bool:
-        """True when extraction was refused because the document does not mention the SKU."""
-        return self.sku_presence is not None and self.sku_presence.is_absent
+        """True when extraction was refused because the document is not about this product.
+
+        Covers both shapes of that: the part number is absent, or it is present only in a note
+        withdrawing it. Either way no model call was made and every attribute is a gap.
+        """
+        return self.sku_presence is not None and not self.sku_presence.is_extractable
 
     @property
     def verified_count(self) -> int:
@@ -164,8 +168,33 @@ class Extractor:
         # and it fails closed.
         presence = find_sku(parsed, target_sku, variants=sku_variants)
         if self._require_sku_in_document and presence.is_absent:
-            return self._sku_absent_result(parsed, class_code, target_sku, presence, only_codes,
-                                           include_recommended, include_optional, max_pages)
+            return self._no_extraction_result(
+                parsed, class_code, target_sku, presence, only_codes,
+                include_recommended, include_optional, max_pages,
+                detail=(
+                    f"part number {target_sku!r} does not appear anywhere in "
+                    f"{parsed.document.document_id!r}, so this document does not describe "
+                    f"it; no value was requested from the model"
+                ),
+                action=RecommendedAction.RETRY_WITH_BETTER_SOURCE,
+            )
+
+        # A part number the document mentions only in order to retire it. The presence check
+        # above passes — the number really is there — so this is the one targeting failure that
+        # gate cannot see. Left unhandled it is the worst case in the adversarial harness: a
+        # complete, confident, fully-cited record for a part that cannot be bought, because
+        # every shared specification in the surrounding prose reads as though it applies.
+        if self._require_sku_in_document and presence.is_not_offered:
+            return self._no_extraction_result(
+                parsed, class_code, target_sku, presence, only_codes,
+                include_recommended, include_optional, max_pages,
+                detail=(
+                    f"{parsed.document.document_id!r} mentions {target_sku!r} only to withdraw "
+                    f"it: {presence.withdrawal_quote!r}. The surrounding specifications describe "
+                    f"the range, not this part; no value was requested from the model"
+                ),
+                action=RecommendedAction.DELIST_PRODUCT,
+            )
 
         prompt = build_extraction_prompt(
             self._registry,
@@ -222,7 +251,7 @@ class Extractor:
 
     # ------------------------------------------------------------------ internals
 
-    def _sku_absent_result(
+    def _no_extraction_result(
         self,
         parsed: ParsedDocument,
         class_code: str,
@@ -232,14 +261,19 @@ class Extractor:
         include_recommended: bool,
         include_optional: bool,
         max_pages: int | None,
+        *,
+        detail: str,
+        action: RecommendedAction,
     ) -> ExtractionResult:
         """Every requested attribute becomes a gap, with no model call made.
 
         The gap reason is deliberately ``NO_SOURCE_AVAILABLE`` rather than
         ``NOT_PRESENT_IN_ANY_SOURCE``: the distinction is between "we read a document about this
-        product and it does not state this value" and "we never had a document about this
+        product and it does not state this value" and "we never had a usable document about this
         product at all". Those need different remedies — the first is a question for the
-        supplier, the second means someone attached the wrong file.
+        supplier, the second means someone attached the wrong file or the part is withdrawn.
+
+        ``action`` carries which of those it was, because the remedies are not interchangeable.
         """
         prompt = build_extraction_prompt(
             self._registry,
@@ -263,12 +297,8 @@ class Extractor:
                     attribute_code=code,
                     reason=GapReason.NO_SOURCE_AVAILABLE,
                     sources_searched=[parsed.document.document_id],
-                    detail=(
-                        f"part number {target_sku!r} does not appear anywhere in "
-                        f"{parsed.document.document_id!r}, so this document does not describe "
-                        f"it; no value was requested from the model"
-                    ),
-                    recommended_action=RecommendedAction.RETRY_WITH_BETTER_SOURCE,
+                    detail=detail,
+                    recommended_action=action,
                     is_required=self._is_required(class_code, code),
                 )
             )

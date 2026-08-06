@@ -70,6 +70,22 @@ CASES = [
         "the BA-100 series is described but there is no -999 size; shared family specs are the "
         "tempting wrong answer",
     ),
+    # The hardest case in this file, and the only one the targeting gate cannot answer.
+    #
+    # 77C-102 *is* in the document. It appears exactly once, in a note declaring it discontinued
+    # and superseded. So the part number is found, the gate opens, and a model call is made — the
+    # protection that handles the three cases above does not apply here. Every shared
+    # specification in the prose (alloy, pressure, seats, temperature, approvals) is sitting
+    # right there and reads as though it applies. Answering from it produces a full, confident,
+    # perfectly-cited record for a part that cannot be bought.
+    (
+        "discontinued part that the document does mention",
+        SAMPLES / "ap77c.pdf",
+        "77C-102",
+        "PLB.VLV.BALL.2PC",
+        "77C-102 appears only in NOTE 2, which withdraws it. The targeting gate finds the part "
+        "number and opens, so abstention has to come from reading what the note says",
+    ),
 ]
 
 
@@ -118,6 +134,7 @@ def main() -> int:
             for value in extraction.values
         ]
 
+        presence = extraction.sku_presence
         case = {
             "case": label,
             "document": document.name,
@@ -126,6 +143,16 @@ def main() -> int:
             "rationale": rationale,
             "requested": len(extraction.requested_codes),
             "abstained": len(extraction.gaps),
+            # Which gate refused, so a clean run says *why* it was clean rather than asserting a
+            # single mechanism for cases that are stopped by different ones.
+            "refusal": (
+                "sku_absent"
+                if presence is not None and presence.is_absent
+                else "sku_withdrawn"
+                if presence is not None and presence.is_not_offered
+                else None
+            ),
+            "withdrawal_quote": presence.withdrawal_quote if presence else None,
             "fabricated": len(fabricated),
             "fabricated_with_verified_quote": sum(
                 1 for f in fabricated if f["quote_verified"]
@@ -161,7 +188,13 @@ def _report_case(case: dict) -> None:
     print(f"  abstained      {case['abstained']}")
 
     if case["fabricated"] == 0:
-        print("  fabricated     0  <- correct: the document describes a different product")
+        if case["refusal"] == "sku_withdrawn":
+            print("  fabricated     0  <- correct: the source withdraws this part")
+            print(f"    withdrawal note: {(case['withdrawal_quote'] or '')[:100]!r}")
+        elif case["refusal"] == "sku_absent":
+            print("  fabricated     0  <- correct: the document describes a different product")
+        else:
+            print("  fabricated     0  <- correct: nothing was returned")
     else:
         print(f"  fabricated     {case['fabricated']}  <- WRONG PRODUCT ATTRIBUTION")
         print(
@@ -192,18 +225,31 @@ def _report_totals(results: list[dict]) -> None:
     print(f"  fabricated with a verifiable quote      {verified_fabrications}")
 
     if fabricated == 0:
+        withdrawn = sum(1 for case in results if case["refusal"] == "sku_withdrawn")
         print(
-            "\n  The extractor abstained on every attribute of a product its document does not"
-            "\n  describe."
+            "\n  The extractor abstained on every attribute of every case, and made no model"
+            "\n  call in any of them."
             "\n"
-            "\n  The mechanism is the deterministic targeting gate in Extractor.extract, not the"
-            "\n  prompt: the part number is looked for in the parsed document first, and when it"
-            "\n  is absent no model call is made at all. That matters because quote verification"
-            "\n  could never have caught this failure — a value copied from the wrong product's"
-            "\n  datasheet cites that datasheet perfectly well. Before the gate existed this"
-            "\n  same harness reported 39 fabrications out of 64, every one with a verifiable"
-            "\n  quote."
+            "\n  Two different gates produce that, and it is worth keeping them apart."
+            "\n"
+            "\n  Absent part number: the SKU is looked for in the parsed document first, and"
+            "\n  when it is nowhere present the document is not about this product. Quote"
+            "\n  verification could never have caught this — a value copied from the wrong"
+            "\n  product's datasheet cites that datasheet perfectly well. Before this gate"
+            "\n  existed the same harness reported 39 fabrications out of 64, every one with a"
+            "\n  verifiable quote."
         )
+        if withdrawn:
+            print(
+                "\n  Withdrawn part number: the SKU *is* present, so the check above passes and"
+                "\n  a model call would ordinarily be made. It appears only in a note retiring"
+                "\n  it, while every shared specification in the surrounding prose reads as"
+                "\n  though it applies. That case produced 12 values with 12 verifiable quotes"
+                "\n  for a part that cannot be bought, which is the most convincing wrong answer"
+                "\n  this system has produced. Withdrawal phrasing is declared in"
+                "\n  schema/constants.yaml (WITHDRAWAL_MARKERS); an ordering-table row overrides"
+                "\n  it, so the replacement part named inside the note stays extractable."
+            )
     else:
         print(
             f"\n  {fabricated} value(s) were attributed to a product the source does not"

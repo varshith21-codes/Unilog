@@ -232,3 +232,62 @@ def test_an_empty_value_is_never_supported(registry):
 
 def test_an_empty_quote_is_never_support(registry):
     assert verdict(registry, "port_type", "Full Port", "").support is Support.UNSUPPORTED
+
+
+# ------------------------------------------- values in the source's own phrasing
+#
+# The first version of this gate resolved the whole value_raw as an exact alias, which rejected
+# nine correct values across two datasheets because the model had answered in the document's
+# wording rather than the schema's. A trust layer that discards correct values to look strict
+# is not safer, it is just less useful — and the abstentions it produces are indistinguishable
+# from genuine gaps, so the damage is invisible in a hallucination count.
+
+
+@pytest.mark.parametrize(
+    ("code", "value_raw", "quote"),
+    [
+        (
+            "end_connection",
+            "NPT threaded, female both ends",
+            "End Connection ................. NPT threaded, female both ends",
+        ),
+        (
+            "end_connection",
+            "Solder ends, C x C",
+            "End Connection ................. Solder ends, C x C",
+        ),
+        (
+            "approvals",
+            "UL listed, MSS SP-80",
+            "Approvals ...................... UL listed, MSS SP-80",
+        ),
+        (
+            "approvals",
+            "UL listed, CSA certified, NSF/ANSI 61",
+            "Approvals ...................... UL listed, CSA certified, NSF/ANSI 61",
+        ),
+        (
+            "handle_type",
+            "Handwheel",
+            "Handwheel ...................... Malleable Iron",
+        ),
+    ],
+)
+def test_a_value_phrased_the_way_the_source_phrases_it_is_supported(
+    registry, code, value_raw, quote
+):
+    """Every one of these was a real model answer against a real datasheet in the golden set."""
+    assert check_entailment(value_raw, quote, registry.attribute(code)).support is (
+        Support.SUPPORTED
+    )
+
+
+def test_verbosity_does_not_defeat_the_fabrication_check(registry):
+    """The permissive reading of the value must not become a permissive reading of the quote."""
+    v = verdict(
+        registry,
+        "end_connection",
+        "NPT threaded, female both ends",
+        "The 77C is a two-piece bronze ball valve intended for general service.",
+    )
+    assert v.support is Support.UNSUPPORTED

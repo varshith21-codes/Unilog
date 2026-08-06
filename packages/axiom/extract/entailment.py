@@ -160,8 +160,19 @@ def _check_enum(
     if definition.datatype is Datatype.MULTI_ENUM:
         return _check_multi_enum(value_raw, quote, definition, matches)
 
-    claimed = definition.resolve_allowed(value_raw)
-    spoken_as = [m for m in matches if claimed is not None and m.value == claimed]
+    # The value has to be scanned the same way the quote is, not resolved as an exact alias.
+    # Models answer with the source's own phrasing — "NPT threaded, female both ends" — which
+    # names an allowed value without being one. Demanding an exact alias here rejected nine
+    # correct values whose citation stated them verbatim.
+    claimed_values = {m.value for m in _allowed_values_spoken_by(value_raw, definition)}
+    if not claimed_values:
+        return Entailment(
+            Support.UNSUPPORTED,
+            value_raw,
+            f"{value_raw!r} names none of this attribute's allowed values",
+        )
+
+    spoken_as = [m for m in matches if m.value in claimed_values]
 
     if not spoken_as:
         # The quote may well name some other allowed value, but the model did not read it from
@@ -184,7 +195,7 @@ def _check_enum(
     # one's. "FNPT x FNPT solder ends" names two end connections; silently picking the longer
     # surface would resolve a genuine conflict by string length.
     for match in matches:
-        if match.value == claimed:
+        if match.value in claimed_values:
             continue
         if any(match.overlaps(hit) and len(match.surface) > len(hit.surface) for hit in spoken_as):
             return Entailment(
@@ -216,8 +227,10 @@ def _check_multi_enum(
     kept: list[str] = []
     dropped: list[str] = []
     for part in claimed_parts:
-        resolved = definition.resolve_allowed(part)
-        if resolved is not None and resolved in spoken:
+        # Members arrive in source phrasing too: "MSS SP-80" names MSS without being an alias
+        # of it, and an exact-alias check silently pruned a real certification.
+        named = {m.value for m in _allowed_values_spoken_by(part, definition)}
+        if named & spoken:
             kept.append(part)
         else:
             dropped.append(part)

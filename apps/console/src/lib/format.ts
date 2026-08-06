@@ -201,6 +201,7 @@ export const ACTION_LABEL: Record<RecommendedAction, string> = {
   human_review: "Review",
   retry_with_better_source: "Retry with a better source",
   accept_as_not_applicable: "Mark not applicable",
+  delist_product: "Delist — source says withdrawn",
 };
 
 export const DECISION_LABEL: Record<DecisionReason, string> = {

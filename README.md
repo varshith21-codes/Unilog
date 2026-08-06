@@ -49,7 +49,7 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -e ".[dev,api,docintel]"
 
-pytest -q                      # 815 tests, no AWS credentials needed
+pytest -q                      # 863 tests, no AWS credentials needed
 ruff check .
 ```
 
@@ -173,21 +173,21 @@ python scripts/run_backtest.py --detail          # reports only
 python scripts/run_backtest.py --write --detail  # also writes the calibration artifacts
 ```
 
-**9 products, 180 comparisons (55 of them known-absent), 51s, 9 model calls.**
+**15 products, 312 comparisons (85 of them known-absent), 93s, 15 model calls.**
 
 | Outcome | Count |
 |---|---|
-| correct | 124 |
-| **wrong value** (the dangerous failure) | **0** |
-| missed | 1 |
-| correctly abstained | 55 |
+| correct | 222 |
+| **wrong value** (the dangerous failure) | **2** |
+| missed | 3 |
+| correctly abstained | 85 |
 | **hallucinated** | **0** |
 
 | Metric | Value |
 |---|---|
-| precision | 100.0% |
-| recall | 99.2% |
-| F1 | 99.6% |
+| precision | 99.1% |
+| recall | 97.8% |
+| F1 | 98.4% |
 | abstention correctness | 100.0% |
 | citation coverage | 100.0% |
 
@@ -196,20 +196,31 @@ freely benchmark like an honest one, because a confident wrong answer and a corr
 both collapse to "not correct". Separating *missed* from *wrong value* from *hallucinated* is
 what makes the numbers mean anything.
 
+The two remaining wrong values and all three misses are the same attribute, `handle_type`, on
+the datasheet where a footnote *overrides* the prose: the description promises a lever on every
+valve, then a note replaces it with a tee handle for DN25 and up. Applying that requires
+reasoning about a size threshold, and the model gets it right about half the time. It is
+reported here rather than tuned away because `handle_type` at 61.5% is the honest answer to
+"what should be worked on next", and the hardest-attributes table exists to say so.
+
 ### Risk-controlled auto-accept
 
 | Error budget | Threshold | Coverage | Upper bound | Status |
 |---|---|---|---|---|
-| 1% | — | 0.0% | 2.1% | not achievable |
-| 2% | — | 0.0% | 2.1% | not achievable |
-| 5% | 0.685 | 100.0% | 2.1% | ok |
-| 10% | 0.685 | 100.0% | 2.1% | ok |
+| 2% | 0.719 | 74.1% | 1.6% | ok |
+| 5% | 0.685 | 100.0% | 2.7% | ok |
+| 10% | 0.685 | 100.0% | 2.7% | ok |
 
 The threshold is chosen against a **one-sided Wilson upper bound**, not the observed error
-rate. Zero errors in a small sample does not mean zero risk: with 125 samples the true rate
-could still be 2.1%, which is why the 2% budget is correctly reported as unreachable even
-though the observed error rate is 0%. Thresholding on the point estimate would manufacture a
-guarantee out of sample size, which is worse than no guarantee because it invites reliance.
+rate. Zero errors in a small sample does not mean zero risk, which is why a budget can be
+reported as unreachable even when the observed error rate is 0% — on the earlier 9-product
+corpus the 2% budget was correctly refused, because with 125 samples the true rate could still
+have been 2.1%. Thresholding on the point estimate would manufacture a guarantee out of sample
+size, which is worse than no guarantee because it invites reliance.
+
+That budget became reachable by *earning* it rather than by relaxing the bound: 312 comparisons
+instead of 180 tightened the interval, and the entailment gate below removed the errors that
+were widening it.
 
 The console renders the whole curve as an interactive dial (`GET /api/policy?epsilon=` serves
 31 points). Dragging the budget moves the operating point, and the chart shows something
@@ -250,14 +261,119 @@ that escalates often costs several times this.
 documents, differing only in whether a value without a locatable quote is discarded or kept. The
 second arm is what a generic enrichment pipeline publishes.
 
-**The result was null.** Both arms scored 125 correct, 0 wrong, 0 hallucinated, 100% citation
-coverage. On clean, text-extractable datasheets this model does not invent quotes, so the
-evidence contract never fires.
+| Outcome | AXIOM | control | delta |
+|---|---|---|---|
+| correct | 220 | 216 | +4 |
+| wrong value | 2 | 10 | −8 |
+| **hallucinated** | **0** | **8** | **−8** |
+| precision | 99.1% | 92.3% | +6.8 pts |
+| recall | 96.9% | 95.2% | +1.8 pts |
 
-That is worth reporting rather than burying. It reframes the contract honestly: on this corpus it
-is not a filter that catches a misbehaving model, it is a **guarantee that bounds the worst
-case**. Its value is in the tail, and this corpus has no tail. A harder one — scanned PDFs,
-values stated only in prose — would exercise it properly.
+**The trade, stated plainly:** the contract withheld 12 values. 3 of them were correct and 9 were
+wrong or invented. Enforcing evidence cost 3 good values to prevent 9 bad ones.
+
+**This ablation used to come back null**, and that is the more interesting half of the story. On
+the original corpus — two clean, text-extractable datasheets — both arms scored identically,
+because the model never invented a *quote*. The contract never fired, so the honest report was
+that it bounded a worst case this corpus did not contain.
+
+The corpus now has a tail: a third datasheet as a PDF, with DN sizing, a footnote that overrides
+the prose, reduced-port rows sharing a size with their full-port twins, and a part number that
+exists only to be discontinued. Adding it turned the null result into the table above — and the
+first run against it exposed a real hole in the contract, described next.
+
+### A verified quote is not a supporting quote
+
+The first backtest against the harder corpus returned **10 hallucinations with citation coverage
+still reporting 100%**. Both numbers were correct, which is what made it interesting.
+
+The clearest instance: the extractor returned `selling_uom = "Each"` citing the quote `"Ctn Qty"`.
+That quote verified at `match_score 1.0` — those words genuinely are on the page, as the header of
+the carton-quantity column. The citation resolved to a real highlight on a real page. And the
+value was invented. A reviewer clicking through to the evidence would have found a column header
+and no unit of measure anywhere near it.
+
+Quote verification and entailment are different questions, and the contract was only asking the
+first one:
+
+- **verification** — is this text really in the source document?
+- **entailment** — does that text actually state this value?
+
+A fabrication that passes verification is worse than an obvious one, because it arrives wearing
+the uniform of a checked fact. Evidence-or-null only means anything if "evidence" means evidence
+*for this value*.
+
+`packages/axiom/extract/entailment.py` closes it with three mechanical checks and no second model
+call:
+
+**Header cells are not values.** A value citing row 0 of a table is rejected outright — a header
+names what a column *means*, so it can never state a value for a part. This kills the `Ctn Qty`
+case structurally rather than by guessing at wording.
+
+**Enum values must be spoken by the quote.** The quote is scanned for every allowed value and
+alias. This rejects invented values, and it also *corrects under-read ones*: a quote reading
+"Seats are reinforced PTFE" contains `ptfe` (→ PTFE) and `reinforced ptfe` (→ RPTFE). Where two
+matches cover **the same text**, the longer one is a strictly better reading of it, and the
+evidence outranks the model's paraphrase of the evidence.
+
+Where two matches cover **different** text, it deliberately does nothing. `FNPT x FNPT solder
+ends` names two incompatible end connections; that is a contradiction in the document, and
+resolving a real engineering conflict by string length would be worse than leaving it to the
+rules layer.
+
+**Numbers must appear in their own citation.** Extraction is contractually forbidden from
+normalising — it returns `value_raw` verbatim — so a magnitude absent from its own quote was not
+read from the document. This is the only thing that catches reading the *wrong row* of an
+ordering table, where both rows are real text and the citation is genuine either way.
+
+Booleans are exempt on purpose. `lead_free_compliant: true` is a conclusion drawn from "lead-free
+bronze alloy C89833"; the token "true" will never appear in the quote, and demanding it would
+reject every correct answer.
+
+Result: **hallucinations 10 → 0, precision 92.4% → 99.1%, abstention correctness 88.2% → 100%**,
+and the 2% error budget became reachable for the first time.
+
+The first version of the gate was **too strict, and the backtest caught that too.** It resolved
+the whole `value_raw` as an exact alias, so `"NPT threaded, female both ends"` — the datasheet's
+own phrasing — matched nothing and was discarded. That silently traded 10 hallucinations for 13
+false abstentions, which barely moves a hallucination count while making the system less useful,
+and the resulting gaps are indistinguishable from genuine ones. The fix was to scan the value the
+same way the quote is scanned. Recall went from 91.2% back to 97.8% with every fabrication still
+caught.
+
+### The hardest targeting case: a part the document mentions in order to retire it
+
+Adding the PDF to the adversarial harness produced the most convincing wrong answer this system
+has generated: **12 values for `77C-102`, all 12 carrying verifiable quotes**, for a part that
+cannot be bought.
+
+The existing targeting gate asks "is this part number in the document?" — and `77C-102` is. It
+appears exactly once, in `NOTE 2: Catalog No 77C-102 (DN10) is discontinued and superseded by
+77C-103. Do not order.` The gate opens, a model call is made, and every shared specification in
+the surrounding prose — alloy, pressure rating, seats, temperature, approvals — is sitting right
+there reading as though it applies.
+
+So the presence check was answering the wrong question. "Is this part number here" and "does this
+document *offer* this part" are different, and only the second one is a reason to extract.
+
+Two signals, both deterministic:
+
+- **An ordering-table row wins outright.** A part with a row is being sold, whatever the notes
+  elsewhere say. This is what keeps the gate from retiring `77C-103` — which is named *inside* the
+  withdrawal note, as the replacement.
+- **Otherwise, if every mention withdraws it, refuse.** Phrasings are declared in
+  `schema/constants.yaml` under `WITHDRAWAL_MARKERS`, because withdrawal is a wording question,
+  not a logic question, and a merchandiser who meets a new phrasing should be able to add it
+  without touching Python.
+
+The remedy is a new one: `DELIST_PRODUCT`, not `RETRY_WITH_BETTER_SOURCE`. Absent and withdrawn
+are not the same state and their fixes are not interchangeable — an absent part number means
+somebody attached the wrong file, while a withdrawn one means the file is right and the part is
+dead. Telling someone to go and find a better datasheet would waste the single most useful thing
+the document said.
+
+Adversarial harness: **87 attributes requested across 4 cases, 0 fabricated, $0.00** — no model
+call is made in any of them.
 
 ### L6: formal verification of claims, by an SMT solver
 
@@ -450,7 +566,8 @@ same species as the ones the system exists to prevent:
 
 ### An actual defect, found by adversarial testing
 
-The null ablation prompted a harder question, and this one found a real bug.
+The ablation was null at the time, which prompted a harder question — and this one found a real
+bug.
 
 `scripts/run_adversarial.py` supplies the **wrong document**: it asks for a ball valve part
 number while handing over the gate valve datasheet. Nothing about that SKU is in the source, so
@@ -477,10 +594,10 @@ looser than that.
 | cost of the run | $0.0024 | $0.000000 |
 
 Zero cost because the refusal needs no inference. The backtest was re-run to confirm no
-regression: still 125 correct, 100% precision and recall. The gap reason is deliberately
-`NO_SOURCE_AVAILABLE` rather than `NOT_PRESENT_IN_ANY_SOURCE` — "this datasheet is about a
-different product" needs a different remedy from "this datasheet does not state that value", and
-collapsing them would send a buyer chasing a supplier for data that was never missing.
+regression. The gap reason is deliberately `NO_SOURCE_AVAILABLE` rather than
+`NOT_PRESENT_IN_ANY_SOURCE` — "this datasheet is about a different product" needs a different
+remedy from "this datasheet does not state that value", and collapsing them would send a buyer
+chasing a supplier for data that was never missing.
 
 The gate can be disabled for genuine series-level documents where orderable part numbers are
 never printed. It is opt-in, because that is also the excuse a wrong-document bug would hide
@@ -490,14 +607,23 @@ behind.
 
 Stated plainly, because a benchmark oversold is worse than no benchmark:
 
-- **The set is small.** 9 products, 180 comparisons. Wide confidence intervals on everything.
+- **The set is small.** 15 products, 312 comparisons, 3 datasheets. Wide confidence intervals on
+  everything. This is why thresholds are chosen against a Wilson upper bound rather than the
+  observed rate.
 - **Author coupling.** I wrote both the source fixtures and the ground truth. That is the
   weakest part of the evaluation. Real supplier PDFs from a distributor with independently
-  maintained ground truth would be a materially harder test.
-- **Recall varies run to run.** An earlier run scored 125/0 missed; this one missed
-  `operating_torque` on BA-100-050, where the datasheet qualifies the torque figure to one size
-  only. Precision and hallucination rate have been stable at 100% / 0% across runs — the
-  failure mode is abstention, not fabrication, which is the correct direction for this design.
+  maintained ground truth would be a materially harder test. The mitigation is that the fixtures
+  were written to be adversarial to the extractor and have repeatedly succeeded — the corpus has
+  found real defects rather than confirming what was already believed.
+- **Recall varies run to run.** Between two runs of the same code, recall moved 96.5% ↔ 97.8% as
+  the model resolved `handle_type` differently. Precision and hallucination rate have been stable
+  at ≥99% / 0% — the run-to-run failure mode is abstention, not fabrication, which is the correct
+  direction for this design.
+- **The corpus is what makes the guarantees measurable, and it was almost too easy.** Every
+  headline result in this README that reports the trust layer *doing* something — the ablation
+  delta, the entailment gate, the withdrawn-part refusal — became measurable only after the
+  third datasheet was added. Before that the ablation was null and the same code looked flawless.
+  A clean corpus does not validate a trust layer; it hides whether there is one.
 - **One vertical.** Bronze and brass valves (PVF). The schema is declarative, so a new class is
   YAML rather than code, but that claim is untested outside valves.
 
@@ -522,7 +648,7 @@ axiom/
 │   ├── docintel/              # document parsing, quote location, span resolution
 │   ├── schema/                # schema loader, integrity checks, prompt generation
 │   ├── classify/              # class assignment + derived ETIM / UNSPSC
-│   ├── extract/               # model cascade, evidence-bound extraction
+│   ├── extract/               # model cascade, evidence-bound extraction, entailment gate
 │   ├── normalize/             # unit registry, datasheet value parsers, MPN cleaning
 │   ├── validate/              # validation layers L0–L3 + AST rule evaluator
 │   ├── confidence/            # features, calibration, Wilson risk policy
@@ -550,12 +676,13 @@ axiom/
 │   └── export_console_fixture.py
 ├── data/
 │   ├── golden/                # ground truth — the highest-value directory here
+│   │                          #   15 SKUs / 3 datasheets, written to be adversarial
 │   ├── calibration/           # calibration set + learned priors (governs auto-accept)
 │   ├── samples/               # demo datasheets
 │   ├── sessions/              # review state: what humans decided
 │   ├── console/               # pipeline output: what the machine produced
 │   └── cache/                 # content-addressed artifact store
-└── tests/                     # 815 tests
+└── tests/                     # 863 tests
 ```
 
 Adding an attribute means editing YAML in `schema/`. No Python change, no prompt change — the
@@ -645,6 +772,13 @@ Tracked against blueprint Part 12.
 - [ ] **Tier 2 — differentiators.** In progress:
       - [x] Cost-per-SKU meter, priced from the AWS Price List API, surfaced in the console
       - [x] Ablation harness and adversarial negative control (found and fixed the targeting bug)
+      - [x] Hardened golden set: a third datasheet as a PDF with DN sizing, an overriding
+            footnote, reduced-port twins and a discontinued part. Turned the null ablation into
+            a measurable delta and exposed the two defects below
+      - [x] Entailment gate — a verified quote must also *support* its value (10 hallucinations
+            → 0, precision 92.4% → 99.1%)
+      - [x] Withdrawn-part targeting — refuse a part the source mentions only to discontinue it
+            (12 fabrications with 12 verifiable quotes → 0)
       - [x] Automated Reasoning (L6) — formal verification via Bedrock Guardrails, deployed live
       - [x] Risk–coverage curve as an interactive dial in the console (hand-drawn SVG, no
             charting dependency)
@@ -663,7 +797,11 @@ Storage infrastructure is deployed (see above). Compute is not — the pipeline 
 - `apps/console/src/lib/types.ts` is a hand-maintained mirror of the Python models. The API and
   the fixture exporter share one projection so they cannot drift from each other, but the
   TypeScript can still drift from both. Generating it from the OpenAPI schema is the fix.
-- The golden set is 9 SKUs against a blueprint target of 100–300 (see the caveats above).
+- The golden set is 15 SKUs against a blueprint target of 100–300 (see the caveats above).
+- `handle_type` sits at 61.5% because one datasheet has a footnote that overrides the prose for
+  sizes DN25 and up. Applying a size-scoped override is reasoning the extractor does not do
+  reliably. `variants.py` already has size-scoped note logic for variant explosion; the fix is
+  probably to share it with extraction rather than to escalate a tier.
 - L4 (cross-source agreement) is still only a member of the `ValidationLayer` enum — no validator
   implements it, because it needs two independent sources per SKU and the corpus has one.
 - L6 is implemented and deployed but **not yet wired into the pipeline run**. It is callable via
