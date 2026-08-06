@@ -29,13 +29,17 @@ from axiom.core.values import (
     ValueStatus,
 )
 from axiom.generate import (
+    Claim,
     ClaimKind,
+    ClaimReport,
     ClaimVerdict,
+    GeneratedCopy,
     build_fact_sheet,
     check_text,
     load_policy,
 )
 from axiom.schema import load_default
+from axiom.validate import ReasoningFinding, ReasoningReport
 
 CLASS_CODE = "PLB.VLV.BALL.2PC"
 SHA = "9f2c" + "0" * 60
@@ -440,3 +444,101 @@ def test_the_report_is_serialisable(sheet, policy):
     report = check_copy({"headline": "Rated to 600 psi"}, sheet, policy)
     json.dumps([claim.to_dict() for claim in report.claims])
     json.dumps(report.summary())
+
+
+# ===================================================== the publication gate, including L6
+#
+# `published` is the single property the console and the channel exports both read. Every gate
+# that ran has to be visible in it, or the UI ends up showing "published" beside a finding that
+# says otherwise.
+
+
+def clean_copy(**overrides) -> GeneratedCopy:
+    """Copy that passes the claim check, so each test varies exactly one thing."""
+    fields = {
+        "sku": "BA-100-075",
+        "headline": "Bronze ball valve, 3/4 in NPT",
+        "report": ClaimReport(
+            claims=[
+                Claim(
+                    kind=ClaimKind.DESIGNATION,
+                    text="Bronze C84400",
+                    verdict=ClaimVerdict.SUPPORTED,
+                    reason="appears in verified attribute 'body_material'",
+                )
+            ]
+        ),
+    }
+    fields.update(overrides)
+    return GeneratedCopy(**fields)
+
+
+def formal(kind: str, rules: tuple[str, ...] = ()) -> ReasoningReport:
+    return ReasoningReport(findings=[("claim", ReasoningFinding(kind=kind, rules=rules))])
+
+
+def test_copy_publishes_when_the_claim_check_passes_and_l6_was_not_run():
+    """L6 is optional. Not deploying a policy must not stop copy publishing."""
+    copy = clean_copy()
+
+    assert copy.formal is None
+    assert copy.published is True
+
+
+def test_a_proven_contradiction_withholds_copy_that_passed_the_claim_check():
+    """The case that justifies the layer existing.
+
+    Every claim traces to a verified attribute, so the claim checker is satisfied — and the
+    sentence is still impossible. Only L6 catches this, and it has to be able to block.
+    """
+    copy = clean_copy(formal=formal("invalid", ("RLEADEDALLOY",)))
+
+    assert copy.report.passed is True, "the claim check is satisfied"
+    assert copy.published is False, "and the copy is still withheld"
+
+
+def test_an_unreachable_policy_withholds_copy():
+    """"We could not check" must not resolve to the same outcome as "we checked"."""
+    report = ReasoningReport(error="the reasoning policy could not be reached: ExpiredToken")
+    copy = clean_copy(formal=report)
+
+    assert copy.published is False
+
+
+def test_an_indeterminate_verdict_does_not_withhold_copy():
+    """A solver that formed no opinion has produced nothing to act on. Blocking on it would
+    make the layer a liability rather than a gate."""
+    copy = clean_copy(formal=formal("tooComplex"))
+
+    assert copy.formal.conclusive is False
+    assert copy.published is True
+
+
+def test_an_unsupported_claim_still_blocks_regardless_of_l6():
+    """The two gates are independent; passing one does not excuse the other."""
+    copy = clean_copy(
+        report=ClaimReport(
+            claims=[
+                Claim(
+                    kind=ClaimKind.QUANTITY,
+                    text="800 psi",
+                    verdict=ClaimVerdict.UNSUPPORTED,
+                    reason="no verified attribute states this figure",
+                )
+            ]
+        ),
+        formal=formal("satisfiable"),
+    )
+
+    assert copy.published is False
+
+
+def test_the_serialised_copy_distinguishes_unchecked_from_clean():
+    """A console rendering `formal_check` needs to tell "not checked" from "checked, clean".
+    Serialising an absent report as an empty one would read as a clean bill of health."""
+    assert clean_copy().to_dict()["formal_check"] is None
+
+    checked = clean_copy(formal=formal("satisfiable")).to_dict()["formal_check"]
+    assert checked is not None
+    assert checked["passed"] is True
+    assert checked["conclusive"] is True

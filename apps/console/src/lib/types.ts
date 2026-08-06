@@ -628,6 +628,47 @@ export interface ClaimCheckSummary {
   passed: boolean;
 }
 
+/** axiom.validate.reasoning — one claim's formal verdict. */
+export interface FormalClaim {
+  claim: string;
+  /** The raw solver finding: `satisfiable`, `invalid`, `impossible`, `tooComplex`, … */
+  verdict: string;
+  /** Identifiers of the policy rules the claim contradicts. Empty unless it does. */
+  rules: string[];
+  contradiction: boolean;
+  /** The solver declined to translate this claim. Neither proven nor disproven. */
+  indeterminate: boolean;
+  confidence: number | null;
+  detail: string;
+}
+
+/**
+ * axiom.validate.reasoning.ReasoningReport — validation layer L6.
+ *
+ * Three states, and conflating any two of them would misrepresent the layer:
+ *
+ * - `passed && conclusive` — the solver reached a verdict and found no contradiction.
+ * - `passed && !conclusive` — nothing was disproven, but nothing was established either. Not a
+ *   reason to withhold copy, and not grounds for a "verified" badge.
+ * - `!passed` — either a contradiction was proven, or `error` is set because the policy could
+ *   not be reached at all. Both withhold publication.
+ */
+export interface FormalCheck {
+  checked: number;
+  contradictions: number;
+  indeterminate: number;
+  violated_rules: string[];
+  /** No contradiction proven *and* the policy was reachable. */
+  passed: boolean;
+  /** At least one claim got a real verdict. Read this, not `passed`, before claiming verification. */
+  conclusive: boolean;
+  /** Set when the policy could not be consulted. Distinct from a clean report. */
+  error: string | null;
+  /** The premises the claims were judged against, rendered from publishable values only. */
+  premises: string;
+  claims: FormalClaim[];
+}
+
 /**
  * axiom.generate.copy.GeneratedCopy
  *
@@ -649,6 +690,13 @@ export interface GeneratedCopy {
   error: string | null;
   claim_check: ClaimCheckSummary;
   claims: Claim[];
+  /**
+   * The L6 result, or null when no reasoning policy was consulted.
+   *
+   * Null must render as "not checked". An absent report is not a clean one, and showing an
+   * empty summary in its place would read as a pass the system never established.
+   */
+  formal_check?: FormalCheck | null;
 }
 
 // ---------------------------------------------------------------- review decisions

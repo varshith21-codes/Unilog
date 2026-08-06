@@ -28,6 +28,7 @@ from axiom.validate import (
     ReasoningFinding,
     ReasoningReport,
     describe_record,
+    split_claims,
 )
 
 SHA = "9f2c" + "0" * 60
@@ -313,3 +314,144 @@ def test_a_report_summarises_contradictions():
 def test_a_clean_report_passes():
     report = ReasoningReport(findings=[("x", ReasoningFinding(kind="satisfiable"))])
     assert report.passed is True
+
+
+# ===================================================================== claim splitting
+
+
+def test_a_standard_reference_is_not_split_at_its_dot():
+    """The bug this splitter exists to avoid.
+
+    "ASME B16.34" is one token. Splitting on every period would cut it in half and send "34" to
+    a solver as though it were a sentence.
+    """
+    claims = split_claims("Rated to ASME B16.34 standards. Full port design.")
+
+    assert claims == ["Rated to ASME B16.34 standards.", "Full port design."]
+
+
+def test_a_decimal_after_a_period_is_not_a_sentence_boundary():
+    """"approx. 600 psi" is followed by a digit, so it stays whole."""
+    assert split_claims("Torque approx. 600 psi rating.") == ["Torque approx. 600 psi rating."]
+
+
+def test_bullets_are_split_per_line_without_losing_leading_numbers():
+    """A bullet reading "600 psi WOG" must keep its figure — that is the checkable part."""
+    claims = split_claims("- 600 psi WOG rating\n- Bronze C84400 body\n\u2022 NPT threaded ends")
+
+    assert claims == ["600 psi WOG rating", "Bronze C84400 body", "NPT threaded ends"]
+
+
+def test_repeated_sentences_are_verified_once():
+    """A headline is routinely restated in the description. Each solver call costs money."""
+    claims = split_claims("This valve is lead-free.\nThis valve is lead-free.")
+    assert claims == ["This valve is lead-free."]
+
+
+def test_fragments_too_short_to_assert_anything_are_dropped():
+    assert split_claims("Yes. No. 3/4\".") == []
+
+
+# ===================================================================== verifying copy
+
+
+def test_every_claim_in_copy_is_verified_against_the_same_premises(config):
+    """Premises are rendered once. Two sentences judged against different worlds would make a
+    formal verdict meaningless."""
+    stub = StubRuntime([SATISFIABLE])
+    report = ReasoningChecker(stub, config).verify_copy(
+        record(),
+        {"headline": "Bronze ball valve.", "bullets": "NPT threaded ends are provided"},
+    )
+
+    assert report.checked == 2
+    assert len(stub.calls) == 2
+    premises = [call["content"][0]["text"]["text"] for call in stub.calls]
+    assert all("Bronze C84400" in text for text in premises)
+    assert report.passed is True
+    assert report.conclusive is True
+
+
+def test_a_contradiction_in_copy_names_the_claim_and_the_rule(config):
+    stub = StubRuntime([invalid("RLEADEDALLOY")])
+    report = ReasoningChecker(stub, config).verify_copy(
+        record(), {"headline": "This valve is certified lead-free."}
+    )
+
+    assert report.passed is False
+    assert report.summary()["violated_rules"] == ["RLEADEDALLOY"]
+    claim, finding = report.contradictions[0]
+    assert claim == "This valve is certified lead-free."
+    assert finding.rules == ("RLEADEDALLOY",)
+
+
+def test_l6_results_are_produced_as_validation_results(config):
+    """The layer has to speak the same language as the rest of the validation stack."""
+    report = ReasoningChecker(StubRuntime([invalid("RLEADEDALLOY")]), config).verify_copy(
+        record(), {"headline": "This valve is certified lead-free."}
+    )
+
+    assert [r.layer for r in report.results] == [ValidationLayer.L6_FORMAL]
+    assert report.results[0].is_blocking is True
+
+
+def test_an_unreachable_policy_fails_closed(config):
+    """The failure mode that matters. If the solver cannot be reached, the answer is "not
+    verified" and publication is withheld — never "verified"."""
+
+    class Broken:
+        def apply_guardrail(self, **kwargs):
+            raise RuntimeError("ExpiredTokenException")
+
+    report = ReasoningChecker(Broken(), config).verify_copy(
+        record(), {"headline": "This valve is bronze bodied."}
+    )
+
+    assert report.error is not None
+    assert "ExpiredTokenException" in report.error
+    assert report.passed is False, "an unreachable solver must not read as assent"
+    assert report.conclusive is False
+
+
+def test_a_response_with_no_finding_is_indeterminate_not_a_pass(config):
+    """An empty findings list is indistinguishable from agreement, so it cannot be treated
+    as agreement."""
+
+    class Empty:
+        def apply_guardrail(self, **kwargs):
+            return {"assessments": [{"automatedReasoningPolicy": {"findings": []}}]}
+
+    report = ReasoningChecker(Empty(), config).verify_copy(
+        record(), {"headline": "This valve is bronze bodied."}
+    )
+
+    assert report.checked == 1
+    assert len(report.indeterminate) == 1
+    assert report.results[0].verdict is Verdict.SKIPPED
+
+
+def test_all_claims_indeterminate_passes_but_is_not_conclusive(config):
+    """The distinction a "formally verified" badge must respect.
+
+    Nothing was disproven, so publication is not blocked. But nothing was established either,
+    so the UI cannot claim verification.
+    """
+    report = ReasoningChecker(StubRuntime([{"tooComplex": {}}]), config).verify_copy(
+        record(), {"headline": "This valve is bronze bodied."}
+    )
+
+    assert report.passed is True
+    assert report.conclusive is False
+
+
+def test_a_report_serialises_per_claim_for_the_console(config):
+    report = ReasoningChecker(StubRuntime([invalid("RPOTABLELEAD")]), config).verify_copy(
+        record(), {"headline": "Suitable for potable water systems."}
+    )
+    payload = report.to_dict()
+
+    assert payload["passed"] is False
+    assert payload["premises"], "the premises must travel with the verdict"
+    assert payload["claims"][0]["claim"] == "Suitable for potable water systems."
+    assert payload["claims"][0]["rules"] == ["RPOTABLELEAD"]
+    assert payload["claims"][0]["contradiction"] is True

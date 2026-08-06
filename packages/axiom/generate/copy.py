@@ -26,6 +26,7 @@ from axiom.extract.client import (
 from axiom.generate.claims import ClaimReport, check_copy
 from axiom.generate.facts import FactSheet
 from axiom.generate.policy import CopyPolicy
+from axiom.validate.reasoning import ReasoningReport
 
 PROMPT_VERSION = "copy@v1"
 
@@ -83,10 +84,30 @@ class GeneratedCopy:
     model_tier: str | None = None
     error: str | None = None
 
+    formal: ReasoningReport | None = None
+    """The L6 verdict, attached after generation when a reasoning policy is deployed.
+
+    Not produced by the generator itself. Formal verification needs the whole record to build its
+    premises, not just the fact sheet, and it costs a call per sentence — so the pipeline decides
+    whether to run it and hangs the result here. ``None`` means *not checked*, which
+    :attr:`published` treats very differently from *checked and clean*.
+    """
+
     @property
     def published(self) -> bool:
-        """Copy is publishable only if it generated *and* passed the claim check."""
-        return self.error is None and bool(self.headline) and self.report.passed
+        """Copy is publishable only if every gate that ran actually passed.
+
+        Three independent conditions, and the third is the subtle one. ``formal is None`` means
+        no reasoning policy was consulted, so there is no finding to withhold on and copy
+        publishes exactly as it did before L6 existed. But a formal report that exists and did
+        not pass blocks — including when it failed because the policy was unreachable. An
+        unverifiable claim and a verified-clean claim must not reach the same outcome.
+        """
+        if self.error is not None or not self.headline:
+            return False
+        if not self.report.passed:
+            return False
+        return self.formal is None or self.formal.passed
 
     def fields(self) -> dict[str, str]:
         return {
@@ -111,6 +132,9 @@ class GeneratedCopy:
             "error": self.error,
             "claim_check": self.report.summary(),
             "claims": [claim.to_dict() for claim in self.report.claims],
+            # None rather than an empty report when L6 did not run, so the console can say "not
+            # checked" instead of rendering a zero that reads like a clean bill of health.
+            "formal_check": self.formal.to_dict() if self.formal is not None else None,
         }
 
 

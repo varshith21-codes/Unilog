@@ -101,6 +101,27 @@ class ReasoningConfig:
         }
 
 
+def guardrail_runtime(config: ReasoningConfig, *, profile: str | None = None, timeout: int = 60):
+    """A ``bedrock-runtime`` client bound to the region the *policy* was deployed in.
+
+    Deliberately not the region from ``models.yaml``. The guardrail is a regional resource and
+    the model cascade may legitimately run elsewhere; resolving the client from the cascade's
+    region would produce a ``ResourceNotFoundException`` that reads like a missing policy rather
+    than a misrouted call.
+
+    Imported lazily so that everything else in this module stays usable — and testable — without
+    boto3 or credentials present.
+    """
+    import boto3
+    from botocore.config import Config
+
+    session = boto3.Session(profile_name=profile, region_name=config.region or None)
+    return session.client(
+        "bedrock-runtime",
+        config=Config(retries={"max_attempts": 3, "mode": "standard"}, read_timeout=timeout),
+    )
+
+
 # Rendering the record into the phrasing the policy's variable descriptions were written
 # against. Deterministic on purpose: if a model paraphrased the facts, a contradiction could be
 # introduced or hidden by the paraphrase rather than by the product data.
@@ -290,6 +311,66 @@ class ReasoningChecker:
         findings = self.evaluate(f"{premises} {claim}".strip())
         return [self._to_result(finding, claim) for finding in findings]
 
+    def verify_claims(self, premises: str, claims: Sequence[str]) -> ReasoningReport:
+        """Verify many claims against one set of premises.
+
+        The premises are rendered once and reused, so every claim is judged against exactly the
+        same established facts. Building them per claim would let two sentences in one
+        description be evaluated against different worlds.
+
+        **Fails closed.** If the policy cannot be reached, the report carries the error and
+        ``passed`` is False. The alternative — treating an unreachable solver as assent — would
+        make the gate quietly stop working the moment credentials expired, which is precisely
+        when nobody is looking.
+        """
+        report = ReasoningReport(premises=premises)
+
+        for claim in claims:
+            try:
+                findings = self.evaluate(f"{premises} {claim}".strip())
+            except Exception as exc:  # noqa: BLE001 - any failure means "not verified"
+                report.error = f"the reasoning policy could not be reached: {exc}"
+                return report
+
+            if not findings:
+                # A response carrying no finding is not assent. The policy may have declined to
+                # translate the sentence at all, and there is no way to tell that apart from
+                # agreement, so it is recorded as the indeterminate case.
+                findings = [
+                    ReasoningFinding(
+                        kind="noTranslations",
+                        detail="the policy returned no finding for this claim",
+                    )
+                ]
+
+            for finding in findings:
+                report.findings.append((claim, finding))
+                report.results.append(self._to_result(finding, claim))
+
+        return report
+
+    def verify_copy(self, record: ProductRecord, fields: Mapping[str, str]) -> ReasoningReport:
+        """Verify every assertion in a piece of generated copy against the record.
+
+        This is the layer's intended production use. The claim checker in ``axiom.generate``
+        already proves each statement *came from* a verified attribute; this proves the
+        statement is not *self-contradictory* given everything else the record establishes. Copy
+        assembled entirely from real attributes can still assert something impossible, and only
+        this catches that.
+        """
+        premises = describe_record(record)
+        claims: list[str] = []
+        seen: set[str] = set()
+
+        for text in fields.values():
+            for claim in split_claims(text or ""):
+                key = claim.casefold()
+                if key not in seen:
+                    seen.add(key)
+                    claims.append(claim)
+
+        return self.verify_claims(premises, claims)
+
     def evaluate(self, text: str) -> list[ReasoningFinding]:
         """Raw findings for a passage. Premises and claim must both be in ``text``."""
         response = self._client.apply_guardrail(
@@ -315,7 +396,7 @@ class ReasoningChecker:
                 detail=f"violated {rules}; finding={finding.kind}",
             )
 
-        if finding.kind in {"translationAmbiguous", "tooComplex", "noTranslations"}:
+        if finding.is_indeterminate:
             # Explicitly SKIPPED, not PASS. The solver could not form an opinion, and recording
             # that as success would let an unchecked claim through wearing a verified badge —
             # the confidence features count a skipped check differently from a passing one for
@@ -371,24 +452,83 @@ def _finding(kind: str, body: dict[str, Any]) -> ReasoningFinding:
 
 @dataclass
 class ReasoningReport:
-    """Findings across several claims, for reporting."""
+    """Findings across several claims, for reporting and for the publication gate."""
 
     findings: list[tuple[str, ReasoningFinding]] = field(default_factory=list)
+    results: list[ValidationResult] = field(default_factory=list)
+    premises: str = ""
+    error: str | None = None
+    """Set when the policy could not be consulted at all. Distinct from a clean report."""
 
     @property
     def contradictions(self) -> list[tuple[str, ReasoningFinding]]:
         return [(claim, f) for claim, f in self.findings if f.is_contradiction]
 
     @property
+    def indeterminate(self) -> list[tuple[str, ReasoningFinding]]:
+        """Claims the solver declined to translate. Neither proven nor disproven."""
+        return [(claim, f) for claim, f in self.findings if f.is_indeterminate]
+
+    @property
+    def checked(self) -> int:
+        return len(self.findings)
+
+    @property
     def passed(self) -> bool:
-        return not self.contradictions
+        """Whether publication may proceed.
+
+        No contradiction was proven *and* the policy was actually reachable. A confused solver
+        does not block publication — there is nothing to act on — but an unreachable one does,
+        because "we could not check" must never read as "we checked".
+        """
+        return self.error is None and not self.contradictions
+
+    @property
+    def conclusive(self) -> bool:
+        """Whether the layer actually established anything.
+
+        ``passed`` can be true while this is false: a passage in which every sentence came back
+        untranslatable is not a contradiction, but nor is it verified. Any UI that shows a
+        "formally verified" badge must read this, not ``passed``.
+        """
+        return (
+            self.error is None
+            and self.checked > 0
+            and len(self.indeterminate) < self.checked
+        )
 
     def summary(self) -> dict[str, object]:
         return {
-            "checked": len(self.findings),
+            "checked": self.checked,
             "contradictions": len(self.contradictions),
+            "indeterminate": len(self.indeterminate),
             "violated_rules": sorted(
                 {rule for _, f in self.contradictions for rule in f.rules}
             ),
             "passed": self.passed,
+            "conclusive": self.conclusive,
+            "error": self.error,
+        }
+
+    def to_dict(self) -> dict[str, object]:
+        """The full report, for the console bundle.
+
+        Per-claim rather than aggregate: the value of this layer is naming the sentence and the
+        rule, so a summary alone would discard the only actionable part.
+        """
+        return {
+            **self.summary(),
+            "premises": self.premises,
+            "claims": [
+                {
+                    "claim": claim,
+                    "verdict": finding.kind,
+                    "rules": list(finding.rules),
+                    "contradiction": finding.is_contradiction,
+                    "indeterminate": finding.is_indeterminate,
+                    "confidence": finding.confidence,
+                    "detail": finding.detail,
+                }
+                for claim, finding in self.findings
+            ],
         }

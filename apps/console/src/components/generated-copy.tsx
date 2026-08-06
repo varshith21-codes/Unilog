@@ -2,7 +2,7 @@ import clsx from "clsx";
 
 import { AlertIcon, CheckIcon, Overline, Panel, SectionHeading } from "@/components/primitives";
 import { humanise } from "@/lib/format";
-import type { Claim, GeneratedCopy } from "@/lib/types";
+import type { Claim, FormalCheck, GeneratedCopy } from "@/lib/types";
 
 /**
  * Generated copy, shown only ever beside its claim check.
@@ -19,6 +19,17 @@ import type { Claim, GeneratedCopy } from "@/lib/types";
 export function GeneratedCopyPanel({ copy }: { copy: GeneratedCopy }) {
   const failing = copy.claims.filter((claim) => claim.verdict !== "supported");
   const { claim_check: check } = copy;
+  const formal = copy.formal_check ?? null;
+
+  // Which gate to name in the pill. Two gates run and either can withhold copy, so a single
+  // "Blocked" would leave a merchandiser guessing which one to go and read.
+  const blockedBy = !copy.published
+    ? formal && !formal.passed
+      ? formal.error
+        ? "Not verified"
+        : "Contradiction"
+      : "Blocked"
+    : null;
 
   return (
     <section>
@@ -28,7 +39,11 @@ export function GeneratedCopyPanel({ copy }: { copy: GeneratedCopy }) {
         action={
           <span className={clsx("pill", copy.published ? "pill-pass" : "pill-fail")}>
             {copy.published ? <CheckIcon /> : <AlertIcon />}
-            {copy.published ? "Claim check passed" : "Blocked"}
+            {copy.published
+              ? formal?.conclusive
+                ? "Checked and formally verified"
+                : "Claim check passed"
+              : blockedBy}
           </span>
         }
       />
@@ -168,10 +183,141 @@ export function GeneratedCopyPanel({ copy }: { copy: GeneratedCopy }) {
               compared after unit conversion; standards and alloy designations must appear
               verbatim in a verified value.
             </p>
+
+            <FormalCheckPanel check={formal} />
           </Panel>
         </div>
       )}
     </section>
+  );
+}
+
+/**
+ * Validation layer L6, rendered beneath the claim check because it answers a different question.
+ *
+ * The claim check proves each statement *came from* a verified attribute. This proves the
+ * statement is not *self-contradictory* given everything else the record establishes — a sentence
+ * assembled entirely from real attributes can still assert something impossible, and only a solver
+ * catches that.
+ *
+ * The three states are kept visibly distinct. "No contradiction found" and "the solver formed no
+ * opinion" look similar in a summary and mean opposite things, so a passing-but-inconclusive
+ * result never renders as verified.
+ */
+function FormalCheckPanel({ check }: { check: FormalCheck | null }) {
+  // Not checked is its own state. Rendering a zeroed summary here would read as a clean result
+  // from a layer that never ran.
+  if (!check) {
+    return (
+      <div className="hairline-t mt-6 pt-5">
+        <Overline>Formal verification</Overline>
+        <p className="mt-2 text-meta text-[var(--fg-quiet)]">
+          Not run for this SKU. Re-run the pipeline with{" "}
+          <span className="mono">--verify-claims</span> to check the copy against the deployed
+          Automated Reasoning policy.
+        </p>
+      </div>
+    );
+  }
+
+  const contradictions = check.claims.filter((claim) => claim.contradiction);
+  const indeterminate = check.claims.filter((claim) => claim.indeterminate);
+
+  return (
+    <div className="hairline-t mt-6 pt-5">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <Overline>Formal verification · L6</Overline>
+        <span
+          className={clsx(
+            "pill",
+            check.error || contradictions.length > 0
+              ? "pill-fail"
+              : check.conclusive
+                ? "pill-pass"
+                : "pill-warn",
+          )}
+        >
+          {check.error
+            ? "Not verified"
+            : contradictions.length > 0
+              ? `${contradictions.length} contradiction${contradictions.length === 1 ? "" : "s"}`
+              : check.conclusive
+                ? "No contradiction"
+                : "No verdict"}
+        </span>
+      </div>
+
+      {check.error ? (
+        // Fail-closed, and say so. An unreachable solver is not assent, and a reader has to know
+        // the difference between "we checked and it was fine" and "we could not check".
+        <p className="mt-2.5 text-meta text-[var(--fg-secondary)]">
+          {check.error} Copy is withheld rather than published unverified.
+        </p>
+      ) : (
+        <p className="mt-2.5 text-meta text-[var(--fg-secondary)]">
+          <span className="tabular-nums text-[var(--fg)]">{check.checked}</span> sentence
+          {check.checked === 1 ? "" : "s"} translated to logic and checked against the policy by
+          an SMT solver
+          {indeterminate.length > 0 ? (
+            <>
+              ;{" "}
+              <span className="tabular-nums text-[var(--warn)]">{indeterminate.length}</span>{" "}
+              could not be translated and {indeterminate.length === 1 ? "was" : "were"} left
+              unverified
+            </>
+          ) : null}
+          .
+        </p>
+      )}
+
+      {/*
+        A contradiction names the rule it violated. That identifier is the proof — it is what
+        makes this a verdict rather than a score, so it is shown rather than summarised away.
+      */}
+      {contradictions.length > 0 ? (
+        <ul className="mt-4 flex flex-col gap-2.5">
+          {contradictions.map((claim) => (
+            <li key={claim.claim} className="rounded-lg bg-[var(--surface-sunken)] p-3.5">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="pill pill-fail">Proven contradiction</span>
+                {claim.rules.map((rule) => (
+                  <span key={rule} className="mono text-meta text-[var(--fg-quiet)]">
+                    {rule}
+                  </span>
+                ))}
+              </div>
+              <p className="mt-2 text-sm text-[var(--fg)]">{claim.claim}</p>
+              <p className="mt-1.5 text-meta text-[var(--fg-secondary)]">
+                Contradicts the product&rsquo;s established facts. Remove the claim, or establish
+                the attribute that would support it.
+              </p>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+
+      {!check.error && !check.conclusive ? (
+        <p className="mt-3 text-meta text-[var(--warn)]">
+          The policy formed no opinion on any sentence, so nothing was disproven and nothing was
+          verified. This is not a pass.
+        </p>
+      ) : null}
+
+      {check.premises ? (
+        <details className="group mt-4">
+          <summary className="cursor-pointer text-meta text-[var(--fg-tertiary)] transition-colors duration-150 hover:text-[var(--fg)]">
+            Premises the claims were judged against
+          </summary>
+          {/*
+            Worth exposing: the premises are built from publishable values only, so a reader can
+            confirm no queued value was smuggled in as an established fact.
+          */}
+          <p className="mt-2 text-meta leading-relaxed text-[var(--fg-secondary)]">
+            {check.premises}
+          </p>
+        </details>
+      ) : null}
+    </div>
   );
 }
 

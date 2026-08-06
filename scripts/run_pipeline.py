@@ -58,7 +58,12 @@ from axiom.normalize import BrandMaster, clean_mpn, normalize_all
 from axiom.review import build_session
 from axiom.schema import load_default
 from axiom.syndicate import export_all
-from axiom.validate import Validator
+from axiom.validate import (
+    ReasoningChecker,
+    ReasoningConfig,
+    Validator,
+    guardrail_runtime,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_STORE = REPO_ROOT / "data" / "cache" / "artifacts"
@@ -108,6 +113,15 @@ def main() -> int:
             "Costs one extra model call; copy that fails the check is reported, not published."
         ),
     )
+    parser.add_argument(
+        "--verify-claims",
+        action="store_true",
+        help=(
+            "formally verify the generated copy against the deployed Automated Reasoning policy "
+            "(L6). Requires --generate-copy. Costs one ApplyGuardrail call per sentence; a "
+            "proven contradiction withholds the copy and names the rule it violated."
+        ),
+    )
     parser.add_argument("--tier", default="volume", help="cheapest tier to start the cascade")
     parser.add_argument("--include-optional", action="store_true")
     parser.add_argument("--profile", default=None)
@@ -124,6 +138,16 @@ def main() -> int:
     # destroying whatever the last real run established — the review queue and every dashboard
     # would go blank with no indication why. Refuse rather than warn: the combination has no
     # legitimate use, and by the time a warning is read the data is already gone.
+    # L6 verifies prose. Without copy there are no sentences to verify, and silently ignoring
+    # the flag would let a run look verified when nothing was checked.
+    if args.verify_claims and not args.generate_copy:
+        print(
+            "--verify-claims needs --generate-copy: L6 verifies the sentences in generated "
+            "copy, and without copy there is nothing to verify.",
+            file=sys.stderr,
+        )
+        return 2
+
     if args.dry_run and args.save_session:
         print(
             "--dry-run cannot be combined with --save-session: a dry run extracts nothing, "
@@ -239,12 +263,39 @@ def main() -> int:
     # Runs last, and only from values that already survived every earlier gate. Generating
     # before the acceptance decision would let a queued value into a product description.
     generated = None
+    reasoning_config = None
     if args.generate_copy:
         sheet = build_fact_sheet(record, registry)
         generator = CopyGenerator(client, ModelCascade.load(), load_policy(), tier="mid")
         generated = generator.generate(sheet)
         usage.merge(generated.usage)
         cost_usd = usage.cost_usd(tier_prices)
+
+        # --- stage 9b: formal verification of the prose (L6) --------------------
+        # Runs after the claim check rather than instead of it. The claim check proves each
+        # statement came *from* a verified attribute; this proves the statement is not
+        # self-contradictory given everything else the record establishes. Copy assembled
+        # entirely from real attributes can still assert something impossible.
+        #
+        # Deliberately no regeneration on an L6 failure, unlike an unsupported claim. A
+        # contradiction here is almost always a property of the source data — a leaded alloy
+        # carrying a potable-water approval — so asking the model to rewrite would spend another
+        # call to re-derive the same contradiction from the same facts. The finding belongs in
+        # front of a human, not in a retry loop.
+        if args.verify_claims and generated.headline:
+            reasoning_config = ReasoningConfig.load()
+            if reasoning_config is None:
+                print(
+                    "  L6 skipped: no reasoning policy is deployed. Deploy one with "
+                    "scripts/deploy_reasoning_policy.py",
+                    file=sys.stderr,
+                )
+            else:
+                checker = ReasoningChecker(
+                    guardrail_runtime(reasoning_config, profile=args.profile),
+                    reasoning_config,
+                )
+                generated.formal = checker.verify_copy(record, generated.fields())
 
     session_path = None
     bundle_path = None
@@ -410,11 +461,51 @@ def _report_copy(generated) -> None:
             mark = "BANNED" if claim.verdict is ClaimVerdict.BANNED else "UNSUPPORTED"
             print(f"    {mark:<12}[{claim.kind.value}] {claim.text!r} — {claim.reason}")
 
+    _report_formal(generated.formal)
+
     print()
     if generated.published:
         print("  publishable: every checkable assertion traces to a verified attribute")
+        if generated.formal is not None and generated.formal.conclusive:
+            print("               and no policy rule contradicts it")
+    elif generated.formal is not None and not generated.formal.passed:
+        print("  BLOCKED: copy is withheld on the formal verification result above")
     else:
         print("  BLOCKED: copy is withheld while any claim is unsupported")
+
+
+def _report_formal(report) -> None:
+    """The L6 section. Reports what was proven, and just as clearly what was not."""
+    if report is None:
+        return
+
+    print("\n  " + "-" * 74)
+    print("  FORMAL VERIFICATION (L6, Automated Reasoning)")
+
+    if report.error:
+        print(f"    NOT VERIFIED: {report.error}")
+        print("    Copy is withheld: an unreachable solver is not assent.")
+        return
+
+    summary = report.summary()
+    print(
+        f"    {summary['checked']} claim(s) checked — "
+        f"{summary['contradictions']} contradiction(s), "
+        f"{summary['indeterminate']} with no verdict"
+    )
+
+    for claim, finding in report.contradictions:
+        rules = ", ".join(finding.rules) or "unnamed rule"
+        print(f"    CONTRADICTION [{rules}]")
+        print(f"      {claim}")
+
+    for claim, finding in report.indeterminate:
+        print(f"    no verdict ({finding.kind}): {claim[:64]}")
+
+    if not report.conclusive:
+        # Every sentence came back untranslatable. Nothing was disproven, and nothing was
+        # established either — which must not be reported as a pass.
+        print("    INCONCLUSIVE: the policy formed no opinion on any claim")
 
 
 def _effective_date(prices) -> str:
