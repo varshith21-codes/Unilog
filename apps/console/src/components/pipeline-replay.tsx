@@ -51,8 +51,11 @@ export function PipelineReplay({
   const [generation, setGeneration] = useState(0);
 
   useEffect(() => {
+    // Guarded on the function's existence, not just on `window`. Where `matchMedia` is missing the
+    // honest default is no animation: staging is decoration, and the numbers are the content.
     const reduced =
-      typeof window !== "undefined" &&
+      typeof window === "undefined" ||
+      typeof window.matchMedia !== "function" ||
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     if (reduced) {
