@@ -161,7 +161,7 @@ cd apps/console
 npm install
 npm run dev          # http://localhost:3000
 
-npm test             # 71 component tests (Vitest + React Testing Library)
+npm test             # 102 component tests (Vitest + React Testing Library)
 npm run typecheck
 npm run check:contrast
 ```
@@ -173,11 +173,31 @@ superseded rather than as a conflict, and whether the cohort refuses to vouch fo
 control arm moved. There is deliberately no coverage threshold — a number pushes effort toward the
 easy 80% and away from the handful of branches that matter.
 
-Five screens: a portfolio overview (quality scoreboard, cost meter, interactive risk dial), the
-review queue, the per-SKU review workspace with the evidence viewer, the enrichment certificate,
-and the Quality Index page carrying the before/after cohort. All of it renders **real pipeline
-output** — the API serves bundles written by `run_pipeline.py --save-session`, and decisions made
-in the workspace post back and persist.
+Six screens: a portfolio overview (quality scoreboard, cost meter, interactive risk dial), the
+pipeline replay, the review queue, the per-SKU review workspace with the evidence viewer, the
+enrichment certificate, and the Quality Index page carrying the before/after cohort. All of it
+renders **real pipeline output** — the API serves bundles written by `run_pipeline.py
+--save-session`, and decisions made in the workspace post back and persist.
+
+**`/pipeline` replays a run rather than performing one.** It shows the stages a recorded run went
+through — ingest, parse, classify, explode variants, extract, normalize, validate, decide, certify,
+syndicate — each with the numbers that run actually produced, revealed in sequence. There is no Run
+button and no upload, which is a deliberate reading of the blueprint's own demo hygiene note: cache
+the scripted path, because conference WiFi will fail. A single frontier escalation is thirty seconds
+of dead air in a seven-minute slot.
+
+That trade creates the one real hazard on the screen, and it is not technical. A sequence of stage
+cards completing looks exactly like work happening now. So the heading says replay, the run's own
+timestamp is shown beside it, and the elapsed figures are labelled *recorded then, not now* —
+because the only measurements that exist are the model calls (`extraction.latency_ms` and the run
+total in `cost.latency_ms`). The deterministic stages were never instrumented, so their timing reads
+as absent rather than as zero. Staging is fixed at 300ms per card rather than proportional to the
+real durations: replaying seven seconds of extraction teaches a viewer nothing the card already
+says. `prefers-reduced-motion` skips the staging and shows every number at once.
+
+The screen also counts something worth counting. Two of the stages call a model; the rest, including
+every stage that decides whether a value may be published, are deterministic. That ratio is the
+architecture stated as a number, and a test fails if a model ever appears on the deciding side.
 
 **The evidence viewer has two base layers and one overlay.** Coordinates come from
 `axiom.core.evidence.BoundingBox` — PDF points, origin top-left — and every element is positioned as
@@ -1072,6 +1092,11 @@ Storage infrastructure is deployed (see above). Compute is not — the pipeline 
   outside the version this repo pins, so it is left as a deliberate decision rather than taken
   silently. Neither package sits on a request path: `postcss` runs at build time, and `sharp` only
   serves image optimisation, which this console does not use.
+- **The pipeline replay has been verified by test and build, not by eye.** The stage derivation, the
+  model/deterministic split, the reduced-motion branch, the reveal timing and every honesty label are
+  covered by tests, and the route builds. Nobody has watched the animation in a browser. Its
+  `variants` card also only appears for an exploded series, so on the two committed bundles the
+  replay shows nine stages rather than ten.
 - **The variant series panel has no data behind it on a fresh clone.** Both committed bundles are
   standalone SKUs, and the checked-in offline fixture's five BA-100 records were each extracted
   independently rather than exploded from the ordering table — so `parent_sku` is legitimately null

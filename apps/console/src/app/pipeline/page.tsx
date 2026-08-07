@@ -9,7 +9,7 @@ import {
   variantGroupFor,
 } from "@/lib/data";
 import { dateTime } from "@/lib/format";
-import { pipelineStages } from "@/lib/stages";
+import { modelStageShare, pipelineStages } from "@/lib/stages";
 
 export const metadata = { title: "Pipeline" };
 
@@ -62,16 +62,21 @@ export default async function PipelinePage({
   const document = await getDocument(bundle);
   const series = variantGroupFor(bundle, skus);
   const stages = pipelineStages(bundle, document, dataset.policy, series);
+  const share = modelStageShare(stages);
 
   return (
     <div className="mx-auto max-w-[var(--container-shell)] px-[var(--spacing-gutter)] pb-24">
       <header className="py-[var(--spacing-section-lg)]">
+        {/*
+          Counted, not asserted. The stage list is shorter when a bundle's document is missing and
+          longer for an exploded series, so a hardcoded number here would be wrong on most runs.
+        */}
         <SectionHeading
           title="What the pipeline did"
           detail={
             <>
-              Ten stages from a supplier document to a signed, publishable record. Two of them call a
-              model.
+              {stages.length} stages from a supplier document to a signed, publishable record.{" "}
+              {share.model} of them call a model.
             </>
           }
         />
