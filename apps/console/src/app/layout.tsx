@@ -52,7 +52,23 @@ try {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
+    /*
+     * `suppressHydrationWarning` is required here, and only here.
+     *
+     * `THEME_SCRIPT` below adds `dark` to this element before React hydrates, so the client's
+     * className is deliberately not the one the server sent. React cannot tell an intentional
+     * pre-paint mutation from a bug and warns on every page load without this.
+     *
+     * It is safe rather than a blanket silencer: the flag applies to this element's own attributes
+     * and one level of children, so a genuine mismatch anywhere inside the app still reports. The
+     * alternative — resolving the theme in React state — reintroduces the light-mode flash the
+     * script exists to prevent.
+     */
+    <html
+      lang="en"
+      className={`${GeistSans.variable} ${GeistMono.variable}`}
+      suppressHydrationWarning
+    >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
