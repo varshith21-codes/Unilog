@@ -22,7 +22,9 @@ import type {
   FormalCheck,
   GeneratedCopy,
   QualityIndex,
+  RiskPolicySummary,
   SkuBundle,
+  SourceDocument,
 } from "@/lib/types";
 
 export function cohortScore(overrides: Partial<CohortScore> = {}): CohortScore {
@@ -308,5 +310,120 @@ export function variantBundle(overrides: {
       recommended_action: "accept_as_not_applicable",
       is_required: false,
     })),
+  } as unknown as SkuBundle;
+}
+
+// ------------------------------------------------------------------ pipeline stages
+//
+// The numbers below are copied from the real `data/console/BA-100-075.bundle.json`, not invented.
+// The stage view's whole purpose is to report a run faithfully, so a fixture describing a shape the
+// pipeline never produces would test the wrong thing — and these particular values carry the awkward
+// cases worth keeping: one channel held rather than published, three validation rules skipped, and a
+// `quality_index` whose `composite` was absent until the API reinterpreted it on read.
+
+export function sourceDocument(overrides: Partial<SourceDocument> = {}): SourceDocument {
+  return {
+    document_id: "ba100@f7500023",
+    uri: "local://f7/50/f7500023aad5093f9f77c12af5186aa8d4c5a67db25550c5c49a589959bf1da0.txt",
+    sha256: "f7500023aad5093f9f77c12af5186aa8d4c5a67db25550c5c49a589959bf1da0",
+    doc_type: "spec_sheet",
+    fetched_at: "2026-08-05T03:15:49.608515Z",
+    page_count: 1,
+    revision_label: null,
+    supplier_id: null,
+    license_note: null,
+    parser: "text",
+    line_count: 26,
+    table_count: 1,
+    warnings: [],
+    size_bytes: 1175,
+    storage_uri: "local://f7/50/f7500023aad5093f9f77c12af5186aa8d4c5a67db25550c5c49a589959bf1da0.txt",
+    ...overrides,
+  };
+}
+
+export function policySummary(overrides: Partial<RiskPolicySummary> = {}): RiskPolicySummary {
+  return {
+    epsilon: 0.05,
+    confidence_level: 0.95,
+    threshold: 0.62,
+    coverage: 0.87,
+    accepted: 15,
+    accepted_errors: 0,
+    observed_error_rate: 0,
+    error_upper_bound: 0.04,
+    calibration_size: 120,
+    achievable: true,
+    reason: "",
+    ...overrides,
+  };
+}
+
+/**
+ * A bundle carrying exactly the fields `pipelineStages` reads.
+ *
+ * Cast at the boundary like `triageBundle`, for the same reason: the derivation touches nine of the
+ * bundle's keys and filling the rest would imply the assertions depend on them.
+ */
+export function stageBundle(): SkuBundle {
+  return {
+    sku: "BA-100-075",
+    class_code: "PLB.VLV.BALL.2PC",
+    classification_summary: {
+      class_code: "PLB.VLV.BALL.2PC",
+      confidence: 0.92,
+      confident_depth: 4,
+      schemes: ["internal", "ETIM", "UNSPSC"],
+      candidates_considered: 2,
+      method: "model_adjudicated",
+      abstained: false,
+    },
+    extraction: {
+      requested: 23,
+      values: 15,
+      gaps: 8,
+      rejected_unverifiable: 0,
+      citation_coverage: 1,
+      input_tokens: 3225,
+      output_tokens: 1649,
+      escalations: 0,
+      latency_ms: 7022,
+    },
+    normalization_issues: [],
+    validation: { checks: 15, failures: 0, warnings: 1, skipped_rules: 3, consistency: 0.9167 },
+    metrics: {
+      fill_rate: 0.75,
+      verifiability: 1,
+      values_total: 15,
+      values_publishable: 15,
+      values_needing_review: 0,
+      gaps_total: 8,
+      gaps_required: 3,
+      conflicts: [],
+    },
+    certificate: {
+      generated_at: "2026-08-05T03:16:03.271000+00:00",
+      pipeline_version: "axiom-0.1.0",
+      signature_verified: true,
+      summary: {
+        attributes_required: 12,
+        attributes_populated: 15,
+        quality_index: {
+          completeness: 0.75,
+          verifiability: 1,
+          consistency: 1,
+          richness: 0,
+          composite: 0.83,
+        },
+        wall_clock_seconds: 10.65,
+      },
+    },
+    // One held, one published — the state that proves pre-flight is per channel.
+    channels: [
+      { name: "cx1_pim", published: false, value_count: 0, withheld: [] },
+      { name: "schema_org", published: true, value_count: 15, withheld: [] },
+    ],
+    cost: { calls: 3, escalations: 0, latency_ms: 13319 },
+    copy: null,
   } as unknown as SkuBundle;
 }

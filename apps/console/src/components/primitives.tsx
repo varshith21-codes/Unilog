@@ -169,7 +169,11 @@ export function EmptyState({
   action,
 }: {
   title: string;
-  detail?: string;
+  /**
+   * `ReactNode` rather than `string`, matching `SectionHeading`. An empty state usually has to name
+   * the command that fills it, and a command reads as a command only when it can be marked up.
+   */
+  detail?: ReactNode;
   action?: ReactNode;
 }) {
   return (
