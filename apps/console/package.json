@@ -8,6 +8,8 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "check:contrast": "node scripts/check-contrast.mjs",
     "fixture": "python ../../scripts/export_console_fixture.py"
   },
@@ -20,11 +22,16 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "4.3.3",
+    "@testing-library/dom": "10.4.1",
+    "@testing-library/react": "16.3.2",
     "@types/node": "26.1.2",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.4",
+    "@vitejs/plugin-react": "6.0.5",
+    "jsdom": "30.0.1",
     "postcss": "8.5.25",
     "tailwindcss": "4.3.3",
-    "typescript": "7.0.2"
+    "typescript": "7.0.2",
+    "vitest": "4.1.10"
   }
 }

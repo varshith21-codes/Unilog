@@ -49,8 +49,9 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -e ".[dev,api,docintel,ingest]"
 
-pytest -m "not live"           # 1,008 tests, no AWS credentials needed
+pytest -m "not live"                    # 1,036 tests, no AWS credentials needed
 ruff check .
+python scripts/check_console_types.py   # types.ts vs the Python models it mirrors
 ```
 
 Everything above runs offline, and so do three of the entry points — supplier-file ingestion,
@@ -145,7 +146,18 @@ python -m uvicorn apps.api.main:app --port 8000
 cd apps/console
 npm install
 npm run dev          # http://localhost:3000
+
+npm test             # 36 component tests (Vitest + React Testing Library)
+npm run typecheck
+npm run check:contrast
 ```
+
+The component tests target the branches where being wrong would mislead a reviewer about their own
+data rather than the layout: whether the formal-verification panel can tell *not checked* from
+*checked and clean* from *the solver returned an error*, whether a stale catalogue reads as
+superseded rather than as a conflict, and whether the cohort refuses to vouch for a lift when its
+control arm moved. There is deliberately no coverage threshold — a number pushes effort toward the
+easy 80% and away from the handful of branches that matter.
 
 Five screens: a portfolio overview (quality scoreboard, cost meter, interactive risk dial), the
 review queue, the per-SKU review workspace with the evidence viewer, the enrichment certificate,
@@ -712,7 +724,7 @@ Stated plainly, because a benchmark oversold is worse than no benchmark:
 ```
 axiom/
 ├── .github/workflows/
-│   ├── ci.yml                 # ruff, tests, typecheck, contrast, baseline integrity — every push
+│   ├── ci.yml                 # ruff, pytest, vitest, tsc, contrast, type drift — every push
 │   └── regression.yml         # the metrics gate; blocks a change that degrades a tracked number
 ├── docs/
 │   ├── AXIOM-Product-Intelligence-Blueprint.md   # the design document
@@ -757,6 +769,7 @@ axiom/
 │   ├── run_cohort.py          # before/after quality index against the original item master
 │   ├── run_backtest.py        # the numbers above; writes calibration artifacts
 │   ├── check_regression.py    # the CI gate: fail the build if a tracked metric got worse
+│   ├── check_console_types.py # fail the build if types.ts drifts from the Python models
 │   ├── explode_variants.py    # one datasheet -> a record per orderable part number
 │   ├── generate_copy.py       # constrained copy + claim check; --audit tries to break it
 │   ├── run_ablation.py        # same model, trust layer off — what does the gate buy?
@@ -780,7 +793,7 @@ axiom/
 │   ├── cohort.json            # the before/after study the console's Quality Index page reads
 │   ├── ablation.json          # trust layer on vs off
 │   └── adversarial.json       # wrong-document negative control
-└── tests/                     # 1,008 tests
+└── tests/                     # 1,036 tests
 ```
 
 Adding an attribute means editing YAML in `schema/`. No Python change, no prompt change — the
@@ -919,9 +932,10 @@ Tracked against blueprint Part 12.
             image consistency, spec drift — not started, and deliberately so
 
 Beyond the tiers, blueprint module M15's **CI regression gate** is in place: `ci.yml` runs lint,
-tests, typecheck and contrast on every push, and `regression.yml` measures the pipeline against
-the golden set and blocks a change that degrades any tracked metric. The blueprint rates that
-above shipping another feature, and it was the largest thing missing.
+Python tests, console tests, typecheck, contrast, schema integrity and a type-drift check on every push, and
+`regression.yml` measures the pipeline against the golden set and blocks a change that degrades any
+tracked metric. The blueprint rates that above shipping another feature, and it was the largest
+thing missing.
 
 Storage infrastructure is deployed (see above). Compute is not — the pipeline runs locally.
 
@@ -929,9 +943,20 @@ Storage infrastructure is deployed (see above). Compute is not — the pipeline 
 
 - The API has no authentication or tenant scoping. `_session_path` guards against path
   traversal but nothing stops one tenant reading another's sessions.
-- `apps/console/src/lib/types.ts` is a hand-maintained mirror of the Python models. The API and
-  the fixture exporter share one projection so they cannot drift from each other, but the
-  TypeScript can still drift from both. Generating it from the OpenAPI schema is the fix.
+- `apps/console/src/lib/types.ts` is still hand-maintained, but it is no longer unguarded:
+  `scripts/check_console_types.py` compares 16 enums and 15 models against their Python
+  definitions on every push and fails the build on drift. Enum members are checked in both
+  directions — a Python value the console cannot express is a case it will mishandle, and a
+  TypeScript value Python never emits is a dead branch that reads as supported.
+
+  Generating the file from the OpenAPI schema was the original plan and does not work: every
+  endpoint in `apps/api` is annotated `-> dict`, so FastAPI emits
+  `{"type": "object", "additionalProperties": true}` for all of them and codegen would yield
+  `Record<string, unknown>`. Generating from the Pydantic models directly would work mechanically
+  and would flatten the documentation in `types.ts` — the notes explaining why `formal_check`
+  distinguishes null from clean, why a legacy value never publishes, what each of L4's four
+  verdict states means. Checking catches the drift without discarding the reasoning. Typed
+  response models on the API would make real codegen possible and are the longer-term fix.
 - The golden set is 15 SKUs against a blueprint target of 100–300 (see the caveats above).
 - `handle_type` sits at 61.5% because one datasheet has a footnote that overrides the prose for
   sizes DN25 and up. Applying a size-scoped override is reasoning the extractor does not do

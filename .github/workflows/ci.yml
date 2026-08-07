@@ -57,6 +57,12 @@ jobs:
         # bad YAML edit fails CI even if no test happens to touch that class.
         run: python -c "from axiom.schema import load_default; r = load_default(); print(f'{len(r.attribute_codes)} attributes, {len(r.class_codes)} classes')"
 
+      - name: Console type drift
+        # types.ts is a hand-maintained mirror of the Python models, and the failure mode is silent:
+        # add an enum member in Python and the console keeps compiling while quietly being unable to
+        # represent the new case. `tsc` cannot catch that — it only sees the TypeScript.
+        run: python scripts/check_console_types.py --quiet
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
@@ -87,6 +93,12 @@ jobs:
         # types.ts is a hand-maintained mirror of the Python models, so this is the only thing
         # standing between a renamed field and a runtime crash in the console.
         run: npm run typecheck
+
+      - name: Tests
+        # `tsc` proves the types line up. It cannot prove that a panel reporting "no contradiction"
+        # would still say so when the solver returned an error — and several components here exist
+        # specifically to keep two similar-looking states apart, which is where the risk is.
+        run: npm test
 
       - name: Contrast
         # Accessibility is a build failure, not a review comment. The script checks every
