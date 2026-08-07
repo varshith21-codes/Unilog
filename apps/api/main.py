@@ -17,6 +17,7 @@ Then open http://127.0.0.1:8000/
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Literal
 
@@ -38,7 +39,31 @@ SESSION_DIR = REPO_ROOT / "data" / "sessions"
 CONSOLE_DIR = REPO_ROOT / "data" / "console"
 CALIBRATION_DIR = REPO_ROOT / "data" / "calibration"
 CROSS_SOURCE_DIR = REPO_ROOT / "data" / "cross-source"
+ARTIFACT_DIR = REPO_ROOT / "data" / "cache" / "artifacts"
 COHORT_PATH = REPO_ROOT / "evals" / "cohort.json"
+
+_SHA256 = re.compile(r"[0-9a-f]{64}")
+
+# Suffixes the artifact endpoint will serve, and the type it declares for each. An allowlist rather
+# than a lookup: the store holds whatever suppliers sent, and guessing a content type for an
+# unexpected suffix is how a browser ends up executing something.
+_MEDIA_TYPES = {
+    ".pdf": "application/pdf",
+    ".txt": "text/plain; charset=utf-8",
+    # Deliberately *not* text/html. These are third-party bytes served inline, so declaring them
+    # HTML would let a supplier page run script on this API's origin — and `nosniff` cannot help
+    # when the declared type is itself the dangerous one. Nothing needs it rendered: the console
+    # draws the *parsed* projection of a page, and the only reason to hand back the original file is
+    # so a human can read it. text/plain does that and executes nothing.
+    ".html": "text/plain; charset=utf-8",
+    ".csv": "text/csv; charset=utf-8",
+    ".tsv": "text/tab-separated-values; charset=utf-8",
+    ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ".xls": "application/vnd.ms-excel",
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+}
 CONSOLE = Path(__file__).resolve().parent / "static" / "index.html"
 
 app = FastAPI(
@@ -298,6 +323,68 @@ def _empty_dataset(reason: str) -> dict:
 def console_stats() -> dict:
     """Counts only — cheap enough for a nav badge or a poll."""
     return dataset_stats(console_dataset())
+
+
+@app.get("/api/artifact/{sha256}")
+def artifact(sha256: str) -> FileResponse:
+    """Serve a stored source document by its own hash, so the evidence viewer can render it.
+
+    **Addressed by hash, never by path.** The store is content-addressed, so the SHA-256 *is* the
+    key — and a 64-hex-character validation is inherently traversal-proof in a way that sanitising a
+    caller-supplied path is not. There is no input here that could name a file outside the store,
+    because the only accepted input cannot contain a separator or a dot.
+
+    The suffix is discovered by globbing rather than taken from the caller, for the same reason.
+
+    **This endpoint serves raw supplier documents and has no authentication**, like the rest of this
+    API. That is documented as a known gap, and it matters more here than elsewhere: the other
+    endpoints return derived projections, while this one returns bytes a supplier gave you under
+    licence terms. Anything beyond a laptop needs auth and a licence check in front of it.
+    """
+    if not _SHA256.fullmatch(sha256):
+        raise HTTPException(
+            status_code=400,
+            detail="artifact id must be a 64-character lowercase hex SHA-256",
+        )
+
+    directory = ARTIFACT_DIR / sha256[:2] / sha256[2:4]
+    matches = sorted(directory.glob(f"{sha256}.*")) if directory.is_dir() else []
+    # A `.partial` file is a write that crashed mid-flight; serving one would hand out truncated
+    # bytes under a hash that claims to describe complete content.
+    matches = [path for path in matches if path.suffix != ".partial"]
+
+    if not matches:
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                f"no stored artifact for {sha256[:12]}…. The bytes live in "
+                f"data/cache/artifacts/, which is gitignored, so a fresh clone has to re-ingest "
+                f"the source before its citations can be rendered."
+            ),
+        )
+
+    target = matches[0]
+    media_type = _MEDIA_TYPES.get(target.suffix.lower())
+    if media_type is None:
+        # Refuse rather than guess. An unexpected suffix in the store is not something to hand to a
+        # browser with a content type invented for it.
+        raise HTTPException(
+            status_code=415, detail=f"stored artifact type {target.suffix!r} is not servable"
+        )
+
+    return FileResponse(
+        target,
+        media_type=media_type,
+        # `inline` so a PDF renders in the evidence viewer instead of downloading. `nosniff` because
+        # these are third-party bytes and the browser must not reinterpret their type.
+        headers={
+            "Content-Disposition": "inline",
+            "X-Content-Type-Options": "nosniff",
+            # Immutable is safe to the letter here: the URL contains the content hash, so the bytes
+            # at this address can never change.
+            "Cache-Control": "public, max-age=31536000, immutable",
+        },
+    )
 
 
 @app.get("/api/cohort")

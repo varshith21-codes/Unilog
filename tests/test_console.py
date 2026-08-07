@@ -13,6 +13,7 @@ refactor breaks silently.
 
 from __future__ import annotations
 
+import hashlib
 import json
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -345,6 +346,44 @@ def test_bundle_carries_everything_a_screen_needs(bundle):
         assert key in bundle, f"the console renders {key}"
 
 
+def test_the_record_block_projects_the_variant_parent_pointer(bundle, registry):
+    """Without this field the console cannot reconstruct a series at all.
+
+    ``parent_sku`` is the only thing linking one orderable part number to the others cut from the
+    same ordering table. The projection enumerates record fields explicitly rather than dumping the
+    model, so a field that is never named is silently unreachable from every screen — which is what
+    this one was.
+    """
+    assert "parent_sku" in bundle["record"], "the console groups variant series on this"
+    assert bundle["record"]["parent_sku"] is None, "a standalone product has no parent"
+
+    record = product()
+    record.parent_sku = "BA-100-050"
+    made = decisions_for(record)
+    child = build_bundle(
+        registry=registry,
+        record=record,
+        artifact=StubArtifact(document=source_document()),
+        classification=StubClassification(
+            candidates=[StubCandidate(CLASS_CODE, 0.92, "Plumbing > Valves")]
+        ),
+        extraction=StubExtraction(),
+        normalization_issues=[],
+        validation=Validator(registry).validate(record),
+        scores=SCORES,
+        features=FEATURES,
+        decisions=made,
+        certificate=build_certificate(
+            record,
+            required_attribute_codes=registry.required_codes(CLASS_CODE),
+            pipeline_version="axiom-test",
+        ),
+        exports=export_all(record, registry),
+    )
+
+    assert child["record"]["parent_sku"] == "BA-100-050"
+
+
 def test_bundle_certificate_signature_is_verified_server_side(bundle):
     """A browser cannot check an HMAC it has no key for, so the verdict travels with it."""
     assert bundle["certificate"]["signature_verified"] is True
@@ -644,6 +683,209 @@ def test_dataset_reflects_a_recorded_decision(client):
     handle = next(v for v in after["skus"][0]["values"] if v["attribute_code"] == "handle_type")
     assert handle["status"] == "human_approved"
     assert handle["review_reason"] == "human_accept"
+
+
+# ===================================================== serving the source bytes
+#
+# The evidence viewer draws a highlight over the real page, so it needs the page. This is the only
+# endpoint that returns supplier bytes rather than a derived projection, which makes it the only one
+# where a path bug would leak something outside the project. It is addressed by content hash for
+# exactly that reason: a 64-hex-character key cannot name a file elsewhere on disk.
+
+
+def store_artifact(root, payload: bytes, suffix: str) -> str:
+    """Write ``payload`` into a content-addressed store the way the ingest cache lays it out."""
+    digest = hashlib.sha256(payload).hexdigest()
+    directory = root / digest[:2] / digest[2:4]
+    directory.mkdir(parents=True, exist_ok=True)
+    (directory / f"{digest}{suffix}").write_bytes(payload)
+    return digest
+
+
+@pytest.fixture
+def artifacts(tmp_path, monkeypatch):
+    """A tmp artifact store, plus a client pointed at it.
+
+    Returns ``(client, store_root)`` so a test can add its own files. The real store is gitignored
+    and may be empty, so nothing here may depend on the developer's machine.
+    """
+    from fastapi.testclient import TestClient
+
+    from apps.api import main
+
+    root = tmp_path / "artifacts"
+    root.mkdir()
+    monkeypatch.setattr(main, "ARTIFACT_DIR", root)
+    return TestClient(main.app), root
+
+
+PDF_BYTES = b"%PDF-1.4\n1 0 obj\n<< /Type /Catalog >>\nendobj\ntrailer\n%%EOF\n"
+
+
+def test_a_stored_pdf_is_served_for_rendering_not_download(artifacts):
+    """`inline` is the point: a download prompt in the middle of a citation is not evidence."""
+    client, root = artifacts
+    digest = store_artifact(root, PDF_BYTES, ".pdf")
+
+    response = client.get(f"/api/artifact/{digest}")
+
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/pdf"
+    assert response.headers["content-disposition"] == "inline"
+
+
+def test_served_bytes_are_not_reinterpretable_by_the_browser(artifacts):
+    """These are third-party bytes. Content sniffing would let a supplier choose their own type."""
+    client, root = artifacts
+    digest = store_artifact(root, PDF_BYTES, ".pdf")
+
+    headers = client.get(f"/api/artifact/{digest}").headers
+    assert headers["x-content-type-options"] == "nosniff"
+    # Safe to the letter: the address *is* the content hash, so these bytes can never change.
+    assert "immutable" in headers["cache-control"]
+
+
+def test_the_bytes_served_hash_back_to_the_key_they_were_asked_for(artifacts):
+    """The invariant that makes this endpoint an evidence source rather than a file server.
+
+    If the response did not hash to the requested key, the viewer would be drawing a citation over a
+    document the certificate never described.
+    """
+    client, root = artifacts
+    digest = store_artifact(root, PDF_BYTES, ".pdf")
+
+    served = client.get(f"/api/artifact/{digest}").content
+    assert hashlib.sha256(served).hexdigest() == digest
+
+
+def test_a_stored_text_source_is_served_as_text(artifacts):
+    """Most of this corpus is text, not PDF.
+
+    The viewer does not render these — there is no bitmap to render, so it shows the parser's
+    reconstruction instead. The endpoint still has to serve them correctly, because the bytes are
+    what a reviewer checks the reconstruction against.
+    """
+    client, root = artifacts
+    digest = store_artifact(root, b"APOLLO VALVE 77C SERIES\n", ".txt")
+
+    response = client.get(f"/api/artifact/{digest}")
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/plain")
+
+
+def test_a_well_formed_hash_with_nothing_behind_it_explains_the_empty_store(artifacts):
+    """The state every fresh clone is in: bundles are committed, the cached bytes are not."""
+    client, _ = artifacts
+
+    response = client.get(f"/api/artifact/{'a' * 64}")
+
+    assert response.status_code == 404
+    assert "gitignored" in response.json()["detail"], "a 404 here has a specific, fixable cause"
+
+
+@pytest.mark.parametrize(
+    "artifact_id",
+    [
+        "A" * 64,  # uppercase hex: two URLs for one artifact breaks content addressing
+        "a" * 63,  # too short
+        "a" * 65,  # too long
+        "a" * 64 + ".pdf",  # caller trying to choose the suffix
+        "a" * 63 + "g",  # hex-shaped but not hex
+        "....secrets",  # dots, without a separator to make them useful
+    ],
+)
+def test_anything_that_is_not_a_bare_lowercase_hash_is_refused(artifacts, artifact_id):
+    """Validation, not sanitisation.
+
+    Sanitising a caller-supplied path is a game you can lose. Requiring 64 lowercase hex characters
+    is one you cannot: the accepted alphabet contains no separator and no dot.
+    """
+    client, _ = artifacts
+
+    response = client.get(f"/api/artifact/{artifact_id}")
+    assert response.status_code == 400
+    assert "SHA-256" in response.json()["detail"]
+
+
+def test_a_traversal_attempt_never_returns_bytes(artifacts, tmp_path):
+    """A file sitting next to the store must stay unreachable, by whichever encoding.
+
+    Payloads carrying a separator do not reach the handler at all — the router decodes the path
+    first, so they match no route and 404. The distinction matters when reading this test: a 400 is
+    the endpoint refusing, a 404 is the router never dispatching. Both are correct; neither returns
+    bytes, which is the property being asserted.
+    """
+    client, _ = artifacts
+    (tmp_path / "secret.pdf").write_bytes(b"%PDF-1.4 not yours")
+
+    attempts = (
+        "../secret.pdf",
+        "..%2Fsecret.pdf",
+        "..%2f..%2fetc%2fpasswd",
+        "....//....//secret.pdf",
+        f"{'a' * 62}/../../secret.pdf",
+        f"{'a' * 64}/../../../../secret.pdf",
+    )
+    for attempt in attempts:
+        response = client.get(f"/api/artifact/{attempt}")
+        assert response.status_code in (400, 404), attempt
+        assert b"not yours" not in response.content, attempt
+
+
+def test_a_half_written_file_is_not_served_under_a_completed_hash(artifacts):
+    """`.partial` is a write that crashed. Its hash claims complete content it does not have, and a
+    truncated PDF would fail to render with no explanation of why."""
+    client, root = artifacts
+    digest = hashlib.sha256(PDF_BYTES).hexdigest()
+    directory = root / digest[:2] / digest[2:4]
+    directory.mkdir(parents=True)
+    (directory / f"{digest}.partial").write_bytes(PDF_BYTES[:20])
+
+    response = client.get(f"/api/artifact/{digest}")
+    assert response.status_code == 404, "an incomplete artifact is a missing artifact"
+
+
+@pytest.mark.parametrize("suffix", [".svg", ".exe", ".docx", ".zip"])
+def test_a_type_the_pipeline_cannot_ingest_is_refused_rather_than_guessed(artifacts, suffix):
+    """The allowlist covers what the pipeline ingests, and nothing else.
+
+    `.svg` is the one that shows why this is an allowlist and not a `mimetypes.guess_type` call: it
+    is a plausible thing to find in an image store, and browsers execute script inside it.
+    """
+    client, root = artifacts
+    digest = store_artifact(root, b"<svg onload=alert(1)>", suffix)
+
+    response = client.get(f"/api/artifact/{digest}")
+    assert response.status_code == 415
+    assert suffix in response.json()["detail"]
+
+
+def test_supplier_html_is_served_as_text_so_it_cannot_run(artifacts):
+    """`inline` plus `text/html` would be script execution on this API's origin, and `nosniff` does
+    not help when the declared type is the dangerous one.
+
+    Nothing needs it rendered — the console draws the *parsed* projection of a page, and the reason
+    to return the original file is so a human can read it.
+    """
+    client, root = artifacts
+    digest = store_artifact(root, b"<script>alert(1)</script>", ".html")
+
+    response = client.get(f"/api/artifact/{digest}")
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/plain")
+    assert "html" not in response.headers["content-type"]
+
+
+def test_the_completed_file_wins_when_a_partial_sits_beside_it(artifacts):
+    """Re-ingesting after a crash leaves both on disk; the good one has to be the one served."""
+    client, root = artifacts
+    digest = store_artifact(root, PDF_BYTES, ".pdf")
+    (root / digest[:2] / digest[2:4] / f"{digest}.partial").write_bytes(b"trunc")
+
+    response = client.get(f"/api/artifact/{digest}")
+    assert response.status_code == 200
+    assert hashlib.sha256(response.content).hexdigest() == digest
 
 
 # ===================================================== the L4 overlay

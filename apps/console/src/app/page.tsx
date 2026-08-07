@@ -11,6 +11,7 @@ import {
   Stat,
 } from "@/components/primitives";
 import { RiskDial } from "@/components/risk-dial";
+import { VariantSeriesPanel } from "@/components/variant-series-panel";
 import {
   costTotals,
   listDocuments,
@@ -19,6 +20,7 @@ import {
   loadPolicy,
   portfolioTotals,
   reviewOrder,
+  variantGroups,
 } from "@/lib/data";
 import { count, dateOnly, percent, shortHash, tokens, usd } from "@/lib/format";
 
@@ -47,6 +49,7 @@ export default async function OverviewPage() {
   const sources = await listDocuments();
   const cost = costTotals(skus);
   const policyView = await loadPolicy(dataset.policy.epsilon);
+  const series = variantGroups(skus);
 
   // Dearest tier first: the question this table answers is "what is costing me money", and
   // alphabetical or cascade order buries the answer.
@@ -564,6 +567,23 @@ export default async function OverviewPage() {
           ))}
         </div>
       </section>
+
+      {/*
+        ---------------------------------------------------------------- variant series
+
+        Below the queue rather than above it. A series is context about how the catalogue was
+        built; the queue is work somebody has to do, and work comes first.
+
+        Absent entirely for a catalogue of standalone products, with no empty state. Every other
+        panel here describes something that should exist and is missing if it does not — a cost
+        figure, a source document — whereas most catalogues legitimately have no variant series at
+        all, and an empty "no series found" panel would report the normal case as a shortfall.
+      */}
+      {series.map((group) => (
+        <div key={group.seriesSku} className="mt-[var(--spacing-section-lg)]">
+          <VariantSeriesPanel group={group} />
+        </div>
+      ))}
     </div>
   );
 }

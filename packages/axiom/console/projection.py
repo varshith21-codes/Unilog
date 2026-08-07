@@ -278,6 +278,12 @@ def build_bundle(
             "brand": record.brand,
             "brand_id": record.brand_id,
             "supplier_id": record.supplier_id,
+            # Set by variant explosion, and the only field the console can reconstruct a series
+            # from. Note the shape it implies: the reference SKU the series was extracted from is
+            # itself one of the children and carries None, while its siblings point at it. So the
+            # grouping key is `parent_sku or sku`, not `parent_sku` — a parent here is a peer, not
+            # a synthetic series node.
+            "parent_sku": record.parent_sku,
             "lifecycle_status": record.lifecycle_status.value,
             "class_code": class_code,
             "schema_version": record.schema_version,

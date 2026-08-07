@@ -12,11 +12,13 @@
  */
 
 import type {
+  AttributeValue,
   CohortMember,
   CohortScore,
   CohortStudy,
   CrossSourceConflict,
   CrossSourceView,
+  EvidenceSpan,
   FormalCheck,
   GeneratedCopy,
   QualityIndex,
@@ -234,5 +236,77 @@ export function triageBundle(overrides: {
     },
     cross_source:
       overrides.unresolved === undefined ? null : { unresolved: overrides.unresolved },
+  } as unknown as SkuBundle;
+}
+
+/**
+ * One value on a variant, in whichever of the three provenance shapes matters.
+ *
+ * `table_extraction` plus a `table_ref` is a value read from this variant's own row.
+ * A non-null `derived_from` is one inherited from the series specification. The distinction is not
+ * cosmetic — it is what `variantGroups` counts — so it is expressed here rather than assumed.
+ */
+export function variantValue(overrides: {
+  code: string;
+  display?: string;
+  fromCell?: string | null;
+  inheritedBy?: string | null;
+}): AttributeValue {
+  const fromCell = overrides.fromCell ?? null;
+  return {
+    attribute_code: overrides.code,
+    value_raw: overrides.display ?? "DN20",
+    value_canonical: overrides.display ?? "DN20",
+    value_display: overrides.display ?? "DN20",
+    method: fromCell !== null ? "table_extraction" : "document_extraction",
+    confidence: 0.95,
+    status: "auto_accepted",
+    evidence:
+      fromCell !== null
+        ? [{ table_ref: fromCell, page: 1, quote_verified: true } as unknown as EvidenceSpan]
+        : [],
+    validations: [],
+    model_id: null,
+    model_tier: null,
+    prompt_version: null,
+    schema_version: "PLB.VLV.BALL.2PC@v1",
+    version: 1,
+    superseded_by: null,
+    derived_from: overrides.inheritedBy
+      ? `series specification inherited by ${overrides.inheritedBy}`
+      : null,
+    reviewed_by: null,
+    reviewed_at: null,
+    created_at: "2026-08-06T00:00:00+00:00",
+    score: 0.9,
+    decision: null,
+    features: {},
+    is_publishable: true,
+    has_verified_evidence: true,
+    citation_summary: [],
+  };
+}
+
+/**
+ * A bundle carrying only what `variantGroups` reads: the parent pointer, values and gaps.
+ *
+ * Same reasoning as `triageBundle` — the grouping touches three fields, and completing the other
+ * forty would imply the assertions depend on them.
+ */
+export function variantBundle(overrides: {
+  sku: string;
+  parentSku?: string | null;
+  values?: AttributeValue[];
+  inapplicable?: number;
+}): SkuBundle {
+  return {
+    sku: overrides.sku,
+    record: { sku: overrides.sku, parent_sku: overrides.parentSku ?? null },
+    values: overrides.values ?? [],
+    gaps: Array.from({ length: overrides.inapplicable ?? 0 }, (_, index) => ({
+      attribute_code: `withheld_${index}`,
+      recommended_action: "accept_as_not_applicable",
+      is_required: false,
+    })),
   } as unknown as SkuBundle;
 }

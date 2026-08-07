@@ -11,6 +11,7 @@ import {
   getSku,
   listSkus,
   loadDataset,
+  variantGroupFor,
 } from "@/lib/data";
 import { percent } from "@/lib/format";
 
@@ -38,6 +39,12 @@ export default async function ReviewSkuPage({
   const source = await getDocumentBundle(bundle);
   const rows = attributeRows(definition?.attributes ?? [], bundle.values, bundle.gaps);
   const className = definition?.name ?? bundle.class_code ?? "Unclassified";
+
+  // Which series this part belongs to, if any. A reviewer checking a size-scoped specification
+  // needs its siblings within reach — that value is correct for exactly one of them, and the
+  // fastest way to sanity-check it is to look at the next size up.
+  const series = variantGroupFor(bundle, await listSkus());
+  const siblings = series?.members.filter((member) => member.bundle.sku !== bundle.sku) ?? [];
 
   // Every span in this corpus resolves to page 1; take the page a span actually names so
   // this keeps working when a multi-page PDF arrives.
@@ -88,6 +95,41 @@ export default async function ReviewSkuPage({
                 {bundle.record.schema_version}
               </span>
             </p>
+
+            {/*
+              Series membership, stated where a reviewer will see it before they judge anything.
+
+              It changes how a value should be read: on a variant, a specification is either from
+              this part's own row of the ordering table or inherited from the series, and those carry
+              different weight. Rendered as links because the useful next action is almost always to
+              compare against the adjacent size.
+            */}
+            {series ? (
+              <p className="mt-3 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-meta text-[var(--fg-quiet)]">
+                {/*
+                  Read off the group rather than from `parent_sku` directly. The group already
+                  resolved which SKU the series was extracted from, and re-deriving it here would
+                  duplicate the `undefined`-vs-null handling that `variantGroups` owns.
+                */}
+                <span className="pill pill-quiet">
+                  {series.seriesSku === bundle.sku ? "Series reference" : "Variant"}
+                </span>
+                <span>
+                  One of {series.members.length} in the{" "}
+                  <span className="mono">{series.seriesSku}</span> series
+                  {siblings.length > 0 ? ":" : ""}
+                </span>
+                {siblings.map((member) => (
+                  <Link
+                    key={member.bundle.sku}
+                    href={`/review/${member.bundle.sku}`}
+                    className="mono rounded-xs text-[var(--accent)] hover:underline"
+                  >
+                    {member.bundle.sku}
+                  </Link>
+                ))}
+              </p>
+            ) : null}
           </div>
 
           <div className="flex items-center gap-2">

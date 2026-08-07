@@ -207,6 +207,122 @@ export function unresolvedConflicts(bundle: SkuBundle): number {
   return bundle.cross_source?.unresolved ?? 0;
 }
 
+// ------------------------------------------------------------------ variant series
+//
+// One ordering table on one datasheet becomes N orderable products. That is the claim variant
+// explosion makes, and it invites an obvious and correct suspicion: did you generate five products,
+// or did you copy one product five times?
+//
+// The answer is already in the bundles, so it is derived here rather than served as a new artifact.
+// Each variant's values carry the provenance that settles it: some were read from that variant's own
+// row of the table, some were inherited from the shared series specification, and some were withheld
+// because the source states them only for another size. Counting those three is what turns "five
+// SKUs" into evidence about how they differ.
+
+/** One product in a series, with the provenance breakdown that shows how it differs from its siblings. */
+export interface VariantMember {
+  bundle: SkuBundle;
+  /**
+   * True for the SKU the series was extracted from.
+   *
+   * Marked rather than promoted. It is special in how extraction happened, not in the catalogue,
+   * and ordering it first would imply a hierarchy the data does not have.
+   */
+  isReference: boolean;
+  /** Values read from this variant's own row of the ordering table, cited to an exact cell. */
+  fromOwnRow: number;
+  /** Values inherited from the shared series specification, keeping their original citation. */
+  inherited: number;
+  /**
+   * Attributes the source states only for a different size.
+   *
+   * Not missing data. Recording it as inapplicable is what stops a reviewer chasing a supplier for
+   * a figure that was never meant to exist for their part.
+   */
+  inapplicable: number;
+}
+
+export interface VariantGroup {
+  /** SKU of the record the series was exploded from, which is also the grouping key. */
+  seriesSku: string;
+  /** Sorted by SKU, which for a size-ordered part number is size order. */
+  members: VariantMember[];
+  /**
+   * Whether the reference SKU's own bundle is in the dataset.
+   *
+   * False when only some children were persisted. The series is still real and still worth showing;
+   * the panel says the reference is absent rather than silently listing a partial family.
+   */
+  referencePresent: boolean;
+}
+
+/**
+ * This SKU's parent pointer, with absent and null collapsed.
+ *
+ * The one place the distinction is allowed to exist. The committed offline fixture predates the
+ * field, so its bundles have no `parent_sku` at all — and `undefined !== null` is true, which would
+ * silently classify every SKU in that fixture as a variant of itself and render a wall of
+ * one-member series. Normalised once here rather than guarded at each of the three read sites.
+ */
+function parentOf(bundle: SkuBundle): string | null {
+  return bundle.record.parent_sku ?? null;
+}
+
+function variantMember(bundle: SkuBundle, seriesSku: string): VariantMember {
+  return {
+    bundle,
+    isReference: bundle.sku === seriesSku,
+    // `table_extraction` is set only by `variants._from_cell`, so this counts cells rather than
+    // guessing from prose.
+    fromOwnRow: bundle.values.filter((value) => value.method === "table_extraction").length,
+    // `derived_from` is written only by `variants._inherited`. It is a general field on the Python
+    // model, so if a second writer ever appears this count needs narrowing.
+    inherited: bundle.values.filter((value) => value.derived_from !== null).length,
+    // Likewise `accept_as_not_applicable` is produced only by the withheld-note branch of `explode`.
+    inapplicable: bundle.gaps.filter(
+      (gap) => gap.recommended_action === "accept_as_not_applicable",
+    ).length,
+  };
+}
+
+/**
+ * Group the catalogue into variant series.
+ *
+ * A group qualifies when **any** member declares a `parent_sku`, which is the only positive signal
+ * that explosion produced it. Grouping on size alone would be wrong in both directions: two
+ * unrelated standalone SKUs never share a key, but a single surviving child of a reference that was
+ * never persisted is a one-member group that is still a genuine series.
+ *
+ * Returns an empty array for a catalogue of standalone products, which is what the two committed
+ * bundles are.
+ */
+export function variantGroups(skus: SkuBundle[]): VariantGroup[] {
+  const grouped = new Map<string, SkuBundle[]>();
+  for (const bundle of skus) {
+    const key = parentOf(bundle) ?? bundle.sku;
+    const members = grouped.get(key);
+    if (members) members.push(bundle);
+    else grouped.set(key, [bundle]);
+  }
+
+  return [...grouped.entries()]
+    .filter(([, members]) => members.some((bundle) => parentOf(bundle) !== null))
+    .map(([seriesSku, members]) => ({
+      seriesSku,
+      members: [...members]
+        .sort((a, b) => a.sku.localeCompare(b.sku))
+        .map((bundle) => variantMember(bundle, seriesSku)),
+      referencePresent: members.some((bundle) => bundle.sku === seriesSku),
+    }))
+    .sort((a, b) => a.seriesSku.localeCompare(b.seriesSku));
+}
+
+/** The series a SKU belongs to, or null when it is a standalone product. */
+export function variantGroupFor(bundle: SkuBundle, skus: SkuBundle[]): VariantGroup | null {
+  const key = parentOf(bundle) ?? bundle.sku;
+  return variantGroups(skus).find((group) => group.seriesSku === key) ?? null;
+}
+
 /**
  * Review order: the SKUs a reviewer should open first.
  *

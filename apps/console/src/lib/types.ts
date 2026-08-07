@@ -384,6 +384,19 @@ export interface ProductRecordSummary {
   brand: string | null;
   brand_id: string | null;
   supplier_id: string | null;
+  /**
+   * Set by variant explosion (`axiom.extract.variants.explode`). Null on a standalone product.
+   *
+   * Also null on the SKU the series was *extracted from*, which is itself one of the variants
+   * rather than a separate series node — so the grouping key is `parent_sku ?? sku`. See
+   * `variantGroups` in `lib/data.ts`.
+   *
+   * Optional rather than required, because the checked-in offline fixture was generated before this
+   * field was projected and therefore omits it. Absent and null must mean the same thing at the read
+   * site: treating `undefined` as "has a parent" would turn every SKU in that fixture into a
+   * one-member series. The live API always emits it.
+   */
+  parent_sku?: string | null;
   lifecycle_status: LifecycleStatus;
   class_code: string | null;
   schema_version: string | null;

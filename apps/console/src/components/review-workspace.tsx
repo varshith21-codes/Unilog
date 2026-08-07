@@ -745,6 +745,14 @@ function ValueDetail({
                   page={page}
                   highlight={span.bbox}
                   context={contextBoxes}
+                  /*
+                   * Only PDF-parsed sources have a bitmap worth rendering. The span's own hash is
+                   * used rather than the document's, because the span is what the citation points
+                   * at — if the two ever disagreed, the citation would be the one telling the truth.
+                   */
+                  pdfSha256={
+                    sourceDocument?.parser === "pdfplumber" ? span.document_sha256 : null
+                  }
                 />
               ) : (
                 <EvidenceTextFallback quote={span.quote} />

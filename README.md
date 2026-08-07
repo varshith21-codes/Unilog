@@ -49,7 +49,7 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -e ".[dev,api,docintel,ingest]"
 
-pytest -m "not live"                    # 1,036 tests, no AWS credentials needed
+pytest -m "not live"                    # 1,056 tests, no AWS credentials needed
 ruff check .
 python scripts/check_console_types.py   # types.ts vs the Python models it mirrors
 ```
@@ -124,6 +124,20 @@ proportion to sample count: one accept does not earn an attribute a confident pr
 | `GET /api/policy?epsilon=` | The risk dial: threshold, coverage, and the full risk-coverage curve |
 | `GET /api/console/dataset` | Everything the dashboards render, with review decisions joined in |
 | `GET /api/console/stats` | Counts only — cheap enough to poll |
+| `GET /api/artifact/{sha256}` | The stored source document itself, so the evidence viewer can render the real page |
+
+`/api/artifact/{sha256}` is addressed by content hash, never by path. A 64-lowercase-hex validation
+is traversal-proof in a way that sanitising a caller-supplied path is not: the accepted alphabet
+contains no separator and no dot. The file suffix is discovered by globbing the store rather than
+taken from the caller, and the content type comes from an allowlist of what the pipeline ingests —
+an unrecognised suffix is refused with a 415 rather than served under a guessed type. Supplier HTML
+is deliberately served as `text/plain`, because `inline` plus `text/html` would let a supplier page
+run script on this API's origin, and `nosniff` cannot help when the declared type is the dangerous
+one. `.partial` files, which are writes that crashed mid-flight, are excluded — their hash claims
+complete content they do not have.
+
+This is the only endpoint that returns raw supplier bytes rather than a derived projection, which
+makes the missing authentication matter more here than elsewhere: those bytes may be licensed.
 
 `/api/console/dataset` reports the policy the bundles were **actually decided under**, not a
 freshly computed one. `/api/policy` is the separate what-if dial. Serving a different threshold
@@ -147,7 +161,7 @@ cd apps/console
 npm install
 npm run dev          # http://localhost:3000
 
-npm test             # 36 component tests (Vitest + React Testing Library)
+npm test             # 71 component tests (Vitest + React Testing Library)
 npm run typecheck
 npm run check:contrast
 ```
@@ -164,6 +178,31 @@ review queue, the per-SKU review workspace with the evidence viewer, the enrichm
 and the Quality Index page carrying the before/after cohort. All of it renders **real pipeline
 output** — the API serves bundles written by `run_pipeline.py --save-session`, and decisions made
 in the workspace post back and persist.
+
+**The evidence viewer has two base layers and one overlay.** Coordinates come from
+`axiom.core.evidence.BoundingBox` — PDF points, origin top-left — and every element is positioned as
+a percentage of page extent, which is what lets the same highlight code sit over a real bitmap and
+over a synthesised layout without knowing which it is on. When the source is a PDF, `PdfPageLayer`
+renders the actual page underneath via `react-pdf` and the box frames the real cell. When it is text
+or HTML — most of this corpus — there is no bitmap, so the parser's reconstruction stands in.
+
+A caption always states which of the two is on screen. "The datasheet" and "our reconstruction of the
+datasheet" are different claims and only one of them is proof, so a provenance tool that blurs them
+is undermining its own argument. A PDF that fails to load falls back to the reconstruction and says
+that too, rather than showing an empty frame — that is the state a fresh clone is in, since
+`data/cache/artifacts/` is gitignored and so a clone has the bundles but not the bytes.
+
+The pdfjs worker is bundled rather than loaded from a CDN. A demo that needs network access to render
+its own evidence fails on conference wifi.
+
+Two caveats, both honest:
+
+- **Neither committed bundle is PDF-backed.** `BA-100-075` and `T-113-100` were both parsed from
+  text, so nothing in the checked-in data exercises the PDF path. One run lights it up:
+  `python scripts/run_pipeline.py data/samples/ap77c.pdf --sku 77C-105 --include-optional --save-session`.
+- **PDF rendering is verified by test and build, not by eye.** The artifact endpoint, the layer
+  choice, the suppression gate, the caption states and the failure fallback all have tests. Nobody
+  has yet confirmed in a real browser that pdfjs paints the page correctly.
 
 The Quality Index page is the one screen with no offline fixture behind it, deliberately. Every
 other page degrades to hand-seeded data when the API is down; a hand-written before/after
@@ -656,6 +695,24 @@ same species as the ones the system exists to prevent:
 - The variant a size-scoped spec *does* apply to was never given the value — the code skipped the
   gap but forgot to add the value.
 
+**The console shows the series, because the claim invites a fair suspicion.** "One table became five
+products" and "one product was copied five times" look identical in a SKU count, so the overview
+reconstructs the series as a table of the records that were actually produced: one row per part
+number, one column per attribute the ordering table supplied, and every cell labelled with the exact
+table cell it was read from. If the pipeline had duplicated a record, every column would be identical
+and every cell reference would point at the same row.
+
+Beside it, each variant's values split three ways — read from its own row, inherited from the shared
+series specification, or withheld as inapplicable at that size. The third is the one worth showing: a
+torque figure printed once for the half-inch valve appearing on four larger valves would be a
+precisely-cited wrong number, which is the exact failure this layer exists to prevent.
+
+Nothing new is written to serve this. `parent_sku` is projected onto the bundle and the console
+derives the rest, so the counts are of real records rather than of a summary that claims them. The
+grouping key is `parent_sku ?? sku` rather than `parent_sku`, because the SKU a series was extracted
+from is itself one of the variants and carries no parent — treating it as a separate node splits every
+series in two.
+
 ### An actual defect, found by adversarial testing
 
 The ablation was null at the time, which prompted a harder question — and this one found a real
@@ -793,7 +850,7 @@ axiom/
 │   ├── cohort.json            # the before/after study the console's Quality Index page reads
 │   ├── ablation.json          # trust layer on vs off
 │   └── adversarial.json       # wrong-document negative control
-└── tests/                     # 1,036 tests
+└── tests/                     # 1,056 tests
 ```
 
 Adding an attribute means editing YAML in `schema/`. No Python change, no prompt change — the
@@ -921,15 +978,25 @@ Tracked against blueprint Part 12.
       - [x] Variant table explosion with parent-child linkage
       - [x] Constrained copy generation with a deterministic claim-check pass
       - [x] Quality Index dashboard with a before/after cohort and a control arm
-- [ ] **Tier 3 — pick one or two.** The blueprint's own instruction, so this is not meant to be
-      finished:
-      - [x] **Multi-source cross-validation (L4)**, with revision-aware precedence. Two sources
-            that agree are the strongest evidence this system can produce; two that disagree are
-            ordered by the revision marker printed on the page, and left for a human when they
-            cannot be
-      - [ ] Batch orchestration on the deployed storage stack
-      - [ ] Part-number grammar induction, cross-reference/equivalence, MCP server, DPP panel,
-            image consistency, spec drift — not started, and deliberately so
+- [ ] **Tier 3 — pick one or two.** **None of the six numbered items is built.** The blueprint's
+      instruction is to pick one or two rather than finish the list, so this is a deliberate stop
+      rather than an omission — but it is worth stating without hedging:
+      - [ ] 19. Part-number grammar induction with held-out validation
+      - [ ] 20. Cross-reference and equivalence report
+      - [ ] 21. MCP server plus a live agent query
+      - [ ] 22. Compliance/DPP readiness panel
+      - [ ] 23. Image-attribute consistency check
+      - [ ] 24. Spec drift detection on a revised datasheet
+
+**Beyond the tiers, and outside them.** Two pieces of work here are not Tier 3 items and should not
+be counted as though they were:
+
+- **Validation layer L4, cross-source agreement.** Tier 1 item 7 scopes validation to L0–L3;
+  module M7 defines L0–L6. L4 closes part of that gap — two sources that agree are the strongest
+  evidence this system can produce, two that disagree are ordered by the revision marker printed on
+  the page, and neither is guessed at when nothing can order them. Real work, and not one of items
+  19–24.
+- **The M15 CI regression gate**, described below.
 
 Beyond the tiers, blueprint module M15's **CI regression gate** is in place: `ci.yml` runs lint,
 Python tests, console tests, typecheck, contrast, schema integrity and a type-drift check on every push, and
@@ -991,6 +1058,40 @@ Storage infrastructure is deployed (see above). Compute is not — the pipeline 
   pull requests that touch the prompts, the extractor, the schema or the golden set — not on every
   push. It fails loudly rather than skipping when credentials are absent, because a gate you
   cannot distinguish from a gate that did not run is not a gate.
+- The console tests cover *components*, not pages. The `page.tsx` server components fetch and
+  compose data before rendering, and nothing here exercises that path — a broken `await` in a page
+  would still ship. `apps/api/static/index.html` carries ~540 lines of inline JavaScript and is
+  untested too; it exists so the review workspace is demonstrable with nothing but Python
+  installed, which is also why it has no build step to hang a test off.
+- **`npm audit` reports three high-severity advisories in the console, all pre-existing and all
+  resolved by one upgrade.** Two are transitive dependencies of `next@16.2.12` — a bundled
+  `postcss` at 8.5.22 or below (source-map path traversal, XSS via an unescaped `</style>`) and
+  `sharp` below 0.35.0 (inherited libvips CVEs). The third is `next` itself, flagged for depending
+  on them. The *direct* `postcss` devDependency is already on a patched version; it is Next's own
+  copy that is not. `npm audit fix --force` fixes all three by installing `next@16.3.0`, which is
+  outside the version this repo pins, so it is left as a deliberate decision rather than taken
+  silently. Neither package sits on a request path: `postcss` runs at build time, and `sharp` only
+  serves image optimisation, which this console does not use.
+- **The variant series panel has no data behind it on a fresh clone.** Both committed bundles are
+  standalone SKUs, and the checked-in offline fixture's five BA-100 records were each extracted
+  independently rather than exploded from the ordering table — so `parent_sku` is legitimately null
+  for all of them and the panel correctly renders nothing. The grouping and the provenance counts are
+  unit-tested against constructed series; what has not been seen is the panel over real explosion
+  output. One run produces it:
+  `python scripts/explode_variants.py data/samples/ba100.txt --sku BA-100-050 --include-optional --save-sessions`.
+
+  That fixture also predates the field entirely, which is why `parent_sku` is declared optional in
+  `types.ts` and normalised in one place: `undefined !== null` is true, so a naive read would
+  classify every SKU in it as a variant of itself and render five one-member series where there is no
+  series at all. Regenerating the fixture would add the field, at the cost of a ten-thousand-line diff
+  of re-signed certificates and new timestamps, so the reader absorbs the difference instead — the
+  same call the `richness` reinterpretation makes.
+- **The PDF base layer of the evidence viewer has never been looked at in a browser.** The artifact
+  endpoint, the layer choice, the glyph suppression, all three caption states and the load-failure
+  fallback are covered by tests, and the bundle builds — but "pdfjs paints this page correctly at
+  this scale" is not a claim any of that supports, and neither committed bundle is PDF-backed, so
+  opening the console today shows the reconstruction on every SKU. One run changes that:
+  `python scripts/run_pipeline.py data/samples/ap77c.pdf --sku 77C-105 --include-optional --save-session`.
 - HTS classification is deliberately never auto-published: published benchmarks put accuracy
   near 40% at the 10-digit level, which is not publishable at any confidence this system can
   honestly assign.
