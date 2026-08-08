@@ -3,6 +3,12 @@
 # `description` and `example_values` are PROMPT INPUT, not documentation. Extraction quality
 # measurably improves when the schema supplies attribute descriptions and example values,
 # so a vague description here is a real defect, not a cosmetic one.
+#
+# `interchange` and `substitution` drive the cross-reference report. They are declared here
+# rather than in the equivalence engine because "does a different handle style block a
+# substitution?" is a merchandising judgement, not a logic question — the person who holds that
+# judgement should be able to change it without touching Python. An attribute with no
+# `interchange` is reported as unclassified rather than quietly ignored.
 
 attributes:
   - code: nominal_size
@@ -24,6 +30,9 @@ attributes:
     table_headers: ["size", "nominal size", "nps", "dn", "valve size", "pipe size"]
     tolerance: 0.0
     plausible_range: [3.0, 1200.0]
+    # The one attribute where a difference ends the conversation. A 3/4" valve is not a
+    # substitute for a 1" valve at any price, so no amount of agreement elsewhere rescues it.
+    interchange: defining
 
   - code: pressure_rating_wog
     name: Pressure Rating (WOG)
@@ -41,6 +50,10 @@ attributes:
       - do not confuse with the steam rating (WSP), which is a different, lower figure
     tolerance: 0.0
     plausible_range: [25.0, 10000.0]
+    # Asymmetric on purpose. A 600 psi valve substitutes for a 400 psi one; the reverse is a
+    # downgrade that could fail in service, and equality would reject the safe direction too.
+    interchange: functional
+    substitution: at_least
 
   - code: steam_pressure_rating
     name: Steam Pressure Rating (WSP)
@@ -54,6 +67,8 @@ attributes:
     example_values: ["125 PSI", "150 PSI"]
     tolerance: 0.0
     plausible_range: [10.0, 1000.0]
+    interchange: functional
+    substitution: at_least
 
   - code: body_material
     name: Body Material
@@ -89,6 +104,10 @@ attributes:
         aliases: ["DI", "A536", "ductile"]
       - value: PVC
         aliases: ["poly vinyl chloride", "u-pvc"]
+    # Deliberately `equal` rather than a ranking. Stainless is not simply "better than" bronze —
+    # substituting one alloy for another is a metallurgical judgement about the service, and an
+    # ordering imposed here would let the engine approve it on the strength of a string sort.
+    interchange: functional
 
   - code: seat_material
     name: Seat Material
@@ -112,6 +131,9 @@ attributes:
         aliases: ["e.p.d.m."]
       - value: Metal Seated
         aliases: ["metal seat", "metal-to-metal"]
+    # Usually the weakest-rated component in the assembly, so a difference here is a real
+    # performance difference even when body and ratings match.
+    interchange: functional
 
   - code: stem_material
     name: Stem Material
@@ -136,6 +158,7 @@ attributes:
         aliases: ["chrome plated brass", "cp brass"]
       - value: Monel
         aliases: ["monel 400"]
+    interchange: functional
 
   - code: port_type
     name: Port Type
@@ -155,6 +178,10 @@ attributes:
         aliases: ["regular port", "conventional port", "standard", "std"]
       - value: Reduced Port
         aliases: ["reduced bore", "restricted port", "reduced"]
+    # Critical rather than functional: the valve fits the same pipe, so it is not a different
+    # product, but the flow is not the same and an installer needs to be told. The magnitude of
+    # that difference is carried by cv_flow_coefficient, which is where it can be compared.
+    interchange: critical
 
   - code: end_connection
     name: End Connection
@@ -184,6 +211,10 @@ attributes:
         aliases: ["bw", "buttweld"]
       - value: Socket Weld
         aliases: ["sw", "socketweld"]
+    # The clearest case for the critical/functional split. A solder-end valve performs
+    # identically to a threaded one and will not thread into the same pipe, so it is a
+    # functional equivalent and never a drop-in.
+    interchange: critical
 
   - code: handle_type
     name: Handle Type
@@ -207,6 +238,10 @@ attributes:
       - value: Handwheel
         aliases: ["hand wheel", "wheel"]
     table_headers: ["handle", "handle type", "handwheel", "operator"]
+    # Cosmetic for interchange, which is not the same as unimportant. A lever for a handwheel
+    # changes nothing about fit or rating, so it must not block a substitution — but it is still
+    # reported as a difference, because an installer expecting a lever should be told.
+    interchange: cosmetic
 
   - code: cv_flow_coefficient
     name: Flow Coefficient (Cv)
@@ -218,6 +253,10 @@ attributes:
     example_values: ["12.5", "18.0", "45"]
     tolerance: 0.05
     plausible_range: [0.01, 50000.0]
+    # More flow is never a fault. This is what catches a reduced-port valve being offered as a
+    # substitute for its full-port twin: same size, same rating, same everything except Cv.
+    interchange: functional
+    substitution: at_least
 
   - code: temperature_range
     name: Temperature Range
@@ -231,6 +270,11 @@ attributes:
     example_values: ["-20F to 366F", "-29C to 186C"]
     tolerance: 0.0
     plausible_range: [-273.15, 1000.0]
+    # A range needs enclosure, not ordering. A candidate rated -10C to 200C has a higher ceiling
+    # than one rated -29C to 186C and is still not a substitute for it, because it gives up 19
+    # degrees at the bottom. Comparing either bound alone would approve exactly that swap.
+    interchange: functional
+    substitution: encloses
 
   - code: operating_torque
     name: Operating Torque
@@ -244,6 +288,11 @@ attributes:
     example_values: ["18-22 ft-lb", "24-30 N.m"]
     tolerance: 0.05
     plausible_range: [0.1, 20000.0]
+    # An operating characteristic rather than an interchange criterion: a stiffer valve is still
+    # the same valve in the pipe. Reported as a difference, never as a blocker. It is also the
+    # attribute most often stated for one size only, so treating it as decisive would refuse
+    # substitutions on the strength of a figure that was never published for either part.
+    interchange: cosmetic
 
   - code: number_of_pieces
     name: Body Construction
@@ -259,3 +308,6 @@ attributes:
         aliases: ["2 piece", "2-piece", "two piece"]
       - value: Three-Piece
         aliases: ["3 piece", "3-piece", "three piece"]
+    # Critical: construction decides whether the valve can be serviced in line, and a three-piece
+    # body is physically longer. The valve does the same job, so this is not defining.
+    interchange: critical

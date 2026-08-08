@@ -528,6 +528,34 @@ def overlay_cross_source(bundle: dict[str, Any], payload: dict[str, Any]) -> dic
     }
 
 
+def overlay_equivalence(bundle: dict[str, Any], payload: dict[str, Any]) -> dict[str, Any]:
+    """Fold a cross-reference onto a projected bundle.
+
+    Written by ``scripts/cross_reference.py --write``, joined here at read time for the same
+    reason review decisions and L4 findings are: the bundle records what a *single-SKU* run
+    produced, and a comparison against the rest of the catalogue is a later, separate reading.
+    Rewriting the bundle with it would destroy the ability to ask what that run said on its own.
+
+    **Only a top-level block is attached — no per-value verdict**, which is a deliberate departure
+    from :func:`overlay_cross_source`. An equivalence finding is a statement about a *pair of
+    products*, not about an attribute of this one. `pressure_rating_wog` is not "in conflict" on
+    this record because some other part rates lower; hanging that on the attribute row would be a
+    category error, and a reviewer would read it as a defect in their own data.
+
+    ``source`` and ``measured`` arrive inside the report, carried there by the catalogue's own
+    summary, so the panel can say whether the records compared were real pipeline output or the
+    hand-authored corpus. Same contract as the L4 dry-run marker.
+    """
+    report = payload.get("report")
+    if not isinstance(report, dict):
+        return bundle
+
+    return {
+        **bundle,
+        "equivalence": {"generated_at": payload.get("generated_at"), **report},
+    }
+
+
 def build_dataset(
     bundles: list[dict[str, Any]],
     *,

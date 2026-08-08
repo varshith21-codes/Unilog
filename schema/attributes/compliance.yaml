@@ -23,6 +23,12 @@ attributes:
       - "the word 'lead-free' alone is not sufficient without a standard reference"
     evidence_requirement: strict
     compliance_claim: true
+    # Holding a certification the reference lacks is never a fault, so the direction is at_least
+    # rather than equal. Note what this does NOT license: `at_least` compares two *established*
+    # values, and a candidate whose lead-free status was never established is unknown rather than
+    # false. The equivalence engine refuses to satisfy a compliance requirement from an absence.
+    interchange: functional
+    substitution: at_least
 
   - code: potable_water_approved
     name: Potable Water Approved
@@ -34,6 +40,8 @@ attributes:
     example_values: ["NSF/ANSI 61 certified"]
     evidence_requirement: strict
     compliance_claim: true
+    interchange: functional
+    substitution: at_least
 
   - code: approvals
     name: Approvals and Listings
@@ -46,6 +54,11 @@ attributes:
     example_values: ["UL, CSA, NSF-61", "FM approved"]
     evidence_requirement: strict
     compliance_claim: true
+    # A substitute must carry every listing the reference carries, and may carry more. Set
+    # comparison rather than equality: an Apollo valve holding NSF-61, NSF-372 and UL is an
+    # acceptable stand-in for one holding NSF-61 and UL, and equality would refuse it.
+    interchange: functional
+    substitution: superset
     allowed_values:
       - value: UL
         aliases: ["ul listed", "underwriters laboratories", "u.l."]
@@ -83,6 +96,8 @@ attributes:
     example_values: ["RoHS 3 compliant", "RoHS 2011/65/EU"]
     evidence_requirement: strict
     compliance_claim: true
+    interchange: functional
+    substitution: at_least
 
   - code: prop65_warning_required
     name: California Prop 65 Warning Required
@@ -93,6 +108,10 @@ attributes:
       rather than false when the source is silent.
     evidence_requirement: strict
     compliance_claim: true
+    # The one attribute here where more is worse, so the direction inverts: a candidate needing a
+    # Prop 65 warning is not an acceptable substitute for one that does not.
+    interchange: functional
+    substitution: at_most
 
   - code: country_of_origin
     name: Country of Origin
@@ -104,3 +123,8 @@ attributes:
     example_values: ["United States", "Taiwan", "Italy", "China"]
     evidence_requirement: strict
     compliance_claim: true
+    # Cosmetic for *interchange* and emphatically not for procurement. Origin changes landed cost
+    # and trade-agreement eligibility, but a Taiwanese valve fits and performs exactly as a
+    # domestic one does, so it must not block a technical substitution. Reported as a difference
+    # so a buyer sees it, because the tariff consequence is theirs to weigh rather than ours.
+    interchange: cosmetic

@@ -49,13 +49,14 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -e ".[dev,api,docintel,ingest]"
 
-pytest -m "not live"                    # 1,056 tests, no AWS credentials needed
+pytest -m "not live"                    # 1,167 tests, no AWS credentials needed
 ruff check .
 python scripts/check_console_types.py   # types.ts vs the Python models it mirrors
 ```
 
-Everything above runs offline, and so do three of the entry points — supplier-file ingestion,
-the quality cohort, and the regression gate make no model calls at all:
+Everything above runs offline, and so do five of the entry points — supplier-file ingestion,
+the quality cohort, part-number grammar induction, the cross-reference report, and the regression
+gate make no model calls at all:
 
 ```powershell
 # a messy supplier spreadsheet -> canonical fields, with the mapping remembered per supplier
@@ -68,6 +69,14 @@ python scripts/run_cohort.py --write
 # cross-source agreement, with scripted responses so the mechanism is visible for free
 python scripts/cross_validate.py `
   data/samples/ba100.txt data/samples/ba100-catalog.txt --sku BA-100-075 --dry-run
+
+# what a part number encodes, learned from examples and scored on held-out parts
+python scripts/induce_grammar.py --ablation
+
+# what else in the catalogue could ship instead, and why the rest cannot
+python scripts/cross_reference.py --sku BA-100-100
+python scripts/cross_reference.py --sku 77C-105R --against 77C-105   # one directional pair
+python scripts/cross_reference.py --sweep                            # every ordered pair
 ```
 
 The pipeline itself needs Bedrock:
@@ -161,7 +170,7 @@ cd apps/console
 npm install
 npm run dev          # http://localhost:3000
 
-npm test             # 102 component tests (Vitest + React Testing Library)
+npm test             # 122 component tests (Vitest + React Testing Library)
 npm run typecheck
 npm run check:contrast
 ```
@@ -169,15 +178,16 @@ npm run check:contrast
 The component tests target the branches where being wrong would mislead a reviewer about their own
 data rather than the layout: whether the formal-verification panel can tell *not checked* from
 *checked and clean* from *the solver returned an error*, whether a stale catalogue reads as
-superseded rather than as a conflict, and whether the cohort refuses to vouch for a lift when its
-control arm moved. There is deliberately no coverage threshold — a number pushes effort toward the
+superseded rather than as a conflict, whether the cohort refuses to vouch for a lift when its
+control arm moved, and whether the cross-reference reads *cannot be determined* as a data gap rather
+than as a rejection. There is deliberately no coverage threshold — a number pushes effort toward the
 easy 80% and away from the handful of branches that matter.
 
 Six screens: a portfolio overview (quality scoreboard, cost meter, interactive risk dial), the
-pipeline replay, the review queue, the per-SKU review workspace with the evidence viewer, the
-enrichment certificate, and the Quality Index page carrying the before/after cohort. All of it
-renders **real pipeline output** — the API serves bundles written by `run_pipeline.py
---save-session`, and decisions made in the workspace post back and persist.
+pipeline replay, the review queue, the per-SKU review workspace with the evidence viewer and the
+cross-reference beneath it, the enrichment certificate, and the Quality Index page carrying the
+before/after cohort. All of it renders **real pipeline output** — the API serves bundles written by
+`run_pipeline.py --save-session`, and decisions made in the workspace post back and persist.
 
 **`/pipeline` replays a run rather than performing one.** It shows the stages a recorded run went
 through — ingest, parse, classify, extract, normalize, validate, decide, certify, syndicate, plus
@@ -738,6 +748,254 @@ grouping key is `parent_sku ?? sku` rather than `parent_sku`, because the SKU a 
 from is itself one of the variants and carries no parent — treating it as a separate node splits every
 series in two.
 
+### Part-number grammar induction, and how to tell a law from a coincidence
+
+`BA-100-075` is a 3/4" valve from the BA-100 series, and a merchandiser reads that off the string
+without opening a datasheet. Tier 3 item 19 learns to do the same from examples rather than from a
+hand-written regex per supplier — a distributor carries thousands of series, and nobody is going to
+write thousands of regexes.
+
+```powershell
+python scripts/induce_grammar.py --ablation
+```
+
+No model calls, no documents, no network: the corpus supplies part numbers and ground truth and
+everything in between is arithmetic and lookup. So unlike the backtest this is free and
+reproducible bit-for-bit, which is why it can run in CI.
+
+**The headline is not the rule count.** Induction always succeeds, and every rule it returns fits
+the data it was induced from perfectly — that is what induction *is*. So the number that means
+something is held-out accuracy: hide a part number, induce the grammar without it, and see whether
+the grammar can reconstruct that part. Leave-one-out, so every SKU takes a turn, scored through the
+same five-outcome scorer the extraction backtest uses.
+
+**15 part numbers, 15 folds, 312 comparisons, 0 model calls, $0.00.**
+
+| Outcome | Count |
+|---|---|
+| correct | 125 |
+| **wrong value** | **0** |
+| missed | 102 |
+| correctly abstained | 85 |
+| **hallucinated** | **0** |
+
+| Metric | Value |
+|---|---|
+| precision | 100.0% |
+| recall | 55.1% |
+| F1 | 71.0% |
+| exact-match share | 100.0% |
+| abstention correctness | 100.0% |
+| citation coverage | **0.0%** |
+
+That last row is not a defect, it is the point. A grammar value has **no evidence span**, because a
+part number is not a document. That is why the method sits in `DerivationMethod`'s inference family,
+why every value it emits is `QUEUED_FOR_REVIEW`, and why `AttributeValue` refuses to construct an
+inferred value as `AUTO_ACCEPTED` at all — this cannot become an auto-publish path by accident.
+
+Recall is capped by what a part number can carry. Carton quantity and country of origin are not
+encoded in `BA-100-075` and never will be, so they count as misses. Reporting recall against every
+scored attribute rather than a hand-picked subset is what stops the figure being cosmetic.
+
+**One rule out of 71 generalises, and that distinction is the whole feature.**
+
+```
+A-N-N[2] as a number x 0.254 mm -> nominal_size    (support 9, corroboration 2)
+```
+
+The third segment of `BA-100-075` and `T-113-025` really is the size in hundredths of an inch, so a
+rule learned from those extends to a code never seen — `BA-100-150` resolves to 38.1 mm without ever
+having appeared in a datasheet. It is corroborated across **two independent manufacturers**,
+Milwaukee and NIBCO, which share the encoding without sharing a catalogue.
+
+The 77C series looks identical in a lookup table and is not the same thing at all. `77C-103` is 1/2"
+and `77C-104` is 3/4" — a catalogue sequence, not a measurement. Nothing about `104` implies three
+quarters of an inch, and `77C-107` could never be predicted. So the grammar **declines to size a
+77C part**, which is the correct answer and the one a system that could not tell the two cases apart
+would get wrong while reporting full coverage.
+
+**Two guards, and 71 rules refused.**
+
+| Refused at induction | Count | Why |
+|---|---|---|
+| `compliance_claim` | 12 | a legal claim is never derivable from a part number, at any support |
+| `not_a_function` | 29 | one token, two different values |
+| `uncorroborated` | 30 | every key seen once — fits perfectly, predicts nothing |
+
+The third one is the interesting guard. Given four part numbers with four distinct size codes, "the
+third segment determines the size" is a perfect rule — and so is "the third segment determines the
+carton quantity", and so is "the third segment determines the price". With one observation per key,
+every attribute is trivially a function of every varying segment, and such a rule fits its training
+data exactly while predicting nothing. Its held-out accuracy is not low, it is *undefined*, because
+the key is simply absent.
+
+**What the guard actually buys, stated the unflattering way.** Dropping it (`--min-support 1`) admits
+30 more rules and changes **nothing** about accuracy — correct stays at 125, precision at 100%,
+hallucinations at 0. An uncorroborated rule keys on a token the held-out part does not have, so it
+abstains rather than errs. The guard does not make the grammar better; it stops the grammar
+*claiming* rules that have never predicted anything, and a coverage figure built from those would be
+fiction. Reported this way because the reverse framing is the easy one to oversell.
+
+| Attribute | Held-out recall |
+|---|---|
+| end_connection | 100.0% |
+| body_material, pressure_rating_wog, product_series, steam_pressure_rating, temperature_range | 86.7% |
+| number_of_pieces, port_type, seat_material | 81.8% |
+| stem_material | 80.0% |
+| nominal_size | 60.0% |
+| handle_type | 53.8% |
+
+Never recovered, correctly: `approvals`, `case_quantity`, `country_of_origin`,
+`cv_flow_coefficient`, `lead_free_compliant`, `operating_torque`, `potable_water_approved`.
+
+**Caveats.**
+
+- **Two folds could not be scored at all**, and they are reported rather than averaged away.
+  `77C-105R` and `77C-106R` are the only two members of the `NA-NA` shape group, so holding either
+  one out leaves a single sibling and a one-member group supports no rule. A shape seen once cannot
+  be learned from itself.
+- **71 rules is an inflated number** and the report says so. It covers only 31 distinct
+  (shape, attribute) pairs, because the alpha prefix and the family number co-vary perfectly in this
+  corpus — the series is identified twice, and neither position is preferable to the other. 21 of
+  those pairs actually fired on held-out data, which is the figure worth comparing against.
+- **Induction finds correlation, not causation.** A position that never varies within a shape group
+  is indistinguishable from the cause: `R` in `77C-105R` yields a correct rule for `body_material`
+  even though it means "reduced port". Harmless here, and a reason not to read a rule as an
+  explanation.
+- **An unseparated run cannot be subdivided.** `BA100075` yields two tokens, not three, because
+  nothing in the string says whether the size code is two digits or three. Recovering that needs a
+  grammar already known for the series, which is the problem this module is solving rather than one
+  it may assume away.
+
+### Cross-reference: what else will do when the part is out of stock
+
+Tier 3 item 20, and the blueprint's own framing of it: an "equivalent on these fields, differs on
+these two, therefore functional equivalent but not drop-in" verdict, built on **normalised
+specification compatibility rather than text similarity**.
+
+That distinction is the reason the feature exists. "Bronze ball valve 3/4 NPT 600WOG" and "bronze
+ball valve 3/4 NPT 400WOG" are nearly identical strings and one of them fails at 500 psi. Similarity
+is not compatibility.
+
+```powershell
+python scripts/cross_reference.py --sku 77C-105R --against 77C-105
+```
+
+```
+verdict: FUNCTIONAL EQUIVALENT
+  performs the same function, but differs on port type, so it is not a drop-in
+  and installation changes
+  13 of 14 interchange-relevant attributes were established on both records
+    DIFFERS
+      port_type                    Reduced Port  ->  Full Port          [critical]
+    NOT ESTABLISHED
+      end_connection            not established  ->  not established    [critical]
+    CANDIDATE EXCEEDS
+      cv_flow_coefficient                    21  ->  49                 [functional]
+    AGREES (11)
+      approvals, body_material, lead_free_compliant, nominal_size, …
+```
+
+**Interchange semantics are declarative, not code.** Whether a different handle style blocks a
+substitution is a merchandising judgement, so it lives in `schema/attributes/*.yaml` where the
+person who holds that judgement can change it:
+
+| Level | Attributes | A difference means |
+|---|---|---|
+| `defining` | `nominal_size` | a different product. Nothing else rescues it |
+| `critical` | `end_connection`, `port_type`, `number_of_pieces` | form or fit differs, so not a drop-in |
+| `functional` | ratings, materials, approvals, compliance flags | must be met or exceeded |
+| `cosmetic` | handle, packaging, origin, series, GTIN | reported, never a blocker |
+
+**Substitution is directional, and that is where most of the design sits.** A 600 psi valve
+substitutes for a 400 psi one; the reverse is a downgrade that could fail in service. So
+`substitution` declares the direction per attribute — `at_least` for ratings and flow, `at_most` for
+whether a Prop 65 warning is required, `encloses` for temperature range, `superset` for approvals,
+and plain `equal` for alloys, because ranking metallurgy by string sort would approve substitutions
+nobody vetted.
+
+`temperature_range` earns `encloses` rather than `at_least` specifically: a candidate rated −10 °C to
+200 °C has a higher ceiling than one rated −29 °C to 186 °C and is **not** a substitute for it,
+because it gives up nineteen degrees at the bottom. Comparing either bound alone approves exactly
+that swap.
+
+**Sweep of the whole corpus: 15 records, 210 ordered pairs, 0 model calls, $0.00.**
+
+Ordered, not unordered — `n(n-1)` rather than `n(n-1)/2` — because halving the work would mean
+answering "does B replace A" with A's verdict.
+
+| | |
+|---|---|
+| ordered pairs | 210 |
+| **share a nominal size, so worth comparing at all** | **28** |
+| substitutable | 2 (7.1% of comparable) |
+| across manufacturers | 0 |
+| directionally asymmetric pairs | 2 |
+
+The second row is why the first is not the headline. 182 of 210 pairs differ in size, and "a 1/4"
+valve does not replace a 2" valve" is arithmetic rather than a finding — quoting a 1% substitution
+rate against all pairs would bury the real rejections under trivial ones and read as a verdict on
+the engine rather than on the corpus.
+
+**The asymmetry, as a measurement.** Two unordered pairs reach different verdicts depending on which
+part is the reference, and both are the full-port/reduced-port twins:
+
+| a | b | b replaces a | a replaces b |
+|---|---|---|---|
+| 77C-105 | 77C-105R | not equivalent | functional equiv |
+| 77C-106 | 77C-106R | not equivalent | functional equiv |
+
+Same size, same rating, same alloy, same approvals. The reduced-port valve cannot stand in for its
+full-port twin because Cv falls from 49 to 21; the full-port one can stand in for the reduced-port
+valve, and differs only on a fit attribute. If this table were ever empty on a corpus with mixed
+ratings and ports, the engine would have quietly become symmetric — a test asserts it is not.
+
+**What refuses a substitution is a sourcing fact, not a data-quality one:**
+
+| Blocked on | Pairs |
+|---|---|
+| nominal_size | 182 |
+| approvals | 148 |
+| body_material | 100 |
+| pressure_rating_wog | 74 |
+| temperature_range | 74 |
+| steam_pressure_rating | 50 |
+| end_connection | 40 |
+| port_type | 36 |
+| cv_flow_coefficient | 15 |
+
+**An unestablished attribute is never a match.** This is evidence-or-null one layer up, and it is
+the property the feature lives or dies on. If the candidate's end connection was never established
+then it is *unknown* whether it threads into the same pipe, and answering "no difference found,
+therefore compatible" would be the most dangerous thing this module could do. Unknowns produce
+`indeterminate` and are listed by name — and `indeterminate` is deliberately not a synonym for
+`not_equivalent`, because "I cannot tell" and "no" have different remedies. One is enrich the record;
+the other is offer a different part. Queued and uncited values count as absent for the same reason:
+letting one support a substitution would launder an unverified extraction into a purchasing decision.
+
+**A class difference caps the verdict at functional equivalence.** A bronze gate valve matching a
+bronze ball valve on size, rating and alloy is not a drop-in for it — the class implies throttling
+behaviour, flow characteristic and service position that this attribute dictionary does not model.
+Claiming drop-in across classes would rest on the *absence* of attributes rather than on their
+agreement, so the ladder refuses and the reason says why.
+
+**Caveats, since this is the other measurement most likely to be quoted.**
+
+- **Nothing in this corpus substitutes across manufacturers, and that is the honest answer.** The
+  three datasheets use different alloys (C84400 against C89833), different rating classes
+  (600 / 400 / 200 psi) and different approval sets, so the parts genuinely do not interchange. The
+  golden set was authored to be adversarial to an *extractor*, not to contain substitutes. Relaxing
+  the semantics to manufacture a nicer number was the available alternative and would have been
+  worse than a boring table.
+- **The sweep runs on the golden corpus, so it exercises the comparison and not the extraction.**
+  Fifteen SKUs across three manufacturers is the only set here wide enough to rank substitutes, and
+  its values are hand-authored. `source` and `measured` travel in every payload, and the console
+  panel says so in prose — the same contract as the L4 dry-run marker. `--from-bundles` runs on real
+  pipeline output instead, and today that is two SKUs.
+- **The console panel renders its empty state on a fresh clone.** Both committed bundles come back
+  with zero substitutes, for the reason above. The verdict ladder's upper rungs are covered by tests
+  against constructed records rather than by anything in the checked-in data.
+
 ### An actual defect, found by adversarial testing
 
 The ablation was null at the time, which prompted a harder question — and this one found a real
@@ -828,15 +1086,20 @@ axiom/
 │   ├── schema/                # schema loader, integrity checks, prompt generation
 │   ├── classify/              # class assignment + derived ETIM / UNSPSC
 │   ├── extract/               # model cascade, evidence-bound extraction, entailment gate
+│   │                          #   grammar.py: part-number grammar induction, no model calls
 │   ├── normalize/             # unit registry, datasheet value parsers, MPN cleaning
 │   ├── validate/              # validation layers L0–L4 and L6 + AST rule evaluator
 │   ├── confidence/            # features, calibration, Wilson risk policy
 │   ├── generate/              # constrained copy generation + deterministic claim check
+│   ├── resolve/               # attribute-compatibility equivalence and cross-reference
+│   │                          #   equivalence.py: the directional verdict ladder
+│   │                          #   catalogue.py: records from bundles, or from ground truth
 │   ├── review/                # review sessions, decisions, prior updates
 │   ├── console/               # projection of pipeline output for the UI (presentation only)
 │   ├── syndicate/             # channel pre-flight, exporters, publication gate
 │   ├── evaluation/            # backtest harness, five-outcome scoring, before/after cohort,
-│   │                          #   and the regression gate the CI workflow runs
+│   │                          #   the regression gate the CI workflow runs, and
+│   │                          #   grammar.py: leave-one-out validation of induced grammars
 │   └── config/                # models.yaml (generated by the preflight script)
 ├── apps/
 │   ├── api/                   # FastAPI: review + console dataset, plus a no-build console
@@ -853,6 +1116,8 @@ axiom/
 │   ├── check_regression.py    # the CI gate: fail the build if a tracked metric got worse
 │   ├── check_console_types.py # fail the build if types.ts drifts from the Python models
 │   ├── explode_variants.py    # one datasheet -> a record per orderable part number
+│   ├── induce_grammar.py      # what a part number encodes, validated on held-out parts
+│   ├── cross_reference.py     # what else will do, and why the rest will not
 │   ├── generate_copy.py       # constrained copy + claim check; --audit tries to break it
 │   ├── run_ablation.py        # same model, trust layer off — what does the gate buy?
 │   ├── run_adversarial.py     # wrong-document negative control; exits non-zero on fabrication
@@ -867,6 +1132,7 @@ axiom/
 │   │                          #   degraded to look like a real ERP item master
 │   ├── ingest/                # per-supplier column mappings, confirmed once and reused
 │   ├── cross-source/          # L4 findings, joined onto a bundle at read time
+│   ├── equivalence/           # cross-reference findings, joined the same way
 │   ├── sessions/              # review state: what humans decided
 │   ├── console/               # pipeline output: what the machine produced
 │   └── cache/                 # content-addressed artifact store
@@ -874,8 +1140,10 @@ axiom/
 │   ├── baseline.json          # the measured numbers the regression gate compares against
 │   ├── cohort.json            # the before/after study the console's Quality Index page reads
 │   ├── ablation.json          # trust layer on vs off
-│   └── adversarial.json       # wrong-document negative control
-└── tests/                     # 1,056 tests
+│   ├── adversarial.json       # wrong-document negative control
+│   ├── grammar.json           # part-number grammar, scored leave-one-out
+│   └── equivalence.json       # the cross-reference sweep over every ordered pair
+└── tests/                     # 1,167 tests
 ```
 
 Adding an attribute means editing YAML in `schema/`. No Python change, no prompt change — the
@@ -1003,15 +1271,29 @@ Tracked against blueprint Part 12.
       - [x] Variant table explosion with parent-child linkage
       - [x] Constrained copy generation with a deterministic claim-check pass
       - [x] Quality Index dashboard with a before/after cohort and a control arm
-- [ ] **Tier 3 — pick one or two.** **None of the six numbered items is built.** The blueprint's
-      instruction is to pick one or two rather than finish the list, so this is a deliberate stop
-      rather than an omission — but it is worth stating without hedging:
-      - [ ] 19. Part-number grammar induction with held-out validation
-      - [ ] 20. Cross-reference and equivalence report
+- [x] **Tier 3 — pick one or two.** **Two of the six are built.** The blueprint's instruction is to
+      pick one or two rather than finish the list, so the four unbuilt items are a deliberate stop
+      rather than an omission:
+      - [x] 19. **Part-number grammar induction with held-out validation** — leave-one-out over the
+            golden set: 312 comparisons, precision 100%, recall 55.1%, **0 fabrications**, no model
+            calls. One induced rule out of 71 generalises to an unseen code, and the report is built
+            around telling that rule apart from the 70 that merely memorise
+      - [x] 20. **Cross-reference and equivalence report** — compatibility from normalised
+            specification values under declarative interchange semantics, with a directional verdict
+            ladder that separates *drop-in* from *functional equivalent* from *cannot be determined*.
+            210 ordered pairs, and the asymmetry is reported as a measurement rather than asserted
       - [ ] 21. MCP server plus a live agent query
       - [ ] 22. Compliance/DPP readiness panel
       - [ ] 23. Image-attribute consistency check
       - [ ] 24. Spec drift detection on a revised datasheet
+
+      Both were chosen partly because they are **fully deterministic**: no model call, no network,
+      no credentials, so both are reproducible bit-for-bit and can run in CI alongside the fast
+      gate rather than behind the AWS-gated regression workflow. Both also make an existing seam
+      load-bearing rather than adding a parallel one — item 19 is the first producer of
+      `DerivationMethod.PART_NUMBER_GRAMMAR`, which the domain model has always refused to
+      auto-accept, and item 20 reuses `core.compare` so "these two values agree" cannot mean one
+      thing to the backtest and another to a substitution.
 
 **Beyond the tiers, and outside them.** Two pieces of work here are not Tier 3 items and should not
 be counted as though they were:

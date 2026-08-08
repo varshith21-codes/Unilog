@@ -275,6 +275,147 @@ export interface CrossSourceView {
   conflicts: CrossSourceConflict[];
 }
 
+// ---------------------------------------------------------------- equivalence
+// axiom.resolve.equivalence, axiom.schema.models
+
+/**
+ * axiom.schema.models.Interchange — what a difference in an attribute does to a substitution.
+ *
+ * Declared per attribute in `schema/attributes/*.yaml`, not in the engine, because whether a
+ * handle style blocks a substitution is a merchandising judgement rather than a logic question.
+ *
+ * - `defining` — differs, so it is a different product. Nothing else rescues it.
+ * - `critical` — form or fit differs, so not a drop-in. It may still do the same job.
+ * - `functional` — must be met or exceeded, per `SubstitutionRule`.
+ * - `cosmetic` — reported as a difference, never as a blocker.
+ */
+export type Interchange = "defining" | "critical" | "functional" | "cosmetic";
+
+/**
+ * axiom.schema.models.SubstitutionRule — the direction a candidate must satisfy.
+ *
+ * Where the asymmetry lives. A 600 psi valve substitutes for a 400 psi one and the reverse is a
+ * downgrade, so comparing for equality would either refuse every safe upgrade or accept every
+ * unsafe one.
+ */
+export type SubstitutionRule = "equal" | "at_least" | "at_most" | "encloses" | "superset";
+
+/**
+ * axiom.resolve.equivalence.Verdict.
+ *
+ * Named `EquivalenceVerdict` because `Verdict` is already taken by the validation layers.
+ *
+ * `indeterminate` is deliberately not a synonym for `not_equivalent`. "I cannot tell" and "no"
+ * are different answers, and collapsing them would hide that the remedy is to enrich a record
+ * rather than to reject a part.
+ */
+export type EquivalenceVerdict =
+  | "identical"
+  | "drop_in"
+  | "functional_equivalent"
+  | "not_equivalent"
+  | "indeterminate";
+
+/**
+ * axiom.resolve.equivalence.Compatibility — one attribute's outcome.
+ *
+ * The three `unknown_*` states are the point of the whole feature: an attribute nobody
+ * established is never a match. `inapplicable` is separate again, and means the attribute is not
+ * bound to both product classes — a gate valve has no port type in the ball-valve sense, and
+ * recording that as unestablished would make every cross-class comparison look like a data gap.
+ */
+export type Compatibility =
+  | "agrees"
+  | "satisfies"
+  | "differs"
+  | "unknown_reference"
+  | "unknown_candidate"
+  | "unknown_both"
+  | "not_comparable"
+  | "inapplicable";
+
+/** axiom.resolve.equivalence.AttributeComparison */
+export interface EquivalenceComparison {
+  attribute_code: string;
+  name: string;
+  /** Null when the schema declares no interchange level. Excluded from the verdict, and listed. */
+  interchange: Interchange | null;
+  substitution: SubstitutionRule;
+  compatibility: Compatibility;
+  /** False for cosmetic, inapplicable and unclassified attributes. */
+  decides: boolean;
+  reference_value: CanonicalValue;
+  candidate_value: CanonicalValue;
+  reference_display: string | null;
+  candidate_display: string | null;
+  match_kind: string | null;
+  detail: string | null;
+}
+
+/** axiom.resolve.equivalence.EquivalenceReport — one directional verdict. */
+export interface EquivalenceCandidate {
+  reference_sku: string;
+  candidate_sku: string;
+  verdict: EquivalenceVerdict;
+  substitutable: boolean;
+  /** True for `indeterminate`: a data problem rather than a product problem. */
+  needs_enrichment: boolean;
+  reason: string;
+  reference_class: string | null;
+  candidate_class: string | null;
+  same_class: boolean;
+  reference_brand: string | null;
+  candidate_brand: string | null;
+  /** Crossing manufacturers is the case a text-similarity match cannot find. */
+  cross_brand: boolean;
+  deciding: number;
+  compared: number;
+  agreed: number;
+  satisfied: number;
+  blocking: number;
+  unknown: number;
+  cosmetic_differences: number;
+  inapplicable: string[];
+  unclassified: string[];
+  coverage_note: string;
+  blocking_detail: EquivalenceComparison[];
+  unknown_detail: EquivalenceComparison[];
+  satisfied_detail: EquivalenceComparison[];
+  cosmetic_detail: EquivalenceComparison[];
+  agreed_attributes: string[];
+  comparisons: EquivalenceComparison[];
+}
+
+/**
+ * axiom.resolve.report.CrossReference, as joined onto a bundle by
+ * `axiom.console.projection.overlay_equivalence`.
+ *
+ * `measured` is the field to read before quoting any of this. False means the records compared
+ * came from the hand-authored golden corpus, so the verdicts exercise the comparison logic rather
+ * than the extraction that would supply it in production — the same distinction the L4 dry-run
+ * marker draws.
+ */
+export interface EquivalenceView {
+  generated_at: string | null;
+  reference_sku: string;
+  /** Where the compared records came from: `pipeline` or `golden`. */
+  source: string;
+  measured: boolean;
+  source_note: string;
+  candidates: number;
+  substitutable: number;
+  indeterminate: number;
+  by_verdict: Record<EquivalenceVerdict, number>;
+  best_substitute: string | null;
+  best_verdict: EquivalenceVerdict | null;
+  cross_brand_substitutes: number;
+  /** Records in the catalogue that was searched. */
+  records: number;
+  skus: string[];
+  failures: string[];
+  candidates_detail: EquivalenceCandidate[];
+}
+
 const EXTRACTION_FAMILY: ReadonlySet<DerivationMethod> = new Set<DerivationMethod>([
   "document_extraction",
   "table_extraction",
@@ -910,6 +1051,11 @@ export interface SkuBundle {
    * needs a second document describing the same part and most SKUs have one source.
    */
   cross_source?: CrossSourceView | null;
+  /**
+   * Cross-reference and equivalence. Present only for SKUs a run has been saved for, and absent
+   * from the offline fixture entirely, because the exporter applies no overlays.
+   */
+  equivalence?: EquivalenceView | null;
 }
 
 /** A source document together with its parsed page geometry. */

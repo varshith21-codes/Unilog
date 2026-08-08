@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { CrossSourcePanel } from "@/components/cross-source-panel";
+import { EquivalencePanel } from "@/components/equivalence-panel";
 import { ArrowIcon, Meter } from "@/components/primitives";
 import { ReviewWorkspace } from "@/components/review-workspace";
 import {
@@ -230,6 +231,18 @@ export default async function ReviewSkuPage({
       {bundle.cross_source?.applicable ? (
         <div className="mt-16">
           <CrossSourcePanel view={bundle.cross_source} />
+        </div>
+      ) : null}
+
+      {/*
+        The cross-reference sits last, because it is the only section that is not about this record
+        at all. Everything above judges whether these values are right; this asks what else in the
+        catalogue could ship instead — a question a merchandiser reaches for after the data is
+        settled, not while settling it. Absent until a run has been saved for this SKU.
+      */}
+      {bundle.equivalence ? (
+        <div className="mt-16">
+          <EquivalencePanel view={bundle.equivalence} />
         </div>
       ) : null}
     </div>

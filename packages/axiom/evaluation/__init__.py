@@ -29,6 +29,15 @@ from axiom.evaluation.golden import (
     GoldenSet,
     mask,
 )
+from axiom.evaluation.grammar import (
+    DEFAULT_MIN_SUPPORT,
+    Fold,
+    GrammarResult,
+    format_comparison,
+    format_grammar_report,
+    observations_from_golden,
+    run_held_out,
+)
 from axiom.evaluation.metrics import (
     Comparison,
     MetricSet,
@@ -49,6 +58,7 @@ from axiom.evaluation.regression import (
 
 __all__ = [
     "DEFAULT_GOLDEN_PATH",
+    "DEFAULT_MIN_SUPPORT",
     "DIMENSIONS",
     "TRACKED",
     "Arm",
@@ -58,8 +68,10 @@ __all__ = [
     "CohortStudy",
     "Comparison",
     "Direction",
+    "Fold",
     "GoldenProduct",
     "GoldenSet",
+    "GrammarResult",
     "build_study",
     "format_study",
     "legacy_record",
@@ -73,10 +85,14 @@ __all__ = [
     "GateVerdict",
     "check_regression",
     "compare_value",
+    "format_comparison",
+    "format_grammar_report",
     "format_regression_report",
     "format_report",
     "mask",
     "match_kind",
+    "observations_from_golden",
     "run_backtest",
+    "run_held_out",
     "write_calibration_artifacts",
 ]

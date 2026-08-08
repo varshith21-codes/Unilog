@@ -27,6 +27,7 @@ from axiom.console import (
     dataset_stats,
     normalise_quality_index,
     overlay_cross_source,
+    overlay_equivalence,
     overlay_review_decisions,
 )
 from axiom.review import ACCEPT, CORRECT, REJECT, ReviewSession, queue_summary, record_decision
@@ -39,6 +40,7 @@ SESSION_DIR = REPO_ROOT / "data" / "sessions"
 CONSOLE_DIR = REPO_ROOT / "data" / "console"
 CALIBRATION_DIR = REPO_ROOT / "data" / "calibration"
 CROSS_SOURCE_DIR = REPO_ROOT / "data" / "cross-source"
+EQUIVALENCE_DIR = REPO_ROOT / "data" / "equivalence"
 ARTIFACT_DIR = REPO_ROOT / "data" / "cache" / "artifacts"
 COHORT_PATH = REPO_ROOT / "evals" / "cohort.json"
 
@@ -247,6 +249,18 @@ def console_dataset() -> dict:
                 )
             except (OSError, ValueError, KeyError, TypeError):
                 unreadable.append(cross_path.name)
+
+        # The cross-reference joins the same way, and for the same reason: a bundle records what a
+        # single-SKU run produced, and a comparison against the rest of the catalogue is a later
+        # reading of it. Written by scripts/cross_reference.py --write.
+        equivalence_path = EQUIVALENCE_DIR / f"{bundle['sku']}.json"
+        if equivalence_path.is_file():
+            try:
+                bundle = overlay_equivalence(
+                    bundle, json.loads(equivalence_path.read_text(encoding="utf-8"))
+                )
+            except (OSError, ValueError, KeyError, TypeError):
+                unreadable.append(equivalence_path.name)
 
         bundles.append(bundle)
         documents.setdefault(

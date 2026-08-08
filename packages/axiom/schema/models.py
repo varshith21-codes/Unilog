@@ -82,6 +82,76 @@ class EvidenceRequirement(str, Enum):
     never be derived from a product family, only from a certificate or declaration."""
 
 
+class Interchange(str, Enum):
+    """What a difference in this attribute does to a substitution claim (blueprint M-resolve).
+
+    Declared per attribute rather than hard-coded in the equivalence engine, for the same reason
+    everything else here is declarative: whether a handle style blocks a substitution is a
+    merchandising judgement, and the person who holds it should be able to change it without
+    touching Python.
+
+    The four levels are ordered by how much a difference costs, and they are genuinely different
+    claims rather than a severity scale:
+    """
+
+    DEFINING = "defining"
+    """Differs -> a different product. A 3/4" valve does not substitute for a 1" valve at any
+    price, so no other agreement can rescue it."""
+
+    CRITICAL = "critical"
+    """Differs -> form or fit differs, so it is not a drop-in. It may still do the same job: a
+    solder-end valve performs identically to a threaded one and needs different fittings."""
+
+    FUNCTIONAL = "functional"
+    """Must be met or exceeded, per :class:`SubstitutionRule`. A lower pressure rating is not a
+    substitute; a higher one is."""
+
+    COSMETIC = "cosmetic"
+    """No bearing on interchangeability. Reported as a difference, never as a blocker."""
+
+    @property
+    def blocks_drop_in(self) -> bool:
+        return self in {Interchange.DEFINING, Interchange.CRITICAL}
+
+    @property
+    def decides_verdict(self) -> bool:
+        """Whether a difference here can change the verdict at all."""
+        return self is not Interchange.COSMETIC
+
+
+class SubstitutionRule(str, Enum):
+    """The direction in which a candidate must relate to the reference to be acceptable.
+
+    Substitution is **asymmetric**, and this enum is where that lives. A 600 psi valve
+    substitutes for a 400 psi one; the reverse is a downgrade that could fail in service. An
+    engine that compared values for equality would either reject every safe upgrade or accept
+    every unsafe downgrade, and both are wrong in a way a distributor would notice.
+    """
+
+    EQUAL = "equal"
+    """Must agree. The default, and the right answer for materials: ranking alloys is a
+    metallurgical judgement, not a string comparison."""
+
+    AT_LEAST = "at_least"
+    """Candidate must be greater than or equal to the reference. Ratings, flow coefficients,
+    and compliance flags — where holding a certification the reference lacks is never a fault."""
+
+    AT_MOST = "at_most"
+    """Candidate must be less than or equal to the reference. For attributes where more is
+    worse, such as whether a Proposition 65 warning is required."""
+
+    ENCLOSES = "encloses"
+    """Candidate's range must contain the reference's. A narrower service window is a
+    downgrade even when both bounds look reasonable in isolation."""
+
+    SUPERSET = "superset"
+    """Candidate must hold every value the reference holds, and may hold more."""
+
+    @property
+    def is_directional(self) -> bool:
+        return self is not SubstitutionRule.EQUAL
+
+
 class Severity(str, Enum):
     ERROR = "error"
     WARNING = "warning"
@@ -195,6 +265,21 @@ class AttributeDefinition(BaseModel):
     unit_hint: str | None = Field(
         default=None, description="Unit to assume when the source states a bare number"
     )
+    interchange: Interchange | None = Field(
+        default=None,
+        description="What a difference in this attribute does to a substitution claim. "
+        "Undeclared on purpose rather than defaulted: the equivalence engine reports an "
+        "unclassified attribute instead of silently ignoring it, the same way variant "
+        "explosion reports an ordering-table column no attribute claimed. Defaulting to "
+        "cosmetic would make a newly added attribute vanish from every equivalence verdict "
+        "with nothing to show it had been overlooked.",
+    )
+    substitution: SubstitutionRule = Field(
+        default=SubstitutionRule.EQUAL,
+        description="Direction the candidate must satisfy relative to the reference. Equality "
+        "is the safe default: it can only ever refuse a substitution that a directional rule "
+        "would have allowed.",
+    )
 
     @field_validator("example_values", "extraction_hints", "table_headers", mode="before")
     @classmethod
@@ -238,7 +323,48 @@ class AttributeDefinition(BaseModel):
                 re.compile(self.pattern)
             except re.error as exc:
                 raise ValueError(f"attribute '{self.code}' has an invalid regex: {exc}") from exc
+        self._check_substitution()
         return self
+
+    def _check_substitution(self) -> None:
+        """Refuse a substitution rule the datatype cannot support.
+
+        Every one of these would otherwise fail silently at comparison time by declining to
+        compare, which reads in a report as "these two products agree" — the single most
+        misleading thing an equivalence engine can say.
+        """
+        rule, datatype = self.substitution, self.datatype
+
+        if rule is SubstitutionRule.ENCLOSES and datatype is not Datatype.RANGE:
+            raise ValueError(
+                f"attribute '{self.code}' declares substitution: encloses but is "
+                f"{datatype.value}, not a range; there are no bounds to enclose"
+            )
+        if rule is SubstitutionRule.SUPERSET and datatype is not Datatype.MULTI_ENUM:
+            raise ValueError(
+                f"attribute '{self.code}' declares substitution: superset but is "
+                f"{datatype.value}; only a multi_enum holds a set of values"
+            )
+        if rule in {SubstitutionRule.AT_LEAST, SubstitutionRule.AT_MOST}:
+            comparable = datatype.is_numeric or datatype is Datatype.BOOLEAN
+            if not comparable or datatype in {Datatype.RANGE, Datatype.DIMENSION_SET}:
+                raise ValueError(
+                    f"attribute '{self.code}' declares substitution: {rule.value} but is "
+                    f"{datatype.value}, which has no single magnitude to order. Use encloses "
+                    f"for a range"
+                )
+        if rule.is_directional and self.interchange is None:
+            raise ValueError(
+                f"attribute '{self.code}' declares substitution: {rule.value} without an "
+                f"interchange level, so the direction can never be applied. Declare "
+                f"interchange, or leave substitution at its default"
+            )
+        if rule.is_directional and self.interchange is Interchange.COSMETIC:
+            raise ValueError(
+                f"attribute '{self.code}' declares substitution: {rule.value} but is "
+                f"interchange: cosmetic, which never affects a verdict — the direction is dead "
+                f"configuration"
+            )
 
     def resolve_allowed(self, candidate: str) -> str | None:
         """Snap a raw value onto a permitted enum value, or None if nothing matches."""

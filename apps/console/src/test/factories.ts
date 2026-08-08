@@ -18,6 +18,9 @@ import type {
   CohortStudy,
   CrossSourceConflict,
   CrossSourceView,
+  EquivalenceCandidate,
+  EquivalenceComparison,
+  EquivalenceView,
   EvidenceSpan,
   FormalCheck,
   GeneratedCopy,
@@ -146,6 +149,97 @@ export function crossSourceView(overrides: Partial<CrossSourceView> = {}): Cross
     single_source_attributes: ["country_of_origin"],
     conflicts: [conflict()],
     ...overrides,
+  };
+}
+
+export function equivalenceComparison(
+  overrides: Partial<EquivalenceComparison> = {},
+): EquivalenceComparison {
+  return {
+    attribute_code: "pressure_rating_wog",
+    name: "Pressure Rating (WOG)",
+    interchange: "functional",
+    substitution: "at_least",
+    compatibility: "differs",
+    decides: true,
+    reference_value: 600,
+    candidate_value: 400,
+    reference_display: "600 psi",
+    candidate_display: "400 psi",
+    match_kind: null,
+    detail: "does not satisfy substitution: at_least",
+    ...overrides,
+  };
+}
+
+export function equivalenceCandidate(
+  overrides: Partial<EquivalenceCandidate> = {},
+): EquivalenceCandidate {
+  return {
+    reference_sku: "BA-100-100",
+    candidate_sku: "77C-105",
+    verdict: "drop_in",
+    substitutable: true,
+    needs_enrichment: false,
+    reason: "form and fit match, and the candidate exceeds the reference on flow coefficient (cv)",
+    reference_class: "PLB.VLV.BALL.2PC",
+    candidate_class: "PLB.VLV.BALL.2PC",
+    same_class: true,
+    reference_brand: "Milwaukee Valve",
+    candidate_brand: "Apollo Valves",
+    cross_brand: true,
+    deciding: 12,
+    compared: 11,
+    agreed: 10,
+    satisfied: 1,
+    blocking: 0,
+    unknown: 1,
+    cosmetic_differences: 0,
+    inapplicable: [],
+    unclassified: [],
+    coverage_note: "11 of 12 interchange-relevant attributes were established on both records",
+    blocking_detail: [],
+    unknown_detail: [],
+    satisfied_detail: [],
+    cosmetic_detail: [],
+    agreed_attributes: ["body_material", "nominal_size"],
+    comparisons: [],
+    ...overrides,
+  };
+}
+
+export function equivalenceView(overrides: Partial<EquivalenceView> = {}): EquivalenceView {
+  const candidates = overrides.candidates_detail ?? [equivalenceCandidate()];
+  return {
+    generated_at: "2026-08-07T00:00:00+00:00",
+    reference_sku: "BA-100-100",
+    source: "pipeline",
+    measured: true,
+    source_note:
+      "Records are real pipeline output: every value was extracted from a source document.",
+    candidates: candidates.length,
+    substitutable: candidates.filter((candidate) => candidate.substitutable).length,
+    indeterminate: candidates.filter((candidate) => candidate.verdict === "indeterminate").length,
+    by_verdict: {
+      identical: 0,
+      drop_in: candidates.filter((candidate) => candidate.verdict === "drop_in").length,
+      functional_equivalent: candidates.filter(
+        (candidate) => candidate.verdict === "functional_equivalent",
+      ).length,
+      not_equivalent: candidates.filter((candidate) => candidate.verdict === "not_equivalent")
+        .length,
+      indeterminate: candidates.filter((candidate) => candidate.verdict === "indeterminate").length,
+    },
+    best_substitute: candidates.find((candidate) => candidate.substitutable)?.candidate_sku ?? null,
+    best_verdict: candidates.find((candidate) => candidate.substitutable)?.verdict ?? null,
+    cross_brand_substitutes: candidates.filter(
+      (candidate) => candidate.substitutable && candidate.cross_brand,
+    ).length,
+    records: 15,
+    skus: ["BA-100-100", "77C-105"],
+    failures: [],
+    ...overrides,
+    candidates_detail: candidates,
   };
 }
 

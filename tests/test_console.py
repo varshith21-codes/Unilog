@@ -26,6 +26,7 @@ from axiom.console import (
     dataset_stats,
     jsonable,
     overlay_cross_source,
+    overlay_equivalence,
     overlay_review_decisions,
     serialise_class,
     serialise_document,
@@ -1035,3 +1036,84 @@ def test_the_overlay_does_not_mutate_the_bundle_it_was_given():
 
     assert "cross_source" not in original
     assert original["values"][0].get("cross_source") is None
+
+
+# ---------------------------------------------------------------- equivalence overlay
+#
+# The cross-reference joins the same way L4 does, with one deliberate difference: it attaches a
+# record-level block and *no* per-value verdict. An equivalence finding is about a pair of
+# products, and `pressure_rating_wog` is not in conflict on this record because some other part
+# rates lower — hanging that on the attribute row would read as a defect in the reviewer's own data.
+
+
+def equivalence_payload(**overrides) -> dict:
+    payload = {
+        "generated_at": "2026-08-07T00:00:00+00:00",
+        "report": {
+            "reference_sku": "BA-100-075",
+            "source": "golden",
+            "measured": False,
+            "source_note": "Records are read from the hand-authored golden set.",
+            "candidates": 2,
+            "substitutable": 1,
+            "indeterminate": 0,
+            "by_verdict": {
+                "identical": 0,
+                "drop_in": 1,
+                "functional_equivalent": 0,
+                "not_equivalent": 1,
+                "indeterminate": 0,
+            },
+            "best_substitute": "77C-104",
+            "best_verdict": "drop_in",
+            "cross_brand_substitutes": 1,
+            "records": 15,
+            "skus": ["BA-100-075", "77C-104"],
+            "failures": [],
+            "candidates_detail": [],
+        },
+    }
+    payload.update(overrides)
+    return payload
+
+
+def test_the_cross_reference_is_attached_to_the_bundle():
+    bundle = overlay_equivalence(bundle_with_values("body_material"), equivalence_payload())
+
+    assert bundle["equivalence"]["best_substitute"] == "77C-104"
+    assert bundle["equivalence"]["records"] == 15
+    assert bundle["equivalence"]["generated_at"] == "2026-08-07T00:00:00+00:00"
+
+
+def test_the_catalogue_provenance_survives_the_join():
+    """`measured` is the field a reader has to see before quoting a verdict. False means the
+    records compared were hand-authored, so the comparison logic was exercised and the extraction
+    was not."""
+    bundle = overlay_equivalence(bundle_with_values("body_material"), equivalence_payload())
+
+    assert bundle["equivalence"]["measured"] is False
+    assert bundle["equivalence"]["source"] == "golden"
+
+
+def test_no_per_value_verdict_is_attached():
+    """Deliberately unlike the L4 overlay. An equivalence finding is a statement about a pair of
+    products, not about an attribute of this one."""
+    bundle = overlay_equivalence(
+        bundle_with_values("pressure_rating_wog", "body_material"), equivalence_payload()
+    )
+
+    for value in bundle["values"]:
+        assert "equivalence" not in value
+
+
+def test_a_malformed_equivalence_payload_is_a_no_op():
+    original = bundle_with_values("body_material")
+    assert overlay_equivalence(original, {"sku": "BA-100-075"}) == original
+    assert overlay_equivalence(original, {"report": "not an object"}) == original
+
+
+def test_the_equivalence_overlay_does_not_mutate_its_input():
+    original = bundle_with_values("body_material")
+    overlay_equivalence(original, equivalence_payload())
+
+    assert "equivalence" not in original

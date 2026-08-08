@@ -1,0 +1,2965 @@
+{
+  "golden_set": "pvf_valves_v1",
+  "arm": "guarded",
+  "min_support": 2,
+  "observations": 15,
+  "folds": 15,
+  "folds_without_grammar": 2,
+  "shapes": {
+    "A-N-N": 9,
+    "NA-N": 4,
+    "NA-NA": 2
+  },
+  "rules": 71,
+  "generalising_rules": 1,
+  "rules_by_kind": {
+    "constant": 56,
+    "linear": 1,
+    "lookup": 14
+  },
+  "covered_pairs": 31,
+  "rules_fired": 21,
+  "rejected": 71,
+  "rejected_by_reason": {
+    "compliance_claim": 12,
+    "not_a_function": 29,
+    "uncorroborated": 30
+  },
+  "comparisons": 312,
+  "total": 312,
+  "correct": 125,
+  "wrong_value": 0,
+  "missed": 102,
+  "correctly_abstained": 85,
+  "hallucinated": 0,
+  "precision": 1.0,
+  "recall": 0.5507,
+  "f1": 0.7102,
+  "abstention_correctness": 1.0,
+  "hallucination_rate": 0.0,
+  "exact_match_rate": 1.0,
+  "citation_coverage": 0.0,
+  "attributes_covered": [
+    "body_material",
+    "end_connection",
+    "handle_type",
+    "nominal_size",
+    "number_of_pieces",
+    "port_type",
+    "pressure_rating_wog",
+    "product_series",
+    "seat_material",
+    "steam_pressure_rating",
+    "stem_material",
+    "temperature_range"
+  ],
+  "rule_detail": [
+    {
+      "shape": "A-N-N",
+      "position": 0,
+      "attribute_code": "body_material",
+      "kind": "lookup",
+      "generalises": false,
+      "support": 9,
+      "corroboration": 5,
+      "confidence": 0.6,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "BA": "Bronze C84400",
+        "T": "Bronze C89833"
+      },
+      "contributing_skus": [
+        "BA-100-025",
+        "BA-100-050",
+        "BA-100-075",
+        "BA-100-100",
+        "BA-100-125",
+        "T-113-025",
+        "T-113-050",
+        "T-113-100",
+        "T-113-200"
+      ],
+      "description": "A-N-N[0] {BA->Bronze C84400, T->Bronze C89833} -> body_material"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 1,
+      "attribute_code": "body_material",
+      "kind": "lookup",
+      "generalises": false,
+      "support": 9,
+      "corroboration": 5,
+      "confidence": 0.6,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "100": "Bronze C84400",
+        "113": "Bronze C89833"
+      },
+      "contributing_skus": [
+        "BA-100-025",
+        "BA-100-050",
+        "BA-100-075",
+        "BA-100-100",
+        "BA-100-125",
+        "T-113-025",
+        "T-113-050",
+        "T-113-100",
+        "T-113-200"
+      ],
+      "description": "A-N-N[1] {100->Bronze C84400, 113->Bronze C89833} -> body_material"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 0,
+      "attribute_code": "end_connection",
+      "kind": "lookup",
+      "generalises": false,
+      "support": 9,
+      "corroboration": 5,
+      "confidence": 0.6,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "BA": "NPT Threaded",
+        "T": "Solder"
+      },
+      "contributing_skus": [
+        "BA-100-025",
+        "BA-100-050",
+        "BA-100-075",
+        "BA-100-100",
+        "BA-100-125",
+        "T-113-025",
+        "T-113-050",
+        "T-113-100",
+        "T-113-200"
+      ],
+      "description": "A-N-N[0] {BA->NPT Threaded, T->Solder} -> end_connection"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 1,
+      "attribute_code": "end_connection",
+      "kind": "lookup",
+      "generalises": false,
+      "support": 9,
+      "corroboration": 5,
+      "confidence": 0.6,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "100": "NPT Threaded",
+        "113": "Solder"
+      },
+      "contributing_skus": [
+        "BA-100-025",
+        "BA-100-050",
+        "BA-100-075",
+        "BA-100-100",
+        "BA-100-125",
+        "T-113-025",
+        "T-113-050",
+        "T-113-100",
+        "T-113-200"
+      ],
+      "description": "A-N-N[1] {100->NPT Threaded, 113->Solder} -> end_connection"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 0,
+      "attribute_code": "handle_type",
+      "kind": "lookup",
+      "generalises": false,
+      "support": 7,
+      "corroboration": 4,
+      "confidence": 0.57,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "BA": "Lever",
+        "T": "Handwheel"
+      },
+      "contributing_skus": [
+        "BA-100-025",
+        "BA-100-050",
+        "BA-100-075",
+        "T-113-025",
+        "T-113-050",
+        "T-113-100",
+        "T-113-200"
+      ],
+      "description": "A-N-N[0] {BA->Lever, T->Handwheel} -> handle_type"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 1,
+      "attribute_code": "handle_type",
+      "kind": "lookup",
+      "generalises": false,
+      "support": 7,
+      "corroboration": 4,
+      "confidence": 0.57,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "100": "Lever",
+        "113": "Handwheel"
+      },
+      "contributing_skus": [
+        "BA-100-025",
+        "BA-100-050",
+        "BA-100-075",
+        "T-113-025",
+        "T-113-050",
+        "T-113-100",
+        "T-113-200"
+      ],
+      "description": "A-N-N[1] {100->Lever, 113->Handwheel} -> handle_type"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 2,
+      "attribute_code": "nominal_size",
+      "kind": "linear",
+      "generalises": true,
+      "support": 9,
+      "corroboration": 2,
+      "confidence": 0.61,
+      "scale": 0.254,
+      "unit": "mm",
+      "mapping": {},
+      "contributing_skus": [
+        "BA-100-025",
+        "BA-100-050",
+        "BA-100-075",
+        "BA-100-100",
+        "BA-100-125",
+        "T-113-025",
+        "T-113-050",
+        "T-113-100",
+        "T-113-200"
+      ],
+      "description": "A-N-N[2] as a number x 0.254 mm -> nominal_size"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 0,
+      "attribute_code": "number_of_pieces",
+      "kind": "constant",
+      "generalises": false,
+      "support": 5,
+      "corroboration": 5,
+      "confidence": 0.6,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "BA": "Two-Piece"
+      },
+      "contributing_skus": [
+        "BA-100-025",
+        "BA-100-050",
+        "BA-100-075",
+        "BA-100-100",
+        "BA-100-125"
+      ],
+      "description": "A-N-N[0] == 'BA' -> number_of_pieces = Two-Piece"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 1,
+      "attribute_code": "number_of_pieces",
+      "kind": "constant",
+      "generalises": false,
+      "support": 5,
+      "corroboration": 5,
+      "confidence": 0.6,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "100": "Two-Piece"
+      },
+      "contributing_skus": [
+        "BA-100-025",
+        "BA-100-050",
+        "BA-100-075",
+        "BA-100-100",
+        "BA-100-125"
+      ],
+      "description": "A-N-N[1] == '100' -> number_of_pieces = Two-Piece"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 0,
+      "attribute_code": "port_type",
+      "kind": "constant",
+      "generalises": false,
+      "support": 5,
+      "corroboration": 5,
+      "confidence": 0.6,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "BA": "Full Port"
+      },
+      "contributing_skus": [
+        "BA-100-025",
+        "BA-100-050",
+        "BA-100-075",
+        "BA-100-100",
+        "BA-100-125"
+      ],
+      "description": "A-N-N[0] == 'BA' -> port_type = Full Port"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 1,
+      "attribute_code": "port_type",
+      "kind": "constant",
+      "generalises": false,
+      "support": 5,
+      "corroboration": 5,
+      "confidence": 0.6,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "100": "Full Port"
+      },
+      "contributing_skus": [
+        "BA-100-025",
+        "BA-100-050",
+        "BA-100-075",
+        "BA-100-100",
+        "BA-100-125"
+      ],
+      "description": "A-N-N[1] == '100' -> port_type = Full Port"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 0,
+      "attribute_code": "pressure_rating_wog",
+      "kind": "lookup",
+      "generalises": false,
+      "support": 9,
+      "corroboration": 5,
+      "confidence": 0.6,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "BA": {
+          "magnitude": 600.0,
+          "unit": "psi"
+        },
+        "T": {
+          "magnitude": 200.0,
+          "unit": "psi"
+        }
+      },
+      "contributing_skus": [
+        "BA-100-025",
+        "BA-100-050",
+        "BA-100-075",
+        "BA-100-100",
+        "BA-100-125",
+        "T-113-025",
+        "T-113-050",
+        "T-113-100",
+        "T-113-200"
+      ],
+      "description": "A-N-N[0] {BA->{'magnitude': 600.0, 'unit': 'psi'}, T->{'magnitude': 200.0, 'unit': 'psi'}} -> pressure_rating_wog"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 1,
+      "attribute_code": "pressure_rating_wog",
+      "kind": "lookup",
+      "generalises": false,
+      "support": 9,
+      "corroboration": 5,
+      "confidence": 0.6,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "100": {
+          "magnitude": 600.0,
+          "unit": "psi"
+        },
+        "113": {
+          "magnitude": 200.0,
+          "unit": "psi"
+        }
+      },
+      "contributing_skus": [
+        "BA-100-025",
+        "BA-100-050",
+        "BA-100-075",
+        "BA-100-100",
+        "BA-100-125",
+        "T-113-025",
+        "T-113-050",
+        "T-113-100",
+        "T-113-200"
+      ],
+      "description": "A-N-N[1] {100->{'magnitude': 600.0, 'unit': 'psi'}, 113->{'magnitude': 200.0, 'unit': 'psi'}} -> pressure_rating_wog"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 0,
+      "attribute_code": "product_series",
+      "kind": "lookup",
+      "generalises": false,
+      "support": 9,
+      "corroboration": 5,
+      "confidence": 0.6,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "BA": "BA-100",
+        "T": "T-113"
+      },
+      "contributing_skus": [
+        "BA-100-025",
+        "BA-100-050",
+        "BA-100-075",
+        "BA-100-100",
+        "BA-100-125",
+        "T-113-025",
+        "T-113-050",
+        "T-113-100",
+        "T-113-200"
+      ],
+      "description": "A-N-N[0] {BA->BA-100, T->T-113} -> product_series"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 1,
+      "attribute_code": "product_series",
+      "kind": "lookup",
+      "generalises": false,
+      "support": 9,
+      "corroboration": 5,
+      "confidence": 0.6,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "100": "BA-100",
+        "113": "T-113"
+      },
+      "contributing_skus": [
+        "BA-100-025",
+        "BA-100-050",
+        "BA-100-075",
+        "BA-100-100",
+        "BA-100-125",
+        "T-113-025",
+        "T-113-050",
+        "T-113-100",
+        "T-113-200"
+      ],
+      "description": "A-N-N[1] {100->BA-100, 113->T-113} -> product_series"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 0,
+      "attribute_code": "seat_material",
+      "kind": "constant",
+      "generalises": false,
+      "support": 5,
+      "corroboration": 5,
+      "confidence": 0.6,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "BA": "RPTFE"
+      },
+      "contributing_skus": [
+        "BA-100-025",
+        "BA-100-050",
+        "BA-100-075",
+        "BA-100-100",
+        "BA-100-125"
+      ],
+      "description": "A-N-N[0] == 'BA' -> seat_material = RPTFE"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 1,
+      "attribute_code": "seat_material",
+      "kind": "constant",
+      "generalises": false,
+      "support": 5,
+      "corroboration": 5,
+      "confidence": 0.6,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "100": "RPTFE"
+      },
+      "contributing_skus": [
+        "BA-100-025",
+        "BA-100-050",
+        "BA-100-075",
+        "BA-100-100",
+        "BA-100-125"
+      ],
+      "description": "A-N-N[1] == '100' -> seat_material = RPTFE"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 0,
+      "attribute_code": "steam_pressure_rating",
+      "kind": "lookup",
+      "generalises": false,
+      "support": 9,
+      "corroboration": 5,
+      "confidence": 0.6,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "BA": {
+          "magnitude": 150.0,
+          "unit": "psi"
+        },
+        "T": {
+          "magnitude": 125.0,
+          "unit": "psi"
+        }
+      },
+      "contributing_skus": [
+        "BA-100-025",
+        "BA-100-050",
+        "BA-100-075",
+        "BA-100-100",
+        "BA-100-125",
+        "T-113-025",
+        "T-113-050",
+        "T-113-100",
+        "T-113-200"
+      ],
+      "description": "A-N-N[0] {BA->{'magnitude': 150.0, 'unit': 'psi'}, T->{'magnitude': 125.0, 'unit': 'psi'}} -> steam_pressure_rating"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 1,
+      "attribute_code": "steam_pressure_rating",
+      "kind": "lookup",
+      "generalises": false,
+      "support": 9,
+      "corroboration": 5,
+      "confidence": 0.6,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "100": {
+          "magnitude": 150.0,
+          "unit": "psi"
+        },
+        "113": {
+          "magnitude": 125.0,
+          "unit": "psi"
+        }
+      },
+      "contributing_skus": [
+        "BA-100-025",
+        "BA-100-050",
+        "BA-100-075",
+        "BA-100-100",
+        "BA-100-125",
+        "T-113-025",
+        "T-113-050",
+        "T-113-100",
+        "T-113-200"
+      ],
+      "description": "A-N-N[1] {100->{'magnitude': 150.0, 'unit': 'psi'}, 113->{'magnitude': 125.0, 'unit': 'psi'}} -> steam_pressure_rating"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 0,
+      "attribute_code": "stem_material",
+      "kind": "constant",
+      "generalises": false,
+      "support": 4,
+      "corroboration": 4,
+      "confidence": 0.57,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "T": "Silicon Bronze"
+      },
+      "contributing_skus": [
+        "T-113-025",
+        "T-113-050",
+        "T-113-100",
+        "T-113-200"
+      ],
+      "description": "A-N-N[0] == 'T' -> stem_material = Silicon Bronze"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 1,
+      "attribute_code": "stem_material",
+      "kind": "constant",
+      "generalises": false,
+      "support": 4,
+      "corroboration": 4,
+      "confidence": 0.57,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "113": "Silicon Bronze"
+      },
+      "contributing_skus": [
+        "T-113-025",
+        "T-113-050",
+        "T-113-100",
+        "T-113-200"
+      ],
+      "description": "A-N-N[1] == '113' -> stem_material = Silicon Bronze"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 0,
+      "attribute_code": "temperature_range",
+      "kind": "lookup",
+      "generalises": false,
+      "support": 9,
+      "corroboration": 5,
+      "confidence": 0.6,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "BA": {
+          "minimum": -28.888889,
+          "maximum": 185.555556,
+          "unit": "degC"
+        },
+        "T": {
+          "minimum": -28.888889,
+          "maximum": 207.777778,
+          "unit": "degC"
+        }
+      },
+      "contributing_skus": [
+        "BA-100-025",
+        "BA-100-050",
+        "BA-100-075",
+        "BA-100-100",
+        "BA-100-125",
+        "T-113-025",
+        "T-113-050",
+        "T-113-100",
+        "T-113-200"
+      ],
+      "description": "A-N-N[0] {BA->{'minimum': -28.888889, 'maximum': 185.555556, 'unit': 'degC'}, T->{'minimum': -28.888889, 'maximum': 207.777778, 'unit': 'degC'}} -> temperature_range"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 1,
+      "attribute_code": "temperature_range",
+      "kind": "lookup",
+      "generalises": false,
+      "support": 9,
+      "corroboration": 5,
+      "confidence": 0.6,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "100": {
+          "minimum": -28.888889,
+          "maximum": 185.555556,
+          "unit": "degC"
+        },
+        "113": {
+          "minimum": -28.888889,
+          "maximum": 207.777778,
+          "unit": "degC"
+        }
+      },
+      "contributing_skus": [
+        "BA-100-025",
+        "BA-100-050",
+        "BA-100-075",
+        "BA-100-100",
+        "BA-100-125",
+        "T-113-025",
+        "T-113-050",
+        "T-113-100",
+        "T-113-200"
+      ],
+      "description": "A-N-N[1] {100->{'minimum': -28.888889, 'maximum': 185.555556, 'unit': 'degC'}, 113->{'minimum': -28.888889, 'maximum': 207.777778, 'unit': 'degC'}} -> temperature_range"
+    },
+    {
+      "shape": "NA-N",
+      "position": 0,
+      "attribute_code": "body_material",
+      "kind": "constant",
+      "generalises": false,
+      "support": 4,
+      "corroboration": 4,
+      "confidence": 0.57,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "77": "Bronze C89833"
+      },
+      "contributing_skus": [
+        "77C-103",
+        "77C-104",
+        "77C-105",
+        "77C-106"
+      ],
+      "description": "NA-N[0] == '77' -> body_material = Bronze C89833"
+    },
+    {
+      "shape": "NA-N",
+      "position": 1,
+      "attribute_code": "body_material",
+      "kind": "constant",
+      "generalises": false,
+      "support": 4,
+      "corroboration": 4,
+      "confidence": 0.57,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "C": "Bronze C89833"
+      },
+      "contributing_skus": [
+        "77C-103",
+        "77C-104",
+        "77C-105",
+        "77C-106"
+      ],
+      "description": "NA-N[1] == 'C' -> body_material = Bronze C89833"
+    },
+    {
+      "shape": "NA-N",
+      "position": 0,
+      "attribute_code": "number_of_pieces",
+      "kind": "constant",
+      "generalises": false,
+      "support": 4,
+      "corroboration": 4,
+      "confidence": 0.57,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "77": "Two-Piece"
+      },
+      "contributing_skus": [
+        "77C-103",
+        "77C-104",
+        "77C-105",
+        "77C-106"
+      ],
+      "description": "NA-N[0] == '77' -> number_of_pieces = Two-Piece"
+    },
+    {
+      "shape": "NA-N",
+      "position": 1,
+      "attribute_code": "number_of_pieces",
+      "kind": "constant",
+      "generalises": false,
+      "support": 4,
+      "corroboration": 4,
+      "confidence": 0.57,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "C": "Two-Piece"
+      },
+      "contributing_skus": [
+        "77C-103",
+        "77C-104",
+        "77C-105",
+        "77C-106"
+      ],
+      "description": "NA-N[1] == 'C' -> number_of_pieces = Two-Piece"
+    },
+    {
+      "shape": "NA-N",
+      "position": 0,
+      "attribute_code": "port_type",
+      "kind": "constant",
+      "generalises": false,
+      "support": 4,
+      "corroboration": 4,
+      "confidence": 0.57,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "77": "Full Port"
+      },
+      "contributing_skus": [
+        "77C-103",
+        "77C-104",
+        "77C-105",
+        "77C-106"
+      ],
+      "description": "NA-N[0] == '77' -> port_type = Full Port"
+    },
+    {
+      "shape": "NA-N",
+      "position": 1,
+      "attribute_code": "port_type",
+      "kind": "constant",
+      "generalises": false,
+      "support": 4,
+      "corroboration": 4,
+      "confidence": 0.57,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "C": "Full Port"
+      },
+      "contributing_skus": [
+        "77C-103",
+        "77C-104",
+        "77C-105",
+        "77C-106"
+      ],
+      "description": "NA-N[1] == 'C' -> port_type = Full Port"
+    },
+    {
+      "shape": "NA-N",
+      "position": 0,
+      "attribute_code": "pressure_rating_wog",
+      "kind": "constant",
+      "generalises": false,
+      "support": 4,
+      "corroboration": 4,
+      "confidence": 0.57,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "77": {
+          "magnitude": 400.0,
+          "unit": "psi"
+        }
+      },
+      "contributing_skus": [
+        "77C-103",
+        "77C-104",
+        "77C-105",
+        "77C-106"
+      ],
+      "description": "NA-N[0] == '77' -> pressure_rating_wog = {'magnitude': 400.0, 'unit': 'psi'}"
+    },
+    {
+      "shape": "NA-N",
+      "position": 1,
+      "attribute_code": "pressure_rating_wog",
+      "kind": "constant",
+      "generalises": false,
+      "support": 4,
+      "corroboration": 4,
+      "confidence": 0.57,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "C": {
+          "magnitude": 400.0,
+          "unit": "psi"
+        }
+      },
+      "contributing_skus": [
+        "77C-103",
+        "77C-104",
+        "77C-105",
+        "77C-106"
+      ],
+      "description": "NA-N[1] == 'C' -> pressure_rating_wog = {'magnitude': 400.0, 'unit': 'psi'}"
+    },
+    {
+      "shape": "NA-N",
+      "position": 0,
+      "attribute_code": "product_series",
+      "kind": "constant",
+      "generalises": false,
+      "support": 4,
+      "corroboration": 4,
+      "confidence": 0.57,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "77": "77C"
+      },
+      "contributing_skus": [
+        "77C-103",
+        "77C-104",
+        "77C-105",
+        "77C-106"
+      ],
+      "description": "NA-N[0] == '77' -> product_series = 77C"
+    },
+    {
+      "shape": "NA-N",
+      "position": 1,
+      "attribute_code": "product_series",
+      "kind": "constant",
+      "generalises": false,
+      "support": 4,
+      "corroboration": 4,
+      "confidence": 0.57,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "C": "77C"
+      },
+      "contributing_skus": [
+        "77C-103",
+        "77C-104",
+        "77C-105",
+        "77C-106"
+      ],
+      "description": "NA-N[1] == 'C' -> product_series = 77C"
+    },
+    {
+      "shape": "NA-N",
+      "position": 0,
+      "attribute_code": "seat_material",
+      "kind": "constant",
+      "generalises": false,
+      "support": 4,
+      "corroboration": 4,
+      "confidence": 0.57,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "77": "RPTFE"
+      },
+      "contributing_skus": [
+        "77C-103",
+        "77C-104",
+        "77C-105",
+        "77C-106"
+      ],
+      "description": "NA-N[0] == '77' -> seat_material = RPTFE"
+    },
+    {
+      "shape": "NA-N",
+      "position": 1,
+      "attribute_code": "seat_material",
+      "kind": "constant",
+      "generalises": false,
+      "support": 4,
+      "corroboration": 4,
+      "confidence": 0.57,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "C": "RPTFE"
+      },
+      "contributing_skus": [
+        "77C-103",
+        "77C-104",
+        "77C-105",
+        "77C-106"
+      ],
+      "description": "NA-N[1] == 'C' -> seat_material = RPTFE"
+    },
+    {
+      "shape": "NA-N",
+      "position": 0,
+      "attribute_code": "steam_pressure_rating",
+      "kind": "constant",
+      "generalises": false,
+      "support": 4,
+      "corroboration": 4,
+      "confidence": 0.57,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "77": {
+          "magnitude": 125.0,
+          "unit": "psi"
+        }
+      },
+      "contributing_skus": [
+        "77C-103",
+        "77C-104",
+        "77C-105",
+        "77C-106"
+      ],
+      "description": "NA-N[0] == '77' -> steam_pressure_rating = {'magnitude': 125.0, 'unit': 'psi'}"
+    },
+    {
+      "shape": "NA-N",
+      "position": 1,
+      "attribute_code": "steam_pressure_rating",
+      "kind": "constant",
+      "generalises": false,
+      "support": 4,
+      "corroboration": 4,
+      "confidence": 0.57,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "C": {
+          "magnitude": 125.0,
+          "unit": "psi"
+        }
+      },
+      "contributing_skus": [
+        "77C-103",
+        "77C-104",
+        "77C-105",
+        "77C-106"
+      ],
+      "description": "NA-N[1] == 'C' -> steam_pressure_rating = {'magnitude': 125.0, 'unit': 'psi'}"
+    },
+    {
+      "shape": "NA-N",
+      "position": 0,
+      "attribute_code": "stem_material",
+      "kind": "constant",
+      "generalises": false,
+      "support": 4,
+      "corroboration": 4,
+      "confidence": 0.57,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "77": "Silicon Bronze"
+      },
+      "contributing_skus": [
+        "77C-103",
+        "77C-104",
+        "77C-105",
+        "77C-106"
+      ],
+      "description": "NA-N[0] == '77' -> stem_material = Silicon Bronze"
+    },
+    {
+      "shape": "NA-N",
+      "position": 1,
+      "attribute_code": "stem_material",
+      "kind": "constant",
+      "generalises": false,
+      "support": 4,
+      "corroboration": 4,
+      "confidence": 0.57,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "C": "Silicon Bronze"
+      },
+      "contributing_skus": [
+        "77C-103",
+        "77C-104",
+        "77C-105",
+        "77C-106"
+      ],
+      "description": "NA-N[1] == 'C' -> stem_material = Silicon Bronze"
+    },
+    {
+      "shape": "NA-N",
+      "position": 0,
+      "attribute_code": "temperature_range",
+      "kind": "constant",
+      "generalises": false,
+      "support": 4,
+      "corroboration": 4,
+      "confidence": 0.57,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "77": {
+          "minimum": -28.888889,
+          "maximum": 185.0,
+          "unit": "degC"
+        }
+      },
+      "contributing_skus": [
+        "77C-103",
+        "77C-104",
+        "77C-105",
+        "77C-106"
+      ],
+      "description": "NA-N[0] == '77' -> temperature_range = {'minimum': -28.888889, 'maximum': 185.0, 'unit': 'degC'}"
+    },
+    {
+      "shape": "NA-N",
+      "position": 1,
+      "attribute_code": "temperature_range",
+      "kind": "constant",
+      "generalises": false,
+      "support": 4,
+      "corroboration": 4,
+      "confidence": 0.57,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "C": {
+          "minimum": -28.888889,
+          "maximum": 185.0,
+          "unit": "degC"
+        }
+      },
+      "contributing_skus": [
+        "77C-103",
+        "77C-104",
+        "77C-105",
+        "77C-106"
+      ],
+      "description": "NA-N[1] == 'C' -> temperature_range = {'minimum': -28.888889, 'maximum': 185.0, 'unit': 'degC'}"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 0,
+      "attribute_code": "body_material",
+      "kind": "constant",
+      "generalises": false,
+      "support": 2,
+      "corroboration": 2,
+      "confidence": 0.51,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "77": "Bronze C89833"
+      },
+      "contributing_skus": [
+        "77C-105R",
+        "77C-106R"
+      ],
+      "description": "NA-NA[0] == '77' -> body_material = Bronze C89833"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 1,
+      "attribute_code": "body_material",
+      "kind": "constant",
+      "generalises": false,
+      "support": 2,
+      "corroboration": 2,
+      "confidence": 0.51,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "C": "Bronze C89833"
+      },
+      "contributing_skus": [
+        "77C-105R",
+        "77C-106R"
+      ],
+      "description": "NA-NA[1] == 'C' -> body_material = Bronze C89833"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 3,
+      "attribute_code": "body_material",
+      "kind": "constant",
+      "generalises": false,
+      "support": 2,
+      "corroboration": 2,
+      "confidence": 0.51,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "R": "Bronze C89833"
+      },
+      "contributing_skus": [
+        "77C-105R",
+        "77C-106R"
+      ],
+      "description": "NA-NA[3] == 'R' -> body_material = Bronze C89833"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 0,
+      "attribute_code": "handle_type",
+      "kind": "constant",
+      "generalises": false,
+      "support": 2,
+      "corroboration": 2,
+      "confidence": 0.51,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "77": "Tee"
+      },
+      "contributing_skus": [
+        "77C-105R",
+        "77C-106R"
+      ],
+      "description": "NA-NA[0] == '77' -> handle_type = Tee"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 1,
+      "attribute_code": "handle_type",
+      "kind": "constant",
+      "generalises": false,
+      "support": 2,
+      "corroboration": 2,
+      "confidence": 0.51,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "C": "Tee"
+      },
+      "contributing_skus": [
+        "77C-105R",
+        "77C-106R"
+      ],
+      "description": "NA-NA[1] == 'C' -> handle_type = Tee"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 3,
+      "attribute_code": "handle_type",
+      "kind": "constant",
+      "generalises": false,
+      "support": 2,
+      "corroboration": 2,
+      "confidence": 0.51,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "R": "Tee"
+      },
+      "contributing_skus": [
+        "77C-105R",
+        "77C-106R"
+      ],
+      "description": "NA-NA[3] == 'R' -> handle_type = Tee"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 0,
+      "attribute_code": "number_of_pieces",
+      "kind": "constant",
+      "generalises": false,
+      "support": 2,
+      "corroboration": 2,
+      "confidence": 0.51,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "77": "Two-Piece"
+      },
+      "contributing_skus": [
+        "77C-105R",
+        "77C-106R"
+      ],
+      "description": "NA-NA[0] == '77' -> number_of_pieces = Two-Piece"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 1,
+      "attribute_code": "number_of_pieces",
+      "kind": "constant",
+      "generalises": false,
+      "support": 2,
+      "corroboration": 2,
+      "confidence": 0.51,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "C": "Two-Piece"
+      },
+      "contributing_skus": [
+        "77C-105R",
+        "77C-106R"
+      ],
+      "description": "NA-NA[1] == 'C' -> number_of_pieces = Two-Piece"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 3,
+      "attribute_code": "number_of_pieces",
+      "kind": "constant",
+      "generalises": false,
+      "support": 2,
+      "corroboration": 2,
+      "confidence": 0.51,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "R": "Two-Piece"
+      },
+      "contributing_skus": [
+        "77C-105R",
+        "77C-106R"
+      ],
+      "description": "NA-NA[3] == 'R' -> number_of_pieces = Two-Piece"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 0,
+      "attribute_code": "port_type",
+      "kind": "constant",
+      "generalises": false,
+      "support": 2,
+      "corroboration": 2,
+      "confidence": 0.51,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "77": "Reduced Port"
+      },
+      "contributing_skus": [
+        "77C-105R",
+        "77C-106R"
+      ],
+      "description": "NA-NA[0] == '77' -> port_type = Reduced Port"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 1,
+      "attribute_code": "port_type",
+      "kind": "constant",
+      "generalises": false,
+      "support": 2,
+      "corroboration": 2,
+      "confidence": 0.51,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "C": "Reduced Port"
+      },
+      "contributing_skus": [
+        "77C-105R",
+        "77C-106R"
+      ],
+      "description": "NA-NA[1] == 'C' -> port_type = Reduced Port"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 3,
+      "attribute_code": "port_type",
+      "kind": "constant",
+      "generalises": false,
+      "support": 2,
+      "corroboration": 2,
+      "confidence": 0.51,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "R": "Reduced Port"
+      },
+      "contributing_skus": [
+        "77C-105R",
+        "77C-106R"
+      ],
+      "description": "NA-NA[3] == 'R' -> port_type = Reduced Port"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 0,
+      "attribute_code": "pressure_rating_wog",
+      "kind": "constant",
+      "generalises": false,
+      "support": 2,
+      "corroboration": 2,
+      "confidence": 0.51,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "77": {
+          "magnitude": 400.0,
+          "unit": "psi"
+        }
+      },
+      "contributing_skus": [
+        "77C-105R",
+        "77C-106R"
+      ],
+      "description": "NA-NA[0] == '77' -> pressure_rating_wog = {'magnitude': 400.0, 'unit': 'psi'}"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 1,
+      "attribute_code": "pressure_rating_wog",
+      "kind": "constant",
+      "generalises": false,
+      "support": 2,
+      "corroboration": 2,
+      "confidence": 0.51,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "C": {
+          "magnitude": 400.0,
+          "unit": "psi"
+        }
+      },
+      "contributing_skus": [
+        "77C-105R",
+        "77C-106R"
+      ],
+      "description": "NA-NA[1] == 'C' -> pressure_rating_wog = {'magnitude': 400.0, 'unit': 'psi'}"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 3,
+      "attribute_code": "pressure_rating_wog",
+      "kind": "constant",
+      "generalises": false,
+      "support": 2,
+      "corroboration": 2,
+      "confidence": 0.51,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "R": {
+          "magnitude": 400.0,
+          "unit": "psi"
+        }
+      },
+      "contributing_skus": [
+        "77C-105R",
+        "77C-106R"
+      ],
+      "description": "NA-NA[3] == 'R' -> pressure_rating_wog = {'magnitude': 400.0, 'unit': 'psi'}"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 0,
+      "attribute_code": "product_series",
+      "kind": "constant",
+      "generalises": false,
+      "support": 2,
+      "corroboration": 2,
+      "confidence": 0.51,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "77": "77C"
+      },
+      "contributing_skus": [
+        "77C-105R",
+        "77C-106R"
+      ],
+      "description": "NA-NA[0] == '77' -> product_series = 77C"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 1,
+      "attribute_code": "product_series",
+      "kind": "constant",
+      "generalises": false,
+      "support": 2,
+      "corroboration": 2,
+      "confidence": 0.51,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "C": "77C"
+      },
+      "contributing_skus": [
+        "77C-105R",
+        "77C-106R"
+      ],
+      "description": "NA-NA[1] == 'C' -> product_series = 77C"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 3,
+      "attribute_code": "product_series",
+      "kind": "constant",
+      "generalises": false,
+      "support": 2,
+      "corroboration": 2,
+      "confidence": 0.51,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "R": "77C"
+      },
+      "contributing_skus": [
+        "77C-105R",
+        "77C-106R"
+      ],
+      "description": "NA-NA[3] == 'R' -> product_series = 77C"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 0,
+      "attribute_code": "seat_material",
+      "kind": "constant",
+      "generalises": false,
+      "support": 2,
+      "corroboration": 2,
+      "confidence": 0.51,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "77": "RPTFE"
+      },
+      "contributing_skus": [
+        "77C-105R",
+        "77C-106R"
+      ],
+      "description": "NA-NA[0] == '77' -> seat_material = RPTFE"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 1,
+      "attribute_code": "seat_material",
+      "kind": "constant",
+      "generalises": false,
+      "support": 2,
+      "corroboration": 2,
+      "confidence": 0.51,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "C": "RPTFE"
+      },
+      "contributing_skus": [
+        "77C-105R",
+        "77C-106R"
+      ],
+      "description": "NA-NA[1] == 'C' -> seat_material = RPTFE"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 3,
+      "attribute_code": "seat_material",
+      "kind": "constant",
+      "generalises": false,
+      "support": 2,
+      "corroboration": 2,
+      "confidence": 0.51,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "R": "RPTFE"
+      },
+      "contributing_skus": [
+        "77C-105R",
+        "77C-106R"
+      ],
+      "description": "NA-NA[3] == 'R' -> seat_material = RPTFE"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 0,
+      "attribute_code": "steam_pressure_rating",
+      "kind": "constant",
+      "generalises": false,
+      "support": 2,
+      "corroboration": 2,
+      "confidence": 0.51,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "77": {
+          "magnitude": 125.0,
+          "unit": "psi"
+        }
+      },
+      "contributing_skus": [
+        "77C-105R",
+        "77C-106R"
+      ],
+      "description": "NA-NA[0] == '77' -> steam_pressure_rating = {'magnitude': 125.0, 'unit': 'psi'}"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 1,
+      "attribute_code": "steam_pressure_rating",
+      "kind": "constant",
+      "generalises": false,
+      "support": 2,
+      "corroboration": 2,
+      "confidence": 0.51,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "C": {
+          "magnitude": 125.0,
+          "unit": "psi"
+        }
+      },
+      "contributing_skus": [
+        "77C-105R",
+        "77C-106R"
+      ],
+      "description": "NA-NA[1] == 'C' -> steam_pressure_rating = {'magnitude': 125.0, 'unit': 'psi'}"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 3,
+      "attribute_code": "steam_pressure_rating",
+      "kind": "constant",
+      "generalises": false,
+      "support": 2,
+      "corroboration": 2,
+      "confidence": 0.51,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "R": {
+          "magnitude": 125.0,
+          "unit": "psi"
+        }
+      },
+      "contributing_skus": [
+        "77C-105R",
+        "77C-106R"
+      ],
+      "description": "NA-NA[3] == 'R' -> steam_pressure_rating = {'magnitude': 125.0, 'unit': 'psi'}"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 0,
+      "attribute_code": "stem_material",
+      "kind": "constant",
+      "generalises": false,
+      "support": 2,
+      "corroboration": 2,
+      "confidence": 0.51,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "77": "Silicon Bronze"
+      },
+      "contributing_skus": [
+        "77C-105R",
+        "77C-106R"
+      ],
+      "description": "NA-NA[0] == '77' -> stem_material = Silicon Bronze"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 1,
+      "attribute_code": "stem_material",
+      "kind": "constant",
+      "generalises": false,
+      "support": 2,
+      "corroboration": 2,
+      "confidence": 0.51,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "C": "Silicon Bronze"
+      },
+      "contributing_skus": [
+        "77C-105R",
+        "77C-106R"
+      ],
+      "description": "NA-NA[1] == 'C' -> stem_material = Silicon Bronze"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 3,
+      "attribute_code": "stem_material",
+      "kind": "constant",
+      "generalises": false,
+      "support": 2,
+      "corroboration": 2,
+      "confidence": 0.51,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "R": "Silicon Bronze"
+      },
+      "contributing_skus": [
+        "77C-105R",
+        "77C-106R"
+      ],
+      "description": "NA-NA[3] == 'R' -> stem_material = Silicon Bronze"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 0,
+      "attribute_code": "temperature_range",
+      "kind": "constant",
+      "generalises": false,
+      "support": 2,
+      "corroboration": 2,
+      "confidence": 0.51,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "77": {
+          "minimum": -28.888889,
+          "maximum": 185.0,
+          "unit": "degC"
+        }
+      },
+      "contributing_skus": [
+        "77C-105R",
+        "77C-106R"
+      ],
+      "description": "NA-NA[0] == '77' -> temperature_range = {'minimum': -28.888889, 'maximum': 185.0, 'unit': 'degC'}"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 1,
+      "attribute_code": "temperature_range",
+      "kind": "constant",
+      "generalises": false,
+      "support": 2,
+      "corroboration": 2,
+      "confidence": 0.51,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "C": {
+          "minimum": -28.888889,
+          "maximum": 185.0,
+          "unit": "degC"
+        }
+      },
+      "contributing_skus": [
+        "77C-105R",
+        "77C-106R"
+      ],
+      "description": "NA-NA[1] == 'C' -> temperature_range = {'minimum': -28.888889, 'maximum': 185.0, 'unit': 'degC'}"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 3,
+      "attribute_code": "temperature_range",
+      "kind": "constant",
+      "generalises": false,
+      "support": 2,
+      "corroboration": 2,
+      "confidence": 0.51,
+      "scale": null,
+      "unit": null,
+      "mapping": {
+        "R": {
+          "minimum": -28.888889,
+          "maximum": 185.0,
+          "unit": "degC"
+        }
+      },
+      "contributing_skus": [
+        "77C-105R",
+        "77C-106R"
+      ],
+      "description": "NA-NA[3] == 'R' -> temperature_range = {'minimum': -28.888889, 'maximum': 185.0, 'unit': 'degC'}"
+    }
+  ],
+  "rejected_detail": [
+    {
+      "shape": "A-N-N",
+      "position": null,
+      "attribute_code": "approvals",
+      "reason": "compliance_claim",
+      "detail": "a compliance claim cannot be derived from a part number at any level of support; the schema marks it evidence_requirement: strict"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 2,
+      "attribute_code": "body_material",
+      "reason": "not_a_function",
+      "detail": "token '025' appears with 2 different values (Bronze C84400, Bronze C89833), so this position cannot determine body_material"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 0,
+      "attribute_code": "case_quantity",
+      "reason": "not_a_function",
+      "detail": "token 'BA' appears with 3 different values (12, 24, 6), so this position cannot determine case_quantity"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 1,
+      "attribute_code": "case_quantity",
+      "reason": "not_a_function",
+      "detail": "token '100' appears with 3 different values (12, 24, 6), so this position cannot determine case_quantity"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 2,
+      "attribute_code": "case_quantity",
+      "reason": "not_a_function",
+      "detail": "token '025' appears with 2 different values (20, 24), so this position cannot determine case_quantity"
+    },
+    {
+      "shape": "A-N-N",
+      "position": null,
+      "attribute_code": "country_of_origin",
+      "reason": "compliance_claim",
+      "detail": "a compliance claim cannot be derived from a part number at any level of support; the schema marks it evidence_requirement: strict"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 2,
+      "attribute_code": "end_connection",
+      "reason": "not_a_function",
+      "detail": "token '025' appears with 2 different values (NPT Threaded, Solder), so this position cannot determine end_connection"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 2,
+      "attribute_code": "handle_type",
+      "reason": "not_a_function",
+      "detail": "token '025' appears with 2 different values (Handwheel, Lever), so this position cannot determine handle_type"
+    },
+    {
+      "shape": "A-N-N",
+      "position": null,
+      "attribute_code": "lead_free_compliant",
+      "reason": "compliance_claim",
+      "detail": "a compliance claim cannot be derived from a part number at any level of support; the schema marks it evidence_requirement: strict"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 0,
+      "attribute_code": "nominal_size",
+      "reason": "not_a_function",
+      "detail": "token 'BA' appears with 5 different values (12.7 mm, 19.05 mm, 25.4 mm, 31.75 mm, 6.35 mm), so this position cannot determine nominal_size"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 1,
+      "attribute_code": "nominal_size",
+      "reason": "not_a_function",
+      "detail": "token '100' appears with 5 different values (12.7 mm, 19.05 mm, 25.4 mm, 31.75 mm, 6.35 mm), so this position cannot determine nominal_size"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 2,
+      "attribute_code": "number_of_pieces",
+      "reason": "uncorroborated",
+      "detail": "5 tokens over 5 observations, every one seen 1 time(s). A mapping with no repeated key fits perfectly and predicts nothing, so it cannot be told apart from coincidence"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 2,
+      "attribute_code": "port_type",
+      "reason": "uncorroborated",
+      "detail": "5 tokens over 5 observations, every one seen 1 time(s). A mapping with no repeated key fits perfectly and predicts nothing, so it cannot be told apart from coincidence"
+    },
+    {
+      "shape": "A-N-N",
+      "position": null,
+      "attribute_code": "potable_water_approved",
+      "reason": "compliance_claim",
+      "detail": "a compliance claim cannot be derived from a part number at any level of support; the schema marks it evidence_requirement: strict"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 2,
+      "attribute_code": "pressure_rating_wog",
+      "reason": "not_a_function",
+      "detail": "token '025' appears with 2 different values (200 psi, 600 psi), so this position cannot determine pressure_rating_wog"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 2,
+      "attribute_code": "product_series",
+      "reason": "not_a_function",
+      "detail": "token '025' appears with 2 different values (BA-100, T-113), so this position cannot determine product_series"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 2,
+      "attribute_code": "seat_material",
+      "reason": "uncorroborated",
+      "detail": "5 tokens over 5 observations, every one seen 1 time(s). A mapping with no repeated key fits perfectly and predicts nothing, so it cannot be told apart from coincidence"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 2,
+      "attribute_code": "steam_pressure_rating",
+      "reason": "not_a_function",
+      "detail": "token '025' appears with 2 different values (125 psi, 150 psi), so this position cannot determine steam_pressure_rating"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 2,
+      "attribute_code": "stem_material",
+      "reason": "uncorroborated",
+      "detail": "4 tokens over 4 observations, every one seen 1 time(s). A mapping with no repeated key fits perfectly and predicts nothing, so it cannot be told apart from coincidence"
+    },
+    {
+      "shape": "A-N-N",
+      "position": 2,
+      "attribute_code": "temperature_range",
+      "reason": "not_a_function",
+      "detail": "token '025' appears with 2 different values (-28.8889 to 185.556 degC, -28.8889 to 207.778 degC), so this position cannot determine temperature_range"
+    },
+    {
+      "shape": "NA-N",
+      "position": null,
+      "attribute_code": "approvals",
+      "reason": "compliance_claim",
+      "detail": "a compliance claim cannot be derived from a part number at any level of support; the schema marks it evidence_requirement: strict"
+    },
+    {
+      "shape": "NA-N",
+      "position": 2,
+      "attribute_code": "body_material",
+      "reason": "uncorroborated",
+      "detail": "4 tokens over 4 observations, every one seen 1 time(s). A mapping with no repeated key fits perfectly and predicts nothing, so it cannot be told apart from coincidence"
+    },
+    {
+      "shape": "NA-N",
+      "position": 0,
+      "attribute_code": "case_quantity",
+      "reason": "not_a_function",
+      "detail": "token '77' appears with 4 different values (12, 20, 24, 6), so this position cannot determine case_quantity"
+    },
+    {
+      "shape": "NA-N",
+      "position": 1,
+      "attribute_code": "case_quantity",
+      "reason": "not_a_function",
+      "detail": "token 'C' appears with 4 different values (12, 20, 24, 6), so this position cannot determine case_quantity"
+    },
+    {
+      "shape": "NA-N",
+      "position": 2,
+      "attribute_code": "case_quantity",
+      "reason": "uncorroborated",
+      "detail": "4 tokens over 4 observations, every one seen 1 time(s). A mapping with no repeated key fits perfectly and predicts nothing, so it cannot be told apart from coincidence"
+    },
+    {
+      "shape": "NA-N",
+      "position": null,
+      "attribute_code": "country_of_origin",
+      "reason": "compliance_claim",
+      "detail": "a compliance claim cannot be derived from a part number at any level of support; the schema marks it evidence_requirement: strict"
+    },
+    {
+      "shape": "NA-N",
+      "position": 0,
+      "attribute_code": "cv_flow_coefficient",
+      "reason": "not_a_function",
+      "detail": "token '77' appears with 4 different values (15.0, 28.0, 49.0, 88.0), so this position cannot determine cv_flow_coefficient"
+    },
+    {
+      "shape": "NA-N",
+      "position": 1,
+      "attribute_code": "cv_flow_coefficient",
+      "reason": "not_a_function",
+      "detail": "token 'C' appears with 4 different values (15.0, 28.0, 49.0, 88.0), so this position cannot determine cv_flow_coefficient"
+    },
+    {
+      "shape": "NA-N",
+      "position": 2,
+      "attribute_code": "cv_flow_coefficient",
+      "reason": "uncorroborated",
+      "detail": "4 tokens over 4 observations, every one seen 1 time(s). A mapping with no repeated key fits perfectly and predicts nothing, so it cannot be told apart from coincidence"
+    },
+    {
+      "shape": "NA-N",
+      "position": 0,
+      "attribute_code": "handle_type",
+      "reason": "not_a_function",
+      "detail": "token '77' appears with 2 different values (Lever, Tee), so this position cannot determine handle_type"
+    },
+    {
+      "shape": "NA-N",
+      "position": 1,
+      "attribute_code": "handle_type",
+      "reason": "not_a_function",
+      "detail": "token 'C' appears with 2 different values (Lever, Tee), so this position cannot determine handle_type"
+    },
+    {
+      "shape": "NA-N",
+      "position": 2,
+      "attribute_code": "handle_type",
+      "reason": "uncorroborated",
+      "detail": "4 tokens over 4 observations, every one seen 1 time(s). A mapping with no repeated key fits perfectly and predicts nothing, so it cannot be told apart from coincidence"
+    },
+    {
+      "shape": "NA-N",
+      "position": null,
+      "attribute_code": "lead_free_compliant",
+      "reason": "compliance_claim",
+      "detail": "a compliance claim cannot be derived from a part number at any level of support; the schema marks it evidence_requirement: strict"
+    },
+    {
+      "shape": "NA-N",
+      "position": 0,
+      "attribute_code": "nominal_size",
+      "reason": "not_a_function",
+      "detail": "token '77' appears with 4 different values (12.7 mm, 19.05 mm, 25.4 mm, 31.75 mm), so this position cannot determine nominal_size"
+    },
+    {
+      "shape": "NA-N",
+      "position": 1,
+      "attribute_code": "nominal_size",
+      "reason": "not_a_function",
+      "detail": "token 'C' appears with 4 different values (12.7 mm, 19.05 mm, 25.4 mm, 31.75 mm), so this position cannot determine nominal_size"
+    },
+    {
+      "shape": "NA-N",
+      "position": 2,
+      "attribute_code": "nominal_size",
+      "reason": "uncorroborated",
+      "detail": "4 tokens over 4 observations, every one seen 1 time(s). A mapping with no repeated key fits perfectly and predicts nothing, so it cannot be told apart from coincidence"
+    },
+    {
+      "shape": "NA-N",
+      "position": 2,
+      "attribute_code": "number_of_pieces",
+      "reason": "uncorroborated",
+      "detail": "4 tokens over 4 observations, every one seen 1 time(s). A mapping with no repeated key fits perfectly and predicts nothing, so it cannot be told apart from coincidence"
+    },
+    {
+      "shape": "NA-N",
+      "position": 2,
+      "attribute_code": "port_type",
+      "reason": "uncorroborated",
+      "detail": "4 tokens over 4 observations, every one seen 1 time(s). A mapping with no repeated key fits perfectly and predicts nothing, so it cannot be told apart from coincidence"
+    },
+    {
+      "shape": "NA-N",
+      "position": null,
+      "attribute_code": "potable_water_approved",
+      "reason": "compliance_claim",
+      "detail": "a compliance claim cannot be derived from a part number at any level of support; the schema marks it evidence_requirement: strict"
+    },
+    {
+      "shape": "NA-N",
+      "position": 2,
+      "attribute_code": "pressure_rating_wog",
+      "reason": "uncorroborated",
+      "detail": "4 tokens over 4 observations, every one seen 1 time(s). A mapping with no repeated key fits perfectly and predicts nothing, so it cannot be told apart from coincidence"
+    },
+    {
+      "shape": "NA-N",
+      "position": 2,
+      "attribute_code": "product_series",
+      "reason": "uncorroborated",
+      "detail": "4 tokens over 4 observations, every one seen 1 time(s). A mapping with no repeated key fits perfectly and predicts nothing, so it cannot be told apart from coincidence"
+    },
+    {
+      "shape": "NA-N",
+      "position": 2,
+      "attribute_code": "seat_material",
+      "reason": "uncorroborated",
+      "detail": "4 tokens over 4 observations, every one seen 1 time(s). A mapping with no repeated key fits perfectly and predicts nothing, so it cannot be told apart from coincidence"
+    },
+    {
+      "shape": "NA-N",
+      "position": 2,
+      "attribute_code": "steam_pressure_rating",
+      "reason": "uncorroborated",
+      "detail": "4 tokens over 4 observations, every one seen 1 time(s). A mapping with no repeated key fits perfectly and predicts nothing, so it cannot be told apart from coincidence"
+    },
+    {
+      "shape": "NA-N",
+      "position": 2,
+      "attribute_code": "stem_material",
+      "reason": "uncorroborated",
+      "detail": "4 tokens over 4 observations, every one seen 1 time(s). A mapping with no repeated key fits perfectly and predicts nothing, so it cannot be told apart from coincidence"
+    },
+    {
+      "shape": "NA-N",
+      "position": 2,
+      "attribute_code": "temperature_range",
+      "reason": "uncorroborated",
+      "detail": "4 tokens over 4 observations, every one seen 1 time(s). A mapping with no repeated key fits perfectly and predicts nothing, so it cannot be told apart from coincidence"
+    },
+    {
+      "shape": "NA-NA",
+      "position": null,
+      "attribute_code": "approvals",
+      "reason": "compliance_claim",
+      "detail": "a compliance claim cannot be derived from a part number at any level of support; the schema marks it evidence_requirement: strict"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 2,
+      "attribute_code": "body_material",
+      "reason": "uncorroborated",
+      "detail": "2 tokens over 2 observations, every one seen 1 time(s). A mapping with no repeated key fits perfectly and predicts nothing, so it cannot be told apart from coincidence"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 0,
+      "attribute_code": "case_quantity",
+      "reason": "not_a_function",
+      "detail": "token '77' appears with 2 different values (12, 6), so this position cannot determine case_quantity"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 1,
+      "attribute_code": "case_quantity",
+      "reason": "not_a_function",
+      "detail": "token 'C' appears with 2 different values (12, 6), so this position cannot determine case_quantity"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 2,
+      "attribute_code": "case_quantity",
+      "reason": "uncorroborated",
+      "detail": "2 tokens over 2 observations, every one seen 1 time(s). A mapping with no repeated key fits perfectly and predicts nothing, so it cannot be told apart from coincidence"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 3,
+      "attribute_code": "case_quantity",
+      "reason": "not_a_function",
+      "detail": "token 'R' appears with 2 different values (12, 6), so this position cannot determine case_quantity"
+    },
+    {
+      "shape": "NA-NA",
+      "position": null,
+      "attribute_code": "country_of_origin",
+      "reason": "compliance_claim",
+      "detail": "a compliance claim cannot be derived from a part number at any level of support; the schema marks it evidence_requirement: strict"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 0,
+      "attribute_code": "cv_flow_coefficient",
+      "reason": "not_a_function",
+      "detail": "token '77' appears with 2 different values (21.0, 37.0), so this position cannot determine cv_flow_coefficient"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 1,
+      "attribute_code": "cv_flow_coefficient",
+      "reason": "not_a_function",
+      "detail": "token 'C' appears with 2 different values (21.0, 37.0), so this position cannot determine cv_flow_coefficient"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 2,
+      "attribute_code": "cv_flow_coefficient",
+      "reason": "uncorroborated",
+      "detail": "2 tokens over 2 observations, every one seen 1 time(s). A mapping with no repeated key fits perfectly and predicts nothing, so it cannot be told apart from coincidence"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 3,
+      "attribute_code": "cv_flow_coefficient",
+      "reason": "not_a_function",
+      "detail": "token 'R' appears with 2 different values (21.0, 37.0), so this position cannot determine cv_flow_coefficient"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 2,
+      "attribute_code": "handle_type",
+      "reason": "uncorroborated",
+      "detail": "2 tokens over 2 observations, every one seen 1 time(s). A mapping with no repeated key fits perfectly and predicts nothing, so it cannot be told apart from coincidence"
+    },
+    {
+      "shape": "NA-NA",
+      "position": null,
+      "attribute_code": "lead_free_compliant",
+      "reason": "compliance_claim",
+      "detail": "a compliance claim cannot be derived from a part number at any level of support; the schema marks it evidence_requirement: strict"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 0,
+      "attribute_code": "nominal_size",
+      "reason": "not_a_function",
+      "detail": "token '77' appears with 2 different values (25.4 mm, 31.75 mm), so this position cannot determine nominal_size"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 1,
+      "attribute_code": "nominal_size",
+      "reason": "not_a_function",
+      "detail": "token 'C' appears with 2 different values (25.4 mm, 31.75 mm), so this position cannot determine nominal_size"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 2,
+      "attribute_code": "nominal_size",
+      "reason": "uncorroborated",
+      "detail": "2 tokens over 2 observations, every one seen 1 time(s). A mapping with no repeated key fits perfectly and predicts nothing, so it cannot be told apart from coincidence"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 3,
+      "attribute_code": "nominal_size",
+      "reason": "not_a_function",
+      "detail": "token 'R' appears with 2 different values (25.4 mm, 31.75 mm), so this position cannot determine nominal_size"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 2,
+      "attribute_code": "number_of_pieces",
+      "reason": "uncorroborated",
+      "detail": "2 tokens over 2 observations, every one seen 1 time(s). A mapping with no repeated key fits perfectly and predicts nothing, so it cannot be told apart from coincidence"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 2,
+      "attribute_code": "port_type",
+      "reason": "uncorroborated",
+      "detail": "2 tokens over 2 observations, every one seen 1 time(s). A mapping with no repeated key fits perfectly and predicts nothing, so it cannot be told apart from coincidence"
+    },
+    {
+      "shape": "NA-NA",
+      "position": null,
+      "attribute_code": "potable_water_approved",
+      "reason": "compliance_claim",
+      "detail": "a compliance claim cannot be derived from a part number at any level of support; the schema marks it evidence_requirement: strict"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 2,
+      "attribute_code": "pressure_rating_wog",
+      "reason": "uncorroborated",
+      "detail": "2 tokens over 2 observations, every one seen 1 time(s). A mapping with no repeated key fits perfectly and predicts nothing, so it cannot be told apart from coincidence"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 2,
+      "attribute_code": "product_series",
+      "reason": "uncorroborated",
+      "detail": "2 tokens over 2 observations, every one seen 1 time(s). A mapping with no repeated key fits perfectly and predicts nothing, so it cannot be told apart from coincidence"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 2,
+      "attribute_code": "seat_material",
+      "reason": "uncorroborated",
+      "detail": "2 tokens over 2 observations, every one seen 1 time(s). A mapping with no repeated key fits perfectly and predicts nothing, so it cannot be told apart from coincidence"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 2,
+      "attribute_code": "steam_pressure_rating",
+      "reason": "uncorroborated",
+      "detail": "2 tokens over 2 observations, every one seen 1 time(s). A mapping with no repeated key fits perfectly and predicts nothing, so it cannot be told apart from coincidence"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 2,
+      "attribute_code": "stem_material",
+      "reason": "uncorroborated",
+      "detail": "2 tokens over 2 observations, every one seen 1 time(s). A mapping with no repeated key fits perfectly and predicts nothing, so it cannot be told apart from coincidence"
+    },
+    {
+      "shape": "NA-NA",
+      "position": 2,
+      "attribute_code": "temperature_range",
+      "reason": "uncorroborated",
+      "detail": "2 tokens over 2 observations, every one seen 1 time(s). A mapping with no repeated key fits perfectly and predicts nothing, so it cannot be told apart from coincidence"
+    }
+  ],
+  "per_shape": {
+    "A-N-N": {
+      "total": 180,
+      "correct": 89,
+      "wrong_value": 0,
+      "missed": 36,
+      "correctly_abstained": 55,
+      "hallucinated": 0,
+      "precision": 1.0,
+      "recall": 0.712,
+      "f1": 0.8318,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 1.0,
+      "citation_coverage": 0.0
+    },
+    "NA-N": {
+      "total": 88,
+      "correct": 36,
+      "wrong_value": 0,
+      "missed": 32,
+      "correctly_abstained": 20,
+      "hallucinated": 0,
+      "precision": 1.0,
+      "recall": 0.5294,
+      "f1": 0.6923,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 1.0,
+      "citation_coverage": 0.0
+    },
+    "NA-NA": {
+      "total": 44,
+      "correct": 0,
+      "wrong_value": 0,
+      "missed": 34,
+      "correctly_abstained": 10,
+      "hallucinated": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 0.0,
+      "citation_coverage": 0.0
+    }
+  },
+  "per_attribute": {
+    "approvals": {
+      "total": 15,
+      "correct": 0,
+      "wrong_value": 0,
+      "missed": 15,
+      "correctly_abstained": 0,
+      "hallucinated": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 0.0,
+      "citation_coverage": 0.0
+    },
+    "body_material": {
+      "total": 15,
+      "correct": 13,
+      "wrong_value": 0,
+      "missed": 2,
+      "correctly_abstained": 0,
+      "hallucinated": 0,
+      "precision": 1.0,
+      "recall": 0.8667,
+      "f1": 0.9286,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 1.0,
+      "citation_coverage": 0.0
+    },
+    "case_quantity": {
+      "total": 15,
+      "correct": 0,
+      "wrong_value": 0,
+      "missed": 15,
+      "correctly_abstained": 0,
+      "hallucinated": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 0.0,
+      "citation_coverage": 0.0
+    },
+    "case_weight": {
+      "total": 11,
+      "correct": 0,
+      "wrong_value": 0,
+      "missed": 0,
+      "correctly_abstained": 11,
+      "hallucinated": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 0.0,
+      "citation_coverage": 0.0
+    },
+    "country_of_origin": {
+      "total": 15,
+      "correct": 0,
+      "wrong_value": 0,
+      "missed": 10,
+      "correctly_abstained": 5,
+      "hallucinated": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 0.0,
+      "citation_coverage": 0.0
+    },
+    "cv_flow_coefficient": {
+      "total": 15,
+      "correct": 0,
+      "wrong_value": 0,
+      "missed": 6,
+      "correctly_abstained": 9,
+      "hallucinated": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 0.0,
+      "citation_coverage": 0.0
+    },
+    "each_weight": {
+      "total": 15,
+      "correct": 0,
+      "wrong_value": 0,
+      "missed": 0,
+      "correctly_abstained": 15,
+      "hallucinated": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 0.0,
+      "citation_coverage": 0.0
+    },
+    "end_connection": {
+      "total": 15,
+      "correct": 9,
+      "wrong_value": 0,
+      "missed": 0,
+      "correctly_abstained": 6,
+      "hallucinated": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 1.0,
+      "citation_coverage": 0.0
+    },
+    "gtin": {
+      "total": 15,
+      "correct": 0,
+      "wrong_value": 0,
+      "missed": 0,
+      "correctly_abstained": 15,
+      "hallucinated": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 0.0,
+      "citation_coverage": 0.0
+    },
+    "handle_type": {
+      "total": 13,
+      "correct": 7,
+      "wrong_value": 0,
+      "missed": 6,
+      "correctly_abstained": 0,
+      "hallucinated": 0,
+      "precision": 1.0,
+      "recall": 0.5385,
+      "f1": 0.7,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 1.0,
+      "citation_coverage": 0.0
+    },
+    "lead_free_compliant": {
+      "total": 15,
+      "correct": 0,
+      "wrong_value": 0,
+      "missed": 10,
+      "correctly_abstained": 5,
+      "hallucinated": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 0.0,
+      "citation_coverage": 0.0
+    },
+    "nominal_size": {
+      "total": 15,
+      "correct": 9,
+      "wrong_value": 0,
+      "missed": 6,
+      "correctly_abstained": 0,
+      "hallucinated": 0,
+      "precision": 1.0,
+      "recall": 0.6,
+      "f1": 0.75,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 1.0,
+      "citation_coverage": 0.0
+    },
+    "number_of_pieces": {
+      "total": 11,
+      "correct": 9,
+      "wrong_value": 0,
+      "missed": 2,
+      "correctly_abstained": 0,
+      "hallucinated": 0,
+      "precision": 1.0,
+      "recall": 0.8182,
+      "f1": 0.9,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 1.0,
+      "citation_coverage": 0.0
+    },
+    "operating_torque": {
+      "total": 5,
+      "correct": 0,
+      "wrong_value": 0,
+      "missed": 1,
+      "correctly_abstained": 4,
+      "hallucinated": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 0.0,
+      "citation_coverage": 0.0
+    },
+    "port_type": {
+      "total": 11,
+      "correct": 9,
+      "wrong_value": 0,
+      "missed": 2,
+      "correctly_abstained": 0,
+      "hallucinated": 0,
+      "precision": 1.0,
+      "recall": 0.8182,
+      "f1": 0.9,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 1.0,
+      "citation_coverage": 0.0
+    },
+    "potable_water_approved": {
+      "total": 15,
+      "correct": 0,
+      "wrong_value": 0,
+      "missed": 15,
+      "correctly_abstained": 0,
+      "hallucinated": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 0.0,
+      "citation_coverage": 0.0
+    },
+    "pressure_rating_wog": {
+      "total": 15,
+      "correct": 13,
+      "wrong_value": 0,
+      "missed": 2,
+      "correctly_abstained": 0,
+      "hallucinated": 0,
+      "precision": 1.0,
+      "recall": 0.8667,
+      "f1": 0.9286,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 1.0,
+      "citation_coverage": 0.0
+    },
+    "product_series": {
+      "total": 15,
+      "correct": 13,
+      "wrong_value": 0,
+      "missed": 2,
+      "correctly_abstained": 0,
+      "hallucinated": 0,
+      "precision": 1.0,
+      "recall": 0.8667,
+      "f1": 0.9286,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 1.0,
+      "citation_coverage": 0.0
+    },
+    "seat_material": {
+      "total": 11,
+      "correct": 9,
+      "wrong_value": 0,
+      "missed": 2,
+      "correctly_abstained": 0,
+      "hallucinated": 0,
+      "precision": 1.0,
+      "recall": 0.8182,
+      "f1": 0.9,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 1.0,
+      "citation_coverage": 0.0
+    },
+    "selling_uom": {
+      "total": 15,
+      "correct": 0,
+      "wrong_value": 0,
+      "missed": 0,
+      "correctly_abstained": 15,
+      "hallucinated": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 0.0,
+      "citation_coverage": 0.0
+    },
+    "steam_pressure_rating": {
+      "total": 15,
+      "correct": 13,
+      "wrong_value": 0,
+      "missed": 2,
+      "correctly_abstained": 0,
+      "hallucinated": 0,
+      "precision": 1.0,
+      "recall": 0.8667,
+      "f1": 0.9286,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 1.0,
+      "citation_coverage": 0.0
+    },
+    "stem_material": {
+      "total": 10,
+      "correct": 8,
+      "wrong_value": 0,
+      "missed": 2,
+      "correctly_abstained": 0,
+      "hallucinated": 0,
+      "precision": 1.0,
+      "recall": 0.8,
+      "f1": 0.8889,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 1.0,
+      "citation_coverage": 0.0
+    },
+    "temperature_range": {
+      "total": 15,
+      "correct": 13,
+      "wrong_value": 0,
+      "missed": 2,
+      "correctly_abstained": 0,
+      "hallucinated": 0,
+      "precision": 1.0,
+      "recall": 0.8667,
+      "f1": 0.9286,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 1.0,
+      "citation_coverage": 0.0
+    }
+  },
+  "folds_detail": [
+    {
+      "sku": "BA-100-025",
+      "shape": "A-N-N",
+      "matched": true,
+      "shape_siblings": 8,
+      "predicted": 11,
+      "generalising_predictions": 1,
+      "conflicts": 0,
+      "total": 22,
+      "correct": 11,
+      "wrong_value": 0,
+      "missed": 3,
+      "correctly_abstained": 8,
+      "hallucinated": 0,
+      "precision": 1.0,
+      "recall": 0.7857,
+      "f1": 0.88,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 1.0,
+      "citation_coverage": 0.0
+    },
+    {
+      "sku": "BA-100-050",
+      "shape": "A-N-N",
+      "matched": true,
+      "shape_siblings": 8,
+      "predicted": 11,
+      "generalising_predictions": 1,
+      "conflicts": 0,
+      "total": 22,
+      "correct": 11,
+      "wrong_value": 0,
+      "missed": 4,
+      "correctly_abstained": 7,
+      "hallucinated": 0,
+      "precision": 1.0,
+      "recall": 0.7333,
+      "f1": 0.8462,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 1.0,
+      "citation_coverage": 0.0
+    },
+    {
+      "sku": "BA-100-075",
+      "shape": "A-N-N",
+      "matched": true,
+      "shape_siblings": 8,
+      "predicted": 11,
+      "generalising_predictions": 1,
+      "conflicts": 0,
+      "total": 22,
+      "correct": 11,
+      "wrong_value": 0,
+      "missed": 3,
+      "correctly_abstained": 8,
+      "hallucinated": 0,
+      "precision": 1.0,
+      "recall": 0.7857,
+      "f1": 0.88,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 1.0,
+      "citation_coverage": 0.0
+    },
+    {
+      "sku": "BA-100-100",
+      "shape": "A-N-N",
+      "matched": true,
+      "shape_siblings": 8,
+      "predicted": 11,
+      "generalising_predictions": 1,
+      "conflicts": 0,
+      "total": 21,
+      "correct": 10,
+      "wrong_value": 0,
+      "missed": 3,
+      "correctly_abstained": 8,
+      "hallucinated": 0,
+      "precision": 1.0,
+      "recall": 0.7692,
+      "f1": 0.8696,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 1.0,
+      "citation_coverage": 0.0
+    },
+    {
+      "sku": "BA-100-125",
+      "shape": "A-N-N",
+      "matched": true,
+      "shape_siblings": 8,
+      "predicted": 11,
+      "generalising_predictions": 1,
+      "conflicts": 0,
+      "total": 21,
+      "correct": 10,
+      "wrong_value": 0,
+      "missed": 3,
+      "correctly_abstained": 8,
+      "hallucinated": 0,
+      "precision": 1.0,
+      "recall": 0.7692,
+      "f1": 0.8696,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 1.0,
+      "citation_coverage": 0.0
+    },
+    {
+      "sku": "T-113-025",
+      "shape": "A-N-N",
+      "matched": true,
+      "shape_siblings": 8,
+      "predicted": 9,
+      "generalising_predictions": 1,
+      "conflicts": 0,
+      "total": 18,
+      "correct": 9,
+      "wrong_value": 0,
+      "missed": 5,
+      "correctly_abstained": 4,
+      "hallucinated": 0,
+      "precision": 1.0,
+      "recall": 0.6429,
+      "f1": 0.7826,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 1.0,
+      "citation_coverage": 0.0
+    },
+    {
+      "sku": "T-113-050",
+      "shape": "A-N-N",
+      "matched": true,
+      "shape_siblings": 8,
+      "predicted": 9,
+      "generalising_predictions": 1,
+      "conflicts": 0,
+      "total": 18,
+      "correct": 9,
+      "wrong_value": 0,
+      "missed": 5,
+      "correctly_abstained": 4,
+      "hallucinated": 0,
+      "precision": 1.0,
+      "recall": 0.6429,
+      "f1": 0.7826,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 1.0,
+      "citation_coverage": 0.0
+    },
+    {
+      "sku": "T-113-100",
+      "shape": "A-N-N",
+      "matched": true,
+      "shape_siblings": 8,
+      "predicted": 9,
+      "generalising_predictions": 1,
+      "conflicts": 0,
+      "total": 18,
+      "correct": 9,
+      "wrong_value": 0,
+      "missed": 5,
+      "correctly_abstained": 4,
+      "hallucinated": 0,
+      "precision": 1.0,
+      "recall": 0.6429,
+      "f1": 0.7826,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 1.0,
+      "citation_coverage": 0.0
+    },
+    {
+      "sku": "T-113-200",
+      "shape": "A-N-N",
+      "matched": true,
+      "shape_siblings": 8,
+      "predicted": 9,
+      "generalising_predictions": 1,
+      "conflicts": 0,
+      "total": 18,
+      "correct": 9,
+      "wrong_value": 0,
+      "missed": 5,
+      "correctly_abstained": 4,
+      "hallucinated": 0,
+      "precision": 1.0,
+      "recall": 0.6429,
+      "f1": 0.7826,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 1.0,
+      "citation_coverage": 0.0
+    },
+    {
+      "sku": "77C-103",
+      "shape": "NA-N",
+      "matched": true,
+      "shape_siblings": 3,
+      "predicted": 9,
+      "generalising_predictions": 0,
+      "conflicts": 0,
+      "total": 22,
+      "correct": 9,
+      "wrong_value": 0,
+      "missed": 8,
+      "correctly_abstained": 5,
+      "hallucinated": 0,
+      "precision": 1.0,
+      "recall": 0.5294,
+      "f1": 0.6923,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 1.0,
+      "citation_coverage": 0.0
+    },
+    {
+      "sku": "77C-104",
+      "shape": "NA-N",
+      "matched": true,
+      "shape_siblings": 3,
+      "predicted": 9,
+      "generalising_predictions": 0,
+      "conflicts": 0,
+      "total": 22,
+      "correct": 9,
+      "wrong_value": 0,
+      "missed": 8,
+      "correctly_abstained": 5,
+      "hallucinated": 0,
+      "precision": 1.0,
+      "recall": 0.5294,
+      "f1": 0.6923,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 1.0,
+      "citation_coverage": 0.0
+    },
+    {
+      "sku": "77C-105",
+      "shape": "NA-N",
+      "matched": true,
+      "shape_siblings": 3,
+      "predicted": 9,
+      "generalising_predictions": 0,
+      "conflicts": 0,
+      "total": 22,
+      "correct": 9,
+      "wrong_value": 0,
+      "missed": 8,
+      "correctly_abstained": 5,
+      "hallucinated": 0,
+      "precision": 1.0,
+      "recall": 0.5294,
+      "f1": 0.6923,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 1.0,
+      "citation_coverage": 0.0
+    },
+    {
+      "sku": "77C-105R",
+      "shape": "NA-NA",
+      "matched": false,
+      "shape_siblings": 1,
+      "predicted": 0,
+      "generalising_predictions": 0,
+      "conflicts": 0,
+      "total": 22,
+      "correct": 0,
+      "wrong_value": 0,
+      "missed": 17,
+      "correctly_abstained": 5,
+      "hallucinated": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 0.0,
+      "citation_coverage": 0.0
+    },
+    {
+      "sku": "77C-106",
+      "shape": "NA-N",
+      "matched": true,
+      "shape_siblings": 3,
+      "predicted": 9,
+      "generalising_predictions": 0,
+      "conflicts": 0,
+      "total": 22,
+      "correct": 9,
+      "wrong_value": 0,
+      "missed": 8,
+      "correctly_abstained": 5,
+      "hallucinated": 0,
+      "precision": 1.0,
+      "recall": 0.5294,
+      "f1": 0.6923,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 1.0,
+      "citation_coverage": 0.0
+    },
+    {
+      "sku": "77C-106R",
+      "shape": "NA-NA",
+      "matched": false,
+      "shape_siblings": 1,
+      "predicted": 0,
+      "generalising_predictions": 0,
+      "conflicts": 0,
+      "total": 22,
+      "correct": 0,
+      "wrong_value": 0,
+      "missed": 17,
+      "correctly_abstained": 5,
+      "hallucinated": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "abstention_correctness": 1.0,
+      "hallucination_rate": 0.0,
+      "exact_match_rate": 0.0,
+      "citation_coverage": 0.0
+    }
+  ],
+  "failures": []
+}

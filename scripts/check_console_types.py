@@ -71,6 +71,13 @@ ENUM_MAP: dict[str, str] = {
     "ClaimKind": "axiom.generate.claims:ClaimKind",
     "ClaimVerdict": "axiom.generate.claims:ClaimVerdict",
     "CohortArm": "axiom.evaluation.cohort:Arm",
+    "Interchange": "axiom.schema.models:Interchange",
+    "SubstitutionRule": "axiom.schema.models:SubstitutionRule",
+    # Renamed on the way across: `Verdict` is already taken in types.ts by the validation layers,
+    # and two unrelated unions under one name is how a UI ends up rendering a solver verdict with
+    # an equivalence label.
+    "EquivalenceVerdict": "axiom.resolve.equivalence:Verdict",
+    "Compatibility": "axiom.resolve.equivalence:Compatibility",
 }
 
 # TypeScript interface -> the Pydantic model it mirrors.
