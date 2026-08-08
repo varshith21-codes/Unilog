@@ -251,8 +251,10 @@ Python installed — no Node, no build step.
 **How the data flows, and one distinction that matters:**
 
 ```
-run_pipeline.py ──> data/console/{sku}.bundle.json   what the machine produced
-                └─> data/sessions/{sku}.json         what humans decided
+run_pipeline.py ────> data/console/{sku}.bundle.json    what the machine produced
+                 └──> data/sessions/{sku}.json          what humans decided
+cross_validate.py ──> data/cross-source/{sku}.json      what a second document said
+cross_reference.py ─> data/equivalence/{sku}.json       what else would do
                                   │
               GET /api/console/dataset  ── joins them ──> console
 ```
@@ -882,19 +884,29 @@ python scripts/cross_reference.py --sku 77C-105R --against 77C-105
 ```
 
 ```
-verdict: FUNCTIONAL EQUIVALENT
-  performs the same function, but differs on port type, so it is not a drop-in
-  and installation changes
+EQUIVALENCE — can 77C-105 replace 77C-105R?
+  verdict: FUNCTIONAL EQUIVALENT
+    performs the same function, but differs on port type, so it is not a
+    drop-in and installation changes
   13 of 14 interchange-relevant attributes were established on both records
     DIFFERS
-      port_type                    Reduced Port  ->  Full Port          [critical]
+      port_type                          Reduced Port  ->  Full Port         [critical]
     NOT ESTABLISHED
-      end_connection            not established  ->  not established    [critical]
+      end_connection                  not established  ->  not established   [critical]
     CANDIDATE EXCEEDS
-      cv_flow_coefficient                    21  ->  49                 [functional]
+      cv_flow_coefficient                          21  ->  49                [functional]
     AGREES (11)
-      approvals, body_material, lead_free_compliant, nominal_size, …
+      approvals, body_material, lead_free_compliant, nominal_size,
+      number_of_pieces, potable_water_approved, pressure_rating_wog,
+      seat_material, steam_pressure_rating, stem_material, temperature_range
 ```
+
+Three things on one screen that a compatible/incompatible flag cannot express: a **fit** difference
+that does not stop the valve doing its job, an attribute that is **not established** on either side
+and so cannot be claimed either way, and a figure where the candidate **exceeds** the reference
+rather than matching it. `end_connection` is never stated on this datasheet, which is why the verdict
+is qualified rather than promoted — and the reverse direction comes back `not equivalent`, because
+the reduced-port valve gives up flow the full-port one has.
 
 **Interchange semantics are declarative, not code.** Whether a different handle style blocks a
 substitution is a merchandising judgement, so it lives in `schema/attributes/*.yaml` where the
@@ -1171,7 +1183,7 @@ that is internally inconsistent.
 Extraction never normalises and never validates. Keeping those separate is what makes a
 failure attributable: a bad unit conversion cannot masquerade as a bad extraction.
 
-Two layers sit outside this single-SKU flow because they need inputs it does not have:
+Four analyses sit outside this single-SKU flow because they need inputs it does not have:
 
 - **L4, cross-source agreement** — `scripts/cross_validate.py` extracts the same SKU from two or
   more documents and compares them. It needs a second source, which is why it is a separate
@@ -1182,6 +1194,16 @@ Two layers sit outside this single-SKU flow because they need inputs it does not
   a later multi-source analysis would destroy the ability to ask what that run said on its own.
 - **The quality cohort** — `scripts/run_cohort.py` scores the item master a catalogue started
   from against the enriched output, both through one scorer.
+- **Part-number grammar induction** — `scripts/induce_grammar.py` needs *many* part numbers with
+  known values, so it is a corpus-level analysis rather than a stage. It produces reviewable
+  candidate values for a SKU the pipeline has never seen, at zero cost, which is the only thing in
+  this system that can populate a record without a document.
+- **Cross-reference and equivalence** — `scripts/cross_reference.py` needs a catalogue to search,
+  so like L4 it cannot be a stage in a single-SKU run. With `--write` the findings land in
+  `data/equivalence/` and the API joins them onto the bundle at read time, exactly as L4's do.
+  Unlike L4 the join attaches **no per-value verdict**: an equivalence finding is a statement about
+  a pair of products, and hanging it on one attribute row of one record would read as a defect in
+  the reviewer's own data.
 
 ## AWS configuration
 
@@ -1288,15 +1310,15 @@ Tracked against blueprint Part 12.
       - [ ] 24. Spec drift detection on a revised datasheet
 
       Both were chosen partly because they are **fully deterministic**: no model call, no network,
-      no credentials, so both are reproducible bit-for-bit and can run in CI alongside the fast
-      gate rather than behind the AWS-gated regression workflow. Both also make an existing seam
-      load-bearing rather than adding a parallel one — item 19 is the first producer of
-      `DerivationMethod.PART_NUMBER_GRAMMAR`, which the domain model has always refused to
-      auto-accept, and item 20 reuses `core.compare` so "these two values agree" cannot mean one
-      thing to the backtest and another to a substitution.
+      no credentials. So both run in `ci.yml` alongside lint and tests rather than behind the
+      AWS-gated regression workflow, and the grammar's fabrication count is a build failure rather
+      than a weekly report. Both also make an existing seam load-bearing rather than adding a
+      parallel one — item 19 is the first producer of `DerivationMethod.PART_NUMBER_GRAMMAR`, which
+      the domain model has always refused to auto-accept, and item 20 reuses `core.compare` so
+      "these two values agree" cannot mean one thing to the backtest and another to a substitution.
 
-**Beyond the tiers, and outside them.** Two pieces of work here are not Tier 3 items and should not
-be counted as though they were:
+**Beyond the tiers, and outside them.** Two further pieces of work are not Tier 3 items and should
+not be counted as though they were:
 
 - **Validation layer L4, cross-source agreement.** Tier 1 item 7 scopes validation to L0–L3;
   module M7 defines L0–L6. L4 closes part of that gap — two sources that agree are the strongest
@@ -1306,9 +1328,12 @@ be counted as though they were:
 - **The M15 CI regression gate**, described below.
 
 Beyond the tiers, blueprint module M15's **CI regression gate** is in place: `ci.yml` runs lint,
-Python tests, console tests, typecheck, contrast, schema integrity and a type-drift check on every push, and
+Python tests, console tests, typecheck, contrast, schema integrity, a type-drift check, the
+part-number grammar's held-out validation and the cross-reference sweep on every push, and
 `regression.yml` measures the pipeline against the golden set and blocks a change that degrades any
-tracked metric. The blueprint rates that above shipping another feature, and it was the largest
+tracked metric. The two Tier 3 analyses sit in the *fast* gate rather than the metrics one precisely
+because they make no model call: no credentials, no cost, reproducible bit-for-bit, so there is no
+reason to run them weekly instead of on every push. The blueprint rates that above shipping another feature, and it was the largest
 thing missing.
 
 Storage infrastructure is deployed (see above). Compute is not — the pipeline runs locally.
@@ -1408,3 +1433,26 @@ Storage infrastructure is deployed (see above). Compute is not — the pipeline 
 - HTS classification is deliberately never auto-published: published benchmarks put accuracy
   near 40% at the 10-digit level, which is not publishable at any confidence this system can
   honestly assign.
+- **The induced grammar covers one vertical's part numbers, and 55.1% recall is the ceiling on this
+  corpus, not a tuning target.** Carton quantity, country of origin and flow coefficient are not
+  encoded in these part numbers at all, so the missing half is mostly attributes no grammar could
+  ever recover. The figure that would move with more data is the number of *generalising* rules,
+  which is currently one.
+- **Two grammar folds cannot be scored**, because `77C-105R` and `77C-106R` are the only members of
+  their part-number shape and holding either out leaves nothing to learn from. Reported as
+  unlearnable rather than averaged into the headline.
+- **The cross-reference finds no substitutes in the committed corpus, and the console panel
+  therefore renders its empty state on a fresh clone.** The three datasheets use different alloys,
+  rating classes and approval sets, so the parts genuinely do not interchange — the golden set was
+  built to be adversarial to an extractor, not to contain substitutes. The upper rungs of the
+  verdict ladder (`identical`, `drop_in`) are covered by tests against constructed records, and
+  nothing in the checked-in data exercises them.
+- **The equivalence sweep runs on ground truth by default**, so it measures the comparison logic
+  rather than the extraction that would feed it in production. `source` and `measured` travel in
+  every payload and the panel says so in prose, the same contract as the L4 dry-run marker.
+  `--from-bundles` uses real pipeline output, and today that is two SKUs — enough for one pair.
+- **Interchange semantics are one merchandiser's judgement, declared in YAML and not validated
+  against anyone's returns data.** That `end_connection` blocks a drop-in while `handle_type` does
+  not is defensible and untested against outcomes; the schema is where to argue with it.
+- `scripts/export_console_fixture.py` raises `ValueError` from `Path.relative_to` if `--out` is a
+  relative path or points outside the repository. Pre-existing, and harmless with the default path.

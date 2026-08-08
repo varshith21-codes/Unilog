@@ -293,7 +293,10 @@ def format_equivalence(report: EquivalenceReport) -> str:
     add("=" * 78)
     add(f"EQUIVALENCE — can {report.candidate_sku} replace {report.reference_sku}?")
     add("=" * 78)
-    add(f"  verdict: {_VERDICT_LABEL[report.verdict].upper()}")
+    # Spelled out rather than reusing the table label. `_VERDICT_LABEL` is abbreviated to fit a
+    # ranked column, and there is no column here — an abbreviation leaking into prose reads as a
+    # different verdict from the one the enum actually names.
+    add(f"  verdict: {report.verdict.value.replace('_', ' ').upper()}")
     for line in _wrap(report.reason, width=74):
         add(f"    {line}")
     add("")

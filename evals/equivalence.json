@@ -1,26 +1,5 @@
 {
-  "generated_at": "2026-08-07T18:00:12.615754+00:00",
-  "source": "golden",
-  "measured": false,
-  "source_note": "Records are read from the hand-authored golden set, so these verdicts exercise the comparison logic rather than the extraction that would supply it in production. The corpus is used because it is the only set here wide enough to rank substitutes across manufacturers.",
-  "catalogue_size": 15,
-  "catalogue_skus": [
-    "BA-100-025",
-    "BA-100-050",
-    "BA-100-075",
-    "BA-100-100",
-    "BA-100-125",
-    "T-113-025",
-    "T-113-050",
-    "T-113-100",
-    "T-113-200",
-    "77C-103",
-    "77C-104",
-    "77C-105",
-    "77C-105R",
-    "77C-106",
-    "77C-106R"
-  ],
+  "generated_at": "2026-08-08T13:01:48.657736+00:00",
   "report": {
     "pairs": 210,
     "comparable_pairs": 28,

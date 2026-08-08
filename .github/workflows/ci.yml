@@ -63,6 +63,47 @@ jobs:
         # represent the new case. `tsc` cannot catch that — it only sees the TypeScript.
         run: python scripts/check_console_types.py --quiet
 
+      - name: Part-number grammar holds its held-out numbers
+        # Belongs in the *fast* gate rather than regression.yml, because grammar induction makes no
+        # model call: it reads part numbers and ground truth off disk and the rest is arithmetic. So
+        # unlike the backtest it needs no credentials, costs nothing, and is reproducible
+        # bit-for-bit — there is no reason to run it weekly instead of on every push.
+        #
+        # The script exits non-zero if the grammar produced a value for an attribute the golden set
+        # records as absent. That is the one outcome that must fail a build: a grammar costs nothing
+        # to run, so a fabrication rate above zero would scale faster than any review capacity.
+        run: python scripts/induce_grammar.py --no-rules
+
+      - name: Cross-reference sweep runs and every attribute is classified
+        # Also free and deterministic. The assertion worth making here is not a substitution rate —
+        # that is a property of the corpus — but that no attribute reached the comparison without a
+        # declared interchange level, since an unclassified attribute is silently excluded from every
+        # verdict.
+        run: |
+          python - <<'PY'
+          import sys
+
+          from axiom.resolve import records_from_golden, sweep
+          from axiom.schema import load_default
+
+          registry = load_default()
+          result = sweep(records_from_golden(registry), registry)
+
+          if result.unclassified():
+              print(
+                  "FAIL: attributes with no declared interchange level reached a comparison: "
+                  + ", ".join(result.unclassified()),
+                  file=sys.stderr,
+              )
+              sys.exit(1)
+
+          print(
+              f"sweep ok: {result.pairs} ordered pairs, {len(result.comparable())} comparable, "
+              f"{len(result.substitutable())} substitutable, "
+              f"{len(result.asymmetric_pairs())} asymmetric"
+          )
+          PY
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
