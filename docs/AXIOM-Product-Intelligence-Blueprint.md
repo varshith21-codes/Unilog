@@ -29,7 +29,13 @@ Version 1.0 · Prepared as a build-and-pitch blueprint, not a spec document. Rea
 | 14 | [The scoreboard: metrics that win the "impact" category](#part-14--the-scoreboard) |
 | 15 | [Risks, ethics, and how to defuse the hard questions](#part-15--risks-ethics-and-hard-questions) |
 | 16 | [Pitch narrative and slide outline](#part-16--pitch-narrative-and-slide-outline) |
+| 17 | [**The Unilog delivery contract** — written after the dataset pack arrived; supersedes earlier assumptions about the output schema, and records the measured baseline](#part-17--the-unilog-delivery-contract) |
 | A | [Appendices: schemas, prompts, policies, metric definitions, sources](#appendix-a--example-attribute-schema) |
+
+> **Read Part 17 first if you are implementing.** Parts 0–16 were written before the client's
+> dataset pack was available and assume we design our own output schema. We do not: there is a fixed
+> 252-column delivery format. Part 17 records what the real files demand and which earlier decisions
+> it overrides.
 
 ---
 
@@ -1043,6 +1049,11 @@ Judgement is a scoring signal. Deliberately excluding things, and being able to 
 
 Build strictly in this order. Do not start a Tier 2 item until every Tier 1 item works end to end.
 
+> **Superseded in part by [§17.8](#178-revised-scope--tier-0).** A Tier 0 now sits ahead of this
+> list: the client's fixed 252-column delivery format. Item 3's "pick one vertical" is re-pointed
+> away from PVF valves to a category that actually occurs in the sample data, and item 11's two
+> exports become three. The engineering below is unchanged; the target is.
+
 **Tier 1 — must ship (the spine).** Without all of these there is no story.
 1. Ingest: CSV/XLSX plus PDF plus URL, with hashing and provenance
 2. Document parsing with page renders, table extraction and evidence spans
@@ -1128,6 +1139,14 @@ axiom/
 Two notes on this layout. First, `data/golden/` is genuinely the highest-value directory in the repo — invest real time there, because every metric you claim depends on it. Second, keeping `packages/schema/` as declarative files rather than code is what lets you say "adding an attribute requires no code change," which is a strong scalability claim.
 
 ### 12.4 Sourcing demo data
+
+> **Largely obsolete — see [§17.1](#171-the-pack-as-actually-delivered) and
+> [§17.2](#172-what-the-input-actually-gives-us).** The client supplied a real 1,000-row item master
+> and a real delivery-format example, so there is no need to synthesise a degraded "before" state.
+> The hand-built golden set advised below is replaced by obtaining
+> `Unilog-Sample_200_Items-Input-vs-Output.xlsx`, which is better ground truth than we could author.
+> What remains valid: sourcing manufacturer datasheets locally so the demo never needs the network,
+> and the public benchmarks in the last bullet.
 
 You need three things: source documents, ground truth, and a believable "before" state.
 
@@ -1325,6 +1344,545 @@ This matters more than usual because the sponsor's own business involves license
 - "This is not a model checking a model. This is formal verification against a logic policy."
 - "You set the error budget. We tell you how much of your catalog fits inside it, and what the rest will cost you in review time."
 - "Every attribute has a source, every claim has a proof, and every decision has a number attached to it."
+
+---
+
+## Part 17 — The Unilog delivery contract
+
+Parts 0–16 were written before the client's dataset pack arrived. This part is written after, and
+where the two disagree **this part wins**. Everything below is measured from
+`UniHack Solution Guide.pdf`, `Unihack_ Sample Dataset - Input.csv` and
+`Unihack_ Expected Output - Delivery Format.csv` rather than assumed.
+
+The headline correction: the blueprint assumed we would *design* our own output schema and prove it
+with a PIM-shaped JSON export. We do not get to design it. The client has a fixed 252-column
+delivery format, and a submission that does not land in those exact columns is unusable regardless
+of how good the enrichment underneath is. **The output contract is now a Tier 0 requirement, ahead
+of everything in §12.1.**
+
+### 17.1 The pack as actually delivered
+
+The guide describes ten files in four groups. Two are in the repository. Eight are not.
+
+| Guide's file | Role | Present? |
+|---|---|---|
+| `Sample-1000_Items.xlsx` | 1,000 raw rows, the volume input | ✅ as `Unihack_ Sample Dataset - Input.csv` |
+| `Unilog-Sample_200_Items-Input-vs-Output.xlsx` | **the labelled ground truth**, 200 rows × 252 cols | ❌ — we have a 2-row extract only |
+| `UNILOG_INTERNAL_CONTENT_GUIDELINES.docx` | construction formulas, char limits, casing rules | ❌ |
+| `Unilog_Master_UOM_Standards_Abbreviations_and_Terms.xlsx` | ~500 approved UOM abbreviations, 89 measurement types | ❌ |
+| `Decimal_Fraction.xlsx` | 63 inch conversions, 1/64 → 63/64 | ❌ |
+| `UniCat_Manufacturer_and_Brand_List.xlsx` | 27,000+ approved manufacturer/brand rows | ❌ |
+| `Unicat_Lov_v1_0_Updated_With_Remarks.xlsx` | ~161,000 rows of permitted attribute values | ❌ |
+| `FAUCETS_LOV.xlsx` | one category specified to full depth | ❌ |
+| `Fittings_LOV.xlsx` | 390 fitting types, 1,472→515 connection mappings | ❌ |
+| `Reference_Documents_Summary.xlsx` | index of the reference files | ❌ |
+
+This matters more than any code gap. The guide is explicit that the UOM file is *"the only permitted
+way to write a unit anywhere in your output"* and that attribute values must come from the LOV
+files — *"a fluent description made of invented values scores zero."* Until those arrive we are
+building the machinery that will consume them, not the final answer. §17.9 explains how the design
+stays honest in the meantime.
+
+**Action: obtain the eight missing files before investing further in value generation.** Two are
+blocking for correctness (`UOM_Standards`, `UniCat_Manufacturer_and_Brand_List`), one is blocking
+for measurement (`200_Items`), and the LOV files are blocking for the "constrained, not creative"
+requirement.
+
+### 17.2 What the input actually gives us
+
+1,000 rows, six columns, and far less signal than §12.4 assumed:
+
+```
+Mfg_Part_Num  Part_Desc  E1_Brand  Unilog_Brand  DIB_Brand  Part_Manuf
+```
+
+Measured properties that change design decisions:
+
+| Property | Measured | Consequence |
+|---|---|---|
+| `Part_Desc` length | median 35 chars, max 70 | the whole record must be built from ~35 characters plus retrieval |
+| `E1_Brand` placeholders | 799/1,000 are `-- Unbranded --` | brand cannot come from the brand columns |
+| `Unilog_Brand` placeholders | 1,000/1,000 | column is pure noise; drop it |
+| `DIB_Brand` placeholders | 755/1,000 | ditto, mostly |
+| Rows with *any* real brand | **446/1,000 (44.6%)** | brand resolution must key off `Part_Manuf` and the description |
+| `Part_Manuf` shape | 76 distinct, 959/1,000 with a trailing `(CODE)` | the usable manufacturer signal, once the code is stripped |
+| Product mix | lighting 208, abrasives ~163, building materials ~183, appliances 84, power tools ~94, plus wire, mortar, tape, eyewear | **zero valves** |
+
+That last row retires the PVF vertical as the demo subject. The 25 valve attributes and 2 valve
+classes in `schema/` do not apply to a single one of the 1,000 rows.
+
+There is one piece of luck: both delivery-format example part numbers (`PDSH4816AF`, `WDTS7024RZ`)
+**are present in the 1,000-row input**. We have two fully traceable input→output pairs, which is
+exactly enough to build against and nowhere near enough to measure with.
+
+Also note what the input does *not* contain: `PART_NUMBER` (`20887830`) and
+`SKU - MY_PART_NUMBER` (`1515863`) are distributor-internal identifiers. The guide says the
+*200-item* input sheet supplies `Dept/Class/Fine` and `SKU`; our 6-column file does not. So on this
+dataset those two columns are **unknowable** and `Dept/Class/Fine` must be *predicted*. Emitting a
+fabricated internal SKU would be the single worst thing we could do — it would corrupt the client's
+own key. Leave them blank and say why.
+
+### 17.3 The 252-column delivery format
+
+Two rows, 252 columns, 79 populated, 173 entirely empty. Grouped by what it takes to produce them:
+
+| Group | Columns | Provenance class | Notes |
+|---|---|---|---|
+| Reference URLs | `MFR URL`, `Ref URL 1-5` | **evidence** | the source we enriched *from* — this is our citation, and the format has a home for it |
+| Input echo | `Mfg_Part_Num`, `Part_Desc`, `E1_Brand`, `Unilog_Brand`, `DIB_Brand`, `Part_Manuf` | **passthrough** | copied verbatim, placeholders included |
+| Client keys | `PART_NUMBER`, `SKU - MY_PART_NUMBER` | **unavailable** | not derivable from a 6-column input |
+| Taxonomy | `Dept`, `Class`, `Fine`, `Classpath` | **derived** | from classification; `Classpath` is `>`-joined with no spaces |
+| Brand/manufacturer | `MANUFACTURER_NAME`, `BRAND_NAME`, `TRADE_NAME`, `MANUFACTURER_PART_NUMBER`, `ALTERNATE_PART_NUMBER` | **derived** | must match the approved list exactly, `®`/`™` included |
+| The five rewrites | `MOBILE_DESC`, `INVOICE_DESC`, `SHORT_DESC`, `LONG_DESC1`, `RETAIL_DESC`, `MARKETING_DESCRIPTION` | **generated** | see §17.4 |
+| Features | `ITEM_FEATURES_1-20` | **generated** | row 2 fills 11; row 1 fills 0 |
+| Prose slots | `With`, `Standard/Approvals`, `Prop 65`, `Application`, `Includes`, `Product Name` | **mixed** | `Standard/Approvals` is `\|`-delimited |
+| Attribute grid | `ATTRIBUTE_LABEL/VALUE/UOM 1-50` (150 cols) | **extracted** | see §17.5 |
+| Identifiers | `UPC`, `EAN`, `GTIN`, `UNSPSC` | **extracted** | all blank in ground truth |
+| Commercial | `Warranty`, `List Price`, `Selling Qty`, `Selling UOM`, `Standard Packaging Information` | **extracted** | only `Warranty` populated |
+| Dimensions | `LENGTH`, `HEIGHT`, `WIDTH`, `WEIGHT`, `VOLUME` + `_UOM` each | **extracted** | all blank in ground truth |
+| Assets | `Product Image`, `Alternate Image 1-4`, `SDS`, `Specification Sheet`, +14 more doc slots, `Video Link`, `Video Link 1` | **derived** | filename convention, see §17.6 |
+| Flags | `Country Of Origin`, `Discontinued`, `Actual Image (Yes/No)` | **mixed** | |
+
+The single most important engineering fact: **173 of 252 columns are empty in the ground truth.**
+The format is a superset envelope, not a completeness target. A submission that fills columns the
+client left blank is *worse*, not better — it is inventing data. Fill rate is the wrong metric here;
+per-column correctness against ground truth is the right one.
+
+### 17.4 The five rewrites are the actual task
+
+The guide is blunt about this: *"the same product information is rewritten five times at five
+different lengths and casings… Getting these formats right is most of the task."* Measured from both
+ground-truth rows:
+
+| Column | Row 1 | Row 2 | Constraint | Purpose |
+|---|---|---|---|---|
+| `INVOICE_DESC` | 38, ALL CAPS | 39, ALL CAPS | **≤40, uppercase** | till receipt |
+| `MOBILE_DESC` | 75 | 64 | **60–80** | mobile app |
+| `RETAIL_DESC` | 75 | 74 | ~75 | search results |
+| `SHORT_DESC` | 115 | 96 | product title | PDP heading |
+| `LONG_DESC1` | 390 | 405 | ~400 | product page |
+| `MARKETING_DESCRIPTION` | 0 | 214 | optional | prose, manufacturer-sourced |
+
+Two observations that drive the implementation:
+
+`INVOICE_DESC` is not a truncation, it is an **abbreviation grammar**:
+`DISHWASHER LEG 5 SST 120V 15A 50-1/4IN`. Note `SST` for stainless steel, `LEG` for leg mounting,
+units closed up (`120V`, not `120 V`) *only here* — the guide's "always keep a space between number
+and unit" rule is a long-form rule that the 40-character invoice line overrides. That is a
+compositional rule over known attribute values, not a generation task, and it should be
+**deterministic code with an abbreviation table**, not a model call.
+
+`LONG_DESC1` is also compositional, not free prose:
+`{BRAND} {ItemType} With {Feature}, {Series}, {attr}, {attr}, …, Additional Information: {list}`.
+It reads as a template walk over the attribute grid in slot order. Compare row 1's `LONG_DESC1` to
+its `ATTRIBUTE_*` slots and the correspondence is one-to-one. This is `render_title` at a larger
+scale — our existing template mechanism, not our generation mechanism.
+
+So the split is: **`MOBILE_DESC`, `INVOICE_DESC`, `RETAIL_DESC`, `SHORT_DESC` and `LONG_DESC1` are
+deterministic template renders. Only `MARKETING_DESCRIPTION` and `ITEM_FEATURES_*` are genuinely
+generative** — and both are manufacturer-sourced marketing content, so they belong to retrieval with
+a claim check, not to invention. That is a much stronger position than "we asked an LLM for six
+descriptions", and it is measurable to the character.
+
+`generate/copy.py` currently produces `headline / short_description / long_description / bullets`.
+Four fields, none of them character-constrained, mapping onto at most three of the six required. It
+needs to become a **channel-profile-driven renderer** with hard length validators, keeping the
+model call only for the two genuinely generative fields.
+
+### 17.5 The attribute grid is a per-class template
+
+This is the most useful thing measured, and it was not obvious. Both ground-truth rows share
+`Classpath = Appliances & Consumer Electronics>Kitchen Appliances>Built-In Dishwashers`, and they
+carry the **identical 15-label template in identical slot order**:
+
+```
+1 Series          2 Model           3 Number of Wash Cycles   4 Voltage Rating
+5 Amperage Rating 6 Mounting Type   7 Plug Type               8 Size
+9 Depth With Door Open              10 Minimum Height         11 Maximum Height
+12 Sound Level    13 Material       14 Color                  15 Additional Information
+```
+
+Row 1 leaves slots 2, 7 and 14 with a label and **no value**. Row 2 leaves 3, 7, 11 and 14 empty.
+So the label set is fixed by class and the values are sparse — `ATTRIBUTE_LABEL n` is a *schema
+projection*, not a per-row decision.
+
+This is good news architecturally: it is exactly what `ClassDefinition` already models with ordered
+`AttributeBinding`s. Slot *n* is binding *n*. The empty-label tail (slots 16–50) is the class having
+fewer than 50 attributes. `ATTRIBUTE_UOM n` is populated only where the value is a `Quantity` —
+which is precisely what `exporters._render_value` already computes.
+
+Consequence: **the attribute grid needs no new mechanism, only class definitions.** Each new
+category is a YAML file, no Python. That is the scalability claim §12.3 wanted to make, and here it
+is load-bearing rather than rhetorical.
+
+### 17.6 Assets are a filename convention
+
+```
+FRIGIDAIRE_PDSH4816AF.jpg            Whirlpool_WDTS7024RZ.jpg
+FRIGIDAIRE_PDSH4816AF_1.jpg  …_4.jpg
+FRIGIDAIRE_PDSH4816AF_Specification_Sheet.pdf
+Whirlpool_WDTS7024RZ_Specification_Sheet.pdf
+```
+
+The pattern is `{BRAND_sans_symbols}_{MPN}[_{n}|_{Doc_Type}].{ext}`, with brand casing taken from
+`BRAND_NAME` minus `®`. M10 (Digital Asset Intelligence) was scoped in §5 as a full
+image-understanding module and is unbuilt. **It does not need to be built to fill these columns.**
+Deriving the filenames is a string operation over brand and MPN, and `Actual Image (Yes/No)` is a
+boolean over whether the asset was actually retrieved.
+
+The honest caveat, and it must be stated in the demo: emitting a filename asserts the asset exists.
+If we have not fetched it, that is a claim without evidence — the exact sin this whole system exists
+to prevent. So filenames are emitted **only for assets actually retrieved and hashed into the
+artifact store**, and `Actual Image (Yes/No)` reports that fact rather than defaulting to `Yes`.
+
+### 17.7 The planted imperfections — and the credit for spotting them
+
+The guide says: *"The delivery file has blank UNSPSC and country-of-origin cells, and at least one
+row where the manufacturer and brand look mismatched. Noticing and reporting such gaps is a
+strength, not a failure."*
+
+All three are present in the two rows we have, and we detect all three:
+
+1. `UNSPSC` — blank in both rows.
+2. `Country Of Origin` — blank in both rows.
+3. **The mismatch**: row 1 carries `MANUFACTURER_NAME = Rheem Manufacturing` against
+   `BRAND_NAME = FRIGIDAIRE®`, with `MFR URL` pointing at `frigidaire.com`. Rheem does not
+   manufacture Frigidaire dishwashers. Two of the three signals agree with each other and disagree
+   with the third.
+
+Item 3 is a cross-source disagreement between the supplied manufacturer field and the evidence URL,
+which is `validate/cross_source.py`'s existing job. We should surface it as a `needs_human_review`
+flag with both candidates and the URL as the tiebreak — not silently pick one. The guide explicitly
+rewards this, and it is the cheapest available demonstration that the trust layer does something.
+
+### 17.8 Revised scope — Tier 0
+
+§12.1's Tier 1 list stands as engineering, but it is now preceded by a tier that did not exist when
+it was written. Nothing in Tier 1 is demonstrable to *this* client without Tier 0.
+
+**Tier 0 — the delivery contract. Without these, nothing else counts.**
+
+| # | Item | Status |
+|---|---|---|
+| 0.1 | The 252-column contract declared as data, header byte-identical to the client's | build now |
+| 0.2 | `DeliveryFormatExporter`: `ProductRecord` → one delivery row, with per-cell provenance | build now |
+| 0.3 | Six Unilog input headers understood by the column mapper; placeholders treated as null | build now |
+| 0.4 | One real class from the sample data, defined to full depth (Built-In Dishwashers) | build now |
+| 0.5 | Batch driver: input CSV → delivery CSV | build now |
+| 0.6 | Field-level scorer against the ground-truth rows, with char-limit compliance | build now |
+| 0.7 | Deterministic renderers for the five rewrites, with hard length validators | after 0.1–0.6 |
+| 0.8 | LOV / UOM / brand-master loaders | **blocked on the missing files** |
+
+Two Tier 1 items are explicitly **re-pointed** rather than kept:
+
+- §12.1 #3, "two fully-specified product classes (pick one vertical)" — the vertical is no longer
+  PVF valves. It is whatever category we pick from the actual sample data. The valve schema stays in
+  the repo as the worked second vertical and as the thing the existing 1,167 tests exercise, but it
+  is no longer the demo.
+- §12.1 #11, "two channel exports (PIM-shaped import file plus schema.org JSON-LD)" — becomes
+  **three**, and the delivery-format CSV is the one that is graded. The other two are supporting
+  evidence that the canonical record is genuinely channel-agnostic.
+
+§12.4 ("Sourcing demo data") is largely obsolete: we no longer need to construct a degraded "before"
+state, because the client supplied a real one. The advice to hand-build a 100–300 SKU golden set is
+*replaced* by "obtain `Unilog-Sample_200_Items-Input-vs-Output.xlsx`", which is strictly better
+ground truth than anything we could author.
+
+Category choice for 0.4, from the measured mix: **Built-In Dishwashers**. Not because it is the
+largest cohort (lighting is, at 208 rows) but because it is the *only* category where we currently
+hold labelled ground truth. Both example rows are dishwashers. Lighting and abrasives are the right
+second and third categories, and both are large enough to show volume.
+
+### 17.9 The evidence problem this creates, and the honest answer
+
+This is the part that needs the most care, because it is where the client's format and AXIOM's
+central principle collide.
+
+AXIOM's rule is *evidence or null*, enforced in the type system: an extraction-family value without
+an evidence span fails a Pydantic validator, and `AttributeValue.is_publishable` requires verified
+evidence. The delivery format, meanwhile, asks for ~79 populated columns per row starting from a
+35-character description and no attached document.
+
+Run naively, the correct behaviour of the current code is to **emit an empty file**. Values arriving
+from a CSV row are `LEGACY_RECORD`, `confidence 0.0`, `status CANDIDATE`; `channels.preflight`
+refuses; the exporter withholds everything. That is not a bug, and the fix is emphatically *not* to
+weaken the gate.
+
+The fix is to recognise that the delivery format's cells have **different provenance classes**, and
+to make that explicit rather than flatten it:
+
+| Class | Meaning | Evidence needed | Example |
+|---|---|---|---|
+| `passthrough` | Copied from the input unchanged | none — it is the client's own data | `Part_Desc` |
+| `derived` | Deterministic function of passthrough or of an accepted value | inherits from its input | `Classpath`, `MANUFACTURER_PART_NUMBER`, asset filenames |
+| `extracted` | Read from a manufacturer source | **span required**, full gate applies | `Sound Level`, `Voltage Rating` |
+| `generated` | Composed from already-accepted cells only | claim check against the fact sheet | `LONG_DESC1`, `INVOICE_DESC` |
+| `unavailable` | Cannot be established | — | `PART_NUMBER`, `UNSPSC` |
+
+So a row is legitimately populated without weakening anything, provided every cell declares its
+class and `extracted` cells still face the full gate. `derived` inheriting provenance is already
+precedent in this codebase — `verifiability()` treats derivation-family values as verified because a
+unit conversion inherits the provenance of its input.
+
+Two hard rules follow, and they are the design's spine on this dataset:
+
+1. **A `generated` cell may only reference cells that are `passthrough`, `derived`, or accepted
+   `extracted`.** `INVOICE_DESC` cannot mention stainless steel unless `Material` is established.
+   This is `generate/claims.py` applied to template output instead of prose, which is *easier* to
+   check, not harder — a template's inputs are enumerable.
+2. **Every emitted row ships with a provenance sidecar**: for each populated column, its class, its
+   confidence, and its evidence reference where it has one. The delivery CSV is what the client
+   ingests; the sidecar is what makes it auditable, and it is the Enrichment Certificate (§7.3)
+   projected onto their column names.
+
+This is a better story than the original blueprint's, not a compromised one. It says: *here is your
+format, filled in, and here is a per-cell account of which values we copied, which we computed,
+which we read off a manufacturer document with a citation, and which we refused to guess.* No other
+team will hand the judges a column-level provenance map.
+
+### 17.10 A precision failure the sample data exposed, and the fix
+
+Worth recording because it was invisible on the valve vertical and obvious the moment real
+heterogeneous data arrived.
+
+Retrieval (§M4) builds each class's vocabulary from its name, its browse path, **and the values of
+its bound attributes** — deliberately, because "full port" and "RPTFE" discriminate a ball valve
+better than the word "ball" does. On a two-class valve schema that is correct and works. On 1,000
+products spanning twenty categories it produced this:
+
+| Classified | Correct | Precision |
+|---|---|---|
+| 45 rows | 10 | **10/45** |
+
+Every false positive matched on *attribute* vocabulary rather than on any evidence of what the
+product was:
+
+- `2 Port Decor Plate` matched the ball-valve class via `Port Type`, scoring **0.1854** — higher
+  than any genuine dishwasher scored against the dishwasher class (range 0.1725–0.2135).
+- `1x6-20' Castle Gate Grooved - Landmark Azek PVC Decking` matched the bronze **gate** valve.
+- `15A GFCI Plug`, `Milw Voltage Detector` and a 14" bandsaw matched **dishwashers**, via
+  `Plug Type`, `Voltage Rating` and `Size`.
+- Cut-off discs and grinding wheels matched ball valves on shared size fractions (`1/4"`, `7/8"`).
+
+**A score threshold cannot fix this.** The best false positive (0.1854) outranks the worst true
+positive (0.1725), so there is no floor that keeps the dishwashers and drops the decor plate. That
+is not a tuning problem, it is the wrong instrument: lexical overlap answers "how much vocabulary
+do these share", and identity is a different question.
+
+The fix is one declarative field, `ClassDefinition.identity_terms`, and a filter applied *before*
+scoring: a class the text gives no identity evidence for is not a weak candidate, it is not a
+candidate. `[valve, valves, vlv]` on the valve classes, `[dishwasher, dishwashers, dw]` on the
+dishwasher class. Abbreviations are included because they are the whole difficulty — a guard that
+only knew full words would abstain on exactly the cryptic strings this system exists to enrich.
+
+| | Before | After |
+|---|---|---|
+| Rows classified | 45 | 10 |
+| Correct | 10 | 10 |
+| **Precision** | **10/45** | **10/10** |
+| Ground-truth rows still classified | 2/2 | 2/2 |
+
+Recall is unchanged and precision is total. Note what the guard *also* protects: the dominance
+ratio in §M4's decision layer is computed from the top two scores, so an inadmissible class in the
+ranking was corrupting the abstain/adjudicate decision as well as the answer.
+
+Two honest caveats. This raises abstention sharply — 990 of 1,000 rows now decline to classify,
+because only three classes exist and 990 rows are not in them. That is the correct answer and it
+is what the coverage number should say. And the guard is opt-in per class, so a class that declares
+no terms behaves exactly as before; it is a tool for the schema author, not an automatic property.
+
+### 17.11 How we will be scored, and how we score ourselves
+
+The guide names the metrics: *"Field-level accuracy against the 200 known-good rows, character-limit
+compliance, and percentage of values found in the LOV are all simple, credible metrics. Judges will
+look for them."*
+
+So the scorer is a deliverable, not a convenience. It reports, per column:
+
+- **Exact match** against ground truth, and **normalized match** (case- and whitespace-folded,
+  `®`/`™` normalized) — reported separately, because exact match on `FRIGIDAIRE®` is a real
+  requirement and hiding a symbol failure inside a fuzzy score would be dishonest.
+- **Character-limit compliance** per copy field, as a hard pass/fail.
+- **LOV conformance** — share of attribute values present in the permitted vocabulary (pending 17.1).
+- **Fill discipline** — populated-when-ground-truth-is-populated *and* empty-when-ground-truth-is-empty.
+  Both directions. Filling a column the client left blank is a defect.
+- **Provenance mix** — how much of the row is passthrough versus derived versus cited.
+
+Two honesty requirements on our own reporting. With two ground-truth rows, every percentage has a
+denominator of 2 and must be printed as a fraction (`14/15`), never a percentage — `93.3%` from two
+samples is a lie of precision. And the scorer must run in CI against the committed fixture so the
+number in the pitch is the number in the repo.
+
+#### The measured baseline
+
+Produced by `scripts/export_delivery.py` and scored by `scripts/score_delivery.py`, pinned in
+`tests/test_delivery_scoring.py::test_measured_score_against_real_ground_truth`:
+
+```
+2 rows, 504 cells compared, 134 populated in ground truth
+
+  exact match                    56/134
+  over-filled                    0        <- nothing invented
+  character-limit compliance     PASS
+  wrong values                   0
+
+  by group          exact     missed   wrong
+    taxonomy         8/8         0       0
+    input_echo      12/12        0       0
+    attribute_grid  32/62       30       0     (30 labels + 2 values)
+    identity         2/6         4       0
+    descriptions     0/11       11       0
+    item_features    0/11       11       0
+    assets           0/8         8       0
+```
+
+**Report it split, or it misleads.** The headline conflates two very different things:
+
+| | | |
+|---|---|---|
+| **structure** — columns, both hierarchies, grid labels, input echo | **54/58** | 93% |
+| **enrichment** — actual facts about the product | **2/76** | 3% |
+
+The scaffolding is right; the enrichment barely exists. Every one of the 78 failures is `missed`,
+not `wrong` — the projection places the columns correctly and the evidence gate withholds what it
+cannot cite. Both figures are pinned separately, on purpose: a rise in the headline that is all
+scaffolding is not progress, and a single number would let that pass unnoticed.
+
+The two enrichment cells are `Material: Stainless Steel` per row, read from the `SS` in
+`"...Dishwasher SS - Display Only"` and citing that substring (§17.12). Everything else the client
+expects lives in Frigidaire's and Whirlpool's own documents.
+
+It would have been easy to report a higher figure by filling `UNSPSC` from the class mapping,
+guessing `BRAND_NAME` from `Part_Manuf`, and emitting asset filenames for files never fetched. All
+three were built and then deliberately declined, and `over-filled 0` is the assertion that records
+the decision.
+
+#### The second measurement: attributes supplied
+
+A single number cannot separate "extraction is blocked" from "the projection is wrong", and those
+need very different work. So there is a second arm, in the sense §8.6's ablation harness uses the
+word — a deliberately altered condition, reported alongside the real one and never instead of it.
+
+`data/golden/unilog_dishwashers.yaml` supplies the attribute values the client's own row states.
+That makes it **useless for measuring extraction** — scoring extraction against values copied from
+the answer sheet is circular — and useful for measuring everything downstream of it.
+
+```
+                              unseeded      attributes supplied
+  exact match                  56/134            107/134  (79.9%)
+  over-filled                      0                  0
+  wrong values                     0                  1
+  character limits              PASS               PASS
+  attribute grid                32/62              62/62  (100%)
+  five deterministic
+    descriptions                 0/10              10/10  (exact strings)
+  identity / citations /
+    taxonomy / echo           partial           complete
+```
+
+What the arm establishes: the projection, the magnitude/unit handling and the five construction
+formulas are correct. What it cannot establish: anything at all about extraction.
+
+The 26 remaining gaps are fully accounted for, and that accounting is the point — an unexplained
+gap is a defect, an explained one is a roadmap:
+
+| Gap | Cells | Why |
+|---|---|---|
+| `PART_NUMBER`, `SKU - MY_PART_NUMBER` | 4 | The client's own key space. Unavailable from six columns at any level of extraction quality. |
+| `ITEM_FEATURES_1..20`, `MARKETING_DESCRIPTION` | 12 | Genuinely generative manufacturer marketing copy. Belongs to retrieval plus a claim check. |
+| Asset filenames, `Actual Image` | 8 | Convention is derivable; the files were never fetched. Emitting a name asserts a file exists. |
+| `Country Of Origin` and one flag | 2 | Blank in the client's data too. |
+
+And the single wrong cell is a vocabulary gap rather than a defect: the client writes `UL Listed`,
+the shared approvals enum canonicalises to `UL` — which is what the PVF world writes and what the
+valve golden set, its certificates and its equivalence artifacts all contain. Both are correct in
+their own category, which is precisely why the client's LOV is keyed by
+(Classpath, Attribute Label). Changing the shared enum to satisfy the appliance row would corrupt a
+working vertical to gain one cell; the right fix is per-class value vocabularies, and populating
+those needs the missing file.
+
+### 17.12 The description as a source document
+
+The one enrichment path that needed nothing external, and it follows directly from the guide's own
+framing: *"descriptions are cryptic ('3/8 CPLG BRS 150#')"*. If the description is what we must
+enrich *from*, then it is a source document — and a substring of it is a citable evidence span that
+verifies by string comparison rather than by fuzzy match. That is **stronger** evidence than a model
+extraction from a parsed PDF, not a loophole around the evidence rule.
+
+`axiom.extract.description` implements it with two rule families, neither hardcoded per attribute:
+
+- **Unit-derived patterns.** An attribute declaring `quantity_kind: voltage` and
+  `canonical_unit: V` implies "a number followed by a volt spelling", and the pattern is generated
+  from the unit registry's own alias table. Adding a quantity attribute to the schema gives it an
+  extraction rule with no code change — the same property the extraction prompt has.
+- **Declared abbreviations.** `schema/abbreviations.yaml` maps (attribute, abbreviation) to a
+  canonical value. This is the shape of the client's missing UOM/terms sheet, so that file replaces
+  its contents rather than its design.
+
+Three guards, each earning its place on real data:
+
+1. **Class scoping.** Only attributes the class binds are looked for. Without it, `"24 in W"` from
+   the client's own ground truth reads as 24 watts. The same principle that fixed classification
+   precision in §17.10.
+2. **A single optional space** between number and unit. `\s*` would match that axis label two
+   tokens away; `\s?` matches how a unit is actually written.
+3. **Plausible-range rejection.** `"9000V"` is refused against `voltage_rating`'s declared range
+   rather than published, because a coincidental match is far more likely than a 9 kV dishwasher.
+
+And two deliberate omissions worth more than the inclusions:
+
+- **`body_material` is absent from the table.** The obvious entry is `BRS → Bronze`. It cannot be
+  written: BRS is shorthand for *brass* at least as often, and the attribute's permitted values are
+  alloy designations (Brass C36000/C46500/C69300, Bronze C84400/C89833) that differ in lead content
+  and therefore in potable-water eligibility. `lead_free_compliant` has a cross-field rule reading
+  exactly this attribute, so a guessed alloy would propagate into a compliance claim. The guide's
+  own cryptic example therefore yields no material — the correct answer, reported as refused rather
+  than dropped.
+- **A compliance code never publishes.** `LF` in a description is not a lead-free certification.
+  The attribute declares strict evidence, so the token is surfaced for review instead.
+
+Measured yield: 78% of the 1,000 descriptions carry recoverable content, but only 8 cells are
+extracted, because 990 rows have no class for a matched token to bind to. The bottleneck is
+classification coverage, not the rules.
+
+### 17.13 The five rewrites are formulas, and the formulas are recoverable
+
+The guide's claim that *"getting these formats right is most of the task"* turned out to be
+tractable in a way the earlier draft of §17.4 did not anticipate. Four of the five are not
+generation at all — they are deterministic assembly from established values, and the construction
+formulas are recoverable from two example rows.
+
+`schema/descriptions/dishwasher_builtin.yaml` declares them, and they reproduce the client's strings
+**character for character on all five formats across both rows**. Two mechanisms carry the whole
+thing, and both were forced by the data rather than chosen:
+
+**Skip-don't-stop overflow.** When a component will not fit the budget, the renderer skips it and
+tries the next:
+
+```
+row 1   DISHWASHER LEG 5 SST 120V 15A 50-1/4IN    38   takes depth, omits 47DBA (would be 44)
+row 2   DISHWASHER BLTLN SST SST 120V 10A 41DBA   39   omits 50-3/16IN (43), then takes 41DBA
+```
+
+Row 1 keeps the depth and drops the sound level; row 2 does the reverse, from the same ordered list.
+No renderer that stopped at the first overflow can produce row 2, and a different component order
+per row would not be a formula. This one rule explains both.
+
+**Display units, not canonical units.** `normalize` stores a depth in millimetres and renders it
+`50-1/4"`; the client writes `50-1/4` in the value column with `in` beside it, and `50-1/4IN` on the
+till line. So the unit is recovered from the display string and reported as the registry's *code* —
+the glyph is a display convention, the code is the identifier. Getting this wrong put `mm` in a
+column their importer reads as inches, and it was invisible until the supplied arm exercised it.
+
+A **completeness gate** stops the mechanism producing fragments, and it exists because of how the
+output is judged as much as how it reads. With only a material established, the invoice recipe would
+assemble `DISHWASHER SST`. An absent description is a *missing* value — an honest gap retrieval will
+close. A fragment is a *wrong* value, and it ships. Each recipe declares how many components it
+requires and withholds below that, with the reason recorded.
+
+The consequence for the roadmap is worth stating plainly: **the descriptions are no longer blocked on
+engineering, only on facts.** When retrieval fills the attribute grid, eleven description cells
+appear with no further work.
 
 ---
 

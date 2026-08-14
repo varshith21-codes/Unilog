@@ -12,6 +12,11 @@ class:
   name: Two-Piece Ball Valve
   version: v1
 
+  # Identity evidence, required before this class is even a candidate. "ball" and "port" are
+  # attribute vocabulary and match a torsion-bit set and a decor plate; only "valve" (or the
+  # abbreviations a supplier actually writes) says the product is one.
+  identity_terms: [valve, valves, vlv]
+
   browse_path: [Plumbing, Valves, Ball Valves, Two-Piece]
 
   # Multi-target classification. The browse path above is how buyers shop; these codes are

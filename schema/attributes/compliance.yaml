@@ -87,6 +87,36 @@ attributes:
       - value: WRAS
         aliases: ["wras approved", "water regulations advisory scheme"]
 
+      # --- appliance listings -------------------------------------------------
+      #
+      # Added when the first appliance class arrived. Before this, the enum held only PVF
+      # certifications, so a dishwasher's "ASSE 1006|CEE Tier 2 Qualified|cUL Listed|ENERGY STAR
+      # Certified|NSF Certified|UL Listed" snapped down to the single value "UL" — five real
+      # certifications silently discarded because the vocabulary had never seen them.
+      #
+      # That is the failure mode a closed vocabulary has, and it is why the client's LOV file
+      # matters: an unrecognised value in a multi_enum does not error, it evaporates. `cUL Listed`
+      # and `NSF Certified` are kept as values distinct from `UL` and `NSF-61` rather than aliased
+      # onto them, because they are genuinely different marks — cUL is the Canadian listing, and a
+      # bare "NSF Certified" does not identify which NSF standard was met.
+      - value: cUL Listed
+        aliases: ["cul", "cul listed", "c-ul", "culus"]
+      - value: ENERGY STAR Certified
+        aliases: ["energy star", "energystar", "energy star qualified", "energy star certified"]
+      - value: NSF Certified
+        note: >
+          Generic NSF mark with no standard named. Deliberately not aliased onto NSF-61: a
+          potable-water claim needs the specific standard, and treating this as equivalent would
+          let a cross-field rule pass on evidence that does not support it.
+      - value: ASSE 1006
+        aliases: ["asse1006", "asse 1006 listed"]
+      - value: CEE Tier 2 Qualified
+        aliases: ["cee tier 2", "cee tier2", "cee tier 2 qualified"]
+      - value: AHAM Verified
+        aliases: ["aham", "aham verified"]
+      - value: WaterSense
+        aliases: ["watersense", "epa watersense"]
+
   - code: rohs_compliant
     name: RoHS Compliant
     datatype: boolean

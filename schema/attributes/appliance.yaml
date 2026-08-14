@@ -1,0 +1,250 @@
+# Major-appliance attributes, for the Unilog delivery format's first real category.
+#
+# ---------------------------------------------------------------------------------------------
+# A NOTE ON DATATYPES, because most of these are `string` and that looks lazy.
+#
+# It is not. `Unicat_Lov_v1_0_Updated_With_Remarks.xlsx` — the client's ~161,000-row List of
+# Values, which specifies the permitted values for every (Classpath, Attribute Label) pair — is
+# NOT in this repository. Until it arrives we know the label set (proved from the ground-truth
+# rows) but not the vocabulary.
+#
+# Declaring `enum` from two observed rows would invent a closed vocabulary: `mounting_type` would
+# permit exactly "Leg" and "Built-in" and would then reject "Free-standing" and "Integrated",
+# which are obviously legitimate. Enum snapping against a wrong vocabulary is worse than no
+# snapping, because it converts an unknown value into a confidently wrong one.
+#
+# So: attributes whose values are genuinely numeric are typed as quantities and get their unit
+# split into ATTRIBUTE_UOM. Attributes whose vocabulary the LOV owns stay `string` and carry a
+# `lov_pending: true` marker in the class binding note. When the LOV lands, each becomes an
+# `enum` with `allowed_values` and the aliases the LOV supplies, and no other code changes.
+#
+# The guide is explicit that this matters: "Attribute values must come from the LOV files... A
+# fluent description made of invented values scores zero."
+
+attributes:
+  # ------------------------------------------------------------------ electrical
+  - code: voltage_rating
+    name: Voltage Rating
+    datatype: quantity
+    quantity_kind: voltage
+    canonical_unit: V
+    unit_hint: V
+    description: >
+      Nominal supply voltage the appliance is designed to operate on. Read the nameplate or
+      electrical-specification row, not the motor or component rating, which may differ.
+    example_values: ["120 V", "240 V", "208 V"]
+    extraction_hints:
+      - usually in an "Electrical" or "Specifications" table
+      - written "120V" or "120 VAC" as often as "120 V"
+    tolerance: 0.0
+    plausible_range: [1.0, 600.0]
+    # Critical, not defining. A 240 V dishwasher will not run on a 120 V circuit, so it is not a
+    # drop-in — but it is still a dishwasher doing the same job, which is exactly the distinction
+    # `critical` draws and `defining` overstates. Compare the schema's own example: a solder-end
+    # valve performs identically to a threaded one and merely needs different fittings.
+    #
+    # The stronger reason to keep `defining` scarce: it is unrescuable. No amount of agreement
+    # elsewhere can recover a defining difference, so over-using it makes the cross-reference
+    # report refuse every candidate and report nothing useful.
+    interchange: critical
+
+  - code: amperage_rating
+    name: Amperage Rating
+    datatype: quantity
+    quantity_kind: current
+    canonical_unit: A
+    unit_hint: A
+    description: >
+      Rated current draw at the nominal supply voltage. Determines the branch circuit the
+      appliance requires, so it is a fitment attribute rather than a performance one.
+    example_values: ["15 A", "10 A", "12.5 A"]
+    tolerance: 0.0
+    plausible_range: [0.1, 200.0]
+    # Form and fit: a higher draw may exceed the circuit it is replacing on.
+    interchange: critical
+
+  # ------------------------------------------------------------------ acoustic
+  - code: sound_level
+    name: Sound Level
+    datatype: quantity
+    quantity_kind: sound_level
+    canonical_unit: dBA
+    unit_hint: dBA
+    description: >
+      A-weighted sound pressure level during normal operation, as published by the
+      manufacturer. Lower is quieter. Record the figure for the standard or normal cycle when
+      several cycles are rated, and never convert an unweighted dB figure into dBA — the two
+      are not interconvertible without the signal spectrum.
+    example_values: ["47 dBA", "41 dBA", "39 dBA"]
+    extraction_hints:
+      - a headline marketing number for dishwashers, often on the first page
+      - may be labelled "Sound Rating", "Noise Level" or "dBA Rating"
+    tolerance: 0.0
+    plausible_range: [20.0, 110.0]
+    # Quieter is better and a buyer filtering on it wants "at most this loud", so a candidate
+    # must not be louder than the reference.
+    interchange: functional
+    substitution: at_most
+
+  # ------------------------------------------------------------------ dimensional
+  - code: depth_with_door_open
+    name: Depth With Door Open
+    datatype: dimension
+    quantity_kind: length
+    canonical_unit: mm
+    display_preference: imperial_fraction
+    unit_hint: in
+    description: >
+      Total projection from the finished wall or cabinet face with the door fully open. The
+      installation-critical clearance dimension for a built-in appliance, and distinct from
+      the cabinet depth, which is smaller.
+    example_values: ['50-1/4"', '50-3/16"', '48"']
+    extraction_hints:
+      - found on the installation-dimensions drawing rather than the spec table
+      - do not confuse with overall or cabinet depth
+    tolerance: 0.01
+    plausible_range: [100.0, 2000.0]
+    interchange: critical
+
+  - code: overall_size
+    name: Size
+    datatype: string
+    description: >
+      The manufacturer's headline size statement, kept as published with its axis labels
+      intact, e.g. "24 in W x 24-1/4 in D". Deliberately a string and not a dimension_set:
+      the published form varies in both the number of axes and their order, and the client's
+      ground truth carries no unit column for it, so reformatting into a fixed W x H x D
+      triple would discard information and diverge from the expected output.
+    example_values:
+      - "24 in W x 24-1/4 in D"
+      - "33-7/16 in H x 23-7/8 in W x 22-5/8 in D"
+    extraction_hints:
+      - keep the axis letters (W, H, D) and the spacing as published
+    interchange: critical
+
+  - code: minimum_height
+    name: Minimum Height
+    datatype: string
+    description: >
+      Lowest height the appliance can be installed or adjusted to. A string rather than a
+      dimension because the published form is not always a single measurement: it may be one
+      figure ("33-7/16 in") or several qualified ones ("8-1/2 in Upper Rack, 11-1/4 in Lower
+      Rack"). Typing it as a length would parse the first case and silently drop the second.
+    example_values: ["33-7/16 in", "8-1/2 in Upper Rack, 11-1/4 in Lower Rack"]
+    interchange: critical
+
+  - code: maximum_height
+    name: Maximum Height
+    datatype: string
+    description: >
+      Greatest height the appliance can be installed or adjusted to. A string for the same
+      reason as minimum_height — the value may carry per-component qualifiers rather than
+      being a single length.
+    example_values: ["10-3/8 in Upper Rack, 13-1/4 in Lower Rack"]
+    interchange: critical
+
+  # ------------------------------------------------------------------ configuration
+  - code: mounting_type
+    name: Mounting Type
+    datatype: string
+    description: >
+      How the appliance is secured in the installation, e.g. leg-levelled, built-in under a
+      counter, or free-standing. Determines what cabinetry work an installation needs, so it
+      is a fitment attribute. Becomes an enum when the LOV supplies the permitted values.
+    example_values: ["Leg", "Built-in", "Free-standing"]
+    extraction_hints:
+      - stated in the installation section rather than the specification table
+    interchange: critical
+
+  - code: plug_type
+    name: Plug Type
+    datatype: string
+    description: >
+      Attached cord and plug configuration, typically a NEMA designation, or an indication
+      that the appliance is supplied for hard-wiring. Frequently unstated even on a full
+      datasheet, which is why the ground truth leaves it blank on both rows.
+    example_values: ["NEMA 5-15P", "Hard-wired", "None"]
+    interchange: critical
+
+  - code: model_number
+    name: Model
+    datatype: string
+    description: >
+      The manufacturer's marketing model designation where it differs from the ordering part
+      number. Often absent, or identical to the MPN and therefore not restated by the
+      manufacturer, which is why the ground truth leaves it blank.
+    example_values: ["PDSH4816AF", "WDTS7024RZ"]
+    interchange: cosmetic
+
+  - code: wash_cycle_count
+    name: Number of Wash Cycles
+    datatype: integer
+    description: >
+      Count of selectable wash cycles or programmes. A whole number: report the count, not
+      the cycle names, which belong in the feature list.
+    example_values: ["5", "6", "14"]
+    extraction_hints:
+      - count the cycles listed on the control-panel description if no explicit total is given
+      - do not include options or modifiers such as Sani Rinse as cycles
+    plausible_range: [1.0, 40.0]
+    interchange: functional
+    substitution: at_least
+
+  # ------------------------------------------------------------------ finish
+  - code: primary_material
+    name: Material
+    datatype: string
+    description: >
+      Principal material of the appliance's visible construction, most often the tub or body
+      material for a major appliance. Becomes an enum when the LOV supplies the vocabulary;
+      until then it is recorded as published so no value is snapped onto a wrong term.
+    example_values: ["Stainless Steel", "Plastic", "Porcelain Enamel"]
+    interchange: cosmetic
+
+  - code: finish_color
+    name: Color
+    datatype: string
+    description: >
+      Finish or colourway as the manufacturer names it. A merchandising attribute: buyers
+      filter on it heavily, and the manufacturer's own name for a finish is what shoppers
+      search, so it is recorded verbatim rather than mapped to a generic colour.
+    example_values: ["Stainless Steel", "White", "Black Stainless"]
+    interchange: cosmetic
+
+  # ------------------------------------------------------------------ overflow
+  - code: additional_information
+    name: Additional Information
+    datatype: string
+    multivalued: false
+    description: >
+      Comma-separated residual specifications the class has no dedicated attribute for, in the
+      client's own overflow convention, e.g. "240 kW-hr Annual Energy, 1 to 12 hr Delay Start
+      Hours". A holding pen, not a dumping ground: anything appearing here repeatedly across a
+      category is a missing attribute and should be promoted to one.
+    example_values:
+      - "240 kW-hr Annual Energy, 1 to 12 hr Delay Start Hours"
+      - "Folding Tines, Leak Detection System, Normal Cycle"
+    # Free-text residue cannot be compared meaningfully, so it never decides a substitution.
+    interchange: cosmetic
+
+  - code: warranty_terms
+    name: Warranty
+    datatype: string
+    description: >
+      Warranty coverage as stated by the manufacturer, including duration and what it covers,
+      e.g. "1 Year Manufacturer, 1 Year Labor and Parts". Recorded as published: summarising
+      it into a single duration loses the parts/labour distinction that determines what a
+      claim actually pays for.
+    example_values: ["1 Year Manufacturer, 1 Year Labor and Parts", "10 Year Limited"]
+    interchange: cosmetic
+
+  - code: included_technology
+    name: Included Technology
+    datatype: string
+    description: >
+      Named proprietary technology the product ships with, phrased as the client's "With"
+      column expects it, e.g. "With CleanBoost(TM)". Trademarked feature names, so they are
+      reproduced exactly as the manufacturer writes them including the symbol, and never
+      paraphrased or expanded.
+    example_values: ["With CleanBoost(TM)", "With Washing 3rd Rack, Water Repellent Basket"]
+    interchange: cosmetic

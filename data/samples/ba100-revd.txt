@@ -1,0 +1,31 @@
+MILWAUKEE VALVE - BA-100 SERIES
+Two-Piece Full Port Bronze Ball Valve                          Rev D  2026-02
+
+SPECIFICATIONS
+  Body Material .................. Bronze C84400
+  Ball / Stem .................... Chrome-plated brass / Brass
+  Seat Material .................. PTFE
+  Pressure Rating ................ 400 PSI WOG @ 73 degF
+  Steam Rating ................... 210 PSI WSP
+  Temperature Range .............. 0 degF to 366 degF
+  End Connection ................. NPT threaded, female both ends
+  Approvals ...................... UL listed, CSA certified
+  Operating Torque ............... 18-22 ft-lb (1/2" size)
+  Flow Coefficient (Cv) .......... 16.5 (1/2" size)
+
+ORDERING INFORMATION
+  Part Number      Size        Handle       Carton Qty
+  BA-100-025       1/4"        Lever        24
+  BA-100-050       1/2"        Lever        24
+  BA-100-075       3/4"        Lever        12
+  BA-100-100       1"          Lever        12
+  BA-100-125       1-1/4"      Tee          6
+
+  NOTE 1: Sizes 1" and larger are supplied with a locking lever handle.
+  NOTE 2: Pressure rating derates above 100 degF. See derating chart, page 7.
+  NOTE 3: Effective with this revision the WOG rating is 400 PSI. Valves produced
+          under Rev C and earlier carry a 600 PSI WOG rating and remain suitable
+          for that service. Confirm the rating stamped on the body before use.
+  NOTE 4: NSF/ANSI 61 certification is withdrawn for this series pending
+          re-testing. Do not specify these valves for potable water service until
+          certification is reinstated.

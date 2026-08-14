@@ -104,6 +104,88 @@ jobs:
           )
           PY
 
+      - name: Delivery format is byte-identical to the client's
+        # The one binary requirement in the whole deliverable. Every other quality measure is a
+        # matter of degree — an attribute can be 90% right and still useful. If the columns do not
+        # line up with the client's, the file cannot be ingested and the enrichment behind it is
+        # worth nothing.
+        #
+        # Asserted against the client's own CSV rather than a fixture we wrote, because a fixture
+        # we wrote would agree with our mistakes. Skips cleanly when the CSV is absent so a fork
+        # without the dataset is not blocked, but says so rather than reporting a silent pass.
+        run: |
+          python - <<'PY'
+          import csv
+          import sys
+          from pathlib import Path
+
+          from axiom.delivery import load_default
+
+          client = Path("Unihack_ Expected Output - Delivery Format.csv")
+          if not client.is_file():
+              print(f"SKIP: {client} is not in this checkout")
+              sys.exit(0)
+
+          with open(client, newline="", encoding="utf-8-sig") as handle:
+              theirs = next(csv.reader(handle))
+          ours = list(load_default().header)
+
+          if ours != theirs:
+              if len(ours) != len(theirs):
+                  print(
+                      f"FAIL: contract declares {len(ours)} columns, client file has "
+                      f"{len(theirs)}",
+                      file=sys.stderr,
+                  )
+              for index, (t, o) in enumerate(zip(theirs, ours)):
+                  if t != o:
+                      print(
+                          f"FAIL: column {index}: client {t!r} != contract {o!r}", file=sys.stderr
+                      )
+              sys.exit(1)
+          print(f"delivery contract ok: {len(ours)} columns, byte-identical")
+          PY
+
+      - name: Delivery export scores against ground truth and invents nothing
+        # Free and deterministic, so it belongs in the fast gate: the export makes no model call
+        # (classification is the retrieval step) and the scorer is arithmetic over two CSVs.
+        #
+        # The scorer exits non-zero on a hard failure only — an over-filled cell, a breached
+        # character limit, or a ground-truth row that produced no output. Missing values do NOT
+        # fail the build, because on this dataset they are expected until documents are attached.
+        # Over-fill does, because 173 of the client's 252 columns are blank by design and filling
+        # one means we invented data. That is the number worth defending on every push.
+        run: |
+          if [ ! -f "Unihack_ Sample Dataset - Input.csv" ]; then
+            echo "SKIP: sample dataset is not in this checkout"
+            exit 0
+          fi
+          python scripts/export_delivery.py "Unihack_ Sample Dataset - Input.csv" \
+            --mpn PDSH4816AF --mpn WDTS7024RZ --out data/delivery --quiet
+          python scripts/score_delivery.py \
+            data/delivery/Unihack__Sample_Dataset_-_Input.delivery.csv
+
+      - name: Delivery arm with attributes supplied reproduces the client's row
+        # The second measurement, and it answers a different question: given correct extraction,
+        # does everything downstream produce the client's row? The golden values are transcribed
+        # from their answer sheet, so this proves nothing about extraction and everything about the
+        # projection, the unit handling and the five description recipes.
+        #
+        # Gated in CI for the same reason as the unseeded run: it is the arm where a regression in
+        # the description formulas or the magnitude/unit split would actually show up, because the
+        # unseeded run has too few facts to exercise them.
+        run: |
+          if [ ! -f "Unihack_ Sample Dataset - Input.csv" ]; then
+            echo "SKIP: sample dataset is not in this checkout"
+            exit 0
+          fi
+          python scripts/export_delivery.py "Unihack_ Sample Dataset - Input.csv" \
+            --mpn PDSH4816AF --mpn WDTS7024RZ \
+            --golden data/golden/unilog_dishwashers.yaml \
+            --out data/delivery/supplied --quiet
+          python scripts/score_delivery.py \
+            data/delivery/supplied/Unihack__Sample_Dataset_-_Input.delivery.csv
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4

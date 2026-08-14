@@ -1,0 +1,165 @@
+# How the five description rewrites are constructed for Built-In Dishwashers.
+#
+# The guide is blunt that this is the core of the task: "the same product information is rewritten
+# five times at five different lengths and casings - for the till receipt, the mobile app, the
+# search results page, the product page and the marketing copy. Getting these formats right is most
+# of the task."
+#
+# These are the "construction formulas" the client's own
+# `UNILOG_INTERNAL_CONTENT_GUIDELINES.docx` specifies. That file is not in this repository, so every
+# recipe below was REVERSE-ENGINEERED from the two ground-truth rows and reproduces both exactly.
+# When the guidelines arrive they replace these recipes; the shape they load into should not need to
+# change.
+#
+# ---------------------------------------------------------------------------------------------
+# THE ONE NON-OBVIOUS RULE: on_overflow: skip.
+#
+# When a component does not fit the character budget, the renderer skips it and tries the NEXT one
+# rather than stopping. This is not a guess. It is forced by the ground truth:
+#
+#   row 1  DISHWASHER LEG 5 SST 120V 15A 50-1/4IN   38   takes depth, omits 47DBA (would be 44)
+#   row 2  DISHWASHER BLTLN SST SST 120V 10A 41DBA  39   omits 50-3/16IN (43), then takes 41DBA
+#
+# Row 1 keeps depth and drops sound; row 2 drops depth and keeps sound. A renderer that stopped at
+# the first component that did not fit could not produce row 2, and one that had a different
+# component order per row would not be a formula. Skip-and-continue produces both, exactly.
+#
+# ---------------------------------------------------------------------------------------------
+# `source` is either an attribute code bound by this class, or one of these record tokens:
+#   product_name        the class's item_type -- "Dishwasher"
+#   brand               BRAND_NAME as resolved, symbols intact -- "FRIGIDAIRE(R)"
+#   brand_plain         BRAND_NAME with (R)/(TM) stripped -- "FRIGIDAIRE"
+#   manufacturer_brand  manufacturer and brand joined, de-duplicated (see below)
+#   mpn                 the manufacturer part number
+#   with_clause         the `included_technology` value, e.g. "With CleanBoost(TM)"
+
+descriptions:
+  class: APP.KIT.DISHWASHER.BUILTIN
+
+  recipes:
+    # ------------------------------------------------------------------ till receipt
+    - name: invoice
+      column: INVOICE_DESC
+      max_chars: 40
+      casing: upper
+      on_overflow: skip
+      # Ground truth draws on 7. Four is the point below which the line stops being a description:
+      # product plus three differentiators. "DISHWASHER SST" is a category and a colour, and it
+      # tells a picker less than the part number already printed beside it does.
+      min_components: 4
+      note: >
+        An abbreviation grammar, not a truncation. Units close up here (120V, 50-1/4IN) even
+        though the house style requires a space in long form (120 V) -- the 40-character budget
+        overrides it, and the client's own rows are written that way. Values are shortened through
+        the `invoice_terms` table in schema/abbreviations.yaml: Stainless Steel -> SST,
+        Built-in -> BLTLN.
+      components:
+        - { source: product_name,         separator: " " }
+        - { source: mounting_type,        separator: " ", abbreviate: true }
+        - { source: wash_cycle_count,     separator: " " }
+        - { source: primary_material,     separator: " ", abbreviate: true }
+        - { source: finish_color,         separator: " ", abbreviate: true }
+        - { source: voltage_rating,       separator: " ", compact_unit: true }
+        - { source: amperage_rating,      separator: " ", compact_unit: true }
+        - { source: depth_with_door_open, separator: " ", compact_unit: true }
+        - { source: sound_level,          separator: " ", compact_unit: true }
+
+    # ------------------------------------------------------------------ mobile app
+    - name: mobile
+      column: MOBILE_DESC
+      min_chars: 60
+      max_chars: 80
+      on_overflow: skip
+      # The 60-character minimum already implies roughly this much content; declaring it as a
+      # component count too means the gate reports *why* it withheld rather than just that the
+      # string was short.
+      min_components: 4
+      note: >
+        `manufacturer_brand` de-duplicates: row 1 pairs "Rheem Manufacturing" with "FRIGIDAIRE"
+        and keeps both because they share nothing, while row 2 has "Whirlpool Corporation" and
+        "Whirlpool" and keeps only the brand, because printing "Whirlpool Corporation Whirlpool"
+        would waste a third of a 60-80 character budget on a repetition.
+      components:
+        - { source: manufacturer_brand,   separator: "" }
+        - { source: product_name }
+        - { source: product_series }
+        - { source: mpn }
+        - { source: mounting_type,        phrase: "{value} Mounting" }
+        - { source: primary_material }
+
+    # ------------------------------------------------------------------ product title
+    - name: short
+      column: SHORT_DESC
+      on_overflow: skip
+      # Brand, series, part number, item type is the identity core of a product title. A title
+      # missing any of those is not a title a shopper can act on.
+      min_components: 4
+      note: >
+        No max_chars declared, deliberately. Row 1 is 115 characters and row 2 is 96, and the
+        guide states no limit for this field -- so inventing one would mean scoring ourselves
+        against a threshold we made up. The `With` clause is governed by `omit_if_contains: ","`
+        instead, which is what actually separates the two rows: row 1's "With CleanBoost(TM)" is a
+        single feature and appears, while row 2's "With Washing 3rd Rack, Water Repellent
+        Silverware Basket" is two and is omitted. A comma-bearing clause inside a comma-delimited
+        description is ambiguous to read and to parse, which makes that a defensible rule rather
+        than a fitted one -- and it reproduces both rows.
+      components:
+        - { source: brand,                separator: "" }
+        - { source: product_series,       separator: " " }
+        - { source: mpn,                  separator: " " }
+        - { source: product_name,         separator: " " }
+        - { source: with_clause,          separator: " ", omit_if_contains: "," }
+        - { source: mounting_type,        phrase: "{value} Mounting" }
+        - { source: wash_cycle_count,     phrase: "{value}-Wash Cycle" }
+        - { source: primary_material }
+        - { source: finish_color }
+
+    # ------------------------------------------------------------------ search results
+    - name: retail
+      column: RETAIL_DESC
+      on_overflow: skip
+      # Lower than the title's, because this format deliberately drops brand and part number. Its
+      # whole content is series, item type and differentiators.
+      min_components: 3
+      note: >
+        The product title with the brand, part number and technology clause removed. A shopper
+        scanning a result list already knows the brand from the facet they filtered on.
+      components:
+        - { source: product_series,       separator: "" }
+        - { source: product_name,         separator: " " }
+        - { source: mounting_type,        phrase: "{value} Mounting" }
+        - { source: wash_cycle_count,     phrase: "{value}-Wash Cycle" }
+        - { source: primary_material }
+        - { source: finish_color }
+
+    # ------------------------------------------------------------------ product page
+    - name: long
+      column: LONG_DESC1
+      on_overflow: skip
+      # The highest bar of the five. This is the product-page body copy, and a buyer who reaches it
+      # has come for the specifications. Sixteen components are available; fewer than five means
+      # the page would say less than the search result that led to it.
+      min_components: 5
+      note: >
+        A walk over the attribute grid in slot order, each value carrying its own label where the
+        label is needed to disambiguate it. Note the pattern: a value whose meaning is obvious
+        from its form is printed bare ("120 V", "Stainless Steel"), while one that is just a
+        measurement gets its label appended ("50-1/4 in Depth With Door Open"). That is a
+        readability rule, not an arbitrary one -- "50-1/4 in" alone tells a buyer nothing.
+      components:
+        - { source: brand,                separator: "" }
+        - { source: product_name,         separator: " " }
+        - { source: with_clause,          separator: " ", omit_if_contains: "," }
+        - { source: product_series }
+        - { source: wash_cycle_count,     phrase: "{value} Wash Cycles" }
+        - { source: voltage_rating }
+        - { source: amperage_rating }
+        - { source: mounting_type,        phrase: "{value} Mounting" }
+        - { source: overall_size }
+        - { source: depth_with_door_open, phrase: "{value} Depth With Door Open" }
+        - { source: minimum_height,       phrase: "{value} Minimum Height" }
+        - { source: maximum_height,       phrase: "{value} Maximum Height" }
+        - { source: sound_level,          phrase: "{value} Sound Level" }
+        - { source: primary_material }
+        - { source: finish_color }
+        - { source: additional_information, phrase: "Additional Information: {value}" }

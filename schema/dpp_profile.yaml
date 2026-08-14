@@ -1,0 +1,203 @@
+# EU Digital Product Passport readiness profile (ESPR).
+#
+# Declarative for the same reason the validation rules and the copy policy are: the people who
+# should own this are compliance counsel and the sustainability team, not engineers. Which DPP data
+# groups apply to a product category is a regulatory reading, and burying it in a Python list puts
+# it where the person accountable for it will never see it.
+#
+# WHAT THIS FILE IS FOR
+#
+# Not a claim that AXIOM produces a compliant passport. It is the opposite: an honest audit of the
+# distance between a catalogue and a regulation, designed so the two kinds of shortfall stay
+# separate.
+#
+#   * A field mapped to an attribute with no value is a DATA gap. Re-extraction may fix it.
+#   * A field with `satisfied_by: []` is a SCHEMA gap. Nothing in this system can express it, so no
+#     amount of re-extraction will ever fill it — it needs a new attribute, a new source type, and
+#     usually a supplier who does not currently publish the figure at all.
+#
+# Collapsing those two into one percentage is the thing that makes most compliance dashboards
+# useless. A team told "you are 46% ready" will re-run extraction; a team told "46% ready, and 9 of
+# the 11 missing fields are ones your schema cannot represent" will go and talk to their suppliers,
+# which is the only action that helps.
+#
+# TIMING
+#
+# The ESPR central registry was scheduled to be established in July 2026; the first mandatory
+# passports apply to certain batteries from February 2027, with further product groups phasing in
+# through 2030. Valves and PVF are NOT in a delegated act yet. So this profile scores readiness
+# ahead of a deadline that has not landed for this category — which is the useful moment to measure
+# it, and is stated here so nobody reads a low score as a live compliance breach.
+
+name: espr_dpp_v1
+version: "1.0"
+regulation: Regulation (EU) 2024/1781 (ESPR)
+description: >
+  Readiness assessment against the Digital Product Passport data groups. Scored over the fields a
+  passport for an industrial flow-control component would plausibly carry, with the fields this
+  schema cannot express recorded as unmapped rather than as zero.
+category_in_scope: false
+category_note: >
+  No delegated act covers valves or PVF fittings at the time of writing. Readiness is therefore
+  forward-looking: a low score is a gap against an anticipated requirement, not a current breach.
+
+fields:
+  # ------------------------------------------------------------------ identification
+  - id: product_identifier
+    name: Product identifier
+    group: identification
+    requirement: mandatory
+    satisfied_by: [gtin]
+    requires_verified_evidence: true
+    note: >
+      The passport's primary key. A DPP with no stable identifier cannot be registered at all,
+      which is why this is scored as mandatory even though the registry schema is still moving.
+
+  - id: model_identifier
+    name: Model / commercial reference
+    group: identification
+    requirement: mandatory
+    satisfied_by: [product_series]
+    requires_verified_evidence: false
+
+  - id: economic_operator
+    name: Economic operator identity
+    group: identification
+    requirement: mandatory
+    satisfied_by: []
+    note: >
+      Unmapped. The passport requires the registered identity and EORI of the manufacturer or
+      importer placing the product on the EU market. That is an organisational fact about a legal
+      entity, not a property of the product, so it does not belong in the attribute dictionary and
+      would come from a supplier master this repository does not have.
+
+  - id: manufacturing_origin
+    name: Country of manufacture
+    group: identification
+    requirement: mandatory
+    satisfied_by: [country_of_origin]
+    requires_verified_evidence: true
+
+  # ------------------------------------------------------------------ substances of concern
+  - id: substances_of_concern_present
+    name: Substances of concern — presence
+    group: substances
+    requirement: mandatory
+    satisfied_by: [lead_free_compliant, prop65_warning_required, rohs_compliant]
+    satisfaction: all
+    requires_verified_evidence: true
+    note: >
+      Requires all three, and deliberately so. A lead-free certification says nothing about RoHS
+      scope substances, and a Prop 65 statement is a Californian disclosure rather than an EU one.
+      Treating any one of them as sufficient is the most common way a substances declaration ends
+      up overstating what was actually established.
+
+  - id: substances_of_concern_concentration
+    name: Substances of concern — concentration and location
+    group: substances
+    requirement: mandatory
+    satisfied_by: []
+    note: >
+      Unmapped, and the gap is larger than it looks. The passport wants concentration ranges and
+      the component each substance sits in, at SCIP-database granularity. The schema carries
+      boolean compliance flags, which answer a different and much weaker question.
+
+  # ------------------------------------------------------------------ material composition
+  - id: material_composition
+    name: Material composition
+    group: materials
+    requirement: mandatory
+    satisfied_by: [body_material, seat_material, stem_material]
+    satisfaction: all
+    requires_verified_evidence: true
+    note: >
+      Named alloys and polymers for the three wetted components. Falls short of a full bill of
+      materials by mass, which is what a mature passport will want, but it is the part a datasheet
+      actually states.
+
+  - id: recycled_content
+    name: Recycled content share
+    group: materials
+    requirement: conditional
+    satisfied_by: []
+    note: >
+      Unmapped. Post-consumer recycled share by mass. Bronze casting stock is routinely high in
+      recycled content and almost never documented per part, so this is a supplier-data problem
+      before it is a schema problem.
+
+  # ------------------------------------------------------------------ circularity
+  - id: recyclability
+    name: Recyclability and material separation
+    group: circularity
+    requirement: conditional
+    satisfied_by: []
+    note: Unmapped. Requires a dismantling-informed assessment, not a specification value.
+
+  - id: dismantling_information
+    name: Dismantling and disassembly instructions
+    group: circularity
+    requirement: conditional
+    satisfied_by: []
+    note: >
+      Unmapped. Would come from an installation or service manual — a document type the ingest
+      layer already models (INSTALLATION_MANUAL) but which no golden-set source is.
+
+  - id: spare_parts_availability
+    name: Spare parts and repair support
+    group: circularity
+    requirement: conditional
+    satisfied_by: []
+    note: >
+      Unmapped as data, but partially *derivable*: number_of_pieces distinguishes a three-piece
+      body that can be serviced in line from a two-piece that cannot. Deliberately not wired up —
+      inferring a reparability claim from a construction type is exactly the kind of plausible
+      leap the evidence contract exists to prevent.
+
+  # ------------------------------------------------------------------ durability
+  - id: service_envelope
+    name: Rated service envelope
+    group: durability
+    requirement: recommended
+    satisfied_by: [pressure_rating_wog, temperature_range]
+    satisfaction: all
+    requires_verified_evidence: true
+    note: >
+      The durability evidence an industrial component actually publishes. Pressure and temperature
+      limits are what determine whether a part survives its service, and both are extractable.
+
+  - id: expected_lifetime
+    name: Expected lifetime or duty rating
+    group: durability
+    requirement: conditional
+    satisfied_by: []
+    note: Unmapped. Cycle life is published for actuated valves and rarely for manual ones.
+
+  # ------------------------------------------------------------------ environmental footprint
+  - id: carbon_footprint
+    name: Product carbon footprint
+    group: footprint
+    requirement: conditional
+    satisfied_by: []
+    note: >
+      Unmapped. Requires a life-cycle assessment to a declared methodology. There is no honest
+      route from a datasheet to this number, and a system that produced one anyway would be
+      manufacturing exactly the kind of unaccountable figure this repository exists to refuse.
+
+  # ------------------------------------------------------------------ conformity
+  - id: conformity_documentation
+    name: Certifications, listings and declarations
+    group: conformity
+    requirement: mandatory
+    satisfied_by: [approvals]
+    requires_verified_evidence: true
+
+  - id: ce_declaration
+    name: EU declaration of conformity
+    group: conformity
+    requirement: mandatory
+    satisfied_by: []
+    note: >
+      Unmapped. The approvals attribute records North American listings — UL, CSA, NSF — because
+      that is what the sample corpus states. A CE marking and its declaration are a different
+      regime, and mapping one onto the other would be the single most misleading thing this
+      profile could do.

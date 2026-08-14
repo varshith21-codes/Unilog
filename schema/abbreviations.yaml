@@ -1,0 +1,146 @@
+# Supplier abbreviations, scoped per attribute.
+#
+# This is the stand-in for the client's `Unilog_Master_UOM_Standards_Abbreviations_and_Terms.xlsx`
+# (~500 approved abbreviations across 89 measurement types), which is not in this repository. When
+# it arrives it replaces the contents of this file, not its shape: the loader reads
+# (attribute, abbreviation) -> canonical value, which is exactly how that sheet is organised.
+#
+# ---------------------------------------------------------------------------------------------
+# WHY THESE ARE SCOPED PER ATTRIBUTE, not global.
+#
+# "SS" means stainless steel on an appliance and it means "socket set" on a fastener. A global
+# table would expand it wrongly wherever the second reading applies, and the expansion is
+# irreversible — nobody downstream can tell that "Stainless Steel" was once "SS". Scoping to an
+# attribute means a rule only fires for a class that binds it, so an abbreviation is only ever read
+# in a context where the reading has been declared correct.
+#
+# The consequence to keep in mind: adding a term here is a claim that it *always* means this for
+# this attribute. If a supplier uses it both ways, it does not belong in this file — it belongs in
+# front of a human.
+#
+# ---------------------------------------------------------------------------------------------
+# WHAT IS DELIBERATELY ABSENT.
+#
+# `SS` is mapped to `primary_material` and NOT to `finish_color`, even though the client's row 2
+# carries "Stainless Steel" in both. One token cannot evidence two independent attributes: the
+# description says the thing is made of stainless steel, and inferring that its *finish* is
+# therefore also stainless steel is a guess that happens to be right on that row. Row 1 has the
+# same "SS" and leaves Color blank, which is the counterexample. So Color stays empty and scores as
+# missed rather than as invented.
+
+# ---------------------------------------------------------------------------------------------
+# INVOICE TERMS run the other way: canonical value -> short form, for the 40-character till line.
+#
+# A separate table rather than the inverse of the one below, because the two are not inverses. The
+# reading direction has to accept every spelling a supplier might send ("SS", "S/S", "SST" all mean
+# stainless steel); the writing direction must choose exactly one, and the client's rows show which:
+# SST, not SS. Deriving one from the other would either produce the wrong output or force the input
+# table to be lossy.
+#
+# Matched on the canonical value, case-insensitively, longest first.
+invoice_terms:
+  Stainless Steel: SST
+  Black Stainless Steel: BSST
+  PrintShield Stainless Steel: PSST
+  Porcelain Enamel: PORC
+  Built-in: BLTLN
+  Built-In: BLTLN
+  Free-standing: FRSTD
+  Leg: LEG
+  White: WHT
+  Black: BLK
+  Bronze: BRZ
+  Chrome: CHR
+  Nickel: NKL
+  Stainless: STNL
+
+abbreviations:
+  # ---------------------------------------------------------------- materials
+  - attribute: primary_material
+    note: >
+      Construction material. Read from finish/material codes suppliers append to a short
+      description, e.g. "PDSH4816AF Dishwasher SS - Display Only".
+    terms:
+      SS: Stainless Steel
+      SST: Stainless Steel
+      "S/S": Stainless Steel
+      BSS: Black Stainless Steel
+      PSS: PrintShield Stainless Steel
+      PLST: Plastic
+      PORC: Porcelain Enamel
+      GLS: Glass
+
+  # ---------------------------------------------------------------- finishes
+  - attribute: finish_color
+    note: >
+      Colourway as the manufacturer names it. Deliberately does NOT include SS/SST — see the
+      header note. These are unambiguous colour words rather than material codes.
+    terms:
+      Wh: White
+      Wht: White
+      Bk: Black
+      Blk: Black
+      Bge: Beige
+      Alm: Almond
+      Bz: Bronze
+      Chr: Chrome
+      Nkl: Nickel
+      Slvr: Silver
+
+  # ---------------------------------------------------------------- valve vocabulary
+  #
+  # Included because the guide's own worked example of a cryptic description is a valve
+  # ("3/8 CPLG BRS 150#") and because the valve classes are the vertical with real documents and a
+  # golden set, so these are the terms this repository can actually regression-test against.
+  # `body_material` is DELIBERATELY ABSENT, and it is the most instructive omission in this file.
+  #
+  # The obvious entries would be BRS/BRZ -> Bronze. They cannot be written, for two reasons that
+  # compound. "BRS" is industrial shorthand for *brass* at least as often as for bronze. And the
+  # attribute's permitted values are alloy designations — Brass C36000, Brass C46500, Brass C69300,
+  # Bronze C84400, Bronze C89833 — so even the correct metal leaves a one-in-three choice between
+  # alloys that differ in lead content and therefore in potable-water eligibility.
+  #
+  # Snapping a three-letter code onto one of them would fabricate a metallurgical claim, and
+  # `lead_free_compliant` has a cross-field rule that reads exactly this attribute. The guide's own
+  # cryptic example, "3/8 CPLG BRS 150#", therefore yields no material here — which is the correct
+  # answer and the reason the token is still reported as refused rather than dropped.
+
+  - attribute: end_connection
+    note: >
+      Unambiguous connection codes. Values match the attribute's permitted list exactly; an
+      expansion that does not snap onto a permitted value is refused rather than written.
+    terms:
+      THRD: NPT Threaded
+      THD: NPT Threaded
+      NPT: NPT Threaded
+      BSPT: BSPT Threaded
+      SWT: Solder
+      SLD: Solder
+      SOL: Solder
+      FLG: Flanged
+      GRV: Grooved
+
+  - attribute: port_type
+    terms:
+      FP: Full Port
+      FB: Full Port
+      RP: Reduced Port
+      STD: Standard Port
+
+  - attribute: handle_type
+    terms:
+      LVR: Lever
+      LEV: Lever
+      TEE: Tee
+      HW: Handwheel
+
+  - attribute: lead_free_compliant
+    note: >
+      A compliance attribute, so extraction from an abbreviation is NOT permitted to publish it
+      — `evidence_requirement: strict` on the attribute refuses inference, and a three-letter code
+      in a description is not a certification. Listed so the token is *recognised* and reported as
+      a candidate for review rather than silently ignored.
+      is_compliance_claim: true
+    terms:
+      LF: "true"
+      "NL": "true"

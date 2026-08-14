@@ -13,6 +13,11 @@ class:
   name: Bronze Gate Valve
   version: v1
 
+  # "gate" alone is not identity evidence, and this class is the clearest demonstration of why:
+  # without the guard it claimed "Castle Gate" PVC decking, a vinyl fence gate and a gravity
+  # latch. The word that matters is "valve".
+  identity_terms: [valve, valves, vlv]
+
   browse_path: [Plumbing, Valves, Gate Valves, Bronze]
 
   mappings:

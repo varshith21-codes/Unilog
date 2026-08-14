@@ -1,0 +1,366 @@
+# The Unilog delivery format: the graded output contract.
+#
+# This file is the authority on WHAT COLUMNS WE EMIT AND IN WHAT ORDER. It is data rather than
+# code for the same reason the attribute dictionary is: the column set belongs to the client, it
+# will change when they revise it, and a revision should be a YAML edit rather than a Python edit.
+#
+# The header this expands to is byte-identical to the client's own delivery file. That is not a
+# nicety — a submission whose columns do not line up with theirs cannot be ingested at all, so
+# `tests/test_delivery_format.py` asserts the equality against the real CSV and will fail the
+# build if this file drifts. Do not "tidy" a column name here. `SKU - MY_PART_NUMBER` has spaces
+# around its hyphen and `Actual Image (Yes/No)` has parentheses because that is what the client
+# wrote, and matching them exactly is the whole job of this file.
+#
+# ---------------------------------------------------------------------------------------------
+# PROVENANCE is the second thing this file declares, and it is what keeps the delivery format
+# compatible with AXIOM's evidence rule instead of in conflict with it (blueprint 17.9).
+#
+# The delivery format asks for ~79 populated columns starting from a 35-character description and
+# no attached document. Run naively against `channels.preflight`, the honest output is an empty
+# file, because a CSV row carries no evidence span. The resolution is not to weaken the gate; it
+# is to recognise that these cells do not all make the same kind of claim:
+#
+#   passthrough  Copied from the client's own input, unchanged. Needs no evidence: asserting it
+#                is asserting only "you sent us this", which is trivially true.
+#   derived      A deterministic function of passthrough data or of an already-accepted value.
+#                Inherits its input's provenance, exactly as a unit conversion does in
+#                `ProductRecord.verifiability()`.
+#   extracted    Read off a manufacturer source. THE FULL GATE APPLIES — evidence span required,
+#                validation and confidence policy enforced. These are the cells that can be
+#                wrong in a way that costs a customer money.
+#   generated    Composed from cells that are already passthrough, derived, or accepted-extracted.
+#                May introduce wording; may NOT introduce facts. Claim-checked.
+#   unavailable  Cannot be established from a 6-column input at all. Always emitted empty. A
+#                fabricated value here would corrupt the client's own primary key.
+#
+# The rule that makes this sound: a `generated` cell may only reference established cells, and an
+# `extracted` cell that fails the gate is emitted empty rather than guessed. Provenance travels
+# with every populated cell into the sidecar, so the delivery CSV is auditable per cell.
+
+format:
+  name: unilog_delivery
+  version: v1
+  description: >
+    Unilog UniHack delivery format. 252 columns. Derived from
+    "Unihack_ Expected Output - Delivery Format.csv" as supplied by the client.
+  join_key: Mfg_Part_Num
+  # Ground truth populates 79 of 252 columns and leaves 173 empty. The format is a superset
+  # envelope, not a completeness target: filling a column the client left blank is a defect, not
+  # extra credit, so the scorer checks emptiness in both directions.
+  populated_in_ground_truth: 79
+
+  sections:
+    # -------------------------------------------------------------------- provenance of record
+    - group: reference_urls
+      provenance: evidence
+      note: >
+        Where the enrichment came from. The client's own format has a slot for the citation,
+        which is a gift: our evidence chain lands in a column they already read. `MFR URL` is
+        the manufacturer's own page; the guide's sourcing rule excludes marketplaces and
+        distributor sites, so a URL that is not the manufacturer's does not belong here.
+      columns:
+        - MFR URL
+        - Ref URL 1
+        - Ref URL 2
+        - Ref URL 3
+        - Ref URL 4
+        - Ref URL 5
+
+    # -------------------------------------------------------------------- client-owned key
+    #
+    # NOTE ON SECTION ORDER, because the next few sections look wrong and are not.
+    #
+    # Sections are emitted in the order declared, and that order mirrors the CLIENT'S column
+    # order exactly. Their file interleaves things we would have grouped together: PART_NUMBER,
+    # then Dept/Class/Fine, then SKU - MY_PART_NUMBER, then the input echo, then brand identity,
+    # and only then Classpath. So `client_keys` and `taxonomy` each appear TWICE below, split
+    # around the columns the client placed between them.
+    #
+    # Group labels are therefore logical, not positional, and `DeliveryFormat.group()` gathers a
+    # label from every section carrying it. Reordering these to read more tidily would produce a
+    # header that no longer matches theirs, which is the one failure this file cannot have.
+    - group: client_keys
+      provenance: unavailable
+      note: >
+        Distributor-internal identifiers. The guide states the 200-item input sheet supplies
+        these; our 6-column input does not, and they cannot be derived from anything we hold.
+        Emitted empty on purpose. Inventing a value here would collide with the client's own
+        key space, which is the most damaging error available in this whole format.
+      columns:
+        - PART_NUMBER
+
+    # -------------------------------------------------------------------- taxonomy (1 of 2)
+    - group: taxonomy
+      provenance: derived
+      note: >
+        The three-level merchandising hierarchy. Derived from classification, not from the
+        input: none of the three is present in a 6-column row, so all three are predictions
+        and carry a confidence.
+      columns:
+        - Dept
+        - Class
+        - Fine
+
+    # -------------------------------------------------------------------- client-owned key
+    - group: client_keys
+      provenance: unavailable
+      note: >
+        The client's own SKU. Sits here, between Fine and the input echo, in their file.
+      columns:
+        - SKU - MY_PART_NUMBER
+
+    # -------------------------------------------------------------------- input echo
+    - group: input_echo
+      provenance: passthrough
+      note: >
+        The client's six input columns, returned verbatim so their row joins back to ours.
+        Placeholders are echoed unchanged HERE — "-- Unbranded --" is what they sent and the
+        echo must be faithful. Placeholder suppression applies to the columns we derive
+        (MANUFACTURER_NAME, BRAND_NAME), never to the echo.
+      columns:
+        - Mfg_Part_Num
+        - Part_Desc
+        - E1_Brand
+        - Unilog_Brand
+        - DIB_Brand
+        - Part_Manuf
+
+    # -------------------------------------------------------------------- resolved identity
+    - group: identity
+      provenance: derived
+      note: >
+        Resolved against the approved manufacturer/brand master. Casing, suffixes and the
+        (R)/(TM) symbols must match that list exactly — "FRIGIDAIRE(R)" is a different string
+        from "Frigidaire" and only one of them is correct. Until
+        UniCat_Manufacturer_and_Brand_List.xlsx is available these resolve from Part_Manuf with
+        the trailing supplier code stripped, and the confidence reflects that.
+      columns:
+        - MANUFACTURER_NAME
+        - BRAND_NAME
+        - TRADE_NAME
+        - MANUFACTURER_PART_NUMBER
+        - ALTERNATE_PART_NUMBER
+
+    # -------------------------------------------------------------------- taxonomy (2 of 2)
+    - group: taxonomy
+      provenance: derived
+      note: >
+        The full path, joined with a bare ">" and NO surrounding spaces — matching the client's
+        "Appliances & Consumer Electronics>Kitchen Appliances>Built-In Dishwashers". Note this
+        is a different string from Dept>Class>Fine: the classpath is the merchandising tree the
+        buyer browses, while Dept/Class/Fine is the internal reporting hierarchy, and in the
+        ground truth they genuinely disagree ("Appliances / Large Appliances / Dishwashers"
+        against "Appliances & Consumer Electronics / Kitchen Appliances / Built-In
+        Dishwashers"). Deriving one from the other would be wrong.
+      columns:
+        - Classpath
+
+    # -------------------------------------------------------------------- the five rewrites
+    - group: descriptions
+      provenance: generated
+      note: >
+        The same product written five times at five lengths and casings, plus optional
+        marketing prose. Per the guide, "getting these formats right is most of the task".
+        Four of the six are deterministic template renders over the attribute grid, not model
+        output; only MARKETING_DESCRIPTION is genuinely generative. Constraints below are
+        declared ONLY where the guide states them — the observed lengths of the others are
+        recorded as notes so we do not invent a limit and then score ourselves against it.
+      columns:
+        - name: MOBILE_DESC
+          min_chars: 60
+          max_chars: 80
+          constraint_source: guide
+          note: Mobile app. Observed 75 and 64 characters.
+        - name: INVOICE_DESC
+          max_chars: 40
+          casing: upper
+          constraint_source: guide
+          note: >
+            Till receipt. An abbreviation grammar, not a truncation: "DISHWASHER LEG 5 SST
+            120V 15A 50-1/4IN". Units close up here (120V) even though the house style
+            requires a space elsewhere (120 V) — the 40-character budget overrides it.
+            Observed 38 and 39 characters.
+        - name: SHORT_DESC
+          note: Product title / PDP heading. Observed 115 and 96 characters.
+        - name: LONG_DESC1
+          note: >
+            Product page. Compositional, not free prose: a template walk over the attribute
+            grid in slot order, ending "Additional Information: {list}". Observed 390 and 405.
+        - name: RETAIL_DESC
+          note: Search results. Observed 75 and 74 characters.
+        - name: MARKETING_DESCRIPTION
+          provenance: generated
+          note: >
+            The only genuinely generative field. Manufacturer marketing copy, so it belongs to
+            retrieval plus a claim check rather than to invention. Empty in row 1, 214
+            characters in row 2 — legitimately optional.
+
+    - group: item_features
+      provenance: generated
+      note: >
+        Marketing feature bullets. Row 2 fills 11 of 20; row 1 fills none, so this is
+        legitimately sparse and an empty block is not a failure. Sourced from the
+        manufacturer's own feature list, claim-checked against established attributes.
+      repeat:
+        count: 20
+        columns:
+          - template: ITEM_FEATURES_{n}
+            role: feature
+
+    # -------------------------------------------------------------------- prose slots
+    - group: prose_slots
+      provenance: extracted
+      note: >
+        Narrow single-purpose slots. "With" carries included-technology phrasing
+        ("With CleanBoost(TM)") and is composed from established features rather than read
+        directly. "Standard/Approvals" is pipe-delimited and is a compliance claim, so it is
+        strict-evidence only: an approval we cannot cite is omitted, never inferred.
+      columns:
+        - name: With
+          provenance: derived
+        - name: Standard/Approvals
+          delimiter: "|"
+          note: >
+            Observed "ASSE 1006|CEE Tier 2 Qualified|cUL Listed|ENERGY STAR Certified|NSF
+            Certified|UL Listed". Alphabetically ordered in the ground truth.
+        - Prop 65
+        - Application
+        - Includes
+        - name: Product Name
+          provenance: derived
+          note: The bare item type, e.g. "Dishwasher". Derived from the class, not extracted.
+
+    # -------------------------------------------------------------------- the attribute grid
+    - group: attribute_grid
+      provenance: extracted
+      note: >
+        150 columns as 50 label/value/UOM triplets. Proved to be a PER-CLASS TEMPLATE rather
+        than a per-row decision: both ground-truth rows carry the identical 15-label sequence
+        in the identical order, with values sparse against it (row 1 leaves slots 2, 7 and 14
+        labelled but empty; row 2 leaves 3, 7, 11 and 14).
+
+        So slot n is the class's nth attribute binding, the label comes from the attribute
+        definition's name, and the tail beyond the class's binding count stays entirely blank.
+        UOM is populated only where the canonical value is a Quantity, which is exactly what
+        `exporters._render_value` already computes. This block therefore needs no new
+        mechanism, only class definitions — a new category is a YAML file, not a code change.
+      repeat:
+        count: 50
+        columns:
+          # The label is a projection of the class schema, not something read off a document,
+          # so it is derived even though the value beside it is extracted.
+          - template: ATTRIBUTE_LABEL {n}
+            role: label
+            provenance: derived
+          - template: ATTRIBUTE_VALUE {n}
+            role: value
+          - template: ATTRIBUTE_UOM {n}
+            role: uom
+            provenance: derived
+
+    # -------------------------------------------------------------------- identifiers
+    - group: identifiers
+      provenance: extracted
+      note: >
+        All four are blank in the ground truth, which the guide flags as deliberate
+        ("real data is imperfect - say so"). UNSPSC is the exception in kind: it is derivable
+        from the class mapping rather than extracted, so it is marked derived and will populate
+        once a class declares its UNSPSC code.
+      columns:
+        - UPC
+        - EAN
+        - GTIN
+        - name: UNSPSC
+          provenance: derived
+
+    # -------------------------------------------------------------------- commercial
+    - group: commercial
+      provenance: extracted
+      note: >
+        Only Warranty is populated in the ground truth ("1 Year Manufacturer, 1 Year Labor and
+        Parts"). List Price is deliberately never emitted: pricing is the distributor's, not
+        the manufacturer's, and guessing it is out of scope.
+      columns:
+        - Warranty
+        - name: List Price
+          provenance: unavailable
+        - Selling Qty
+        - Selling UOM
+        - Standard Packaging Information
+
+    # -------------------------------------------------------------------- dimensions
+    - group: dimensions
+      provenance: extracted
+      note: >
+        Paired magnitude/unit columns. Blank throughout the ground truth. Note that the
+        dishwasher's physical size lives in the attribute grid instead ("24 in W x 24-1/4 in
+        D" under a "Size" label), so these columns are for products whose class declares
+        discrete dimension attributes. Do not populate both for the same measurement.
+      columns:
+        - LENGTH
+        - LENGTH_UOM
+        - HEIGHT
+        - HEIGHT_UOM
+        - WIDTH
+        - WIDTH_UOM
+        - WEIGHT
+        - WEIGHT_UOM
+        - VOLUME
+        - VOLUME_UOM
+
+    # -------------------------------------------------------------------- assets
+    - group: assets
+      provenance: derived
+      note: >
+        Filenames following {BRAND_sans_symbols}_{MPN}[_{n}|_{Doc_Type}].{ext}, e.g.
+        FRIGIDAIRE_PDSH4816AF.jpg, FRIGIDAIRE_PDSH4816AF_2.jpg,
+        Whirlpool_WDTS7024RZ_Specification_Sheet.pdf. Brand casing comes from BRAND_NAME with
+        the (R)/(TM) symbol removed.
+
+        These are derived, but derivation is NOT permission to emit. A filename asserts the
+        asset exists; emitting one for an asset we never fetched is a claim without evidence,
+        which is the precise failure this system exists to prevent. So a name is written only
+        when the asset has been retrieved and hashed into the artifact store, and
+        `Actual Image (Yes/No)` reports that retrieval rather than defaulting to Yes.
+      columns:
+        - Product Image
+        - Alternate Image 1
+        - Alternate Image 2
+        - Alternate Image 3
+        - Alternate Image 4
+        - SDS
+        - SDS_1
+        - Warranty Information
+        - Catalog
+        - Specification Sheet
+        - Instruction/Installation Manual
+        - Service Manual
+        - Owners/User Manual
+        - Line Drawing
+        - MTR
+        - RoHS
+        - Full Engineering Drawing
+        - Energy Star Guide
+        - Technical Bulletin
+        - Submittal
+        - Compatibility Chart
+        - Size Chart
+        - Product Label/Insert
+        - Video Link
+        - Video Link 1
+
+    # -------------------------------------------------------------------- flags
+    - group: flags
+      provenance: extracted
+      columns:
+        - name: Country Of Origin
+          note: Blank in ground truth. Flagged by the guide as a known gap in the client's data.
+        - name: Discontinued
+          provenance: derived
+          note: From lifecycle status.
+        - name: Actual Image (Yes/No)
+          provenance: derived
+          note: >
+            Whether the product image is a real photograph of this item rather than a
+            placeholder or a family shot. "Yes" in both ground-truth rows. Reports retrieval,
+            so it is only Yes when an image was actually obtained.

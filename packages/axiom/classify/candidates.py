@@ -56,6 +56,22 @@ class ClassProfile:
     browse_path: tuple[str, ...]
     term_counts: Counter[str]
     total_terms: int
+    identity_terms: frozenset[str] = frozenset()
+    """Terms that must be present for this class to be considered. See
+    :attr:`~axiom.schema.models.ClassDefinition.identity_terms`. Empty means no guard."""
+
+    def admits(self, query_terms: Counter[str]) -> bool:
+        """Whether the text contains any evidence that the product IS this kind of thing.
+
+        The scorer cannot answer this, because TF-IDF treats a class's attribute vocabulary and
+        its identity vocabulary identically — and attribute vocabulary is promiscuous. "Port
+        Type" makes a decor plate look like a ball valve, and it scores higher than a real
+        dishwasher does against the dishwasher class. Overlap is simply the wrong instrument for
+        an identity question, so identity is asked separately and first.
+        """
+        if not self.identity_terms:
+            return True
+        return bool(self.identity_terms & set(query_terms))
 
     def score(self, query_terms: Counter[str], idf: dict[str, float]) -> float:
         """TF-IDF cosine-ish overlap. Deterministic, explainable, and free."""
@@ -128,7 +144,13 @@ class CandidateIndex:
         return len(self._profiles)
 
     def search(self, text: str, *, limit: int = 5) -> list[Candidate]:
-        """Rank classes against free text. Zero-scoring classes are excluded."""
+        """Rank classes against free text. Zero-scoring classes are excluded.
+
+        Classes are filtered by :meth:`ClassProfile.admits` *before* scoring, not after. A class
+        the text gives no identity evidence for is not a weak candidate to be out-ranked, it is
+        not a candidate — and letting it into the ranking would also distort the dominance ratio
+        the decision layer computes from the top two scores.
+        """
         query = Counter(tokenize(text))
         if not query:
             return []
@@ -140,6 +162,7 @@ class CandidateIndex:
                 score=round(profile.score(query, self._idf), 6),
             )
             for profile in self._profiles
+            if profile.admits(query)
         ]
         ranked = sorted(
             (c for c in scored if c.score > 0.0), key=lambda c: (-c.score, c.code)
@@ -170,10 +193,17 @@ def _profile_for(registry: SchemaRegistry, definition: ClassDefinition) -> Class
             for alias in allowed.aliases:
                 terms.update(tokenize(alias))
 
+    # Identity terms are tokenized through the same function as the query, so a declared term is
+    # matched on the same basis as the text it is compared against.
+    identity = frozenset(
+        token for term in definition.identity_terms for token in tokenize(term)
+    )
+
     return ClassProfile(
         code=definition.code,
         name=definition.name,
         browse_path=definition.browse_path,
         term_counts=terms,
         total_terms=sum(terms.values()),
+        identity_terms=identity,
     )

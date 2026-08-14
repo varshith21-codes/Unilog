@@ -20,6 +20,15 @@ from axiom.ingest.fabric import (
     pdf_page_count,
     read_flat_file,
 )
+from axiom.ingest.placeholders import (
+    AMBIGUOUS_SENTINELS,
+    ColumnProfile,
+    clean_row,
+    dead_columns,
+    is_placeholder,
+    profile_column,
+    profile_rows,
+)
 from axiom.ingest.store import (
     ArtifactStore,
     LocalArtifactStore,
@@ -43,6 +52,7 @@ from axiom.ingest.web import (
 
 __all__ = [
     "ALLOWED_SCHEMES",
+    "AMBIGUOUS_SENTINELS",
     "DEFAULT_MAX_BYTES",
     "DEFAULT_TIMEOUT",
     "FLAT_FILE_SUFFIXES",
@@ -52,6 +62,7 @@ __all__ = [
     "ArtifactStore",
     "ColumnMapping",
     "ColumnMatch",
+    "ColumnProfile",
     "FetchedResource",
     "Fetcher",
     "FlatFile",
@@ -61,6 +72,8 @@ __all__ = [
     "MappingMemory",
     "UrlFetchError",
     "artifact_key",
+    "clean_row",
+    "dead_columns",
     "detect_document_type",
     "fetch_url",
     "filename_for",
@@ -69,8 +82,11 @@ __all__ = [
     "ingest_bytes",
     "ingest_file",
     "ingest_url",
+    "is_placeholder",
     "is_url",
     "pdf_page_count",
+    "profile_column",
+    "profile_rows",
     "read_flat_file",
     "sha256_bytes",
     "sha256_file",

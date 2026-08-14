@@ -465,6 +465,20 @@ class AttributeBinding(BaseModel):
         description="Importance for completeness scoring. A missing pressure rating matters "
         "more than a missing handle colour, and a flat count hides that.",
     )
+    label: str | None = Field(
+        default=None,
+        description="Customer-facing label for this attribute *in this class*, overriding the "
+        "dictionary name. Exists because the display label is genuinely per-class while the "
+        "attribute is shared: `product_series` is named 'Product Series' in the dictionary and "
+        "must print as 'Series' in the dishwasher grid. Unilog's own List of Values is keyed by "
+        "(Classpath, Attribute Label) for exactly this reason. Renaming the dictionary entry "
+        "instead would change the label for every other class that binds it.",
+    )
+
+    @property
+    def display_label(self) -> str | None:
+        """The override, if declared. Callers fall back to the definition's ``name``."""
+        return self.label
 
 
 class ClassDefinition(BaseModel):
@@ -475,7 +489,49 @@ class ClassDefinition(BaseModel):
     code: str = Field(pattern=r"^[A-Z][A-Z0-9.]*$")
     name: str
     version: str
+    item_type: str | None = Field(
+        default=None,
+        description="The bare noun a buyer would call this product — 'Dishwasher', not "
+        "'Built-In Dishwasher'. Distinct from `name`, which is a class label and properly "
+        "carries qualifiers. Needed wherever the product is named inside a sentence: the "
+        "delivery format's `Product Name` column expects 'Dishwasher', and the long "
+        "description reads 'FRIGIDAIRE(R) Dishwasher With CleanBoost(TM)...'. Depluralising "
+        "the browse path to get it would be fragile and wrong as often as not. Falls back to "
+        "`name` when undeclared.",
+    )
+
+    identity_terms: tuple[str, ...] = Field(
+        default=(),
+        description="Terms that must appear in the product text for this class to be a "
+        "candidate at all. The classifier's own first rule is to decide on what the product IS "
+        "rather than how it is described, and without this that rule is only enforced when a "
+        "model is in the loop.\n\n"
+        "It exists because retrieval scores attribute vocabulary as readily as identity "
+        "vocabulary, and attribute vocabulary is promiscuous. Measured on the 1,000-row Unilog "
+        "sample with three classes and no term guard: 45 rows classified and 35 of them wrongly, "
+        "because 'Castle Gate' PVC decking matched the gate-valve class, a '2 Port Decor Plate' "
+        "outscored every real dishwasher on the strength of 'Port Type', and cut-off discs "
+        "matched ball valves on shared size fractions. A score floor cannot fix it: the best "
+        "false positive scored 0.1854 against a true-positive floor of 0.1725.\n\n"
+        "Include abbreviations a supplier might actually write, since that is the whole "
+        "difficulty — 'dw' for dishwasher, 'cplg' for coupling. Leave empty to disable the "
+        "guard for a class, which is the backward-compatible default.",
+    )
+
     browse_path: tuple[str, ...] = ()
+    """The customer-facing browse tree — how buyers shop. Rendered as the delivery format's
+    ``Classpath``."""
+
+    reporting_path: tuple[str, ...] = Field(
+        default=(),
+        description="The internal reporting hierarchy, distinct from browse_path. Distributors "
+        "commonly run two trees: one the buyer navigates and one finance and merchandising "
+        "report against. In the client's delivery format these are genuinely different strings "
+        "for the same product — browse_path is 'Appliances & Consumer Electronics > Kitchen "
+        "Appliances > Built-In Dishwashers' while reporting_path is 'Appliances / Large "
+        "Appliances / Dishwashers'. Neither is derivable from the other, so both are declared.",
+    )
+
     mappings: dict[str, str] = Field(
         default_factory=dict,
         description="External scheme codes: ETIM, UNSPSC, eCl@ss. Multi-target by design — "
@@ -485,7 +541,7 @@ class ClassDefinition(BaseModel):
     cross_field_rules: tuple[CrossFieldRule, ...] = ()
     channel_profiles: tuple[ChannelProfile, ...] = ()
 
-    @field_validator("browse_path", mode="before")
+    @field_validator("browse_path", "reporting_path", "identity_terms", mode="before")
     @classmethod
     def _coerce(cls, v):
         return tuple(v) if v else ()
@@ -502,6 +558,11 @@ class ClassDefinition(BaseModel):
     def schema_version(self) -> str:
         return f"{self.code}@{self.version}"
 
+    @property
+    def product_noun(self) -> str:
+        """The bare item type, falling back to the class name."""
+        return self.item_type or self.name
+
     def codes(self, *requirements: Requirement) -> list[str]:
         wanted = set(requirements) or set(Requirement)
         return [b.code for b in self.attributes if b.requirement in wanted]
@@ -515,6 +576,16 @@ class ClassDefinition(BaseModel):
             if b.code == code:
                 return b
         return None
+
+    def slot_bindings(self) -> tuple[AttributeBinding, ...]:
+        """Bindings in declared order — the attribute-grid slot assignment.
+
+        Declared order is load-bearing for the delivery format, where slot *n* of the
+        ``ATTRIBUTE_LABEL/VALUE/UOM`` grid is binding *n*. Reordering this tuple silently
+        reshuffles a published column layout, so it is exposed as an explicit method rather than
+        left to callers iterating ``attributes`` and hoping the order is meaningful.
+        """
+        return self.attributes
 
     def channel(self, name: str) -> ChannelProfile | None:
         for profile in self.channel_profiles:

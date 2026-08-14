@@ -56,6 +56,9 @@ class QuantityKind(str, Enum):
     WIRE_GAUGE = "wire_gauge"
     """Gauge scales are ordinal-ish and nonlinear; they convert to LENGTH/AREA via tables."""
 
+    SOUND_LEVEL = "sound_level"
+    """Logarithmic, and weighted. Only ``dBA`` is defined — see the note beside it."""
+
     THREAD_STANDARD = "thread_standard"
     """Not a measurement. Deliberately non-convertible — see module docstring."""
 
@@ -96,6 +99,7 @@ CANONICAL_UNITS: dict[QuantityKind, str] = {
     QuantityKind.FREQUENCY: "Hz",
     QuantityKind.ANGLE: "deg",
     QuantityKind.TIME: "s",
+    QuantityKind.SOUND_LEVEL: "dBA",
     QuantityKind.DIMENSIONLESS: "1",
 }
 
@@ -205,6 +209,29 @@ _UNITS: tuple[UnitDef, ...] = (
     UnitDef("kW", QuantityKind.POWER, 1000.0, aliases=("kilowatt",)),
     UnitDef("hp", QuantityKind.POWER, 745.6998715822702, aliases=("horsepower",)),
     UnitDef("Hz", QuantityKind.FREQUENCY, 1.0, aliases=("hertz", "cycles", "cps")),
+    # ---------------- acoustic ----------------
+    #
+    # Only the A-weighted decibel, and deliberately so. Plain `dB` is NOT defined here.
+    #
+    # dBA is dB passed through the A-weighting curve, which approximates human hearing. The two
+    # are not interconvertible by any factor: going between them requires the signal's spectrum,
+    # which a datasheet never publishes. Defining both in this kind with factor 1.0 would let the
+    # registry silently treat "47 dB" and "47 dBA" as the same measurement, and for appliance
+    # sound ratings — where a few dB is the whole marketing claim — that is the same class of
+    # error as converting NPT into BSPT.
+    #
+    # A source that states plain dB therefore fails to resolve, which surfaces it for a human
+    # instead of quietly mis-typing it. That is the intended behaviour, not a gap.
+    #
+    # Logarithmic, so arithmetic on these values is meaningless even within the kind: two 40 dBA
+    # sources together are 43 dBA, not 80. `Quantity` only ever adds like units, and nothing in
+    # the pipeline sums sound levels, but it is worth knowing before someone tries.
+    UnitDef(
+        "dBA",
+        QuantityKind.SOUND_LEVEL,
+        1.0,
+        aliases=("dba", "db(a)", "db a", "a-weighted decibel"),
+    ),
     # ---------------- misc ----------------
     UnitDef("deg", QuantityKind.ANGLE, 1.0, aliases=("°", "degree", "degrees")),
     UnitDef("rad", QuantityKind.ANGLE, 180.0 / math.pi, aliases=("radian",)),

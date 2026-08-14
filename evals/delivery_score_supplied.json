@@ -1,0 +1,28 @@
+{
+  "format": "unilog_delivery@v1",
+  "rows_scored": 2,
+  "cells_compared": 504,
+  "exact_of_expected": [
+    107,
+    134
+  ],
+  "acceptable_of_expected": [
+    107,
+    134
+  ],
+  "fill_discipline": [
+    478,
+    504
+  ],
+  "verdicts": {
+    "exact": 107,
+    "normalized": 0,
+    "both_empty": 370,
+    "missed": 26,
+    "overfilled": 0,
+    "wrong": 1
+  },
+  "constraint_violations": 0,
+  "unmatched_expected": [],
+  "unmatched_actual": []
+}

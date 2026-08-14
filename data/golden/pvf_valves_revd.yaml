@@ -1,0 +1,188 @@
+# Golden set: the BA-100 series as stated in Rev D.
+#
+# The second half of a matched pair. `pvf_valves.yaml` records what the Rev C datasheet
+# (`../samples/ba100.txt`) states; this file records what the Rev D reissue
+# (`../samples/ba100-revd.txt`) states for the same five SKUs. Spec drift is measured between the
+# two.
+#
+# It exists as a separate file rather than as extra keys on the first because ground truth is a
+# statement about a *document*, not about a part. One SKU has as many correct answers as it has
+# source revisions, and collapsing them would make "what does the datasheet say" ambiguous in
+# exactly the corpus every accuracy number in this repository is measured against.
+#
+# The annotation discipline is inherited unchanged, including the awkward parts: handle_type is
+# still omitted for the 1" and 1-1/4" sizes because Rev D reprints the same self-contradicting
+# footnote, and cv_flow_coefficient is recorded only for the 1/2" size because that is the only
+# size Rev D qualifies it to.
+#
+# Every difference from Rev C is deliberate and is listed in `description` so the drift report can
+# be checked against an authored expectation rather than against itself.
+
+name: pvf_valves_revd_v1
+description: >
+  The BA-100 series after the manufacturer reissued the datasheet. Seven deliberate changes
+  against Rev C, chosen to exercise every drift direction the schema can express: a pressure
+  rating cut from 600 to 400 PSI (tightened, at_least), a steam rating raised from 150 to 210 PSI
+  (relaxed, at_least), a service window that gives up its bottom 20 degF (tightened, encloses), a
+  seat material moved from RPTFE to PTFE (unordered, so revised rather than ranked), NSF/ANSI 61
+  withdrawn from the approvals list (tightened, superset) and with it the potable-water claim it
+  substantiated (tightened on a boolean, and a compliance claim, so withdrawal rather than
+  refresh), a Cv published where the old sheet deferred to the factory (added), and a body alloy
+  and end connection left untouched (unchanged).
+
+source_documents:
+  - id: ba100_revd
+    path: ../samples/ba100-revd.txt
+    supplier_id: milwaukee
+    brand: Milwaukee Valve
+
+products:
+  - sku: BA-100-025
+    class_code: PLB.VLV.BALL.2PC
+    source: ba100_revd
+    notes: >
+      stem_material omitted for the same paired-value ambiguity as Rev C.
+    attributes:
+      product_series: BA-100
+      number_of_pieces: Two-Piece
+      nominal_size: 1/4"
+      case_quantity: "24"
+      handle_type: Lever
+      body_material: Bronze C84400
+      seat_material: PTFE
+      port_type: Full Port
+      pressure_rating_wog: 400 PSI
+      steam_pressure_rating: 210 PSI
+      temperature_range: 0 degF to 366 degF
+      end_connection: NPT threaded
+      approvals: UL, CSA
+      # NOTE 4 states the certification is withdrawn pending re-testing. That is an explicit
+      # negative statement, not silence, so `false` is substantiated here — unlike prop65, where
+      # the schema requires a gap when the source says nothing at all.
+      potable_water_approved: "false"
+    absent:
+      - lead_free_compliant
+      - cv_flow_coefficient      # qualified to the 1/2" size only
+      - operating_torque         # stated for the 1/2" size only
+      - gtin
+      - country_of_origin
+      - each_weight
+      - case_weight
+      - selling_uom
+
+  - sku: BA-100-050
+    class_code: PLB.VLV.BALL.2PC
+    source: ba100_revd
+    notes: >
+      The only SKU carrying operating_torque and, now, cv_flow_coefficient — Rev D qualifies
+      both to the 1/2" size. The Cv is the one attribute that gained a value in this revision.
+    attributes:
+      product_series: BA-100
+      number_of_pieces: Two-Piece
+      nominal_size: 1/2"
+      case_quantity: "24"
+      handle_type: Lever
+      body_material: Bronze C84400
+      seat_material: PTFE
+      port_type: Full Port
+      pressure_rating_wog: 400 PSI
+      steam_pressure_rating: 210 PSI
+      temperature_range: 0 degF to 366 degF
+      end_connection: NPT threaded
+      approvals: UL, CSA
+      potable_water_approved: "false"
+      operating_torque: 18-22 ft-lb
+      cv_flow_coefficient: "16.5"
+    absent:
+      - lead_free_compliant
+      - gtin
+      - country_of_origin
+      - each_weight
+      - case_weight
+      - selling_uom
+
+  - sku: BA-100-075
+    class_code: PLB.VLV.BALL.2PC
+    source: ba100_revd
+    attributes:
+      product_series: BA-100
+      number_of_pieces: Two-Piece
+      nominal_size: 3/4"
+      case_quantity: "12"
+      handle_type: Lever
+      body_material: Bronze C84400
+      seat_material: PTFE
+      port_type: Full Port
+      pressure_rating_wog: 400 PSI
+      steam_pressure_rating: 210 PSI
+      temperature_range: 0 degF to 366 degF
+      end_connection: NPT threaded
+      approvals: UL, CSA
+      potable_water_approved: "false"
+    absent:
+      - lead_free_compliant
+      - cv_flow_coefficient
+      - operating_torque
+      - gtin
+      - country_of_origin
+      - each_weight
+      - case_weight
+      - selling_uom
+
+  - sku: BA-100-100
+    class_code: PLB.VLV.BALL.2PC
+    source: ba100_revd
+    notes: >
+      handle_type omitted: Rev D reprints the same contradiction as Rev C — the ordering row
+      says "Lever" and NOTE 1 says sizes 1" and larger ship with a locking lever.
+    attributes:
+      product_series: BA-100
+      number_of_pieces: Two-Piece
+      nominal_size: 1"
+      case_quantity: "12"
+      body_material: Bronze C84400
+      seat_material: PTFE
+      port_type: Full Port
+      pressure_rating_wog: 400 PSI
+      steam_pressure_rating: 210 PSI
+      temperature_range: 0 degF to 366 degF
+      end_connection: NPT threaded
+      approvals: UL, CSA
+      potable_water_approved: "false"
+    absent:
+      - lead_free_compliant
+      - cv_flow_coefficient
+      - operating_torque
+      - gtin
+      - country_of_origin
+      - each_weight
+      - case_weight
+      - selling_uom
+
+  - sku: BA-100-125
+    class_code: PLB.VLV.BALL.2PC
+    source: ba100_revd
+    notes: handle_type omitted for the same footnote contradiction as BA-100-100.
+    attributes:
+      product_series: BA-100
+      number_of_pieces: Two-Piece
+      nominal_size: 1-1/4"
+      case_quantity: "6"
+      body_material: Bronze C84400
+      seat_material: PTFE
+      port_type: Full Port
+      pressure_rating_wog: 400 PSI
+      steam_pressure_rating: 210 PSI
+      temperature_range: 0 degF to 366 degF
+      end_connection: NPT threaded
+      approvals: UL, CSA
+      potable_water_approved: "false"
+    absent:
+      - lead_free_compliant
+      - cv_flow_coefficient
+      - operating_torque
+      - gtin
+      - country_of_origin
+      - each_weight
+      - case_weight
+      - selling_uom

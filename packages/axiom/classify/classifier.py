@@ -35,10 +35,37 @@ from axiom.schema import SchemaRegistry
 #
 # Deliberately a *ratio* rather than an absolute margin. Raw retrieval scores scale with how
 # much text the caller supplies, so an absolute threshold would classify the same product
-# differently from a one-line ERP description than from a full datasheet. Measured on the
-# valve classes: a correct match sits around 0.57-0.63, and a genuinely ambiguous one around
-# 0.75, so 0.68 separates them with room on both sides.
-DECISIVE_DOMINANCE = 0.68
+# differently from a one-line ERP description than from a full datasheet.
+#
+# ---------------------------------------------------------------------------------------------
+# THIS VALUE IS CORPUS-SENSITIVE AT SMALL CLASS COUNTS. Re-measure it when adding a class.
+#
+# It was 0.68, measured against a two-class valve schema. Adding one unrelated class (built-in
+# dishwashers) moved the correct ball-valve match from 0.659 to 0.696 and broke it.
+#
+# The mechanism is IDF over a tiny corpus. IDF is log((N+1)/(df+1)) + 1, so a term shared by both
+# valve classes scores log(3/3)+1 = 1.0 at N=2 but log(4/3)+1 = 1.288 at N=3. Adding an unrelated
+# class therefore *inflates the weight of the vocabulary the related classes share* — "bronze",
+# "NPT", "threaded" — which pulls ball and gate closer together and raises the dominance ratio.
+# Counter-intuitively, a distant class makes two near neighbours harder to separate.
+#
+# Measured on the current three-class schema, and pinned by
+# tests/test_classify.py::test_dominance_band_still_separates, which recomputes both sides and
+# fails with the offending number when a new class moves them:
+#
+#     correct   ball valve         0.696      <- hardest correct match
+#     correct   gate valve         0.664
+#     correct   dishwasher         0.582
+#     --------------------------------------- threshold sits here
+#     ambiguous shared vocab only  0.738      <- easiest ambiguous case
+#     ambiguous bronze NPT 150 PSI 0.794
+#
+# 0.72 sits in the gap with roughly 0.02 either side. That is thinner than is comfortable, and
+# the real fix is to stop IDF moving with class count at all — floor the document count so the
+# corpus behaves as though it were large (`total = max(len(profiles), 50)`), which would make
+# this constant stable as the taxonomy grows. That is a change to retrieval scoring for every
+# class and belongs in its own commit with its own measurements, not smuggled in here.
+DECISIVE_DOMINANCE = 0.72
 
 # Weak candidates are down-weighted before agreement is computed. Cosine scores are not
 # probabilities, and treating a 25%-weaker candidate as 75% as likely overstates it badly

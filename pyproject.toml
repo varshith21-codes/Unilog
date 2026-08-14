@@ -8,7 +8,10 @@ version = "0.1.0"
 description = "Verifiable product intelligence for industrial commerce"
 requires-python = ">=3.11"
 dependencies = [
-    "pydantic==2.11.7",
+    # 2.12+ is a floor imposed by the `mcp` extra, not a preference. Raising the base pin rather
+    # than letting the extra diverge keeps one pydantic in the tree: two would mean the MCP tool
+    # layer validating records against a different model version than the pipeline built them with.
+    "pydantic==2.13.4",
     "pyyaml==6.0.2",
     "boto3==1.40.15",
     "python-dateutil==2.9.0.post0",
@@ -27,8 +30,21 @@ ingest = [
     "openpyxl==3.1.5",
 ]
 api = [
-    "fastapi==0.115.6",
+    # 0.141 rather than 0.115 because `mcp` brings starlette 1.x and fastapi 0.115 caps it below
+    # 0.42. Both extras have to be installable at once — the review API and the agent surface are
+    # two faces of the same catalogue — so the older cap was the thing that had to move.
+    "fastapi==0.141.1",
     "uvicorn==0.34.0",
+]
+mcp = [
+    # The MCP server transport. Optional because the tool layer in axiom.agents.tools carries
+    # every guarantee and needs no protocol: it is pure functions over records on disk, so CI
+    # gates the behaviour without installing this. Only axiom.agents.server imports it, lazily.
+    #
+    # v2 is a deliberate choice, not the default of picking latest. The v2 line implements the
+    # 2026-07-28 spec revision and exposes `MCPServer` with typed tool signatures; v1's
+    # `FastMCP` would work but is the older API and would date the integration on arrival.
+    "mcp==2.0.0",
 ]
 dev = [
     "pytest==8.4.1",

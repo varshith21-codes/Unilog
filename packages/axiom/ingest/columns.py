@@ -30,14 +30,19 @@ RECORD_FIELDS = ("sku", "mpn", "brand", "description", "supplier_id")
 SYNONYMS: dict[str, tuple[str, ...]] = {
     "mpn": (
         "mpn", "part", "partno", "partnumber", "partnum", "pn", "part#", "mfrpn",
-        "mfgpn", "mfrpartno", "mfgpartno", "manufacturerpartnumber", "vendorpartnumber",
+        "mfgpn", "mfrpartno", "mfgpartno", "mfgpartnum", "mfrpartnum", "mfgpartnumber",
+        "manufacturerpartnumber", "manufacturerpartnum", "vendorpartnumber",
         "catno", "catalogno", "catalognumber", "itemno", "itemnumber", "model", "modelno",
         "modelnumber", "stocknumber",
     ),
     "sku": ("sku", "skuid", "itemid", "internalid", "productid", "productcode", "ourpart"),
-    "brand": ("brand", "make", "manufacturer", "mfr", "mfg", "mfgname", "vendor", "supplier"),
+    "brand": (
+        "brand", "make", "manufacturer", "manuf", "mfr", "mfg", "mfgname", "manufname",
+        "partmanuf", "partmanufacturer", "vendor", "supplier",
+    ),
     "description": (
-        "description", "desc", "desc1", "descr", "descr1", "productname", "name", "title",
+        "description", "desc", "desc1", "descr", "descr1", "partdesc", "partdescription",
+        "productname", "name", "title",
         "itemdescription", "shortdescription", "longdescription",
     ),
     "gtin": ("gtin", "upc", "upca", "ean", "barcode", "gtin14", "upccode"),
@@ -70,6 +75,22 @@ SYNONYMS: dict[str, tuple[str, ...]] = {
     "product_series": ("series", "productseries", "family", "productline", "line"),
     "number_of_pieces": ("pieces", "bodypieces", "construction", "piececount"),
 }
+
+# Deliberately absent: `E1_Brand`, `Unilog_Brand`, `DIB_Brand`.
+#
+# A file can carry several competing brand columns — the Unilog item master carries three, plus a
+# separate manufacturer column. Adding all of them here would map four headers onto `brand`, and
+# `resolved` awards a contested target to the first confident match, i.e. to whichever column the
+# supplier happened to put leftmost. On the real file that is `E1_Brand`, which is a placeholder in
+# 799 of 1,000 rows — so the mapper would confidently choose the emptiest column available.
+#
+# Which of several brand columns to believe is a question about the *data*, not the header, and
+# this function never sees a row. So they stay unmapped here and survive in the per-row `unmapped`
+# bag, where a resolver that can weigh placeholder density decides. See
+# `axiom.ingest.placeholders`.
+#
+# `Part_Manuf` -> `brand` is mapped, and is the guide's own fallback rule: where an item has no
+# brand, the manufacturer name is used instead.
 
 # Built once: folded synonym -> canonical target.
 _LOOKUP: dict[str, str] = {}

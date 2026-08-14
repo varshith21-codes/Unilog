@@ -1,0 +1,133 @@
+# Built-In Dishwashers — the first class defined against the real Unilog delivery format.
+#
+# WHY THIS CATEGORY. Not because it is the largest cohort in the 1,000-row sample (lighting is,
+# at 208 rows against 84 appliance rows) but because it is the ONLY category for which we hold
+# labelled ground truth: both rows of the client's delivery-format example are dishwashers, and
+# both part numbers appear in the input file. Every accuracy number we can honestly quote today
+# traces back to those two rows, so this is where the schema has to be right first.
+#
+# ---------------------------------------------------------------------------------------------
+# THE ATTRIBUTE ORDER BELOW IS A PUBLISHED COLUMN LAYOUT, NOT A PREFERENCE.
+#
+# Slot n of the delivery format's ATTRIBUTE_LABEL/VALUE/UOM grid is binding n of this list. The
+# order is copied from the client's ground truth, where both rows carry the identical 15-label
+# sequence — which is what proves the grid is a per-class template rather than a per-row decision.
+#
+# Reordering, inserting or removing a binding shifts every subsequent column in a file the client
+# ingests. `tests/test_dishwasher_class.py` pins the sequence against the real CSV for that
+# reason. If a new attribute is needed, append it at slot 16+ rather than inserting it.
+
+class:
+  code: APP.KIT.DISHWASHER.BUILTIN
+  name: Built-In Dishwasher
+  version: v1
+
+  # The bare noun, for the `Product Name` column and for use inside generated sentences. The
+  # client's ground truth writes "Dishwasher" there, not "Built-In Dishwasher" — the mounting
+  # qualifier belongs in the class label and in the Mounting Type attribute, not in the product's
+  # name. The long description reads the same way: "FRIGIDAIRE(R) Dishwasher With CleanBoost(TM)".
+  item_type: Dishwasher
+
+  # Nothing is a dishwasher unless the text says so. Without this guard, retrieval matched this
+  # class to a "2 Port Decor Plate", a "15A GFCI Plug" and a bandsaw, all on the strength of the
+  # class's own attribute vocabulary (Plug Type, Voltage Rating, Size) rather than on any evidence
+  # of what the product is. On the 1,000-row sample the guard takes precision from 10/45 to 10/10.
+  identity_terms: [dishwasher, dishwashers, dw]
+
+  # How buyers shop. Rendered as the delivery format's `Classpath`, joined with a bare ">".
+  browse_path:
+    - Appliances & Consumer Electronics
+    - Kitchen Appliances
+    - Built-In Dishwashers
+
+  # The internal reporting hierarchy -> Dept / Class / Fine. A genuinely different tree from
+  # browse_path, and neither derives from the other: the client's own ground truth pairs
+  # "Appliances & Consumer Electronics > Kitchen Appliances > Built-In Dishwashers" with
+  # "Appliances / Large Appliances / Dishwashers". Deriving one would produce the wrong string.
+  reporting_path: [Appliances, Large Appliances, Dishwashers]
+
+  mappings:
+    # 52141505 is UNSPSC's commercial dishwashing-machine commodity. Declared but note that the
+    # client's ground truth leaves UNSPSC BLANK on both rows, and the guide flags that as a known
+    # gap in their data rather than something for us to fill. The builder therefore treats a
+    # class UNSPSC as available-but-not-asserted, so we do not "improve" on ground truth by
+    # populating a column they deliberately left empty.
+    unspsc: "52141505"
+
+  attributes:
+    # --- slots 1-15: the client's exact grid template, in the client's exact order -----------
+    #
+    # `label` overrides the dictionary name where the client's label differs. `product_series` is
+    # "Product Series" in the dictionary because valves use it too; here it must print "Series".
+    - { code: product_series,        requirement: recommended, weight: 2.0, label: Series }
+    - { code: model_number,          requirement: optional,    weight: 1.0 }
+    - { code: wash_cycle_count,      requirement: recommended, weight: 2.0 }
+    - { code: voltage_rating,        requirement: required,    weight: 3.0 }
+    - { code: amperage_rating,       requirement: required,    weight: 3.0 }
+    - { code: mounting_type,         requirement: required,    weight: 3.0 }
+    - { code: plug_type,             requirement: optional,    weight: 1.0 }
+    - { code: overall_size,          requirement: required,    weight: 3.0, label: Size }
+    - { code: depth_with_door_open,  requirement: recommended, weight: 2.0 }
+    - { code: minimum_height,        requirement: optional,    weight: 1.0 }
+    - { code: maximum_height,        requirement: optional,    weight: 1.0 }
+    - { code: sound_level,           requirement: required,    weight: 3.0 }
+    - { code: primary_material,      requirement: required,    weight: 2.0, label: Material }
+    - { code: finish_color,          requirement: recommended, weight: 2.0, label: Color }
+    - { code: additional_information, requirement: optional,   weight: 1.0 }
+
+    # --- beyond the grid ---------------------------------------------------------------------
+    #
+    # These populate their own named delivery columns rather than a numbered slot, so they sit
+    # after the fifteen. They must stay after them: anything inserted above shifts the grid.
+    - { code: warranty_terms,        requirement: recommended, weight: 1.0 }  # -> Warranty
+    - { code: included_technology,   requirement: optional,    weight: 1.0 }  # -> With
+    - { code: approvals,             requirement: recommended, weight: 2.0 }  # -> Standard/Approvals
+    - { code: country_of_origin,     requirement: recommended, weight: 1.0 }  # -> Country Of Origin
+    - { code: gtin,                  requirement: optional,    weight: 1.0 }  # -> UPC/EAN/GTIN
+
+  cross_field_rules:
+    - id: R_HEIGHT_ORDER
+      expr: "maximum_height >= minimum_height"
+      references: [minimum_height, maximum_height]
+      severity: warning
+      message: >
+        Maximum installed height is below the minimum. Usually means the two were read from
+        adjacent table cells in the wrong order. A warning rather than an error because both are
+        strings that may carry per-component qualifiers ("8-1/2 in Upper Rack, 11-1/4 in Lower
+        Rack"), so a comparison is not always meaningful and must not block publication.
+
+    - id: R_DOOR_DEPTH_EXCEEDS_BODY
+      expr: "depth_with_door_open > 0"
+      references: [depth_with_door_open]
+      severity: warning
+      message: >
+        Depth with the door open must be positive, and should exceed the cabinet depth. A figure
+        smaller than the body depth means the cabinet dimension was captured instead of the
+        clearance dimension — the single most consequential error in this class, because it is
+        the number an installer plans the run against.
+
+  channel_profiles:
+    # The delivery format itself. `required` is deliberately SHORT.
+    #
+    # Pre-flight refuses to publish a record missing a required attribute, and a 1,000-row batch
+    # where most rows have no manufacturer document would then emit nothing at all. The columns
+    # listed here are the ones without which a delivery row is genuinely useless — identity and
+    # placement. Specifications are individually gated by their own evidence requirement instead,
+    # so a row publishes with the specs it can prove and blank cells where it cannot, which is
+    # exactly what the client's own ground truth looks like.
+    - name: unilog_delivery
+      title_template: "{brand} {product_series} {mpn} {class_name}"
+      max_title_chars: 200
+      unit_system: imperial_primary
+      required: [mpn]
+
+    - name: cx1_pim
+      title_template: "{brand} {product_series} {mpn} {class_name}, {mounting_type} Mounting"
+      max_title_chars: 200
+      unit_system: imperial_primary
+      required: [mpn, voltage_rating]
+
+    - name: schema_org
+      max_title_chars: 200
+      unit_system: metric_primary
+      required: [mpn]

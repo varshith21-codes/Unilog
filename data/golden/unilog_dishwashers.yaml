@@ -1,0 +1,110 @@
+# Golden set: the two Unilog dishwashers.
+#
+# ---------------------------------------------------------------------------------------------
+# READ THIS BEFORE QUOTING ANY NUMBER MEASURED WITH THIS FILE.
+#
+# These attribute values are TRANSCRIBED FROM THE CLIENT'S OWN delivery-format example. That makes
+# this file useless for measuring extraction and useful for measuring everything downstream of it.
+#
+#   It CANNOT measure:  extraction accuracy. Scoring extraction against values copied out of the
+#                       answer sheet would be circular, and the answer would always be 100%.
+#   It CAN measure:     the projection and the description recipes. "Given correct attributes, does
+#                       the pipeline produce the client's row?" is a real question with a real
+#                       answer, and it is the question that isolates the part we control from the
+#                       part that is blocked on retrieval.
+#
+# So a run seeded from this file is an ARM, in the sense `scripts/run_ablation.py` uses the word:
+# a deliberately altered condition, reported alongside the real one and never instead of it. The
+# unseeded run is the honest measurement of the system as it stands; this one measures the ceiling
+# the retrieval stage is working towards.
+#
+# It was generated from the client's CSV rather than typed, so the values cannot drift through a
+# transcription error, and `tests/test_delivery_golden.py` re-asserts the equality on every run.
+#
+# ---------------------------------------------------------------------------------------------
+# WHAT IS DELIBERATELY NOT HERE.
+#
+# No asset filenames. The client's row lists `FRIGIDAIRE_PDSH4816AF.jpg` and four alternates, and
+# the naming convention is derivable — but a filename asserts the file exists, and none of them has
+# been fetched. Seeding them would make the arm measure something we could not reproduce with real
+# retrieval, which defeats its purpose.
+#
+# No PART_NUMBER or SKU - MY_PART_NUMBER. Those are the client's internal keys and are unavailable
+# from a six-column input regardless of how good extraction gets.
+
+name: unilog_dishwashers_v1
+description: >
+  The two SKUs the client supplied as a worked input-to-output example, both present in the
+  1,000-row item master. Used as the attributes-supplied arm of the delivery-format measurement.
+provenance: >
+  Attribute values transcribed from "Unihack_ Expected Output - Delivery Format.csv". Not
+  independently sourced, and therefore not evidence of extraction accuracy.
+arm: attributes_supplied
+
+products:
+  - sku: PDSH4816AF
+    class_code: APP.KIT.DISHWASHER.BUILTIN
+    brand: "FRIGIDAIRE®"
+    manufacturer: "Rheem Manufacturing"
+    # The client's own row pairs this brand with this manufacturer, and the pairing is wrong:
+    # Rheem does not make Frigidaire dishwashers. The guide flags exactly one such row as a
+    # planted imperfection and rewards noticing it. Kept verbatim so the cross-source check has
+    # something real to disagree about.
+    reference_urls:
+      - "https://www.frigidaire.com/en/p/owner-center/product-support/PDSH4816AF"
+    attributes:
+      product_series: "Professional Series"
+      wash_cycle_count: "5"
+      voltage_rating: "120 V"
+      amperage_rating: "15 A"
+      mounting_type: "Leg"
+      overall_size: "24 in W x 24-1/4 in D"
+      depth_with_door_open: "50-1/4 in"
+      minimum_height: "8-1/2 in Upper Rack, 11-1/4 in Lower Rack"
+      maximum_height: "10-3/8 in Upper Rack, 13-1/4 in Lower Rack"
+      sound_level: "47 dBA"
+      primary_material: "Stainless Steel"
+      additional_information: "240 kW-hr Annual Energy, 1 to 12 hr Delay Start Hours"
+      included_technology: "With CleanBoost™"
+      warranty_terms: "1 Year Manufacturer, 1 Year Labor and Parts"
+      # Comma-separated here, pipe-delimited on output. Source form is what a human reads off a
+      # certificate list, and the extractor is instructed to report a multi_enum comma-separated;
+      # the pipe is the client's *delivery* delimiter and the exporter applies it. Writing pipes
+      # here would hand the normaliser one six-certification token to snap, and a multi_enum that
+      # cannot match a token discards it silently — which is how this column first came out holding
+      # a single value.
+      approvals: "ASSE 1006, CEE Tier 2 Qualified, cUL Listed, ENERGY STAR Certified, NSF Certified, UL Listed"
+    # Deliberately absent, and each absence is the client's, not ours: model_number, plug_type and
+    # finish_color are blank in their row. Listing them proves the blanks are observed rather than
+    # overlooked, which is what makes `over-filled 0` meaningful.
+    absent:
+      - model_number
+      - plug_type
+      - finish_color
+
+  - sku: WDTS7024RZ
+    class_code: APP.KIT.DISHWASHER.BUILTIN
+    brand: "Whirlpool®"
+    manufacturer: "Whirlpool Corporation"
+    reference_urls:
+      - "https://learnwhirlpool.com/smartsearchresults?searchtext=WDTS7024R"
+      - "https://www.whirlpool.com/content/dam/global/documents/202412/owners-manual-w11323304-revj.pdf"
+      - "https://www.whirlpool.com/content/dam/global/documents/202406/installation-instructions-w11323304-revG.pdf"
+    attributes:
+      product_series: "Eco Series"
+      voltage_rating: "120 V"
+      amperage_rating: "10 A"
+      mounting_type: "Built-in"
+      overall_size: "33-7/16 in H x 23-7/8 in W x 22-5/8 in D"
+      depth_with_door_open: "50-3/16 in"
+      minimum_height: "33-7/16 in"
+      sound_level: "41 dBA"
+      primary_material: "Stainless Steel"
+      finish_color: "Stainless Steel"
+      additional_information: "Folding Tines, Leak Detection System, Moisture Repellent Silverware Basket, Normal Cycle, Quick Wash Cycle, Sani Rinse Option, Sensor Cycle, Triple Wash Spray"
+      included_technology: "With Washing 3rd Rack, Water Repellent Silverware Basket"
+    absent:
+      - model_number
+      - wash_cycle_count
+      - plug_type
+      - maximum_height

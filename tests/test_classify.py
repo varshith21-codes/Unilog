@@ -95,9 +95,88 @@ def test_gate_valve_text_ranks_the_gate_valve_class_first(index):
 
 def test_attribute_values_drive_discrimination(index):
     """What separates a ball valve from a gate valve in supplier text is rarely the word
-    'ball' — it is 'full port', 'RPTFE', 'two-piece', which live in the enum values."""
-    candidates = index.search("full port RPTFE two-piece")
+    'ball' — it is 'full port', 'RPTFE', 'two-piece', which live in the enum values.
+
+    The word "valve" is present only to satisfy the identity guard, which is a separate concern:
+    both valve classes declare `identity_terms: [valve, ...]`, so both are admitted equally and
+    the choice between them is still made entirely by the attribute vocabulary. Nothing about the
+    original claim is weakened — see `test_identity_guard_rejects_attribute_vocabulary_matches`
+    for why the guard has to exist.
+    """
+    candidates = index.search("full port RPTFE two-piece valve")
     assert candidates[0].code == BALL_VALVE
+    assert {c.code for c in candidates} >= {BALL_VALVE, GATE_VALVE}, (
+        "both valve classes must be admitted, or this is testing the guard rather than "
+        "attribute-driven discrimination"
+    )
+
+
+def test_identity_guard_rejects_attribute_vocabulary_matches(index):
+    """A class must not be a candidate on the strength of its own attribute vocabulary.
+
+    Every string below was a real false positive before the guard existed, measured on the
+    1,000-row Unilog sample:
+
+    * "2 Port Decor Plate" matched the ball-valve class on `Port Type` and scored 0.1854 —
+      *higher* than any genuine dishwasher scored against the dishwasher class (max 0.2135, min
+      0.1725), which is why a score floor cannot fix this.
+    * "Castle Gate" PVC decking matched the bronze gate-valve class on the word "gate".
+    * A GFCI plug and a bandsaw matched the dishwasher class on `Plug Type` and `Voltage Rating`.
+
+    Overlap is the wrong instrument for an identity question, so identity is asked separately.
+    """
+    for text in (
+        "5522-5EV 2 Port Decor Plate",
+        "1x6-20' Castle Gate Grooved - Landmark Azek PVC Decking",
+        "R5GSRA1THD 15A GFCI Plug",
+        "JWBS-14SFX 14in Bandsaw JTP-714400K",
+        "IBMG90K003 Vessel Impact Ball Torsion Bit Assort 5pc",
+        '49-94-0533 Milw 7"x1/4"x7/8" Metal Grinding Wheel',
+    ):
+        assert index.search(text) == [], f"{text!r} should not be a candidate for any class"
+
+
+def test_identity_guard_admits_the_real_thing(index):
+    """The guard must not cost recall on products that genuinely are the class."""
+    assert index.search(BALL_TEXT)[0].code == BALL_VALVE
+    assert index.search(GATE_TEXT)[0].code == GATE_VALVE
+    assert index.search("PDSH4816AF Dishwasher SS - Display Only")[0].code == (
+        "APP.KIT.DISHWASHER.BUILTIN"
+    )
+
+
+def test_identity_guard_accepts_supplier_abbreviations(index):
+    """The abbreviations are the whole difficulty; a guard that only knew full words would
+    abstain on exactly the cryptic strings this system exists to enrich."""
+    candidates = index.search("VLV BALL 3/4 BRS 600WOG LF FP THRD")
+    assert candidates and candidates[0].code == BALL_VALVE
+
+
+def test_a_class_without_identity_terms_is_unguarded(registry):
+    """The guard is opt-in, so an existing schema keeps working unchanged."""
+    from collections import Counter
+
+    from axiom.classify.candidates import ClassProfile
+
+    unguarded = ClassProfile(
+        code="X",
+        name="Thing",
+        browse_path=("Things",),
+        term_counts=Counter({"thing": 1}),
+        total_terms=1,
+    )
+    assert unguarded.admits(Counter({"anything": 1}))
+
+    guarded = ClassProfile(
+        code="Y",
+        name="Widget",
+        browse_path=("Widgets",),
+        term_counts=Counter({"widget": 1}),
+        total_terms=1,
+        identity_terms=frozenset({"widget"}),
+    )
+    assert not guarded.admits(Counter({"anything": 1}))
+    assert guarded.admits(Counter({"widget": 1}))
 
 
 def test_unrelated_text_returns_nothing(index):
@@ -155,6 +234,48 @@ def test_no_viable_candidate_abstains(registry, index):
     assert result.abstained is True
     assert result.method == "no_viable_candidate"
     assert result.classifications == []
+
+
+def test_dominance_band_still_separates(index):
+    """DECISIVE_DOMINANCE is corpus-sensitive. Pin the band so a new class fails loudly.
+
+    IDF is computed across classes, so adding one shifts every score. Worse, adding an
+    *unrelated* class inflates the weight of vocabulary the *related* classes share, pulling
+    near neighbours together — a two-class schema put the correct ball-valve match at 0.659 and
+    a three-class schema puts it at 0.696.
+
+    When this fails, the fix is to re-measure both sides and move the constant, not to delete
+    the test. The numbers in `classifier.DECISIVE_DOMINANCE`'s comment come from here.
+    """
+    from axiom.classify.classifier import DECISIVE_DOMINANCE
+
+    def dominance(text: str) -> float:
+        ranked = index.search(text, limit=5)
+        assert len(ranked) >= 2, f"expected a runner-up for {text!r}"
+        return ranked[1].score / ranked[0].score
+
+    correct = {
+        "ball": dominance(BALL_TEXT),
+        "gate": dominance(GATE_TEXT),
+    }
+    ambiguous = {
+        "shared vocabulary only": dominance("bronze valve NPT threaded"),
+        "bronze NPT 150 PSI": dominance("Bronze C84400 body NPT threaded valve 150 PSI"),
+    }
+
+    for label, value in correct.items():
+        assert value <= DECISIVE_DOMINANCE, (
+            f"correct match {label!r} has dominance {value:.4f}, above the decisive threshold "
+            f"{DECISIVE_DOMINANCE} — it now needs a model call it should not need"
+        )
+    for label, value in ambiguous.items():
+        assert value > DECISIVE_DOMINANCE, (
+            f"ambiguous case {label!r} has dominance {value:.4f}, at or below the decisive "
+            f"threshold {DECISIVE_DOMINANCE} — it would be resolved without adjudication"
+        )
+
+    # The gap the threshold lives in. Narrow enough to be worth reporting.
+    assert max(correct.values()) < min(ambiguous.values())
 
 
 # --------------------------------------------------------------------- model adjudication

@@ -101,6 +101,156 @@ verdicts, the accept/queue decision per value with the feature that drove it, an
 pre-flight result. Artifacts land in `data/out/`: a signed certificate and one payload per
 channel that passed pre-flight.
 
+## The Unilog delivery format
+
+The graded output. The client's format is fixed at **252 columns in an order we do not control**,
+so a file whose columns do not match theirs is unusable regardless of the enrichment behind it.
+Blueprint [Part 17](docs/AXIOM-Product-Intelligence-Blueprint.md#part-17--the-unilog-delivery-contract)
+records what the real dataset pack demands and which earlier design decisions it overrides.
+
+Both steps below are **fully offline and make no model calls** — classification is the
+deterministic retrieval pass — so they run in CI on every push:
+
+```powershell
+# a 1,000-row supplier item master -> a 252-column delivery CSV plus a provenance sidecar
+python scripts/export_delivery.py "Unihack_ Sample Dataset - Input.csv" `
+  --mpn PDSH4816AF --mpn WDTS7024RZ --out data/delivery
+
+# field-level accuracy against the client's own known-good rows
+python scripts/score_delivery.py data/delivery/Unihack__Sample_Dataset_-_Input.delivery.csv
+```
+
+### Two measurements, because they answer different questions
+
+```powershell
+# the system as it stands: six columns in, no documents attached
+python scripts/export_delivery.py "Unihack_ Sample Dataset - Input.csv" `
+  --mpn PDSH4816AF --mpn WDTS7024RZ --out data/delivery
+
+# the same pipeline with correct attributes supplied, isolating everything downstream of extraction
+python scripts/export_delivery.py "Unihack_ Sample Dataset - Input.csv" `
+  --mpn PDSH4816AF --mpn WDTS7024RZ `
+  --golden data/golden/unilog_dishwashers.yaml --out data/delivery/supplied
+```
+
+|  | unseeded | attributes supplied |
+|---|---|---|
+| **exact match** | **56/134** | **107/134** (79.9%) |
+| over-filled | 0 | 0 |
+| wrong values | 0 | 1 |
+| character limits | PASS | PASS |
+| attribute grid | 32/62 | **62/62** |
+| five descriptions | 0/10 | **10/10** |
+| identity, taxonomy, citations, echo | partial | **complete** |
+
+Both are pinned — `tests/test_delivery_scoring.py` and `tests/test_delivery_golden.py` — and both
+run in CI. Read them together or not at all:
+
+- **The unseeded run is the honest state of the system.** 56/134, and of that, 54 is scaffolding
+  and 2 is enrichment (`Material: Stainless Steel`, read from the `SS` in
+  `"...Dishwasher SS - Display Only"` and citing that substring). Every one of the 78 failures is
+  `missed`, not `wrong`.
+- **The supplied arm is the ceiling retrieval is working towards.** Its attribute values are
+  transcribed from the client's own answer sheet, so it proves *nothing* about extraction and
+  everything about the projection, the unit handling and the description formulas. Quoting it as
+  the result would be dishonest; omitting it would hide a working capability behind a blocked one.
+
+What the arm establishes concretely: the attribute grid is exact, all five deterministic
+descriptions reproduce the client's strings character for character, and the single wrong cell is a
+vocabulary gap the missing LOV file would settle (they write `UL Listed`, our shared approvals enum
+canonicalises to `UL`, and both are correct in their own category).
+
+The 26 remaining gaps in the arm are all accounted for: 4 client-internal keys that a six-column
+input cannot yield, 11 marketing feature bullets and 1 marketing description that are genuinely
+generative manufacturer content, 8 asset filenames deliberately not seeded because none was fetched,
+and 2 flags.
+
+### The five rewrites are formulas, not generation
+
+The guide calls this most of the task: *"the same product information is rewritten five times at
+five different lengths and casings."* Four of the five turn out not to be generation at all. They
+are deterministic assembly from established values, driven by recipes in `schema/descriptions/`,
+and they reproduce the client's own strings exactly:
+
+```
+INVOICE_DESC   DISHWASHER LEG 5 SST 120V 15A 50-1/4IN            38 chars, <=40, CAPS
+MOBILE_DESC    Rheem Manufacturing FRIGIDAIRE, Dishwasher, ...   75 chars, 60-80
+SHORT_DESC     FRIGIDAIRE® Professional Series PDSH4816AF ...   115 chars
+RETAIL_DESC    Professional Series Dishwasher, Leg Mounting...   75 chars
+LONG_DESC1     FRIGIDAIRE® Dishwasher With CleanBoost™, ...     390 chars
+```
+
+That matters for three reasons. A template cannot introduce a fact, so the claim-check problem
+disappears rather than being solved. Character limits are satisfied by construction rather than by
+asking a model nicely. And the same product yields the same string every run, which is what makes a
+category's titles consistent enough for on-site search to work.
+
+The one non-obvious mechanism was **forced by the client's data, not chosen**. When a component
+does not fit the budget the renderer skips it and tries the next, rather than stopping:
+
+```
+row 1   DISHWASHER LEG 5 SST 120V 15A 50-1/4IN    38   takes depth, omits 47DBA (would be 44)
+row 2   DISHWASHER BLTLN SST SST 120V 10A 41DBA   39   omits 50-3/16IN (43), then takes 41DBA
+```
+
+Row 1 keeps the depth and drops the sound level; row 2 does the reverse. No stop-at-first-overflow
+renderer can produce both, and no fixed component order per row would be a formula.
+
+A **completeness gate** stops this producing fragments. With only a material known, the invoice
+recipe would assemble `DISHWASHER SST` — which scores as a *wrong* value where an empty cell scores
+as *missed*, and tells a picker less than the part number printed beside it. Each recipe declares
+how many components it needs, and below that it withholds and says why.
+
+### Where the remaining facts have to come from
+
+Three sources, and only one is currently reachable:
+
+| Source | Yield on 1,000 rows | Yield on the 2 scored rows | Blocked by |
+|---|---|---|---|
+| The description string | 8 cells | 2 cells | classification coverage (below) |
+| Manufacturer documents | all of it | all of it | JS-rendered pages, >10MB PDFs, no Bedrock credentials |
+| LOV / brand / UOM masters | brand, approvals, vocabularies | `BRAND_NAME`, `Standard/Approvals` | 8 missing files |
+
+**78% of the 1,000 descriptions carry recoverable attribute content** — voltages, wattages,
+dimensions, fractions, finish codes — but only 8 cells are actually extracted. The bottleneck is
+not the extractor, it is that 990 rows have no class, so a matched token has no attribute to bind
+to. `axiom.extract.description` is class-scoped on purpose: without that guard, `"24 in W"` in the
+client's own ground truth would be read as 24 watts. Unlocking the 78% means defining classes for
+lighting, abrasives, power tools and decking — YAML rather than code, but guessing their label
+templates without ground truth would be the invention this whole system exists to prevent.
+
+### Why the delivery format does not break "evidence or null"
+
+The format asks for ~79 populated columns from an input of six columns and no attached document.
+Run naively against the publish gate, the honest output is an *empty file*. The resolution is not
+to weaken the gate but to notice that these cells do not all make the same kind of claim, so every
+column declares a provenance class and each gets a different rule:
+
+| Class | Claim being made | Gate |
+|---|---|---|
+| `passthrough` | "you sent us this" | none needed |
+| `derived` | a deterministic function of established data | inherits its input's provenance |
+| `extracted` | read off a manufacturer source | **full gate: evidence span required** |
+| `generated` | composed from established cells only | claim-checked, may not add facts |
+| `unavailable` | cannot be established | always emitted empty |
+
+Every populated cell records its class, confidence and citation in the sidecar, so the CSV is
+auditable cell by cell. That is the Enrichment Certificate projected onto the client's columns.
+
+Three things were built and then deliberately declined, because each would have raised the score
+by inventing data:
+
+- **`UNSPSC`** — we hold a code per class; the client leaves the column blank and the guide names
+  that as a known gap in *their* data. Filling it would diverge from the expected output to look
+  more complete.
+- **`BRAND_NAME`** — ground truth expects `FRIGIDAIRE®`, which appears nowhere in the input row.
+  All three brand columns are sentinels and `Part_Manuf` names a buying co-op. So it is left blank
+  pending retrieval rather than approximated.
+- **Asset filenames** — the convention is derivable (`FRIGIDAIRE_PDSH4816AF.jpg`), but emitting a
+  filename asserts the file exists. Names are written only for assets actually fetched.
+
+`over-filled 0` is the assertion that records those decisions, and CI fails the build if it moves.
+
 ## The review workspace
 
 ```powershell
@@ -1076,7 +1226,8 @@ Stated plainly, because a benchmark oversold is worse than no benchmark:
 ```
 axiom/
 ├── .github/workflows/
-│   ├── ci.yml                 # ruff, pytest, vitest, tsc, contrast, type drift — every push
+│   ├── ci.yml                 # ruff, pytest, vitest, tsc, contrast, type drift, and the
+│   │                          #   delivery-format gate — every push, no credentials
 │   └── regression.yml         # the metrics gate; blocks a change that degrades a tracked number
 ├── docs/
 │   ├── AXIOM-Product-Intelligence-Blueprint.md   # the design document
@@ -1085,6 +1236,8 @@ axiom/
 ├── schema/                    # THE SOURCE OF TRUTH (declarative, no code)
 │   ├── attributes/            # reusable attribute dictionary
 │   ├── classes/               # class bindings, cross-field rules, channel profiles
+│   ├── delivery/              # the client's 252-column output contract, column by column,
+│   │                          #   each declaring its provenance class and character limits
 │   ├── brands.yaml            # brand master with alias resolution
 │   ├── constants.yaml         # domain facts referenced by rules
 │   ├── copy_policy.yaml       # banned phrases, regulated claims — for counsel, not engineers
@@ -1109,6 +1262,10 @@ axiom/
 │   ├── review/                # review sessions, decisions, prior updates
 │   ├── console/               # projection of pipeline output for the UI (presentation only)
 │   ├── syndicate/             # channel pre-flight, exporters, publication gate
+│   ├── delivery/              # the graded output. format.py: the 252-column contract;
+│   │                          #   source.py: reading the item master honestly;
+│   │                          #   builder.py: record -> row with per-cell provenance;
+│   │                          #   scoring.py: field-level accuracy that refuses to flatter
 │   ├── evaluation/            # backtest harness, five-outcome scoring, before/after cohort,
 │   │                          #   the regression gate the CI workflow runs, and
 │   │                          #   grammar.py: leave-one-out validation of induced grammars
@@ -1121,6 +1278,8 @@ axiom/
 │   ├── fetch_bedrock_prices.py# pin real token prices from the AWS Price List API
 │   ├── smoke_extraction.py    # prove the evidence contract holds against live models
 │   ├── run_pipeline.py        # one SKU, end to end, fully reported
+│   ├── export_delivery.py     # supplier CSV -> the 252-column delivery CSV + provenance sidecar
+│   ├── score_delivery.py      # field-level accuracy against the client's known-good rows
 │   ├── ingest_supplier_file.py# a messy spreadsheet -> canonical fields, mapping remembered
 │   ├── cross_validate.py      # L4: same SKU from several sources, compared
 │   ├── run_cohort.py          # before/after quality index against the original item master
@@ -1260,8 +1419,27 @@ half-bootstrapped account, and the scoped IAM policy needed once Tier 2 adds Lam
 
 ## Build status
 
-Tracked against blueprint Part 12.
+Tracked against blueprint Part 12, and — for the graded output — blueprint
+[§17.8](docs/AXIOM-Product-Intelligence-Blueprint.md#178-revised-scope--tier-0), which adds a tier
+ahead of Tier 1 that did not exist when Part 12 was written.
 
+- [ ] **Tier 0 — the delivery contract.** The client's output schema is fixed, so nothing in
+      Tier 1 is demonstrable to them without this. Six of eight items are built:
+      - [x] 0.1 The 252-column contract declared as data, header byte-identical to the client's
+            file and asserted against *their* CSV rather than a fixture of ours
+      - [x] 0.2 `DeliveryFormatExporter`: record → row, with per-cell provenance in a sidecar
+      - [x] 0.3 The six item-master headers understood, and sentinels (`-- Unbranded --`) treated
+            as absent rather than as data
+      - [x] 0.4 Built-In Dishwashers defined to full depth — the 15-slot label template, both
+            hierarchies, and the acoustic unit the class needs
+      - [x] 0.5 Batch driver, offline, no model calls
+      - [x] 0.6 Field-level scorer, in CI, failing the build on invented data
+      - [ ] 0.7 Deterministic renderers for the five description rewrites — **blocked by
+            sequencing, not difficulty.** They are template renders over the attribute grid, and
+            with the grid empty they would emit partial titles that score as *wrong* rather than
+            *missed*. They land after retrieval.
+      - [ ] 0.8 LOV / UOM / brand-master loaders — **blocked on the missing files** (see Known
+            gaps). These are what turn `mounting_type` from a `string` into a governed `enum`.
 - [x] **Tier 1 — the spine and the trust layer.** Core domain models with the evidence
       invariant, unit registry, declarative schema registry, document parsing with addressable
       tables, model cascade, evidence-bound extraction, normalization, validation L0–L3,
@@ -1340,6 +1518,43 @@ Storage infrastructure is deployed (see above). Compute is not — the pipeline 
 
 ### Known gaps
 
+- **Eight of the client's ten dataset files are missing, and two of them are blocking.** The guide
+  describes a ten-file pack; the repository has the 1,000-row input and a two-row delivery-format
+  example. Absent: `Unilog_Master_UOM_Standards_Abbreviations_and_Terms.xlsx` (the guide calls it
+  "the only permitted way to write a unit anywhere in your output"),
+  `UniCat_Manufacturer_and_Brand_List.xlsx` (27,000+ approved rows, and the reason `BRAND_NAME`
+  cannot be resolved), `Unicat_Lov_v1_0_Updated_With_Remarks.xlsx` (~161,000 rows of permitted
+  attribute values), `FAUCETS_LOV.xlsx`, `Fittings_LOV.xlsx`, `Decimal_Fraction.xlsx`,
+  `Reference_Documents_Summary.xlsx`, and — most costly for measurement —
+  `Unilog-Sample_200_Items-Input-vs-Output.xlsx`, the 200-row labelled ground truth.
+
+  The consequences are concrete rather than theoretical. Most appliance attributes are typed
+  `string` instead of `enum` because declaring a closed vocabulary from two observed rows would
+  invent one: `mounting_type` would permit exactly `Leg` and `Built-in` and then reject
+  `Free-standing`. And every accuracy figure above has a denominator of **2**, which is why the
+  scorer prints fractions and refuses to render a percentage below 20 observations.
+- **Auto-classification covers 10 of 1,000 rows**, because three classes exist and the sample spans
+  roughly twenty categories. 990 rows abstain. That is the correct answer and the coverage number
+  should say so, but it means the delivery path is demonstrated on Built-In Dishwashers only —
+  chosen because it is the one category with labelled ground truth, not because it is the largest
+  cohort (lighting is, at 208 rows). Adding categories is YAML rather than code, but doing it
+  without ground truth would mean guessing at label templates.
+- `MARKETING_DESCRIPTION` and `ITEM_FEATURES_1..20` are the only genuinely generative fields in the
+  format, and they are **not implemented**. Both are manufacturer marketing copy, so they belong to
+  retrieval plus a claim check rather than to invention — writing feature bullets we cannot cite is
+  the one thing this system is built to refuse. 12 of the 26 remaining gaps in the supplied arm.
+- The approvals vocabulary is shared across categories and cannot yet be per-classpath. The client
+  writes `UL Listed`; the enum canonicalises to `UL`, which is what the PVF world writes and what
+  the valve golden set and its committed certificates contain. Both are right in their own category,
+  which is exactly why the client's LOV is keyed by (Classpath, Attribute Label). Fixing it properly
+  means per-class value vocabularies, and populating those needs the LOV file.
+- `DECISIVE_DOMINANCE` in `classify/classifier.py` is corpus-sensitive at small class counts. IDF
+  is computed across classes, so adding an unrelated one inflates the weight of vocabulary the
+  related classes share and pulls near neighbours together — adding the dishwasher class moved the
+  correct ball-valve match from 0.659 to 0.696 and required the threshold to move from 0.68 to
+  0.72. The band is pinned by `test_dominance_band_still_separates`, but the real fix is to stop
+  IDF moving with class count at all (floor the document count, e.g. `max(len(profiles), 50)`),
+  which is a change to retrieval scoring for every class and belongs in its own commit.
 - The API has no authentication or tenant scoping. `_session_path` guards against path
   traversal but nothing stops one tenant reading another's sessions.
 - `apps/console/src/lib/types.ts` is still hand-maintained, but it is no longer unguarded:
