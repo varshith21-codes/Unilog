@@ -238,7 +238,24 @@ class AttributeDefinition(BaseModel):
         description="Column headings that identify this attribute in an ordering table, e.g. "
         "'Size' or 'Carton Qty'. Used by variant explosion to bind a column to an attribute "
         "deterministically. Declarative on purpose: matching headers by guessing at the "
-        "attribute name works until a supplier writes 'Ctn' and then fails silently.",
+        "attribute name works until a supplier writes 'Ctn' and then fails silently.\n\n"
+        "Order is significant. When two columns of one table both resolve to this attribute — "
+        "an ordering table carrying both 'DN' and 'Size' — the header appearing earlier in this "
+        "tuple wins, so the schema author's preference is explicit rather than decided by which "
+        "column the supplier happened to print first.",
+    )
+    spec_labels: tuple[str, ...] = Field(
+        default=(),
+        description="Row labels that identify this attribute in a SPECIFICATION BLOCK, e.g. "
+        "'Pressure Rating' in 'Pressure Rating ....... 600 PSI WOG'.\n\n"
+        "Deliberately separate from `table_headers`, because the same word means different "
+        "things in the two layouts and conflating them produces confident wrong values. The case "
+        "that forced the split: `handle_type` declares the table header 'Handwheel', which is "
+        "correct for an ordering-table column whose cells read 'Lever' or 'Tee'. In a "
+        "specification block, 'Handwheel ....... Malleable Iron' is the handwheel's *material*, "
+        "and reading it as a handle type yields a cited, plausible, wrong value.\n\n"
+        "The attribute's `name` is always matched in both layouts, so a label identical to the "
+        "name needs no entry here.",
     )
 
     quantity_kind: str | None = None
@@ -281,7 +298,9 @@ class AttributeDefinition(BaseModel):
         "would have allowed.",
     )
 
-    @field_validator("example_values", "extraction_hints", "table_headers", mode="before")
+    @field_validator(
+        "example_values", "extraction_hints", "table_headers", "spec_labels", mode="before"
+    )
     @classmethod
     def _coerce_tuple(cls, v):
         if v is None:

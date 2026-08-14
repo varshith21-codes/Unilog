@@ -24,6 +24,7 @@ import argparse
 import csv
 import sys
 from collections import Counter
+from datetime import UTC, datetime
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -31,7 +32,7 @@ sys.path.insert(0, str(REPO_ROOT / "packages"))
 
 import yaml  # noqa: E402
 from axiom.classify import Classifier  # noqa: E402
-from axiom.core.evidence import EvidenceSpan  # noqa: E402
+from axiom.core.evidence import EvidenceSpan, SourceDocument  # noqa: E402
 from axiom.core.product import ProductRecord  # noqa: E402
 from axiom.core.values import (  # noqa: E402
     AttributeValue,
@@ -46,12 +47,24 @@ from axiom.delivery import (  # noqa: E402
     load_default,
 )
 from axiom.delivery.source import INPUT_COLUMNS  # noqa: E402
+from axiom.docintel import ParsedDocument, parse_artifact  # noqa: E402
 from axiom.extract.description import (  # noqa: E402
     AbbreviationTable,
     extract_from_description,
+)
+from axiom.extract.description import (  # noqa: E402
+    to_attribute_values as description_values,
+)
+from axiom.extract.structured import (  # noqa: E402
+    extract_structured,
+    reject_unresolved,
     to_attribute_values,
 )
-from axiom.ingest import profile_rows, sha256_bytes  # noqa: E402
+from axiom.ingest import (  # noqa: E402
+    detect_document_type,  # noqa: E402
+    profile_rows,
+    sha256_bytes,
+)
 from axiom.normalize import normalize_all  # noqa: E402
 from axiom.schema import load_default as load_schema  # noqa: E402
 
@@ -90,6 +103,15 @@ def main() -> int:
         action="store_true",
         help="do not read attributes out of Part_Desc. Useful for measuring what the description "
         "contributes: run with and without, and diff the score.",
+    )
+    parser.add_argument(
+        "--document",
+        type=Path,
+        action="append",
+        default=[],
+        help="a manufacturer document to extract from, repeatable. Read deterministically: "
+        "specification lines and the ordering row for each part number, cited to a line or a "
+        "table cell. No model call and no credentials. This is real extraction, unlike --golden.",
     )
     parser.add_argument(
         "--golden",
@@ -156,6 +178,16 @@ def main() -> int:
     document_id = args.source.stem
     document_sha256 = sha256_bytes(args.source.read_bytes())
 
+    documents = _load_documents(args.document)
+    if documents and not args.quiet:
+        for parsed, _sha in documents:
+            tables = len(parsed.all_tables())
+            print(
+                f"document {parsed.document.document_id}: {parsed.page_count} page(s), "
+                f"{tables} table(s), parser={parsed.parser}"
+            )
+        print()
+
     golden = _load_golden(args.golden) if args.golden else {}
     if golden and not args.quiet:
         print(
@@ -169,6 +201,8 @@ def main() -> int:
     extracted_total = 0
     refused_total = 0
     seeded_total = 0
+    from_documents_total = 0
+    document_refused_total = 0
     skipped = 0
 
     for raw in selected:
@@ -209,7 +243,7 @@ def main() -> int:
                 class_code=class_code,
                 abbreviations=abbreviations,
             )
-            values = to_attribute_values(
+            values = description_values(
                 result,
                 document_id=document_id,
                 document_sha256=document_sha256,
@@ -221,8 +255,19 @@ def main() -> int:
             extracted_total += extracted
             refused_total += len(result.refused)
 
-        # The supplied arm. Seeded after description extraction so a golden value supersedes a
-        # weaker reading of the same attribute rather than colliding with it.
+        # Real extraction from a manufacturer document, deterministically. Runs AFTER the
+        # description pass so a cited document value supersedes a reading of an abbreviation: both
+        # are evidenced, but a datasheet states the fact where a description only implies it.
+        from_documents = 0
+        if class_code and documents:
+            from_documents, document_refused = _extract_from_documents(
+                record, documents, registry, class_code, source.mpn or ""
+            )
+            from_documents_total += from_documents
+            document_refused_total += document_refused
+
+        # The supplied arm. Seeded after everything real so a golden value supersedes a weaker
+        # reading of the same attribute rather than colliding with it.
         seeded = 0
         entry = golden.get(source.mpn or "")
         if entry:
@@ -245,6 +290,8 @@ def main() -> int:
             notes = []
             if extracted:
                 notes.append(f"+{extracted} desc")
+            if from_documents:
+                notes.append(f"+{from_documents} doc")
             if seeded:
                 notes.append(f"+{seeded} golden")
             suffix = f"  ({', '.join(notes)})" if notes else ""
@@ -277,6 +324,8 @@ def main() -> int:
         extracted_total=extracted_total,
         refused_total=refused_total,
         seeded_total=seeded_total,
+        from_documents_total=from_documents_total,
+        document_refused_total=document_refused_total,
         golden_path=args.golden,
     )
     return 0
@@ -285,6 +334,70 @@ def main() -> int:
 def _read(path: Path) -> list[dict[str, str]]:
     with open(path, newline="", encoding="utf-8-sig") as handle:
         return list(csv.DictReader(handle))
+
+
+def _load_documents(paths: list[Path]) -> list[tuple[ParsedDocument, str]]:
+    """Parse each manufacturer document once, paired with its content hash.
+
+    Parsed up front rather than per row: a thousand-row batch against one datasheet would otherwise
+    re-parse the PDF a thousand times. The hash travels with it because a citation that named the
+    file without pinning its content would not survive the supplier issuing a revision.
+    """
+    loaded: list[tuple[ParsedDocument, str]] = []
+    for path in paths:
+        if not path.is_file():
+            print(f"no such document: {path}", file=sys.stderr)
+            continue
+        raw = path.read_bytes()
+        sha = sha256_bytes(raw)
+        document = SourceDocument(
+            document_id=f"{path.stem}@{sha[:8]}",
+            # Resolved first: `as_uri` refuses a relative path, and a caller naturally types
+            # `--document data/samples/ba100.txt`.
+            uri=path.resolve().as_uri(),
+            sha256=sha,
+            doc_type=detect_document_type(raw, path.name),
+            fetched_at=datetime.now(UTC),
+        )
+        loaded.append((parse_artifact(raw, document), sha))
+    return loaded
+
+
+def _extract_from_documents(
+    record: ProductRecord,
+    documents: list[tuple[ParsedDocument, str]],
+    registry,
+    class_code: str,
+    target_sku: str,
+) -> tuple[int, int]:
+    """Read every attached document deterministically. Returns (values added, values refused).
+
+    Values are normalised and then filtered through ``reject_unresolved``, because an enum value
+    that normalisation could not snap keeps its accepted status and its verified citation — so it
+    would publish as a null with a perfect quote attached.
+    """
+    added = refused = 0
+    for parsed, sha in documents:
+        result = extract_structured(
+            parsed, registry, class_code=class_code, target_sku=target_sku or None
+        )
+        refused += len(result.refused)
+        if not result.matches:
+            continue
+
+        values = to_attribute_values(
+            result, sha, schema_version=registry.product_class(class_code).schema_version
+        )
+        normalized, _issues = normalize_all(values, registry, class_code=class_code)
+        kept, dropped = reject_unresolved(normalized, registry)
+        refused += len(dropped)
+
+        for value in kept:
+            record.add_value(value)
+            added += 1
+        if parsed.document.document_id not in record.source_document_ids:
+            record.source_document_ids.append(parsed.document.document_id)
+    return added, refused
 
 
 def _load_golden(path: Path) -> dict[str, dict]:
@@ -397,6 +510,8 @@ def _report(
     extracted_total: int,
     refused_total: int,
     seeded_total: int = 0,
+    from_documents_total: int = 0,
+    document_refused_total: int = 0,
     golden_path: Path | None = None,
 ) -> None:
     print()
@@ -417,6 +532,11 @@ def _report(
         print(f"  {name:22s} {count}")
     print()
     print(f"from Part_Desc  {extracted_total} values extracted, {refused_total} refused")
+    if from_documents_total or document_refused_total:
+        print(
+            f"from documents  {from_documents_total} values extracted, "
+            f"{document_refused_total} refused   <- real extraction, cited to a line or a cell"
+        )
     if seeded_total:
         print(
             f"from golden     {seeded_total} values seeded from "
@@ -438,13 +558,21 @@ def _report(
             "      the class declares, and no manufacturer documents were attached. The grid\n"
             "      therefore carries its labels and no values."
         )
+    elif from_documents_total:
+        print(
+            f"NOTE: {from_documents_total} value(s) were read from attached manufacturer\n"
+            "      documents, each cited to a specification line or an ordering-table cell that\n"
+            "      can be highlighted. This is real extraction: deterministic, offline, and with\n"
+            "      no model in the loop. Anything the layout does not state plainly - prose,\n"
+            "      footnotes, qualified claims - still needs the model path."
+        )
     else:
         print(
             f"NOTE: the {extracted} extracted cells come from the DESCRIPTION STRING only, each\n"
             "      citing the substring it was read from. No manufacturer documents were\n"
             "      attached, so anything a supplier did not abbreviate into the description is\n"
             "      still absent - series names, cycle counts, dimensions and approvals among\n"
-            "      them. Attach source documents to close that gap."
+            "      them. Attach source documents with --document to close that gap."
         )
 
 

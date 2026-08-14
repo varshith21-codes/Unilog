@@ -201,15 +201,99 @@ recipe would assemble `DISHWASHER SST` — which scores as a *wrong* value where
 as *missed*, and tells a picker less than the part number printed beside it. Each recipe declares
 how many components it needs, and below that it withholds and says why.
 
+### Real extraction, with no model in the loop
+
+The supplied arm above proves the projection works but supplies its own facts. This is the third
+measurement, and it is the one where facts are *read*: attach manufacturer documents and the
+extractor takes values straight out of the page layout. No model, no credentials, no network.
+
+```powershell
+# accuracy against hand-read ground truth: 3 datasheets, 15 SKUs, one of them a real PDF
+python scripts/score_extraction.py
+
+# the same extractor through the delivery export, end to end
+python scripts/export_delivery.py data/samples/valve-feed.csv `
+  --document data/samples/ba100.txt `
+  --document data/samples/ap77c.pdf `
+  --document data/samples/gv200.txt `
+  --out data/delivery/valves
+```
+
+| | |
+|---|---|
+| **agrees with a human reading** | **115** |
+| **disagrees** | **0** |
+| **produced where ground truth says absent** | **0** |
+| not extracted | 112 |
+| absences respected | 85 |
+| precision | **115/115 (100%)** |
+| coverage | 115/227 (50.7%) |
+
+Precision is asserted absolutely and coverage as a floor, because reading more of a document is an
+improvement and reading less is a regression. The 112 not-extracted are the coverage gap, reported
+separately from disagreements on purpose: "did not read it" and "read it wrong" are different
+problems with different fixes, and averaging them into one accuracy figure hides the second.
+
+Through the delivery export the same three documents yield **24 extracted values across 3 parts** —
+25 cited cells once the derived UOM columns are counted — taking `valve-feed.csv` from **36 to 53 of
+252 columns** populated, with `withheld 0` and every cell citing a specification line or an
+ordering-table cell that a reviewer can highlight.
+
+**Two paths, two vocabularies.** Manufacturer documents state facts in two shapes, and conflating
+them produces confident errors:
+
+- **Spec lines** — `Body Material .......... Bronze C84400` — matched against an attribute's name
+  and its declared `spec_labels`, cited to `p1:l14` with the bounding box tightened to the value
+  fragment.
+- **Ordering tables** — the row whose part number equals the target — matched against `name` and
+  `table_headers`, cited to a cell reference like `t1:r4:c3`. Higher confidence (0.94 vs 0.90),
+  because both coordinates are computed rather than judged.
+
+`spec_labels` and `table_headers` are separate fields because a real document forced them apart.
+`gv200.txt` has a column headed `Handwheel` holding `Lever`/`Tee` — correctly bound to
+`handle_type` — and also a line reading `Handwheel ....... Malleable Iron`, which is the handwheel's
+*material*. One shared vocabulary gave `handle_type = Malleable Iron`: cited, plausible, wrong.
+
+**The golden set caught three defects that looked like successes.** Each produced output that was
+correctly cited and would have survived every integrity check downstream:
+
+1. **Size-scoped values.** `Operating Torque ..... 18-22 ft-lb (1/2" size)` was being emitted for
+   all four BA-100 sizes. Genuinely present, correctly quoted, wrong for three of the four parts —
+   and the golden set records torque as absent for every one. Fixed by learning the target's
+   `nominal_size` from the ordering table *first*, then filtering size-qualified lines against it,
+   and refusing when the size is unknown. Four fabrications to zero.
+2. **The wrong document.** Every row was read against every attached document, so specifications
+   crossed between products. This is the failure nothing downstream can catch, because the quotes
+   verify perfectly — they are just quotes about another product. Fixed with a relevance guard that
+   requires the document to name the part before any value is read. On the three-document valve
+   feed, running `require_sku=False` to reproduce the old behaviour: **35 values became 24, of which
+   11 were surplus and 6 were actively wrong** — `T-113-100`, a NIBCO bronze gate valve, was reading
+   `Bronze C84400`, `NPT threaded` and `366 degF` off the Milwaukee ball-valve sheet because it was
+   parsed first. `scripts/score_extraction.py` runs a second arm offering every part all three
+   datasheets specifically to keep this fixed; the two arms must report identical numbers.
+3. **Prose read as a specification.** `Installation: the valve must be supported independently...`
+   split cleanly into a label and a value. Fixed by rejecting values that open with a word no
+   specification starts with (`the`, `must`, `see`, ...). The opener is the signal rather than the
+   length, because an overflow field legitimately holds eleven words.
+
+What this does *not* cover: prose, footnotes, and qualified claims. Those are what the model path is
+for. The point of this path is that everything a document states plainly can be read for free, with
+a citation, and audited by anyone with the repo and no AWS account.
+
 ### Where the remaining facts have to come from
 
-Three sources, and only one is currently reachable:
+Three sources. One is now reachable offline, one is reachable with credentials, one is blocked:
 
-| Source | Yield on 1,000 rows | Yield on the 2 scored rows | Blocked by |
+| Source | Yield on 1,000 rows | Yield on the 2 scored rows | Status |
 |---|---|---|---|
-| The description string | 8 cells | 2 cells | classification coverage (below) |
-| Manufacturer documents | all of it | all of it | JS-rendered pages, >10MB PDFs, no Bedrock credentials |
+| The description string | 8 cells | 2 cells | works; capped by classification coverage (below) |
+| Manufacturer documents, by layout | all stated plainly | all stated plainly | **works offline** — 115/115 precision on 3 real datasheets |
+| Manufacturer documents, prose and footnotes | the rest | the rest | needs Bedrock credentials; retrieval also blocked on JS-rendered pages and >10MB PDFs |
 | LOV / brand / UOM masters | brand, approvals, vocabularies | `BRAND_NAME`, `Standard/Approvals` | 8 missing files |
+
+The documents row is split because the two halves have entirely different costs and failure modes.
+Reading a labelled line off a datasheet needs no model and cannot hallucinate; reading a paragraph
+does and can, which is why the evidence contract exists for the second and not the first.
 
 **78% of the 1,000 descriptions carry recoverable attribute content** — voltages, wattages,
 dimensions, fractions, finish codes — but only 8 cells are actually extracted. The bottleneck is
@@ -1226,8 +1310,9 @@ Stated plainly, because a benchmark oversold is worse than no benchmark:
 ```
 axiom/
 ├── .github/workflows/
-│   ├── ci.yml                 # ruff, pytest, vitest, tsc, contrast, type drift, and the
-│   │                          #   delivery-format gate — every push, no credentials
+│   ├── ci.yml                 # ruff, pytest, vitest, tsc, contrast, type drift, the
+│   │                          #   delivery-format gate and the extraction accuracy gate
+│   │                          #   — every push, no credentials
 │   └── regression.yml         # the metrics gate; blocks a change that degrades a tracked number
 ├── docs/
 │   ├── AXIOM-Product-Intelligence-Blueprint.md   # the design document
@@ -1252,6 +1337,10 @@ axiom/
 │   ├── classify/              # class assignment + derived ETIM / UNSPSC
 │   ├── extract/               # model cascade, evidence-bound extraction, entailment gate
 │   │                          #   grammar.py: part-number grammar induction, no model calls
+│   │                          #   structured.py: spec lines and ordering tables read from
+│   │                          #     document layout — no model, cited to a line or a cell
+│   │                          #   description.py: what the supplier's own 6-column string
+│   │                          #     yields, citing the substring it was read from
 │   ├── normalize/             # unit registry, datasheet value parsers, MPN cleaning
 │   ├── validate/              # validation layers L0–L4 and L6 + AST rule evaluator
 │   ├── confidence/            # features, calibration, Wilson risk policy
@@ -1280,6 +1369,8 @@ axiom/
 │   ├── run_pipeline.py        # one SKU, end to end, fully reported
 │   ├── export_delivery.py     # supplier CSV -> the 252-column delivery CSV + provenance sidecar
 │   ├── score_delivery.py      # field-level accuracy against the client's known-good rows
+│   ├── score_extraction.py    # layout extraction vs hand-read ground truth; precision,
+│   │                          #   abstention, and the wrong-document guard. No model.
 │   ├── ingest_supplier_file.py# a messy spreadsheet -> canonical fields, mapping remembered
 │   ├── cross_validate.py      # L4: same SKU from several sources, compared
 │   ├── run_cohort.py          # before/after quality index against the original item master
@@ -1424,7 +1515,8 @@ Tracked against blueprint Part 12, and — for the graded output — blueprint
 ahead of Tier 1 that did not exist when Part 12 was written.
 
 - [ ] **Tier 0 — the delivery contract.** The client's output schema is fixed, so nothing in
-      Tier 1 is demonstrable to them without this. Six of eight items are built:
+      Tier 1 is demonstrable to them without this. Eight of nine items are built; the ninth is
+      blocked on files that are not in the repository:
       - [x] 0.1 The 252-column contract declared as data, header byte-identical to the client's
             file and asserted against *their* CSV rather than a fixture of ours
       - [x] 0.2 `DeliveryFormatExporter`: record → row, with per-cell provenance in a sidecar
@@ -1434,12 +1526,20 @@ ahead of Tier 1 that did not exist when Part 12 was written.
             hierarchies, and the acoustic unit the class needs
       - [x] 0.5 Batch driver, offline, no model calls
       - [x] 0.6 Field-level scorer, in CI, failing the build on invented data
-      - [ ] 0.7 Deterministic renderers for the five description rewrites — **blocked by
-            sequencing, not difficulty.** They are template renders over the attribute grid, and
-            with the grid empty they would emit partial titles that score as *wrong* rather than
-            *missed*. They land after retrieval.
+      - [x] 0.7 Deterministic renderers for the five description rewrites, driven by recipes in
+            `schema/descriptions/`. All five reproduce the client's own strings **character for
+            character on both scored rows (10/10)**. The sequencing risk this item was previously
+            blocked on is handled by a declared `min_components` gate per recipe: below its
+            threshold a recipe withholds and says why, because `DISHWASHER SST` scores as *wrong*
+            where an empty cell scores as *missed*
       - [ ] 0.8 LOV / UOM / brand-master loaders — **blocked on the missing files** (see Known
             gaps). These are what turn `mounting_type` from a `string` into a governed `enum`.
+      - [x] 0.9 Model-free extraction from document layout — `extract/structured.py` reads spec
+            lines and ordering-table rows, citing each value to `p1:l14` or `t1:r4:c3`. Measured
+            against hand-read ground truth on three real datasheets: **115 agree, 0 disagree, 0
+            produced where ground truth records an absence.** A relevance guard requires the
+            document to name the part before any value is read, which is the only defence against
+            values cited to a datasheet for a different product
 - [x] **Tier 1 — the spine and the trust layer.** Core domain models with the evidence
       invariant, unit registry, declarative schema registry, document parsing with addressable
       tables, model cascade, evidence-bound extraction, normalization, validation L0–L3,
@@ -1507,11 +1607,13 @@ not be counted as though they were:
 
 Beyond the tiers, blueprint module M15's **CI regression gate** is in place: `ci.yml` runs lint,
 Python tests, console tests, typecheck, contrast, schema integrity, a type-drift check, the
-part-number grammar's held-out validation and the cross-reference sweep on every push, and
-`regression.yml` measures the pipeline against the golden set and blocks a change that degrades any
-tracked metric. The two Tier 3 analyses sit in the *fast* gate rather than the metrics one precisely
-because they make no model call: no credentials, no cost, reproducible bit-for-bit, so there is no
-reason to run them weekly instead of on every push. The blueprint rates that above shipping another feature, and it was the largest
+part-number grammar's held-out validation, the cross-reference sweep, both delivery arms and the
+document-extraction accuracy gate on every push, and `regression.yml` measures the pipeline against
+the golden set and blocks a change that degrades any tracked metric. The two Tier 3 analyses sit in
+the *fast* gate rather than the metrics one precisely because they make no model call: no
+credentials, no cost, reproducible bit-for-bit, so there is no reason to run them weekly instead of
+on every push. The same reasoning puts the extraction gate there: it reads three committed
+datasheets by layout alone, so its fabrication count is a build failure rather than a weekly report. The blueprint rates that above shipping another feature, and it was the largest
 thing missing.
 
 Storage infrastructure is deployed (see above). Compute is not — the pipeline runs locally.
@@ -1572,10 +1674,13 @@ Storage infrastructure is deployed (see above). Compute is not — the pipeline 
   verdict states means. Checking catches the drift without discarding the reasoning. Typed
   response models on the API would make real codegen possible and are the longer-term fix.
 - The golden set is 15 SKUs against a blueprint target of 100–300 (see the caveats above).
-- `handle_type` sits at 61.5% because one datasheet has a footnote that overrides the prose for
-  sizes DN25 and up. Applying a size-scoped override is reasoning the extractor does not do
-  reliably. `variants.py` already has size-scoped note logic for variant explosion; the fix is
-  probably to share it with extraction rather than to escalate a tier.
+- `handle_type` sits at 61.5% **on the model path** because one datasheet has a footnote that
+  overrides the prose for sizes DN25 and up, and applying a size-scoped override is reasoning the
+  model does not do reliably. The sharing this entry used to propose has since happened, but only
+  for the layout path: `extract/structured.py` reuses `variants.py`'s size-scoped note logic to
+  *refuse* a value qualified to a size other than the target's, which is what took the golden set's
+  fabrications to zero. Refusing a mis-scoped value and correctly *applying* a size-scoped override
+  are different problems; only the first is solved.
 - L4's corpus is two sources for one SKU family, not for the whole golden set. The layer is
   exercised end to end and unit-tested against agreement, revision precedence, supplier trust and
   the unresolvable case — but the *measured* numbers in this README still come from single-source

@@ -1,0 +1,34 @@
+{
+  "golden_set": "pvf_valves_v1",
+  "documents": [
+    "ap77c",
+    "ba100",
+    "gv200"
+  ],
+  "coverage_floor": 115,
+  "arms": [
+    {
+      "arm": "own-document (extraction accuracy)",
+      "agreed": 115,
+      "disagreed": 0,
+      "not_extracted": 112,
+      "absent_respected": 85,
+      "absent_violated": 0,
+      "mismatches": [],
+      "fabrications": [],
+      "quote_failures": []
+    },
+    {
+      "arm": "all-documents (relevance guard)",
+      "agreed": 115,
+      "disagreed": 0,
+      "not_extracted": 112,
+      "absent_respected": 85,
+      "absent_violated": 0,
+      "mismatches": [],
+      "fabrications": [],
+      "quote_failures": []
+    }
+  ],
+  "problems": []
+}

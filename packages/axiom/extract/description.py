@@ -44,7 +44,7 @@ from axiom.core.values import (
     ValueStatus,
 )
 from axiom.normalize.units import registry as unit_registry
-from axiom.schema import Datatype, SchemaRegistry
+from axiom.schema import SchemaRegistry
 from axiom.schema.models import AttributeDefinition
 
 PROMPT_VERSION = "description@v1"
@@ -155,11 +155,29 @@ def default_abbreviation_path() -> Path:
 # ------------------------------------------------------------------ unit pattern generation
 
 
+SAFE_BARE_UNITS = frozenset({"V", "A", "W"})
+"""Single-character unit spellings permitted when reading an abbreviated description.
+
+A one-letter unit is fine on a datasheet and dangerous in a 35-character part description, because
+a digit followed by a letter is overwhelmingly more likely to be a part number than a measurement.
+The registry lists ``c`` as an alias for Celsius, which turned ``Apollo 77C Series`` into
+``temperature_range = 77 degC`` — a plausible number inside a plausible range, cited to a real
+substring.
+
+``V``, ``A`` and ``W`` stay because suppliers genuinely write them bare and unspaced in exactly this
+context: ``120V``, ``15A``, ``60W``. ``C``, ``F``, ``K`` and ``L`` do not survive, so a temperature
+in a description must spell its unit out (``degF``, ``°C``) to be read.
+"""
+
+
 def _unit_spellings(unit_code: str) -> list[str]:
     """Every spelling the registry accepts for a unit, longest first.
 
     Longest-first matters: "VAC" must be tried before "V", or the alternation matches the "V" and
     leaves "AC" stranded in the description.
+
+    Single-character spellings are filtered against :data:`SAFE_BARE_UNITS` — see the note there
+    for the part-number collision that made it necessary.
     """
     resolved = unit_registry.resolve(unit_code)
     if resolved is None:
@@ -167,7 +185,12 @@ def _unit_spellings(unit_code: str) -> list[str]:
     spellings = {resolved.code, *resolved.aliases}
     if resolved.display:
         spellings.add(resolved.display)
-    return sorted(spellings, key=len, reverse=True)
+    usable = {
+        spelling
+        for spelling in spellings
+        if len(spelling) > 1 or spelling.upper() in SAFE_BARE_UNITS
+    }
+    return sorted(usable, key=len, reverse=True)
 
 
 def _quantity_pattern(unit_code: str) -> re.Pattern[str] | None:
@@ -445,12 +468,12 @@ def to_attribute_values(
 __all__ = [
     "ABBREVIATION_CONFIDENCE",
     "MIN_TOKEN_LENGTH",
+    "SAFE_BARE_UNITS",
     "PROMPT_VERSION",
     "QUANTITY_CONFIDENCE",
     "AbbreviationTable",
     "DescriptionExtraction",
     "DescriptionMatch",
-    "Datatype",
     "default_abbreviation_path",
     "extract_from_description",
     "to_attribute_values",

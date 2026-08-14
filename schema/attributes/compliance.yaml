@@ -54,6 +54,9 @@ attributes:
     example_values: ["UL, CSA, NSF-61", "FM approved"]
     evidence_requirement: strict
     compliance_claim: true
+    # Safe to read from a labelled specification row: the row states the listings explicitly, and
+    # multi_enum snapping discards anything not in the permitted vocabulary rather than guessing.
+    spec_labels: ["Approvals", "Approvals and Listings", "Listings", "Certifications", "Approvals/Listings"]
     # A substitute must carry every listing the reference carries, and may carry more. Set
     # comparison rather than equality: an Apollo valve holding NSF-61, NSF-372 and UL is an
     # acceptable stand-in for one holding NSF-61 and UL, and equality would refuse it.

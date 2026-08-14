@@ -165,6 +165,72 @@ jobs:
           python scripts/score_delivery.py \
             data/delivery/Unihack__Sample_Dataset_-_Input.delivery.csv
 
+      - name: Document extraction agrees with a human reading and invents nothing
+        # The accuracy measurement for the model-free path, gated on every push because it costs
+        # nothing: three committed datasheets — one a real PDF — read by layout alone, compared
+        # against hand-read ground truth. No credentials, no network, no model.
+        #
+        # Fails on a disagreement, a fabrication, an unverifiable quote, or a coverage drop below
+        # the pinned floor. It also runs a second arm that offers every part all three datasheets,
+        # which is the only check that catches the wrong-document failure — values cited to a sheet
+        # describing a different product, whose quotes verify perfectly.
+        run: python scripts/score_extraction.py --json evals/extraction_score.json
+
+      - name: Deterministic document extraction produces cited values end to end
+        # The measurement above scores the extractor in isolation. This one runs it through the
+        # actual delivery export, because the two can diverge: a value can be correct and still be
+        # dropped by normalisation or projection before it reaches a cell.
+        #
+        # The assertions are the two that matter here. Cited cells must be produced (a silent zero
+        # would mean the wiring broke without the extractor changing), and no cell may cite another
+        # product's datasheet.
+        run: |
+          python scripts/export_delivery.py data/samples/valve-feed.csv \
+            --document data/samples/ba100.txt \
+            --document data/samples/ap77c.pdf \
+            --document data/samples/gv200.txt \
+            --out data/delivery/valves --quiet
+          python - <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          sidecar = json.loads(
+              Path("data/delivery/valves/valve-feed.provenance.json").read_text(encoding="utf-8")
+          )
+          expected_source = {
+              "BA-100-075": "ba100",
+              "77C-105R": "ap77c",
+              "T-113-100": "gv200",
+          }
+          problems = []
+          for record in sidecar["records"]:
+              mpn = record["mpn"]
+              cited = [c for c in record["cells"] if c.get("evidence")]
+              if not cited:
+                  problems.append(f"{mpn}: no cited cells")
+                  continue
+              wanted = expected_source[mpn]
+              for cell in cited:
+                  for reference in cell["evidence"]:
+                      # A citation naming another product's datasheet is the wrong-document bug.
+                      if any(
+                          other in reference
+                          for other in expected_source.values()
+                          if other != wanted
+                      ):
+                          problems.append(
+                              f"{mpn} {cell['column']} cites {reference!r}, which is not its "
+                              f"document ({wanted})"
+                          )
+              print(f"{mpn}: {len(cited)} cited cells from {wanted}")
+
+          for problem in problems:
+              print(f"FAIL: {problem}", file=sys.stderr)
+          if problems:
+              sys.exit(1)
+          PY
+
       - name: Delivery arm with attributes supplied reproduces the client's row
         # The second measurement, and it answers a different question: given correct extraction,
         # does everything downstream produce the client's row? The golden values are transcribed

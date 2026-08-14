@@ -48,6 +48,9 @@ attributes:
     extraction_hints:
       - often written "600 PSI WOG @ 73F"
       - do not confuse with the steam rating (WSP), which is a different, lower figure
+    # Specification-block labels. Deliberately excludes a bare "Rating", which every rated
+    # attribute on the sheet would also answer to.
+    spec_labels: ["Pressure Rating", "Working Pressure", "WOG Rating", "CWP", "Cold Working Pressure"]
     tolerance: 0.0
     plausible_range: [25.0, 10000.0]
     # Asymmetric on purpose. A 600 psi valve substitutes for a 400 psi one; the reverse is a
@@ -65,6 +68,7 @@ attributes:
       Maximum working steam pressure. Distinct from and lower than the WOG rating.
       Reporting the WOG figure here is a common and consequential extraction error.
     example_values: ["125 PSI", "150 PSI"]
+    spec_labels: ["Steam Rating", "Saturated Steam", "WSP", "Steam Pressure", "SWP"]
     tolerance: 0.0
     plausible_range: [10.0, 1000.0]
     interchange: functional
@@ -78,6 +82,10 @@ attributes:
       designation when the source gives one, because lead content and pressure rating both
       depend on the exact alloy rather than the material family.
     example_values: ["Bronze C84400", "Brass C46500", "Stainless Steel 316"]
+    # "Body / Bonnet" is how a gate-valve sheet labels this: the two castings are the same alloy
+    # and the manufacturer states them together. A bare "Material" is excluded — on a sheet that
+    # also lists seat and stem materials it is ambiguous, and guessing costs more than abstaining.
+    spec_labels: ["Body Material", "Body", "Body / Bonnet", "Body/Bonnet", "Body Casting"]
     allowed_values:
       - value: Brass C46500
         aliases: ["naval brass", "C46500", "CW722R"]
@@ -142,6 +150,12 @@ attributes:
       Material of the valve stem. Relevant to dezincification resistance and to
       potable-water compliance.
     example_values: ["Brass", "Silicon Bronze", "Stainless Steel 316"]
+    # "Ball / Stem" is deliberately absent. A ball valve sheet labels one row for two components
+    # and gives a compound value — "Chrome-plated brass / Brass" — where the first alloy is the
+    # ball and the second the stem. Splitting that on the slash is a positional assumption about
+    # the manufacturer's wording, and getting it backwards puts the wrong alloy on a potable-water
+    # compliance path. It stays an unmapped label so it surfaces for the model or a human.
+    spec_labels: ["Stem Material", "Stem", "Stem Alloy"]
     allowed_values:
       - value: Brass
         aliases: ["brass stem"]
@@ -178,6 +192,8 @@ attributes:
         aliases: ["regular port", "conventional port", "standard", "std"]
       - value: Reduced Port
         aliases: ["reduced bore", "restricted port", "reduced"]
+    table_headers: ["port", "port type", "bore", "port size"]
+    spec_labels: ["Port Type", "Port", "Bore"]
     # Critical rather than functional: the valve fits the same pipe, so it is not a different
     # product, but the flow is not the same and an installer needs to be told. The magnitude of
     # that difference is carried by cv_flow_coefficient, which is where it can be compared.
@@ -238,6 +254,15 @@ attributes:
       - value: Handwheel
         aliases: ["hand wheel", "wheel"]
     table_headers: ["handle", "handle type", "handwheel", "operator"]
+    # `spec_labels` is deliberately left at just the attribute name, and "Handwheel" is
+    # deliberately NOT among them even though it IS a valid table header.
+    #
+    # This attribute is the reason `spec_labels` exists as a separate field. A column headed
+    # "Handwheel" holds handle types ("Lever", "Tee"). A specification row labelled
+    # "Handwheel ....... Malleable Iron" holds the handwheel's *material*, and reading it here
+    # produced "handle_type = Malleable Iron" — cited to a real line, plausible on inspection, and
+    # wrong. There is no handwheel-material attribute, so the correct outcome is an unmapped label.
+    spec_labels: ["Handle Type", "Handle"]
     # Cosmetic for interchange, which is not the same as unimportant. A lever for a handwheel
     # changes nothing about fit or rating, so it must not block a substitution — but it is still
     # reported as a difference, because an installer expecting a lever should be told.
@@ -251,6 +276,8 @@ attributes:
       produces a one PSI pressure drop. Dimensionless by convention. Size-dependent, so
       read the value for the target SKU's size.
     example_values: ["12.5", "18.0", "45"]
+    table_headers: ["cv", "flow coefficient", "cv flow coefficient", "flow coeff"]
+    spec_labels: ["Flow Coefficient (Cv)", "Flow Coefficient", "Cv"]
     tolerance: 0.05
     plausible_range: [0.01, 50000.0]
     # More flow is never a fault. This is what catches a reduced-port valve being offered as a

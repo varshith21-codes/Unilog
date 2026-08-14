@@ -1884,6 +1884,169 @@ The consequence for the roadmap is worth stating plainly: **the descriptions are
 engineering, only on facts.** When retrieval fills the attribute grid, eleven description cells
 appear with no further work.
 
+### 17.14 Reading the document without a model
+
+§17.12 found one enrichment path that needed nothing external. This is the second, and it is the
+larger one: **everything a manufacturer document states plainly can be read from its layout, with a
+citation, at zero cost and with no credentials.**
+
+The observation behind it is that §17.9's evidence problem was framed too pessimistically. That
+section assumed extraction means a model reading prose, so it treated every populated attribute cell
+as requiring a model call, an evidence span and an entailment check. But the attributes the client's
+grid actually asks for are, overwhelmingly, the ones a datasheet prints in a **labelled line** or an
+**ordering-table row**:
+
+```
+  Body Material .................. Bronze C84400
+  Pressure Rating ................ 600 PSI WOG @ 73 degF
+  Approvals ...................... UL listed, CSA certified, NSF/ANSI 61
+
+  Part Number     Size      Handle    Carton Qty
+  BA-100-075      3/4"      Lever     12
+```
+
+Neither of those is prose. Both are structure, and structure can be traversed rather than
+interpreted. `packages/axiom/extract/structured.py` does exactly that.
+
+**Two paths, and — this is the part that matters — two vocabularies.**
+
+| | spec line | ordering table |
+|---|---|---|
+| shape | `Label ..... Value`, `Label: Value`, or a run of spaces | the row whose part number equals the target |
+| vocabulary | attribute `name` + `spec_labels` | attribute `name` + `table_headers` |
+| citation | `p1:l14`, bbox tightened to the value fragment | `t1:r4:c3` |
+| confidence | 0.90 | 0.94 |
+| method | `DOCUMENT_EXTRACTION` | `TABLE_EXTRACTION` |
+
+The table path earns the higher confidence because both of its coordinates are *computed* — the row
+by matching a part number, the column by matching a header the schema declared. Neither is a
+judgement. A spec line is only slightly weaker: the label is explicit, but a label can be abbreviated
+in a way that matches the wrong attribute, which is precisely what happened.
+
+`spec_labels` exists as a field separate from `table_headers` because a real document forced them
+apart, and the failure was instructive. `gv200.txt` has a column headed `Handwheel` whose cells hold
+`Lever` and `Tee` — correctly bound to `handle_type`. The same sheet has a line reading
+`Handwheel ....... Malleable Iron`, which is the handwheel's *material*. With one shared vocabulary
+the extractor produced `handle_type = Malleable Iron`: correctly cited, physically plausible, and
+wrong. No downstream check can catch it, because the quote genuinely says what it says. The header
+`Handwheel` is right for a column and wrong for a line, so the two vocabularies have to be declared
+separately. Heuristics were considered and rejected: any rule strong enough to separate these two
+uses would depend on the surrounding document, which is exactly the kind of reasoning this path
+exists to avoid.
+
+**The measurement.** `scripts/score_extraction.py` scores it against `data/golden/pvf_valves.yaml`,
+which is hand-read ground truth for three committed datasheets — 15 SKUs, one of them a real PDF:
+
+| | |
+|---|---|
+| agree | **115** |
+| disagree | **0** |
+| produced where ground truth records an absence | **0** |
+| not extracted | 112 |
+| absences respected | 85 |
+| precision | **115/115 (100%)** |
+| coverage | 115/227 (50.7%) |
+
+The split into three numbers rather than one accuracy figure is deliberate, and it follows §17.11's
+argument about denominators. *Disagree* and *not extracted* are different failures with different
+fixes — one means the extractor read something wrong, the other means it read nothing — and averaging
+them into a single percentage hides the second entirely. *Absences respected* is scored from the
+golden set's `absent` list, and it is the only number here that can detect fabrication: a system that
+invents freely scores identically to one that abstains honestly if the only thing measured is the
+values it chose to emit.
+
+Precision is asserted absolutely and coverage as a floor. Reading more of a document is an
+improvement; reading less is a regression; reading it wrong is a build failure.
+
+**Three defects the golden set caught, all of which looked like successes.** Each produced output
+that was correctly cited and would have passed every integrity check in Part 6:
+
+1. **A value qualified to a different size.** `ba100.txt` states
+   `Operating Torque ..... 18-22 ft-lb (1/2" size)`, and the extractor emitted it for all four
+   BA-100 sizes. Genuinely present, correctly quoted, and wrong for three of the four parts — the
+   golden set records torque as absent for every one. The fix reorders the passes: the ordering table
+   runs **first**, so the target's `nominal_size` is known before spec lines are read, and a
+   size-qualified line is then filtered against it. When the size is unknown the value is refused
+   rather than guessed. Four fabrications to zero. `size_qualifier()` reuses the size-scoped note
+   logic `variants.py` already had for variant explosion, rather than adding a second implementation
+   of the same idea.
+
+2. **The wrong document.** Every row was read against every attached document, so specifications
+   crossed between products. This is the most dangerous failure mode in the whole system, because
+   *every check passes*: the quote is present, the span resolves, the value entails, the hash pins
+   the content. They are simply quotes about a different product, and nothing downstream can tell
+   the difference.
+
+   The fix is a relevance guard inside `extract_structured` that requires the document to name the
+   part before any value is read. Its effect on the three-document valve feed, measured by running
+   `require_sku=False` to reproduce the old behaviour:
+
+   ```
+   guard off   35 values      guard on   24 values
+     11 values existed only because a document that never mentions the part was read
+      6 values were actively WRONG — a wrong document reached the attribute first
+   ```
+
+   The six are all one part, `T-113-100`, a NIBCO bronze gate valve reading Milwaukee ball-valve
+   specifications because `ba100.txt` was parsed first and claimed the slots:
+
+   ```
+   body_material           Bronze C84400   ->  Bronze C89833
+   end_connection          NPT threaded    ->  Solder ends, C x C
+   steam_pressure_rating   150 PSI WSP     ->  125 PSI WSP
+   temperature_range       366 degF        ->  406 degF
+   approvals               CSA, NSF/ANSI 61 -> MSS SP-80
+   country_of_origin       Taiwan          ->  United States
+   ```
+
+   The count understates the harm, which is why it is reported both ways. Eleven surplus values are
+   a precision problem; six wrong values on a part whose sheet was sitting right there are a
+   correctness problem, and every one of them carried a verbatim quote from a genuine manufacturer
+   document.
+
+   Leaving the check to callers was considered and rejected: forgetting to check *is* the bug, so it
+   belongs where it cannot be forgotten. `require_sku=False` exists for the deliberate case — a
+   single-product sheet that never prints its own part number — and is not the default.
+   `score_extraction.py` runs a second arm that offers every part all three datasheets specifically
+   to keep this fixed. The two arms must report identical numbers; more values in the all-documents
+   arm means the guard has stopped working.
+
+3. **Prose read as a specification.** `Installation: the valve must be supported independently...`
+   splits cleanly into a label and a value under any of the three separators. The fix rejects values
+   opening with a word no specification starts with — `the`, `a`, `this`, `it`, `must`, `should`,
+   `see`. The opener is the primary signal rather than the length, because length alone is too weak:
+   an overflow description field legitimately holds
+   `240 kW-hr Annual Energy, 1 to 12 hr Delay Start Hours` at eleven words. A cap exists at fourteen
+   words, but only as a backstop.
+
+A fourth defect of the same family was found in §17.12's description path while this was being built
+and is recorded here because the cause is identical. `Apollo 77C Series` produced
+`temperature_range = 77 degC`, because `c` is a registered alias for Celsius. Single-character unit
+spellings are now refused when reading an abbreviated string, except `V`, `A` and `W`, which
+suppliers genuinely write bare (`120V`, `15A`, `60W`). A word-boundary check would not have helped:
+`77C` is a standalone token.
+
+**What this path deliberately does not do.** Prose, footnotes, and qualified claims are left to the
+model path. The point is not that the model is unnecessary — it is that the model should be spent on
+the part of the document that actually needs interpretation, and that the part which does not need it
+should cost nothing, run offline, and be auditable by anyone with the repository and no AWS account.
+
+**What it changes in §17.9.** That section's answer was to classify every column by provenance and
+publish the map. That still stands. What changes is the *size* of the class that needs a model:
+**`extracted` no longer implies `model_call`.** The attribute grid — the largest populated block in
+the format, and the one every description recipe reads from — is now reachable deterministically
+whenever a document is attached. On the three-document valve feed that is 24 extracted values
+driving 77 derived cells, taking the file from 36 to 53 of 252 columns with `withheld 0`.
+
+Two things it does *not* reach, so the map does not change for them. The identity fields
+(`BRAND_NAME`, `MANUFACTURER_NAME`, `MFR URL`) come from the brand master, not from a datasheet's
+layout — §17.11's LOV dependency is untouched. And the marketing fields remain what §17.9 said they
+were: retrieval plus a claim check, never invention.
+
+The narrower claim is the one worth defending. `over-filled 0` now survives contact with real
+documents rather than being a property of an empty file — which is the difference between an
+invariant and an accident.
+
 ---
 
 ## Appendix A — Example attribute schema
