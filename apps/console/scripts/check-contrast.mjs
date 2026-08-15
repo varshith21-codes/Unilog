@@ -140,6 +140,17 @@ const T = {
   hairlineStrongD: "oklch(1 0 0 / 0.20)",
 };
 
+/*
+ * Semantic aliases, named exactly as globals.css names them.
+ *
+ * The ramp entries above are steps; these are roles. Checking a role against a bare step is how the
+ * `--border-control` drift survived — globals.css moved the role onto ink-450 and this file went on
+ * verifying ink-500, which passes. Anything held to a WCAG threshold is declared here so the two
+ * files can be compared by name.
+ */
+T.borderControlL = T.ink500;
+T.borderControlD = T.ink600;
+
 const TEXT = 4.5;
 const OBJECT = 3.0;
 const STEP = 1.06;
@@ -174,9 +185,15 @@ const checks = [
   ["light", "TEXT", "page-line on document canvas", T.ink650, T.raisedL, TEXT],
 
   // ================================================================ LIGHT — objects
-  ["light", "OBJECT", "control border vs button face", T.ink500, T.raisedL, OBJECT],
-  ["light", "OBJECT", "control border vs canvas", T.ink500, T.ink150, OBJECT],
-  ["light", "OBJECT", "control border vs surface", T.ink500, T.surfaceL, OBJECT],
+  //
+  // `borderControlL`, not a bare ink step. These three read `T.ink500` while globals.css defined
+  // `--border-control` as ink-450, so the gate was verifying a colour the stylesheet did not use —
+  // and the one it did use failed against the canvas at 2.73:1. Naming the alias is the fix that
+  // makes the next such drift visible: a reader comparing the two files now compares like with
+  // like instead of having to notice a digit.
+  ["light", "OBJECT", "control border vs button face", T.borderControlL, T.raisedL, OBJECT],
+  ["light", "OBJECT", "control border vs canvas", T.borderControlL, T.ink150, OBJECT],
+  ["light", "OBJECT", "control border vs surface", T.borderControlL, T.surfaceL, OBJECT],
   ["light", "OBJECT", "meter fill (accent) vs track", T.accent600, T.ink300, OBJECT],
   ["light", "OBJECT", "meter fill (accent) vs surface", T.accent600, T.surfaceL, OBJECT],
   // The risk dial's budget slider puts a meter directly on the page canvas rather than inside a
@@ -237,9 +254,9 @@ const checks = [
   ["dark", "TEXT", "page-line on document canvas", T.ink450, T.ink900, TEXT],
 
   // ================================================================ DARK — objects
-  ["dark", "OBJECT", "control border vs button face", T.ink600, T.ink900, OBJECT],
-  ["dark", "OBJECT", "control border vs canvas", T.ink600, T.ink1000, OBJECT],
-  ["dark", "OBJECT", "control border vs surface", T.ink600, T.ink950, OBJECT],
+  ["dark", "OBJECT", "control border vs button face", T.borderControlD, T.ink900, OBJECT],
+  ["dark", "OBJECT", "control border vs canvas", T.borderControlD, T.ink1000, OBJECT],
+  ["dark", "OBJECT", "control border vs surface", T.borderControlD, T.ink950, OBJECT],
   ["dark", "OBJECT", "meter fill (accent) vs track", T.accent400, T.ink800, OBJECT],
   ["dark", "OBJECT", "meter fill (accent) vs surface", T.accent400, T.ink950, OBJECT],
   ["dark", "OBJECT", "meter fill (accent) vs canvas", T.accent400, T.ink1000, OBJECT],

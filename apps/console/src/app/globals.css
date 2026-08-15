@@ -200,8 +200,19 @@
     --hairline-strong: oklch(0.163 0.006 265 / 0.2);
     --hairline-accent: oklch(0.576 0.171 255 / 0.45);
 
-    /* Interactive control boundary and graphical objects. Both clear 3:1. */
-    --border-control: var(--color-ink-450);
+    /*
+     * Interactive control boundary and graphical objects. Both clear 3:1.
+     *
+     * ink-500, not ink-450. This was ink-450 and the contrast script was checking ink-500, so the
+     * gate reported green on a colour the app did not use. Measured, the one in use failed: a
+     * `.btn-quiet` border reached 3.11:1 against the button's own raised face and 3.07:1 against a
+     * panel, but only 2.73:1 against the canvas — and the overview's two masthead buttons sit
+     * directly on the canvas. That is WCAG 1.4.11, and it was invisible because the checker and the
+     * stylesheet had drifted onto different steps of the ramp.
+     *
+     * ink-500 clears it everywhere the token is used, worst case 3.39:1 against the canvas.
+     */
+    --border-control: var(--color-ink-500);
     --track: var(--color-ink-400);
 
     --accent: var(--color-accent-600);
