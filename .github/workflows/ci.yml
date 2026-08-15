@@ -304,6 +304,32 @@ jobs:
         # foreground/background pair in the theme against the WCAG ratios.
         run: npm run check:contrast
 
+      # Python, in the console job, for one reason: `next build` statically generates
+      # /review/[sku] and /certificates/[sku], so it needs real data at build time. Without it the
+      # build fails on "Could not reach the AXIOM API ... and no offline fixture exists".
+      #
+      # The fixture is generated rather than committed. It is 374 KB of pipeline output whose
+      # certificates are re-signed and timestamped on every run, so committing it would put a
+      # ten-thousand-line diff in front of a reviewer for any change that touched it. Generating
+      # costs about a minute and buys real signal instead: the script drives the actual pipeline —
+      # ingest, parse, classify, extract, normalize, validate, score, certify — so this step also
+      # proves those stages still compose. It uses StubModelClient, so no credentials and no
+      # network.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Offline fixture for static generation
+        # working-directory overrides the job default: this runs at the repo root, not in the
+        # console.
+        working-directory: .
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev,docintel,ingest]"
+          python scripts/export_console_fixture.py
+
       - name: Build
         run: npm run build
 
