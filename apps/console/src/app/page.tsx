@@ -424,8 +424,16 @@ export default async function OverviewPage() {
                 <th scope="col" className="px-5 py-3 text-left font-medium">
                   SKU
                 </th>
+                {/*
+                  Class, not size. This column read `nominal_size` and was labelled "Size", which
+                  is a valve attribute — correct while the schema held nothing but valves, and
+                  blank on every row the moment a lamp or a dishwasher enters the queue. The class
+                  is the one thing every row has, and it is what a reviewer needs first: the same
+                  screen now mixes verticals, and which attributes are even expected depends on
+                  which class you are looking at.
+                */}
                 <th scope="col" className="px-5 py-3 text-left font-medium">
-                  Size
+                  Class
                 </th>
                 <th scope="col" className="w-44 px-5 py-3 text-left font-medium">
                   Completeness
@@ -449,9 +457,9 @@ export default async function OverviewPage() {
             </thead>
             <tbody>
               {queue.map((bundle) => {
-                const size = bundle.values.find(
-                  (value) => value.attribute_code === "nominal_size",
-                );
+                const definition = bundle.class_code
+                  ? dataset.class_definitions[bundle.class_code]
+                  : undefined;
                 return (
                   <tr key={bundle.sku} className="grid-row hairline-b last:border-b-0">
                     <th scope="row" className="px-5 py-3.5 text-left font-medium">
@@ -463,7 +471,11 @@ export default async function OverviewPage() {
                       </Link>
                     </th>
                     <td className="px-5 py-3.5 text-[var(--fg-secondary)]">
-                      {size?.value_display ?? size?.value_raw ?? "—"}
+                      {definition ? (
+                        definition.item_type
+                      ) : (
+                        <span className="text-[var(--fg-quiet)]">Unclassified</span>
+                      )}
                     </td>
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">

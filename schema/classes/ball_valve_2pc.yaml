@@ -17,6 +17,20 @@ class:
   # abbreviations a supplier actually writes) says the product is one.
   identity_terms: [valve, valves, vlv]
 
+  # The bare noun, for the delivery format's `Product Name` column and for use inside a generated
+  # sentence. "Two-Piece Ball Valve" is a class label and carries a construction qualifier that
+  # belongs in `number_of_pieces`, not in the product's name.
+  item_type: Ball Valve
+
+  # The internal reporting hierarchy -> Dept / Class / Fine. A genuinely different tree from
+  # browse_path, which is why both are declared: this one has three levels because the delivery
+  # format has three columns, while the browse path has four because a buyer drills further.
+  #
+  # Unlike the dishwasher class, this is OURS rather than copied from ground truth. The client's
+  # dataset contains no valves at all — this is the demo vertical — so there is no answer sheet to
+  # match and no risk of contradicting one.
+  reporting_path: [Plumbing, Valves, Ball Valves]
+
   browse_path: [Plumbing, Valves, Ball Valves, Two-Piece]
 
   # Multi-target classification. The browse path above is how buyers shop; these codes are

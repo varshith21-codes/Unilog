@@ -144,6 +144,18 @@ def serialise_class(registry, class_code: str) -> dict[str, Any]:
         "name": cls.name,
         "version": cls.version,
         "schema_version": cls.schema_version,
+        # The bare noun, and the second hierarchy. Both were missing from this projection, and
+        # both are published delivery columns: `item_type` is the format's `Product Name` and
+        # `reporting_path` is its `Dept` / `Class` / `Fine`. The console could show neither, which
+        # meant a reviewer could not see two of the columns they are signing off — and any UI
+        # naming the product had to fall back to the class label, so a built-in dishwasher
+        # displayed as "Built-In Dishwasher" where the client's own row says "Dishwasher".
+        #
+        # `item_type` is sent as the resolved noun rather than the raw field, because every caller
+        # wants the fallback and duplicating `item_type or name` in TypeScript is how the two
+        # drift.
+        "item_type": cls.product_noun,
+        "reporting_path": list(cls.reporting_path),
         "browse_path": list(cls.browse_path),
         "mappings": dict(cls.mappings),
         "required_codes": list(cls.required_codes),

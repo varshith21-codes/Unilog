@@ -18,6 +18,15 @@ class:
   # latch. The word that matters is "valve".
   identity_terms: [valve, valves, vlv]
 
+  # The bare noun, for the delivery format's `Product Name` column. The bronze qualifier is
+  # `body_material`'s to state, not the product name's.
+  item_type: Gate Valve
+
+  # Dept / Class / Fine. Three levels because the format has three columns, where the browse path
+  # has four. Ours rather than the client's, for the reason the ball-valve class records: the
+  # client's dataset contains no valves.
+  reporting_path: [Plumbing, Valves, Gate Valves]
+
   browse_path: [Plumbing, Valves, Gate Valves, Bronze]
 
   mappings:

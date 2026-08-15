@@ -610,6 +610,22 @@ export interface ClassDefinition {
   name: string;
   version: string;
   schema_version: string;
+  /**
+   * The bare noun a buyer would use — "Dishwasher", not "Built-In Dishwasher". Already resolved
+   * server-side to `item_type or name`, so it is never null and callers must not re-implement the
+   * fallback. This is the delivery format's `Product Name` column.
+   */
+  item_type: string;
+  /**
+   * The internal reporting hierarchy, and genuinely NOT derivable from `browse_path`. The client's
+   * own ground truth pairs a browse path of "Appliances & Consumer Electronics > Kitchen
+   * Appliances > Built-In Dishwashers" with a reporting path of "Appliances / Large Appliances /
+   * Dishwashers". Deriving one from the other produces the wrong string; this is the format's
+   * `Dept` / `Class` / `Fine`.
+   *
+   * May hold fewer than three levels, in which case the trailing delivery columns are blank.
+   */
+  reporting_path: string[];
   browse_path: string[];
   mappings: Record<string, string>;
   required_codes: string[];
