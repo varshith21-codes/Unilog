@@ -51,7 +51,18 @@ dev = [
     "pytest-cov==6.2.1",
     "ruff==0.12.7",
     # Required by fastapi.testclient; TestClient drives the app through real ASGI transport.
-    "httpx==0.28.1",
+    #
+    # httpx2, not httpx, and the distinction is load-bearing. starlette 1.6 imports `httpx2` and
+    # falls back to `httpx` only with a StarletteDeprecationWarning — which `filterwarnings =
+    # ["error"]` below turns into a fatal import error. The suite passed locally anyway because the
+    # `mcp` extra depends on httpx2 and a developer venv usually has every extra installed, while
+    # CI installs [dev,docintel,ingest,api] and does not. So every API test errored on the runner
+    # and nowhere else, and the message named httpx2 rather than the warning that actually stopped
+    # it.
+    #
+    # Declared here rather than left to `mcp`: a test dependency arriving through an unrelated
+    # optional extra is the coupling that produced the failure.
+    "httpx2==2.10.0",
     # Generates the synthetic PDFs the docintel tests parse.
     "reportlab==4.2.5",
     # The flat-file tests build a real workbook rather than a fixture, so this is not optional
