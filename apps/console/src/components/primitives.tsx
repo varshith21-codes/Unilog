@@ -548,15 +548,41 @@ export function KeyValue({
   label: string;
   children: ReactNode;
   mono?: boolean;
-  span?: 2 | 3 | 4;
+  /**
+   * Column span. `"full"` is the responsive case, for a `dl` that is two columns on a phone and four
+   * on a tablet.
+   *
+   * It exists because a fixed `span={4}` is a trap on such a grid: an item spanning more columns than
+   * the template declares does not clamp, it makes the grid generate implicit auto-sized columns —
+   * so the row that was meant to run full width instead widens the whole grid past its container.
+   */
+  span?: 2 | 3 | 4 | "full";
 }) {
   const spanClass =
-    span === 2 ? "col-span-2" : span === 3 ? "col-span-3" : span === 4 ? "col-span-4" : undefined;
+    span === 2
+      ? "col-span-2"
+      : span === 3
+        ? "col-span-3"
+        : span === 4
+          ? "col-span-4"
+          : span === "full"
+            ? "col-span-2 sm:col-span-4"
+            : undefined;
 
   return (
     <div className={clsx("flex flex-col gap-1", spanClass)}>
       <dt className="overline">{label}</dt>
-      <dd className={clsx("text-sm", mono ? "mono text-[var(--fg-secondary)]" : "text-[var(--fg)]")}>
+      {/*
+        `break-words`. Half the values that land here are hashes, document ids and model names —
+        unbreakable tokens with no space to wrap at — and at 360px one of them is enough to push the
+        whole page sideways.
+      */}
+      <dd
+        className={clsx(
+          "text-sm break-words",
+          mono ? "mono text-[var(--fg-secondary)]" : "text-[var(--fg)]",
+        )}
+      >
         {children}
       </dd>
     </div>
@@ -575,7 +601,10 @@ export function Quote({ children, className }: { children: ReactNode; className?
     <blockquote
       className={clsx(
         "mono border-l-2 border-[var(--hairline-accent)] bg-[var(--surface-sunken)]",
-        "py-1.5 pr-2 pl-2.5 text-[var(--fg-secondary)]",
+        // A datasheet quote can be a long unbroken run of part numbers and slashes. Wrapping it
+        // mid-token is not ideal for character-by-character comparison; pushing the page sideways at
+        // 360px is worse.
+        "py-1.5 pr-2 pl-2.5 break-words text-[var(--fg-secondary)]",
         className,
       )}
     >

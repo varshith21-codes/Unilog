@@ -472,7 +472,7 @@ export default async function OverviewPage() {
                       <KeyValue label="Type">{document.doc_type.replace(/_/g, " ")}</KeyValue>
                       <KeyValue label="Parser">{document.parser}</KeyValue>
                       <KeyValue label="Retrieved">{dateOnly(document.fetched_at)}</KeyValue>
-                      <KeyValue label="Structure" span={4}>
+                      <KeyValue label="Structure" span="full">
                         {document.page_count ?? pages.length} page
                         {(document.page_count ?? pages.length) === 1 ? "" : "s"},{" "}
                         {document.line_count} lines, {document.table_count} table

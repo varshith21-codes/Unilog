@@ -727,6 +727,12 @@
 
   .slider::-webkit-slider-thumb {
     -webkit-appearance: none;
+    /*
+     * `border-box` explicitly. Preflight's `*` reset does not reach a slider-thumb pseudo-element,
+     * so without this the 2px ring is added outside the declared height and the negative margin —
+     * which centres a 0.875rem thumb on a 0.25rem track — leaves it sitting 2px low.
+     */
+    box-sizing: border-box;
     height: 0.875rem;
     width: 0.875rem;
     margin-top: -0.3125rem;
@@ -741,6 +747,7 @@
   }
 
   .slider::-moz-range-thumb {
+    box-sizing: border-box;
     height: 0.875rem;
     width: 0.875rem;
     border-radius: 9999px;
