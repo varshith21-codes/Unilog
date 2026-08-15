@@ -235,7 +235,7 @@ separately from disagreements on purpose: "did not read it" and "read it wrong" 
 problems with different fixes, and averaging them into one accuracy figure hides the second.
 
 Through the delivery export the same three documents yield **24 extracted values across 3 parts** —
-25 cited cells once the derived UOM columns are counted — taking `valve-feed.csv` from **36 to 53 of
+25 cited cells once the derived UOM columns are counted — taking `valve-feed.csv` from **39 to 56 of
 252 columns** populated, with `withheld 0` and every cell citing a specification line or an
 ordering-table cell that a reviewer can highlight.
 
@@ -286,7 +286,7 @@ Three sources. One is now reachable offline, one is reachable with credentials, 
 
 | Source | Yield on 1,000 rows | Yield on the 2 scored rows | Status |
 |---|---|---|---|
-| The description string | 8 cells | 2 cells | works; capped by classification coverage (below) |
+| The description string | **445 cells** | 2 cells | works; capped by classification coverage (below) |
 | Manufacturer documents, by layout | all stated plainly | all stated plainly | **works offline** — 115/115 precision on 3 real datasheets |
 | Manufacturer documents, prose and footnotes | the rest | the rest | needs Bedrock credentials; retrieval also blocked on JS-rendered pages and >10MB PDFs |
 | LOV / brand / UOM masters | brand, approvals, vocabularies | `BRAND_NAME`, `Standard/Approvals` | 8 missing files |
@@ -296,12 +296,39 @@ Reading a labelled line off a datasheet needs no model and cannot hallucinate; r
 does and can, which is why the evidence contract exists for the second and not the first.
 
 **78% of the 1,000 descriptions carry recoverable attribute content** — voltages, wattages,
-dimensions, fractions, finish codes — but only 8 cells are actually extracted. The bottleneck is
-not the extractor, it is that 990 rows have no class, so a matched token has no attribute to bind
-to. `axiom.extract.description` is class-scoped on purpose: without that guard, `"24 in W"` in the
-client's own ground truth would be read as 24 watts. Unlocking the 78% means defining classes for
-lighting, abrasives, power tools and decking — YAML rather than code, but guessing their label
-templates without ground truth would be the invention this whole system exists to prevent.
+dimensions, fractions, finish codes — and the bottleneck was never the extractor. It was that a row
+with no class has no attribute for a matched token to bind to. `axiom.extract.description` is
+class-scoped on purpose: without that guard, `"24 in W"` in the client's own ground truth reads as
+24 watts.
+
+Adding one class demonstrates the size of that effect. Lighting is the largest cohort at 208 rows,
+and with it in the schema:
+
+| | before | after |
+|---|---|---|
+| rows classified | 10 | **214** |
+| values extracted from descriptions | 8 | **445** |
+| columns populated | 31 | **40** |
+| rows classified without a lighting term in the source | — | **0** |
+
+The 445 values are technology 126, wattage 107, base 89, form 69, shape 37, colour 10, material 7 —
+each citing the substring it was read from. Wattage arrives through the quantity path because it
+carries its own unit; the enums arrive through `schema/abbreviations.yaml`, which is the only route
+from a description to an enum and the reason a lighting row could classify and still yield nothing
+until those entries existed.
+
+Two things were deliberately left undone, and both are tested to stay undone.
+`schema/descriptions/` holds the five rewrite formulas, reverse-engineered from the client's own
+dishwasher strings character by character; there is no labelled lighting row anywhere in this
+repository, so a recipe here would be an invented template. And `27k` is trade shorthand for
+2700 K — reading it literally gives 27 K, colder than liquid nitrogen — so the attribute is
+declared with a `plausible_range` starting at 1500 to refuse the literal reading, and the expansion
+waits for ground truth. A systematic 100× error across 208 rows is worse than 208 blank cells.
+
+The remaining cohorts are abrasives (154 rows), decking (128) and power tools. Each is YAML rather
+than code, with one measured constraint noted under Known gaps: the classifier's dominance threshold
+now has 0.0104 of headroom and drift has run at about 0.02 per class, so the fifth class needs the
+threshold re-measured in the same commit.
 
 ### Why the delivery format does not break "evidence or null"
 
@@ -1319,10 +1346,18 @@ axiom/
 │   └── AWS-SETUP.md
 ├── infra/                     # AWS CDK app (TypeScript) — synthesizes, not deployed
 ├── schema/                    # THE SOURCE OF TRUTH (declarative, no code)
-│   ├── attributes/            # reusable attribute dictionary
-│   ├── classes/               # class bindings, cross-field rules, channel profiles
+│   ├── attributes/            # reusable attribute dictionary — valve, appliance, lighting,
+│   │                          #   compliance, packaging
+│   ├── classes/               # class bindings, cross-field rules, channel profiles.
+│   │                          #   Four classes: two valve, dishwasher, lighting
+│   ├── descriptions/          # the five rewrite recipes, per class. Absent for a class means
+│   │                          #   no generated copy, which is the honest answer without
+│   │                          #   ground truth to reverse-engineer a template from
 │   ├── delivery/              # the client's 252-column output contract, column by column,
 │   │                          #   each declaring its provenance class and character limits
+│   ├── abbreviations.yaml     # (attribute, abbreviation) -> canonical, scoped per attribute
+│   │                          #   because "SS" is stainless on an appliance and socket-set
+│   │                          #   on a fastener. The only route from a description to an enum
 │   ├── brands.yaml            # brand master with alias resolution
 │   ├── constants.yaml         # domain facts referenced by rules
 │   ├── copy_policy.yaml       # banned phrases, regulated claims — for counsel, not engineers
@@ -1515,7 +1550,7 @@ Tracked against blueprint Part 12, and — for the graded output — blueprint
 ahead of Tier 1 that did not exist when Part 12 was written.
 
 - [ ] **Tier 0 — the delivery contract.** The client's output schema is fixed, so nothing in
-      Tier 1 is demonstrable to them without this. Eight of nine items are built; the ninth is
+      Tier 1 is demonstrable to them without this. Nine of ten items are built; the tenth is
       blocked on files that are not in the repository:
       - [x] 0.1 The 252-column contract declared as data, header byte-identical to the client's
             file and asserted against *their* CSV rather than a fixture of ours
@@ -1540,6 +1575,12 @@ ahead of Tier 1 that did not exist when Part 12 was written.
             produced where ground truth records an absence.** A relevance guard requires the
             document to name the part before any value is read, which is the only defence against
             values cited to a datasheet for a different product
+      - [x] 0.10 Class coverage beyond the one category that has ground truth — a Lighting class,
+            the sample's largest cohort at 208 rows. Took auto-classification from **10 of 1,000
+            rows to 214** and description extraction from **8 values to 445**, with **zero rows
+            classified that carry no lighting term**. No description recipes and no
+            colour-temperature expansion: both would be invention without a labelled row, and both
+            are tested to stay undone
 - [x] **Tier 1 — the spine and the trust layer.** Core domain models with the evidence
       invariant, unit registry, declarative schema registry, document parsing with addressable
       tables, model cascade, evidence-bound extraction, normalization, validation L0–L3,
@@ -1635,12 +1676,24 @@ Storage infrastructure is deployed (see above). Compute is not — the pipeline 
   invent one: `mounting_type` would permit exactly `Leg` and `Built-in` and then reject
   `Free-standing`. And every accuracy figure above has a denominator of **2**, which is why the
   scorer prints fractions and refuses to render a percentage below 20 observations.
-- **Auto-classification covers 10 of 1,000 rows**, because three classes exist and the sample spans
-  roughly twenty categories. 990 rows abstain. That is the correct answer and the coverage number
-  should say so, but it means the delivery path is demonstrated on Built-In Dishwashers only —
-  chosen because it is the one category with labelled ground truth, not because it is the largest
-  cohort (lighting is, at 208 rows). Adding categories is YAML rather than code, but doing it
-  without ground truth would mean guessing at label templates.
+- **Auto-classification covers 214 of 1,000 rows**, across four classes against a sample spanning
+  roughly twenty categories. 786 rows still abstain, which is the correct answer for a category the
+  schema does not describe. The delivery path is now demonstrated on two verticals rather than one:
+  Built-In Dishwashers, which has labelled ground truth, and Lighting, which is the largest cohort
+  and has none. The remaining cohorts are abrasives (154 rows), decking (128) and power tools.
+- **The classifier's threshold is nearly out of headroom, and this is the constraint on adding the
+  fifth class.** `DECISIVE_DOMINANCE` is corpus-sensitive: IDF is computed across classes, so adding
+  one shifts every score, and adding an *unrelated* class inflates the weight of vocabulary the
+  *related* classes share. Measured, the hardest correct match moved 0.6889 → 0.7096 against a
+  threshold of 0.72 — still separating, with 0.0104 to spare and drift running at about 0.02 per
+  class.
+
+  The fix the code comment proposes — flooring the IDF document count at 50 so the corpus behaves as
+  though it were large — **was measured and does not work**. It stabilises drift, 0.0174 → 0.0008,
+  but it inverts the band: the correct ball-valve match rises to 0.7716 while the easiest ambiguous
+  case sits at 0.7701, so correct and ambiguous swap sides and no threshold separates them. Recorded
+  here so the next person does not spend an afternoon rediscovering it. A real fix needs a scoring
+  change with its own measurements, not a constant nudge.
 - `MARKETING_DESCRIPTION` and `ITEM_FEATURES_1..20` are the only genuinely generative fields in the
   format, and they are **not implemented**. Both are manufacturer marketing copy, so they belong to
   retrieval plus a claim check rather than to invention — writing feature bullets we cannot cite is

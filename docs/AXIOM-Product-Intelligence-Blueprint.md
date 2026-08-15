@@ -2036,7 +2036,7 @@ publish the map. That still stands. What changes is the *size* of the class that
 **`extracted` no longer implies `model_call`.** The attribute grid — the largest populated block in
 the format, and the one every description recipe reads from — is now reachable deterministically
 whenever a document is attached. On the three-document valve feed that is 24 extracted values
-driving 77 derived cells, taking the file from 36 to 53 of 252 columns with `withheld 0`.
+driving 86 derived cells, taking the file from 39 to 56 of 252 columns with `withheld 0`.
 
 Two things it does *not* reach, so the map does not change for them. The identity fields
 (`BRAND_NAME`, `MANUFACTURER_NAME`, `MFR URL`) come from the brand master, not from a datasheet's
