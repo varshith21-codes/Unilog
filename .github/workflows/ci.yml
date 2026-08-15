@@ -27,9 +27,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           # 3.12 is the blueprint's choice; the package declares >=3.11.
           python-version: "3.12"
@@ -254,7 +254,7 @@ jobs:
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: junit
           path: junit.xml
@@ -268,9 +268,9 @@ jobs:
       run:
         working-directory: apps/console
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           # 22, not 20. Node 20 reached end-of-life on 2026-04-30, so it receives no security
           # patches — reason enough on its own for a build that ships to a client. It was also
@@ -315,7 +315,7 @@ jobs:
       # ingest, parse, classify, extract, normalize, validate, score, certify — so this step also
       # proves those stages still compose. It uses StubModelClient, so no credentials and no
       # network.
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
           cache: pip
@@ -338,9 +338,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
           cache: pip

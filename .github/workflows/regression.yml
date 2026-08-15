@@ -50,9 +50,9 @@ jobs:
     env:
       AWS_REGION: us-east-2
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
           cache: pip
@@ -101,7 +101,7 @@ jobs:
                "never ran."
           exit 1
 
-      - uses: aws-actions/configure-aws-credentials@v4
+      - uses: aws-actions/configure-aws-credentials@v6
         if: steps.auth.outputs.configured == 'true'
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
@@ -128,7 +128,7 @@ jobs:
         # `always()` but still gated on the secret: without it there is no candidate.json to upload
         # and the action would warn about a missing path on every scheduled run.
         if: ${{ always() && steps.auth.outputs.configured == 'true' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: backtest-${{ github.run_number }}
           path: |
