@@ -34,6 +34,14 @@ apps/console/src/data/fixture.json
 data/samples/**/*.pdf
 data/samples/**/*.png
 data/samples/**/*.jpg
+
+# ...except the generated PDF fixture, which is 3 KB and is a test dependency rather than sample
+# data. `scripts/make_hard_sample.py` authors it from scratch — there is no vendor content in it and
+# nothing to license — and the golden set names it as a source document, so the exclusion above took
+# roughly twenty tests down with it on any clone but the one it was generated on. The rule above is
+# right for real supplier literature, which is large and not ours to redistribute. This file is
+# neither.
+!data/samples/ap77c.pdf
 data/cache/
 evals/results/*.local.json
 

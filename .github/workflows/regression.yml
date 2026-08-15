@@ -63,41 +63,71 @@ jobs:
           python -m pip install -e ".[dev,docintel,ingest]"
 
       - name: Require a way to authenticate
-        # Explicit and first, so the reason for failing is one line rather than a Bedrock
+        # Explicit and first, so the reason for stopping is one line rather than a Bedrock
         # AccessDenied forty lines into a traceback.
+        #
+        # How this responds to a missing secret depends on WHO ASKED, because the two cases carry
+        # different information:
+        #
+        #   workflow_dispatch / pull_request -> FAIL. Someone deliberately asked for a measurement.
+        #     Returning success without measuring anything would report green for a gate that never
+        #     ran, which is the failure mode this whole workflow is designed around.
+        #
+        #   schedule -> STOP, and say so. A repository where the secret was never configured has
+        #     opted out of the metrics gate. Failing here every Monday would produce a red build
+        #     that is identical whether the code is perfect or broken, so it carries no signal —
+        #     and a weekly false alarm is worse than no alarm, because it trains everyone to filter
+        #     the notification that would have mattered. Nothing is reported green either: there is
+        #     no candidate measurement and no comparison, and the summary step below says exactly
+        #     that.
+        id: auth
         env:
           ROLE: ${{ secrets.AWS_ROLE_ARN }}
         run: |
-          if [ -z "$ROLE" ]; then
-            echo "::error::AWS_ROLE_ARN is not configured, so the backtest cannot run and the" \
-                 "gate cannot pass. Configure the secret, or trigger this workflow only from a" \
-                 "branch that has access. Skipping silently would report green for a gate that" \
-                 "never ran."
-            exit 1
+          if [ -n "$ROLE" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
+          echo "configured=false" >> "$GITHUB_OUTPUT"
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            echo "::notice::AWS_ROLE_ARN is not configured, so the scheduled backtest did not" \
+                 "run. No measurement was taken and nothing was compared. Configure the secret to" \
+                 "enable the metrics gate."
+            exit 0
+          fi
+          echo "::error::AWS_ROLE_ARN is not configured, so the backtest cannot run and the" \
+               "gate cannot pass. Configure the secret, or trigger this workflow only from a" \
+               "branch that has access. Skipping silently would report green for a gate that" \
+               "never ran."
+          exit 1
 
       - uses: aws-actions/configure-aws-credentials@v4
+        if: steps.auth.outputs.configured == 'true'
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: us-east-2
 
       - name: Measure
+        if: steps.auth.outputs.configured == 'true'
         # Not --write. The calibration artifacts govern what publishes without a human, and a CI
         # run must not quietly move that threshold; rebaselining calibration is a deliberate local
         # step. This only measures.
         run: python scripts/run_backtest.py --json > evals/candidate.json
 
       - name: Compare against the baseline
+        if: steps.auth.outputs.configured == 'true'
         run: python scripts/check_regression.py evals/candidate.json
 
       - name: Rebaseline
-        if: ${{ success() && inputs.update_baseline }}
+        if: ${{ success() && steps.auth.outputs.configured == 'true' && inputs.update_baseline }}
         run: |
           python scripts/check_regression.py evals/candidate.json --update
           git diff --stat evals/baseline.json
 
       - name: Publish the measurement
-        if: always()
+        # `always()` but still gated on the secret: without it there is no candidate.json to upload
+        # and the action would warn about a missing path on every scheduled run.
+        if: ${{ always() && steps.auth.outputs.configured == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: backtest-${{ github.run_number }}
@@ -108,12 +138,18 @@ jobs:
 
       - name: Summary
         if: always()
-        # Puts the table in the run summary rather than making a reviewer open the log.
+        # Puts the table in the run summary rather than making a reviewer open the log. Writes the
+        # not-configured case too, so a green scheduled run cannot be mistaken for a passing gate.
         run: |
           {
             echo '## Regression gate'
             echo
-            echo '```'
-            python scripts/check_regression.py evals/candidate.json || true
-            echo '```'
+            if [ "${{ steps.auth.outputs.configured }}" != "true" ]; then
+              echo 'DID NOT RUN. `AWS_ROLE_ARN` is not configured, so no measurement was taken'
+              echo 'and no metric was compared. This is not a pass.'
+            else
+              echo '```'
+              python scripts/check_regression.py evals/candidate.json || true
+              echo '```'
+            fi
           } >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,41 @@
+# Line-ending and binary policy.
+#
+# This file exists because of a near-miss. `core.autocrlf` is true on the machine this repository
+# is developed on, there was no policy here, and `git add data/samples/ap77c.pdf` warned that it
+# would rewrite LF to CRLF. Git normally detects a binary by looking for NUL bytes and leaves it
+# alone, but that fixture is a minimal uncompressed PDF written by `scripts/make_hard_sample.py`
+# and contains none — so it read as text. Rewriting its line endings shifts every byte offset in
+# the trailing `xref` table, which is how a PDF locates its own objects. The file would still open
+# in some viewers and would fail in pdfplumber, on the CI runner only, with a parse error that
+# names nothing.
+#
+# So: declare the policy rather than rely on content sniffing.
+
+# Everything not named below is text, normalised to LF in the repository. Working copies keep
+# whatever the platform prefers; the committed bytes are identical either way, which is what makes a
+# Windows checkout and a Linux runner agree on a file hash.
+* text=auto eol=lf
+
+# Binaries. `-text` disables all conversion in both directions.
+*.pdf   -text
+*.png   -text
+*.jpg   -text
+*.jpeg  -text
+*.gif   -text
+*.webp  -text
+*.ico   -text
+*.woff  -text
+*.woff2 -text
+*.xlsx  -text
+*.zip   -text
+
+# Windows-only scripts, which genuinely need CRLF to run.
+*.bat   text eol=crlf
+*.cmd   text eol=crlf
+
+# Shell scripts and anything the CI runner executes must keep LF, or bash fails with a
+# `\r: command not found` that reads as a syntax error in the script rather than a checkout problem.
+*.sh    text eol=lf
+
+# Lockfiles are generated. Marking them keeps a diff from being attributed to a reviewer.
+package-lock.json -diff linguist-generated

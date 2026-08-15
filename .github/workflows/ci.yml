@@ -272,7 +272,17 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          # 22, not 20. Node 20 reached end-of-life on 2026-04-30, so it receives no security
+          # patches — reason enough on its own for a build that ships to a client. It was also
+          # breaking the suite outright: every one of the nine test files died with
+          # "[vitest-pool]: Failed to start forks worker" before running a single assertion, while
+          # the same commit passed 122 tests locally on 22.17.1. A worker pool that cannot spawn
+          # reports as a test failure, which sent the whole build red for a runtime problem.
+          #
+          # Pinned to the major the code is actually verified against rather than the newest
+          # available, and declared in apps/console/package.json `engines` so the constraint lives
+          # with the package instead of only in this file.
+          node-version: "22"
           cache: npm
           cache-dependency-path: apps/console/package-lock.json
 
