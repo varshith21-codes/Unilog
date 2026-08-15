@@ -1,0 +1,187 @@
+# Lighting — the fourth class, and the first one added to close a coverage gap rather than to
+# support a measurement.
+#
+# WHY THIS CATEGORY. It is the largest cohort in the client's 1,000-row sample at 208 rows:
+# Phillips Lighting 111, Kichler 56, Satco 41. With three classes covering a sample that spans
+# roughly twenty categories, 990 of 1,000 rows abstained with `no_viable_candidate`. That is the
+# correct answer to "which of ball valve, gate valve or dishwasher is this LED tube" and it is
+# worth nothing to the client, so coverage is the gap that matters most.
+#
+# ---------------------------------------------------------------------------------------------
+# WHY ONE CLASS AND NOT TWO. A production taxonomy splits lamps from luminaires: a replaceable
+# bulb and a hardwired wall fixture are bought by different people for different reasons. This
+# class deliberately covers both, for a reason visible in the data:
+#
+#     801274      10w LED 6" Retro 50k          <- a lamp
+#     65-1224     4' Led Strip Light            <- a luminaire
+#     45573BK     Kichler Wall Light            <- a luminaire
+#     141465      15W Flor 18" T12 27k          <- a lamp
+#
+# Separating them requires deciding, per row, whether "Light" names a bulb or a fixture. Nothing
+# in a six-column item master answers that: "Led Lt" is written the same way for both. Splitting
+# on a guess would put roughly a quarter of the cohort in the wrong branch of the browse tree,
+# which is worse for a buyer than a correct coarse branch. The client's
+# `Unicat_Lov_v1_0_Updated_With_Remarks.xlsx` is keyed by (Classpath, Attribute Label) and would
+# settle it; it is not in this repository. Recorded as a known gap rather than guessed.
+#
+# The attribute grid is shaped for that decision: everything a bulb and a fixture genuinely share
+# (wattage, colour temperature, technology, lumens, voltage, life) is recommended or required, and
+# the bulb-only attributes (shape, base) are optional so a fixture row is not scored down for
+# lacking a cap it does not have.
+#
+# ---------------------------------------------------------------------------------------------
+# NO DESCRIPTION RECIPES FOR THIS CLASS, ON PURPOSE. `schema/descriptions/` holds the five rewrite
+# formulas, and the dishwasher ones were reverse-engineered from the client's own ground-truth
+# strings character by character. There is no labelled lighting row anywhere in this repository, so
+# a recipe here would be an invented template. The delivery builder handles a class with no recipe
+# book by emitting no generated descriptions, which is the honest outcome: eleven blank cells that
+# score as missed rather than eleven plausible sentences that score as wrong.
+
+class:
+  code: LGT.LMP.GEN
+  name: Lighting
+  version: v1
+
+  # "Light" covers a bulb and a wall fixture equally, which matches what this class admits. A
+  # buyer reading the delivery format's `Product Name` column sees the word they would use.
+  item_type: Light
+
+  # Nothing is a lighting product unless the text says so. The dishwasher class established why
+  # this guard is not optional: without it, retrieval scores a class's attribute vocabulary as
+  # readily as its identity vocabulary, and this class binds `voltage_rating`, `wattage` and
+  # `finish_color` — promiscuous enough to match a grease gun.
+  #
+  # `lt` and `flor` are here because that is how Satco and Phillips actually abbreviate. Checked
+  # against the six strings pinned by
+  # tests/test_classify.py::test_identity_guard_rejects_attribute_vocabulary_matches: none of them
+  # contains any token below, so the guard stays as tight as it was.
+  #
+  # Deliberately absent: `light` alone would be enough to admit most of the cohort, but `lamp`,
+  # `bulb` and the technology words are what make the admission evidence about identity rather
+  # than about the word appearing anywhere.
+  identity_terms:
+    - light
+    - lights
+    - lighting
+    - lt
+    - lamp
+    - lamps
+    - bulb
+    - bulbs
+    - led
+    - fluorescent
+    - flor
+    - fluor
+    - halogen
+    - incandescent
+    - sodium
+    - luminaire
+    - fixture
+    - downlight
+    - highbay
+    - troffer
+
+  browse_path:
+    - Electrical
+    - Lighting
+    - Lamps & Fixtures
+
+  reporting_path: [Electrical, Lighting, Lamps]
+
+  mappings:
+    # 39101600 is UNSPSC's lamps commodity family. Declared for completeness and, as with the
+    # dishwasher class, NOT written to the delivery file: the client leaves UNSPSC blank on both
+    # ground-truth rows and their guide flags it as a gap in their own data. Populating a column
+    # they deliberately left empty is not an improvement on ground truth.
+    unspsc: "39101600"
+
+  attributes:
+    # --- slots 1-15: the delivery format's attribute grid ------------------------------------
+    #
+    # THE ORDER IS A PUBLISHED COLUMN LAYOUT. Slot n of the ATTRIBUTE_LABEL/VALUE/UOM grid is
+    # binding n. There is no client ground truth for lighting to copy an order from, so this one
+    # is ours: identity and electrical first, because that is the order a specifier reads, then
+    # photometric, then form factor, then commercial. Append at slot 16+ rather than inserting,
+    # for the same reason as every other class — inserting shifts every subsequent column in a
+    # file the client ingests.
+    - { code: product_series,          requirement: recommended, weight: 2.0, label: Series }
+    - { code: luminaire_form,          requirement: recommended, weight: 3.0, label: Form }
+    - { code: lamp_technology,         requirement: required,    weight: 3.0 }
+    - { code: wattage,                 requirement: required,    weight: 3.0 }
+    - { code: color_temperature,       requirement: recommended, weight: 3.0 }
+    - { code: lumen_output,            requirement: recommended, weight: 3.0 }
+    - { code: voltage_rating,          requirement: recommended, weight: 2.0 }
+    - { code: voltage_range_supported, requirement: optional,    weight: 1.0 }
+    # Bulb-only, so optional: a hardwired wall fixture has no cap and no envelope designation,
+    # and marking these required would score every luminaire in the cohort as incomplete for
+    # lacking attributes it cannot have.
+    - { code: lamp_shape,              requirement: optional,    weight: 2.0 }
+    - { code: lamp_base,               requirement: optional,    weight: 2.0 }
+    - { code: beam_angle,              requirement: optional,    weight: 1.0 }
+    - { code: color_rendering_index,   requirement: optional,    weight: 1.0, label: CRI }
+    - { code: rated_life,              requirement: optional,    weight: 1.0 }
+    - { code: dimmable,                requirement: optional,    weight: 1.0 }
+    - { code: nominal_length,          requirement: optional,    weight: 1.0, label: Length }
+    - { code: pack_quantity,           requirement: optional,    weight: 1.0, label: Pack }
+    - { code: finish_color,            requirement: optional,    weight: 1.0, label: Color }
+
+    # --- beyond the grid ---------------------------------------------------------------------
+    #
+    # These fill their own named delivery columns rather than a numbered slot, so they sit after
+    # the grid bindings and must stay there.
+    #
+    # The grid itself holds fifty slots, not fifteen. The dishwasher class binds fifteen because
+    # that is what the client's ground truth showed for dishwashers — it is that category's
+    # template, not the format's ceiling. Worth stating because the fifteen looks like a limit
+    # until you count the columns, and believing it would have cost this class two real
+    # specifications for no reason.
+    - { code: approvals,               requirement: recommended, weight: 2.0 }  # -> Standard/Approvals
+    - { code: country_of_origin,       requirement: optional,    weight: 1.0 }  # -> Country Of Origin
+    - { code: warranty_terms,          requirement: optional,    weight: 1.0 }  # -> Warranty
+    - { code: gtin,                    requirement: optional,    weight: 1.0 }  # -> UPC/EAN/GTIN
+
+  cross_field_rules:
+    - id: R_BEAM_ANGLE_NEEDS_DIRECTIONAL_SHAPE
+      expr: "beam_angle > 0"
+      references: [beam_angle, lamp_shape]
+      severity: warning
+      message: >
+        A beam angle was recorded. It is only meaningful for a directional envelope — PAR, BR and
+        MR shapes — and an omnidirectional A-shape or a linear tube does not have one. Where the
+        shape is non-directional this usually means a field angle was copied from an adjacent
+        column. A warning rather than an error because a luminaire legitimately has a beam angle
+        and no lamp shape at all, which is the majority of the fixture half of this class.
+
+    - id: R_EFFICACY_IS_PHYSICALLY_POSSIBLE
+      expr: "lumen_output <= wattage * 250"
+      references: [lumen_output, wattage]
+      severity: error
+      message: >
+        Lumens divided by watts exceeds 250 lm/W, which is above the demonstrated laboratory
+        ceiling for a white LED and far above anything commercially available. Effectively always
+        a decimal error in one of the two figures, or a lumen value read from a multi-lamp
+        fixture's total against a single lamp's wattage. An error rather than a warning because
+        both figures are individually plausible, so nothing else in the stack will catch it.
+
+  channel_profiles:
+    # The delivery format. `required` is deliberately short, for the reason the dishwasher class
+    # documents: pre-flight refuses to publish a record missing a required attribute, and a
+    # 1,000-row batch where almost no row has an attached document would then emit nothing at all.
+    # Specifications are gated individually by their own evidence requirement instead, so a row
+    # publishes with what it can prove and leaves the rest blank.
+    - name: unilog_delivery
+      title_template: "{brand} {wattage} {lamp_technology} {class_name}"
+      max_title_chars: 200
+      unit_system: imperial_primary
+      required: [mpn]
+
+    - name: cx1_pim
+      title_template: "{brand} {mpn} {wattage} {lamp_technology} {class_name}"
+      max_title_chars: 200
+      unit_system: imperial_primary
+      required: [mpn, lamp_technology]
+
+    - name: schema_org
+      max_title_chars: 200
+      unit_system: metric_primary
+      required: [mpn]

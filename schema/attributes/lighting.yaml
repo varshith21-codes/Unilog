@@ -1,0 +1,418 @@
+# Lighting attributes — lamps, bulbs and luminaires.
+#
+# WHY THIS CATEGORY EXISTS. Lighting is the largest cohort in the client's 1,000-row sample: 208
+# rows across Phillips (111), Kichler (56) and Satco (41). Before this file the sample had three
+# classes covering roughly twenty categories, so 990 of 1,000 rows abstained with
+# `no_viable_candidate` — correct behaviour, and useless to the client.
+#
+# ---------------------------------------------------------------------------------------------
+# WHAT THE SUPPLIER STRINGS ACTUALLY CONTAIN, because that is what these attributes are shaped to.
+#
+#     141465  15W Flor 18" T12 27k
+#     801274  10w LED 6" Retro 50k
+#     567313  50W Led MR16 30K 3pk
+#     467316  150W Sodium Med 21k
+#     603571  3' Strip Light Ext
+#
+# Four things are recoverable from that with no document and no model: wattage, the technology word,
+# the ANSI shape designation, and a pack multiple. Two more are recoverable when a datasheet is
+# attached: lumens and rated life. The rest of this file exists so the document path has somewhere
+# to put them, not because a description will ever state them.
+#
+# ---------------------------------------------------------------------------------------------
+# THE COLOUR-TEMPERATURE TRAP, and why it is deliberately not solved here.
+#
+# `27k`, `30K`, `50k` in those strings are the lighting trade's shorthand for 2700 K, 3000 K and
+# 5000 K. Reading them literally gives 27 K — colder than liquid nitrogen — and reading them as
+# thousands requires knowing the convention.
+#
+# The attribute is declared in kelvin and its `plausible_range` starts at 1500, so a literal
+# reading is refused by L3 rather than published. What is NOT done is the expansion: no rule in
+# this release turns `27k` into 2700 K. The convention is real and standard, but there is no
+# labelled lighting ground truth in this repository to verify the expansion against, and a
+# systematic 100x error applied to 208 rows is a worse outcome than 208 blank cells. When the
+# client's LOV arrives, the expansion becomes a declared rule with a test behind it.
+
+attributes:
+  # ------------------------------------------------------------------ electrical
+  - code: wattage
+    name: Wattage
+    datatype: quantity
+    quantity_kind: power
+    canonical_unit: W
+    unit_hint: W
+    description: >
+      Nominal power the lamp or luminaire consumes at its rated voltage. For a retrofit LED this
+      is the actual draw, not the incandescent wattage it replaces — suppliers print both and the
+      equivalence figure is marketing, not a specification.
+    example_values: ["15 W", "60 W", "150 W"]
+    extraction_hints:
+      - stated immediately before the technology word in an abbreviated description, e.g. "15W Flor"
+      - a figure written as "60W equivalent" is a comparison, not this attribute
+    spec_labels: ["Wattage", "Watts", "Power", "Input Power", "Lamp Watts", "Nominal Wattage"]
+    table_headers: ["watts", "wattage", "w", "power"]
+    tolerance: 0.0
+    # 0.5 W covers an indicator lamp; 2000 W covers a stadium fixture. A figure outside this is a
+    # unit error rather than an unusual product.
+    plausible_range: [0.5, 2000.0]
+    # Critical rather than defining: a 12 W lamp genuinely substitutes for a 15 W one when the
+    # lumen output matches, which is the whole basis of LED retrofit. It is never a drop-in
+    # decision to make silently, though, because the fixture may be wattage-limited.
+    interchange: critical
+
+  - code: color_temperature
+    name: Color Temperature
+    datatype: quantity
+    quantity_kind: temperature
+    canonical_unit: K
+    unit_hint: K
+    description: >
+      Correlated colour temperature of the emitted light, in kelvin. Lower is warmer: 2700 K is
+      domestic warm white, 4000 K neutral, 6500 K daylight. See this file's header for why the
+      supplier shorthand "27k" is not expanded automatically.
+    example_values: ["2700 K", "3000 K", "5000 K"]
+    extraction_hints:
+      - printed as a bare number followed by K, often at the end of a description
+      - "a two-digit form such as 27k or 30K is trade shorthand for hundreds; do not read it literally"
+    spec_labels: ["Color Temperature", "Colour Temperature", "CCT", "Correlated Color Temperature", "Kelvin"]
+    table_headers: ["cct", "color temp", "colour temp", "kelvin", "k"]
+    tolerance: 0.0
+    # Starts at 1500 so a literal reading of "27k" (27 K) is refused rather than published.
+    plausible_range: [1500.0, 10000.0]
+    # Two lamps of different colour temperature are not interchangeable in a room where the rest
+    # are one or the other, and a buyer notices immediately. Not critical: it does not affect fit.
+    interchange: functional
+
+  - code: voltage_range_supported
+    name: Voltage Range
+    datatype: range
+    quantity_kind: voltage
+    canonical_unit: V
+    unit_hint: V
+    description: >
+      Supply voltage window the product operates across, for universal-input drivers stated as a
+      span rather than a single figure. Distinct from voltage_rating, which is a single nominal
+      value; a 120-277 V driver genuinely has no single nominal voltage.
+    example_values: ["120 V to 277 V", "12 V to 24 V"]
+    spec_labels: ["Voltage Range", "Input Voltage", "Operating Voltage", "Supply Voltage"]
+    tolerance: 0.0
+    plausible_range: [1.0, 600.0]
+    # A wider window contains a narrower one, so encloses is the only correct direction here.
+    interchange: critical
+    substitution: encloses
+
+  # ------------------------------------------------------------------ photometric
+  - code: lumen_output
+    name: Lumen Output
+    datatype: integer
+    description: >
+      Initial luminous flux in lumens. The figure a lamp is actually chosen on — wattage is a
+      cost, lumens are the product. Declared as an integer rather than a quantity because the unit
+      registry has no luminous-flux kind, so there is no lumen unit to convert to or from and a
+      quantity would fail schema load. The consequence is a blank UOM cell in the delivery grid.
+    example_values: ["800", "1600", "2450"]
+    extraction_hints:
+      - almost never in an abbreviated supplier description; expect it only from a datasheet
+      - "\"800 lm\" and \"800 lumens\" are the same figure; capture the number"
+    spec_labels: ["Lumens", "Lumen Output", "Initial Lumens", "Luminous Flux", "Light Output", "Delivered Lumens"]
+    table_headers: ["lumens", "lm", "initial lumens", "output"]
+    plausible_range: [1.0, 100000.0]
+    # Deliberately `equal` rather than at_least. More light is not automatically a substitute: an
+    # under-cabinet lamp at triple the lumens is glare, not an upgrade. The engine reports the
+    # difference and leaves the judgement to a merchandiser.
+    interchange: functional
+
+  - code: beam_angle
+    name: Beam Angle
+    datatype: quantity
+    quantity_kind: angle
+    canonical_unit: deg
+    unit_hint: deg
+    description: >
+      Angle of the cone within which intensity stays above half its peak. Applies to directional
+      lamps such as MR16, PAR and BR shapes; an omnidirectional A-shape lamp has none, and
+      recording one for it is an error rather than a default.
+    example_values: ["25 deg", "40 deg", "60 deg"]
+    spec_labels: ["Beam Angle", "Beam Spread", "Beam", "Field Angle"]
+    table_headers: ["beam", "beam angle", "beam spread"]
+    tolerance: 0.0
+    plausible_range: [4.0, 360.0]
+    # A 25-degree spot and a 60-degree flood light a completely different area from the same
+    # socket. Same fit, different product behaviour.
+    interchange: critical
+
+  - code: color_rendering_index
+    name: Color Rendering Index
+    datatype: number
+    description: >
+      CRI, the fidelity with which the source renders colour against a reference, on a 0-100
+      scale. Dimensionless by definition, so no unit is declared. Retail and gallery lighting
+      specifies 90+; a high-pressure sodium street lamp sits near 25.
+    example_values: ["80", "90", "97"]
+    spec_labels: ["CRI", "Color Rendering Index", "Colour Rendering Index", "Ra", "CRI (Ra)"]
+    table_headers: ["cri", "ra"]
+    tolerance: 0.0
+    plausible_range: [0.0, 100.0]
+    # Higher genuinely is better here, with no counterexample of the kind lumens has: no
+    # application is harmed by more faithful colour rendering at the same colour temperature.
+    interchange: functional
+    substitution: at_least
+
+  - code: rated_life
+    name: Rated Life
+    datatype: quantity
+    quantity_kind: time
+    canonical_unit: h
+    unit_hint: h
+    description: >
+      Hours at which the stated proportion of a population is expected to have failed, or for LED
+      to have depreciated to a stated fraction of initial output. The threshold differs by
+      technology and manufacturer, so the figure is only comparable within a technology.
+    example_values: ["1000 h", "15000 h", "50000 h"]
+    spec_labels: ["Rated Life", "Average Life", "Life Hours", "Rated Average Life", "Lifetime", "L70"]
+    table_headers: ["life", "rated life", "hours", "life (hrs)"]
+    tolerance: 0.0
+    plausible_range: [100.0, 200000.0]
+    interchange: functional
+    substitution: at_least
+
+  # ------------------------------------------------------------------ form factor
+  - code: luminaire_form
+    name: Form
+    datatype: enum
+    description: >
+      What kind of fitting this is, for a luminaire rather than a replaceable lamp. A chandelier
+      and a troffer share every electrical attribute and are not remotely the same purchase, so
+      the form is the first thing that distinguishes them.
+    example_values: ["Pendant", "Chandelier", "Troffer"]
+    extraction_hints:
+      - usually the noun immediately before the word Light in an abbreviated description
+      - "\"Kichler Pendant Lt\" gives Pendant; a bare \"Light\" gives nothing and must stay empty"
+    spec_labels: ["Form", "Fixture Type", "Luminaire Type", "Product Type", "Style"]
+    # A bare "type" is deliberately absent from both this attribute and lamp_technology. A lighting
+    # ordering table headed just "Type" could be holding Pendant or holding LED, and there is no
+    # way to tell from the header which vocabulary the column is drawn from. Claiming it for either
+    # produces a cited, plausible, wrong value — the same failure the spec_labels/table_headers
+    # split was created for. The qualified headers below are unambiguous, so the abstention only
+    # costs the genuinely ambiguous case.
+    table_headers: ["form", "fixture type", "luminaire type", "style"]
+    allowed_values:
+      - value: Pendant
+        aliases: ["pendant light", "pendant lt", "mini pendant", "pend"]
+      - value: Chandelier
+        aliases: ["chand", "chandelier lt"]
+      - value: Ceiling Mount
+        aliases: ["ceiling", "ceiling light", "ceiling lt", "flush mount", "semi-flush", "close to ceiling"]
+      - value: Wall Mount
+        aliases: ["wall", "wall light", "wall lt", "sconce", "wall sconce", "vanity"]
+      - value: Bath Bar
+        aliases: ["bath", "bath light", "bath lt", "bath bar", "vanity bar"]
+      - value: Recessed Downlight
+        aliases: ["downlight", "down light", "recessed", "retro", "retrofit", "can light", "recessed can"]
+      - value: Strip Light
+        aliases: ["strip", "strip light", "strip lt", "linear strip"]
+      - value: Troffer
+        aliases: ["troffer light", "lay-in", "recessed troffer"]
+      - value: Flat Panel
+        aliases: ["panel", "flat panel", "led panel", "edge-lit panel"]
+      - value: High Bay
+        aliases: ["highbay", "high bay light", "hi-bay"]
+      - value: Under Cabinet
+        aliases: ["undercabinet", "under counter", "task light"]
+      - value: Track Head
+        aliases: ["track", "track light", "track fixture"]
+      - value: Landscape
+        aliases: ["path light", "landscape light", "well light"]
+      - value: Flood
+        aliases: ["flood light", "floodlight", "security light"]
+      - value: Lamp
+        aliases: ["bulb", "replacement lamp", "light bulb"]
+        note: a replaceable lamp rather than a fitting; the shape and base attributes apply
+    # Cosmetic would be wrong and defining would be too strong. A pendant and a flush ceiling
+    # mount serve the same circuit and the same room, so the engine should report the difference
+    # loudly and still let a merchandiser decide.
+    interchange: critical
+
+  - code: lamp_technology
+    name: Lamp Technology
+    datatype: enum
+    description: >
+      The light-producing mechanism. Determines efficacy, dimming behaviour, warm-up time and
+      disposal obligation, so it is the first thing a specifier looks at and the attribute most
+      reliably present in an abbreviated description.
+    example_values: ["LED", "Fluorescent", "High Pressure Sodium"]
+    spec_labels: ["Lamp Type", "Technology", "Light Source", "Source Type", "Lamp Technology"]
+    # No bare "type" here either — see the note on luminaire_form's table_headers.
+    table_headers: ["technology", "source", "lamp type", "light source"]
+    allowed_values:
+      - value: LED
+        aliases: ["l.e.d.", "light emitting diode", "led retrofit", "solid state"]
+      - value: Fluorescent
+        aliases: ["flor", "fluor", "fl", "linear fluorescent", "fluorescent tube"]
+      - value: Compact Fluorescent
+        aliases: ["cfl", "compact fluor", "twist"]
+      - value: Incandescent
+        aliases: ["inc", "incand", "filament"]
+      - value: Halogen
+        aliases: ["hal", "quartz halogen", "tungsten halogen"]
+      - value: High Pressure Sodium
+        aliases: ["hps", "sodium", "son", "high pressure sod"]
+      - value: Metal Halide
+        aliases: ["mh", "halide", "ceramic metal halide", "cmh"]
+      - value: Mercury Vapor
+        aliases: ["mv", "mercury", "mercury vapour"]
+      - value: Induction
+        aliases: ["induction lamp"]
+    # Critical, not defining. An LED retrofit is sold precisely as a substitute for the
+    # fluorescent tube it replaces, so calling a technology difference a different product would
+    # refuse the most common real substitution in this category. It is never a silent swap.
+    interchange: critical
+
+  - code: lamp_shape
+    name: Lamp Shape
+    datatype: enum
+    description: >
+      ANSI/IEC envelope designation. The letter names the profile and the number is the maximum
+      diameter in eighths of an inch, so A19 is a 2-3/8" A-shape and T12 a 1-1/2" tube. Governs
+      whether the lamp physically fits the fixture and, for reflector shapes, how it throws light.
+    example_values: ["A19", "PAR38", "MR16", "T8"]
+    spec_labels: ["Shape", "Bulb Shape", "Lamp Shape", "Envelope", "Bulb Type", "Bulb"]
+    table_headers: ["shape", "bulb", "envelope"]
+    allowed_values:
+      - value: A15
+        aliases: ["a-15"]
+      - value: A19
+        aliases: ["a-19", "a19 standard", "standard a"]
+      - value: A21
+        aliases: ["a-21"]
+      - value: BR30
+        aliases: ["br-30"]
+      - value: BR40
+        aliases: ["br-40"]
+      - value: PAR16
+        aliases: ["par-16"]
+      - value: PAR20
+        aliases: ["par-20"]
+      - value: PAR30
+        aliases: ["par-30", "par30 long neck", "par30ln"]
+      - value: PAR38
+        aliases: ["par-38"]
+      - value: MR11
+        aliases: ["mr-11"]
+      - value: MR16
+        aliases: ["mr-16"]
+      # T3 and T4 are in the client's sample on halogen capsules ("300W Halogen T3 Bulb"), which
+      # is the only place the very small tube diameters still appear.
+      - value: T3
+        aliases: ["t-3"]
+      - value: T4
+        aliases: ["t-4"]
+      - value: T5
+        aliases: ["t-5"]
+      - value: T8
+        aliases: ["t-8"]
+      - value: T9
+        aliases: ["t-9"]
+      - value: T12
+        aliases: ["t-12"]
+      - value: G25
+        aliases: ["g-25", "globe 25"]
+      - value: B11
+        aliases: ["b-11", "candle"]
+    # Critical rather than defining, which is a finer call than it first looks. A PAR38 plainly
+    # does not go where an MR16 goes — but that pair differs in base as well, and `lamp_base`
+    # already refuses it absolutely. What shape alone distinguishes is A19 from A21: same medium
+    # base, same service, one slightly larger, and they substitute for each other in most fittings
+    # every day. Declaring shape defining would refuse that real substitution to catch a case
+    # another attribute already catches.
+    interchange: critical
+
+  - code: lamp_base
+    name: Base Type
+    datatype: enum
+    description: >
+      The cap that engages the socket. An exact match is required for the product to function at
+      all, which makes this the one lighting attribute where a difference is disqualifying rather
+      than merely consequential.
+    example_values: ["Medium E26", "GU10", "G13"]
+    spec_labels: ["Base", "Base Type", "Cap", "Socket", "Cap Type"]
+    table_headers: ["base", "cap", "socket"]
+    allowed_values:
+      - value: Medium E26
+        aliases: ["med", "medium", "e26", "e-26", "medium screw", "standard base", "es"]
+      - value: Candelabra E12
+        aliases: ["cand", "candelabra", "e12", "e-12", "ses"]
+      - value: Intermediate E17
+        aliases: ["int", "intermediate", "e17", "e-17"]
+      - value: Mogul E39
+        aliases: ["mog", "mogul", "e39", "e-39", "goliath"]
+      - value: GU10
+        aliases: ["gu-10", "gu 10"]
+      - value: GU5.3
+        aliases: ["gu-5.3", "gu53", "mr16 bi-pin", "bi-pin"]
+      - value: GU24
+        aliases: ["gu-24", "twist and lock"]
+      - value: G13
+        aliases: ["g-13", "medium bi-pin", "t8 base"]
+      - value: G5
+        aliases: ["g-5", "miniature bi-pin"]
+      - value: GX23
+        aliases: ["gx-23"]
+      - value: Integrated
+        aliases: ["no base", "hardwired", "integral", "built-in led"]
+        note: LED array not replaceable; the luminaire is the lamp
+    interchange: defining
+
+  - code: nominal_length
+    name: Nominal Length
+    datatype: dimension
+    quantity_kind: length
+    canonical_unit: mm
+    display_preference: imperial_fraction
+    unit_hint: in
+    description: >
+      Overall length as the manufacturer designates it, for tubes, strips and linear fixtures.
+      A designation rather than a measurement: a nominal 4' fluorescent tube is 47-3/4" so that it
+      fits a 4' fixture, and recording the measured figure would contradict every catalogue.
+    example_values: ['18"', "3 ft", "4 ft"]
+    extraction_hints:
+      - in an abbreviated description this is the foot or inch mark figure, e.g. '18"' or "3'"
+      - do not confuse with a lamp shape number, which is a diameter in eighths of an inch
+    spec_labels: ["Length", "Nominal Length", "Overall Length", "MOL", "Maximum Overall Length"]
+    table_headers: ["length", "nominal length", "size"]
+    tolerance: 0.0
+    plausible_range: [10.0, 5000.0]
+    interchange: critical
+
+  - code: dimmable
+    name: Dimmable
+    datatype: boolean
+    description: >
+      Whether the product is designed to dim on a compatible control. Stated explicitly or not at
+      all: an LED lamp on an incompatible dimmer flickers or fails early, so absence of a claim is
+      meaningful and must not be read as either value.
+    example_values: ["true", "false"]
+    spec_labels: ["Dimmable", "Dimming", "Dimmable?"]
+    table_headers: ["dimmable", "dimming"]
+    # Functional and at_least: a dimmable lamp satisfies a request for a non-dimmable one, never
+    # the reverse. Booleans order as false < true, which is the direction wanted here.
+    interchange: functional
+    substitution: at_least
+
+  - code: pack_quantity
+    name: Pack Quantity
+    datatype: integer
+    description: >
+      Number of units in the consumer pack the part number sells as. Distinct from
+      case_quantity, which counts packs in a shipping carton: a "3pk" of lamps is one sellable
+      unit containing three lamps, and confusing the two misprices the line.
+    example_values: ["1", "2", "3", "6"]
+    extraction_hints:
+      - written as a bare digit followed by pk or pc, e.g. "3pk", "6pc"
+      - absent means one; do not record 1 unless the source says so
+    spec_labels: ["Pack Quantity", "Pack Size", "Units Per Pack", "Pack"]
+    table_headers: ["pack", "pk", "pack qty", "units per pack"]
+    plausible_range: [1.0, 100.0]
+    # A 3-pack and a single are the same lamp. The difference is commercial, and the equivalence
+    # engine should report it without ever blocking a substitution on it.
+    interchange: cosmetic

@@ -580,13 +580,30 @@ class TestSchemaSemantics:
                 assert definition.interchange is not None
                 assert definition.interchange is not Interchange.COSMETIC
 
-    def test_only_one_attribute_is_defining(self, registry):
+    def test_defining_is_reserved_for_physical_impossibility(self, registry):
+        """`defining` ends the conversation, so the bar is impossibility rather than importance.
+
+        A difference here cannot be rescued by agreement anywhere else, which makes it the one
+        level that must not be handed out for being merely consequential. Both current holders pass
+        the same test: the parts cannot be made to connect.
+
+        * `nominal_size` — a 3/4" valve does not join 1" pipe at any price.
+        * `lamp_base` — a GU10 lamp does not enter an E26 socket. Binary, and physical.
+
+        `lamp_shape` was declared defining first and then demoted, which is the useful precedent.
+        PAR38 versus MR16 looks disqualifying, but that pair also differs in base, so `lamp_base`
+        already refuses it; what shape alone separates is A19 from A21, which share a base and
+        substitute for each other daily. Defining would have refused a real substitution in order
+        to catch a case another attribute catches.
+
+        Adding a code here is a claim of that kind. Extend the list and the docstring together.
+        """
         defining = [
             c
             for c in registry.attribute_codes
             if registry.attribute(c).interchange is Interchange.DEFINING
         ]
-        assert defining == ["nominal_size"]
+        assert defining == ["lamp_base", "nominal_size"]
 
     def test_ranges_use_enclosure_and_sets_use_superset(self, registry):
         assert registry.attribute("temperature_range").substitution is SubstitutionRule.ENCLOSES

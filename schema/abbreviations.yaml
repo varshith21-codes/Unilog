@@ -144,3 +144,116 @@ abbreviations:
     terms:
       LF: "true"
       "NL": "true"
+
+  # ---------------------------------------------------------------- lighting vocabulary
+  #
+  # The largest cohort in the client's sample (208 of 1,000 rows) and the one whose descriptions
+  # are most consistently machine-readable, because lighting suppliers abbreviate to a convention
+  # rather than freely: technology, then a size, then a shape designation, then a colour
+  # temperature.
+  #
+  #     141465  15W Flor 18" T12 27k
+  #     567313  50W Led MR16 30K 3pk
+  #     45573BK Kichler Wall Light
+  #
+  # Wattage comes out through the quantity path because it carries its own unit. Everything below
+  # is an enum, and an enum can only be read from a description through this table — which is why
+  # a lighting row classified but produced no technology before these entries existed.
+
+  - attribute: lamp_technology
+    note: >
+      The light-producing mechanism, which lighting suppliers abbreviate consistently. Every term
+      here means one technology and nothing else in any catalogue this repository has seen.
+
+      SODIUM is the one judgement call and it is recorded rather than hidden. Bare "Sodium" is
+      mapped to High Pressure Sodium because low-pressure sodium has been effectively absent from
+      North American distribution for two decades, and the attribute's own permitted values
+      already carry "sodium" as an alias of the high-pressure value. If a low-pressure line ever
+      appears in a feed, this entry is the thing that has to be removed.
+    terms:
+      LED: LED
+      Flor: Fluorescent
+      Fluor: Fluorescent
+      Fluorescent: Fluorescent
+      CFL: Compact Fluorescent
+      Incand: Incandescent
+      Halogen: Halogen
+      Hal: Halogen
+      Sodium: High Pressure Sodium
+      HPS: High Pressure Sodium
+      MH: Metal Halide
+      Halide: Metal Halide
+
+  - attribute: luminaire_form
+    note: >
+      What kind of fitting it is. Safe to read only because this table is scoped per attribute and
+      the attribute is bound to one class: "Wall" means a wall-mounted luminaire in a lighting row
+      and would mean something else entirely on a building product, which is exactly the situation
+      the per-attribute scoping exists for.
+
+      DELIBERATELY ABSENT: "Retro". It appears in rows like "10w LED 6\" Retro 50k" where it does
+      mean a recessed downlight retrofit, but the word on its own only says "retrofit" — it is
+      equally the name for a replacement lamp that fits an existing fixture. One token cannot
+      decide between a fitting and a bulb, so the form stays empty on those rows.
+    terms:
+      Pendant: Pendant
+      Pend: Pendant
+      Chandelier: Chandelier
+      Chand: Chandelier
+      Ceiling: Ceiling Mount
+      Sconce: Wall Mount
+      Wall: Wall Mount
+      Bath: Bath Bar
+      Vanity: Bath Bar
+      Downlight: Recessed Downlight
+      Troffer: Troffer
+      Highbay: High Bay
+      Strip: Strip Light
+      Undercabinet: Under Cabinet
+      Floodlight: Flood
+
+  - attribute: lamp_shape
+    note: >
+      ANSI envelope designations. These are not abbreviations of anything — the designation IS the
+      value — but the description path reaches an enum only through this table, so each is listed
+      as its own expansion. The letter names the profile and the number is the maximum diameter in
+      eighths of an inch, so the strings are unambiguous wherever they appear as a whole token.
+    terms:
+      A15: A15
+      A19: A19
+      A21: A21
+      BR30: BR30
+      BR40: BR40
+      PAR16: PAR16
+      PAR20: PAR20
+      PAR30: PAR30
+      PAR38: PAR38
+      MR11: MR11
+      MR16: MR16
+      T3: T3
+      T4: T4
+      T5: T5
+      T8: T8
+      T9: T9
+      T12: T12
+      G25: G25
+      B11: B11
+
+  - attribute: lamp_base
+    note: >
+      Socket caps. "Med" and "Cand" are the two a supplier actually shortens; the rest are already
+      the standard designation. Deliberately excludes a bare "E" prefix guess and excludes "Pin",
+      which appears in rows like "20W Halogen Pin T4" but names a family of bi-pin caps with
+      different pin spacings rather than one of them.
+    terms:
+      Med: Medium E26
+      Medium: Medium E26
+      E26: Medium E26
+      Cand: Candelabra E12
+      E12: Candelabra E12
+      E17: Intermediate E17
+      Mog: Mogul E39
+      E39: Mogul E39
+      GU10: GU10
+      GU24: GU24
+      G13: G13
