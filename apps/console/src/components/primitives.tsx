@@ -7,7 +7,7 @@
  */
 
 import clsx from "clsx";
-import type { ReactNode } from "react";
+import { Children, type ReactNode } from "react";
 
 import {
   DECISION_LABEL,
@@ -136,26 +136,110 @@ export function Overline({ children, className }: { children: ReactNode; classNa
 }
 
 /**
+ * Section shell. Owns the vertical rhythm and the rule that separates one section from the next.
+ *
+ * Sections were previously spaced by whatever each page reached for — `py-[var(--spacing-section)]`
+ * on one screen, a fixed `mt-16` on another, nothing at all on a third. Fixed spacing is the worse
+ * of the two: it does not scale with the viewport, so the same page that felt tight at 360px felt
+ * arbitrary at 1600px. Routing every section through one component means the rhythm is a property
+ * of the design system rather than of whoever wrote the page.
+ *
+ * `divider` is the other half. A long screen of stacked panels with no rules between them reads as
+ * one undifferentiated column; a hairline above each section is what turns it into a document with
+ * structure, and it costs a border rather than a card.
+ *
+ * `<section>` without an accessible name is exposed as generic rather than as a landmark, so this
+ * does not add navigational noise. Pass `labelledBy` when the section's own heading should name it.
+ */
+export function Section({
+  children,
+  className,
+  divider = true,
+  rhythm = "base",
+  labelledBy,
+  id,
+}: {
+  children: ReactNode;
+  className?: string;
+  /** A hairline above the section. Off for the first section after a masthead. */
+  divider?: boolean;
+  /** `lg` for a section that opens a new chapter of the page rather than continuing one. */
+  rhythm?: "base" | "lg" | "tight";
+  labelledBy?: string;
+  id?: string;
+}) {
+  return (
+    <section
+      id={id}
+      aria-labelledby={labelledBy}
+      className={clsx(
+        divider && "hairline-t",
+        /*
+         * Asymmetric on purpose: more space above the rule than below it. A rule sitting
+         * equidistant between two sections belongs to neither, so the eye has to decide which
+         * heading it introduces. Weighting the gap upward attaches it to the heading underneath,
+         * which is the editorial convention and the one that makes a long page scannable.
+         *
+         * The lower half is derived from the same token rather than fixed, so the whole rhythm
+         * still scales with the viewport.
+         */
+        rhythm === "lg"
+          ? "mt-[var(--spacing-section-lg)] pt-[calc(var(--spacing-section)*0.6)]"
+          : rhythm === "tight"
+            ? "mt-[var(--spacing-section)] pt-[calc(var(--spacing-section)*0.4)]"
+            : "mt-[var(--spacing-section)] pt-[calc(var(--spacing-section)*0.55)]",
+        // With no rule there is nothing for the padding to sit under, so the margin carries the
+        // whole gap.
+        !divider && "pt-0",
+        className,
+      )}
+    >
+      {children}
+    </section>
+  );
+}
+
+/**
  * Section heading. One weight step and one colour step below the page title — hierarchy
  * through weight and colour rather than another size, which keeps a dense screen calm.
+ *
+ * `level="primary"` promotes the heading one step up the type scale. It exists because a page of
+ * uniformly-weighted section headings tells the reader nothing about which section matters: on the
+ * overview, the review queue is work somebody has to do and the cost table is context, and those
+ * two had been reading as equals. One size step is the cheapest way to say so, and it stays inside
+ * the existing scale rather than inventing a sixth heading size.
  */
 export function SectionHeading({
   title,
   detail,
   action,
   className,
+  level = "default",
+  id,
 }: {
   title: string;
   detail?: ReactNode;
   action?: ReactNode;
   className?: string;
+  level?: "default" | "primary";
+  id?: string;
 }) {
   return (
-    <div className={clsx("flex items-baseline justify-between gap-4", className)}>
+    <div className={clsx("flex flex-wrap items-baseline justify-between gap-x-6 gap-y-3", className)}>
       <div className="min-w-0">
-        <h2 className="text-lg font-medium">{title}</h2>
+        <h2
+          id={id}
+          className={clsx(
+            "font-medium",
+            level === "primary"
+              ? "text-xl tracking-[var(--tracking-heading)]"
+              : "text-lg",
+          )}
+        >
+          {title}
+        </h2>
         {detail ? (
-          <p className="mt-1 text-sm text-[var(--fg-tertiary)]">{detail}</p>
+          <p className="mt-1.5 max-w-[76ch] text-sm text-[var(--fg-tertiary)]">{detail}</p>
         ) : null}
       </div>
       {action ? <div className="shrink-0">{action}</div> : null}
@@ -163,10 +247,24 @@ export function SectionHeading({
   );
 }
 
+/**
+ * Designed empty state.
+ *
+ * `kind` is the load-bearing prop, and it is not styling. This product distinguishes "there is
+ * nothing in this set" from "this was never measured" everywhere else — a quiet `0` against an
+ * em-dash in a table cell, a suppressed meter against a zero-width one — and an empty panel is
+ * where that distinction is easiest to lose and most expensive to lose. A reviewer who reads
+ * "nothing to review" as "nothing was checked" draws the opposite conclusion from the true one.
+ *
+ * So the mark carries it: a solid border and a minus for an empty set, a dashed border and the
+ * same em-dash the tables use for something unmeasured. The mark is `aria-hidden` and the
+ * distinction is repeated in text for a screen reader, because shape alone is not a label.
+ */
 export function EmptyState({
   title,
   detail,
   action,
+  kind = "empty",
 }: {
   title: string;
   /**
@@ -175,19 +273,88 @@ export function EmptyState({
    */
   detail?: ReactNode;
   action?: ReactNode;
+  /** `unmeasured` when the panel is empty because nothing was observed, not because nothing exists. */
+  kind?: "empty" | "unmeasured";
 }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-2 px-6 py-14 text-center">
-      <p className="text-body font-medium">{title}</p>
-      {detail ? (
-        <p className="max-w-[42ch] text-sm text-[var(--fg-tertiary)]">{detail}</p>
-      ) : null}
-      {action ? <div className="mt-3">{action}</div> : null}
+    <div className="flex flex-col items-center justify-center gap-3.5 px-6 py-12 text-center">
+      <span
+        aria-hidden
+        className={clsx(
+          "grid size-9 place-items-center rounded-md text-[var(--fg-quiet)]",
+          "bg-[var(--surface-sunken)]",
+          /*
+           * The dashed border is at `--fg-quiet`, not at the decorative hairline the solid variant
+           * uses. It is carrying meaning — dashed is what says "not measured" — so it is held to the
+           * 3:1 a graphical object needs, and `--hairline-strong` does not clear that against a
+           * sunken fill in either theme.
+           */
+          kind === "unmeasured"
+            ? "border border-dashed border-[var(--fg-quiet)]"
+            : "border border-[var(--hairline-strong)]",
+        )}
+      >
+        {kind === "unmeasured" ? <span className="mono">&mdash;</span> : <MinusIcon />}
+      </span>
+
+      <div className="flex flex-col gap-1.5">
+        <p className="text-body font-medium">
+          {title}
+          <span className="sr-only">
+            {kind === "unmeasured" ? " — not measured" : " — nothing to show"}
+          </span>
+        </p>
+        {detail ? (
+          <p className="max-w-[46ch] text-sm text-[var(--fg-tertiary)]">{detail}</p>
+        ) : null}
+      </div>
+      {action ? <div className="mt-1">{action}</div> : null}
     </div>
   );
 }
 
 // ---------------------------------------------------------------- figures
+
+/**
+ * The rule-bounded band of headline figures that opens each index page.
+ *
+ * A band rather than a row of cards: four figures that share a denominator belong in one horizontal
+ * field, and boxing each would put three borders between numbers the reader is comparing. Vertical
+ * rules between the columns instead, because at four columns the gap alone left it ambiguous whether
+ * a hint belonged to the figure above it or the one beside it.
+ *
+ * A component rather than the same twenty classes on three pages. The column rules and the stagger
+ * steps have to change together and have to survive a reflow from four columns to two — the padding
+ * has to drop to zero on whichever column starts a row, and which column that is depends on the
+ * breakpoint. Expressing that with `first:` and `md:` variants on one element does not work: variant
+ * ordering decides which of `first:pl-0` and `md:px-6` wins, and it is the wrong one.
+ */
+const BAND_COLUMN = [
+  "pr-5 md:pr-6",
+  "hairline-l pl-5 md:pl-6 md:pr-6",
+  "pr-5 md:hairline-l md:pl-6 md:pr-6",
+  "hairline-l pl-5 md:pl-6",
+] as const;
+
+const BAND_REVEAL = ["reveal-1", "reveal-2", "reveal-3", "reveal-4"] as const;
+
+export function StatBand({ children }: { children: ReactNode }) {
+  return (
+    <section className="hairline-t hairline-b grid grid-cols-2 gap-y-9 py-10 md:grid-cols-4">
+      {Children.map(children, (child, index) => (
+        <div
+          className={clsx(
+            "reveal",
+            BAND_REVEAL[index % BAND_REVEAL.length],
+            BAND_COLUMN[index % BAND_COLUMN.length],
+          )}
+        >
+          {child}
+        </div>
+      ))}
+    </section>
+  );
+}
 
 /**
  * A single headline number. `hint` carries the denominator or the definition — a figure
@@ -264,8 +431,20 @@ export function Meter({
         style={{ width: `${pct}%`, backgroundColor: fill }}
       />
       {typeof threshold === "number" ? (
+        /*
+         * The threshold mark, which is the reason this is a meter and not a progress bar: the
+         * question is "is this above the line", and a bar without the line only answers "how big".
+         *
+         * A single hairline was not answering it. Over the unfilled track a 1px rule at
+         * `--fg-secondary` is legible, but the moment the value passes the threshold the mark sits
+         * on the fill — where it lands around 1.4:1 and effectively vanishes, so the bar stopped
+         * showing the line exactly in the case where the reader wants confirmation it was cleared.
+         *
+         * Two pixels wide with a one-pixel surface-coloured halo fixes both regions: the body
+         * carries it against the track, the halo carries it against the fill.
+         */
         <div
-          className="absolute inset-y-0 w-px bg-[var(--fg-secondary)]"
+          className="absolute inset-y-0 w-0.5 bg-[var(--fg-secondary)] outline-1 outline-[var(--surface)]"
           style={{ left: `${Math.max(0, Math.min(1, threshold)) * 100}%` }}
         />
       ) : null}

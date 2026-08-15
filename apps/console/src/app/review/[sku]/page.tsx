@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import { CrossSourcePanel } from "@/components/cross-source-panel";
 import { EquivalencePanel } from "@/components/equivalence-panel";
-import { ArrowIcon, Meter } from "@/components/primitives";
+import { ArrowIcon, Meter, Section } from "@/components/primitives";
 import { ReviewWorkspace } from "@/components/review-workspace";
 import {
   attributeRows,
@@ -64,7 +64,10 @@ export default async function ReviewSkuPage({
         <nav aria-label="Breadcrumb" className="text-meta text-[var(--fg-quiet)]">
           <ol className="flex flex-wrap items-center gap-1.5">
             <li>
-              <Link href="/review" className="rounded-xs hover:text-[var(--fg)]">
+              <Link
+                href="/review"
+                className="rounded-xs transition-colors duration-[var(--duration-fast)] hover:text-[var(--fg)]"
+              >
                 Review
               </Link>
             </li>
@@ -124,7 +127,7 @@ export default async function ReviewSkuPage({
                   <Link
                     key={member.bundle.sku}
                     href={`/review/${member.bundle.sku}`}
-                    className="mono rounded-xs text-[var(--accent)] hover:underline"
+                    className="mono rounded-xs text-[var(--accent)] underline-offset-2 transition-colors duration-[var(--duration-fast)] hover:underline"
                   >
                     {member.bundle.sku}
                   </Link>
@@ -229,9 +232,9 @@ export default async function ReviewSkuPage({
         because it needs a second source and most have one.
       */}
       {bundle.cross_source?.applicable ? (
-        <div className="mt-16">
+        <Section rhythm="lg">
           <CrossSourcePanel view={bundle.cross_source} />
-        </div>
+        </Section>
       ) : null}
 
       {/*
@@ -241,9 +244,9 @@ export default async function ReviewSkuPage({
         settled, not while settling it. Absent until a run has been saved for this SKU.
       */}
       {bundle.equivalence ? (
-        <div className="mt-16">
+        <Section rhythm="lg">
           <EquivalencePanel view={bundle.equivalence} />
-        </div>
+        </Section>
       ) : null}
     </div>
   );

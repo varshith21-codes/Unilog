@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 
-import { AlertIcon } from "@/components/primitives";
+import { AlertIcon, EmptyState, Meter } from "@/components/primitives";
 import { fetchPolicy } from "@/lib/actions";
 import { count, percent, score as fmtScore } from "@/lib/format";
 import type { RiskCoveragePoint, RiskPolicyView } from "@/lib/types";
@@ -23,8 +23,10 @@ const WIDTH = 560;
 const HEIGHT = 260;
 const PAD = { top: 16, right: 16, bottom: 40, left: 52 };
 
-const BUDGETS = [1, 2, 5, 10, 20];
 /** Presets in percent. The slider covers the same range continuously. */
+const BUDGETS = [1, 2, 5, 10, 20];
+const MIN_BUDGET = 1;
+const MAX_BUDGET = 20;
 
 export interface RiskDialProps {
   /** The policy the displayed data was actually decided under. */
@@ -78,26 +80,56 @@ export function RiskDial({ initial }: RiskDialProps) {
           </span>
         </div>
 
-        <input
-          id="risk-budget"
-          type="range"
-          min={1}
-          max={20}
-          step={1}
-          value={epsilonPct}
-          onChange={(event) => setEpsilonPct(Number(event.target.value))}
-          aria-describedby="risk-verdict"
-          className="mt-4 w-full accent-[var(--accent)]"
-        />
+        {/*
+          Track and fill are a `Meter` underneath the input, not the input's own pseudo-elements.
 
-        <div className="mt-3 flex flex-wrap gap-1.5">
+          Styling `::-webkit-slider-runnable-track` means giving up the native fill, and the usual
+          way back — a huge box-shadow on the thumb clipped by an `overflow: hidden` track — fails
+          loudly in any engine that declines to clip it. Rendering the bar as the same component
+          every other bar on this screen uses costs one wrapper and inherits colours that are
+          already verified against the surface.
+        */}
+        {/*
+          The height comes from `.slider`, which grows to a 44px target on a coarse pointer, and the
+          wrapper sizes to it. `top-1/2 -translate-y-1/2` on the bar rather than relying on
+          `items-center`: an absolutely-positioned flex child's static position is resolved from the
+          alignment properties, which is correct per spec but not worth depending on for the one
+          control this whole screen is about.
+        */}
+        <div className="relative mt-5 flex items-center">
+          <div className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2">
+            <Meter
+              value={(epsilonPct - MIN_BUDGET) / (MAX_BUDGET - MIN_BUDGET)}
+              tone="accent"
+              label={`Error budget ${epsilonPct} percent`}
+            />
+          </div>
+          <input
+            id="risk-budget"
+            type="range"
+            min={MIN_BUDGET}
+            max={MAX_BUDGET}
+            step={1}
+            value={epsilonPct}
+            onChange={(event) => setEpsilonPct(Number(event.target.value))}
+            aria-describedby="risk-verdict"
+            className="slider relative"
+          />
+        </div>
+
+        <div className="mt-4 flex flex-wrap gap-1.5">
           {BUDGETS.map((preset) => (
             <button
               key={preset}
               type="button"
               onClick={() => setEpsilonPct(preset)}
               aria-pressed={epsilonPct === preset}
-              className={`pill ${epsilonPct === preset ? "pill-accent" : "pill-quiet"}`}
+              /*
+                `pill-button` rather than a bare pill. These are controls, and they had a rest state
+                and nothing else — no hover, no press, no disabled. Six states now come from one
+                place instead of being re-decided per usage.
+              */
+              className={`pill pill-button ${epsilonPct === preset ? "pill-accent" : "pill-quiet"}`}
             >
               {preset}%
             </button>
@@ -109,7 +141,22 @@ export function RiskDial({ initial }: RiskDialProps) {
           look like an error: it means the data cannot support a guarantee that tight, which is
           the system declining to promise something rather than failing.
         */}
-        <div id="risk-verdict" aria-live="polite" className="mt-6">
+        {/*
+          `data-pending` on the whole readout rather than on the verdict pill alone.
+
+          It was on the pill and nothing in the stylesheet responded to it, so refetching the policy
+          had no visible state at all: a reviewer dragging the slider watched four stale numbers sit
+          still and could not tell whether the request was in flight or the answer had not changed.
+          Dimming rather than blanking, because the previous reading is still true until the new one
+          lands — a skeleton here would throw away information that is still usable.
+        */}
+        <div
+          id="risk-verdict"
+          aria-live="polite"
+          aria-busy={pending || undefined}
+          data-pending={pending ? "true" : undefined}
+          className="mt-7"
+        >
           {error !== null ? (
             <p className="flex gap-2 text-sm text-[var(--fail)]">
               <AlertIcon className="mt-0.5 shrink-0" />
@@ -117,10 +164,7 @@ export function RiskDial({ initial }: RiskDialProps) {
             </p>
           ) : (
             <>
-              <span
-                className={`pill ${policy.achievable ? "pill-pass" : "pill-warn"}`}
-                data-pending={pending || undefined}
-              >
+              <span className={`pill ${policy.achievable ? "pill-pass" : "pill-warn"}`}>
                 {policy.achievable ? "Achievable" : "Not achievable"}
               </span>
 
@@ -233,11 +277,24 @@ function Curve({
 }) {
   if (curve.length === 0) {
     return (
-      <div className="panel flex h-[260px] items-center justify-center p-6">
-        <p className="text-sm text-[var(--fg-tertiary)]">
-          No calibration data. Run{" "}
-          <span className="mono">python scripts/run_backtest.py --write</span>.
-        </p>
+      /*
+        The chart's own aspect ratio rather than a hardcoded 260px, so the placeholder occupies
+        exactly the space the curve will and the swap does not shift the page. `unmeasured`: there is
+        no curve because no backtest has run, and a reader must not take an absent curve for a
+        policy that was evaluated and found to guarantee nothing.
+      */
+      <div className="panel flex items-center justify-center" style={{ aspectRatio: WIDTH / HEIGHT }}>
+        <EmptyState
+          kind="unmeasured"
+          title="No calibration data"
+          detail={
+            <>
+              The risk&ndash;coverage curve is computed from reviewed outcomes, and none have been
+              recorded. Produce them with{" "}
+              <span className="mono">python scripts/run_backtest.py --write</span>.
+            </>
+          }
+        />
       </div>
     );
   }
@@ -388,12 +445,18 @@ function Curve({
               strokeWidth={1}
               opacity={0.5}
             />
+            {/*
+              The ring is `--surface`, which is what this marker actually sits on. It was `--canvas`,
+              a step darker in light mode than the panel behind the chart, so the operating point —
+              the one mark on this figure a reader is meant to find — wore a visible halo of the
+              wrong colour.
+            */}
             <circle
               cx={scales.x(operating.coverage)}
               cy={scales.y(operating.error_upper_bound)}
               r={5}
               fill="var(--pass)"
-              stroke="var(--canvas)"
+              stroke="var(--surface)"
               strokeWidth={2}
             />
           </g>

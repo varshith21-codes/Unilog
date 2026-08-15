@@ -6,12 +6,14 @@ import {
   AlertIcon,
   ArrowIcon,
   CheckIcon,
+  EmptyState,
   KeyValue,
   Meter,
   MethodPill,
   Overline,
   Panel,
   Quote,
+  Section,
   SectionHeading,
 } from "@/components/primitives";
 import { getClassDefinition, getSku, listSkus } from "@/lib/data";
@@ -74,7 +76,10 @@ export default async function CertificatePage({
         <nav aria-label="Breadcrumb" className="text-meta text-[var(--fg-quiet)]">
           <ol className="flex flex-wrap items-center gap-1.5">
             <li>
-              <Link href="/certificates" className="rounded-xs hover:text-[var(--fg)]">
+              <Link
+                href="/certificates"
+                className="rounded-xs transition-colors duration-[var(--duration-fast)] hover:text-[var(--fg)]"
+              >
                 Certificates
               </Link>
             </li>
@@ -104,7 +109,7 @@ export default async function CertificatePage({
       </header>
 
       {/* ---------------------------------------------------------------- quality */}
-      <section className="grid gap-6 lg:grid-cols-12">
+      <section className="hairline-t grid gap-6 pt-[calc(var(--spacing-section)*0.55)] lg:grid-cols-12">
         <Panel raised className="p-7 lg:col-span-5">
           <Overline>Quality index</Overline>
           <p className="figure mt-3">{percent(composite(quality), 1)}</p>
@@ -213,12 +218,12 @@ export default async function CertificatePage({
       </section>
 
       {/* ---------------------------------------------------------------- classification */}
-      <section className="mt-16">
+      <Section>
         <SectionHeading
           title="Classification"
           detail="Multi-target by design: the browse tree and the technical class answer different questions."
         />
-        <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-7 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {certificate.classifications.map((entry) => (
             <Panel key={`${entry.scheme}-${entry.code}`} className="p-6">
               <div className="flex items-center justify-between gap-3">
@@ -257,16 +262,27 @@ export default async function CertificatePage({
             </Panel>
           ))}
         </div>
-      </section>
+      </Section>
 
       {/* ---------------------------------------------------------------- attributes */}
-      <section className="mt-16">
+      <Section rhythm="lg" labelledBy="certified-values-heading">
         <SectionHeading
+          id="certified-values-heading"
+          level="primary"
           title="Certified values"
           detail={`${certificate.attributes.length} values, each with the verbatim span it was read from.`}
         />
 
-        <div className="mt-6 flex flex-col gap-3">
+        {certificate.attributes.length === 0 ? (
+          <Panel className="mt-7">
+            <EmptyState
+              title="No certified values"
+              detail="Nothing on this record cleared the bar to be certified. Candidates and queued values are counted elsewhere but are never presented here as established facts."
+            />
+          </Panel>
+        ) : null}
+
+        <div className="mt-7 flex flex-col gap-3">
           {certificate.attributes.map((entry) => {
             const spec = specByCode.get(entry.code);
             const span = entry.evidence[0];
@@ -356,83 +372,101 @@ export default async function CertificatePage({
             );
           })}
         </div>
-      </section>
+      </Section>
 
       {/* ---------------------------------------------------------------- gaps */}
-      <section className="mt-16">
+      <Section>
         <SectionHeading
           title="Gaps"
           detail="Recorded rather than hidden. A negative result with its search trail is auditable; silence is not."
         />
 
-        <Panel className="scroll-x mt-6 overflow-hidden p-0">
-          <table className="w-full min-w-[48rem] border-collapse text-sm">
-            <caption className="sr-only">Attributes no source could establish</caption>
-            <thead>
-              <tr className="hairline-b bg-[var(--surface-sunken)]">
-                <th scope="col" className="px-6 py-3 text-left font-medium">
-                  Attribute
-                </th>
-                <th scope="col" className="px-6 py-3 text-left font-medium">
-                  Reason
-                </th>
-                <th scope="col" className="px-6 py-3 text-left font-medium">
-                  Recommended action
-                </th>
-                <th scope="col" className="px-6 py-3 text-right font-medium">
-                  Required
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {certificate.gaps.map((gap) => (
-                <tr key={gap.code} className="grid-row hairline-b last:border-b-0">
-                  <th scope="row" className="px-6 py-3.5 text-left font-medium">
-                    {specByCode.get(gap.code)?.name ?? gap.code}
-                    <span className="mono ml-2 font-normal text-[var(--fg-quiet)]">
-                      {gap.code}
-                    </span>
-                  </th>
-                  <td className="px-6 py-3.5 text-[var(--fg-secondary)]">
-                    {GAP_REASON_LABEL[gap.reason]}
-                    {gap.detail ? (
-                      <span className="block text-meta text-[var(--fg-quiet)]">
-                        {gap.detail}
-                      </span>
-                    ) : null}
-                  </td>
-                  <td className="px-6 py-3.5 text-[var(--fg-secondary)]">
-                    {gap.recommended_action ? ACTION_LABEL[gap.recommended_action] : "—"}
-                  </td>
-                  <td className="px-6 py-3.5 text-right">
-                    {gap.required ? (
-                      <span className="pill pill-warn">Required</span>
-                    ) : (
-                      <span className="pill pill-quiet">Optional</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-              {certificate.gaps.length === 0 ? (
+        {certificate.gaps.length === 0 ? (
+          <Panel className="mt-7">
+            {/*
+              Lifted out of a `colSpan` cell inside the table body. A sentence stretched across four
+              empty columns under a header row reads as a table that failed to load; a designed panel
+              reads as the finding it is.
+            */}
+            <EmptyState
+              title="No gaps"
+              detail="Every attribute this class defines resolved to a value, so there is no negative result to record."
+            />
+          </Panel>
+        ) : (
+          <Panel className="scroll-x mt-7 overflow-hidden p-0">
+            <table className="w-full min-w-[48rem] border-collapse text-sm">
+              <caption className="sr-only">Attributes no source could establish</caption>
+              <colgroup>
+                <col className="w-[18rem]" />
+                <col />
+                <col className="w-[14rem]" />
+                <col className="w-[7.5rem]" />
+              </colgroup>
+              <thead className="table-head">
                 <tr>
-                  <td colSpan={4} className="px-6 py-10 text-center text-[var(--fg-tertiary)]">
-                    No gaps. Every attribute this class defines resolved to a value.
-                  </td>
+                  <th scope="col" className="px-6 py-2.5 text-left">
+                    Attribute
+                  </th>
+                  <th scope="col" className="px-6 py-2.5 text-left">
+                    Reason
+                  </th>
+                  <th scope="col" className="px-6 py-2.5 text-left">
+                    Recommended action
+                  </th>
+                  <th scope="col" className="px-6 py-2.5 text-right">
+                    Required
+                  </th>
                 </tr>
-              ) : null}
-            </tbody>
-          </table>
-        </Panel>
-      </section>
+              </thead>
+              <tbody>
+                {certificate.gaps.map((gap) => (
+                  <tr key={gap.code} className="grid-row hairline-b last:border-b-0">
+                    <th scope="row" className="px-6 py-3.5 text-left align-top font-medium">
+                      {specByCode.get(gap.code)?.name ?? gap.code}
+                      <span className="mono mt-0.5 block font-normal text-[var(--fg-quiet)]">
+                        {gap.code}
+                      </span>
+                    </th>
+                    <td className="px-6 py-3.5 align-top text-[var(--fg-secondary)]">
+                      {GAP_REASON_LABEL[gap.reason]}
+                      {gap.detail ? (
+                        <span className="mt-0.5 block text-meta text-[var(--fg-quiet)]">
+                          {gap.detail}
+                        </span>
+                      ) : null}
+                    </td>
+                    <td className="px-6 py-3.5 align-top text-[var(--fg-secondary)]">
+                      {gap.recommended_action ? (
+                        ACTION_LABEL[gap.recommended_action]
+                      ) : (
+                        /* No action recorded is not "no action needed". */
+                        <span className="figure-zero">&mdash;</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-3.5 text-right align-top">
+                      {gap.required ? (
+                        <span className="pill pill-warn">Required</span>
+                      ) : (
+                        <span className="pill pill-quiet">Optional</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Panel>
+        )}
+      </Section>
 
       {/* ---------------------------------------------------------------- channels */}
-      <section className="mt-16">
+      <Section>
         <SectionHeading
           title="Channel readiness"
           detail="Preflight against each destination's own required set, run before anything is published."
         />
 
-        <div className="mt-6 grid gap-5 md:grid-cols-3">
+        <div className="mt-7 grid gap-5 md:grid-cols-3">
           {bundle.channels.map((channel) => (
             <Panel key={channel.name} className="p-6">
               <div className="flex items-center justify-between gap-3">
@@ -485,18 +519,33 @@ export default async function CertificatePage({
               ) : null}
             </Panel>
           ))}
+
+          {bundle.channels.length === 0 ? (
+            <Panel className="md:col-span-3">
+              {/*
+                `unmeasured`. No preflight ran, which is not the same as every channel being blocked
+                — and on a page whose whole subject is what can be published, that is exactly the
+                confusion worth spending a component on.
+              */}
+              <EmptyState
+                kind="unmeasured"
+                title="No channel preflight recorded"
+                detail="This run did not evaluate any destination, so channel readiness is unknown rather than failing."
+              />
+            </Panel>
+          ) : null}
         </div>
-      </section>
+      </Section>
 
       {/* ---------------------------------------------------------------- generated copy */}
       {bundle.copy ? (
-        <div className="mt-16">
+        <Section>
           <GeneratedCopyPanel copy={bundle.copy} />
-        </div>
+        </Section>
       ) : null}
 
       {/* ---------------------------------------------------------------- locator legend */}
-      <section className="mt-16">
+      <Section rhythm="tight">
         <Panel className="p-7">
           <Overline>Reading a citation</Overline>
           <p className="mt-3 max-w-[70ch] text-sm text-[var(--fg-secondary)]">
@@ -507,7 +556,7 @@ export default async function CertificatePage({
             is recoverable even if the page is re-rendered at another size.
           </p>
         </Panel>
-      </section>
+      </Section>
     </div>
   );
 }

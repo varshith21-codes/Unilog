@@ -9,6 +9,7 @@ import {
   AnchorIcon,
   CheckIcon,
   DecisionNote,
+  EmptyState,
   KeyValue,
   Meter,
   MethodPill,
@@ -45,8 +46,37 @@ type Filter = "review" | "all" | "gaps";
 const FILTERS: { id: Filter; label: string }[] = [
   { id: "review", label: "Needs review" },
   { id: "gaps", label: "Gaps" },
-  { id: "all", label: "All attributes" },
+  { id: "all", label: "All" },
 ];
+
+/**
+ * Which rows a filter shows.
+ *
+ * Extracted to module scope so the segmented control can label each option with its count without
+ * re-deriving the predicate. Two copies of this logic would drift, and a badge that disagreed with
+ * the list under it is worse than no badge.
+ */
+function selectRows(rows: AttributeRow[], filter: Filter): AttributeRow[] {
+  if (filter === "all") return rows;
+  if (filter === "gaps") return rows.filter((row) => row.gap !== null);
+
+  const open = rows.filter(
+    (row) =>
+      (row.value !== null && row.value.status !== "auto_accepted") ||
+      (row.gap !== null && row.gap.is_required),
+  );
+
+  // Values before gaps. These are different jobs: a value needs verifying against its
+  // evidence, a gap needs obtaining from somewhere. Grouping them keeps the reviewer in
+  // one mode at a time, and it means the first item always has something to look at.
+  // Requirement and weight order is preserved inside each group.
+  return [
+    ...open.filter((row) => row.value !== null),
+    ...open.filter((row) => row.value === null),
+  ];
+}
+
+const countFor = (rows: AttributeRow[], filter: Filter): number => selectRows(rows, filter).length;
 
 export interface ReviewWorkspaceProps {
   sku: string;
@@ -131,25 +161,7 @@ export function ReviewWorkspace({
     [live, sku],
   );
 
-  const visible = useMemo(() => {
-    if (filter === "all") return rows;
-    if (filter === "gaps") return rows.filter((row) => row.gap !== null);
-
-    const open = rows.filter(
-      (row) =>
-        (row.value !== null && row.value.status !== "auto_accepted") ||
-        (row.gap !== null && row.gap.is_required),
-    );
-
-    // Values before gaps. These are different jobs: a value needs verifying against its
-    // evidence, a gap needs obtaining from somewhere. Grouping them keeps the reviewer in
-    // one mode at a time, and it means the first item always has something to look at.
-    // Requirement and weight order is preserved inside each group.
-    return [
-      ...open.filter((row) => row.value !== null),
-      ...open.filter((row) => row.value === null),
-    ];
-  }, [rows, filter]);
+  const visible = useMemo(() => selectRows(rows, filter), [rows, filter]);
 
   const [selected, setSelected] = useState<string | null>(
     () => visible[0]?.spec.code ?? rows[0]?.spec.code ?? null,
@@ -291,23 +303,48 @@ export function ReviewWorkspace({
             aria-label="Filter attributes"
             className="flex gap-0.5 rounded-lg bg-[var(--surface-inset)] p-0.5"
           >
-            {FILTERS.map((option) => (
-              <button
-                key={option.id}
-                type="button"
-                aria-pressed={filter === option.id}
-                onClick={() => setFilter(option.id)}
-                className={clsx(
-                  "rounded-md px-2.5 py-1 text-meta font-medium",
-                  "transition-colors duration-[var(--duration-fast)]",
-                  filter === option.id
-                    ? "bg-[var(--surface-raised)] text-[var(--fg)] shadow-xs"
-                    : "text-[var(--fg-tertiary)] hover:text-[var(--fg)]",
-                )}
-              >
-                {option.label}
-              </button>
-            ))}
+            {FILTERS.map((option) => {
+              const count = countFor(rows, option.id);
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  aria-pressed={filter === option.id}
+                  onClick={() => setFilter(option.id)}
+                  /*
+                    Press feedback and a hover fill on the unselected segments, neither of which this
+                    control had: an unselected segment changed text colour only, which on a tinted
+                    inset track is close to no feedback at all.
+                  */
+                  className={clsx(
+                    "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-meta font-medium",
+                    "transition-[background-color,color,transform] duration-[var(--duration-fast)] ease-[var(--ease-out-quart)]",
+                    "active:scale-[0.97]",
+                    filter === option.id
+                      ? "bg-[var(--surface-raised)] text-[var(--fg)] shadow-xs"
+                      : "text-[var(--fg-tertiary)] hover:bg-[var(--surface-hover)] hover:text-[var(--fg)]",
+                  )}
+                >
+                  {option.label}
+                  {/*
+                    The count per filter, so a reviewer can see there are no gaps without switching
+                    to the gaps view and finding it empty. Rendered when zero rather than hidden — a
+                    missing badge reads as "not counted", which is the one thing it must not say.
+
+                    Zero is a step quieter than a real count, not a different colour: same reading as
+                    a zero in a table cell.
+                  */}
+                  <span
+                    className={clsx(
+                      "tabular-nums",
+                      count === 0 ? "figure-zero" : "text-[var(--fg-secondary)]",
+                    )}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
           </div>
           <p className="text-meta text-[var(--fg-quiet)] tabular-nums">
             {visible.length} of {rows.length}
@@ -353,8 +390,27 @@ export function ReviewWorkspace({
           className="panel mt-3 max-h-[min(38rem,calc(100dvh-16rem))] overflow-y-auto p-1"
         >
           {visible.length === 0 ? (
-            <li className="px-4 py-10 text-center text-sm text-[var(--fg-tertiary)]">
-              Nothing in this view.
+            /*
+              `role="presentation"` because a listbox may only own options, and this is a message
+              rather than something selectable. The three filters need three different messages: an
+              empty review view is a result, an empty gaps view is a different result, and an empty
+              "all" view means the class declared no attributes — which is a defect, not either.
+            */
+            <li role="presentation" className="px-4 py-8 text-center">
+              <p className="text-sm font-medium">
+                {filter === "review"
+                  ? "Nothing to decide"
+                  : filter === "gaps"
+                    ? "No gaps"
+                    : "No attributes"}
+              </p>
+              <p className="mx-auto mt-1.5 max-w-[34ch] text-meta text-[var(--fg-quiet)]">
+                {filter === "review"
+                  ? "Every value here cleared the threshold and no required attribute is missing."
+                  : filter === "gaps"
+                    ? "Every attribute this class defines resolved to a value."
+                    : "This class declared no attributes, so there is nothing to extract against. That is a schema problem rather than an extraction result."}
+              </p>
             </li>
           ) : null}
 
@@ -374,6 +430,7 @@ export function ReviewWorkspace({
                   data-code={row.spec.code}
                   role="option"
                   aria-selected={isActive}
+                  aria-busy={busy || undefined}
                   onClick={() => setSelected(row.spec.code)}
                   className={clsx(
                     "grid w-full cursor-pointer grid-cols-[1fr_auto] items-center gap-x-3 gap-y-1",
@@ -382,6 +439,7 @@ export function ReviewWorkspace({
                     isActive
                       ? "bg-[var(--accent-quiet)] shadow-[inset_2px_0_0_0_var(--accent)]"
                       : "hover:bg-[var(--surface-hover)]",
+                    busy && "cursor-progress",
                   )}
                 >
                   <span className="flex min-w-0 items-center gap-2">
@@ -398,9 +456,23 @@ export function ReviewWorkspace({
 
                   <span className="flex shrink-0 items-center gap-1.5">
                     {busy ? (
-                      <span className="pill pill-quiet">Saving…</span>
+                      /*
+                        A loading state that occupies the same box as the pill it replaces, so the
+                        row does not reflow mid-save. `aria-busy` on the row carries it for a screen
+                        reader; the visible text is for everyone else.
+                      */
+                      <span className="pill pill-quiet animate-pulse motion-reduce:animate-none">
+                        Saving…
+                      </span>
                     ) : outcome ? (
-                      <StatusPill status={outcome.status} />
+                      /*
+                        The one moment in this app where something changes because the reviewer acted.
+                        A pill that swaps with no transition looks like a re-render; a short fade says
+                        a decision landed on this row and not on the one above it.
+                      */
+                      <span className="animate-fade-in">
+                        <StatusPill status={outcome.status} />
+                      </span>
                     ) : blocking ? (
                       <span className="pill pill-fail">
                         <AlertIcon />
@@ -529,11 +601,11 @@ export function ReviewWorkspace({
             )}
           </div>
         ) : (
-          <div className="panel p-14 text-center">
-            <p className="text-body font-medium">Nothing selected</p>
-            <p className="mt-1 text-sm text-[var(--fg-tertiary)]">
-              Choose an attribute to see its evidence.
-            </p>
+          <div className="panel">
+            <EmptyState
+              title="Nothing selected"
+              detail="Choose an attribute on the left to see the value, its confidence, and the exact region of the source page it was read from."
+            />
           </div>
         )}
       </div>
@@ -680,25 +752,36 @@ function ValueDetail({
           </p>
         ) : null}
 
-        <details className="group mt-5">
-          <summary className="cursor-pointer text-sm text-[var(--fg-tertiary)] transition-colors duration-150 hover:text-[var(--fg)]">
-            Signals behind this score
-          </summary>
-          <dl className="mt-4 flex flex-col gap-2.5">
-            {features.map(([key, magnitude]) => (
-              <div key={key} className="grid grid-cols-[11rem_1fr_2.75rem] items-center gap-3">
-                <dt className="truncate text-meta text-[var(--fg-secondary)]">
-                  {featureLabel(key)}
-                </dt>
-                <dd>
-                  <Meter value={magnitude} tone="quiet" label={featureLabel(key)} />
-                </dd>
-                <dd className="text-right text-meta tabular-nums text-[var(--fg-tertiary)]">
-                  {magnitude.toFixed(2)}
-                </dd>
-              </div>
-            ))}
-          </dl>
+        {/*
+          The default disclosure triangle was showing through here at platform size and colour.
+          `.disclosure` replaces it with a chevron that rotates on open, which is what ties the
+          panel below to the row that opened it.
+        */}
+        <details className="hairline-t mt-5 pt-4">
+          <summary className="disclosure text-sm">Signals behind this score</summary>
+
+          {features.length === 0 ? (
+            <p className="mt-4 text-meta text-[var(--fg-quiet)]">
+              No feature contributions were recorded for this value, so the score cannot be broken
+              down. That is a gap in the run rather than a score of zero on every signal.
+            </p>
+          ) : (
+            <dl className="mt-4 flex flex-col gap-2.5">
+              {features.map(([key, magnitude]) => (
+                <div key={key} className="grid grid-cols-[11rem_1fr_2.75rem] items-center gap-3">
+                  <dt className="truncate text-meta text-[var(--fg-secondary)]">
+                    {featureLabel(key)}
+                  </dt>
+                  <dd>
+                    <Meter value={magnitude} tone="quiet" label={featureLabel(key)} />
+                  </dd>
+                  <dd className="text-right text-meta tabular-nums text-[var(--fg-tertiary)]">
+                    {magnitude.toFixed(2)}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          )}
         </details>
       </div>
 

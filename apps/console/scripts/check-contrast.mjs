@@ -179,10 +179,25 @@ const checks = [
   ["light", "OBJECT", "control border vs surface", T.ink500, T.surfaceL, OBJECT],
   ["light", "OBJECT", "meter fill (accent) vs track", T.accent600, T.ink300, OBJECT],
   ["light", "OBJECT", "meter fill (accent) vs surface", T.accent600, T.surfaceL, OBJECT],
+  // The risk dial's budget slider puts a meter directly on the page canvas rather than inside a
+  // panel, which is a darker backdrop in light mode than any surface — so the fill is checked
+  // against it too.
+  ["light", "OBJECT", "meter fill (accent) vs canvas", T.accent600, T.ink150, OBJECT],
   ["light", "OBJECT", "meter fill (pass) vs track", T.pass700, T.ink300, OBJECT],
   ["light", "OBJECT", "meter fill (warn) vs track", T.warn700, T.ink300, OBJECT],
   ["light", "OBJECT", "meter fill (fail) vs track", T.fail700, T.ink300, OBJECT],
   ["light", "OBJECT", "meter threshold tick vs track", T.ink700, T.ink300, OBJECT],
+  // The threshold tick now carries a one-pixel surface-coloured halo so it stays visible where the
+  // fill has passed it. Both edges of that sandwich are graphical objects conveying the threshold.
+  ["light", "OBJECT", "meter threshold tick vs accent fill", T.surfaceL, T.accent600, OBJECT],
+  ["light", "OBJECT", "meter threshold tick vs pass fill", T.surfaceL, T.pass700, OBJECT],
+  ["light", "OBJECT", "meter threshold tick vs warn fill", T.surfaceL, T.warn700, OBJECT],
+  // Slider thumb: an accent disc ringed in the raised surface, sitting on the page canvas.
+  ["light", "OBJECT", "slider thumb vs canvas", T.accent600, T.ink150, OBJECT],
+  ["light", "OBJECT", "slider thumb pressed vs canvas", T.accent700, T.ink150, OBJECT],
+  // Empty-state mark: the dashed border is the only thing separating "not measured" from "nothing to
+  // show", so it conveys information and is held to 3:1 rather than to the decorative hairline.
+  ["light", "OBJECT", "empty-state dashed mark vs sunken", T.ink600, T.ink175, OBJECT],
   ["light", "OBJECT", "focus ring vs canvas", T.accent500, T.ink150, OBJECT],
   ["light", "OBJECT", "focus ring vs surface", T.accent500, T.surfaceL, OBJECT],
   ["light", "OBJECT", "focus ring vs raised", T.accent500, T.raisedL, OBJECT],
@@ -227,10 +242,17 @@ const checks = [
   ["dark", "OBJECT", "control border vs surface", T.ink600, T.ink950, OBJECT],
   ["dark", "OBJECT", "meter fill (accent) vs track", T.accent400, T.ink800, OBJECT],
   ["dark", "OBJECT", "meter fill (accent) vs surface", T.accent400, T.ink950, OBJECT],
+  ["dark", "OBJECT", "meter fill (accent) vs canvas", T.accent400, T.ink1000, OBJECT],
   ["dark", "OBJECT", "meter fill (pass) vs track", T.pass300, T.ink800, OBJECT],
   ["dark", "OBJECT", "meter fill (warn) vs track", T.warn300, T.ink800, OBJECT],
   ["dark", "OBJECT", "meter fill (fail) vs track", T.fail300, T.ink800, OBJECT],
   ["dark", "OBJECT", "meter threshold tick vs track", T.ink350, T.ink800, OBJECT],
+  ["dark", "OBJECT", "meter threshold tick vs accent fill", T.ink950, T.accent400, OBJECT],
+  ["dark", "OBJECT", "meter threshold tick vs pass fill", T.ink950, T.pass300, OBJECT],
+  ["dark", "OBJECT", "meter threshold tick vs warn fill", T.ink950, T.warn300, OBJECT],
+  ["dark", "OBJECT", "slider thumb vs canvas", T.accent400, T.ink1000, OBJECT],
+  ["dark", "OBJECT", "slider thumb pressed vs canvas", T.accent300, T.ink1000, OBJECT],
+  ["dark", "OBJECT", "empty-state dashed mark vs sunken", T.ink475, T.ink850, OBJECT],
   ["dark", "OBJECT", "focus ring vs canvas", T.accent400, T.ink1000, OBJECT],
   ["dark", "OBJECT", "focus ring vs surface", T.accent400, T.ink950, OBJECT],
   ["dark", "OBJECT", "focus ring vs raised", T.accent400, T.ink900, OBJECT],

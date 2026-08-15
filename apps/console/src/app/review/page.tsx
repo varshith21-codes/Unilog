@@ -7,8 +7,10 @@ import {
   EmptyState,
   Overline,
   Panel,
+  Section,
   SectionHeading,
   Stat,
+  StatBand,
   StatusPill,
 } from "@/components/primitives";
 import {
@@ -63,7 +65,7 @@ export default async function ReviewIndexPage() {
         </p>
       </header>
 
-      <section className="hairline-t hairline-b grid grid-cols-2 gap-x-6 gap-y-8 py-8 md:grid-cols-4">
+      <StatBand>
         <Stat
           label="Open items"
           value={count(openTotal)}
@@ -74,14 +76,18 @@ export default async function ReviewIndexPage() {
         <Stat label="Required gaps" value={count(gapsOpen)} hint="no value could be read" />
         <Stat
           label="Threshold"
+          /*
+            An unset threshold is an em-dash, not a zero. A `0.000` threshold would mean every value
+            auto-accepts, which is the opposite of what a missing calibration means.
+          */
           value={dataset.policy.threshold === null ? "—" : dataset.policy.threshold.toFixed(3)}
           hint={`${percent(dataset.policy.epsilon)} error budget at ${percent(
             dataset.policy.confidence_level,
           )} confidence`}
         />
-      </section>
+      </StatBand>
 
-      <div className="mt-[var(--spacing-section)] flex flex-col gap-5">
+      <div className="mt-[var(--spacing-section)] flex flex-col gap-6">
         {groups.map(({ bundle, open }) => (
           <Panel key={bundle.sku} className="overflow-hidden p-0">
             <div className="hairline-b flex flex-wrap items-center justify-between gap-4 bg-[var(--surface-sunken)] px-6 py-4">
@@ -89,7 +95,7 @@ export default async function ReviewIndexPage() {
                 <h2 className="text-lg font-medium">
                   <Link
                     href={`/review/${bundle.sku}`}
-                    className="rounded-xs transition-colors duration-150 hover:text-[var(--accent)]"
+                    className="rounded-xs transition-colors duration-[var(--duration-fast)] hover:text-[var(--accent)]"
                   >
                     {bundle.sku}
                   </Link>
@@ -135,6 +141,10 @@ export default async function ReviewIndexPage() {
             </div>
 
             {open.length === 0 ? (
+              /*
+                `empty`, deliberately. This SKU was measured and came back clean — the reviewer has
+                nothing to do, which is a result rather than an absence of one.
+              */
               <EmptyState
                 title="Fully accepted"
                 detail="Every attribute this class requires cleared the threshold with verified evidence."
@@ -144,12 +154,12 @@ export default async function ReviewIndexPage() {
                 {open.map((row) => (
                   <li
                     key={row.spec.code}
-                    className="grid-row hairline-b grid grid-cols-[1fr_auto] items-center gap-x-5 gap-y-1.5 px-6 py-3.5 last:border-b-0 sm:grid-cols-[16rem_1fr_auto]"
+                    className="grid-row group hairline-b grid grid-cols-[1fr_auto] items-center gap-x-5 gap-y-1.5 px-6 py-3.5 last:border-b-0 sm:grid-cols-[16rem_1fr_auto]"
                   >
                     <div className="flex min-w-0 items-center gap-2">
                       <Link
                         href={`/review/${bundle.sku}`}
-                        className="truncate rounded-xs text-sm font-medium transition-colors duration-150 hover:text-[var(--accent)]"
+                        className="truncate rounded-xs text-sm font-medium transition-colors duration-[var(--duration-fast)] group-hover:text-[var(--accent)] hover:text-[var(--accent)]"
                       >
                         {row.spec.name}
                       </Link>
@@ -199,37 +209,53 @@ export default async function ReviewIndexPage() {
       </div>
 
       {groups.length === 0 ? (
-        <Panel className="mt-10">
+        <Panel className="mt-[var(--spacing-section)]">
+          {/*
+            `unmeasured`: no SKUs loaded means no run has been read, not a catalogue that was
+            examined and found to contain nothing.
+          */}
           <EmptyState
+            kind="unmeasured"
             title="No SKUs loaded"
-            detail="Run scripts/export_console_fixture.py to generate console data from the pipeline."
+            detail={
+              <>
+                Nothing has been read from a pipeline run. Generate console data with{" "}
+                <span className="mono">python scripts/export_console_fixture.py</span>.
+              </>
+            }
           />
         </Panel>
       ) : null}
 
-      <SectionHeading
-        className="mt-[var(--spacing-section)]"
-        title="Why an attribute lands here"
-        detail="Two distinct reasons, worked differently."
-      />
-      <div className="mt-6 grid gap-5 md:grid-cols-2">
-        <Panel className="p-6">
-          <Overline>Below threshold</Overline>
-          <p className="mt-3 text-sm text-[var(--fg-secondary)]">
-            A value exists and its quote verified, but the calibrated score sat under the
-            acceptance threshold. The reviewer confirms or corrects it, and that decision is
-            what later trains the calibrator.
-          </p>
-        </Panel>
-        <Panel className="p-6">
-          <Overline>Required gap</Overline>
-          <p className="mt-3 text-sm text-[var(--fg-secondary)]">
-            No source stated the value. Nothing to confirm, so the work is to obtain it —
-            usually a supplier request, sometimes a better document. The gap records every
-            source already searched so the negative result stays auditable.
-          </p>
-        </Panel>
-      </div>
+      {/*
+        The legend, at the foot of the page rather than mid-column. It explains the two kinds of row
+        above it and is read once; giving it the same weight as the queue itself would put reference
+        material between a reviewer and their work.
+      */}
+      <Section rhythm="lg">
+        <SectionHeading
+          title="Why an attribute lands here"
+          detail="Two distinct reasons, worked differently."
+        />
+        <div className="mt-7 grid gap-6 md:grid-cols-2">
+          <Panel className="p-6">
+            <Overline>Below threshold</Overline>
+            <p className="mt-3 max-w-[62ch] text-sm text-[var(--fg-secondary)]">
+              A value exists and its quote verified, but the calibrated score sat under the
+              acceptance threshold. The reviewer confirms or corrects it, and that decision is
+              what later trains the calibrator.
+            </p>
+          </Panel>
+          <Panel className="p-6">
+            <Overline>Required gap</Overline>
+            <p className="mt-3 max-w-[62ch] text-sm text-[var(--fg-secondary)]">
+              No source stated the value. Nothing to confirm, so the work is to obtain it —
+              usually a supplier request, sometimes a better document. The gap records every
+              source already searched so the negative result stays auditable.
+            </p>
+          </Panel>
+        </div>
+      </Section>
     </div>
   );
 }

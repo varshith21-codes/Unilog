@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { CohortPanel } from "@/components/cohort-panel";
-import { EmptyState, Panel } from "@/components/primitives";
+import { EmptyState, Overline, Panel } from "@/components/primitives";
 import { loadCohort } from "@/lib/data";
 
 export const metadata: Metadata = {
@@ -27,10 +27,26 @@ export default async function QualityPage() {
   const study = await loadCohort();
 
   return (
-    <div className="flex flex-col gap-10">
-      <header>
-        <h1 className="text-2xl font-medium tracking-[var(--tracking-heading)]">Quality Index</h1>
-        <p className="mt-2 max-w-[70ch] text-body text-[var(--fg-secondary)]">
+    /*
+     * Container and gutter, which this route was missing entirely.
+     *
+     * Every other screen wraps itself in the shell container; this one did not, so its heading and
+     * its widest table ran flush to the viewport edge at every breakpoint. The shell is applied
+     * here rather than in the layout because `main` also carries full-bleed children — the data
+     * source banner sets its own container for the same reason.
+     */
+    <div className="mx-auto max-w-[var(--container-shell)] px-[var(--spacing-gutter)] pb-24">
+      <header className="py-[var(--spacing-section-lg)]">
+        <Overline>Before and after</Overline>
+        {/*
+          `text-display`, matching every other page title. This was `text-2xl`, which is not a step
+          in this system's scale at all — it resolves to a Tailwind default and left the one page
+          that reports the product's headline result with the smallest title in the console.
+        */}
+        <h1 className="mt-4 max-w-[22ch] text-display font-medium tracking-[var(--tracking-display)]">
+          Quality Index
+        </h1>
+        <p className="mt-5 max-w-[68ch] text-body text-[var(--fg-secondary)]">
           The catalogue before enrichment and after, scored on the same four dimensions by the
           same code. A control arm of untouched SKUs sits alongside, not to prove enrichment
           worked, but to prove the measurement itself did not move between the two readings.
@@ -40,19 +56,25 @@ export default async function QualityPage() {
       {study.available ? (
         <CohortPanel study={study} />
       ) : (
-        <Panel>
+        <Panel className="overflow-hidden">
+          {/*
+            `unmeasured`, not `empty`. There is no cohort here because the study was never run, not
+            because it ran and found nothing — and a buyer reading this panel must not come away
+            thinking enrichment was measured at zero lift.
+          */}
           <EmptyState
+            kind="unmeasured"
             title="No cohort study has been run"
             detail={
               study.reason ??
               "The study compares an ERP item master against enriched output, so it needs both."
             }
           />
-          <div className="hairline-t px-7 py-6">
+          <div className="hairline-t bg-[var(--surface-sunken)] px-7 py-6">
             <p className="text-meta text-[var(--fg-quiet)]">
               Build the &ldquo;before&rdquo; state from a supplier flat file, then compare:
             </p>
-            <pre className="mono mt-3 overflow-x-auto text-meta leading-relaxed text-[var(--fg-secondary)]">
+            <pre className="mono scroll-x mt-3 text-meta leading-relaxed text-[var(--fg-secondary)]">
               {`python scripts/ingest_supplier_file.py data/samples/supplier-feed.csv \\
     --supplier milwaukee --map "WT/EA (lb)=each_weight" --out data/ingest
 

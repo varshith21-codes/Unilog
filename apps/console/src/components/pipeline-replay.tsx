@@ -98,9 +98,26 @@ export function PipelineReplay({
           </p>
         </div>
 
-        <button type="button" onClick={replay} className="btn btn-quiet">
-          Replay
-        </button>
+        <div className="flex shrink-0 items-center gap-3">
+          {/*
+            Visible progress. The sequence already announced itself to a screen reader and showed
+            nothing to anyone else, so a sighted viewer watching cards appear had no way to tell
+            whether more were coming — which on a nine-stage reveal is the difference between waiting
+            and assuming it had finished.
+
+            `aria-hidden` because the live region below carries the same information properly;
+            announcing a bare fraction on every tick would be nine interruptions.
+          */}
+          {!done ? (
+            <p aria-hidden className="text-meta tabular-nums text-[var(--fg-quiet)]">
+              {revealed} of {stages.length}
+            </p>
+          ) : null}
+
+          <button type="button" onClick={replay} className="btn btn-quiet">
+            Replay
+          </button>
+        </div>
       </div>
 
       {/*
@@ -142,9 +159,25 @@ export function PipelineReplay({
           : `Replaying stage ${revealed} of ${stages.length}.`}
       </p>
 
+      {/*
+        Each card enters with the shared rise, which is the whole fix here.
+
+        The staging worked and looked wrong: a card was appended with no transition, so nine stages
+        arrived as nine jump-cuts and the sequence read as a rendering glitch rather than a
+        progression. A 300ms rise against a 300ms interval means each card is still settling as the
+        next begins, which is what makes it read as flow.
+
+        `animate-rise` rather than a `reveal-*` step: the delay here comes from the interval, not from
+        a stagger, so stacking a CSS delay on top would double it.
+
+        The reveal's real weakness is not its speed. Nine cards grow the page by roughly 1800px, so a
+        viewer watching from the top loses the last few below the fold. Slowing it down would make
+        that worse, and auto-scrolling would take the page away from them — so the interval stays and
+        the honest fix is a shorter card, which is a content decision rather than a motion one.
+      */}
       <ol className="mt-7 flex flex-col gap-3">
         {stages.slice(0, revealed).map((stage, index) => (
-          <li key={stage.id}>
+          <li key={stage.id} className="animate-rise">
             <StageCard stage={stage} index={index} />
           </li>
         ))}
@@ -171,7 +204,12 @@ const TONE_EDGE: Record<PipelineStage["tone"], string> = {
 
 function StageCard({ stage, index }: { stage: PipelineStage; index: number }) {
   return (
-    <Panel className={clsx("border-l-2 p-6", TONE_EDGE[stage.tone])}>
+    /*
+      `p-5` rather than `p-6`, and tighter separators below. Nine of these stack during the reveal, so
+      every row of padding is multiplied by nine — this is the one lever that reduces how far the
+      sequence pushes the last cards past the fold without touching the timing.
+    */
+    <Panel className={clsx("border-l-2 p-5", TONE_EDGE[stage.tone])}>
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2">
         <span className="mono text-meta text-[var(--fg-quiet)]">
           {String(index + 1).padStart(2, "0")}
@@ -198,10 +236,12 @@ function StageCard({ stage, index }: { stage: PipelineStage; index: number }) {
         </span>
       </div>
 
-      <p className={clsx("mt-3 text-body", TONE_TEXT[stage.tone])}>{stage.headline}</p>
+      <p className={clsx("mt-2.5 max-w-[80ch] text-body", TONE_TEXT[stage.tone])}>
+        {stage.headline}
+      </p>
 
       {stage.facts.length > 0 ? (
-        <dl className="mt-4 flex flex-wrap gap-x-7 gap-y-2">
+        <dl className="mt-3.5 flex flex-wrap gap-x-7 gap-y-2">
           {stage.facts.map((fact) => (
             <div key={fact.label}>
               <dt className="text-meta text-[var(--fg-quiet)]">{fact.label}</dt>
@@ -211,7 +251,9 @@ function StageCard({ stage, index }: { stage: PipelineStage; index: number }) {
         </dl>
       ) : null}
 
-      <p className="hairline-t mt-5 pt-4 text-meta text-[var(--fg-quiet)]">{stage.note}</p>
+      <p className="hairline-t mt-4 max-w-[92ch] pt-3.5 text-meta text-[var(--fg-quiet)]">
+        {stage.note}
+      </p>
     </Panel>
   );
 }

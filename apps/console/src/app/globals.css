@@ -151,6 +151,15 @@
   --animate-fade-in: fade-in 240ms var(--ease-out-quart) both;
   --animate-rise: rise 300ms var(--ease-out-expo) both;
 
+  /*
+   * Stagger step for first-paint reveals.
+   *
+   * 55ms between siblings, 6 steps maximum. Past six the delay is longer than the animation
+   * and the last item reads as slow loading rather than as sequence — so a seventh element
+   * shares the sixth step rather than extending the ramp.
+   */
+  --stagger-step: 55ms;
+
   /* ---------------------------------------------------------------- layout */
   --spacing-gutter: clamp(1.25rem, 3vw, 2.5rem);
   --container-shell: 100rem;
@@ -319,6 +328,16 @@
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
+      /*
+       * Delay has to go too, not just duration.
+       *
+       * A staggered reveal uses `both` fill, so it holds the element at `opacity: 0` for the
+       * length of the delay. Collapsing the duration alone would leave the sixth panel
+       * invisible for 330ms and then snap in — a worse experience than the animation it was
+       * meant to replace.
+       */
+      animation-delay: 0ms !important;
+      transition-delay: 0ms !important;
     }
   }
 }
@@ -531,7 +550,64 @@
     color: var(--fg-secondary);
   }
 
+  /*
+   * A pill that is actually a control.
+   *
+   * Several pills in this console are buttons or links — budget presets, the recorded-run
+   * picker. They inherited a pill's appearance without a pill ever having been given the six
+   * states a control needs, so this adds them in one place rather than per usage. The pressed
+   * and current variants are excluded from hover: washing an accent fill toward the neutral
+   * hover colour reads as the selection being undone.
+   */
+  .pill-button {
+    cursor: pointer;
+    transition:
+      background-color var(--duration-fast) var(--ease-out-quart),
+      color var(--duration-fast) var(--ease-out-quart),
+      transform var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .pill-button:hover:not([aria-pressed="true"], [aria-current="page"], :disabled) {
+    background-color: var(--surface-hover);
+    color: var(--fg);
+  }
+
+  .pill-button:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+
+  .pill-button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
   /* ------------------------------------------------------------------ tables */
+  /*
+   * One header treatment for every table in the console.
+   *
+   * Two were in use: a sentence-case 13px row on a sunken fill, and an uppercase 11px row on
+   * no fill. Both are defensible and having both is not — a header that looks like data in one
+   * table and like a label in the next makes the reader re-learn each grid. The label reading
+   * wins, because at 13px sentence case the header competes with the first row for attention,
+   * which is exactly backwards in a screen whose job is column scanning.
+   *
+   * The fill stays. These tables scroll horizontally, and a filled band is what keeps the
+   * header attached to its columns once the first one has scrolled out of view.
+   */
+  .table-head {
+    background-color: var(--surface-sunken);
+  }
+
+  .table-head th {
+    font-size: var(--text-micro);
+    font-weight: 500;
+    letter-spacing: var(--tracking-overline);
+    text-transform: uppercase;
+    color: var(--fg-quiet);
+    white-space: nowrap;
+    border-bottom: 1px solid var(--hairline);
+  }
+
   .grid-row {
     transition: background-color var(--duration-instant) var(--ease-out-quart);
   }
@@ -543,6 +619,163 @@
   .grid-row[data-selected="true"] {
     background-color: var(--accent-quiet);
     box-shadow: inset 2px 0 0 0 var(--accent);
+  }
+
+  /*
+   * Numeric cell whose value is a measured zero rather than an absence.
+   *
+   * `0` and `—` are one glyph apart and mean opposite things: nothing failed, versus nothing
+   * was counted. Both are quiet so they do not pull the eye down a column of real figures,
+   * and they are quiet in the same way so the difference is carried by the glyph.
+   */
+  .figure-zero {
+    color: var(--fg-quiet);
+  }
+
+  /* ------------------------------------------------------------------ disclosure */
+  /*
+   * `summary` with a designed marker.
+   *
+   * The default triangle is a platform glyph that sits at a platform size in a platform colour,
+   * and it was showing through on three panels. This replaces it with a chevron built from two
+   * borders, which inherits `currentColor` and rotates on open — the rotation is what tells the
+   * reader the panel below belongs to the row they just clicked.
+   */
+  .disclosure {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4375rem;
+    cursor: pointer;
+    list-style: none;
+    color: var(--fg-tertiary);
+    transition: color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .disclosure::-webkit-details-marker {
+    display: none;
+  }
+
+  .disclosure::before {
+    content: "";
+    width: 0.375rem;
+    height: 0.375rem;
+    flex: none;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    rotate: -45deg;
+    translate: 1px -1px;
+    transition: rotate var(--duration-fast) var(--ease-out-quart);
+  }
+
+  details[open] > .disclosure::before {
+    rotate: 45deg;
+    translate: 0 -2px;
+  }
+
+  .disclosure:hover {
+    color: var(--fg);
+  }
+
+  /* ------------------------------------------------------------------ slider */
+  /*
+   * The error-budget slider.
+   *
+   * This control is the product's central claim — pick an error budget, see what it costs in
+   * coverage — and it was shipping as a browser default with an accent colour applied. Track and
+   * thumb are drawn here so it belongs to the same system as everything around it.
+   *
+   * The track is transparent: the visible track and its fill are a `Meter` rendered underneath,
+   * which is the same component and therefore the same verified colours as every other bar in
+   * the console. Styling `::-webkit-slider-runnable-track` would have meant losing the fill in
+   * WebKit, or reaching for the clipped-box-shadow trick, which fails visibly when a browser
+   * declines to clip a pseudo-element's shadow.
+   */
+  .slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    /* Declared rather than left to the intrinsic height of a range input, which differs per engine. */
+    height: 1.25rem;
+    background-color: transparent;
+    cursor: grab;
+  }
+
+  .slider:active {
+    cursor: grabbing;
+  }
+
+  /*
+   * 44px target on a coarse pointer. A range input cannot carry a pseudo-element, so the height is
+   * grown directly and the wrapper sizes to it — the bar underneath stays centred because it is
+   * positioned against the wrapper's midline rather than its top.
+   */
+  @media (pointer: coarse) {
+    .slider {
+      height: 2.75rem;
+    }
+  }
+
+  .slider::-webkit-slider-runnable-track {
+    height: 0.25rem;
+    background-color: transparent;
+  }
+
+  .slider::-moz-range-track {
+    height: 0.25rem;
+    background-color: transparent;
+  }
+
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 0.875rem;
+    width: 0.875rem;
+    margin-top: -0.3125rem;
+    border-radius: 9999px;
+    background-color: var(--accent);
+    /* A ring in the surface colour, so the thumb reads as sitting on the track rather than in it. */
+    border: 2px solid var(--surface-raised);
+    box-shadow: var(--shadow-xs);
+    transition:
+      transform var(--duration-fast) var(--ease-out-quart),
+      background-color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .slider::-moz-range-thumb {
+    height: 0.875rem;
+    width: 0.875rem;
+    border-radius: 9999px;
+    background-color: var(--accent);
+    border: 2px solid var(--surface-raised);
+    box-shadow: var(--shadow-xs);
+    transition:
+      transform var(--duration-fast) var(--ease-out-quart),
+      background-color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  /* Pointer-only. On a touch device there is no hover, and the grow would fire on tap. */
+  @media (hover: hover) and (pointer: fine) {
+    .slider:hover::-webkit-slider-thumb {
+      transform: scale(1.15);
+    }
+
+    .slider:hover::-moz-range-thumb {
+      transform: scale(1.15);
+    }
+  }
+
+  .slider:active::-webkit-slider-thumb {
+    transform: scale(0.94);
+    background-color: var(--accent-hover);
+  }
+
+  .slider:active::-moz-range-thumb {
+    transform: scale(0.94);
+    background-color: var(--accent-hover);
+  }
+
+  .slider:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
   }
 
   /*
@@ -587,6 +820,58 @@
 }
 
 @layer utilities {
+  /*
+   * First-paint reveal, staggered.
+   *
+   * Applied to sections and to grouped siblings, never to a headline or a primary figure. The
+   * point of a console is that a number is on screen when the page is; gating the one figure a
+   * reader came for behind 300ms of entrance would be trading the product for the polish.
+   *
+   * Six numbered steps rather than an inline custom property, so the delays stay in the
+   * stylesheet and a component only ever passes a class name. Past six the delay exceeds the
+   * animation and the last item reads as slow loading — see `--stagger-step`.
+   */
+  .reveal {
+    animation: var(--animate-rise);
+  }
+
+  .reveal-1 {
+    animation-delay: calc(1 * var(--stagger-step));
+  }
+
+  .reveal-2 {
+    animation-delay: calc(2 * var(--stagger-step));
+  }
+
+  .reveal-3 {
+    animation-delay: calc(3 * var(--stagger-step));
+  }
+
+  .reveal-4 {
+    animation-delay: calc(4 * var(--stagger-step));
+  }
+
+  .reveal-5 {
+    animation-delay: calc(5 * var(--stagger-step));
+  }
+
+  .reveal-6 {
+    animation-delay: calc(6 * var(--stagger-step));
+  }
+
+  /*
+   * In-flight state for a region whose contents are being refetched.
+   *
+   * Dims rather than blanks, because the previous reading is still true until the new one
+   * arrives — replacing it with a skeleton would discard information the reader can still use.
+   * `cursor: progress` on the region says the delay is expected rather than a stall.
+   */
+  [data-pending="true"] {
+    opacity: 0.55;
+    cursor: progress;
+    transition: opacity var(--duration-base) var(--ease-out-quart);
+  }
+
   .hairline-b {
     border-bottom: 1px solid var(--hairline);
   }

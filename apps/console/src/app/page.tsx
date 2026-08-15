@@ -3,12 +3,16 @@ import Link from "next/link";
 import {
   AlertIcon,
   ArrowIcon,
+  CheckIcon,
+  EmptyState,
   KeyValue,
   Meter,
   Overline,
   Panel,
+  Section,
   SectionHeading,
   Stat,
+  StatBand,
 } from "@/components/primitives";
 import { RiskDial } from "@/components/risk-dial";
 import { VariantSeriesPanel } from "@/components/variant-series-panel";
@@ -120,7 +124,11 @@ export default async function OverviewPage() {
         </div>
 
         {/* Composite quality, with its four weighted dimensions underneath. A composite
-            without its components is unauditable, so both travel together. */}
+            without its components is unauditable, so both travel together.
+
+            No reveal on this panel. It holds the one figure a reader opens this page for, and an
+            entrance animation on the headline number is the definition of polish getting in the way
+            of the product. */}
         <Panel raised className="p-7 lg:col-span-5">
           <div className="flex items-start justify-between gap-6">
             <Stat
@@ -131,7 +139,9 @@ export default async function OverviewPage() {
             <span className="pill pill-quiet mt-1">Mean</span>
           </div>
 
-          <dl className="mt-8 flex flex-col gap-4">
+          {/* A rule between the composite and its components. They are not four more figures at the
+              same level — they are what the one above is made of. */}
+          <dl className="hairline-t mt-7 flex flex-col gap-4 pt-6">
             {dimensions.map((dimension) => (
               <div
                 key={dimension.label}
@@ -174,7 +184,7 @@ export default async function OverviewPage() {
       </header>
 
       {/* ---------------------------------------------------------------- counters */}
-      <section className="hairline-t hairline-b grid grid-cols-2 gap-x-6 gap-y-9 py-9 md:grid-cols-4">
+      <StatBand>
         <Stat
           label="Publishable"
           value={count(totals.valuesPublishable)}
@@ -198,10 +208,15 @@ export default async function OverviewPage() {
           value={`${totals.channelsReady}/${totals.channelsTotal}`}
           hint="passing preflight across all SKUs"
         />
-      </section>
+      </StatBand>
 
-      {/* ---------------------------------------------------------------- cost meter */}
-      <section className="py-[var(--spacing-section)]">
+      {/*
+        ---------------------------------------------------------------- cost meter
+
+        No rule of its own: the counter band above closes with one, and two rules separated by
+        nothing but space is a rule too many.
+      */}
+      <Section divider={false}>
         <SectionHeading
           title="Cost to enrich"
           detail="Bedrock token spend, priced from the AWS Price List API."
@@ -215,17 +230,28 @@ export default async function OverviewPage() {
         />
 
         {cost.skusPriced === 0 ? (
-          <Panel className="mt-6 p-7">
-            <p className="text-body text-[var(--fg-secondary)]">
-              No cost recorded. Fetch the price table with{" "}
-              <span className="mono">python scripts/fetch_bedrock_prices.py --write</span> and
-              re-run the pipeline.
-            </p>
+          <Panel className="mt-7">
+            {/*
+              `unmeasured`. No cost recorded is not a cost of zero, and this panel is the one place
+              on the page where a reader could plausibly read the second from the first.
+            */}
+            <EmptyState
+              kind="unmeasured"
+              title="No cost recorded"
+              detail={
+                <>
+                  Nothing was priced, which is not the same as nothing having been spent. Fetch the
+                  price table with{" "}
+                  <span className="mono">python scripts/fetch_bedrock_prices.py --write</span> and
+                  re-run the pipeline.
+                </>
+              }
+            />
           </Panel>
         ) : (
           <>
-            <div className="mt-6 grid gap-6 lg:grid-cols-12">
-              <Panel className="p-7 lg:col-span-5">
+            <div className="mt-7 grid gap-6 lg:grid-cols-12">
+              <Panel className="reveal reveal-1 p-7 lg:col-span-5">
                 <Overline>Mean per SKU</Overline>
                 <p className="figure mt-3">{usd(cost.meanPerSkuUsd)}</p>
                 <p className="mt-2 text-meta text-[var(--fg-quiet)]">
@@ -259,38 +285,50 @@ export default async function OverviewPage() {
                 </p>
               </Panel>
 
-              <Panel className="p-7 lg:col-span-7">
+              <Panel className="reveal reveal-2 p-7 lg:col-span-7">
                 <Overline>Where the spend went</Overline>
 
                 {/*
                   Per-tier, because the cascade's entire justification is that most work lands
                   on the cheapest model. If the frontier tier dominated this table, the tier
                   ordering would need revisiting rather than defending.
+
+                  Widths are declared rather than left to the content. Four of these five columns are
+                  numeric and their widest plausible value is known, so fixing them stops the table
+                  reflowing between runs and keeps the tier names — the only column a reader scans
+                  vertically — flush left against the panel edge.
                 */}
                 <table className="mt-5 w-full border-collapse text-sm">
                   <caption className="sr-only">Cost by model tier</caption>
-                  <thead>
-                    <tr className="text-meta text-[var(--fg-quiet)]">
-                      <th scope="col" className="hairline-b py-2 text-left font-medium">
+                  <colgroup>
+                    <col />
+                    <col className="w-[5.5rem]" />
+                    <col className="w-[6.5rem]" />
+                    <col className="w-[6rem]" />
+                    <col className="w-[4.5rem]" />
+                  </colgroup>
+                  <thead className="table-head bg-transparent">
+                    <tr>
+                      <th scope="col" className="py-2 text-left">
                         Tier
                       </th>
-                      <th scope="col" className="hairline-b py-2 text-right font-medium">
+                      <th scope="col" className="py-2 text-right">
                         Calls
                       </th>
-                      <th scope="col" className="hairline-b py-2 text-right font-medium">
+                      <th scope="col" className="py-2 text-right">
                         Tokens
                       </th>
-                      <th scope="col" className="hairline-b py-2 text-right font-medium">
+                      <th scope="col" className="py-2 text-right">
                         Cost
                       </th>
-                      <th scope="col" className="hairline-b py-2 text-right font-medium">
+                      <th scope="col" className="py-2 text-right">
                         Share
                       </th>
                     </tr>
                   </thead>
                   <tbody>
                     {tierRows.map((row) => (
-                      <tr key={row.tier}>
+                      <tr key={row.tier} className="grid-row">
                         <td className="hairline-b py-2.5">{row.tier}</td>
                         <td className="hairline-b py-2.5 text-right tabular-nums">
                           {count(row.calls)}
@@ -329,11 +367,19 @@ export default async function OverviewPage() {
             ) : null}
           </>
         )}
-      </section>
+      </Section>
 
-      {/* ---------------------------------------------------------------- the risk dial */}
-      <section className="py-[var(--spacing-section)]">
+      {/*
+        ---------------------------------------------------------------- the risk dial
+
+        `level="primary"` and the wider rhythm. This control is the product's central claim, and it
+        had been reading as the fourth of six equally-weighted panels. Nothing about it moves except
+        its heading size and the space around it, which is the point: the page needed a hierarchy,
+        not another card.
+      */}
+      <Section rhythm="lg">
         <SectionHeading
+          level="primary"
           title="Acceptance policy"
           detail="Choose an error budget; see what it costs in coverage."
           action={
@@ -343,7 +389,7 @@ export default async function OverviewPage() {
           }
         />
 
-        <div className="mt-6">
+        <div className="mt-8">
           <RiskDial initial={policyView} />
         </div>
 
@@ -361,186 +407,298 @@ export default async function OverviewPage() {
             be earned from real review decisions before these numbers are relied on.
           </p>
         </div>
-      </section>
+      </Section>
 
-      {/* ---------------------------------------------------------------- sources */}
-      <section className="grid gap-6 pb-[var(--spacing-section)] lg:grid-cols-12">
-        <Panel className="p-7 lg:col-span-7">
-          <SectionHeading
-            title={sources.length === 1 ? "Source document" : "Source documents"}
-            detail="Content-addressed, so every citation stays stable."
-          />
+      {/*
+        ---------------------------------------------------------------- sources
 
-          <ul className="mt-7 flex flex-col gap-6">
-            {sources.map(({ document, pages }) => (
-              <li key={document.document_id} className="not-first:hairline-t not-first:pt-6">
-                {/* Grid lives on the `dl` itself; an intermediate wrapper would nest a second
-                    `div` between the list and its `dt`/`dd` pairs, which is not valid. */}
-                <dl className="grid grid-cols-2 gap-x-5 gap-y-5">
-                  <KeyValue label="Document" span={2}>
-                    {document.document_id}
-                  </KeyValue>
-                  <KeyValue label="SHA-256" mono span={2}>
-                    {shortHash(document.sha256, 24)}…
-                  </KeyValue>
-                  <KeyValue label="Revision">
-                    {document.revision_label ?? "Unlabelled"}
-                  </KeyValue>
-                  <KeyValue label="Type">{document.doc_type.replace(/_/g, " ")}</KeyValue>
-                  <KeyValue label="Parser">{document.parser}</KeyValue>
-                  <KeyValue label="Retrieved">{dateOnly(document.fetched_at)}</KeyValue>
-                  <KeyValue label="Structure" span={2}>
-                    {document.page_count ?? pages.length} page
-                    {(document.page_count ?? pages.length) === 1 ? "" : "s"},{" "}
-                    {document.line_count} lines, {document.table_count} table
-                    {document.table_count === 1 ? "" : "s"}
-                  </KeyValue>
-                </dl>
-              </li>
-            ))}
+        Restructured from a twelve-column grid holding a single seven-column panel, which left five
+        columns of nothing beside it on any screen wide enough to notice — an accident rather than a
+        composition, and the most visible one on the page.
+
+        It is now an asymmetric split: the label and the reason the documents are addressed this way
+        on the left, the document's own fields on the right. That gives the section a shape no other
+        section on the page has, which is what stops six sections reading as one list, and it uses
+        the full measure without inventing a panel to fill the gap.
+      */}
+      <Section>
+        <div className="grid gap-x-10 gap-y-7 lg:grid-cols-12">
+          <div className="lg:col-span-4">
+            <SectionHeading
+              title={sources.length === 1 ? "Source document" : "Source documents"}
+              detail="Content-addressed, so every citation stays stable."
+            />
+            <p className="mt-4 max-w-[46ch] text-meta text-[var(--fg-quiet)]">
+              A citation names a digest, not a filename. Re-download the same datasheet and it
+              resolves to the same document; edit one byte and every span that pointed into it stops
+              resolving rather than quietly pointing somewhere else.
+            </p>
+          </div>
+
+          <div className="lg:col-span-8">
             {sources.length === 0 ? (
-              <li className="text-sm text-[var(--fg-tertiary)]">
-                No source documents. Run the pipeline to produce some.
-              </li>
-            ) : null}
-          </ul>
-        </Panel>
-      </section>
+              <Panel>
+                {/*
+                  `empty`, not `unmeasured`: a run with no documents is a run that has not happened,
+                  which is a real absence rather than an unobserved quantity.
+                */}
+                <EmptyState
+                  title="No source documents"
+                  detail={
+                    <>
+                      Nothing has been ingested, so there is nothing for a citation to resolve
+                      against. Produce a run with{" "}
+                      <span className="mono">python scripts/run_pipeline.py</span>.
+                    </>
+                  }
+                />
+              </Panel>
+            ) : (
+              <ul className="flex flex-col gap-6">
+                {sources.map(({ document, pages }) => (
+                  <li key={document.document_id} className="not-first:hairline-t not-first:pt-6">
+                    {/* Grid lives on the `dl` itself; an intermediate wrapper would nest a second
+                        `div` between the list and its `dt`/`dd` pairs, which is not valid. */}
+                    <dl className="grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-4">
+                      <KeyValue label="Document" span={2}>
+                        {document.document_id}
+                      </KeyValue>
+                      <KeyValue label="SHA-256" mono span={2}>
+                        {shortHash(document.sha256, 24)}…
+                      </KeyValue>
+                      <KeyValue label="Revision">
+                        {document.revision_label ?? "Unlabelled"}
+                      </KeyValue>
+                      <KeyValue label="Type">{document.doc_type.replace(/_/g, " ")}</KeyValue>
+                      <KeyValue label="Parser">{document.parser}</KeyValue>
+                      <KeyValue label="Retrieved">{dateOnly(document.fetched_at)}</KeyValue>
+                      <KeyValue label="Structure" span={4}>
+                        {document.page_count ?? pages.length} page
+                        {(document.page_count ?? pages.length) === 1 ? "" : "s"},{" "}
+                        {document.line_count} lines, {document.table_count} table
+                        {document.table_count === 1 ? "" : "s"}
+                      </KeyValue>
+                    </dl>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      </Section>
 
-      {/* ---------------------------------------------------------------- queue */}
-      <section>
+      {/*
+        ---------------------------------------------------------------- queue
+
+        The one section on this page that is work rather than context, and it had been the only
+        section with no rhythm of its own — it opened flush against the panel above it, sixth in a
+        stack of six, at the same heading weight as the cost table. `level="primary"` and the wide
+        rhythm say what it is. The count in the heading detail is the other half: a queue whose
+        length you have to read a table to discover is not a queue.
+      */}
+      <Section rhythm="lg" labelledBy="review-queue-heading">
         <SectionHeading
+          id="review-queue-heading"
+          level="primary"
           title="Review queue"
           detail="Ordered by blocking failures, then required gaps, then values below threshold."
+          action={
+            <span className={`pill ${totals.needingReview > 0 ? "pill-warn" : "pill-pass"}`}>
+              {totals.needingReview > 0 ? (
+                <>
+                  <AlertIcon />
+                  {count(totals.needingReview)} to decide
+                </>
+              ) : (
+                <>
+                  <CheckIcon />
+                  Nothing waiting
+                </>
+              )}
+            </span>
+          }
         />
 
-        <Panel className="scroll-x mt-6 overflow-hidden p-0">
-          <table className="w-full min-w-[52rem] border-collapse text-sm">
-            <caption className="sr-only">
-              SKUs ordered by how urgently they need review
-            </caption>
-            <thead>
-              <tr className="hairline-b bg-[var(--surface-sunken)]">
-                <th scope="col" className="px-5 py-3 text-left font-medium">
-                  SKU
-                </th>
-                {/*
-                  Class, not size. This column read `nominal_size` and was labelled "Size", which
-                  is a valve attribute — correct while the schema held nothing but valves, and
-                  blank on every row the moment a lamp or a dishwasher enters the queue. The class
-                  is the one thing every row has, and it is what a reviewer needs first: the same
-                  screen now mixes verticals, and which attributes are even expected depends on
-                  which class you are looking at.
-                */}
-                <th scope="col" className="px-5 py-3 text-left font-medium">
-                  Class
-                </th>
-                <th scope="col" className="w-44 px-5 py-3 text-left font-medium">
-                  Completeness
-                </th>
-                <th scope="col" className="px-5 py-3 text-right font-medium">
-                  Verified
-                </th>
-                <th scope="col" className="px-5 py-3 text-right font-medium">
-                  Review
-                </th>
-                <th scope="col" className="px-5 py-3 text-right font-medium">
-                  Gaps
-                </th>
-                <th scope="col" className="px-5 py-3 text-right font-medium">
-                  Checks
-                </th>
-                <th scope="col" className="px-5 py-3 text-right font-medium">
-                  <span className="sr-only">Open</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {queue.map((bundle) => {
-                const definition = bundle.class_code
-                  ? dataset.class_definitions[bundle.class_code]
-                  : undefined;
-                return (
-                  <tr key={bundle.sku} className="grid-row hairline-b last:border-b-0">
-                    <th scope="row" className="px-5 py-3.5 text-left font-medium">
-                      <Link
-                        href={`/review/${bundle.sku}`}
-                        className="rounded-xs hover:text-[var(--accent)]"
-                      >
-                        {bundle.sku}
-                      </Link>
-                    </th>
-                    <td className="px-5 py-3.5 text-[var(--fg-secondary)]">
-                      {definition ? (
-                        definition.item_type
-                      ) : (
-                        <span className="text-[var(--fg-quiet)]">Unclassified</span>
-                      )}
-                    </td>
-                    <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-3">
-                        <Meter
-                          value={bundle.metrics.fill_rate}
-                          tone={bundle.metrics.fill_rate >= 0.8 ? "pass" : "warn"}
-                          label={`Completeness ${percent(bundle.metrics.fill_rate)}`}
-                        />
-                        <span className="w-9 shrink-0 text-right tabular-nums text-[var(--fg-secondary)]">
-                          {percent(bundle.metrics.fill_rate)}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-5 py-3.5 text-right tabular-nums">
-                      {percent(bundle.metrics.verifiability)}
-                    </td>
-                    <td className="px-5 py-3.5 text-right tabular-nums">
-                      {bundle.metrics.values_needing_review > 0 ? (
-                        <span className="text-[var(--warn)]">
-                          {bundle.metrics.values_needing_review}
-                        </span>
-                      ) : (
-                        <span className="text-[var(--fg-quiet)]">0</span>
-                      )}
-                    </td>
-                    <td className="px-5 py-3.5 text-right tabular-nums">
-                      {bundle.metrics.gaps_required > 0 ? (
-                        <span className="text-[var(--warn)]">
-                          {bundle.metrics.gaps_required}
-                        </span>
-                      ) : (
-                        <span className="text-[var(--fg-quiet)]">0</span>
-                      )}
-                      <span className="text-[var(--fg-quiet)]">
-                        /{bundle.metrics.gaps_total}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3.5 text-right tabular-nums">
-                      {bundle.validation.failures > 0 ? (
-                        <span className="text-[var(--fail)]">
-                          {bundle.validation.failures} failed
-                        </span>
-                      ) : bundle.validation.warnings > 0 ? (
-                        <span className="text-[var(--warn)]">
-                          {bundle.validation.warnings} warn
-                        </span>
-                      ) : (
-                        <span className="text-[var(--pass)]">clean</span>
-                      )}
-                    </td>
-                    <td className="px-5 py-3.5 text-right">
-                      <Link
-                        href={`/review/${bundle.sku}`}
-                        className="btn btn-bare h-7 px-2"
-                        aria-label={`Review ${bundle.sku}`}
-                      >
-                        <ArrowIcon />
-                      </Link>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </Panel>
+        {queue.length === 0 ? (
+          <Panel className="mt-7">
+            {/*
+              A table with a header row and no body reads as broken, which is what this rendered
+              before. `empty` rather than `unmeasured`: the queue really is empty, and saying so is
+              a result — every SKU cleared the threshold.
+            */}
+            <EmptyState
+              title="Nothing in the queue"
+              detail="Every extracted value cleared the acceptance threshold with verified evidence, and no required attribute is missing. Nothing needs a reviewer."
+              action={
+                <Link href="/certificates" className="btn btn-quiet">
+                  Certificates
+                  <ArrowIcon />
+                </Link>
+              }
+            />
+          </Panel>
+        ) : (
+          <Panel className="scroll-x mt-7 overflow-hidden p-0">
+            <table className="w-full min-w-[54rem] border-collapse text-sm">
+              <caption className="sr-only">
+                SKUs ordered by how urgently they need review
+              </caption>
+              {/*
+                Declared widths for every column whose content has a known ceiling, so the table
+                does not redistribute itself between runs and the four narrow tallies sit in a
+                predictable rail on the right. Only SKU and Class flex.
+              */}
+              <colgroup>
+                <col />
+                <col />
+                <col className="w-[13rem]" />
+                <col className="w-[6rem]" />
+                <col className="w-[5.5rem]" />
+                <col className="w-[6rem]" />
+                <col className="w-[7rem]" />
+                <col className="w-[3.5rem]" />
+              </colgroup>
+              <thead className="table-head">
+                <tr>
+                  <th scope="col" className="px-5 py-2.5 text-left">
+                    SKU
+                  </th>
+                  {/*
+                    Class, not size. This column read `nominal_size` and was labelled "Size", which
+                    is a valve attribute — correct while the schema held nothing but valves, and
+                    blank on every row the moment a lamp or a dishwasher enters the queue. The class
+                    is the one thing every row has, and it is what a reviewer needs first: the same
+                    screen now mixes verticals, and which attributes are even expected depends on
+                    which class you are looking at.
+                  */}
+                  <th scope="col" className="px-5 py-2.5 text-left">
+                    Class
+                  </th>
+                  <th scope="col" className="px-5 py-2.5 text-left">
+                    Completeness
+                  </th>
+                  <th scope="col" className="px-5 py-2.5 text-right">
+                    Verified
+                  </th>
+                  <th scope="col" className="px-5 py-2.5 text-right">
+                    Review
+                  </th>
+                  <th scope="col" className="px-5 py-2.5 text-right">
+                    Gaps
+                  </th>
+                  <th scope="col" className="px-5 py-2.5 text-right">
+                    Checks
+                  </th>
+                  <th scope="col" className="px-5 py-2.5 text-right">
+                    <span className="sr-only">Open</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {queue.map((bundle) => {
+                  const definition = bundle.class_code
+                    ? dataset.class_definitions[bundle.class_code]
+                    : undefined;
+                  return (
+                    /*
+                      `group` so the whole row is the hover target rather than each link separately.
+                      A row eight columns wide where the affordance only appears under the cursor's
+                      exact position makes a reviewer aim; hovering anywhere now brings up both the
+                      identity and the action.
+                    */
+                    <tr key={bundle.sku} className="grid-row group hairline-b last:border-b-0">
+                      <th scope="row" className="px-5 py-3.5 text-left font-medium">
+                        <Link
+                          href={`/review/${bundle.sku}`}
+                          className="rounded-xs transition-colors duration-[var(--duration-fast)] group-hover:text-[var(--accent)] hover:text-[var(--accent)]"
+                        >
+                          {bundle.sku}
+                        </Link>
+                      </th>
+                      <td className="px-5 py-3.5 text-[var(--fg-secondary)]">
+                        {definition ? (
+                          definition.item_type
+                        ) : (
+                          <span className="text-[var(--fg-quiet)]">Unclassified</span>
+                        )}
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-3">
+                          <Meter
+                            value={bundle.metrics.fill_rate}
+                            tone={bundle.metrics.fill_rate >= 0.8 ? "pass" : "warn"}
+                            label={`Completeness ${percent(bundle.metrics.fill_rate)}`}
+                          />
+                          <span className="w-9 shrink-0 text-right tabular-nums text-[var(--fg-secondary)]">
+                            {percent(bundle.metrics.fill_rate)}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-5 py-3.5 text-right tabular-nums">
+                        {percent(bundle.metrics.verifiability)}
+                      </td>
+                      <td className="px-5 py-3.5 text-right tabular-nums">
+                        {bundle.metrics.values_needing_review > 0 ? (
+                          <span className="text-[var(--warn)]">
+                            {bundle.metrics.values_needing_review}
+                          </span>
+                        ) : (
+                          /* A measured zero. Quiet, so it does not read as work in a column of work. */
+                          <span className="figure-zero">0</span>
+                        )}
+                      </td>
+                      <td className="px-5 py-3.5 text-right tabular-nums">
+                        {bundle.metrics.gaps_required > 0 ? (
+                          <span className="text-[var(--warn)]">
+                            {bundle.metrics.gaps_required}
+                          </span>
+                        ) : (
+                          <span className="figure-zero">0</span>
+                        )}
+                        <span className="figure-zero">/{bundle.metrics.gaps_total}</span>
+                      </td>
+                      {/*
+                        The one column whose value is a word rather than a number. It was bare
+                        coloured text right-aligned against a rail of figures, where "clean" and
+                        "2 failed" had no shared glyph to align on and the colour was the only
+                        signal — meaning encoded in hue alone, which fails for anyone who cannot
+                        separate the three. A pill gives it an edge to sit against and lets the
+                        clean case carry a check rather than a shade of green.
+                      */}
+                      <td className="px-5 py-3.5 text-right">
+                        {bundle.validation.failures > 0 ? (
+                          <span className="pill pill-fail">
+                            {bundle.validation.failures} failed
+                          </span>
+                        ) : bundle.validation.warnings > 0 ? (
+                          <span className="pill pill-warn">
+                            {bundle.validation.warnings} warn
+                          </span>
+                        ) : (
+                          <span className="pill pill-pass">
+                            <CheckIcon />
+                            clean
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-5 py-3.5 text-right">
+                        <Link
+                          href={`/review/${bundle.sku}`}
+                          className="btn btn-bare h-7 px-2 text-[var(--fg-quiet)]
+                                     transition-colors duration-[var(--duration-fast)]
+                                     group-hover:text-[var(--fg)]"
+                          aria-label={`Review ${bundle.sku}`}
+                        >
+                          <ArrowIcon />
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </Panel>
+        )}
 
         {/*
           Provenance of the page itself.
@@ -550,7 +708,7 @@ export default async function OverviewPage() {
           screen needs to know which one they are looking at, so it is stated rather than
           implied.
         */}
-        <div className="mt-4 flex flex-col gap-2">
+        <div className="mt-5 flex flex-col gap-2">
           <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-meta text-[var(--fg-quiet)]">
             <span className={`pill ${dataset.meta.live ? "pill-pass" : "pill-warn"}`}>
               {dataset.meta.live ? "Live pipeline output" : "Offline fixture"}
@@ -578,7 +736,7 @@ export default async function OverviewPage() {
             </p>
           ))}
         </div>
-      </section>
+      </Section>
 
       {/*
         ---------------------------------------------------------------- variant series
@@ -592,9 +750,9 @@ export default async function OverviewPage() {
         all, and an empty "no series found" panel would report the normal case as a shortfall.
       */}
       {series.map((group) => (
-        <div key={group.seriesSku} className="mt-[var(--spacing-section-lg)]">
+        <Section key={group.seriesSku} rhythm="lg">
           <VariantSeriesPanel group={group} />
-        </div>
+        </Section>
       ))}
     </div>
   );

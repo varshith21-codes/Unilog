@@ -132,7 +132,7 @@ export function CrossSourcePanel({ view }: { view: CrossSourceView }) {
 
       {/* --------------------------------------------------- the positive finding */}
       <div className="mt-6 grid gap-6 sm:grid-cols-2">
-        <Panel className="p-7">
+        <Panel className="reveal reveal-1 p-7">
           <Overline>Corroborated</Overline>
           <p className="mt-3 flex items-baseline gap-2">
             <span className="figure text-[var(--pass)]">{view.corroborated}</span>
@@ -155,7 +155,7 @@ export function CrossSourcePanel({ view }: { view: CrossSourceView }) {
           </p>
         </Panel>
 
-        <Panel className="p-7">
+        <Panel className="reveal reveal-2 p-7">
           <Overline>Single source</Overline>
           <p className="mt-3 flex items-baseline gap-2">
             <span className="figure text-[var(--fg-tertiary)]">{view.single_source}</span>

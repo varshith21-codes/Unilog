@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import Link from "next/link";
 
 import { PipelineReplay } from "@/components/pipeline-replay";
@@ -36,21 +37,28 @@ export default async function PipelinePage({
 
   if (skus.length === 0) {
     return (
-      <div className="mx-auto max-w-[var(--container-shell)] px-[var(--spacing-gutter)] py-16">
-        <EmptyState
-          title="No recorded run to replay"
-          detail={
+      <div className="mx-auto max-w-[var(--container-shell)] px-[var(--spacing-gutter)] py-[var(--spacing-section-lg)]">
+        <Panel>
+          {/*
+            `unmeasured`: this page reads persisted output, so an absent run means nothing was
+            recorded — not that a run happened and did nothing.
+          */}
+          <EmptyState
+            kind="unmeasured"
+            title="No recorded run to replay"
+            detail={
             <>
-              This page reads persisted pipeline output rather than running anything, so it has
-              nothing to show until a run has been saved. Produce one with{" "}
-              <span className="mono">
-                python scripts/run_pipeline.py data/samples/ba100.txt --sku BA-100-075
-                --include-optional --save-session
-              </span>
-              .
-            </>
-          }
-        />
+                This page reads persisted pipeline output rather than running anything, so it has
+                nothing to show until a run has been saved. Produce one with{" "}
+                <span className="mono">
+                  python scripts/run_pipeline.py data/samples/ba100.txt --sku BA-100-075
+                  --include-optional --save-session
+                </span>
+                .
+              </>
+            }
+          />
+        </Panel>
       </div>
     );
   }
@@ -87,14 +95,18 @@ export default async function PipelinePage({
             <ul className="mt-3 flex flex-wrap gap-2">
               {skus.map((entry) => (
                 <li key={entry.sku}>
+                  {/*
+                    `pill-button` carries hover, press and the aria-current exclusion, replacing an
+                    ad-hoc `hover:text-[var(--fg)]` that gave the selected pill a hover state washing
+                    its accent toward neutral — reading as the selection coming undone.
+                  */}
                   <Link
                     href={`/pipeline?sku=${encodeURIComponent(entry.sku)}`}
                     aria-current={entry.sku === bundle.sku ? "page" : undefined}
-                    className={
-                      entry.sku === bundle.sku
-                        ? "pill pill-accent mono"
-                        : "pill pill-quiet mono hover:text-[var(--fg)]"
-                    }
+                    className={clsx(
+                      "pill pill-button mono",
+                      entry.sku === bundle.sku ? "pill-accent" : "pill-quiet",
+                    )}
                   >
                     {entry.sku}
                   </Link>

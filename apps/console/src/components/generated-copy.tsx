@@ -304,8 +304,8 @@ function FormalCheckPanel({ check }: { check: FormalCheck | null }) {
       ) : null}
 
       {check.premises ? (
-        <details className="group mt-4">
-          <summary className="cursor-pointer text-meta text-[var(--fg-tertiary)] transition-colors duration-150 hover:text-[var(--fg)]">
+        <details className="mt-4">
+          <summary className="disclosure text-meta">
             Premises the claims were judged against
           </summary>
           {/*
@@ -333,8 +333,8 @@ function ClaimLedger({ claims }: { claims: Claim[] }) {
   }
 
   return (
-    <details className="group mt-6">
-      <summary className="cursor-pointer text-sm text-[var(--fg-tertiary)] transition-colors duration-150 hover:text-[var(--fg)]">
+    <details className="mt-6">
+      <summary className="disclosure text-sm">
         {unique.size} supported {unique.size === 1 ? "claim" : "claims"}, and what backs each
       </summary>
       <ul className="mt-3 flex flex-col gap-1.5">

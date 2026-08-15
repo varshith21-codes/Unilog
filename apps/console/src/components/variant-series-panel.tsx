@@ -72,26 +72,32 @@ export function VariantSeriesPanel({ group }: { group: VariantGroup }) {
             Products in the {group.seriesSku} series, the attributes the ordering table supplied for
             each, and where each variant&rsquo;s values came from
           </caption>
-          <thead>
-            <tr className="hairline-b bg-[var(--surface-sunken)]">
-              <th scope="col" className="px-5 py-3 text-left font-medium">
+          <thead className="table-head">
+            <tr>
+              <th scope="col" className="px-5 py-2.5 text-left">
                 SKU
               </th>
               {axis.map((code) => (
-                <th key={code} scope="col" className="px-5 py-3 text-left font-medium">
+                <th key={code} scope="col" className="px-5 py-2.5 text-left">
                   {humanise(code)}
                 </th>
               ))}
-              <th scope="col" className="px-5 py-3 text-right font-medium">
+              {/*
+                Three tallies that share a denominator, so they read as one group rather than three
+                columns: a rule opens the group, and the header labels sit above a fixed-width rail
+                on the right. Without it a reader has to check the header of each to know that
+                own-row plus inherited plus N/A is the whole of this variant's values.
+              */}
+              <th scope="col" className="hairline-l w-[6rem] px-5 py-2.5 text-right">
                 Own row
               </th>
-              <th scope="col" className="px-5 py-3 text-right font-medium">
+              <th scope="col" className="w-[6.5rem] px-5 py-2.5 text-right">
                 Inherited
               </th>
-              <th scope="col" className="px-5 py-3 text-right font-medium">
+              <th scope="col" className="w-[4.5rem] px-5 py-2.5 text-right">
                 N/A
               </th>
-              <th scope="col" className="px-5 py-3 text-right font-medium">
+              <th scope="col" className="w-[3.5rem] px-5 py-2.5 text-right">
                 <span className="sr-only">Open</span>
               </th>
             </tr>
@@ -99,11 +105,11 @@ export function VariantSeriesPanel({ group }: { group: VariantGroup }) {
 
           <tbody>
             {group.members.map((member) => (
-              <tr key={member.bundle.sku} className="grid-row hairline-b last:border-b-0">
+              <tr key={member.bundle.sku} className="grid-row group hairline-b last:border-b-0">
                 <th scope="row" className="px-5 py-3.5 text-left font-medium">
                   <Link
                     href={`/review/${member.bundle.sku}`}
-                    className="mono text-[var(--accent)] hover:underline"
+                    className="mono rounded-xs text-[var(--accent)] underline-offset-2 transition-colors duration-[var(--duration-fast)] hover:underline"
                   >
                     {member.bundle.sku}
                   </Link>
@@ -125,7 +131,7 @@ export function VariantSeriesPanel({ group }: { group: VariantGroup }) {
                   </td>
                 ))}
 
-                <td className="px-5 py-3.5 text-right align-top tabular-nums">
+                <td className="hairline-l px-5 py-3.5 text-right align-top tabular-nums">
                   {member.fromOwnRow}
                 </td>
                 <td className="px-5 py-3.5 text-right align-top tabular-nums text-[var(--fg-tertiary)]">
@@ -135,13 +141,16 @@ export function VariantSeriesPanel({ group }: { group: VariantGroup }) {
                   {member.inapplicable > 0 ? (
                     <span className="text-[var(--warn)]">{member.inapplicable}</span>
                   ) : (
-                    <span className="text-[var(--fg-quiet)]">0</span>
+                    /* Measured zero: nothing was withheld from this variant. */
+                    <span className="figure-zero">0</span>
                   )}
                 </td>
                 <td className="px-5 py-3.5 text-right align-top">
                   <Link
                     href={`/review/${member.bundle.sku}`}
-                    className="btn btn-bare"
+                    className="btn btn-bare h-7 px-2 text-[var(--fg-quiet)]
+                               transition-colors duration-[var(--duration-fast)]
+                               group-hover:text-[var(--fg)]"
                     aria-label={`Open ${member.bundle.sku}`}
                   >
                     <ArrowIcon />
@@ -154,7 +163,7 @@ export function VariantSeriesPanel({ group }: { group: VariantGroup }) {
       </Panel>
 
       <div className="mt-6 grid gap-6 sm:grid-cols-3">
-        <Panel className="p-7">
+        <Panel className="reveal reveal-1 p-7">
           <Overline>Read from its own row</Overline>
           <p className="mt-3 figure">{totals.fromOwnRow}</p>
           <p className="mt-3 text-meta text-[var(--fg-quiet)]">
@@ -163,7 +172,7 @@ export function VariantSeriesPanel({ group }: { group: VariantGroup }) {
           </p>
         </Panel>
 
-        <Panel className="p-7">
+        <Panel className="reveal reveal-2 p-7">
           <Overline>Inherited from the series</Overline>
           <p className="mt-3 figure text-[var(--fg-tertiary)]">{totals.inherited}</p>
           <p className="mt-3 text-meta text-[var(--fg-quiet)]">
@@ -173,7 +182,7 @@ export function VariantSeriesPanel({ group }: { group: VariantGroup }) {
           </p>
         </Panel>
 
-        <Panel className="p-7">
+        <Panel className="reveal reveal-3 p-7">
           <Overline>Not applicable at this size</Overline>
           <p
             className={

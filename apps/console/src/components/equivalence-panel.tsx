@@ -187,32 +187,32 @@ export function EquivalencePanel({ view }: { view: EquivalenceView }) {
               <caption className="sr-only">
                 Candidates that cannot replace {view.reference_sku}, and the attribute that refused
               </caption>
-              <thead>
-                <tr className="hairline-b text-meta text-[var(--fg-quiet)]">
-                  <th scope="col" className="px-7 py-2 text-left font-normal">
+              <thead className="table-head">
+                <tr>
+                  <th scope="col" className="w-[13rem] px-7 py-2.5 text-left">
                     Candidate
                   </th>
-                  <th scope="col" className="px-4 py-2 text-left font-normal">
+                  <th scope="col" className="w-[10rem] px-4 py-2.5 text-left">
                     Brand
                   </th>
-                  <th scope="col" className="px-4 py-2 text-left font-normal">
+                  <th scope="col" className="px-4 py-2.5 text-left">
                     Refused on
                   </th>
-                  <th scope="col" className="px-7 py-2 text-right font-normal">
+                  <th scope="col" className="w-[7rem] px-7 py-2.5 text-right">
                     Basis
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {rejected.map((candidate) => (
-                  <tr key={candidate.candidate_sku} className="grid-row">
-                    <th scope="row" className="mono px-7 py-2.5 text-left font-normal">
+                  <tr key={candidate.candidate_sku} className="grid-row hairline-b last:border-b-0">
+                    <th scope="row" className="mono px-7 py-3 text-left align-top font-normal">
                       {candidate.candidate_sku}
                     </th>
-                    <td className="px-4 py-2.5 text-[var(--fg-secondary)]">
-                      {candidate.candidate_brand ?? "—"}
+                    <td className="px-4 py-3 align-top text-[var(--fg-secondary)]">
+                      {candidate.candidate_brand ?? <span className="figure-zero">&mdash;</span>}
                     </td>
-                    <td className="px-4 py-2.5">
+                    <td className="px-4 py-3 align-top">
                       <ul className="flex flex-wrap gap-1.5">
                         {candidate.blocking_detail.map((comparison) => (
                           <li key={comparison.attribute_code} className="pill pill-quiet">
@@ -221,7 +221,7 @@ export function EquivalencePanel({ view }: { view: EquivalenceView }) {
                         ))}
                       </ul>
                     </td>
-                    <td className="mono px-7 py-2.5 text-right text-meta text-[var(--fg-quiet)]">
+                    <td className="mono px-7 py-3 text-right align-top text-meta tabular-nums text-[var(--fg-quiet)]">
                       {candidate.compared}/{candidate.deciding}
                     </td>
                   </tr>
