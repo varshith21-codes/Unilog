@@ -431,10 +431,18 @@ cd apps/console
 npm install
 npm run dev          # http://localhost:3000
 
-npm test             # 122 component tests (Vitest + React Testing Library)
+npm test             # 143 component tests (Vitest + React Testing Library)
 npm run typecheck
 npm run check:contrast
 ```
+
+The list views — Resolve and Audit — are paged at 50, and both state the range and the total
+(`Showing 51–100 of 1,001`). Paged rather than truncated: a capped list is indistinguishable from a
+short one, so a record on page eleven would simply cease to exist as far as the UI is concerned.
+Neither `[sku]` route is prerendered, because the dataset is fetched `no-store` so a reviewer's
+decision takes effect immediately — enumerating a thousand part numbers into
+`generateStaticParams` asked the build to prerender pages it could never reuse, and then failed at
+runtime for any part number that had not existed when the build ran.
 
 The component tests target the branches where being wrong would mislead a reviewer about their own
 data rather than the layout: whether the formal-verification panel can tell *not checked* from
@@ -448,7 +456,9 @@ Six screens: a portfolio overview (quality scoreboard, cost meter, interactive r
 pipeline replay, the review queue, the per-SKU review workspace with the evidence viewer and the
 cross-reference beneath it, the enrichment certificate, and the Quality Index page carrying the
 before/after cohort. All of it renders **real pipeline output** — the API serves bundles written by
-`run_pipeline.py --save-session`, and decisions made in the workspace post back and persist.
+`run_pipeline.py --save-session` or `export_console_catalogue.py`, and decisions made in the
+workspace post back and persist. Neither writer invents a value; the difference between them is the
+source, and therefore how much there was to read: a datasheet, or one row of an item master.
 
 **`/pipeline` replays a run rather than performing one.** It shows the stages a recorded run went
 through — ingest, parse, classify, extract, normalize, validate, decide, certify, syndicate, plus
@@ -512,13 +522,58 @@ Python installed — no Node, no build step.
 **How the data flows, and one distinction that matters:**
 
 ```
-run_pipeline.py ────> data/console/{sku}.bundle.json    what the machine produced
-                 └──> data/sessions/{sku}.json          what humans decided
-cross_validate.py ──> data/cross-source/{sku}.json      what a second document said
-cross_reference.py ─> data/equivalence/{sku}.json       what else would do
+run_pipeline.py ────────────> data/console/{slug}.bundle.json  what the machine produced
+                        └──-> data/sessions/{slug}.json        what humans decided
+export_console_catalogue.py > data/console/{slug}.bundle.json  the same, per item-master row
+cross_validate.py ─────────-> data/cross-source/{slug}.json    what a second document said
+cross_reference.py ────────-> data/equivalence/{slug}.json     what else would do
                                   │
               GET /api/console/dataset  ── joins them ──> console
 ```
+
+`{slug}` rather than `{sku}`, and the difference is not cosmetic. Industrial part numbers contain
+separators — the client's own item master carries `52C3-5/8-UPC` and `MAG:2044-230-1` — and a file
+named after one of those lands in a directory that does not exist. `axiom.core.naming.sku_slug`
+escapes anything outside the unreserved set as `~XX`, so `52C3-5/8-UPC` is stored and addressed as
+`52C3-5~2F8-UPC`. A part number needing no escaping is its own slug, so nothing already on disk
+moved. `apps/console/src/lib/sku.ts` mirrors it for URLs, and one table pins both sides
+(`tests/test_sku_naming.py`, `apps/console/src/lib/sku.test.ts`).
+
+### The whole item master in the console
+
+`run_pipeline.py` takes one datasheet and one `--sku`, so the catalogue the console showed was
+however many times somebody had run it. `export_console_catalogue.py` walks a row file instead and
+writes a bundle and a session per row — **entirely offline, no model calls** — through the same
+deterministic stages the delivery path uses and the same `build_bundle` projection the live pipeline
+uses:
+
+```powershell
+# every row of the client's sample -> 999 bundles the console can render
+python scripts/export_console_catalogue.py "Unihack_ Sample Dataset - Input.csv" `
+  --risk-budget 0.05
+
+python scripts/export_console_catalogue.py "Unihack_ Sample Dataset - Input.csv" --limit 50
+python scripts/export_console_catalogue.py "Unihack_ Sample Dataset - Input.csv" `
+  --classified-only
+```
+
+`--risk-budget` has to match whatever the other bundles in `data/console/` were decided under, or
+the dataset endpoint correctly refuses to report one threshold for two policies and says so in
+`meta.warnings`.
+
+Two numbers from that run are worth stating plainly, because they are the honest shape of the
+result rather than a disappointment:
+
+- **445 values across 1,000 rows.** A six-column row has no datasheet attached, so the only thing
+  to read is a ~40-character `Part_Desc`. Every remaining required attribute becomes a gap carrying
+  `no_source_available` and recommending retrieval — which is the truth. Enrichment is
+  `run_pipeline.py`'s job against a real document.
+- **786 rows classified to nothing.** `schema/classes/` covers four classes; the item master spans
+  abrasives, lumber, power tools, wire and PPE. Retrieval abstains rather than guessing, so those
+  rows carry `class_code: null`. They are *shown* rather than skipped, and shown as unexamined
+  rather than as clean — a SKU with no class has no required attributes, so every per-class metric
+  reports zero for it, and a console that rendered that as "fully accepted" would report a finished
+  catalogue that nobody had looked at. Closing it means adding class definitions.
 
 A bundle is never rewritten by a review decision. It is the record of what the extractor
 actually said under a given schema and model version, and every accuracy number in the project

@@ -31,6 +31,7 @@ from axiom.console import (
     overlay_equivalence,
     overlay_review_decisions,
 )
+from axiom.core.naming import is_sku_slug, sku_slug
 from axiom.delivery import (
     WORKBOOK_MEDIA_TYPE,
     DeliveryFormatExporter,
@@ -46,7 +47,6 @@ from axiom.delivery.batch import (
     select_rows,
     validate_input_columns,
 )
-from axiom.core.naming import is_sku_slug, sku_slug
 from axiom.delivery.source import INPUT_COLUMNS
 from axiom.ingest import IngestError, profile_rows, read_flat_file, sha256_bytes
 from axiom.review import ACCEPT, CORRECT, REJECT, ReviewSession, queue_summary, record_decision

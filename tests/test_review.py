@@ -651,7 +651,25 @@ def test_missing_session_explains_how_to_create_one(client):
 
 @pytest.mark.parametrize(
     "sku",
-    ["", "..", "../pyproject", "a/b", "a\\b", "..\\..\\pyproject", "./../data"],
+    [
+        "",
+        "..",
+        "../pyproject",
+        "a/b",
+        "a\\b",
+        "..\\..\\pyproject",
+        "./../data",
+        # Beyond traversal, because the guard is now a whitelist rather than a list of things
+        # known to be dangerous. A colon opens an NTFS alternate data stream, a leading dot makes
+        # a hidden file, and a device name is not creatable on Windows whatever the extension —
+        # none of which the old separator check caught.
+        "stream:name",
+        ".hidden",
+        "CON",
+        # The reflex fix for a part number containing a separator, and the reason the slug scheme
+        # does not use `%`: a path that is decoded twice puts the separator back.
+        "52C3-5%2F8-UPC",
+    ],
 )
 def test_the_path_guard_rejects_anything_that_could_escape(sku):
     """Tested directly rather than through routing.
@@ -669,7 +687,23 @@ def test_the_path_guard_rejects_anything_that_could_escape(sku):
     with pytest.raises(HTTPException) as raised:
         _session_path(sku)
     assert raised.value.status_code == 400
-    assert raised.value.detail == "invalid sku"
+    assert "invalid sku" in raised.value.detail
+
+
+def test_the_path_guard_names_the_slug_in_its_refusal():
+    """The message has to be actionable, because the caller is usually holding a valid part number.
+
+    "invalid sku" alone sent someone looking for a corrupt record when what they actually had was a
+    fractional size. The refusal now says what shape is expected and shows the escape.
+    """
+    from fastapi import HTTPException
+
+    from apps.api.main import _session_path
+
+    with pytest.raises(HTTPException) as raised:
+        _session_path("52C3-5/8-UPC")
+    assert "slug" in raised.value.detail
+    assert "52C3-5~2F8-UPC" in raised.value.detail
 
 
 def test_the_path_guard_accepts_an_ordinary_sku():
@@ -677,6 +711,24 @@ def test_the_path_guard_accepts_an_ordinary_sku():
     from apps.api.main import _session_path
 
     assert _session_path("BA-100-075").name == "BA-100-075.json"
+
+
+def test_the_path_guard_accepts_a_slugged_part_number():
+    """The whole point of the slug: a part number containing a separator becomes addressable.
+
+    ``52C3-5/8-UPC`` is a fractional size, not an attack, and while the filename was the raw SKU
+    there was nothing this endpoint could do with one but refuse it.
+    """
+    from axiom.core.naming import sku_slug
+
+    from apps.api.main import _session_path
+
+    slug = sku_slug("52C3-5/8-UPC")
+    path = _session_path(slug)
+    assert path.name == f"{slug}.json"
+    # The guard's own invariant, restated where it is relied upon: whatever comes out cannot
+    # contain a separator, so it cannot leave the session directory.
+    assert path.parent.name == "sessions"
 
 
 @pytest.mark.parametrize(
@@ -701,7 +753,12 @@ def test_a_backslash_reaching_the_handler_is_refused_by_the_app(client):
     """Windows-specific, and the case routing does not catch: ``a\\b`` is one path segment."""
     response = client.get("/api/session/a%5Cb")
     assert response.status_code == 400
-    assert response.json()["detail"] == "invalid sku"
+    detail = response.json()["detail"]
+    assert "invalid sku" in detail
+    # Substring rather than equality. The refusal now explains the expected shape, and pinning the
+    # whole sentence made the message unimprovable without editing a test that is about the status
+    # code and the rejection — not about the prose.
+    assert "slug" in detail
 
 
 def test_decision_endpoint_records_and_reports_prior_movement(client):

@@ -11,7 +11,8 @@ per row, so every SKU the client sent is visible, reviewable and counted.
 
     python scripts/export_console_catalogue.py "Unihack_ Sample Dataset - Input.csv"
     python scripts/export_console_catalogue.py "Unihack_ Sample Dataset - Input.csv" --limit 50
-    python scripts/export_console_catalogue.py "Unihack_ Sample Dataset - Input.csv" --classified-only
+    python scripts/export_console_catalogue.py "Unihack_ Sample Dataset - Input.csv" `
+      --classified-only
 
 **Entirely offline. No model calls, no credentials.** It runs the same deterministic stages the
 batch delivery path runs — retrieval classification, description extraction, normalisation,
@@ -635,7 +636,10 @@ def _read(path: Path) -> list[dict[str, str]]:
 
 
 def _prune(args, *, keep: set[str]) -> list[str]:
-    """Remove bundles and sessions for SKUs outside this run. Opt-in, and it says what it removed."""
+    """Remove bundles and sessions for SKUs outside this run.
+
+    Opt-in, and it reports what it removed rather than doing it quietly.
+    """
     slugs = {sku_slug(sku) for sku in keep}
     removed: list[str] = []
     for path in sorted(args.out.glob("*.bundle.json")):

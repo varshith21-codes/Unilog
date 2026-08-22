@@ -30,11 +30,10 @@ import {
 import { composite } from "@/lib/types";
 import type { CanonicalValue } from "@/lib/types";
 
-/** Nothing is prerendered. Same reasoning as the resolve workspace: see `review/[sku]/page.tsx`. */
-export async function generateStaticParams() {
-  return [];
-}
-
+/**
+ * Rendered on demand, with no `generateStaticParams`. Same reasoning as the resolve workspace:
+ * see `review/[sku]/page.tsx`.
+ */
 export async function generateMetadata({ params }: { params: Promise<{ sku: string }> }) {
   const { sku } = await params;
   const bundle = await getSku(sku);

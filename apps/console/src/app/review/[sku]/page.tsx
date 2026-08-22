@@ -19,18 +19,18 @@ import { percent } from "@/lib/format";
 import { certificateHref, reviewHref } from "@/lib/sku";
 
 /**
- * Nothing is prerendered, deliberately.
+ * No `generateStaticParams`, deliberately — this route is rendered on demand.
  *
- * This used to enumerate every SKU in the dataset. At two that was free; at a full item master it
- * asks the build to render a thousand pages, each of which loads the whole catalogue — and none of
- * them can be reused anyway, because the dataset is fetched `no-store` so a reviewer's decision
- * takes effect immediately. An empty list means every part number is still routable and rendered on
- * demand.
+ * It used to enumerate every SKU in the dataset. At two that was free; at a full item master it asks
+ * the build to prerender a thousand pages, each loading the whole catalogue.
+ *
+ * And none of them could be reused anyway. The dataset is fetched `no-store` so that a reviewer's
+ * decision takes effect immediately, which makes every render of this page dynamic by definition.
+ * Declaring the route static and then reading uncacheable data is a contradiction Next.js catches
+ * at runtime rather than at build time: any part number *not* in the prerendered list failed with
+ * "page changed from static to dynamic", so the route worked for the SKUs that happened to exist
+ * when the build ran and 500'd for the rest. Omitting the export states the truth instead.
  */
-export async function generateStaticParams() {
-  return [];
-}
-
 export async function generateMetadata({ params }: { params: Promise<{ sku: string }> }) {
   const { sku } = await params;
   // The route segment is a slug, so resolve it to the real part number rather than putting an
