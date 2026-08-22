@@ -19,8 +19,8 @@
       "source_document_ids": [
         "Unihack__Sample_Dataset_-_Input#DZN930"
       ],
-      "created_at": "2026-08-22T12:30:44.155858+00:00",
-      "updated_at": "2026-08-22T12:30:44.155876+00:00"
+      "created_at": "2026-08-22T19:16:17.881888+00:00",
+      "updated_at": "2026-08-22T19:16:17.881892+00:00"
     },
     "classifications": [],
     "classification_summary": {
@@ -73,10 +73,10 @@
       "per_attribute": {}
     },
     "certificate": {
-      "certificate_id": "ec_440211b1b02d",
+      "certificate_id": "ec_bbf87d52421e",
       "sku": "DZN930",
       "tenant_id": "unilog",
-      "generated_at": "2026-08-22T12:30:44.156241Z",
+      "generated_at": "2026-08-22T19:16:17.881992Z",
       "schema_version": null,
       "pipeline_version": "axiom-0.1.0",
       "classifications": [],
@@ -113,7 +113,7 @@
         "cost_usd": null,
         "wall_clock_seconds": 0.0
       },
-      "signature": "sha256:92e87efa01b72085944c9acd57974a372ef0ef7665ce2feb6ded1e44715ca7f6",
+      "signature": "sha256:15ce5651fa5ce7e665c0f42403542e379445e5ed58f572e979b5edf916839396",
       "signature_verified": true
     },
     "channels": [
@@ -168,7 +168,7 @@
     "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
     "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
     "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-22T12:30:39.344315Z",
+    "fetched_at": "2026-08-22T19:16:11.275717Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": "unilog",
@@ -262,17 +262,17 @@
   ],
   "class_definition": null,
   "policy": {
-    "epsilon": 0.05,
+    "epsilon": 0.02,
     "confidence_level": 0.95,
-    "threshold": 0.6853,
-    "coverage": 1.0,
-    "accepted": 220,
-    "accepted_errors": 1,
-    "observed_error_rate": 0.0045,
-    "error_upper_bound": 0.0201,
+    "threshold": 0.7194,
+    "coverage": 0.7591,
+    "accepted": 167,
+    "accepted_errors": 0,
+    "observed_error_rate": 0.0,
+    "error_upper_bound": 0.0159,
     "calibration_size": 220,
     "achievable": true,
-    "reason": "at threshold 0.685, 100.0% of values are publishable with an error rate of at most 2.0% at 95% confidence"
+    "reason": "at threshold 0.719, 75.9% of values are publishable with an error rate of at most 1.6% at 95% confidence"
   },
   "calibrator": "untrained-heuristic"
 }

@@ -29,6 +29,7 @@ export function ThemeToggle() {
     <button
       type="button"
       className="btn btn-bare icon-target size-8 px-0"
+      title="Toggle color theme"
       onClick={toggle}
     >
       <span className="sr-only dark:hidden">Use dark theme</span>

@@ -2,30 +2,55 @@
   "sku": "KPTCS725A",
   "tenant_id": "unilog",
   "brand": null,
-  "class_code": null,
-  "class_name": null,
-  "category_path": [],
+  "class_code": "TOL.PWR.GEN",
+  "class_name": "Power Tool",
+  "category_path": [
+    "Tools & Consumables",
+    "Power Tools",
+    "Power Tools"
+  ],
   "document_id": "Unihack__Sample_Dataset_-_Input#KPTCS725A",
   "document_sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
-  "gaps": [],
+  "gaps": [
+    {
+      "code": "tool_configuration",
+      "reason": "no_source_available",
+      "sources_searched": [
+        "Unihack__Sample_Dataset_-_Input#KPTCS725A"
+      ],
+      "required": true,
+      "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+      "recommended_action": "retry_with_better_source"
+    },
+    {
+      "code": "power_source",
+      "reason": "no_source_available",
+      "sources_searched": [
+        "Unihack__Sample_Dataset_-_Input#KPTCS725A"
+      ],
+      "required": true,
+      "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+      "recommended_action": "retry_with_better_source"
+    }
+  ],
   "policy": {
-    "epsilon": 0.05,
+    "epsilon": 0.02,
     "confidence_level": 0.95,
-    "threshold": 0.6853,
-    "coverage": 1.0,
-    "accepted": 220,
-    "accepted_errors": 1,
-    "observed_error_rate": 0.0045,
-    "error_upper_bound": 0.0201,
+    "threshold": 0.7194,
+    "coverage": 0.7591,
+    "accepted": 167,
+    "accepted_errors": 0,
+    "observed_error_rate": 0.0,
+    "error_upper_bound": 0.0159,
     "calibration_size": 220,
     "achievable": true,
-    "reason": "at threshold 0.685, 100.0% of values are publishable with an error rate of at most 2.0% at 95% confidence"
+    "reason": "at threshold 0.719, 75.9% of values are publishable with an error rate of at most 1.6% at 95% confidence"
   },
   "quality": {
-    "completeness": 1.0,
-    "verifiability": 0.0,
+    "completeness": 0.0,
+    "verifiability": 1.0,
     "consistency": 1.0,
-    "richness": 0.0,
+    "richness": 0.5,
     "composite": 0.6,
     "measured_dimensions": [
       "completeness",
@@ -34,7 +59,7 @@
       "verifiability"
     ]
   },
-  "created_at": "2026-08-22T12:30:44.593662+00:00",
+  "created_at": "2026-08-22T19:16:19.019332+00:00",
   "decisions": [],
   "pages": [
     {
@@ -50,6 +75,75 @@
       ]
     }
   ],
-  "items": [],
+  "items": [
+    {
+      "attribute_code": "battery_voltage",
+      "attribute_name": "Battery Voltage",
+      "datatype": "quantity",
+      "value_raw": "20V",
+      "value_canonical": {
+        "magnitude": 20.0,
+        "unit": "V"
+      },
+      "value_display": "20 V",
+      "score": 0.8,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.800 >= threshold 0.719",
+      "method": "supplier_feed",
+      "model_tier": null,
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "Unihack__Sample_Dataset_-_Input#KPTCS725A",
+          "quote": "20V",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": 1,
+          "table_ref": null,
+          "method": "exact_line"
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": "V"
+    },
+    {
+      "attribute_code": "blade_diameter",
+      "attribute_name": "Blade Diameter",
+      "datatype": "dimension",
+      "value_raw": "7-1/4\"",
+      "value_canonical": {
+        "magnitude": 184.15,
+        "unit": "mm"
+      },
+      "value_display": "7-1/4\"",
+      "score": 0.8,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.800 >= threshold 0.719",
+      "method": "supplier_feed",
+      "model_tier": null,
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "Unihack__Sample_Dataset_-_Input#KPTCS725A",
+          "quote": "7-1/4\"",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": 1,
+          "table_ref": null,
+          "method": "exact_line"
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": "mm"
+    }
+  ],
   "queue": []
 }

@@ -2,7 +2,7 @@
   "bundle": {
     "sku": "DCS384B",
     "document_id": "Unihack__Sample_Dataset_-_Input#DCS384B",
-    "class_code": null,
+    "class_code": "TOL.PWR.GEN",
     "record": {
       "tenant_id": "unilog",
       "sku": "DCS384B",
@@ -14,36 +14,255 @@
       "supplier_id": "2585",
       "parent_sku": null,
       "lifecycle_status": "active",
-      "class_code": null,
-      "schema_version": null,
+      "class_code": "TOL.PWR.GEN",
+      "schema_version": "TOL.PWR.GEN@v1",
       "source_document_ids": [
         "Unihack__Sample_Dataset_-_Input#DCS384B"
       ],
-      "created_at": "2026-08-22T12:30:44.619127+00:00",
-      "updated_at": "2026-08-22T12:30:44.619130+00:00"
+      "created_at": "2026-08-22T19:16:19.079677+00:00",
+      "updated_at": "2026-08-22T19:16:19.079705+00:00"
     },
-    "classifications": [],
+    "classifications": [
+      {
+        "scheme": "internal",
+        "code": "TOL.PWR.GEN",
+        "path": [
+          "Tools & Consumables",
+          "Power Tools",
+          "Power Tools"
+        ],
+        "confidence": 0.7226,
+        "level_confidences": [
+          1.0,
+          1.0,
+          0.7226
+        ],
+        "rationale": "single viable candidate",
+        "method": "retrieval_only",
+        "alternatives": [],
+        "reviewed_by": null,
+        "reviewed_at": null
+      }
+    ],
     "classification_summary": {
-      "class_code": null,
-      "confidence": 0.0,
-      "confident_depth": 0,
-      "schemes": [],
-      "candidates_considered": 0,
-      "method": "no_viable_candidate",
-      "abstained": true,
+      "class_code": "TOL.PWR.GEN",
+      "confidence": 0.7226,
+      "confident_depth": 3,
+      "schemes": [
+        "internal"
+      ],
+      "candidates_considered": 1,
+      "method": "retrieval_only",
+      "abstained": false,
       "input_tokens": 0,
       "output_tokens": 0
     },
-    "classification_candidates": [],
-    "values": [],
+    "classification_candidates": [
+      {
+        "code": "TOL.PWR.GEN",
+        "score": 0.1226,
+        "path_text": "Tools & Consumables > Power Tools > Power Tools"
+      }
+    ],
+    "values": [
+      {
+        "attribute_code": "battery_voltage",
+        "value_raw": "20V",
+        "value_canonical": {
+          "magnitude": 20.0,
+          "unit": "V"
+        },
+        "value_display": "20 V",
+        "method": "supplier_feed",
+        "confidence": 0.88,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "desc-battery_voltage-15",
+            "document_id": "Unihack__Sample_Dataset_-_Input#DCS384B",
+            "document_sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+            "quote": "20V",
+            "page": null,
+            "bbox": null,
+            "table_ref": null,
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [],
+        "model_id": null,
+        "model_tier": null,
+        "prompt_version": "description@v1",
+        "schema_version": "TOL.PWR.GEN@v1",
+        "version": 1,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-22T19:16:19.079479Z",
+        "score": 0.8,
+        "decision": {
+          "attribute_code": "battery_voltage",
+          "score": 0.8,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.800 >= threshold 0.719"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 0.4,
+          "quote_specificity": 1.0,
+          "self_reported_certainty": 0.88,
+          "validation_pass_rate": 0.5,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.5,
+          "source_prior": 0.5,
+          "tier_cost": 0.5
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "citation_summary": [
+          "Unihack__Sample_Dataset_-_Input#DCS384B"
+        ]
+      },
+      {
+        "attribute_code": "power_source",
+        "value_raw": "Cordless",
+        "value_canonical": "Cordless (Battery)",
+        "value_display": "Cordless (Battery)",
+        "method": "supplier_feed",
+        "confidence": 0.82,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "desc-power_source-31",
+            "document_id": "Unihack__Sample_Dataset_-_Input#DCS384B",
+            "document_sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+            "quote": "Cordless",
+            "page": null,
+            "bbox": null,
+            "table_ref": null,
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [],
+        "model_id": null,
+        "model_tier": null,
+        "prompt_version": "description@v1",
+        "schema_version": "TOL.PWR.GEN@v1",
+        "version": 1,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-22T19:16:19.079501Z",
+        "score": 0.8,
+        "decision": {
+          "attribute_code": "power_source",
+          "score": 0.8,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.800 >= threshold 0.719"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 0.4,
+          "quote_specificity": 1.0,
+          "self_reported_certainty": 0.82,
+          "validation_pass_rate": 0.5,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.5,
+          "source_prior": 0.5,
+          "tier_cost": 0.5
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "citation_summary": [
+          "Unihack__Sample_Dataset_-_Input#DCS384B"
+        ]
+      },
+      {
+        "attribute_code": "tool_configuration",
+        "value_raw": "Bare",
+        "value_canonical": "Bare Tool",
+        "value_display": "Bare Tool",
+        "method": "supplier_feed",
+        "confidence": 0.82,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "desc-tool_configuration-51",
+            "document_id": "Unihack__Sample_Dataset_-_Input#DCS384B",
+            "document_sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+            "quote": "Bare",
+            "page": null,
+            "bbox": null,
+            "table_ref": null,
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [],
+        "model_id": null,
+        "model_tier": null,
+        "prompt_version": "description@v1",
+        "schema_version": "TOL.PWR.GEN@v1",
+        "version": 1,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-22T19:16:19.079515Z",
+        "score": 0.8,
+        "decision": {
+          "attribute_code": "tool_configuration",
+          "score": 0.8,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.800 >= threshold 0.719"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 0.4,
+          "quote_specificity": 1.0,
+          "self_reported_certainty": 0.82,
+          "validation_pass_rate": 0.5,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.5,
+          "source_prior": 0.5,
+          "tier_cost": 0.5
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "citation_summary": [
+          "Unihack__Sample_Dataset_-_Input#DCS384B"
+        ]
+      }
+    ],
     "gaps": [],
     "extraction": {
-      "requested": 0,
-      "values": 0,
+      "requested": 24,
+      "values": 3,
       "gaps": 0,
       "rejected_unverifiable": 0,
       "corrected_to_match_evidence": 0,
-      "citation_coverage": 0.0,
+      "citation_coverage": 1.0,
       "input_tokens": 0,
       "output_tokens": 0,
       "escalations": 0,
@@ -53,18 +272,48 @@
     },
     "normalization_issues": [],
     "validation": {
-      "checks": 1,
-      "failures": 1,
+      "checks": 4,
+      "failures": 0,
       "warnings": 0,
-      "skipped_rules": 0,
-      "consistency": 0.0,
+      "skipped_rules": 2,
+      "consistency": 1.0,
       "results": [
         {
-          "layer": "L0",
-          "rule_id": "no_class",
-          "verdict": "fail",
+          "layer": "L3",
+          "rule_id": "plausible_range",
+          "verdict": "pass",
           "severity": "error",
-          "reason": "record has no product class, so no rules or required attributes apply",
+          "reason": "within the expected range [3, 120]",
+          "counterexample": null,
+          "suggested_fix": null,
+          "detail": null
+        },
+        {
+          "layer": "L2",
+          "rule_id": "R_CORDLESS_STATES_A_PLATFORM",
+          "verdict": "skipped",
+          "severity": "info",
+          "reason": "not evaluated: missing battery_platform",
+          "counterexample": null,
+          "suggested_fix": null,
+          "detail": null
+        },
+        {
+          "layer": "L2",
+          "rule_id": "R_BARE_TOOL_IS_CORDLESS",
+          "verdict": "pass",
+          "severity": "error",
+          "reason": "A corded or pneumatic tool is described as a bare tool. \"Bare\" means no battery and no charger, which is only a meaningful distinction on a cordless product; on a corded one it usually means a word was matched out of context.",
+          "counterexample": null,
+          "suggested_fix": null,
+          "detail": null
+        },
+        {
+          "layer": "L2",
+          "rule_id": "R_CORDED_TOOL_HAS_NO_PLATFORM",
+          "verdict": "skipped",
+          "severity": "info",
+          "reason": "not evaluated: missing battery_platform",
           "counterexample": null,
           "suggested_fix": null,
           "detail": null
@@ -73,29 +322,110 @@
       "per_attribute": {}
     },
     "certificate": {
-      "certificate_id": "ec_632d3a0da73f",
+      "certificate_id": "ec_0b101fee8615",
       "sku": "DCS384B",
       "tenant_id": "unilog",
-      "generated_at": "2026-08-22T12:30:44.619221Z",
-      "schema_version": null,
+      "generated_at": "2026-08-22T19:16:19.080270Z",
+      "schema_version": "TOL.PWR.GEN@v1",
       "pipeline_version": "axiom-0.1.0",
-      "classifications": [],
-      "attributes": [],
+      "classifications": [
+        {
+          "scheme": "internal",
+          "code": "TOL.PWR.GEN",
+          "path": [
+            "Tools & Consumables",
+            "Power Tools",
+            "Power Tools"
+          ],
+          "confidence": 0.7226,
+          "method": "retrieval_only",
+          "status": "auto",
+          "alternatives": []
+        }
+      ],
+      "attributes": [
+        {
+          "code": "battery_voltage",
+          "value_canonical": {
+            "magnitude": 20.0,
+            "unit": "V"
+          },
+          "value_display": "20 V",
+          "value_raw": "20V",
+          "confidence": 0.88,
+          "method": "supplier_feed",
+          "model_tier": null,
+          "status": "auto_accepted",
+          "evidence": [
+            {
+              "document": "Unihack__Sample_Dataset_-_Input#DCS384B",
+              "sha256": "49efd0b2\u2026",
+              "page": null,
+              "bbox": null,
+              "quote": "20V",
+              "verified": true
+            }
+          ],
+          "validations": []
+        },
+        {
+          "code": "power_source",
+          "value_canonical": "Cordless (Battery)",
+          "value_display": "Cordless (Battery)",
+          "value_raw": "Cordless",
+          "confidence": 0.82,
+          "method": "supplier_feed",
+          "model_tier": null,
+          "status": "auto_accepted",
+          "evidence": [
+            {
+              "document": "Unihack__Sample_Dataset_-_Input#DCS384B",
+              "sha256": "49efd0b2\u2026",
+              "page": null,
+              "bbox": null,
+              "quote": "Cordless",
+              "verified": true
+            }
+          ],
+          "validations": []
+        },
+        {
+          "code": "tool_configuration",
+          "value_canonical": "Bare Tool",
+          "value_display": "Bare Tool",
+          "value_raw": "Bare",
+          "confidence": 0.82,
+          "method": "supplier_feed",
+          "model_tier": null,
+          "status": "auto_accepted",
+          "evidence": [
+            {
+              "document": "Unihack__Sample_Dataset_-_Input#DCS384B",
+              "sha256": "49efd0b2\u2026",
+              "page": null,
+              "bbox": null,
+              "quote": "Bare",
+              "verified": true
+            }
+          ],
+          "validations": []
+        }
+      ],
       "gaps": [],
       "summary": {
-        "attributes_required": 0,
-        "attributes_populated": 0,
-        "attributes_with_evidence": 0,
+        "attributes_required": 2,
+        "attributes_populated": 3,
+        "attributes_with_evidence": 3,
         "attributes_inferred": 0,
-        "auto_accepted": 0,
+        "auto_accepted": 3,
         "queued_for_review": 0,
         "gaps_total": 0,
         "gaps_required": 0,
         "quality_index": {
           "completeness": 1.0,
-          "verifiability": 0.0,
+          "verifiability": 1.0,
           "consistency": 1.0,
-          "richness": 0.0,
+          "richness": 0.5,
           "weights": {
             "completeness": 0.35,
             "verifiability": 0.3,
@@ -108,12 +438,12 @@
             "richness",
             "verifiability"
           ],
-          "composite": 0.6
+          "composite": 0.95
         },
         "cost_usd": null,
         "wall_clock_seconds": 0.0
       },
-      "signature": "sha256:4d00da6c58fddcec2018ff635e671e47aedbadb94b48f12163dbec0d230e1f79",
+      "signature": "sha256:c474e0ac83ddeacd311e17175f70a16bdde43a3ec2f5821d977a4533be90a706",
       "signature_verified": true
     },
     "channels": [
@@ -128,33 +458,31 @@
           "missing": [],
           "not_publishable": [],
           "warnings": [
-            "record has no product class, so no channel profile applies"
+            "class TOL.PWR.GEN declares no 'cx1_pim' channel profile"
           ]
         },
         "title": null
       },
       {
         "name": "schema_org",
-        "published": false,
-        "value_count": 0,
+        "published": true,
+        "value_count": 3,
         "withheld": [],
         "readiness": {
           "channel": "schema_org",
-          "ready": false,
+          "ready": true,
           "missing": [],
           "not_publishable": [],
-          "warnings": [
-            "record has no product class, so no channel profile applies"
-          ]
+          "warnings": []
         },
         "title": null
       }
     ],
     "metrics": {
       "fill_rate": 1.0,
-      "verifiability": 0.0,
-      "values_total": 0,
-      "values_publishable": 0,
+      "verifiability": 1.0,
+      "values_total": 3,
+      "values_publishable": 3,
       "values_needing_review": 0,
       "gaps_total": 0,
       "gaps_required": 0,
@@ -168,7 +496,7 @@
     "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
     "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
     "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-22T12:30:39.344315Z",
+    "fetched_at": "2026-08-22T19:16:11.275717Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": "unilog",
@@ -260,19 +588,1068 @@
       "tables": []
     }
   ],
-  "class_definition": null,
+  "class_definition": {
+    "code": "TOL.PWR.GEN",
+    "name": "Power Tool",
+    "version": "v1",
+    "schema_version": "TOL.PWR.GEN@v1",
+    "item_type": "Power Tool",
+    "reporting_path": [
+      "Tools",
+      "Power Tools",
+      "Tools"
+    ],
+    "browse_path": [
+      "Tools & Consumables",
+      "Power Tools",
+      "Power Tools"
+    ],
+    "mappings": {},
+    "required_codes": [
+      "tool_configuration",
+      "power_source"
+    ],
+    "attributes": [
+      {
+        "code": "tool_configuration",
+        "requirement": "required",
+        "weight": 3.0,
+        "name": "Configuration",
+        "datatype": "enum",
+        "description": "What is actually in the box. The most commercially consequential field in this cohort: the same tool as a bare unit and as a kit differ by roughly 3x in price because one includes a battery and charger, and the values below are the words suppliers print rather than a tidy scheme of our own.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Bare Tool",
+          "Kit",
+          "Starter Kit",
+          "Combo Kit"
+        ],
+        "allowed_values": [
+          {
+            "value": "Bare Tool",
+            "aliases": [
+              "bare",
+              "tool only",
+              "tool-only",
+              "bare tool",
+              "no battery",
+              "unit only"
+            ],
+            "note": "no battery or charger included"
+          },
+          {
+            "value": "Kit",
+            "aliases": [
+              "kit",
+              "tool kit"
+            ],
+            "note": null
+          },
+          {
+            "value": "Combo Kit",
+            "aliases": [
+              "combo",
+              "combo kit",
+              "2-tool kit",
+              "multi-tool kit"
+            ],
+            "note": null
+          },
+          {
+            "value": "Starter Kit",
+            "aliases": [
+              "starter kit",
+              "starter",
+              "battery/charger starter kit"
+            ],
+            "note": "batteries and charger without a tool"
+          },
+          {
+            "value": "Set",
+            "aliases": [
+              "set",
+              "assortment",
+              "assort"
+            ],
+            "note": null
+          },
+          {
+            "value": "Replacement Part",
+            "aliases": [
+              "replacement",
+              "spare",
+              "refill"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "power_source",
+        "requirement": "required",
+        "weight": 3.0,
+        "name": "Power Source",
+        "datatype": "enum",
+        "description": "What drives the tool. The first thing a buyer filters on and the thing that decides whether a battery platform is even relevant, so it is recorded even when it seems obvious from the product name.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Cordless (Battery)",
+          "Corded Electric",
+          "Pneumatic",
+          "Manual"
+        ],
+        "allowed_values": [
+          {
+            "value": "Cordless (Battery)",
+            "aliases": [
+              "cordless",
+              "battery",
+              "battery powered",
+              "li-ion",
+              "lithium"
+            ],
+            "note": null
+          },
+          {
+            "value": "Corded Electric",
+            "aliases": [
+              "corded",
+              "electric",
+              "ac",
+              "mains",
+              "plug-in"
+            ],
+            "note": null
+          },
+          {
+            "value": "Pneumatic",
+            "aliases": [
+              "air",
+              "air powered",
+              "compressed air"
+            ],
+            "note": null
+          },
+          {
+            "value": "Hydraulic",
+            "aliases": [
+              "hydraulic"
+            ],
+            "note": null
+          },
+          {
+            "value": "Gas",
+            "aliases": [
+              "gasoline",
+              "petrol",
+              "gas powered",
+              "2-cycle",
+              "4-cycle"
+            ],
+            "note": null
+          },
+          {
+            "value": "Manual",
+            "aliases": [
+              "hand",
+              "hand powered",
+              "non-powered",
+              "manual"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "battery_platform",
+        "requirement": "recommended",
+        "weight": 3.0,
+        "name": "Battery Platform",
+        "datatype": "string",
+        "description": "The manufacturer's battery system name, recorded verbatim. A string rather than an enum because the value set is proprietary and open-ended, and because these names are not reducible to voltage: M18 and 18V LXT are both 18 V and neither battery fits the other tool.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "M18",
+          "M12",
+          "18V LXT",
+          "20V MAX",
+          "20V"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "battery_voltage",
+        "requirement": "recommended",
+        "weight": 2.0,
+        "name": "Battery Voltage",
+        "datatype": "quantity",
+        "description": "Nominal battery voltage. Distinct from voltage_rating, which is the mains supply a corded tool expects, and distinct from battery_platform, which is the interface. Stated separately because it is the figure that predicts power while the platform predicts fit.\n",
+        "canonical_unit": "V",
+        "display_preference": null,
+        "quantity_kind": "voltage",
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "12 V",
+          "18 V",
+          "20 V",
+          "40 V"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          3.0,
+          120.0
+        ]
+      },
+      {
+        "code": "drive_size",
+        "requirement": "recommended",
+        "weight": 3.0,
+        "name": "Drive Size",
+        "datatype": "string",
+        "description": "The output drive a powered driver, wrench or ratchet presents. A string because the values mix square-drive fractions with hex designations \u2014 1/2\" square and 1/4\" hex are different interfaces that a bare fraction could not distinguish.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "1/4\" Hex",
+          "1/4\"",
+          "3/8\"",
+          "1/2\""
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "chuck_size",
+        "requirement": "optional",
+        "weight": 2.0,
+        "name": "Chuck Size",
+        "datatype": "dimension",
+        "description": "Maximum shank diameter the chuck accepts, which caps the bit size the tool can hold. Distinct from drive_size: a drill has a chuck, an impact wrench has an anvil.\n",
+        "canonical_unit": "mm",
+        "display_preference": "imperial_fraction",
+        "quantity_kind": "length",
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "1/4\"",
+          "3/8\"",
+          "1/2\""
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          1.0,
+          40.0
+        ]
+      },
+      {
+        "code": "blade_diameter",
+        "requirement": "optional",
+        "weight": 2.0,
+        "name": "Blade Diameter",
+        "datatype": "dimension",
+        "description": "Outside diameter of a circular saw blade, or the blade a saw is built to take. Recorded separately from wheel_diameter because a toothed blade and a bonded wheel are different products whose sizes must not be pooled into one column.\n",
+        "canonical_unit": "mm",
+        "display_preference": "imperial_fraction",
+        "quantity_kind": "length",
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "4-1/2\"",
+          "6-1/2\"",
+          "7-1/4\"",
+          "10\"",
+          "12\""
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          20.0,
+          900.0
+        ]
+      },
+      {
+        "code": "no_load_speed",
+        "requirement": "optional",
+        "weight": 2.0,
+        "name": "No-Load Speed (RPM)",
+        "datatype": "integer",
+        "description": "Maximum unloaded output speed in revolutions per minute. Declared as a plain integer because RPM is a rate the unit registry does not carry. A multi-speed tool states a range; record the top figure and put the full range in additional_information.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "1800",
+          "2900",
+          "3600"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          10.0,
+          40000.0
+        ]
+      },
+      {
+        "code": "voltage_rating",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Voltage Rating",
+        "datatype": "quantity",
+        "description": "Nominal supply voltage the appliance is designed to operate on. Read the nameplate or electrical-specification row, not the motor or component rating, which may differ.\n",
+        "canonical_unit": "V",
+        "display_preference": null,
+        "quantity_kind": "voltage",
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "120 V",
+          "240 V",
+          "208 V"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          1.0,
+          600.0
+        ]
+      },
+      {
+        "code": "amperage_rating",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Amperage Rating",
+        "datatype": "quantity",
+        "description": "Rated current draw at the nominal supply voltage. Determines the branch circuit the appliance requires, so it is a fitment attribute rather than a performance one.\n",
+        "canonical_unit": "A",
+        "display_preference": null,
+        "quantity_kind": "current",
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "15 A",
+          "10 A",
+          "12.5 A"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          0.1,
+          200.0
+        ]
+      },
+      {
+        "code": "product_series",
+        "requirement": "recommended",
+        "weight": 2.0,
+        "name": "Product Series",
+        "datatype": "string",
+        "description": "Manufacturer's series or family designation only, without the word \"series\" and without the manufacturer name. The anchor for part-number grammar induction, because the positional encoding of a smart part number is defined per series rather than per manufacturer.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "BA-100",
+          "T-113",
+          "T-585"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "model_number",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Model",
+        "datatype": "string",
+        "description": "The manufacturer's marketing model designation where it differs from the ordering part number. Often absent, or identical to the MPN and therefore not restated by the manufacturer, which is why the ground truth leaves it blank.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "PDSH4816AF",
+          "WDTS7024RZ"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "overall_size",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Size",
+        "datatype": "string",
+        "description": "The manufacturer's headline size statement, kept as published with its axis labels intact, e.g. \"24 in W x 24-1/4 in D\". Deliberately a string and not a dimension_set: the published form varies in both the number of axes and their order, and the client's ground truth carries no unit column for it, so reformatting into a fixed W x H x D triple would discard information and diverge from the expected output.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "24 in W x 24-1/4 in D",
+          "33-7/16 in H x 23-7/8 in W x 22-5/8 in D"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "each_weight",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Weight (Each)",
+        "datatype": "quantity",
+        "description": "Shipping weight of a single unit. Distinguish carefully from carton weight; datasheets often place them in adjacent columns with similar headings.\n",
+        "canonical_unit": "kg",
+        "display_preference": null,
+        "quantity_kind": "mass",
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "0.75 lb",
+          "1.2 kg"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          0.0001,
+          5000.0
+        ]
+      },
+      {
+        "code": "sound_level",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Sound Level",
+        "datatype": "quantity",
+        "description": "A-weighted sound pressure level during normal operation, as published by the manufacturer. Lower is quieter. Record the figure for the standard or normal cycle when several cycles are rated, and never convert an unweighted dB figure into dBA \u2014 the two are not interconvertible without the signal spectrum.\n",
+        "canonical_unit": "dBA",
+        "display_preference": null,
+        "quantity_kind": "sound_level",
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "47 dBA",
+          "41 dBA",
+          "39 dBA"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          20.0,
+          110.0
+        ]
+      },
+      {
+        "code": "pack_quantity",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Pack Quantity",
+        "datatype": "integer",
+        "description": "Number of units in the consumer pack the part number sells as. Distinct from case_quantity, which counts packs in a shipping carton: a \"3pk\" of lamps is one sellable unit containing three lamps, and confusing the two misprices the line.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "1",
+          "2",
+          "3",
+          "6"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          1.0,
+          100.0
+        ]
+      },
+      {
+        "code": "selling_uom",
+        "requirement": "recommended",
+        "weight": 2.0,
+        "name": "Selling Unit of Measure",
+        "datatype": "enum",
+        "description": "The unit in which the product is sold, which is not necessarily the unit in which it is priced or stocked. Conflating the three is a classic source of order errors.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Each",
+          "Case",
+          "Box"
+        ],
+        "allowed_values": [
+          {
+            "value": "Each",
+            "aliases": [
+              "ea",
+              "ea.",
+              "each",
+              "pc",
+              "piece",
+              "unit"
+            ],
+            "note": null
+          },
+          {
+            "value": "Box",
+            "aliases": [
+              "bx",
+              "box"
+            ],
+            "note": null
+          },
+          {
+            "value": "Case",
+            "aliases": [
+              "cs",
+              "case",
+              "carton",
+              "ctn"
+            ],
+            "note": null
+          },
+          {
+            "value": "Pair",
+            "aliases": [
+              "pr",
+              "pair"
+            ],
+            "note": null
+          },
+          {
+            "value": "Foot",
+            "aliases": [
+              "ft",
+              "per foot",
+              "lineal foot"
+            ],
+            "note": null
+          },
+          {
+            "value": "Roll",
+            "aliases": [
+              "rl",
+              "roll"
+            ],
+            "note": null
+          },
+          {
+            "value": "Bag",
+            "aliases": [
+              "bg",
+              "bag"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "additional_information",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Additional Information",
+        "datatype": "string",
+        "description": "Comma-separated residual specifications the class has no dedicated attribute for, in the client's own overflow convention, e.g. \"240 kW-hr Annual Energy, 1 to 12 hr Delay Start Hours\". A holding pen, not a dumping ground: anything appearing here repeatedly across a category is a missing attribute and should be promoted to one.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "240 kW-hr Annual Energy, 1 to 12 hr Delay Start Hours",
+          "Folding Tines, Leak Detection System, Normal Cycle"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "warranty_terms",
+        "requirement": "recommended",
+        "weight": 2.0,
+        "name": "Warranty",
+        "datatype": "string",
+        "description": "Warranty coverage as stated by the manufacturer, including duration and what it covers, e.g. \"1 Year Manufacturer, 1 Year Labor and Parts\". Recorded as published: summarising it into a single duration loses the parts/labour distinction that determines what a claim actually pays for.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "1 Year Manufacturer, 1 Year Labor and Parts",
+          "10 Year Limited"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "included_technology",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Included Technology",
+        "datatype": "string",
+        "description": "Named proprietary technology the product ships with, phrased as the client's \"With\" column expects it, e.g. \"With CleanBoost(TM)\". Trademarked feature names, so they are reproduced exactly as the manufacturer writes them including the symbol, and never paraphrased or expanded.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "With CleanBoost(TM)",
+          "With Washing 3rd Rack, Water Repellent Basket"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "approvals",
+        "requirement": "recommended",
+        "weight": 2.0,
+        "name": "Approvals and Listings",
+        "datatype": "multi_enum",
+        "description": "Third-party certifications, listings and approvals explicitly stated in the source. Record only what is stated. A listing number without a recognised mark is not an approval, and an approval for one size in a series does not extend to the others.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": true,
+        "compliance_claim": true,
+        "evidence_requirement": "strict",
+        "example_values": [
+          "UL, CSA, NSF-61",
+          "FM approved"
+        ],
+        "allowed_values": [
+          {
+            "value": "UL",
+            "aliases": [
+              "ul listed",
+              "underwriters laboratories",
+              "u.l."
+            ],
+            "note": null
+          },
+          {
+            "value": "CSA",
+            "aliases": [
+              "csa certified",
+              "canadian standards association"
+            ],
+            "note": null
+          },
+          {
+            "value": "ETL",
+            "aliases": [
+              "etl listed",
+              "intertek"
+            ],
+            "note": null
+          },
+          {
+            "value": "FM",
+            "aliases": [
+              "fm approved",
+              "factory mutual",
+              "fm global"
+            ],
+            "note": null
+          },
+          {
+            "value": "NSF-61",
+            "aliases": [
+              "nsf/ansi 61",
+              "nsf 61",
+              "nsf/ansi standard 61"
+            ],
+            "note": null
+          },
+          {
+            "value": "NSF-372",
+            "aliases": [
+              "nsf/ansi 372",
+              "nsf 372"
+            ],
+            "note": null
+          },
+          {
+            "value": "NSF-14",
+            "aliases": [
+              "nsf/ansi 14",
+              "nsf 14"
+            ],
+            "note": null
+          },
+          {
+            "value": "CRN",
+            "aliases": [
+              "canadian registration number"
+            ],
+            "note": null
+          },
+          {
+            "value": "ASME",
+            "aliases": [
+              "asme certified",
+              "asme b16"
+            ],
+            "note": null
+          },
+          {
+            "value": "MSS",
+            "aliases": [
+              "mss sp",
+              "manufacturers standardization society"
+            ],
+            "note": null
+          },
+          {
+            "value": "ATEX",
+            "aliases": [
+              "atex certified",
+              "atex marked"
+            ],
+            "note": null
+          },
+          {
+            "value": "IECEx",
+            "aliases": [
+              "iecex certified"
+            ],
+            "note": null
+          },
+          {
+            "value": "WRAS",
+            "aliases": [
+              "wras approved",
+              "water regulations advisory scheme"
+            ],
+            "note": null
+          },
+          {
+            "value": "cUL Listed",
+            "aliases": [
+              "cul",
+              "cul listed",
+              "c-ul",
+              "culus"
+            ],
+            "note": null
+          },
+          {
+            "value": "ENERGY STAR Certified",
+            "aliases": [
+              "energy star",
+              "energystar",
+              "energy star qualified",
+              "energy star certified"
+            ],
+            "note": null
+          },
+          {
+            "value": "NSF Certified",
+            "aliases": [],
+            "note": "Generic NSF mark with no standard named. Deliberately not aliased onto NSF-61: a potable-water claim needs the specific standard, and treating this as equivalent would let a cross-field rule pass on evidence that does not support it.\n"
+          },
+          {
+            "value": "ASSE 1006",
+            "aliases": [
+              "asse1006",
+              "asse 1006 listed"
+            ],
+            "note": null
+          },
+          {
+            "value": "CEE Tier 2 Qualified",
+            "aliases": [
+              "cee tier 2",
+              "cee tier2",
+              "cee tier 2 qualified"
+            ],
+            "note": null
+          },
+          {
+            "value": "AHAM Verified",
+            "aliases": [
+              "aham",
+              "aham verified"
+            ],
+            "note": null
+          },
+          {
+            "value": "WaterSense",
+            "aliases": [
+              "watersense",
+              "epa watersense"
+            ],
+            "note": null
+          },
+          {
+            "value": "ANSI Z87.1",
+            "aliases": [
+              "z87",
+              "z87.1",
+              "z87+",
+              "ansi z87",
+              "ansi z87.1",
+              "ansi/isea z87.1"
+            ],
+            "note": "eye and face protection impact rating"
+          },
+          {
+            "value": "ANSI/ISEA 105",
+            "aliases": [
+              "isea 105",
+              "ansi cut level",
+              "ansi/isea 105",
+              "a105"
+            ],
+            "note": "hand protection cut, abrasion and puncture rating"
+          },
+          {
+            "value": "EN 388",
+            "aliases": [
+              "en388",
+              "en 388 certified"
+            ],
+            "note": null
+          },
+          {
+            "value": "UL 217",
+            "aliases": [
+              "ul217",
+              "ul 217 listed"
+            ],
+            "note": "smoke alarm standard"
+          },
+          {
+            "value": "UL 2034",
+            "aliases": [
+              "ul2034",
+              "ul 2034 listed"
+            ],
+            "note": "carbon monoxide alarm standard"
+          },
+          {
+            "value": "UL 299",
+            "aliases": [
+              "ul299",
+              "ul 299 listed"
+            ],
+            "note": "portable fire extinguisher standard"
+          },
+          {
+            "value": "OSHA Compliant",
+            "aliases": [
+              "osha",
+              "osha compliant",
+              "meets osha"
+            ],
+            "note": null
+          },
+          {
+            "value": "ICC-ES Evaluated",
+            "aliases": [
+              "icc-es",
+              "icc es",
+              "icc evaluation report",
+              "esr"
+            ],
+            "note": "building-code evaluation report for a structural or envelope product"
+          },
+          {
+            "value": "ASTM D7032",
+            "aliases": [
+              "astm d7032",
+              "d7032"
+            ],
+            "note": "composite decking and railing performance standard"
+          },
+          {
+            "value": "FSC Certified",
+            "aliases": [
+              "fsc",
+              "fsc certified",
+              "forest stewardship council"
+            ],
+            "note": null
+          },
+          {
+            "value": "NFRC Certified",
+            "aliases": [
+              "nfrc",
+              "nfrc certified",
+              "nfrc rated"
+            ],
+            "note": "fenestration thermal performance rating"
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "country_of_origin",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Country of Origin",
+        "datatype": "string",
+        "description": "Country where the product is manufactured, as stated by the manufacturer. Drives tariff treatment and trade-agreement eligibility, so a guess here has direct financial consequences.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": true,
+        "evidence_requirement": "strict",
+        "example_values": [
+          "United States",
+          "Taiwan",
+          "Italy",
+          "China"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "prop65_warning_required",
+        "requirement": "recommended",
+        "weight": 2.0,
+        "name": "California Prop 65 Warning Required",
+        "datatype": "boolean",
+        "description": "True when the source states that a California Proposition 65 warning applies. Absence of a statement is not evidence of absence of a requirement, so record a gap rather than false when the source is silent.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": true,
+        "evidence_requirement": "strict",
+        "example_values": [],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "gtin",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "GTIN / UPC",
+        "datatype": "string",
+        "description": "Global Trade Item Number, 8, 12, 13 or 14 digits. The final digit is a modulo-10 check digit, which L0 validation verifies arithmetically \u2014 a transposed digit is therefore detectable without any external lookup.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "012345678905",
+          "00012345678905"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      }
+    ],
+    "cross_field_rules": [
+      {
+        "id": "R_CORDLESS_STATES_A_PLATFORM",
+        "expr": "power_source != 'Cordless (Battery)' or battery_platform is not null",
+        "severity": "error",
+        "message": "A cordless tool was captured with no battery platform. The platform is the compatibility fact a buyer needs \u2014 an M18 battery does not fit an 18V LXT tool despite both being eighteen volts \u2014 so a cordless listing without it is not orderable by anyone who owns batteries already.",
+        "references": [
+          "power_source",
+          "battery_platform"
+        ]
+      },
+      {
+        "id": "R_BARE_TOOL_IS_CORDLESS",
+        "expr": "tool_configuration != 'Bare Tool' or power_source == 'Cordless (Battery)'",
+        "severity": "warning",
+        "message": "A corded or pneumatic tool is described as a bare tool. \"Bare\" means no battery and no charger, which is only a meaningful distinction on a cordless product; on a corded one it usually means a word was matched out of context.",
+        "references": [
+          "tool_configuration",
+          "power_source"
+        ]
+      },
+      {
+        "id": "R_CORDED_TOOL_HAS_NO_PLATFORM",
+        "expr": "power_source != 'Corded Electric' or battery_platform is null",
+        "severity": "error",
+        "message": "A battery platform was recorded against a corded tool. Usually means a voltage token such as \"120V\" was read as a platform name, which would then assert compatibility with a battery system the tool cannot accept.",
+        "references": [
+          "power_source",
+          "battery_platform"
+        ]
+      }
+    ],
+    "channel_profiles": [
+      {
+        "name": "unilog_delivery",
+        "title_template": "{brand} {product_series} {mpn} {class_name}",
+        "max_title_chars": 200,
+        "unit_system": "imperial_primary",
+        "required": [
+          "mpn"
+        ]
+      },
+      {
+        "name": "schema_org",
+        "title_template": null,
+        "max_title_chars": 200,
+        "unit_system": "metric_primary",
+        "required": [
+          "mpn"
+        ]
+      }
+    ]
+  },
   "policy": {
-    "epsilon": 0.05,
+    "epsilon": 0.02,
     "confidence_level": 0.95,
-    "threshold": 0.6853,
-    "coverage": 1.0,
-    "accepted": 220,
-    "accepted_errors": 1,
-    "observed_error_rate": 0.0045,
-    "error_upper_bound": 0.0201,
+    "threshold": 0.7194,
+    "coverage": 0.7591,
+    "accepted": 167,
+    "accepted_errors": 0,
+    "observed_error_rate": 0.0,
+    "error_upper_bound": 0.0159,
     "calibration_size": 220,
     "achievable": true,
-    "reason": "at threshold 0.685, 100.0% of values are publishable with an error rate of at most 2.0% at 95% confidence"
+    "reason": "at threshold 0.719, 75.9% of values are publishable with an error rate of at most 1.6% at 95% confidence"
   },
   "calibrator": "untrained-heuristic"
 }

@@ -33,12 +33,114 @@ _TOKEN = re.compile(r"[a-z0-9]+(?:[-/][a-z0-9]+)*")
 
 MIN_TOKEN_LENGTH = 2
 
+# How many times a class's identity terms are counted into its scoring vocabulary. See the note in
+# `_profile_for`, which explains why they belong there at all.
+#
+# Matched to the weight the class name already carries, because they are the same kind of signal:
+# the words a supplier writes for what the product IS.
+#
+# The worry with weighting these up was that sibling classes SHARE identity terms — both valve
+# classes declare [valve, valves, vlv] — so amplifying them should amplify the vocabulary two near
+# neighbours have in common and make them harder to separate. Measured with
+# `scripts/measure_dominance.py --sweep-identity`, that does not happen: both populations rise and
+# the ambiguous one rises faster, so the gap widens monotonically.
+#
+#     weight       1       2       3       4       5       6
+#     gap     0.0344  0.0379  0.0410  0.0437  0.0461  0.0482
+#
+# 3 is therefore chosen on the principle rather than the margin — it is what the class name gets,
+# and identity terms are the same kind of claim. Going higher buys a slightly wider band by pushing
+# every dominance figure up, which is not the same thing as classifying better.
+IDENTITY_TERM_WEIGHT = 3
+
+# How hard a term's weight falls off as more classes share it. See _compute_idf.
+#
+# This replaces a document count, and the replacement is the fix for a real defect rather than a
+# tuning knob. The textbook form is log((N+1)/(df+1)) + 1 with N the number of documents; here
+# the "documents" are classes, so N was the live class count — and that made every term's weight
+# move whenever *any* class was added, including terms the new class does not contain.
+#
+# It moved them unevenly, which is what did the damage: shared vocabulary gained more than
+# distinctive vocabulary, so adding an unrelated class pulled near neighbours together. On the
+# two-class valve schema, adding built-in dishwashers took a df=2 term from log(3/3)+1 = 1.000 to
+# log(4/3)+1 = 1.288 (+29%) while a df=1 term went from 1.405 to 1.693 (+20%). The correct
+# ball-valve match drifted 0.659 -> 0.696 and broke a threshold it had nothing to do with.
+#
+# Two candidate fixes were measured with scripts/measure_dominance.py before this one was kept.
+#
+#   * `max(len(profiles), 50)`, as an earlier note in classifier.py proposed. Rejected: a floor
+#     only defers the problem to the fifty-first class, and it arrives exactly when the taxonomy
+#     is largest and re-measuring is hardest.
+#   * A large fixed N. Rejected on measurement — it *closes the gap the threshold lives in*.
+#     Large N flattens the ratio between a term unique to one class and a term shared by two
+#     (at N=512, 6.55 vs 6.14, only 1.07x), and that ratio is precisely what separates a ball
+#     valve from a gate valve. `--sweep-corpus 4 8 32 128 512 4096` reported the gap shrinking
+#     monotonically from +0.0383 to -0.0207, i.e. no threshold separates the populations at all.
+#     A small fixed N is worse still: at N=8 a term shared by 30 classes scores
+#     log(9/31)+1 = -0.24, and a negative weight actively rewards a class for sharing promiscuous
+#     vocabulary.
+#
+# So the count is removed from the formula entirely and the weight is made a function of document
+# frequency alone:
+#
+#     idf(df) = 1 + log(1 + IDF_SATURATION / df)
+#
+# which is corpus-independent by construction, strictly decreasing in df, and bounded below by
+# 1.0 so a term shared by every class is merely uninformative rather than harmful. Adding a
+# decking class now raises df for decking vocabulary and leaves "bronze NPT threaded" exactly
+# where it was, so DECISIVE_DOMINANCE stops being corpus-sensitive.
+#
+# 4.0 sits in the middle of the plateau the sweep found, rather than on its exact argmax:
+#
+#     K     0.5      1      2      3      4      6      8     16     64
+#     gap  .0131  .0293  .0382  .0391  .0382  .0353  .0325  .0248  .0109
+#
+# K=3 is marginally the widest, but 2..6 are within 0.001 of each other and picking the argmax of
+# a flat region is how a constant ends up fitted to two probe strings. For reference the old
+# class-count form gave a gap of roughly 0.02 at three classes, so this is about twice the margin
+# as well as a stable one.
+#
+# The shape it gives:
+#
+#     df=1  -> 1 + log(5.00) = 2.609     unique to one class
+#     df=2  -> 1 + log(3.00) = 2.099     1.24x less than unique — the near-neighbour margin
+#     df=8  -> 1 + log(1.50) = 1.405
+#     df=34 -> 1 + log(1.12) = 1.111     shared by every class in the taxonomy
+IDF_SATURATION = 4.0
+
 
 def tokenize(text: str) -> list[str]:
     """Lowercase word tokens, keeping hyphenated and slashed compounds intact.
 
     ``two-piece`` and ``NPT/BSPT`` are single meaningful tokens in this domain, and splitting
     them loses exactly the distinguishing detail.
+
+    ---------------------------------------------------------------------------------------------
+    SPLITTING COMPOUNDS INTO THEIR PARTS WAS TRIED TWICE AND MEASURED WORSE BOTH TIMES. The record
+    is here because the idea is a natural one and the argument for it is genuinely persuasive.
+
+    The motivation was real: a separator can hide a word completely. ``DCK225D2 Dewalt Impact/Drill
+    - Kit`` yields the single token ``impact/drill`` and matches neither ``impact`` nor ``drill``,
+    so an unmistakable power tool reaches no candidate at all. The same artifact hides
+    ``sheathing`` inside ``R-Sheathing`` and ``rail`` inside ``T-Rail``.
+
+    Emitting the compound AND its parts looks purely additive — every previous match still works.
+    It is not, because ``_profile_for`` tokenises class vocabularies through this same function, so
+    the parts land in every class's term counts too:
+
+    * Splitting both separators took coverage from 959 classified rows to 954 and closed the
+      dominance gap the decision threshold sits in (an ambiguous probe fell to 0.633, below a
+      correct match at 0.730). Hyphen parts are mostly fragments rather than words — ``easi``,
+      ``lite``, ``wal``, and every numeric piece of every part number.
+    * Splitting only the slash, on the theory that a slash alternates where a hyphen joins, still
+      gave 954. Enum values like ``Concrete / Masonry``, ``Indoor / Outdoor`` and ``Smoke / Gray``
+      put their parts into many classes at once, so class vocabularies gained shared noise faster
+      than queries gained signal, and rows moved out of a clean win into the ambiguous band.
+
+    The conclusion is that a compound spelling is a per-class fact, not a global one, and the schema
+    already has the declarative place to say so: ``identity_terms``. ``impact/drill`` is declared on
+    the power-tool class, ``r-sheathing`` on the panel class, ``t-rail`` on the railing class. That
+    is local, reviewable, and costs nothing anywhere else.
     """
     return [
         token
@@ -125,19 +227,28 @@ class CandidateIndex:
 
     @staticmethod
     def _compute_idf(profiles: list[ClassProfile]) -> dict[str, float]:
-        """Inverse document frequency across classes.
+        """Inverse document frequency across classes, against a FIXED document count.
 
         This is what makes hand-maintained stopwords unnecessary: a term appearing in every
         class contributes almost nothing, so "valve" self-suppresses inside a valve taxonomy
         while still discriminating in a broader one.
+
+        There is deliberately no document count in the formula. Using the live class count made
+        every score — and therefore every threshold derived from a score — move whenever a class
+        was added anywhere in the taxonomy, including for terms the new class does not contain.
+        See :data:`IDF_SATURATION` for the measurement behind the replacement.
+
+        Document *frequency* is still counted over the real profiles, which is the part that
+        should be local: adding a class that says "decking" raises df for "decking" and touches
+        nothing else.
         """
-        total = len(profiles) or 1
         document_frequency: Counter[str] = Counter()
         for profile in profiles:
             document_frequency.update(set(profile.term_counts))
         return {
-            term: math.log((total + 1) / (count + 1)) + 1.0
+            term: 1.0 + math.log(1.0 + IDF_SATURATION / count)
             for term, count in document_frequency.items()
+            if count  # a term reaches this table only by appearing in a profile; guard the divide
         }
 
     def __len__(self) -> int:
@@ -185,6 +296,26 @@ def _profile_for(registry: SchemaRegistry, definition: ClassDefinition) -> Class
         terms.update(tokenize(definition.name))
     for segment in definition.browse_path:
         terms.update(tokenize(segment))
+
+    # Identity terms are part of the SCORING vocabulary as well as the admission guard.
+    #
+    # They were originally only a guard, and that combination had a silent failure: a class could
+    # be admitted on an identity term and then score exactly 0.0, because the term appeared nowhere
+    # in the vocabulary it was scored against. `search` drops zero-scoring candidates, so the class
+    # vanished after being correctly admitted.
+    #
+    # It cost three whole cohorts. "25459 Mason Line Brd Orange - 500'" was admitted to the layout
+    # class on `mason` and scored 0; so was "T-90043 Deep Medium Organizer" on `organizer`, and
+    # "3033-20 Milw M18 24" - Hedge Trimmer" on `trimmer`. All three abstained with
+    # `no_viable_candidate` while the class that should have won them sat admitted at zero.
+    #
+    # The inconsistency was the bug: an identity term is the strongest evidence available that the
+    # product IS this class — that is precisely why it is trusted to gate admission — so scoring it
+    # at nothing while gating on it cannot be right. It is weighted like the class name for the same
+    # reason the class name is weighted up.
+    for _ in range(IDENTITY_TERM_WEIGHT):
+        for term in definition.identity_terms:
+            terms.update(tokenize(term))
 
     for attribute in registry.attributes_for(definition.code):
         terms.update(tokenize(attribute.name))

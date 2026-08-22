@@ -178,12 +178,22 @@ def test_the_identity_guard_admits_the_cohort(index):
         assert ranked[0].code == LIGHTING, f"{text!r} ranked {ranked[0].code} first"
 
 
-def test_the_identity_guard_is_no_looser_than_before(index):
-    """The six strings pinned by test_classify, re-checked against the new class.
+def test_the_lighting_class_never_wins_a_row_that_is_not_lighting(index):
+    """The strings pinned by test_classify, re-checked against THIS class specifically.
 
     Adding a class adds vocabulary, and vocabulary is how false positives happen. This class binds
     `wattage`, `voltage_rating` and `finish_color`, which are exactly as promiscuous as the
     `Port Type` and `Plug Type` that made a decor plate look like a ball valve.
+
+    The assertion used to be `index.search(text) == []` — no candidate for any class. That was
+    correct against a schema where none of these products had a home, and it stopped being a
+    statement about lighting once they did: five of the six now classify, and none of them as
+    lighting. Narrowing the claim to this class is what keeps it a test of this class.
+
+    `97708 Police 800L Headlight` is the interesting one and is kept for its own reason. It contains
+    "light" as a SUBSTRING, and `headlight` tokenises whole, so a substring guard would admit it and
+    a whole-token guard does not. That is a property of the tokeniser this class depends on, and it
+    is the case that would break first if anyone made matching fuzzier.
     """
     for text in (
         "5522-5EV 2 Port Decor Plate",
@@ -192,11 +202,12 @@ def test_the_identity_guard_is_no_looser_than_before(index):
         "JWBS-14SFX 14in Bandsaw JTP-714400K",
         "IBMG90K003 Vessel Impact Ball Torsion Bit Assort 5pc",
         '49-94-0533 Milw 7"x1/4"x7/8" Metal Grinding Wheel',
-        # Not in the original six: a headlight, which contains "light" as a substring but
-        # tokenises whole. Included because a substring guard would admit it and be wrong.
         "97708 Police 800L Headlight",
     ):
-        assert index.search(text) == [], f"{text!r} should not be a candidate for any class"
+        candidates = {c.code for c in index.search(text, limit=10)}
+        assert LIGHTING not in candidates, (
+            f"{text!r} admitted the lighting class; candidates were {sorted(candidates)}"
+        )
 
 
 # --------------------------------------------------------------------- extraction

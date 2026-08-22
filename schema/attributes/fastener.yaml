@@ -1,0 +1,146 @@
+#
+# WHY THIS CATEGORY EXISTS. Fasteners are 24 rows of the client's 1,000-row sample, mostly Senco
+# collated nails and deck screws.
+#
+# ---------------------------------------------------------------------------------------------
+# WHAT THE SUPPLIER STRINGS ACTUALLY CONTAIN, because that is what these attributes are shaped to.
+#
+#     K527APBXR   Senco .131x3" SM BB - 500CT
+#
+# A shank diameter, a length, a finish abbreviation and a box count. That is the whole recoverable
+# content, which is why this file is deliberately small: a fastener's full specification lives on
+# a datasheet, and inventing attributes a description can never fill would only produce blank
+# columns that score as missed.
+#
+# ---------------------------------------------------------------------------------------------
+# THE DIAMETER-AND-LENGTH TRAP. `.131x3"` is a shank diameter of 0.131 inches by a length of 3
+# inches. Both are lengths, both are in inches, and they differ by a factor of 23 — so unlike the
+# abrasive dimension triple, these two cannot be told apart by magnitude alone in every case.
+# They are distinguished by the decimal form: a leading-decimal figure under half an inch is a
+# shank diameter, and a whole-or-fractional figure is a length. That is a convention, so both
+# attributes carry a plausible_range that refuses the other's values outright.
+
+attributes:
+  - code: fastener_type
+    name: Fastener Type
+    datatype: enum
+    description: >
+      What kind of fastener it is. Determines the tool that drives it and the hole it needs, so
+      it is the identity of the line rather than a descriptive detail: a screw and a nail of the
+      same length and finish are not alternatives.
+    example_values: ["Nail (Collated)", "Deck Screw", "Wood Screw", "Anchor"]
+    extraction_hints:
+      - '"BB" in a Senco part description means a collated brad or stick nail'
+      - a bare "SM" is a finish abbreviation, not a type
+    spec_labels: ["Type", "Fastener Type", "Product Type", "Style"]
+    allowed_values:
+      - value: Nail (Collated)
+        aliases: ["collated nail", "stick nail", "coil nail", "bb", "paper tape nail",
+                  "plastic collated"]
+      - value: Nail (Loose)
+        aliases: ["nail", "loose nail", "hand drive nail", "bulk nail"]
+      - value: Brad
+        aliases: ["brad", "brad nail", "finish brad"]
+      - value: Staple
+        aliases: ["staple", "staples", "crown staple"]
+      - value: Deck Screw
+        aliases: ["deck screw", "decking screw", "composite screw"]
+      - value: Wood Screw
+        aliases: ["wood screw", "construction screw", "multi-purpose screw"]
+      - value: Self-Drilling Screw
+        aliases: ["self drilling", "self-drilling", "tek screw", "metal screw"]
+      - value: Lag Screw
+        aliases: ["lag", "lag screw", "lag bolt", "structural screw"]
+      - value: Bolt
+        aliases: ["bolt", "hex bolt", "carriage bolt", "machine bolt"]
+      - value: Nut
+        aliases: ["nut", "hex nut", "lock nut"]
+      - value: Washer
+        aliases: ["washer", "flat washer", "lock washer"]
+      - value: Anchor
+        aliases: ["anchor", "concrete anchor", "wedge anchor", "sleeve anchor", "drop-in anchor"]
+      - value: Rivet
+        aliases: ["rivet", "blind rivet", "pop rivet"]
+      - value: Hidden Deck Fastener
+        aliases: ["hidden fastener", "hidden clip", "deck clip", "start clip"]
+    interchange: defining
+
+  - code: fastener_length
+    name: Length
+    datatype: dimension
+    quantity_kind: length
+    canonical_unit: mm
+    display_preference: imperial_fraction
+    unit_hint: in
+    description: >
+      Overall length of the fastener. The figure that decides whether it reaches the framing
+      member, and the one a code inspector measures.
+    example_values: ['1-1/4"', '2-1/2"', '3"', '3-1/2"']
+    extraction_hints:
+      - 'the SECOND figure of a pair like .131x3" — the whole or fractional one'
+      - a leading-decimal figure under half an inch is the shank diameter, not the length
+    table_headers: ["length", "nail length", "screw length", "size"]
+    spec_labels: ["Length", "Overall Length", "Nominal Length", "Size"]
+    tolerance: 0.0
+    # 6 mm covers the shortest brad; 400 mm the longest timber screw. Deliberately starts above
+    # the shank-diameter range so a transposed pair is refused rather than published.
+    plausible_range: [6.0, 400.0]
+    # Critical rather than defining: a 2" and a 3" nail of the same shank diameter drive from the same
+    # gun magazine, so the parts connect. What the difference costs is embedment depth, which is a code
+    # question rather than a fit one. `shank_diameter` is the fastener dimension that genuinely cannot
+    # be substituted, and it carries defining.
+    interchange: critical
+
+  - code: shank_diameter
+    name: Shank Diameter
+    datatype: dimension
+    quantity_kind: length
+    canonical_unit: mm
+    display_preference: imperial_decimal
+    unit_hint: in
+    description: >
+      Diameter of the fastener shank, written as a decimal inch on collated nails. Sets the
+      holding power and the gun it fits, and is the reason two nails of identical length are not
+      interchangeable.
+    example_values: [".113", ".120", ".131", ".148"]
+    extraction_hints:
+      - 'the FIRST figure of a pair like .131x3" — the leading-decimal one'
+      - a whole or fractional figure is the length, not the diameter
+    table_headers: ["diameter", "shank", "shank diameter", "gauge", "dia"]
+    spec_labels: ["Shank Diameter", "Diameter", "Shank", "Wire Diameter"]
+    tolerance: 0.0
+    # Deliberately capped below the fastener_length floor so a transposed pair is refused.
+    plausible_range: [0.5, 12.0]
+    interchange: defining
+
+  - code: fastener_finish
+    name: Finish
+    datatype: enum
+    description: >
+      The corrosion protection on the fastener. A code and warranty matter rather than an
+      appearance one: an electro-galvanised nail in treated lumber or in a coastal exposure fails
+      early enough to void the deck's warranty, so this is never inferred.
+    example_values: ["Hot-Dip Galvanized", "Stainless Steel 316", "Bright / Plain"]
+    extraction_hints:
+      - '"SM" in a Senco description is a smooth bright shank, not a finish claim'
+      - '"HDG" is hot-dip galvanised; "EG" is the much lighter electro-galvanised'
+    spec_labels: ["Finish", "Coating", "Plating", "Corrosion Protection", "Material/Finish"]
+    allowed_values:
+      - value: Bright / Plain
+        aliases: ["bright", "plain", "sm", "smooth", "uncoated", "bare"]
+      - value: Electro-Galvanized
+        aliases: ["eg", "electro galvanized", "electro-galvanised", "zinc plated", "zp"]
+      - value: Hot-Dip Galvanized
+        aliases: ["hdg", "hot dip", "hot-dip galvanised", "hot dipped"]
+      - value: Mechanically Galvanized
+        aliases: ["mg", "mechanically galvanized", "mech galv"]
+      - value: Stainless Steel 304
+        aliases: ["ss304", "304 ss", "304 stainless", "type 304"]
+      - value: Stainless Steel 316
+        aliases: ["ss316", "316 ss", "316 stainless", "type 316", "marine grade"]
+      - value: Polymer Coated
+        aliases: ["polymer", "epoxy coated", "ceramic coated", "coated", "climatek"]
+      - value: Painted
+        aliases: ["painted", "color matched", "colour matched"]
+    # Ranking corrosion finishes is a service-environment judgement, not a string sort.
+    interchange: functional

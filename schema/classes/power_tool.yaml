@@ -1,0 +1,133 @@
+# Power tools: cordless, corded and pneumatic.
+#
+# The largest tool cohort in the client's 1,000-row sample at 103 rows, across Milwaukee (M18, M12),
+# Makita (18V LXT), Kreg, Festool, DeWalt, Senco, Dremel, Mafell and Oliver.
+#
+# THE FIELD THAT MATTERS MOST HERE IS NOT A SPECIFICATION. `XRU23Z Makita 18V Trimmer Tool - Only`
+# and `XRU23SM1 Makita 18V 13" - String Trimmer Kit` are the same tool at roughly a 3x price
+# difference, because one includes a battery and a charger and the other does not. Every other
+# attribute on those two rows agrees. `tool_configuration` is therefore bound as required with the
+# heaviest weight in the class, and its enum values are the words suppliers actually print — "Bare",
+# "Tool Only", "Tool - Only", "(Bare)" — rather than a tidier scheme of our own.
+#
+# THE PLATFORM IS NOT THE VOLTAGE. `battery_platform` and `battery_voltage` are bound separately
+# because M18 and 18V LXT are both eighteen volts and neither battery fits the other's tool.
+# Recording only the voltage would assert an interchangeability that does not exist; recording only
+# the platform would lose the figure that predicts power. Both, or the listing misleads.
+#
+# WHY ACCESSORIES ARE NOT HERE. Saw blades, driver bits and batteries have their own classes even
+# though they are sold beside these tools and often in the same kit. A blade is not a saw, and the
+# attributes a buyer filters a blade on — tooth count, arbor shape — are not attributes a saw has.
+#
+# No description recipe and no external scheme mapping — see decking_board.yaml.
+
+class:
+  code: TOL.PWR.GEN
+  name: Power Tool
+  version: v1
+
+  item_type: Power Tool
+
+  # "driver" is safe alongside the driver-bit class: the bit rows write "Drive - Bit" and "Drive
+  # Bit", which tokenise to `drive`, never `driver`.
+  #
+  # "tool" earns its place on rows whose only category word it is — "Trimmer Tool - Only", "Rotary
+  # Tool". It also admits "Tool Box", which the storage class then out-scores on `organizer` and
+  # `overall_size` vocabulary; that is the ranking working as intended rather than a leak.
+  # `dust` is here for the Festool dust extractors: "578512 Festool Dust Extractor-CT MIDI I HEPA"
+  # tokenises the hyphenated compound whole as `extractor-ct`, so the bare `extractor` never matches
+  # it and `dust` is the only reliable token. `gun` covers grease guns, `stapler` and `jointer` the
+  # single rows that carry no other tool noun.
+  # `impact/drill` is declared as its own term because the tokeniser keeps slashed compounds whole,
+  # so "DCK225D2 Dewalt Impact/Drill - Kit" yields neither `impact` nor `drill`. Splitting compounds
+  # globally was tried twice and measured worse — see the note on `axiom.classify.candidates.tokenize`
+  # — so the compound spelling is declared where it belongs, on the one class that claims it.
+  #
+  # `planing` and `drilling` are the gerund forms this supplier uses on two rows whose only category
+  # word is the activity: "Mafell Carpentry - Planing Machine" and "TP-1935 Hole Drilling System".
+  # `surge` is Milwaukee's hydraulic impact-driver line and the only category token on "M18 Surge Kit".
+  #
+  # `wrench` is deliberately ABSENT and lives on the hand-tool class instead. Holding it on both
+  # collapsed the dominance band to 0.0013 wide by pulling four M12 impact wrenches level with the
+  # easiest genuinely ambiguous case in the taxonomy. The impact wrenches are still won here, on
+  # `impact`, which is the token that actually says the tool is powered.
+  identity_terms:
+    [saw, sawzall, drill, drilling, driver, impact, impact/drill, grinder, sander, trimmer,
+     blower, vacuum, extractor, dust, ratchet, rachet, nailer, stapler, router, planer, planing,
+     shaper, lathe, bandsaw, jigsaw, jointer, polisher, gun, tool, rotary, speaker, feeder, surge]
+
+  browse_path:
+    - Tools & Consumables
+    - Power Tools
+    - Power Tools
+
+  reporting_path: [Tools, Power Tools, Tools]
+
+  attributes:
+    - { code: tool_configuration,    requirement: required,    weight: 3.0, label: Configuration }
+    - { code: power_source,          requirement: required,    weight: 3.0 }
+    - { code: battery_platform,      requirement: recommended, weight: 3.0, label: Platform }
+    - { code: battery_voltage,       requirement: recommended, weight: 2.0 }
+    - { code: drive_size,            requirement: recommended, weight: 3.0 }
+    - { code: chuck_size,            requirement: optional,    weight: 2.0 }
+    - { code: blade_diameter,        requirement: optional,    weight: 2.0 }
+    - { code: no_load_speed,         requirement: optional,    weight: 2.0, label: Speed }
+    - { code: voltage_rating,        requirement: optional,    weight: 1.0, label: Supply Voltage }
+    - { code: amperage_rating,       requirement: optional,    weight: 1.0 }
+    - { code: product_series,        requirement: recommended, weight: 2.0, label: Series }
+    - { code: model_number,          requirement: optional,    weight: 1.0 }
+    - { code: overall_size,          requirement: optional,    weight: 1.0, label: Size }
+    - { code: each_weight,           requirement: optional,    weight: 1.0 }
+    - { code: sound_level,           requirement: optional,    weight: 1.0 }
+    - { code: pack_quantity,         requirement: optional,    weight: 1.0, label: Piece Count }
+    - { code: selling_uom,           requirement: recommended, weight: 2.0 }
+    - { code: additional_information, requirement: optional,   weight: 1.0 }
+
+    # --- named delivery columns; must stay last ----------------------------------------------
+    - { code: warranty_terms,        requirement: recommended, weight: 2.0 }
+    - { code: included_technology,   requirement: optional,    weight: 1.0 }
+    - { code: approvals,             requirement: recommended, weight: 2.0 }
+    - { code: country_of_origin,     requirement: optional,    weight: 1.0 }
+    - { code: prop65_warning_required, requirement: recommended, weight: 2.0 }
+    - { code: gtin,                  requirement: optional,    weight: 1.0 }
+
+  cross_field_rules:
+    - id: R_CORDLESS_STATES_A_PLATFORM
+      expr: "power_source != 'Cordless (Battery)' or battery_platform is not null"
+      references: [power_source, battery_platform]
+      severity: error
+      message: >
+        A cordless tool was captured with no battery platform. The platform is the compatibility
+        fact a buyer needs — an M18 battery does not fit an 18V LXT tool despite both being
+        eighteen volts — so a cordless listing without it is not orderable by anyone who owns
+        batteries already.
+
+    - id: R_BARE_TOOL_IS_CORDLESS
+      expr: "tool_configuration != 'Bare Tool' or power_source == 'Cordless (Battery)'"
+      references: [tool_configuration, power_source]
+      severity: warning
+      message: >
+        A corded or pneumatic tool is described as a bare tool. "Bare" means no battery and no
+        charger, which is only a meaningful distinction on a cordless product; on a corded one it
+        usually means a word was matched out of context.
+
+    - id: R_CORDED_TOOL_HAS_NO_PLATFORM
+      expr: "power_source != 'Corded Electric' or battery_platform is null"
+      references: [power_source, battery_platform]
+      severity: error
+      message: >
+        A battery platform was recorded against a corded tool. Usually means a voltage token such
+        as "120V" was read as a platform name, which would then assert compatibility with a battery
+        system the tool cannot accept.
+
+  channel_profiles:
+    - name: unilog_delivery
+      title_template: "{brand} {product_series} {mpn} {class_name}"
+      max_title_chars: 200
+      unit_system: imperial_primary
+      required: [mpn]
+
+    - name: schema_org
+      max_title_chars: 200
+      unit_system: metric_primary
+      required: [mpn]

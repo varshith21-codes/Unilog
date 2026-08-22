@@ -27,11 +27,20 @@ What that means for the numbers, said plainly so they are not a surprise:
     list. The gaps carry ``no_source_available`` and recommend retrieval, which is the truth: the
     fix is to fetch the manufacturer document and run ``run_pipeline.py``, not to squeeze the
     description harder.
-*   **Most rows do not classify.** The schema in ``schema/classes/`` covers four classes; the item
-    master spans abrasives, lumber, power tools, PPE, wire and more. Retrieval abstains rather than
-    guessing, so those rows land with ``class_code: null`` — present in the catalogue, with nothing
-    scored against them. That is a schema-coverage result, and hiding those rows would hide it.
-    ``--classified-only`` skips them when you want the narrower view.
+*   **Most rows classify, and the ones that do not say why.** This paragraph used to read "most
+    rows do not classify", and it was accurate: the schema held four classes — two valves, a
+    dishwasher and a lamp — against an item master spanning decking, abrasives, power tools, PPE,
+    appliances, wire and more, so 785 of 1,000 rows landed with ``class_code: null``. The console
+    rendered them as "no class could be established", which was the honest answer to a question the
+    schema could not answer.
+
+    ``schema/classes/`` now covers thirty-two classes drawn from what the file actually contains
+    (see ``scripts/profile_cohorts.py`` for the measurement that chose them), and coverage is 959 of
+    1,000 rows. The remainder still abstain rather than guessing, and they abstain for one of two
+    stated reasons: ``no_viable_candidate`` where nothing in the schema matches, and
+    ``ambiguous_no_model`` where two classes were too close to separate without a model to
+    adjudicate. Both are visible in the bundle. ``--classified-only`` skips them when you want the
+    narrower view; ``scripts/score_classification.py`` reports the split.
 
 One deliberate departure from ``run_pipeline.py``, because 1,000 rows share one file: each row is
 carried as **its own excerpt** of the item master. The excerpt's ``document_id`` is

@@ -38,34 +38,47 @@ from axiom.schema import SchemaRegistry
 # differently from a one-line ERP description than from a full datasheet.
 #
 # ---------------------------------------------------------------------------------------------
-# THIS VALUE IS CORPUS-SENSITIVE AT SMALL CLASS COUNTS. Re-measure it when adding a class.
+# This value used to be corpus-sensitive and no longer is. The history is worth keeping, because
+# it explains why the retrieval scorer looks the way it does.
 #
 # It was 0.68, measured against a two-class valve schema. Adding one unrelated class (built-in
-# dishwashers) moved the correct ball-valve match from 0.659 to 0.696 and broke it.
+# dishwashers) moved the correct ball-valve match from 0.659 to 0.696 and broke it. The mechanism
+# was IDF over a corpus whose size was the live class count: a term shared by both valve classes
+# scored log(3/3)+1 = 1.0 at N=2 but log(4/3)+1 = 1.288 at N=3, so adding a *distant* class
+# inflated the weight of the vocabulary two *near* classes shared and pulled them together.
 #
-# The mechanism is IDF over a tiny corpus. IDF is log((N+1)/(df+1)) + 1, so a term shared by both
-# valve classes scores log(3/3)+1 = 1.0 at N=2 but log(4/3)+1 = 1.288 at N=3. Adding an unrelated
-# class therefore *inflates the weight of the vocabulary the related classes share* — "bronze",
-# "NPT", "threaded" — which pulls ball and gate closer together and raises the dominance ratio.
-# Counter-intuitively, a distant class makes two near neighbours harder to separate.
+# `axiom.classify.candidates.IDF_SATURATION` removed the document count from the formula
+# altogether, so a term's weight now depends only on how many classes actually contain it.
+# Adding a class perturbs the vocabulary it introduces and nothing else, which is what makes this
+# constant safe to leave alone as the taxonomy grows.
 #
-# Measured on the current three-class schema, and pinned by
-# tests/test_classify.py::test_dominance_band_still_separates, which recomputes both sides and
-# fails with the offending number when a new class moves them:
+# Measured with scripts/measure_dominance.py against the full 32-class catalogue schema, and pinned
+# by tests/test_classify.py::test_dominance_band_still_separates, which recomputes both sides and
+# fails with the offending number if anything moves them:
 #
-#     correct   ball valve         0.696      <- hardest correct match
-#     correct   gate valve         0.664
-#     correct   dishwasher         0.582
-#     --------------------------------------- threshold sits here
-#     ambiguous shared vocab only  0.738      <- easiest ambiguous case
-#     ambiguous bronze NPT 150 PSI 0.794
+#     correct   gate valve                  0.735
+#     correct   ball valve                  0.750      <- hardest correct match
+#     ------------------------------------------------ threshold sits here
+#     ambiguous shared valve vocab          0.782      <- easiest ambiguous case
+#     ambiguous tape light                  0.795
+#     ambiguous wrench set in a storage box 0.812
+#     ambiguous bronze NPT 150 PSI          0.831
+#     ambiguous roofing nailer              0.998
 #
-# 0.72 sits in the gap with roughly 0.02 either side. That is thinner than is comfortable, and
-# the real fix is to stop IDF moving with class count at all — floor the document count so the
-# corpus behaves as though it were large (`total = max(len(profiles), 50)`), which would make
-# this constant stable as the taxonomy grows. That is a change to retrieval scoring for every
-# class and belongs in its own commit with its own measurements, not smuggled in here.
-DECISIVE_DOMINANCE = 0.72
+# 0.765 sits near the centre of a 0.032 gap. Re-measure with `python scripts/measure_dominance.py`
+# if it ever tightens; the script prints the midpoint to pin and exits non-zero when the threshold
+# falls outside the gap.
+#
+# ONE LESSON FROM PINNING IT AT 32 CLASSES, worth stating because the instinct it corrects is
+# strong. The band first came out at 0.0013 wide — unpinnable — because four M12 impact wrenches
+# measured 0.781 as CORRECT matches, all but touching the easiest ambiguous case at 0.782. The
+# tempting reading is that the threshold needs to thread a finer needle. The actual cause was that
+# `wrench` was an identity term of both the power-tool and hand-tool classes, and identity terms are
+# weighted heavily in the scoring vocabulary, so a broad class was pulled level with the specific
+# one that was right. Removing one term from one class YAML restored the gap to 0.032. A collapsed
+# is usually a vocabulary collision reported in the wrong units, and moving this constant to
+# accommodate it would have hidden the collision instead of fixing it.
+DECISIVE_DOMINANCE = 0.765
 
 # Weak candidates are down-weighted before agreement is computed. Cosine scores are not
 # probabilities, and treating a 25%-weaker candidate as 75% as likely overstates it badly
@@ -73,7 +86,40 @@ DECISIVE_DOMINANCE = 0.72
 AGREEMENT_SHARPENING = 3.0
 
 # Below this, no candidate is credible enough to classify at all.
-MIN_VIABLE_SCORE = 0.05
+#
+# Deliberately low, because this floor is not what provides precision and never was. The
+# identity guard in `ClassProfile.admits` is — it refuses to score a class at all unless the text
+# asserts the product IS that kind of thing. The record from before the guard existed is explicit
+# that a score floor cannot do this job: the best false positive scored 0.1854 against a
+# true-positive floor of 0.1725, so no threshold separated them.
+#
+# It was 0.05, and at that value it was rejecting CORRECT classifications, because the score is a
+# cosine and cosine is length-asymmetric. A class vocabulary runs to a few thousand terms once
+# every bound attribute's enum values and aliases are counted, so a twenty-token datasheet
+# paragraph scores 0.2-0.3 against it while a five-token item-master string scores 0.01-0.05 on an
+# equally good match. `1/2" 54"x10 Drywall Easi-Lite` matched the panel class on the word
+# "drywall", ranked first with no competitor, and was refused at 0.0152 — the floor was
+# penalising the product for being terse, which is the whole condition this system exists to
+# enrich.
+#
+# Measured with `scripts/score_classification.py --sweep-floor` over the 1,000-row sample:
+#
+#     floor   classified   coverage   fabricated
+#     0.05           431      43.1%            0
+#     0.03           442      44.2%            0
+#     0.02           445      44.5%            0
+#     0.01           450      45.0%            0
+#     0.005          452      45.2%            0
+#     0.0            452      45.2%            0
+#
+# "fabricated" counts rows that classified without carrying an identity term of their winning
+# class. It stays at zero across the whole sweep, including with the floor removed entirely, which
+# is the measurement that says the guard is load-bearing and this constant is not.
+#
+# 0.01 rather than 0: coverage has saturated by 0.005, so the last two rows are free, and keeping a
+# non-zero floor still rejects the one case the guard cannot — a class admitted on a single stray
+# identity token that shares no other vocabulary at all.
+MIN_VIABLE_SCORE = 0.01
 
 # Confidence a level must reach to be published rather than truncated away.
 LEVEL_CONFIDENCE_FLOOR = 0.60

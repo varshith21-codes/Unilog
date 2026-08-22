@@ -1,0 +1,247 @@
+#
+# WHY THIS CATEGORY EXISTS. Electrical distribution and devices are roughly 52 rows of the
+# client's 1,000-row sample: wiring devices (25), boxes and covers (16), wire and cable sold by
+# the linear foot (8) and load centres (3).
+#
+# ---------------------------------------------------------------------------------------------
+# WHAT THE SUPPLIER STRINGS ACTUALLY CONTAIN, because that is what these attributes are shaped to.
+#
+#     R5GSRA1THD   15A GFCI Plug
+#     AYCL-153PH-LA Lutron Dimmer LA
+#     TNIDP12      125V Dig Indoor Timer
+#     HOM2040M200PRB 200A Load Cntr
+#     5522-5EV     2 Port Decor Plate
+#     T50-0SL13000 1G Wallplate SS - Blank
+#     4x4x1-1/2    Oct Box w/Bracket
+#     12-4         SO Cord (Linear Foot)
+#     4/0          Aluminum Entrance Cable (Linear Foot)
+#     1650472900C  15A 125V Cord Conn
+#
+# Recoverable with no document and no model: an amperage, a voltage, a gang or port count, and for
+# cable a gauge-and-conductor designation. That is most of what an electrical counter looks up.
+#
+# ---------------------------------------------------------------------------------------------
+# THE GAUGE TRAP, and why wire_gauge is a string. `12-4` means 12 AWG with 4 conductors, `16/3`
+# means 16 AWG with 3, and `4/0` is a single conductor four sizes ABOVE 1 AWG — the "/0" is an
+# aught designation, not a conductor count. Three different grammars in one column. Parsing them
+# positionally would read 4/0 as four conductors of gauge zero, which is not a wire that exists.
+# The designation is preserved verbatim and conductor_count is populated only when the source
+# states it unambiguously.
+#
+# AWG is also INVERSE: 12 AWG is thicker than 16 AWG. Any future comparison rule has to know that,
+# which is a second reason not to store it as a bare number that a numeric comparison would get
+# exactly backwards.
+
+attributes:
+  # ------------------------------------------------------------------ devices
+  - code: wiring_device_type
+    name: Device Type
+    datatype: enum
+    description: >
+      What the wiring device does. These are not variants of one product: a dimmer, a GFCI
+      receptacle and a blank wall plate share a box opening and nothing else, so the device type
+      is the identity of the line.
+    example_values: ["GFCI Receptacle", "Dimmer", "Timer", "Wall Plate"]
+    extraction_hints:
+      - '"Decor Plate" and "Wallplate" are both wall plates'
+      - '"Cord Conn" is a cord connector; "Wall Tap" is a plug-in multiplier'
+      - '"Blank" qualifies a wall plate as having no opening; it is not a device type'
+    spec_labels: ["Device Type", "Type", "Product Type", "Device"]
+    allowed_values:
+      - value: Receptacle
+        aliases: ["outlet", "outet", "socket", "duplex receptacle", "receptacle"]
+      - value: GFCI Receptacle
+        aliases: ["gfci", "gfi", "ground fault", "gfci outlet"]
+      - value: AFCI Receptacle
+        aliases: ["afci", "arc fault"]
+      - value: Switch
+        aliases: ["toggle switch", "switch", "rocker switch", "single pole switch"]
+      - value: Dimmer
+        aliases: ["dimmer", "dimmer switch", "light dimmer"]
+      - value: Timer
+        aliases: ["timer", "time switch", "mechanical timer", "digital timer"]
+      - value: Occupancy Sensor
+        aliases: ["occupancy sensor", "motion sensor", "vacancy sensor"]
+      - value: Wall Plate
+        aliases: ["wallplate", "wall plate", "decor plate", "cover plate", "faceplate", "cover"]
+      - value: Cord Connector
+        aliases: ["cord conn", "cord connector", "connector body", "cord cap"]
+      - value: Plug
+        aliases: ["plug", "attachment plug", "male plug"]
+      - value: Wall Tap
+        aliases: ["wall tap", "tap", "outlet multiplier"]
+      - value: Cord Grip
+        aliases: ["cord grip", "strain relief", "cable gland"]
+    interchange: defining
+
+  - code: gang_count
+    name: Gang / Port Count
+    datatype: integer
+    description: >
+      Number of device openings a plate or box carries, or ports on a data plate. A 1-gang plate
+      does not fit a 2-gang box, so this is a fit dimension rather than a capacity preference.
+    example_values: ["1", "2", "3", "4"]
+    extraction_hints:
+      - '"1G" and "2G" mean one and two gang'
+      - '"2 Port" on a data plate is this attribute'
+    # "Configuration" is deliberately absent: `nema_configuration` is literally a configuration and
+    # owns that label. Both are bound by the wiring-device class.
+    table_headers: ["gang", "gangs", "ports", "openings", "gang count"]
+    spec_labels: ["Gang", "Gangs", "Number of Gangs", "Ports"]
+    plausible_range: [1.0, 12.0]
+    interchange: defining
+
+  - code: nema_configuration
+    name: NEMA Configuration
+    datatype: string
+    description: >
+      NEMA blade configuration, which fixes voltage, amperage and pole arrangement in one code.
+      A string because the grammar mixes digits, hyphens and a trailing R or P for receptacle or
+      plug — 6-50R and 5-15P are codes, not numbers.
+    example_values: ["5-15R", "5-20R", "6-50R", "L6-30P"]
+    extraction_hints:
+      - 'a trailing R is a receptacle and P is a plug; an L prefix means locking'
+      - keep the code whole and do not reorder it
+    spec_labels: ["NEMA", "NEMA Configuration", "Configuration", "Blade Configuration"]
+    pattern: '^L?\d{1,2}-\d{1,2}[RP]?$'
+    interchange: defining
+
+  # ------------------------------------------------------------------ enclosures
+  - code: enclosure_form
+    name: Enclosure Form
+    datatype: enum
+    description: >
+      The shape and role of the enclosure. Determines what mounts in it and what conduit fittings
+      it accepts, and is stated in nearly every box description as an abbreviation.
+    example_values: ["Octagon Box", "Square Box", "Box Cover", "Load Center"]
+    extraction_hints:
+      - '"Oct" is octagon; a bare "Box" with a square dimension pair is a square box'
+      - '"Load Cntr" and "Load Cnt" are load centres'
+    spec_labels: ["Enclosure", "Form", "Box Type", "Type", "Style"]
+    allowed_values:
+      - value: Octagon Box
+        aliases: ["oct box", "oct", "octagon", "octagonal box", "round/oct"]
+      - value: Square Box
+        aliases: ["square box", "sq box", "4-square", "1900 box"]
+      - value: Device Box
+        aliases: ["device box", "switch box", "handy box", "gang box", "2g box"]
+      - value: Round Box
+        aliases: ["round box", "ceiling pan", "pancake box"]
+      - value: Box Cover
+        aliases: ["box cover", "cover", "blank cover", "mud ring", "plaster ring"]
+      - value: Load Center
+        aliases: ["load center", "load centre", "load cntr", "load cnt", "breaker panel",
+                  "panelboard", "distribution panel"]
+      - value: Weatherproof Enclosure
+        aliases: ["weatherproof", "wp box", "nema 3r", "outdoor box"]
+      - value: Junction Box
+        aliases: ["junction box", "j-box", "jbox", "pull box"]
+    interchange: defining
+
+  - code: circuit_capacity
+    name: Circuit Capacity
+    datatype: integer
+    description: >
+      Number of breaker spaces or circuits a load centre provides. Sized at installation and not
+      practically expandable, so a smaller panel is never a substitute even at the same amperage.
+    example_values: ["12", "20", "30", "40"]
+    extraction_hints:
+      - 'a Square D catalogue number encodes it, but read it only from an explicit statement'
+    spec_labels: ["Spaces", "Circuits", "Number of Spaces", "Poles", "Circuit Capacity"]
+    plausible_range: [1.0, 200.0]
+    # More spaces is never a fault provided the enclosure still fits.
+    interchange: functional
+    substitution: at_least
+
+  # ------------------------------------------------------------------ wire and cable
+  - code: wire_gauge
+    name: Wire Gauge
+    datatype: string
+    description: >
+      Conductor size designation exactly as written. A string because three grammars share this
+      column: "12-4" is 12 AWG with 4 conductors, "16/3" is 16 AWG with 3, and "4/0" is a single
+      aught-size conductor. AWG is also inverse — 12 is thicker than 16 — so a bare number would
+      make any comparison rule read backwards.
+    example_values: ["12-4", "16/3", "4/0", "2/2/4", "6/6/6"]
+    extraction_hints:
+      - 'do not split on the separator: "4/0" is a size, not four conductors of gauge zero'
+      - 'a repeated triple like 2/2/4 describes a triplex cable''s three conductors'
+    table_headers: ["gauge", "awg", "size", "wire size", "conductor size"]
+    spec_labels: ["Gauge", "AWG", "Wire Gauge", "Conductor Size", "Size"]
+    # Critical rather than defining: both gauges are wire and both terminate in the same lug, so the
+    # parts connect. What differs is ampacity, which is a code question. Deliberately left at the
+    # default `equal` substitution rather than given a direction, because AWG is INVERSE — 12 is
+    # thicker than 16 — so any ordering rule written here would approve exactly the wrong swap.
+    interchange: critical
+
+  - code: conductor_count
+    name: Conductor Count
+    datatype: integer
+    description: >
+      Number of current-carrying conductors, populated only when the source states it
+      unambiguously. Deliberately not derived from wire_gauge: the separator in "4/0" is an aught
+      designation and parsing it as a count would invent a conductor that is not there.
+    example_values: ["2", "3", "4"]
+    extraction_hints:
+      - 'read it only from an explicit statement or from an unambiguous form such as "16/3"'
+      - never parse it out of an aught size such as 4/0 or 2/0
+    spec_labels: ["Conductors", "Number of Conductors", "Conductor Count", "Cores"]
+    plausible_range: [1.0, 60.0]
+    interchange: defining
+
+  - code: conductor_material
+    name: Conductor Material
+    datatype: enum
+    description: >
+      The metal of the conductor. Aluminium needs a larger size for the same ampacity and
+      different terminations, so substituting one for the other is a code question rather than a
+      preference.
+    example_values: ["Copper", "Aluminum"]
+    extraction_hints:
+      - '"Aluminum" is stated explicitly on entrance cable and triplex'
+      - absence of a material word usually means copper, but do not infer it
+    spec_labels: ["Conductor", "Conductor Material", "Material", "Metal"]
+    allowed_values:
+      - value: Copper
+        aliases: ["cu", "copper", "bare copper", "annealed copper"]
+      - value: Aluminum
+        aliases: ["al", "alum", "aluminium", "aa-8000"]
+      - value: Copper-Clad Aluminum
+        aliases: ["cca", "copper clad aluminum", "copper-clad"]
+      - value: Tinned Copper
+        aliases: ["tinned", "tinned copper"]
+    interchange: critical
+
+  - code: cable_type
+    name: Cable Type
+    datatype: enum
+    description: >
+      The cable's construction and listing, which decides where it may legally be installed. A
+      cord is not a building wire and neither is a substitute for the other regardless of gauge.
+    example_values: ["SO Cord", "Service Entrance", "Triplex", "CAT5e"]
+    extraction_hints:
+      - '"SO", "SJEWA" and similar letter groups are portable cord type designations'
+      - '"CL3" is an in-wall listing for a low-voltage cable'
+    spec_labels: ["Cable Type", "Type", "Construction", "Listing", "Jacket Type"]
+    allowed_values:
+      - value: SO Cord
+        aliases: ["so", "so cord", "sow", "soow", "portable cord"]
+      - value: SJ Cord
+        aliases: ["sj", "sjo", "sjoow", "sjewa", "sjtw"]
+      - value: NM-B
+        aliases: ["nm-b", "nmb", "romex", "non-metallic sheathed"]
+      - value: UF-B
+        aliases: ["uf-b", "ufb", "underground feeder"]
+      - value: THHN
+        aliases: ["thhn", "thwn", "thhn/thwn", "building wire"]
+      - value: Service Entrance
+        aliases: ["se", "seu", "ser", "entrance cable", "service entrance cable"]
+      - value: Triplex
+        aliases: ["triplex", "ud triplex", "urd", "quadruplex"]
+      - value: CAT5e
+        aliases: ["cat5e", "cat 5e", "category 5e"]
+      - value: CAT6
+        aliases: ["cat6", "cat 6", "category 6"]
+      - value: Speaker / Control
+        aliases: ["cl3", "cl2", "speaker wire", "stranded wire cl3", "control cable"]
+    interchange: defining

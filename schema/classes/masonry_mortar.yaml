@@ -1,0 +1,69 @@
+# Mortar, grout and cementitious mixes.
+#
+# Four rows of the client's 1,000-row sample — a small cohort, and worth a class anyway because it
+# is a COHERENT one. The distinction that matters when deciding whether a cohort earns a class is
+# not its size but whether its members share a specification: these four are all bagged mixes
+# ordered by type designation and colour, and a buyer filters them the same way.
+#
+# Contrast the ten rows this schema deliberately leaves unclassified — a heater kit, an insulated
+# water bottle, a phone holster, hex spikes, grip tape. Those share nothing, and a class built to
+# absorb them would have to be defined on generic vocabulary, which means it would win rows
+# belonging to real classes. Ten honest abstentions cost less than one promiscuous class.
+#
+# THE TYPE DESIGNATION. "Type N" and "Type S" are ASTM C270 mortar types with different compressive
+# strengths and different permitted uses; they are not grades of the same product. They are carried
+# in `product_series` rather than a dedicated attribute because with four rows there is no evidence
+# about how this supplier writes the rest of the range, and inventing an enum from two observations
+# is how a closed vocabulary starts silently discarding values.
+
+class:
+  code: BLD.MAS.MORTAR
+  name: Mortar and Cementitious Mix
+  version: v1
+
+  item_type: Mortar
+
+  # Deliberately EXCLUDES "masonry". It reads like the obvious term for this class and it is an
+  # APPLICATION word, not an identity one: with it in the list this class won six Milwaukee
+  # "Masonry Cut Off Disc" rows, which are abrasives that happen to cut masonry. The products that
+  # belong here all say "Mortar" outright.
+  identity_terms: [mortar, grout, thinset, stucco, cement]
+
+  browse_path:
+    - Building Materials
+    - Concrete & Masonry
+    - Mortar & Mixes
+
+  reporting_path: [Building Materials, Masonry, Mortar]
+
+  attributes:
+    - { code: product_series,        requirement: required,    weight: 3.0, label: Type }
+    - { code: finish_color,          requirement: required,    weight: 3.0, label: Color }
+    - { code: each_weight,           requirement: recommended, weight: 3.0, label: Bag Weight }
+    - { code: coverage_area,         requirement: optional,    weight: 2.0, label: Coverage }
+    - { code: selling_uom,           requirement: required,    weight: 2.0 }
+    - { code: case_quantity,         requirement: optional,    weight: 1.0 }
+    - { code: additional_information, requirement: optional,   weight: 1.0 }
+
+    # --- named delivery columns; must stay last ----------------------------------------------
+    - { code: approvals,             requirement: optional,    weight: 1.0 }
+    - { code: country_of_origin,     requirement: optional,    weight: 1.0 }
+    - { code: prop65_warning_required, requirement: recommended, weight: 2.0 }
+    - { code: gtin,                  requirement: optional,    weight: 1.0 }
+
+  cross_field_rules:
+    - id: R_BAGGED_MIX_STATES_A_WEIGHT
+      expr: "selling_uom is null or each_weight is not null"
+      references: [selling_uom, each_weight]
+      severity: warning
+      message: >
+        A bagged mix with no unit weight cannot be freighted or estimated against. Mortar is
+        ordered by the bag and delivered by the pallet, so the weight is the figure both the
+        estimator and the carrier need.
+
+  channel_profiles:
+    - name: unilog_delivery
+      title_template: "{brand} {product_series} {mpn} {class_name}"
+      max_title_chars: 200
+      unit_system: imperial_primary
+      required: [mpn]

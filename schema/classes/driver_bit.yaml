@@ -1,0 +1,88 @@
+# Driver bits, bit assortments and bit holders.
+#
+# 32 rows of the client's 1,000-row sample, across DeWalt (the DPH/DSQ/DT ranges), Makita and Vessel.
+#
+# THE ONE FIELD THAT DECIDES EVERYTHING. `bit_tip_type` is bound required at the heaviest weight
+# because a Phillips bit in a square recess destroys the fastener, and the two recesses are similar
+# enough at a glance that a buyer relies on the listing rather than the photograph. This cohort's
+# part numbers encode it — DPH is Phillips, DSQ is square, DT is Torx — but the class reads it from
+# the description text, because a part-number convention is a supplier's private scheme that changes
+# without notice.
+#
+# THE TWO-NUMBER TRAP this class exists to keep straight. `DPH22B 2" #2 Phillips Drive - Bit` states
+# two figures: an overall length of 2 inches and a tip size of #2. They are adjacent, both small,
+# and the only thing separating them is that one carries an inch mark and the other a hash. Reading
+# them the wrong way round produces a 2-inch #2 bit listed as a #2-inch 2 bit — both plausible,
+# neither correct. `bit_length` is a dimension and `bit_tip_size` is a string precisely so the two
+# cannot be silently swapped, and the rule below refuses a tip size that parsed as a length.
+#
+# A SUPPLIER TYPO IS PRESERVED, NOT REPAIRED. Row `DT252B 2" #25 Trox Drive Bit` writes "Trox" for
+# Torx. `bit_tip_type` carries "trox" as an alias because the part number confirms the intent, and
+# that is an alias on a closed vocabulary rather than a guess at what the supplier meant.
+#
+# No description recipe and no external scheme mapping — see decking_board.yaml.
+
+class:
+  code: TOL.ACC.DRIVERBIT
+  name: Driver Bit
+  version: v1
+
+  item_type: Driver Bit
+
+  # "bit" is the load-bearing token and it is specific: nothing else in this catalogue is a bit.
+  # The recess names are included for rows that lead with them, and "holder" for the Vessel
+  # carrying holders that are bit accessories rather than bits.
+  identity_terms: [bit, bits, phillips, torx, trox, robertson, holder]
+
+  browse_path:
+    - Tools & Consumables
+    - Tool Accessories
+    - Driver Bits
+
+  reporting_path: [Tools, Accessories, Driver Bits]
+
+  attributes:
+    - { code: bit_tip_type,          requirement: required,    weight: 3.0, label: Tip Type }
+    - { code: bit_tip_size,          requirement: required,    weight: 3.0, label: Tip Size }
+    - { code: bit_length,            requirement: required,    weight: 3.0, label: Length }
+    - { code: shank_type,            requirement: required,    weight: 3.0, label: Shank }
+    - { code: pack_quantity,         requirement: required,    weight: 3.0, label: Piece Count }
+    - { code: blade_material,        requirement: optional,    weight: 1.0, label: Material }
+    - { code: drive_size,            requirement: optional,    weight: 1.0 }
+    - { code: product_series,        requirement: recommended, weight: 2.0, label: Series }
+    - { code: workpiece_material,    requirement: optional,    weight: 1.0, label: For Use On }
+    - { code: finish_color,          requirement: optional,    weight: 1.0, label: Color }
+    - { code: selling_uom,           requirement: recommended, weight: 2.0 }
+    - { code: each_weight,           requirement: optional,    weight: 1.0 }
+    - { code: additional_information, requirement: optional,   weight: 1.0 }
+
+    # --- named delivery columns; must stay last ----------------------------------------------
+    - { code: warranty_terms,        requirement: optional,    weight: 1.0 }
+    - { code: approvals,             requirement: optional,    weight: 1.0 }
+    - { code: country_of_origin,     requirement: optional,    weight: 1.0 }
+    - { code: gtin,                  requirement: optional,    weight: 1.0 }
+
+  cross_field_rules:
+    - id: R_TIP_SIZE_IS_NOT_A_LENGTH
+      expr: "bit_tip_size is null or bit_length is not null"
+      references: [bit_tip_size, bit_length]
+      severity: warning
+      message: >
+        A tip size was captured with no overall length. The two figures sit adjacent in every
+        description in this cohort — '2" #2 Phillips' — and a length that went missing usually means
+        both tokens were read into the same field.
+
+    - id: R_ASSORTMENT_STATES_A_COUNT
+      expr: "pack_quantity is null or pack_quantity >= 1"
+      references: [pack_quantity]
+      severity: warning
+      message: >
+        Bit assortments are sold by the piece count and it is stated as a bare "5pc" or "5pk" beside
+        a real length. A count below one means a dimension was captured instead.
+
+  channel_profiles:
+    - name: unilog_delivery
+      title_template: "{brand} {product_series} {mpn} {class_name}"
+      max_title_chars: 200
+      unit_system: imperial_primary
+      required: [mpn]

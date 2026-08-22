@@ -2,7 +2,7 @@
   "bundle": {
     "sku": "DPH12B",
     "document_id": "Unihack__Sample_Dataset_-_Input#DPH12B",
-    "class_code": null,
+    "class_code": "TOL.ACC.DRIVERBIT",
     "record": {
       "tenant_id": "unilog",
       "sku": "DPH12B",
@@ -14,36 +14,280 @@
       "supplier_id": "2435",
       "parent_sku": null,
       "lifecycle_status": "active",
-      "class_code": null,
-      "schema_version": null,
+      "class_code": "TOL.ACC.DRIVERBIT",
+      "schema_version": "TOL.ACC.DRIVERBIT@v1",
       "source_document_ids": [
         "Unihack__Sample_Dataset_-_Input#DPH12B"
       ],
-      "created_at": "2026-08-22T12:30:44.181806+00:00",
-      "updated_at": "2026-08-22T12:30:44.181810+00:00"
+      "created_at": "2026-08-22T19:16:17.923753+00:00",
+      "updated_at": "2026-08-22T19:16:17.923830+00:00"
     },
-    "classifications": [],
+    "classifications": [
+      {
+        "scheme": "internal",
+        "code": "TOL.ACC.DRIVERBIT",
+        "path": [
+          "Tools & Consumables",
+          "Tool Accessories",
+          "Driver Bits"
+        ],
+        "confidence": 0.8903,
+        "level_confidences": [
+          1.0,
+          1.0,
+          0.8903
+        ],
+        "rationale": "single viable candidate",
+        "method": "retrieval_only",
+        "alternatives": [],
+        "reviewed_by": null,
+        "reviewed_at": null
+      }
+    ],
     "classification_summary": {
-      "class_code": null,
-      "confidence": 0.0,
-      "confident_depth": 0,
-      "schemes": [],
-      "candidates_considered": 0,
-      "method": "no_viable_candidate",
-      "abstained": true,
+      "class_code": "TOL.ACC.DRIVERBIT",
+      "confidence": 0.8903,
+      "confident_depth": 3,
+      "schemes": [
+        "internal"
+      ],
+      "candidates_considered": 1,
+      "method": "retrieval_only",
+      "abstained": false,
       "input_tokens": 0,
       "output_tokens": 0
     },
-    "classification_candidates": [],
-    "values": [],
-    "gaps": [],
+    "classification_candidates": [
+      {
+        "code": "TOL.ACC.DRIVERBIT",
+        "score": 0.2903,
+        "path_text": "Tools & Consumables > Tool Accessories > Driver Bits"
+      }
+    ],
+    "values": [
+      {
+        "attribute_code": "bit_length",
+        "value_raw": "2\"",
+        "value_canonical": {
+          "magnitude": 50.8,
+          "unit": "mm"
+        },
+        "value_display": "2\"",
+        "method": "supplier_feed",
+        "confidence": 0.88,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "desc-bit_length-7",
+            "document_id": "Unihack__Sample_Dataset_-_Input#DPH12B",
+            "document_sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+            "quote": "2\"",
+            "page": null,
+            "bbox": null,
+            "table_ref": null,
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [],
+        "model_id": null,
+        "model_tier": null,
+        "prompt_version": "description@v1",
+        "schema_version": "TOL.ACC.DRIVERBIT@v1",
+        "version": 1,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-22T19:16:17.923498Z",
+        "score": 0.8,
+        "decision": {
+          "attribute_code": "bit_length",
+          "score": 0.8,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.800 >= threshold 0.719"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 0.4,
+          "quote_specificity": 1.0,
+          "self_reported_certainty": 0.88,
+          "validation_pass_rate": 0.5,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.5,
+          "source_prior": 0.5,
+          "tier_cost": 0.5
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "citation_summary": [
+          "Unihack__Sample_Dataset_-_Input#DPH12B"
+        ]
+      },
+      {
+        "attribute_code": "bit_tip_size",
+        "value_raw": "#1",
+        "value_canonical": "#1",
+        "value_display": "#1",
+        "method": "supplier_feed",
+        "confidence": 0.82,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "desc-bit_tip_size-10",
+            "document_id": "Unihack__Sample_Dataset_-_Input#DPH12B",
+            "document_sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+            "quote": "#1",
+            "page": null,
+            "bbox": null,
+            "table_ref": null,
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [],
+        "model_id": null,
+        "model_tier": null,
+        "prompt_version": "description@v1",
+        "schema_version": "TOL.ACC.DRIVERBIT@v1",
+        "version": 1,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-22T19:16:17.923524Z",
+        "score": 0.8,
+        "decision": {
+          "attribute_code": "bit_tip_size",
+          "score": 0.8,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.800 >= threshold 0.719"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 0.4,
+          "quote_specificity": 1.0,
+          "self_reported_certainty": 0.82,
+          "validation_pass_rate": 0.5,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.5,
+          "source_prior": 0.5,
+          "tier_cost": 0.5
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "citation_summary": [
+          "Unihack__Sample_Dataset_-_Input#DPH12B"
+        ]
+      },
+      {
+        "attribute_code": "bit_tip_type",
+        "value_raw": "Phillips",
+        "value_canonical": "Phillips",
+        "value_display": "Phillips",
+        "method": "supplier_feed",
+        "confidence": 0.82,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "desc-bit_tip_type-13",
+            "document_id": "Unihack__Sample_Dataset_-_Input#DPH12B",
+            "document_sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+            "quote": "Phillips",
+            "page": null,
+            "bbox": null,
+            "table_ref": null,
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [],
+        "model_id": null,
+        "model_tier": null,
+        "prompt_version": "description@v1",
+        "schema_version": "TOL.ACC.DRIVERBIT@v1",
+        "version": 1,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-22T19:16:17.923537Z",
+        "score": 0.8,
+        "decision": {
+          "attribute_code": "bit_tip_type",
+          "score": 0.8,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.800 >= threshold 0.719"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 0.4,
+          "quote_specificity": 1.0,
+          "self_reported_certainty": 0.82,
+          "validation_pass_rate": 0.5,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.5,
+          "source_prior": 0.5,
+          "tier_cost": 0.5
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "citation_summary": [
+          "Unihack__Sample_Dataset_-_Input#DPH12B"
+        ]
+      }
+    ],
+    "gaps": [
+      {
+        "attribute_code": "shank_type",
+        "reason": "no_source_available",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#DPH12B"
+        ],
+        "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-22T19:16:17.923815Z"
+      },
+      {
+        "attribute_code": "pack_quantity",
+        "reason": "no_source_available",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#DPH12B"
+        ],
+        "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-22T19:16:17.923822Z"
+      }
+    ],
     "extraction": {
-      "requested": 0,
-      "values": 0,
-      "gaps": 0,
+      "requested": 17,
+      "values": 3,
+      "gaps": 2,
       "rejected_unverifiable": 0,
       "corrected_to_match_evidence": 0,
-      "citation_coverage": 0.0,
+      "citation_coverage": 1.0,
       "input_tokens": 0,
       "output_tokens": 0,
       "escalations": 0,
@@ -53,18 +297,38 @@
     },
     "normalization_issues": [],
     "validation": {
-      "checks": 1,
-      "failures": 1,
+      "checks": 3,
+      "failures": 0,
       "warnings": 0,
-      "skipped_rules": 0,
-      "consistency": 0.0,
+      "skipped_rules": 1,
+      "consistency": 1.0,
       "results": [
         {
-          "layer": "L0",
-          "rule_id": "no_class",
-          "verdict": "fail",
+          "layer": "L3",
+          "rule_id": "plausible_range",
+          "verdict": "pass",
           "severity": "error",
-          "reason": "record has no product class, so no rules or required attributes apply",
+          "reason": "within the expected range [10, 1500]",
+          "counterexample": null,
+          "suggested_fix": null,
+          "detail": null
+        },
+        {
+          "layer": "L2",
+          "rule_id": "R_TIP_SIZE_IS_NOT_A_LENGTH",
+          "verdict": "pass",
+          "severity": "error",
+          "reason": "A tip size was captured with no overall length. The two figures sit adjacent in every description in this cohort \u2014 '2\" #2 Phillips' \u2014 and a length that went missing usually means both tokens were read into the same field.",
+          "counterexample": null,
+          "suggested_fix": null,
+          "detail": null
+        },
+        {
+          "layer": "L2",
+          "rule_id": "R_ASSORTMENT_STATES_A_COUNT",
+          "verdict": "skipped",
+          "severity": "info",
+          "reason": "not evaluated: missing pack_quantity",
           "counterexample": null,
           "suggested_fix": null,
           "detail": null
@@ -73,27 +337,129 @@
       "per_attribute": {}
     },
     "certificate": {
-      "certificate_id": "ec_619f74826d64",
+      "certificate_id": "ec_79f6200886db",
       "sku": "DPH12B",
       "tenant_id": "unilog",
-      "generated_at": "2026-08-22T12:30:44.181918Z",
-      "schema_version": null,
+      "generated_at": "2026-08-22T19:16:17.924389Z",
+      "schema_version": "TOL.ACC.DRIVERBIT@v1",
       "pipeline_version": "axiom-0.1.0",
-      "classifications": [],
-      "attributes": [],
-      "gaps": [],
+      "classifications": [
+        {
+          "scheme": "internal",
+          "code": "TOL.ACC.DRIVERBIT",
+          "path": [
+            "Tools & Consumables",
+            "Tool Accessories",
+            "Driver Bits"
+          ],
+          "confidence": 0.8903,
+          "method": "retrieval_only",
+          "status": "auto",
+          "alternatives": []
+        }
+      ],
+      "attributes": [
+        {
+          "code": "bit_length",
+          "value_canonical": {
+            "magnitude": 50.8,
+            "unit": "mm"
+          },
+          "value_display": "2\"",
+          "value_raw": "2\"",
+          "confidence": 0.88,
+          "method": "supplier_feed",
+          "model_tier": null,
+          "status": "auto_accepted",
+          "evidence": [
+            {
+              "document": "Unihack__Sample_Dataset_-_Input#DPH12B",
+              "sha256": "49efd0b2\u2026",
+              "page": null,
+              "bbox": null,
+              "quote": "2\"",
+              "verified": true
+            }
+          ],
+          "validations": []
+        },
+        {
+          "code": "bit_tip_size",
+          "value_canonical": "#1",
+          "value_display": "#1",
+          "value_raw": "#1",
+          "confidence": 0.82,
+          "method": "supplier_feed",
+          "model_tier": null,
+          "status": "auto_accepted",
+          "evidence": [
+            {
+              "document": "Unihack__Sample_Dataset_-_Input#DPH12B",
+              "sha256": "49efd0b2\u2026",
+              "page": null,
+              "bbox": null,
+              "quote": "#1",
+              "verified": true
+            }
+          ],
+          "validations": []
+        },
+        {
+          "code": "bit_tip_type",
+          "value_canonical": "Phillips",
+          "value_display": "Phillips",
+          "value_raw": "Phillips",
+          "confidence": 0.82,
+          "method": "supplier_feed",
+          "model_tier": null,
+          "status": "auto_accepted",
+          "evidence": [
+            {
+              "document": "Unihack__Sample_Dataset_-_Input#DPH12B",
+              "sha256": "49efd0b2\u2026",
+              "page": null,
+              "bbox": null,
+              "quote": "Phillips",
+              "verified": true
+            }
+          ],
+          "validations": []
+        }
+      ],
+      "gaps": [
+        {
+          "code": "shank_type",
+          "reason": "no_source_available",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#DPH12B"
+          ],
+          "required": true,
+          "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+          "recommended_action": "retry_with_better_source"
+        },
+        {
+          "code": "pack_quantity",
+          "reason": "no_source_available",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#DPH12B"
+          ],
+          "required": true,
+          "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+          "recommended_action": "retry_with_better_source"
+        }
+      ],
       "summary": {
-        "attributes_required": 0,
-        "attributes_populated": 0,
-        "attributes_with_evidence": 0,
+        "attributes_required": 5,
+        "attributes_populated": 3,
+        "attributes_with_evidence": 3,
         "attributes_inferred": 0,
-        "auto_accepted": 0,
+        "auto_accepted": 3,
         "queued_for_review": 0,
-        "gaps_total": 0,
-        "gaps_required": 0,
+        "gaps_total": 2,
+        "gaps_required": 2,
         "quality_index": {
-          "completeness": 1.0,
-          "verifiability": 0.0,
+          "completeness": 0.6,
+          "verifiability": 1.0,
           "consistency": 1.0,
           "richness": 0.0,
           "weights": {
@@ -108,12 +474,12 @@
             "richness",
             "verifiability"
           ],
-          "composite": 0.6
+          "composite": 0.76
         },
         "cost_usd": null,
         "wall_clock_seconds": 0.0
       },
-      "signature": "sha256:eab8619a800224548a0eeffad7bb527fa03cf78dcc760f2b0aea4eca171f5667",
+      "signature": "sha256:94f9bce3c441a8779488c4eed444d5cfbbc6bc5d3f36e036a5c81ee2cee29c00",
       "signature_verified": true
     },
     "channels": [
@@ -128,7 +494,7 @@
           "missing": [],
           "not_publishable": [],
           "warnings": [
-            "record has no product class, so no channel profile applies"
+            "class TOL.ACC.DRIVERBIT declares no 'cx1_pim' channel profile"
           ]
         },
         "title": null
@@ -144,20 +510,20 @@
           "missing": [],
           "not_publishable": [],
           "warnings": [
-            "record has no product class, so no channel profile applies"
+            "class TOL.ACC.DRIVERBIT declares no 'schema_org' channel profile"
           ]
         },
         "title": null
       }
     ],
     "metrics": {
-      "fill_rate": 1.0,
-      "verifiability": 0.0,
-      "values_total": 0,
-      "values_publishable": 0,
+      "fill_rate": 0.6,
+      "verifiability": 1.0,
+      "values_total": 3,
+      "values_publishable": 3,
       "values_needing_review": 0,
-      "gaps_total": 0,
-      "gaps_required": 0,
+      "gaps_total": 2,
+      "gaps_required": 2,
       "conflicts": []
     },
     "cost": null,
@@ -168,7 +534,7 @@
     "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
     "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
     "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-22T12:30:39.344315Z",
+    "fetched_at": "2026-08-22T19:16:11.275717Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": "unilog",
@@ -260,19 +626,1089 @@
       "tables": []
     }
   ],
-  "class_definition": null,
+  "class_definition": {
+    "code": "TOL.ACC.DRIVERBIT",
+    "name": "Driver Bit",
+    "version": "v1",
+    "schema_version": "TOL.ACC.DRIVERBIT@v1",
+    "item_type": "Driver Bit",
+    "reporting_path": [
+      "Tools",
+      "Accessories",
+      "Driver Bits"
+    ],
+    "browse_path": [
+      "Tools & Consumables",
+      "Tool Accessories",
+      "Driver Bits"
+    ],
+    "mappings": {},
+    "required_codes": [
+      "bit_tip_type",
+      "bit_tip_size",
+      "bit_length",
+      "shank_type",
+      "pack_quantity"
+    ],
+    "attributes": [
+      {
+        "code": "bit_tip_type",
+        "requirement": "required",
+        "weight": 3.0,
+        "name": "Tip Type",
+        "datatype": "enum",
+        "description": "The recess a driver bit engages. The single most consequential field on a driver bit: a Phillips bit in a square recess destroys the fastener, and the two are visually similar enough at a glance that the listing has to be right.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Phillips",
+          "Square (Robertson)",
+          "Torx",
+          "Slotted"
+        ],
+        "allowed_values": [
+          {
+            "value": "Phillips",
+            "aliases": [
+              "ph",
+              "phillips",
+              "cross",
+              "ph2",
+              "crosshead"
+            ],
+            "note": null
+          },
+          {
+            "value": "Square (Robertson)",
+            "aliases": [
+              "sq",
+              "square",
+              "robertson",
+              "square drive",
+              "sq2"
+            ],
+            "note": null
+          },
+          {
+            "value": "Torx",
+            "aliases": [
+              "torx",
+              "star",
+              "t-star",
+              "6-lobe",
+              "trox",
+              "hexalobular"
+            ],
+            "note": null
+          },
+          {
+            "value": "Torx Plus",
+            "aliases": [
+              "torx plus",
+              "torxplus"
+            ],
+            "note": null
+          },
+          {
+            "value": "Slotted",
+            "aliases": [
+              "flat",
+              "flathead",
+              "slot",
+              "straight",
+              "sl"
+            ],
+            "note": null
+          },
+          {
+            "value": "Hex (Allen)",
+            "aliases": [
+              "hex",
+              "allen",
+              "hex key",
+              "internal hex"
+            ],
+            "note": null
+          },
+          {
+            "value": "Nut Setter",
+            "aliases": [
+              "nut setter",
+              "nut driver",
+              "magnetic nut setter"
+            ],
+            "note": null
+          },
+          {
+            "value": "Combination",
+            "aliases": [
+              "combo",
+              "double ended",
+              "double-ended",
+              "reversible"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "bit_tip_size",
+        "requirement": "required",
+        "weight": 3.0,
+        "name": "Tip Size",
+        "datatype": "string",
+        "description": "The size designator within the tip type, recorded as written. A string because the numbering is per-family and not comparable across families: #2 Phillips and #2 Square are different sizes, and T20 Torx is not \"20\" of anything the others measure.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "#1",
+          "#2",
+          "#3",
+          "#20",
+          "#25"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "bit_length",
+        "requirement": "required",
+        "weight": 3.0,
+        "name": "Overall Length",
+        "datatype": "dimension",
+        "description": "Overall length of a driver bit or drill bit. Reach rather than capability, but the reason a buyer holds several of the same tip: a 1\" insert bit will not reach into a joist hanger.\n",
+        "canonical_unit": "mm",
+        "display_preference": "imperial_fraction",
+        "quantity_kind": "length",
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "1\"",
+          "2\"",
+          "3-1/2\"",
+          "6\""
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          10.0,
+          1500.0
+        ]
+      },
+      {
+        "code": "shank_type",
+        "requirement": "required",
+        "weight": 3.0,
+        "name": "Shank",
+        "datatype": "enum",
+        "description": "The shank profile a bit presents to the tool. A hard compatibility fact: an SDS-Plus bit does not go in a keyed chuck and a round-shank bit will not lock into an impact driver, so a mismatch here is a returned order rather than a compromise.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "1/4\" Hex",
+          "SDS-Plus",
+          "Round",
+          "Impact Hex"
+        ],
+        "allowed_values": [
+          {
+            "value": "1/4\" Hex",
+            "aliases": [
+              "1/4 hex",
+              "quarter inch hex",
+              "hex shank",
+              "1/4in hex"
+            ],
+            "note": null
+          },
+          {
+            "value": "Impact Hex",
+            "aliases": [
+              "impact",
+              "impact ready",
+              "impact rated",
+              "1/4 impact hex"
+            ],
+            "note": null
+          },
+          {
+            "value": "SDS-Plus",
+            "aliases": [
+              "sds plus",
+              "sds+",
+              "sdsplus"
+            ],
+            "note": null
+          },
+          {
+            "value": "SDS-Max",
+            "aliases": [
+              "sds max",
+              "sdsmax"
+            ],
+            "note": null
+          },
+          {
+            "value": "Round",
+            "aliases": [
+              "round shank",
+              "straight shank",
+              "smooth shank"
+            ],
+            "note": null
+          },
+          {
+            "value": "Reduced Round",
+            "aliases": [
+              "reduced shank",
+              "silver and deming"
+            ],
+            "note": null
+          },
+          {
+            "value": "Quick Change",
+            "aliases": [
+              "quick-change",
+              "quik-lock",
+              "quik lock",
+              "quick release"
+            ],
+            "note": null
+          },
+          {
+            "value": "Threaded",
+            "aliases": [
+              "threaded shank",
+              "arbor thread"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "pack_quantity",
+        "requirement": "required",
+        "weight": 3.0,
+        "name": "Pack Quantity",
+        "datatype": "integer",
+        "description": "Number of units in the consumer pack the part number sells as. Distinct from case_quantity, which counts packs in a shipping carton: a \"3pk\" of lamps is one sellable unit containing three lamps, and confusing the two misprices the line.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "1",
+          "2",
+          "3",
+          "6"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          1.0,
+          100.0
+        ]
+      },
+      {
+        "code": "blade_material",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Blade Material",
+        "datatype": "enum",
+        "description": "Construction of the cutting edge. Governs which workpiece the blade survives and how many times it can be resharpened, and is usually the difference between two otherwise identical blade listings.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Carbide-Tipped",
+          "Bi-Metal",
+          "High Speed Steel",
+          "Diamond"
+        ],
+        "allowed_values": [
+          {
+            "value": "Carbide-Tipped",
+            "aliases": [
+              "carbide",
+              "tct",
+              "tungsten carbide",
+              "carbide tipped"
+            ],
+            "note": null
+          },
+          {
+            "value": "Bi-Metal",
+            "aliases": [
+              "bimetal",
+              "bi metal",
+              "bi-metallic"
+            ],
+            "note": null
+          },
+          {
+            "value": "High Speed Steel",
+            "aliases": [
+              "hss",
+              "high-speed steel"
+            ],
+            "note": null
+          },
+          {
+            "value": "Carbon Steel",
+            "aliases": [
+              "carbon",
+              "high carbon steel",
+              "hcs"
+            ],
+            "note": null
+          },
+          {
+            "value": "Diamond",
+            "aliases": [
+              "diamond",
+              "diamond grit",
+              "segmented diamond"
+            ],
+            "note": null
+          },
+          {
+            "value": "Ceramic",
+            "aliases": [
+              "ceramic",
+              "ceramic tipped"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "drive_size",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Drive Size",
+        "datatype": "string",
+        "description": "The output drive a powered driver, wrench or ratchet presents. A string because the values mix square-drive fractions with hex designations \u2014 1/2\" square and 1/4\" hex are different interfaces that a bare fraction could not distinguish.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "1/4\" Hex",
+          "1/4\"",
+          "3/8\"",
+          "1/2\""
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "product_series",
+        "requirement": "recommended",
+        "weight": 2.0,
+        "name": "Product Series",
+        "datatype": "string",
+        "description": "Manufacturer's series or family designation only, without the word \"series\" and without the manufacturer name. The anchor for part-number grammar induction, because the positional encoding of a smart part number is defined per series rather than per manufacturer.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "BA-100",
+          "T-113",
+          "T-585"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "workpiece_material",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Material Application",
+        "datatype": "multi_enum",
+        "description": "The materials the product is intended to be used on. Multivalued because a single wheel is commonly rated for several, and reporting only the first would understate what the buyer can do with it.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": true,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Metal",
+          "Stainless Steel",
+          "Concrete / Masonry",
+          "Wood"
+        ],
+        "allowed_values": [
+          {
+            "value": "Metal",
+            "aliases": [
+              "steel",
+              "ferrous",
+              "mild steel",
+              "iron",
+              "metal cutting",
+              "all metal"
+            ],
+            "note": null
+          },
+          {
+            "value": "Stainless Steel",
+            "aliases": [
+              "stainless",
+              "inox",
+              "ss",
+              "304",
+              "316"
+            ],
+            "note": null
+          },
+          {
+            "value": "Aluminum",
+            "aliases": [
+              "aluminium",
+              "non-ferrous",
+              "alum",
+              "soft metal"
+            ],
+            "note": null
+          },
+          {
+            "value": "Cast Iron",
+            "aliases": [
+              "cast",
+              "ductile iron"
+            ],
+            "note": null
+          },
+          {
+            "value": "Concrete / Masonry",
+            "aliases": [
+              "concrete",
+              "masonry",
+              "brick",
+              "block",
+              "stone",
+              "mortar"
+            ],
+            "note": null
+          },
+          {
+            "value": "Tile",
+            "aliases": [
+              "ceramic tile",
+              "porcelain",
+              "tile cutting"
+            ],
+            "note": null
+          },
+          {
+            "value": "Wood",
+            "aliases": [
+              "timber",
+              "lumber",
+              "softwood",
+              "hardwood",
+              "wood cutting"
+            ],
+            "note": null
+          },
+          {
+            "value": "Plastic",
+            "aliases": [
+              "pvc",
+              "acrylic",
+              "composite",
+              "plastics"
+            ],
+            "note": null
+          },
+          {
+            "value": "Drywall",
+            "aliases": [
+              "gypsum",
+              "plasterboard",
+              "wallboard"
+            ],
+            "note": null
+          },
+          {
+            "value": "Paint / Coating",
+            "aliases": [
+              "paint",
+              "coating",
+              "primer",
+              "finish",
+              "varnish"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "finish_color",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Color",
+        "datatype": "string",
+        "description": "Finish or colourway as the manufacturer names it. A merchandising attribute: buyers filter on it heavily, and the manufacturer's own name for a finish is what shoppers search, so it is recorded verbatim rather than mapped to a generic colour.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Stainless Steel",
+          "White",
+          "Black Stainless"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "selling_uom",
+        "requirement": "recommended",
+        "weight": 2.0,
+        "name": "Selling Unit of Measure",
+        "datatype": "enum",
+        "description": "The unit in which the product is sold, which is not necessarily the unit in which it is priced or stocked. Conflating the three is a classic source of order errors.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Each",
+          "Case",
+          "Box"
+        ],
+        "allowed_values": [
+          {
+            "value": "Each",
+            "aliases": [
+              "ea",
+              "ea.",
+              "each",
+              "pc",
+              "piece",
+              "unit"
+            ],
+            "note": null
+          },
+          {
+            "value": "Box",
+            "aliases": [
+              "bx",
+              "box"
+            ],
+            "note": null
+          },
+          {
+            "value": "Case",
+            "aliases": [
+              "cs",
+              "case",
+              "carton",
+              "ctn"
+            ],
+            "note": null
+          },
+          {
+            "value": "Pair",
+            "aliases": [
+              "pr",
+              "pair"
+            ],
+            "note": null
+          },
+          {
+            "value": "Foot",
+            "aliases": [
+              "ft",
+              "per foot",
+              "lineal foot"
+            ],
+            "note": null
+          },
+          {
+            "value": "Roll",
+            "aliases": [
+              "rl",
+              "roll"
+            ],
+            "note": null
+          },
+          {
+            "value": "Bag",
+            "aliases": [
+              "bg",
+              "bag"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "each_weight",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Weight (Each)",
+        "datatype": "quantity",
+        "description": "Shipping weight of a single unit. Distinguish carefully from carton weight; datasheets often place them in adjacent columns with similar headings.\n",
+        "canonical_unit": "kg",
+        "display_preference": null,
+        "quantity_kind": "mass",
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "0.75 lb",
+          "1.2 kg"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          0.0001,
+          5000.0
+        ]
+      },
+      {
+        "code": "additional_information",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Additional Information",
+        "datatype": "string",
+        "description": "Comma-separated residual specifications the class has no dedicated attribute for, in the client's own overflow convention, e.g. \"240 kW-hr Annual Energy, 1 to 12 hr Delay Start Hours\". A holding pen, not a dumping ground: anything appearing here repeatedly across a category is a missing attribute and should be promoted to one.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "240 kW-hr Annual Energy, 1 to 12 hr Delay Start Hours",
+          "Folding Tines, Leak Detection System, Normal Cycle"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "warranty_terms",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Warranty",
+        "datatype": "string",
+        "description": "Warranty coverage as stated by the manufacturer, including duration and what it covers, e.g. \"1 Year Manufacturer, 1 Year Labor and Parts\". Recorded as published: summarising it into a single duration loses the parts/labour distinction that determines what a claim actually pays for.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "1 Year Manufacturer, 1 Year Labor and Parts",
+          "10 Year Limited"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "approvals",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Approvals and Listings",
+        "datatype": "multi_enum",
+        "description": "Third-party certifications, listings and approvals explicitly stated in the source. Record only what is stated. A listing number without a recognised mark is not an approval, and an approval for one size in a series does not extend to the others.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": true,
+        "compliance_claim": true,
+        "evidence_requirement": "strict",
+        "example_values": [
+          "UL, CSA, NSF-61",
+          "FM approved"
+        ],
+        "allowed_values": [
+          {
+            "value": "UL",
+            "aliases": [
+              "ul listed",
+              "underwriters laboratories",
+              "u.l."
+            ],
+            "note": null
+          },
+          {
+            "value": "CSA",
+            "aliases": [
+              "csa certified",
+              "canadian standards association"
+            ],
+            "note": null
+          },
+          {
+            "value": "ETL",
+            "aliases": [
+              "etl listed",
+              "intertek"
+            ],
+            "note": null
+          },
+          {
+            "value": "FM",
+            "aliases": [
+              "fm approved",
+              "factory mutual",
+              "fm global"
+            ],
+            "note": null
+          },
+          {
+            "value": "NSF-61",
+            "aliases": [
+              "nsf/ansi 61",
+              "nsf 61",
+              "nsf/ansi standard 61"
+            ],
+            "note": null
+          },
+          {
+            "value": "NSF-372",
+            "aliases": [
+              "nsf/ansi 372",
+              "nsf 372"
+            ],
+            "note": null
+          },
+          {
+            "value": "NSF-14",
+            "aliases": [
+              "nsf/ansi 14",
+              "nsf 14"
+            ],
+            "note": null
+          },
+          {
+            "value": "CRN",
+            "aliases": [
+              "canadian registration number"
+            ],
+            "note": null
+          },
+          {
+            "value": "ASME",
+            "aliases": [
+              "asme certified",
+              "asme b16"
+            ],
+            "note": null
+          },
+          {
+            "value": "MSS",
+            "aliases": [
+              "mss sp",
+              "manufacturers standardization society"
+            ],
+            "note": null
+          },
+          {
+            "value": "ATEX",
+            "aliases": [
+              "atex certified",
+              "atex marked"
+            ],
+            "note": null
+          },
+          {
+            "value": "IECEx",
+            "aliases": [
+              "iecex certified"
+            ],
+            "note": null
+          },
+          {
+            "value": "WRAS",
+            "aliases": [
+              "wras approved",
+              "water regulations advisory scheme"
+            ],
+            "note": null
+          },
+          {
+            "value": "cUL Listed",
+            "aliases": [
+              "cul",
+              "cul listed",
+              "c-ul",
+              "culus"
+            ],
+            "note": null
+          },
+          {
+            "value": "ENERGY STAR Certified",
+            "aliases": [
+              "energy star",
+              "energystar",
+              "energy star qualified",
+              "energy star certified"
+            ],
+            "note": null
+          },
+          {
+            "value": "NSF Certified",
+            "aliases": [],
+            "note": "Generic NSF mark with no standard named. Deliberately not aliased onto NSF-61: a potable-water claim needs the specific standard, and treating this as equivalent would let a cross-field rule pass on evidence that does not support it.\n"
+          },
+          {
+            "value": "ASSE 1006",
+            "aliases": [
+              "asse1006",
+              "asse 1006 listed"
+            ],
+            "note": null
+          },
+          {
+            "value": "CEE Tier 2 Qualified",
+            "aliases": [
+              "cee tier 2",
+              "cee tier2",
+              "cee tier 2 qualified"
+            ],
+            "note": null
+          },
+          {
+            "value": "AHAM Verified",
+            "aliases": [
+              "aham",
+              "aham verified"
+            ],
+            "note": null
+          },
+          {
+            "value": "WaterSense",
+            "aliases": [
+              "watersense",
+              "epa watersense"
+            ],
+            "note": null
+          },
+          {
+            "value": "ANSI Z87.1",
+            "aliases": [
+              "z87",
+              "z87.1",
+              "z87+",
+              "ansi z87",
+              "ansi z87.1",
+              "ansi/isea z87.1"
+            ],
+            "note": "eye and face protection impact rating"
+          },
+          {
+            "value": "ANSI/ISEA 105",
+            "aliases": [
+              "isea 105",
+              "ansi cut level",
+              "ansi/isea 105",
+              "a105"
+            ],
+            "note": "hand protection cut, abrasion and puncture rating"
+          },
+          {
+            "value": "EN 388",
+            "aliases": [
+              "en388",
+              "en 388 certified"
+            ],
+            "note": null
+          },
+          {
+            "value": "UL 217",
+            "aliases": [
+              "ul217",
+              "ul 217 listed"
+            ],
+            "note": "smoke alarm standard"
+          },
+          {
+            "value": "UL 2034",
+            "aliases": [
+              "ul2034",
+              "ul 2034 listed"
+            ],
+            "note": "carbon monoxide alarm standard"
+          },
+          {
+            "value": "UL 299",
+            "aliases": [
+              "ul299",
+              "ul 299 listed"
+            ],
+            "note": "portable fire extinguisher standard"
+          },
+          {
+            "value": "OSHA Compliant",
+            "aliases": [
+              "osha",
+              "osha compliant",
+              "meets osha"
+            ],
+            "note": null
+          },
+          {
+            "value": "ICC-ES Evaluated",
+            "aliases": [
+              "icc-es",
+              "icc es",
+              "icc evaluation report",
+              "esr"
+            ],
+            "note": "building-code evaluation report for a structural or envelope product"
+          },
+          {
+            "value": "ASTM D7032",
+            "aliases": [
+              "astm d7032",
+              "d7032"
+            ],
+            "note": "composite decking and railing performance standard"
+          },
+          {
+            "value": "FSC Certified",
+            "aliases": [
+              "fsc",
+              "fsc certified",
+              "forest stewardship council"
+            ],
+            "note": null
+          },
+          {
+            "value": "NFRC Certified",
+            "aliases": [
+              "nfrc",
+              "nfrc certified",
+              "nfrc rated"
+            ],
+            "note": "fenestration thermal performance rating"
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "country_of_origin",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Country of Origin",
+        "datatype": "string",
+        "description": "Country where the product is manufactured, as stated by the manufacturer. Drives tariff treatment and trade-agreement eligibility, so a guess here has direct financial consequences.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": true,
+        "evidence_requirement": "strict",
+        "example_values": [
+          "United States",
+          "Taiwan",
+          "Italy",
+          "China"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "gtin",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "GTIN / UPC",
+        "datatype": "string",
+        "description": "Global Trade Item Number, 8, 12, 13 or 14 digits. The final digit is a modulo-10 check digit, which L0 validation verifies arithmetically \u2014 a transposed digit is therefore detectable without any external lookup.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "012345678905",
+          "00012345678905"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      }
+    ],
+    "cross_field_rules": [
+      {
+        "id": "R_TIP_SIZE_IS_NOT_A_LENGTH",
+        "expr": "bit_tip_size is null or bit_length is not null",
+        "severity": "warning",
+        "message": "A tip size was captured with no overall length. The two figures sit adjacent in every description in this cohort \u2014 '2\" #2 Phillips' \u2014 and a length that went missing usually means both tokens were read into the same field.",
+        "references": [
+          "bit_tip_size",
+          "bit_length"
+        ]
+      },
+      {
+        "id": "R_ASSORTMENT_STATES_A_COUNT",
+        "expr": "pack_quantity is null or pack_quantity >= 1",
+        "severity": "warning",
+        "message": "Bit assortments are sold by the piece count and it is stated as a bare \"5pc\" or \"5pk\" beside a real length. A count below one means a dimension was captured instead.",
+        "references": [
+          "pack_quantity"
+        ]
+      }
+    ],
+    "channel_profiles": [
+      {
+        "name": "unilog_delivery",
+        "title_template": "{brand} {product_series} {mpn} {class_name}",
+        "max_title_chars": 200,
+        "unit_system": "imperial_primary",
+        "required": [
+          "mpn"
+        ]
+      }
+    ]
+  },
   "policy": {
-    "epsilon": 0.05,
+    "epsilon": 0.02,
     "confidence_level": 0.95,
-    "threshold": 0.6853,
-    "coverage": 1.0,
-    "accepted": 220,
-    "accepted_errors": 1,
-    "observed_error_rate": 0.0045,
-    "error_upper_bound": 0.0201,
+    "threshold": 0.7194,
+    "coverage": 0.7591,
+    "accepted": 167,
+    "accepted_errors": 0,
+    "observed_error_rate": 0.0,
+    "error_upper_bound": 0.0159,
     "calibration_size": 220,
     "achievable": true,
-    "reason": "at threshold 0.685, 100.0% of values are publishable with an error rate of at most 2.0% at 95% confidence"
+    "reason": "at threshold 0.719, 75.9% of values are publishable with an error rate of at most 1.6% at 95% confidence"
   },
   "calibrator": "untrained-heuristic"
 }

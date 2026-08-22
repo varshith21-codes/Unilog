@@ -1,0 +1,80 @@
+# Windows and exterior doors, including basement hoppers and thresholds.
+#
+# 10 rows of the client's 1,000-row sample: United gliding patio doors and sliders, ecoLitePlus
+# basement hoppers, an attic access door and aluminium thresholds.
+#
+# THE HANDING TRAP, which is the whole reason this class binds `handing` as required.
+# `6068R Gliding Patio Dr 4500 United Blk Ext/WH Int LowE Arg w/J` and the otherwise identical
+# `6068L` are the same door hung the opposite way. A left-hand unit cannot be installed in a
+# right-hand opening, it cannot be returned once the opening is cut, and the handing is carried by
+# a SINGLE TRAILING LETTER on the size code rather than by any word in the description. It is the
+# most common ordering error in the category and the one field here worth more than all the others
+# together.
+#
+# THE TWO-COLOUR PROBLEM. `Blk Ext/WH Int` means black outside and white inside — one product with
+# two finishes. `finish_color` holds a single value, so the pair is recorded verbatim as written
+# rather than split, and the exterior colour is NOT preferred over the interior. Choosing one
+# would be a positional assumption that reverses on the next supplier.
+#
+# No description recipe and no external scheme mapping — see decking_board.yaml.
+
+class:
+  code: BLD.WDW.GEN
+  name: Window and Door
+  version: v1
+
+  item_type: Window
+
+  # "dr" is this supplier's abbreviation for door and survives tokenisation as a bare token in
+  # "Gliding Patio Dr". It is safe despite its length because part numbers like "DR7004WG"
+  # tokenise whole and never yield a standalone "dr".
+  # `skylt` is Velux's abbreviation for skylight in "FS C01 Velux Fxd Skylt Gry/Wh" and is the only
+  # category token on those three rows.
+  identity_terms:
+    [window, door, dr, patio, hopper, slider, casement, threshold, awning, sash, scrn, screen,
+     skylight, skylt]
+
+  browse_path:
+    - Building Materials
+    - Windows & Doors
+    - Windows & Exterior Doors
+
+  reporting_path: [Building Materials, Windows & Doors, Units]
+
+  attributes:
+    - { code: product_series,        requirement: recommended, weight: 3.0, label: Series }
+    - { code: handing,               requirement: required,    weight: 3.0 }
+    - { code: nominal_dimensions,    requirement: required,    weight: 3.0, label: Nominal Size }
+    - { code: overall_size,          requirement: recommended, weight: 2.0, label: Actual Size }
+    - { code: glazing_package,       requirement: required,    weight: 3.0, label: Glazing }
+    - { code: material_composition,  requirement: recommended, weight: 2.0, label: Material }
+    - { code: finish_color,          requirement: required,    weight: 3.0, label: Color }
+    - { code: mounting_type,         requirement: optional,    weight: 1.0 }
+    - { code: r_value,               requirement: optional,    weight: 1.0 }
+    - { code: selling_uom,           requirement: recommended, weight: 2.0 }
+    - { code: each_weight,           requirement: optional,    weight: 1.0 }
+    - { code: additional_information, requirement: optional,   weight: 1.0 }
+
+    # --- named delivery columns; must stay last ----------------------------------------------
+    - { code: warranty_terms,        requirement: recommended, weight: 2.0 }
+    - { code: approvals,             requirement: recommended, weight: 2.0 }
+    - { code: country_of_origin,     requirement: optional,    weight: 1.0 }
+    - { code: gtin,                  requirement: optional,    weight: 1.0 }
+
+  cross_field_rules:
+    - id: R_GLAZED_UNIT_STATES_HANDING
+      expr: "glazing_package is null or handing is not null"
+      references: [glazing_package, handing]
+      severity: error
+      message: >
+        A glazed unit was captured with no handing. Handing is carried by a single trailing letter
+        on the size code rather than by any word in the description, so a missing value here almost
+        always means the code was not read rather than that the unit is non-handed. It is the most
+        expensive ordering error in the category: the opening is cut before the mistake is found.
+
+  channel_profiles:
+    - name: unilog_delivery
+      title_template: "{brand} {product_series} {mpn} {class_name}"
+      max_title_chars: 200
+      unit_system: imperial_primary
+      required: [mpn]

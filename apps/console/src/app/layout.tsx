@@ -3,6 +3,7 @@ import { IBM_Plex_Mono, Manrope } from "next/font/google";
 import Link from "next/link";
 
 import { DataSourceBanner } from "@/components/data-source-banner";
+import { DesktopSidebar } from "@/components/desktop-sidebar";
 import { CurrentSection, Nav } from "@/components/nav";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -72,37 +73,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </a>
 
         <div className="app-shell">
-          <aside className="app-sidebar" aria-label="AXIOM workspace">
-            <div className="sidebar-brand">
-              <Link href="/" className="brand-link" aria-label="AXIOM Operations">
-                <ProductMark />
-                <span>
-                  <strong>AXIOM</strong>
-                  <small>Catalog operations</small>
-                </span>
-              </Link>
-            </div>
-
-            <div className="workspace-context" aria-label="Current workspace">
-              <span className="workspace-indicator" aria-hidden />
-              <span>
-                <small>Workspace</small>
-                <strong>Production catalog</strong>
-              </span>
-            </div>
-
-            <Nav variant="desktop" />
-
-            <div className="sidebar-footer">
-              <div>
-                <span className="overline">Environment</span>
-                <p>Catalog intelligence</p>
-              </div>
-              <ThemeToggle />
-            </div>
-          </aside>
+          <DesktopSidebar brandMark={<ProductMark />} />
 
           <div className="app-content">
+            <div className="desktop-theme-control">
+              <ThemeToggle />
+            </div>
             <header className="mobile-header app-bar">
               <Link href="/" className="brand-link" aria-label="AXIOM Operations">
                 <ProductMark />

@@ -177,7 +177,12 @@ def _unit_spellings(unit_code: str) -> list[str]:
     leaves "AC" stranded in the description.
 
     Single-character spellings are filtered against :data:`SAFE_BARE_UNITS` — see the note there
-    for the part-number collision that made it necessary.
+    for the part-number collision that made it necessary. A single-character spelling that is not
+    alphanumeric is exempt from that filter, because the collision the filter exists to prevent is
+    specifically a DIGIT FOLLOWED BY A LETTER being read as a measurement. ``"`` and ``'`` are the
+    prime marks for inch and foot, they cannot occur inside a part-number token, and excluding them
+    made every imperial dimension in an abbreviated description unreadable: a 52" fan span, a 12'
+    board, a 5" cut-off wheel and a 30" range all state their unit and only that way.
     """
     resolved = unit_registry.resolve(unit_code)
     if resolved is None:
@@ -188,25 +193,78 @@ def _unit_spellings(unit_code: str) -> list[str]:
     usable = {
         spelling
         for spelling in spellings
-        if len(spelling) > 1 or spelling.upper() in SAFE_BARE_UNITS
+        if len(spelling) > 1
+        or spelling.upper() in SAFE_BARE_UNITS
+        or not spelling.isalnum()
     }
     return sorted(usable, key=len, reverse=True)
 
 
-def _quantity_pattern(unit_code: str) -> re.Pattern[str] | None:
-    """A pattern for "number immediately followed by this unit".
+def _units_of_kind(quantity_kind: str) -> list[str]:
+    """Every unit code the registry holds for one quantity kind.
+
+    Used so a dimension can be read in whatever unit the supplier wrote rather than only in the one
+    the schema guessed. `nominal_length` declares `unit_hint: in` because lighting states tube
+    lengths in inches, and the same attribute carries decking board lengths in FEET — patterning on
+    the hint alone read the lamps and missed 167 boards. The kind is already declared on every
+    unit-bearing attribute and conversion to canonical happens per match, so this costs nothing in
+    correctness and removes a guess.
+    """
+    out = []
+    for code in unit_registry.known_units():
+        resolved = unit_registry.resolve(code)
+        if resolved is not None and resolved.kind.value == quantity_kind:
+            out.append(code)
+    return out
+
+
+def _quantity_pattern(*unit_codes: str) -> re.Pattern[str] | None:
+    """A pattern for "number immediately followed by any of these units".
 
     ``\\s?`` rather than ``\\s*`` is the guard that keeps this honest on real data. The client's own
     ground truth contains "24 in W x 24-1/4 in D", where W is an axis label. Allowing arbitrary
     whitespace between number and unit would read that as 24 watts. One optional space matches how
     a unit is actually written ("120V", "120 V") and refuses a token two words away.
+
+    Several unit codes are accepted because an attribute's canonical unit is frequently NOT the unit
+    the source writes. Every dimension in this schema is canonically millimetres and every
+    description in this catalogue is in inches or feet, so a pattern built from the canonical unit
+    alone matched nothing at all. The caller passes the canonical unit and the declared
+    ``unit_hint`` together; the matched spelling is resolved on its own terms and converted, so a
+    value read as inches still stores as millimetres.
     """
-    spellings = _unit_spellings(unit_code)
+    spellings: list[str] = []
+    for unit_code in unit_codes:
+        for spelling in _unit_spellings(unit_code):
+            if spelling not in spellings:
+                spellings.append(spelling)
     if not spellings:
         return None
+    # Longest first across the merged set, for the same reason as within one unit.
+    spellings.sort(key=len, reverse=True)
     alternation = "|".join(re.escape(s) for s in spellings)
+    # The trailing guard permits an `x` separator, and that alternative is not a convenience — it is
+    # a correctness fix. `(?![\w])` alone rejects the FIRST figure of a dimension chain, because
+    # `5"x.045"x7/8"` puts an `x` immediately after the unit mark. The match then slides down the
+    # string and finds `8"` — the tail of the 7/8" arbor — which is inside a cut-off wheel's
+    # plausible diameter range and publishes as a confidently wrong, correctly cited 8" diameter on
+    # a 5" wheel. Accepting `x` followed by a digit or a decimal point reads the 5" instead.
+    #
+    # The separator must be followed by a digit or a point to qualify, so this does not open the
+    # guard to a letter: `18VDC` is still refused by the first alternative, as it must be.
+    #
+    # The AXIS-LABEL guard is the other half, and it is what keeps the imperial spellings honest.
+    # "24 in W x 24-1/4 in D" states a width and a depth, and a single-dimension attribute has no
+    # claim on either: the figure belongs to the axis its label names. Refusing a match followed by
+    # a bare W, D, H or L leaves those to `overall_size`, which stores the pair as written.
+    #
+    # The trailing `(?![\w])` on the axis letter is load-bearing: this supplier writes "Wh" for
+    # white, and "12' Wh Heritage Post" must still read its length. A bare W is an axis; a W that
+    # starts a word is not.
     return re.compile(
-        rf"(?<![\w.])(\d+(?:\.\d+)?(?:-\d+/\d+)?)\s?({alternation})(?![\w])",
+        rf"(?<![\w.])(\d+(?:\.\d+)?(?:-\d+/\d+)?)\s?({alternation})"
+        rf"(?:(?![\w])|(?=[xX][\d.]))"
+        rf"(?!\s?[WDHL](?![\w]))",
         re.IGNORECASE,
     )
 
@@ -275,7 +333,16 @@ def _match_quantity(
     result: DescriptionExtraction,
     claimed: set[int],
 ) -> None:
-    pattern = _quantity_pattern(attribute.canonical_unit or "")
+    # Every unit of the attribute's own quantity kind, so the figure can be read in whatever the
+    # supplier wrote and converted afterwards. The canonical unit alone matched no imperial
+    # dimension at all, and the declared hint is a single guess that is right for one cohort and
+    # wrong for the next — inches for a lamp tube, feet for a deck board, same attribute.
+    units = (
+        _units_of_kind(attribute.quantity_kind)
+        if attribute.quantity_kind
+        else [attribute.canonical_unit or "", attribute.unit_hint or ""]
+    )
+    pattern = _quantity_pattern(*units)
     if pattern is None:
         return
     for found in pattern.finditer(description):
@@ -324,6 +391,13 @@ def _match_quantity(
             )
         )
         claimed.update(span)
+        if not attribute.multivalued:
+            # One value per single-valued attribute. The loop continues past claimed spans and
+            # implausible figures to FIND a usable match, not to collect every one of them:
+            # "5\"x.045\"x7/8\" Metal Cut Off Disc" otherwise recorded the wheel diameter twice, as
+            # 5" and again as the 8" tail of the arbor fraction. Two cited values for one dimension
+            # is worse than either alone, because both look verified.
+            return
 
 
 def _match_abbreviations(

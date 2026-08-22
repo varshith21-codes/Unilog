@@ -120,6 +120,49 @@ attributes:
       - value: WaterSense
         aliases: ["watersense", "epa watersense"]
 
+      # --- PPE, tool and building listings ------------------------------------
+      #
+      # Added when the taxonomy grew to cover the rest of the client's catalogue, for exactly the
+      # reason recorded above the appliance block: an unrecognised value in a multi_enum does not
+      # error, it evaporates. A pair of safety glasses whose only certification is ANSI Z87.1
+      # would have published an EMPTY approvals cell, which reads as "uncertified" rather than
+      # "we did not recognise the mark" — the worst possible failure on a protective product.
+      #
+      # Each is kept as its own value rather than aliased onto a neighbour. ANSI Z87.1 (eye
+      # impact) and ANSI/ISEA 105 (hand cut resistance) protect different body parts, and UL 217
+      # (smoke) and UL 2034 (carbon monoxide) certify different sensors in what is often one
+      # combination alarm.
+      - value: ANSI Z87.1
+        aliases: ["z87", "z87.1", "z87+", "ansi z87", "ansi z87.1", "ansi/isea z87.1"]
+        note: eye and face protection impact rating
+      - value: ANSI/ISEA 105
+        aliases: ["isea 105", "ansi cut level", "ansi/isea 105", "a105"]
+        note: hand protection cut, abrasion and puncture rating
+      - value: EN 388
+        aliases: ["en388", "en 388 certified"]
+      - value: UL 217
+        aliases: ["ul217", "ul 217 listed"]
+        note: smoke alarm standard
+      - value: UL 2034
+        aliases: ["ul2034", "ul 2034 listed"]
+        note: carbon monoxide alarm standard
+      - value: UL 299
+        aliases: ["ul299", "ul 299 listed"]
+        note: portable fire extinguisher standard
+      - value: OSHA Compliant
+        aliases: ["osha", "osha compliant", "meets osha"]
+      - value: ICC-ES Evaluated
+        aliases: ["icc-es", "icc es", "icc evaluation report", "esr"]
+        note: building-code evaluation report for a structural or envelope product
+      - value: ASTM D7032
+        aliases: ["astm d7032", "d7032"]
+        note: composite decking and railing performance standard
+      - value: FSC Certified
+        aliases: ["fsc", "fsc certified", "forest stewardship council"]
+      - value: NFRC Certified
+        aliases: ["nfrc", "nfrc certified", "nfrc rated"]
+        note: fenestration thermal performance rating
+
   - code: rohs_compliant
     name: RoHS Compliant
     datatype: boolean

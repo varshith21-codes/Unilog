@@ -1,0 +1,113 @@
+# Composite and lumber decking boards, including the fascia trim of the same lines.
+#
+# The largest cohort in the client's 1,000-row sample after lighting: 167 rows, 17% of the file,
+# across Trex (Enhance, Transcend, Select, Signature, Lineage), AZEK/TimberTech Landmark, and
+# Boise Cascade Douglas Fir. Every one of them abstained with `no_viable_candidate` before this
+# class existed.
+#
+# WHY FASCIA IS NOT ITS OWN CLASS. A fascia board is a decking line's trim board: same material,
+# same colour range, same brand, same length run, machined with a different edge. It is an
+# `edge_profile` value here rather than a sibling class, because two near-identical classes
+# competing on nearly identical vocabulary is precisely what forces the dominance threshold to
+# adjudicate cases it should never have seen — and the split would give a buyer nothing they could
+# filter on that `edge_profile` does not already give them.
+#
+# NO DESCRIPTION RECIPE. There is no labelled decking row anywhere in this repository, so a
+# `schema/descriptions/decking_board.yaml` would be an invented template. The lighting class set
+# the precedent and the reasoning holds here: blank cells score as missed, plausible sentences
+# score as wrong, and a client cannot tell the second kind from a correct one without checking
+# every row by hand.
+#
+# NO EXTERNAL SCHEME MAPPING, for the same reason. An ETIM or UNSPSC code published here would be
+# asserted at 0.95 of the classification confidence with a provenance note saying it came from the
+# schema — which would be true, and would still be a number nobody verified. The dishwasher and
+# valve classes carry mappings because those were researched; these are deliberately absent rather
+# than plausibly invented.
+
+class:
+  code: BLD.DCK.BOARD
+  name: Decking Board
+  version: v1
+
+  # The bare noun for the delivery format's `Product Name` column.
+  item_type: Decking Board
+
+  # Identity evidence, required before this class is a candidate at all.
+  #
+  # Deliberately excludes the bare word "deck", which appears in "Deck Joist Tape" and "Deck
+  # Screw" — neither of which is a board. The brand and line names are included because this
+  # supplier routinely omits the product noun entirely: "1x8-12' Biscayne - Trex Lineage" says
+  # what line it is and never says it is decking.
+  #
+  # Single-word terms only, throughout every class in this schema. Identity terms are tokenised by
+  # the same function as the query, so a two-word term like "deck board" would be split into two
+  # independent tokens and admit on either one — looser than it reads.
+  identity_terms: [decking, fascia, trex, azek, timbertech, lineage, fir]
+
+  browse_path:
+    - Building Materials
+    - Decking & Railing
+    - Decking Boards
+
+  # Dept / Class / Fine. A different tree from browse_path and not derivable from it.
+  reporting_path: [Building Materials, Decking, Boards]
+
+  attributes:
+    # --- grid slots, in the order they publish ------------------------------------------------
+    - { code: product_series,        requirement: recommended, weight: 3.0, label: Series }
+    - { code: nominal_dimensions,    requirement: required,    weight: 3.0, label: Nominal Size }
+    - { code: nominal_length,        requirement: required,    weight: 3.0, label: Length }
+    - { code: edge_profile,          requirement: required,    weight: 3.0 }
+    - { code: material_composition,  requirement: required,    weight: 3.0, label: Material }
+    - { code: finish_color,          requirement: required,    weight: 3.0, label: Color }
+    - { code: surface_texture,       requirement: recommended, weight: 2.0, label: Surface }
+    - { code: overall_size,          requirement: optional,    weight: 1.0, label: Actual Size }
+    - { code: fire_rating,           requirement: optional,    weight: 1.0 }
+    - { code: selling_uom,           requirement: recommended, weight: 2.0 }
+    - { code: each_weight,           requirement: optional,    weight: 1.0 }
+    - { code: additional_information, requirement: optional,   weight: 1.0 }
+
+    # --- beyond the grid: these populate their own named delivery columns ---------------------
+    #
+    # They must stay after the grid bindings. Anything inserted above shifts every slot below it,
+    # and slot n of the published ATTRIBUTE_LABEL/VALUE/UOM grid is binding n.
+    - { code: warranty_terms,        requirement: recommended, weight: 2.0 }  # -> Warranty
+    - { code: approvals,             requirement: optional,    weight: 1.0 }  # -> Standard/Approvals
+    - { code: country_of_origin,     requirement: optional,    weight: 1.0 }  # -> Country Of Origin
+    - { code: prop65_warning_required, requirement: optional,  weight: 1.0 }  # -> Prop 65
+    - { code: gtin,                  requirement: optional,    weight: 1.0 }  # -> UPC/EAN/GTIN
+
+  cross_field_rules:
+    - id: R_GROOVED_IS_NOT_FASCIA
+      expr: "edge_profile != 'Fascia' or nominal_dimensions is not null"
+      references: [edge_profile, nominal_dimensions]
+      severity: warning
+      message: >
+        A fascia board still needs a nominal size to be orderable. Fascia is the one edge profile
+        whose rows frequently omit it, because the supplier treats the trim as an accessory to the
+        board rather than a board in its own right.
+
+    - id: R_LUMBER_HAS_NO_WARRANTY_CLAIM
+      expr: "material_composition not in ('Douglas Fir', 'Cedar') or warranty_terms is null"
+      references: [material_composition, warranty_terms]
+      severity: warning
+      message: >
+        A limited warranty was recorded against a solid-lumber board. Composite and PVC lines
+        carry 25-to-50-year warranties and softwood lumber does not, so this usually means a
+        warranty was inherited from a neighbouring composite row.
+
+  channel_profiles:
+    # `required` is deliberately short. Pre-flight refuses to publish a record missing a required
+    # attribute, and a 1,000-row batch where no row has a manufacturer document would then emit
+    # nothing at all. Specifications are gated individually by their own evidence requirement, so
+    # a row publishes with what it can prove and leaves the rest blank.
+    - name: unilog_delivery
+      title_template: "{brand} {product_series} {mpn} {class_name}"
+      max_title_chars: 200
+      unit_system: imperial_primary
+      required: [mpn]
+
+    - name: schema_org
+      max_title_chars: 200
+      unit_system: metric_primary
+      required: [mpn]

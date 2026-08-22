@@ -19,8 +19,8 @@
       "source_document_ids": [
         "Unihack__Sample_Dataset_-_Input#48-22-9491"
       ],
-      "created_at": "2026-08-22T12:30:44.019845+00:00",
-      "updated_at": "2026-08-22T12:30:44.019849+00:00"
+      "created_at": "2026-08-22T19:16:17.624206+00:00",
+      "updated_at": "2026-08-22T19:16:17.624210+00:00"
     },
     "classifications": [],
     "classification_summary": {
@@ -28,13 +28,29 @@
       "confidence": 0.0,
       "confident_depth": 0,
       "schemes": [],
-      "candidates_considered": 0,
-      "method": "no_viable_candidate",
+      "candidates_considered": 3,
+      "method": "ambiguous_no_model",
       "abstained": true,
       "input_tokens": 0,
       "output_tokens": 0
     },
-    "classification_candidates": [],
+    "classification_candidates": [
+      {
+        "code": "TOL.PWR.GEN",
+        "score": 0.1696,
+        "path_text": "Tools & Consumables > Power Tools > Power Tools"
+      },
+      {
+        "code": "ELC.BOX.GEN",
+        "score": 0.1305,
+        "path_text": "Electrical > Boxes & Enclosures > Boxes, Covers & Load Centres"
+      },
+      {
+        "code": "TOL.HND.GEN",
+        "score": 0.0751,
+        "path_text": "Tools & Consumables > Hand Tools > Hand Tools"
+      }
+    ],
     "values": [],
     "gaps": [],
     "extraction": {
@@ -73,10 +89,10 @@
       "per_attribute": {}
     },
     "certificate": {
-      "certificate_id": "ec_6cd1f8b47659",
+      "certificate_id": "ec_26ef5c5bc590",
       "sku": "48-22-9491",
       "tenant_id": "unilog",
-      "generated_at": "2026-08-22T12:30:44.019937Z",
+      "generated_at": "2026-08-22T19:16:17.624314Z",
       "schema_version": null,
       "pipeline_version": "axiom-0.1.0",
       "classifications": [],
@@ -113,7 +129,7 @@
         "cost_usd": null,
         "wall_clock_seconds": 0.0
       },
-      "signature": "sha256:523768fc5afce737d9ec287a335dda6d4fc788f2b95c843be1bf034ef91f9125",
+      "signature": "sha256:3a2ba5f2e6b838d931135581167875f5baf9f0ff585832b2285482ebe426fe8f",
       "signature_verified": true
     },
     "channels": [
@@ -168,7 +184,7 @@
     "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
     "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
     "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-22T12:30:39.344315Z",
+    "fetched_at": "2026-08-22T19:16:11.275717Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": "unilog",
@@ -262,17 +278,17 @@
   ],
   "class_definition": null,
   "policy": {
-    "epsilon": 0.05,
+    "epsilon": 0.02,
     "confidence_level": 0.95,
-    "threshold": 0.6853,
-    "coverage": 1.0,
-    "accepted": 220,
-    "accepted_errors": 1,
-    "observed_error_rate": 0.0045,
-    "error_upper_bound": 0.0201,
+    "threshold": 0.7194,
+    "coverage": 0.7591,
+    "accepted": 167,
+    "accepted_errors": 0,
+    "observed_error_rate": 0.0,
+    "error_upper_bound": 0.0159,
     "calibration_size": 220,
     "achievable": true,
-    "reason": "at threshold 0.685, 100.0% of values are publishable with an error rate of at most 2.0% at 95% confidence"
+    "reason": "at threshold 0.719, 75.9% of values are publishable with an error rate of at most 1.6% at 95% confidence"
   },
   "calibrator": "untrained-heuristic"
 }

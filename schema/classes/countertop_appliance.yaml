@@ -1,0 +1,95 @@
+# Countertop appliances: coffee makers, espresso machines and toasters.
+#
+# 13 rows of the client's 1,000-row sample, all GE Cafe.
+#
+# WHY THESE ARE NOT IN THE COOKING CLASS. A countertop appliance has no cabinet width, no fuel and no
+# installation. Folding them in would make `appliance_width` and `fuel_type` — the two required
+# attributes that make the cooking class useful — unanswerable for a third of its rows, so every one
+# of those rows would score incomplete for lacking specifications it cannot have. That is the same
+# reasoning that keeps batteries out of the power-tool class.
+#
+# THE FINISH IS THE SKU HERE. These thirteen rows are five appliances in three or four finishes each:
+#
+#     C7CDAAS3PD3  Cafe Drip Coffee Maker MB      (matte black)
+#     C7CDAAS4PW3  Cafe Drip Coffee Maker MW      (matte white)
+#     C7CDABS2RS3  Cafe Coffee Maker              (stainless)
+#
+# The finish code is the last token and the only difference. `finish_color` is bound required for that
+# reason, and it is the field most likely to be got wrong because the codes are two-letter and
+# unexplained.
+#
+# THE TOAST-OVEN BOUNDARY, stated because it is imperfect. `C90AAAS2RS3 Cafe Toast Oven SS` is a
+# countertop toaster oven, and `oven` is an identity term of the COOKING class rather than this one,
+# so it classifies as a cooking appliance. That is a defensible answer for an oven and the wrong shelf
+# for a countertop product. It is left as-is rather than fixed by adding `oven` here, which would put
+# every wall oven into the ambiguous band; the real fix is a `toast` term once there are enough rows
+# to confirm the pattern holds.
+#
+# No description recipe and no external scheme mapping — see decking_board.yaml.
+
+class:
+  code: APP.KIT.COUNTERTOP
+  name: Countertop Appliance
+  version: v1
+
+  item_type: Countertop Appliance
+
+  # Deliberately EXCLUDES `grinder`. A coffee grinder is a countertop appliance and there are none
+  # in this file, whereas there are six DeWalt ANGLE and DIE grinders — and with the term here they
+  # sat in contention with this class at 97% dominance and abstained. Six power tools lost to a
+  # product category the file does not contain.
+  identity_terms: [coffee, espresso, toaster, kettle, blender, mixer]
+
+  browse_path:
+    - Appliances & Consumer Electronics
+    - Kitchen Appliances
+    - Countertop Appliances
+
+  reporting_path: [Appliances, Small Appliances, Countertop]
+
+  attributes:
+    - { code: finish_color,          requirement: required,    weight: 3.0, label: Color }
+    - { code: product_series,        requirement: required,    weight: 3.0, label: Series }
+    - { code: model_number,          requirement: optional,    weight: 1.0 }
+    - { code: capacity_cubic_feet,   requirement: optional,    weight: 1.0, label: Capacity }
+    - { code: voltage_rating,        requirement: recommended, weight: 2.0 }
+    - { code: amperage_rating,       requirement: optional,    weight: 1.0 }
+    - { code: overall_size,          requirement: recommended, weight: 2.0, label: Size }
+    - { code: primary_material,      requirement: recommended, weight: 2.0, label: Material }
+    - { code: plug_type,             requirement: optional,    weight: 1.0 }
+    - { code: each_weight,           requirement: optional,    weight: 1.0 }
+    - { code: selling_uom,           requirement: recommended, weight: 2.0 }
+    - { code: additional_information, requirement: optional,   weight: 1.0 }
+
+    # --- named delivery columns; must stay last ----------------------------------------------
+    - { code: warranty_terms,        requirement: recommended, weight: 2.0 }
+    - { code: included_technology,   requirement: optional,    weight: 1.0 }
+    - { code: approvals,             requirement: recommended, weight: 2.0 }
+    - { code: country_of_origin,     requirement: recommended, weight: 1.0 }
+    - { code: prop65_warning_required, requirement: optional,  weight: 1.0 }
+    - { code: gtin,                  requirement: optional,    weight: 1.0 }
+
+  cross_field_rules:
+    - id: R_COUNTERTOP_IS_120V
+      expr: "voltage_rating is null or voltage_rating <= 130"
+      references: [voltage_rating]
+      severity: warning
+      message: >
+        A countertop appliance was captured above 130 V. These plug into an ordinary domestic outlet,
+        so a 240 V figure means a rating was inherited from a major-appliance row.
+
+    - id: R_FINISH_IS_PRESENT
+      expr: "finish_color is not null"
+      references: [finish_color]
+      severity: warning
+      message: >
+        No finish was captured. In this cohort the finish IS the SKU — the same coffee maker ships in
+        matte black, matte white and stainless under part numbers differing by two characters — so a
+        blank here makes three products indistinguishable.
+
+  channel_profiles:
+    - name: unilog_delivery
+      title_template: "{brand} {product_series} {mpn} {class_name}"
+      max_title_chars: 200
+      unit_system: imperial_primary
+      required: [mpn]

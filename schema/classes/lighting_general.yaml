@@ -80,6 +80,30 @@ class:
     - downlight
     - highbay
     - troffer
+    # Added when the taxonomy grew to the whole catalogue. `incandescent` was already here and
+    # matched nothing: Satco writes `Incan` and `Inc`, never the full word, so eleven rows of the
+    # form "S3702 40W Incan Med 27K" and "S3720 40w Inc A15 Med 26k" abstained against a class
+    # whose vocabulary described them exactly. `sconce` was in luminaire_form's aliases but not
+    # here, so "55209NI Kichler Wall Sconce" was never admitted to be scored.
+    - incan
+    - inc
+    - sconce
+    # A second pass over the rows that still reached no candidate. Each of these is a spelling this
+    # supplier uses and nothing else in the 1,000 rows uses:
+    #
+    #   `base`     "564492 75W Adj Base 27k 3pk" — an adjustable-base lamp. Its only category word
+    #              is Base, which is this class's own `lamp_base` attribute; the row states a
+    #              wattage, a colour temperature and a pack multiple and never says lamp or bulb.
+    #   `flashlt`  "NEBFLT1021 Slyde King FlashLt" — the compound tokenises whole, so `lt` does not
+    #              reach it. Declared here rather than by loosening the tokeniser, which was tried
+    #              and measured worse; see the note on `tokenize`.
+    #   `headlamp` included for symmetry with `flashlight`. NOT `headlight`, which is deliberately
+    #              excluded and pinned by a test: a vehicle headlight is not a lighting product in
+    #              this catalogue.
+    - base
+    - flashlt
+    - flashlight
+    - headlamp
 
   browse_path:
     - Electrical

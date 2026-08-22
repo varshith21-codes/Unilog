@@ -248,3 +248,118 @@ attributes:
       paraphrased or expanded.
     example_values: ["With CleanBoost(TM)", "With Washing 3rd Rack, Water Repellent Basket"]
     interchange: cosmetic
+  # ------------------------------------------------------------------ major-appliance additions
+  #
+  # Added when the taxonomy grew past dishwashers to cover the rest of the client's appliance
+  # cohort: cooking (23 rows), laundry (14), refrigeration (14) and countertop (13).
+  #
+  # WHAT THOSE SUPPLIER STRINGS ACTUALLY CONTAIN:
+  #
+  #     PS960YPFS   30" GE Electric Range SS - Display Only
+  #     GCFG3661AF  36" Frigidaire Gas Range SS
+  #     PTD70GBSTWS GE Gas Dryer Wh
+  #     GDE21EMKES  GE 21CF Fridge SL Display Only
+  #     EUF17CDBW   Element 17CF Freezer - Upright
+  #     PMOS1980AF  OTR Microwave SS - Display Only
+  #
+  # A cabinet width, a fuel word, a cubic-foot capacity and a finish. Nothing else, which is why
+  # this block is four attributes rather than forty.
+
+  - code: fuel_type
+    name: Fuel Type
+    datatype: enum
+    description: >
+      The energy source a cooking or drying appliance burns or draws. A hard installation fact
+      rather than a preference: a gas range needs a gas line and an electric one needs a 240 V
+      circuit, and neither installation accepts the other appliance.
+    example_values: ["Electric", "Gas (Natural)", "Dual Fuel", "Induction"]
+    extraction_hints:
+      - '"Elect" and "Elec" mean Electric'
+      - a bare "Gas" is natural gas unless the source says propane or LP
+      - do not infer the fuel from the model number
+    spec_labels: ["Fuel Type", "Fuel", "Energy Source", "Gas Type", "Power Type"]
+    allowed_values:
+      - value: Electric
+        aliases: ["elect", "elec", "electric", "electrical", "radiant electric"]
+      - value: Gas (Natural)
+        aliases: ["gas", "natural gas", "ng", "gas range"]
+      - value: Gas (Propane)
+        aliases: ["propane", "lp", "lpg", "liquid propane"]
+      - value: Dual Fuel
+        aliases: ["dual fuel", "dual-fuel"]
+        note: gas cooktop with an electric oven
+      - value: Induction
+        aliases: ["induction", "induction cooktop"]
+    interchange: defining
+
+  - code: appliance_width
+    name: Nominal Width
+    datatype: dimension
+    quantity_kind: length
+    canonical_unit: mm
+    display_preference: imperial_fraction
+    unit_hint: in
+    description: >
+      Nominal cabinet-opening width the appliance is built for. The first thing a kitchen designer
+      filters on, because a 36" range will not go into a 30" opening whatever else agrees.
+    example_values: ['24"', '30"', '36"']
+    extraction_hints:
+      - 'the leading figure of a range or cooktop description, e.g. ''30" GE Electric Range'''
+      - this is the nominal opening, not the measured cabinet depth
+    # A bare "size"/"Size" is deliberately absent from both lists: `overall_size` is the attribute
+    # named Size and owns that label, and holding it here too made whichever was bound second
+    # unreachable. Every cooking, laundry and refrigeration class binds both.
+    table_headers: ["width", "nominal width", "opening width"]
+    spec_labels: ["Width", "Nominal Width", "Cabinet Width", "Opening Width"]
+    tolerance: 0.0
+    plausible_range: [200.0, 2500.0]
+    interchange: defining
+
+  - code: capacity_cubic_feet
+    name: Capacity (cu ft)
+    datatype: number
+    description: >
+      Usable interior volume in cubic feet. Declared as a plain number because cubic feet is not
+      in the unit registry; the unit is fixed by this definition. The figure printed on every
+      refrigerator and dryer listing and the one buyers compare across brands.
+    example_values: ["17", "21", "28"]
+    extraction_hints:
+      - '"21CF" and "16CF" mean 21 and 16 cubic feet'
+      - a laundry capacity is also stated in cubic feet and belongs here
+    spec_labels: ["Capacity", "Total Capacity", "Cubic Feet", "Volume", "Interior Volume"]
+    tolerance: 0.02
+    plausible_range: [0.3, 120.0]
+    # More capacity in the same cabinet width is never a fault.
+    interchange: functional
+    substitution: at_least
+
+  - code: door_configuration
+    name: Door Configuration
+    datatype: enum
+    description: >
+      How the appliance opens. A kitchen-layout fact rather than a style choice: a French-door
+      refrigerator and a side-by-side of identical capacity need different clearances, and a chest
+      freezer needs overhead space a upright one does not.
+    example_values: ["French Door", "Side-by-Side", "Top Freezer", "Upright"]
+    extraction_hints:
+      - '"OTR" on a microwave means over-the-range, which is a mounting rather than a door style'
+      - '"Drawer" on a microwave is a door configuration'
+    spec_labels: ["Door Style", "Configuration", "Door Configuration", "Style", "Type"]
+    allowed_values:
+      - value: French Door
+        aliases: ["french door", "french-door", "fdbm"]
+      - value: Side-by-Side
+        aliases: ["side by side", "side-by-side", "sxs"]
+      - value: Top Freezer
+        aliases: ["top freezer", "top mount", "top-mount"]
+      - value: Bottom Freezer
+        aliases: ["bottom freezer", "bottom mount", "bottom-mount"]
+      - value: Single Door
+        aliases: ["single door", "one door", "all refrigerator"]
+      - value: Drawer
+        aliases: ["drawer", "microwave drawer", "drawer style"]
+      - value: Chest
+        aliases: ["chest", "chest freezer", "horizontal"]
+      - value: Upright
+        aliases: ["upright", "vertical", "upright freezer"]
+    interchange: critical

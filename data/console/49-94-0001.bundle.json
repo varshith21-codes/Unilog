@@ -2,7 +2,7 @@
   "bundle": {
     "sku": "49-94-0001",
     "document_id": "Unihack__Sample_Dataset_-_Input#49-94-0001",
-    "class_code": null,
+    "class_code": "ABR.WHL.BONDED",
     "record": {
       "tenant_id": "unilog",
       "sku": "49-94-0001",
@@ -14,36 +14,257 @@
       "supplier_id": "4031",
       "parent_sku": null,
       "lifecycle_status": "active",
-      "class_code": null,
-      "schema_version": null,
+      "class_code": "ABR.WHL.BONDED",
+      "schema_version": "ABR.WHL.BONDED@v1",
       "source_document_ids": [
         "Unihack__Sample_Dataset_-_Input#49-94-0001"
       ],
-      "created_at": "2026-08-22T12:30:39.626815+00:00",
-      "updated_at": "2026-08-22T12:30:39.626819+00:00"
+      "created_at": "2026-08-22T19:16:11.544672+00:00",
+      "updated_at": "2026-08-22T19:16:11.544703+00:00"
     },
-    "classifications": [],
+    "classifications": [
+      {
+        "scheme": "internal",
+        "code": "ABR.WHL.BONDED",
+        "path": [
+          "Tools & Consumables",
+          "Abrasives",
+          "Bonded Abrasive Wheels"
+        ],
+        "confidence": 0.9,
+        "level_confidences": [
+          1.0,
+          1.0,
+          0.9
+        ],
+        "rationale": "single viable candidate",
+        "method": "retrieval_only",
+        "alternatives": [],
+        "reviewed_by": null,
+        "reviewed_at": null
+      }
+    ],
     "classification_summary": {
-      "class_code": null,
-      "confidence": 0.0,
-      "confident_depth": 0,
-      "schemes": [],
-      "candidates_considered": 0,
-      "method": "no_viable_candidate",
-      "abstained": true,
+      "class_code": "ABR.WHL.BONDED",
+      "confidence": 0.9,
+      "confident_depth": 3,
+      "schemes": [
+        "internal"
+      ],
+      "candidates_considered": 1,
+      "method": "retrieval_only",
+      "abstained": false,
       "input_tokens": 0,
       "output_tokens": 0
     },
-    "classification_candidates": [],
-    "values": [],
+    "classification_candidates": [
+      {
+        "code": "ABR.WHL.BONDED",
+        "score": 0.3339,
+        "path_text": "Tools & Consumables > Abrasives > Bonded Abrasive Wheels"
+      }
+    ],
+    "values": [
+      {
+        "attribute_code": "abrasive_operation",
+        "value_raw": "Cut Off",
+        "value_canonical": "Cutting",
+        "value_display": "Cutting",
+        "method": "supplier_feed",
+        "confidence": 0.82,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "desc-abrasive_operation-36",
+            "document_id": "Unihack__Sample_Dataset_-_Input#49-94-0001",
+            "document_sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+            "quote": "Cut Off",
+            "page": null,
+            "bbox": null,
+            "table_ref": null,
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [],
+        "model_id": null,
+        "model_tier": null,
+        "prompt_version": "description@v1",
+        "schema_version": "ABR.WHL.BONDED@v1",
+        "version": 1,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-22T19:16:11.544415Z",
+        "score": 0.8,
+        "decision": {
+          "attribute_code": "abrasive_operation",
+          "score": 0.8,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.800 >= threshold 0.719"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 0.4,
+          "quote_specificity": 1.0,
+          "self_reported_certainty": 0.82,
+          "validation_pass_rate": 0.5,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.5,
+          "source_prior": 0.5,
+          "tier_cost": 0.5
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "citation_summary": [
+          "Unihack__Sample_Dataset_-_Input#49-94-0001"
+        ]
+      },
+      {
+        "attribute_code": "wheel_diameter",
+        "value_raw": "4\"",
+        "value_canonical": {
+          "magnitude": 101.6,
+          "unit": "mm"
+        },
+        "value_display": "4\"",
+        "method": "supplier_feed",
+        "confidence": 0.88,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "desc-wheel_diameter-16",
+            "document_id": "Unihack__Sample_Dataset_-_Input#49-94-0001",
+            "document_sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+            "quote": "4\"",
+            "page": null,
+            "bbox": null,
+            "table_ref": null,
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [],
+        "model_id": null,
+        "model_tier": null,
+        "prompt_version": "description@v1",
+        "schema_version": "ABR.WHL.BONDED@v1",
+        "version": 1,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-22T19:16:11.544373Z",
+        "score": 0.8,
+        "decision": {
+          "attribute_code": "wheel_diameter",
+          "score": 0.8,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.800 >= threshold 0.719"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 0.4,
+          "quote_specificity": 1.0,
+          "self_reported_certainty": 0.88,
+          "validation_pass_rate": 0.5,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.5,
+          "source_prior": 0.5,
+          "tier_cost": 0.5
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "citation_summary": [
+          "Unihack__Sample_Dataset_-_Input#49-94-0001"
+        ]
+      },
+      {
+        "attribute_code": "workpiece_material",
+        "value_raw": "Metal",
+        "value_canonical": [
+          "Metal"
+        ],
+        "value_display": "Metal",
+        "method": "supplier_feed",
+        "confidence": 0.82,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "desc-workpiece_material-30",
+            "document_id": "Unihack__Sample_Dataset_-_Input#49-94-0001",
+            "document_sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+            "quote": "Metal",
+            "page": null,
+            "bbox": null,
+            "table_ref": null,
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [],
+        "model_id": null,
+        "model_tier": null,
+        "prompt_version": "description@v1",
+        "schema_version": "ABR.WHL.BONDED@v1",
+        "version": 1,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-22T19:16:11.544401Z",
+        "score": 0.8,
+        "decision": {
+          "attribute_code": "workpiece_material",
+          "score": 0.8,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.800 >= threshold 0.719"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 0.4,
+          "quote_specificity": 1.0,
+          "self_reported_certainty": 0.82,
+          "validation_pass_rate": 0.5,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.5,
+          "source_prior": 0.5,
+          "tier_cost": 0.5
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "citation_summary": [
+          "Unihack__Sample_Dataset_-_Input#49-94-0001"
+        ]
+      }
+    ],
     "gaps": [],
     "extraction": {
-      "requested": 0,
-      "values": 0,
+      "requested": 19,
+      "values": 3,
       "gaps": 0,
       "rejected_unverifiable": 0,
-      "corrected_to_match_evidence": 0,
-      "citation_coverage": 0.0,
+      "corrected_to_match_evidence": 1,
+      "citation_coverage": 1.0,
       "input_tokens": 0,
       "output_tokens": 0,
       "escalations": 0,
@@ -53,18 +274,48 @@
     },
     "normalization_issues": [],
     "validation": {
-      "checks": 1,
-      "failures": 1,
+      "checks": 4,
+      "failures": 0,
       "warnings": 0,
-      "skipped_rules": 0,
-      "consistency": 0.0,
+      "skipped_rules": 3,
+      "consistency": 1.0,
       "results": [
         {
-          "layer": "L0",
-          "rule_id": "no_class",
-          "verdict": "fail",
+          "layer": "L3",
+          "rule_id": "plausible_range",
+          "verdict": "pass",
           "severity": "error",
-          "reason": "record has no product class, so no rules or required attributes apply",
+          "reason": "within the expected range [10, 500]",
+          "counterexample": null,
+          "suggested_fix": null,
+          "detail": null
+        },
+        {
+          "layer": "L2",
+          "rule_id": "R_THICKNESS_BELOW_DIAMETER",
+          "verdict": "skipped",
+          "severity": "info",
+          "reason": "not evaluated: missing wheel_thickness",
+          "counterexample": null,
+          "suggested_fix": null,
+          "detail": null
+        },
+        {
+          "layer": "L2",
+          "rule_id": "R_CUTTING_WHEEL_IS_THIN",
+          "verdict": "skipped",
+          "severity": "info",
+          "reason": "not evaluated: missing wheel_thickness",
+          "counterexample": null,
+          "suggested_fix": null,
+          "detail": null
+        },
+        {
+          "layer": "L2",
+          "rule_id": "R_SPEED_RATING_PRESENT",
+          "verdict": "skipped",
+          "severity": "info",
+          "reason": "not evaluated: missing max_operating_speed",
           "counterexample": null,
           "suggested_fix": null,
           "detail": null
@@ -73,29 +324,112 @@
       "per_attribute": {}
     },
     "certificate": {
-      "certificate_id": "ec_27ed0a619119",
+      "certificate_id": "ec_8d8d64d08759",
       "sku": "49-94-0001",
       "tenant_id": "unilog",
-      "generated_at": "2026-08-22T12:30:39.626993Z",
-      "schema_version": null,
+      "generated_at": "2026-08-22T19:16:11.545008Z",
+      "schema_version": "ABR.WHL.BONDED@v1",
       "pipeline_version": "axiom-0.1.0",
-      "classifications": [],
-      "attributes": [],
+      "classifications": [
+        {
+          "scheme": "internal",
+          "code": "ABR.WHL.BONDED",
+          "path": [
+            "Tools & Consumables",
+            "Abrasives",
+            "Bonded Abrasive Wheels"
+          ],
+          "confidence": 0.9,
+          "method": "retrieval_only",
+          "status": "auto",
+          "alternatives": []
+        }
+      ],
+      "attributes": [
+        {
+          "code": "wheel_diameter",
+          "value_canonical": {
+            "magnitude": 101.6,
+            "unit": "mm"
+          },
+          "value_display": "4\"",
+          "value_raw": "4\"",
+          "confidence": 0.88,
+          "method": "supplier_feed",
+          "model_tier": null,
+          "status": "auto_accepted",
+          "evidence": [
+            {
+              "document": "Unihack__Sample_Dataset_-_Input#49-94-0001",
+              "sha256": "49efd0b2\u2026",
+              "page": null,
+              "bbox": null,
+              "quote": "4\"",
+              "verified": true
+            }
+          ],
+          "validations": []
+        },
+        {
+          "code": "workpiece_material",
+          "value_canonical": [
+            "Metal"
+          ],
+          "value_display": "Metal",
+          "value_raw": "Metal",
+          "confidence": 0.82,
+          "method": "supplier_feed",
+          "model_tier": null,
+          "status": "auto_accepted",
+          "evidence": [
+            {
+              "document": "Unihack__Sample_Dataset_-_Input#49-94-0001",
+              "sha256": "49efd0b2\u2026",
+              "page": null,
+              "bbox": null,
+              "quote": "Metal",
+              "verified": true
+            }
+          ],
+          "validations": []
+        },
+        {
+          "code": "abrasive_operation",
+          "value_canonical": "Cutting",
+          "value_display": "Cutting",
+          "value_raw": "Cut Off",
+          "confidence": 0.82,
+          "method": "supplier_feed",
+          "model_tier": null,
+          "status": "auto_accepted",
+          "evidence": [
+            {
+              "document": "Unihack__Sample_Dataset_-_Input#49-94-0001",
+              "sha256": "49efd0b2\u2026",
+              "page": null,
+              "bbox": null,
+              "quote": "Cut Off",
+              "verified": true
+            }
+          ],
+          "validations": []
+        }
+      ],
       "gaps": [],
       "summary": {
-        "attributes_required": 0,
-        "attributes_populated": 0,
-        "attributes_with_evidence": 0,
+        "attributes_required": 3,
+        "attributes_populated": 3,
+        "attributes_with_evidence": 3,
         "attributes_inferred": 0,
-        "auto_accepted": 0,
+        "auto_accepted": 3,
         "queued_for_review": 0,
         "gaps_total": 0,
         "gaps_required": 0,
         "quality_index": {
           "completeness": 1.0,
-          "verifiability": 0.0,
+          "verifiability": 1.0,
           "consistency": 1.0,
-          "richness": 0.0,
+          "richness": 0.5,
           "weights": {
             "completeness": 0.35,
             "verifiability": 0.3,
@@ -108,12 +442,12 @@
             "richness",
             "verifiability"
           ],
-          "composite": 0.6
+          "composite": 0.95
         },
         "cost_usd": null,
         "wall_clock_seconds": 0.0
       },
-      "signature": "sha256:da3f44f69ed36937d70a7f4cd19d4da367e0e80a9d0ba0989315da0a46957229",
+      "signature": "sha256:50f8a862e253e712828a4d8f01efdb8d410d4594c379ba870df071c09cd0be10",
       "signature_verified": true
     },
     "channels": [
@@ -128,33 +462,31 @@
           "missing": [],
           "not_publishable": [],
           "warnings": [
-            "record has no product class, so no channel profile applies"
+            "class ABR.WHL.BONDED declares no 'cx1_pim' channel profile"
           ]
         },
         "title": null
       },
       {
         "name": "schema_org",
-        "published": false,
-        "value_count": 0,
+        "published": true,
+        "value_count": 3,
         "withheld": [],
         "readiness": {
           "channel": "schema_org",
-          "ready": false,
+          "ready": true,
           "missing": [],
           "not_publishable": [],
-          "warnings": [
-            "record has no product class, so no channel profile applies"
-          ]
+          "warnings": []
         },
         "title": null
       }
     ],
     "metrics": {
       "fill_rate": 1.0,
-      "verifiability": 0.0,
-      "values_total": 0,
-      "values_publishable": 0,
+      "verifiability": 1.0,
+      "values_total": 3,
+      "values_publishable": 3,
       "values_needing_review": 0,
       "gaps_total": 0,
       "gaps_required": 0,
@@ -168,7 +500,7 @@
     "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
     "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
     "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-22T12:30:39.344315Z",
+    "fetched_at": "2026-08-22T19:16:11.275717Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": "unilog",
@@ -260,19 +592,1270 @@
       "tables": []
     }
   ],
-  "class_definition": null,
+  "class_definition": {
+    "code": "ABR.WHL.BONDED",
+    "name": "Bonded Abrasive Wheel",
+    "version": "v1",
+    "schema_version": "ABR.WHL.BONDED@v1",
+    "item_type": "Abrasive Wheel",
+    "reporting_path": [
+      "Tools",
+      "Abrasives",
+      "Wheels"
+    ],
+    "browse_path": [
+      "Tools & Consumables",
+      "Abrasives",
+      "Bonded Abrasive Wheels"
+    ],
+    "mappings": {},
+    "required_codes": [
+      "abrasive_operation",
+      "wheel_diameter",
+      "workpiece_material"
+    ],
+    "attributes": [
+      {
+        "code": "abrasive_operation",
+        "requirement": "required",
+        "weight": 3.0,
+        "name": "Operation",
+        "datatype": "enum",
+        "description": "The material-removal operation the product is built for. Cutting wheels are thin and loaded radially; grinding wheels are thick and loaded on the face. Using one for the other is a safety matter rather than a preference, which is why a dual-rated product is its own value instead of being recorded as both.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Cutting",
+          "Grinding",
+          "Cutting and Grinding",
+          "Sanding"
+        ],
+        "allowed_values": [
+          {
+            "value": "Cutting",
+            "aliases": [
+              "cut off",
+              "cut-off",
+              "cutoff",
+              "cutting",
+              "cut",
+              "severing"
+            ],
+            "note": null
+          },
+          {
+            "value": "Grinding",
+            "aliases": [
+              "grind",
+              "grinding",
+              "surface grinding",
+              "depressed center"
+            ],
+            "note": null
+          },
+          {
+            "value": "Cutting and Grinding",
+            "aliases": [
+              "cut and grind",
+              "cut n grind",
+              "dual",
+              "combo",
+              "cut & grind"
+            ],
+            "note": "dual-rated wheel; thickness is a compromise between the two duties"
+          },
+          {
+            "value": "Sanding",
+            "aliases": [
+              "sand",
+              "sanding",
+              "finishing",
+              "smoothing"
+            ],
+            "note": null
+          },
+          {
+            "value": "Polishing",
+            "aliases": [
+              "polish",
+              "polishing",
+              "buffing"
+            ],
+            "note": null
+          },
+          {
+            "value": "Deburring",
+            "aliases": [
+              "deburr",
+              "deburring",
+              "blending",
+              "conditioning"
+            ],
+            "note": null
+          },
+          {
+            "value": "Stripping",
+            "aliases": [
+              "strip",
+              "stripping",
+              "paint removal"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "abrasive_form",
+        "requirement": "recommended",
+        "weight": 2.0,
+        "name": "Form",
+        "datatype": "enum",
+        "description": "The physical format the abrasive is supplied in, which determines what machine holds it. A belt and a disc of identical grain and grit fit nothing in common, so this is the first thing a buyer filters on.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Cut-Off Wheel",
+          "Disc",
+          "Belt",
+          "Sanding Sponge"
+        ],
+        "allowed_values": [
+          {
+            "value": "Cut-Off Wheel",
+            "aliases": [
+              "cut off disc",
+              "cut-off disc",
+              "cutoff wheel",
+              "cut off wheel",
+              "cutting disc",
+              "cut-off wheel",
+              "cut and grind disc",
+              "cut n grind disc"
+            ],
+            "note": null
+          },
+          {
+            "value": "Grinding Wheel",
+            "aliases": [
+              "grinding disc",
+              "grind wheel",
+              "depressed center wheel",
+              "type 27"
+            ],
+            "note": null
+          },
+          {
+            "value": "Flap Disc",
+            "aliases": [
+              "flap wheel",
+              "flap"
+            ],
+            "note": null
+          },
+          {
+            "value": "Fiber Disc",
+            "aliases": [
+              "resin fiber disc",
+              "sanding disc",
+              "sand disc",
+              "disc"
+            ],
+            "note": null
+          },
+          {
+            "value": "Belt",
+            "aliases": [
+              "sanding belt",
+              "file belt",
+              "abrasive belt"
+            ],
+            "note": null
+          },
+          {
+            "value": "Sheet",
+            "aliases": [
+              "sanding sheet",
+              "sandpaper",
+              "sheet",
+              "paper sheet"
+            ],
+            "note": null
+          },
+          {
+            "value": "Roll",
+            "aliases": [
+              "abrasive roll",
+              "psa roll",
+              "stikit roll"
+            ],
+            "note": null
+          },
+          {
+            "value": "Sanding Sponge",
+            "aliases": [
+              "sponge",
+              "sanding block",
+              "foam pad"
+            ],
+            "note": null
+          },
+          {
+            "value": "Mesh Disc",
+            "aliases": [
+              "net disc",
+              "abranet",
+              "mesh"
+            ],
+            "note": null
+          },
+          {
+            "value": "Wire Wheel",
+            "aliases": [
+              "wire brush",
+              "wire cup",
+              "knot wheel"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "wheel_diameter",
+        "requirement": "required",
+        "weight": 3.0,
+        "name": "Diameter",
+        "datatype": "dimension",
+        "description": "Outside diameter of a wheel, disc or pad. This is the figure the machine's guard limits, so a larger wheel is never a substitute for a smaller one even though it removes more.\n",
+        "canonical_unit": "mm",
+        "display_preference": "imperial_fraction",
+        "quantity_kind": "length",
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "4-1/2\"",
+          "5\"",
+          "7\"",
+          "12\"",
+          "14\""
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          10.0,
+          500.0
+        ]
+      },
+      {
+        "code": "wheel_thickness",
+        "requirement": "recommended",
+        "weight": 3.0,
+        "name": "Thickness",
+        "datatype": "dimension",
+        "description": "Thickness of the wheel at its cutting edge. The single figure that separates a cutting wheel from a grinding wheel of the same diameter, and the reason a thin wheel must never be side-loaded.\n",
+        "canonical_unit": "mm",
+        "display_preference": "imperial_fraction",
+        "quantity_kind": "length",
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          ".045\"",
+          "1/16\"",
+          "1/8\"",
+          "7/64\"",
+          "1/4\""
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          0.5,
+          15.0
+        ]
+      },
+      {
+        "code": "arbor_size",
+        "requirement": "recommended",
+        "weight": 3.0,
+        "name": "Arbor",
+        "datatype": "string",
+        "description": "The centre hole or mounting thread, recorded as written. A string rather than a length because the values are not all lengths: a plain bore is 7/8\" or 20 mm, while a threaded hub is 5/8-11, which is a thread designation and would be meaningless as a measurement.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "7/8\"",
+          "5/8\"",
+          "1\"",
+          "20mm",
+          "5/8-11"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "workpiece_material",
+        "requirement": "required",
+        "weight": 3.0,
+        "name": "Material Application",
+        "datatype": "multi_enum",
+        "description": "The materials the product is intended to be used on. Multivalued because a single wheel is commonly rated for several, and reporting only the first would understate what the buyer can do with it.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": true,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Metal",
+          "Stainless Steel",
+          "Concrete / Masonry",
+          "Wood"
+        ],
+        "allowed_values": [
+          {
+            "value": "Metal",
+            "aliases": [
+              "steel",
+              "ferrous",
+              "mild steel",
+              "iron",
+              "metal cutting",
+              "all metal"
+            ],
+            "note": null
+          },
+          {
+            "value": "Stainless Steel",
+            "aliases": [
+              "stainless",
+              "inox",
+              "ss",
+              "304",
+              "316"
+            ],
+            "note": null
+          },
+          {
+            "value": "Aluminum",
+            "aliases": [
+              "aluminium",
+              "non-ferrous",
+              "alum",
+              "soft metal"
+            ],
+            "note": null
+          },
+          {
+            "value": "Cast Iron",
+            "aliases": [
+              "cast",
+              "ductile iron"
+            ],
+            "note": null
+          },
+          {
+            "value": "Concrete / Masonry",
+            "aliases": [
+              "concrete",
+              "masonry",
+              "brick",
+              "block",
+              "stone",
+              "mortar"
+            ],
+            "note": null
+          },
+          {
+            "value": "Tile",
+            "aliases": [
+              "ceramic tile",
+              "porcelain",
+              "tile cutting"
+            ],
+            "note": null
+          },
+          {
+            "value": "Wood",
+            "aliases": [
+              "timber",
+              "lumber",
+              "softwood",
+              "hardwood",
+              "wood cutting"
+            ],
+            "note": null
+          },
+          {
+            "value": "Plastic",
+            "aliases": [
+              "pvc",
+              "acrylic",
+              "composite",
+              "plastics"
+            ],
+            "note": null
+          },
+          {
+            "value": "Drywall",
+            "aliases": [
+              "gypsum",
+              "plasterboard",
+              "wallboard"
+            ],
+            "note": null
+          },
+          {
+            "value": "Paint / Coating",
+            "aliases": [
+              "paint",
+              "coating",
+              "primer",
+              "finish",
+              "varnish"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "abrasive_grain",
+        "requirement": "recommended",
+        "weight": 2.0,
+        "name": "Abrasive Grain",
+        "datatype": "enum",
+        "description": "The mineral doing the cutting. Grain choice is matched to the workpiece rather than to the operation: zirconia and ceramic hold an edge on steel where aluminium oxide dulls, and silicon carbide is for masonry and non-ferrous work where the others glaze.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Aluminum Oxide",
+          "Ceramic Aluminum Oxide",
+          "Silicon Carbide",
+          "Diamond"
+        ],
+        "allowed_values": [
+          {
+            "value": "Aluminum Oxide",
+            "aliases": [
+              "alox",
+              "a/o",
+              "aluminium oxide",
+              "al2o3",
+              "brown aluminum oxide"
+            ],
+            "note": null
+          },
+          {
+            "value": "Zirconia Alumina",
+            "aliases": [
+              "zirconia",
+              "zirc",
+              "zirconium",
+              "za"
+            ],
+            "note": null
+          },
+          {
+            "value": "Ceramic Aluminum Oxide",
+            "aliases": [
+              "ceramic",
+              "precision shaped grain",
+              "cubitron",
+              "cubitron ii"
+            ],
+            "note": null
+          },
+          {
+            "value": "Silicon Carbide",
+            "aliases": [
+              "sic",
+              "silicon-carbide",
+              "carborundum"
+            ],
+            "note": null
+          },
+          {
+            "value": "Diamond",
+            "aliases": [
+              "diamond grit",
+              "industrial diamond"
+            ],
+            "note": null
+          },
+          {
+            "value": "Cubic Boron Nitride",
+            "aliases": [
+              "cbn",
+              "borazon"
+            ],
+            "note": null
+          },
+          {
+            "value": "Garnet",
+            "aliases": [
+              "garnet paper"
+            ],
+            "note": null
+          },
+          {
+            "value": "Emery",
+            "aliases": [
+              "emery cloth"
+            ],
+            "note": null
+          },
+          {
+            "value": "Aluminum Oxide Blend",
+            "aliases": [
+              "blend",
+              "mixed grain",
+              "hiolit"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "max_operating_speed",
+        "requirement": "recommended",
+        "weight": 3.0,
+        "name": "Maximum Speed (RPM)",
+        "datatype": "integer",
+        "description": "Maximum safe rotational speed in revolutions per minute, as marked on the wheel. Declared as a plain integer because RPM is a rate the unit registry does not carry; the unit is fixed by this attribute's definition rather than by a canonical_unit.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "13300",
+          "8500",
+          "6600"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          500.0,
+          80000.0
+        ]
+      },
+      {
+        "code": "attachment_type",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Attachment",
+        "datatype": "enum",
+        "description": "How the abrasive fixes to its backing pad or machine. A mismatch here is a hard stop even when diameter and grit are right, so it is recorded separately from the arbor.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "PSA (Stikit)",
+          "Hook and Loop",
+          "Arbor Hole",
+          "Threaded Hub"
+        ],
+        "allowed_values": [
+          {
+            "value": "PSA (Stikit)",
+            "aliases": [
+              "psa",
+              "stikit",
+              "stick-it",
+              "pressure sensitive adhesive",
+              "self adhesive"
+            ],
+            "note": null
+          },
+          {
+            "value": "Hook and Loop",
+            "aliases": [
+              "hookit",
+              "hook & loop",
+              "velcro",
+              "grip",
+              "h&l"
+            ],
+            "note": null
+          },
+          {
+            "value": "Arbor Hole",
+            "aliases": [
+              "arbor",
+              "center hole",
+              "plain bore",
+              "unmounted"
+            ],
+            "note": null
+          },
+          {
+            "value": "Threaded Hub",
+            "aliases": [
+              "threaded",
+              "hub",
+              "5/8-11 hub",
+              "quick change hub"
+            ],
+            "note": null
+          },
+          {
+            "value": "Quick Change",
+            "aliases": [
+              "roloc",
+              "quick-change",
+              "twist lock",
+              "tr",
+              "ts"
+            ],
+            "note": null
+          },
+          {
+            "value": "Shank Mounted",
+            "aliases": [
+              "shank",
+              "mandrel",
+              "1/4 shank"
+            ],
+            "note": null
+          },
+          {
+            "value": "Spliced Loop",
+            "aliases": [
+              "spliced",
+              "joint",
+              "belt splice"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "product_series",
+        "requirement": "recommended",
+        "weight": 2.0,
+        "name": "Product Series",
+        "datatype": "string",
+        "description": "Manufacturer's series or family designation only, without the word \"series\" and without the manufacturer name. The anchor for part-number grammar induction, because the positional encoding of a smart part number is defined per series rather than per manufacturer.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "BA-100",
+          "T-113",
+          "T-585"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "pack_quantity",
+        "requirement": "recommended",
+        "weight": 2.0,
+        "name": "Pack Quantity",
+        "datatype": "integer",
+        "description": "Number of units in the consumer pack the part number sells as. Distinct from case_quantity, which counts packs in a shipping carton: a \"3pk\" of lamps is one sellable unit containing three lamps, and confusing the two misprices the line.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "1",
+          "2",
+          "3",
+          "6"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          1.0,
+          100.0
+        ]
+      },
+      {
+        "code": "selling_uom",
+        "requirement": "recommended",
+        "weight": 2.0,
+        "name": "Selling Unit of Measure",
+        "datatype": "enum",
+        "description": "The unit in which the product is sold, which is not necessarily the unit in which it is priced or stocked. Conflating the three is a classic source of order errors.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Each",
+          "Case",
+          "Box"
+        ],
+        "allowed_values": [
+          {
+            "value": "Each",
+            "aliases": [
+              "ea",
+              "ea.",
+              "each",
+              "pc",
+              "piece",
+              "unit"
+            ],
+            "note": null
+          },
+          {
+            "value": "Box",
+            "aliases": [
+              "bx",
+              "box"
+            ],
+            "note": null
+          },
+          {
+            "value": "Case",
+            "aliases": [
+              "cs",
+              "case",
+              "carton",
+              "ctn"
+            ],
+            "note": null
+          },
+          {
+            "value": "Pair",
+            "aliases": [
+              "pr",
+              "pair"
+            ],
+            "note": null
+          },
+          {
+            "value": "Foot",
+            "aliases": [
+              "ft",
+              "per foot",
+              "lineal foot"
+            ],
+            "note": null
+          },
+          {
+            "value": "Roll",
+            "aliases": [
+              "rl",
+              "roll"
+            ],
+            "note": null
+          },
+          {
+            "value": "Bag",
+            "aliases": [
+              "bg",
+              "bag"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "case_quantity",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Carton Quantity",
+        "datatype": "integer",
+        "description": "Number of selling units per carton or master pack for this specific part number. Frequently varies by size within one series, so read the ordering-table row that matches the target SKU.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "6",
+          "12",
+          "24"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          1.0,
+          100000.0
+        ]
+      },
+      {
+        "code": "each_weight",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Weight (Each)",
+        "datatype": "quantity",
+        "description": "Shipping weight of a single unit. Distinguish carefully from carton weight; datasheets often place them in adjacent columns with similar headings.\n",
+        "canonical_unit": "kg",
+        "display_preference": null,
+        "quantity_kind": "mass",
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "0.75 lb",
+          "1.2 kg"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          0.0001,
+          5000.0
+        ]
+      },
+      {
+        "code": "additional_information",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Additional Information",
+        "datatype": "string",
+        "description": "Comma-separated residual specifications the class has no dedicated attribute for, in the client's own overflow convention, e.g. \"240 kW-hr Annual Energy, 1 to 12 hr Delay Start Hours\". A holding pen, not a dumping ground: anything appearing here repeatedly across a category is a missing attribute and should be promoted to one.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "240 kW-hr Annual Energy, 1 to 12 hr Delay Start Hours",
+          "Folding Tines, Leak Detection System, Normal Cycle"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "approvals",
+        "requirement": "recommended",
+        "weight": 3.0,
+        "name": "Approvals and Listings",
+        "datatype": "multi_enum",
+        "description": "Third-party certifications, listings and approvals explicitly stated in the source. Record only what is stated. A listing number without a recognised mark is not an approval, and an approval for one size in a series does not extend to the others.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": true,
+        "compliance_claim": true,
+        "evidence_requirement": "strict",
+        "example_values": [
+          "UL, CSA, NSF-61",
+          "FM approved"
+        ],
+        "allowed_values": [
+          {
+            "value": "UL",
+            "aliases": [
+              "ul listed",
+              "underwriters laboratories",
+              "u.l."
+            ],
+            "note": null
+          },
+          {
+            "value": "CSA",
+            "aliases": [
+              "csa certified",
+              "canadian standards association"
+            ],
+            "note": null
+          },
+          {
+            "value": "ETL",
+            "aliases": [
+              "etl listed",
+              "intertek"
+            ],
+            "note": null
+          },
+          {
+            "value": "FM",
+            "aliases": [
+              "fm approved",
+              "factory mutual",
+              "fm global"
+            ],
+            "note": null
+          },
+          {
+            "value": "NSF-61",
+            "aliases": [
+              "nsf/ansi 61",
+              "nsf 61",
+              "nsf/ansi standard 61"
+            ],
+            "note": null
+          },
+          {
+            "value": "NSF-372",
+            "aliases": [
+              "nsf/ansi 372",
+              "nsf 372"
+            ],
+            "note": null
+          },
+          {
+            "value": "NSF-14",
+            "aliases": [
+              "nsf/ansi 14",
+              "nsf 14"
+            ],
+            "note": null
+          },
+          {
+            "value": "CRN",
+            "aliases": [
+              "canadian registration number"
+            ],
+            "note": null
+          },
+          {
+            "value": "ASME",
+            "aliases": [
+              "asme certified",
+              "asme b16"
+            ],
+            "note": null
+          },
+          {
+            "value": "MSS",
+            "aliases": [
+              "mss sp",
+              "manufacturers standardization society"
+            ],
+            "note": null
+          },
+          {
+            "value": "ATEX",
+            "aliases": [
+              "atex certified",
+              "atex marked"
+            ],
+            "note": null
+          },
+          {
+            "value": "IECEx",
+            "aliases": [
+              "iecex certified"
+            ],
+            "note": null
+          },
+          {
+            "value": "WRAS",
+            "aliases": [
+              "wras approved",
+              "water regulations advisory scheme"
+            ],
+            "note": null
+          },
+          {
+            "value": "cUL Listed",
+            "aliases": [
+              "cul",
+              "cul listed",
+              "c-ul",
+              "culus"
+            ],
+            "note": null
+          },
+          {
+            "value": "ENERGY STAR Certified",
+            "aliases": [
+              "energy star",
+              "energystar",
+              "energy star qualified",
+              "energy star certified"
+            ],
+            "note": null
+          },
+          {
+            "value": "NSF Certified",
+            "aliases": [],
+            "note": "Generic NSF mark with no standard named. Deliberately not aliased onto NSF-61: a potable-water claim needs the specific standard, and treating this as equivalent would let a cross-field rule pass on evidence that does not support it.\n"
+          },
+          {
+            "value": "ASSE 1006",
+            "aliases": [
+              "asse1006",
+              "asse 1006 listed"
+            ],
+            "note": null
+          },
+          {
+            "value": "CEE Tier 2 Qualified",
+            "aliases": [
+              "cee tier 2",
+              "cee tier2",
+              "cee tier 2 qualified"
+            ],
+            "note": null
+          },
+          {
+            "value": "AHAM Verified",
+            "aliases": [
+              "aham",
+              "aham verified"
+            ],
+            "note": null
+          },
+          {
+            "value": "WaterSense",
+            "aliases": [
+              "watersense",
+              "epa watersense"
+            ],
+            "note": null
+          },
+          {
+            "value": "ANSI Z87.1",
+            "aliases": [
+              "z87",
+              "z87.1",
+              "z87+",
+              "ansi z87",
+              "ansi z87.1",
+              "ansi/isea z87.1"
+            ],
+            "note": "eye and face protection impact rating"
+          },
+          {
+            "value": "ANSI/ISEA 105",
+            "aliases": [
+              "isea 105",
+              "ansi cut level",
+              "ansi/isea 105",
+              "a105"
+            ],
+            "note": "hand protection cut, abrasion and puncture rating"
+          },
+          {
+            "value": "EN 388",
+            "aliases": [
+              "en388",
+              "en 388 certified"
+            ],
+            "note": null
+          },
+          {
+            "value": "UL 217",
+            "aliases": [
+              "ul217",
+              "ul 217 listed"
+            ],
+            "note": "smoke alarm standard"
+          },
+          {
+            "value": "UL 2034",
+            "aliases": [
+              "ul2034",
+              "ul 2034 listed"
+            ],
+            "note": "carbon monoxide alarm standard"
+          },
+          {
+            "value": "UL 299",
+            "aliases": [
+              "ul299",
+              "ul 299 listed"
+            ],
+            "note": "portable fire extinguisher standard"
+          },
+          {
+            "value": "OSHA Compliant",
+            "aliases": [
+              "osha",
+              "osha compliant",
+              "meets osha"
+            ],
+            "note": null
+          },
+          {
+            "value": "ICC-ES Evaluated",
+            "aliases": [
+              "icc-es",
+              "icc es",
+              "icc evaluation report",
+              "esr"
+            ],
+            "note": "building-code evaluation report for a structural or envelope product"
+          },
+          {
+            "value": "ASTM D7032",
+            "aliases": [
+              "astm d7032",
+              "d7032"
+            ],
+            "note": "composite decking and railing performance standard"
+          },
+          {
+            "value": "FSC Certified",
+            "aliases": [
+              "fsc",
+              "fsc certified",
+              "forest stewardship council"
+            ],
+            "note": null
+          },
+          {
+            "value": "NFRC Certified",
+            "aliases": [
+              "nfrc",
+              "nfrc certified",
+              "nfrc rated"
+            ],
+            "note": "fenestration thermal performance rating"
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "country_of_origin",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Country of Origin",
+        "datatype": "string",
+        "description": "Country where the product is manufactured, as stated by the manufacturer. Drives tariff treatment and trade-agreement eligibility, so a guess here has direct financial consequences.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": true,
+        "evidence_requirement": "strict",
+        "example_values": [
+          "United States",
+          "Taiwan",
+          "Italy",
+          "China"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "prop65_warning_required",
+        "requirement": "recommended",
+        "weight": 2.0,
+        "name": "California Prop 65 Warning Required",
+        "datatype": "boolean",
+        "description": "True when the source states that a California Proposition 65 warning applies. Absence of a statement is not evidence of absence of a requirement, so record a gap rather than false when the source is silent.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": true,
+        "evidence_requirement": "strict",
+        "example_values": [],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "gtin",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "GTIN / UPC",
+        "datatype": "string",
+        "description": "Global Trade Item Number, 8, 12, 13 or 14 digits. The final digit is a modulo-10 check digit, which L0 validation verifies arithmetically \u2014 a transposed digit is therefore detectable without any external lookup.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "012345678905",
+          "00012345678905"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      }
+    ],
+    "cross_field_rules": [
+      {
+        "id": "R_THICKNESS_BELOW_DIAMETER",
+        "expr": "wheel_thickness < wheel_diameter",
+        "severity": "error",
+        "message": "Wheel thickness is not less than its diameter, which means the dimension triple was read out of order. The three figures of \"5x.045x7/8\" are diameter, thickness and arbor positionally with nothing in the string to say so, and this is the transposition the individual plausible ranges cannot catch on their own.",
+        "references": [
+          "wheel_thickness",
+          "wheel_diameter"
+        ]
+      },
+      {
+        "id": "R_CUTTING_WHEEL_IS_THIN",
+        "expr": "abrasive_operation != 'Cutting' or wheel_thickness <= 6.0",
+        "severity": "error",
+        "message": "A wheel recorded as a cutting wheel is thicker than 6 mm, which is grinding-wheel territory. One of the two values is wrong, and publishing either would put a wheel on the wrong side of a distinction that is a safety matter rather than a preference: a thick wheel listed as a cut-off invites side loading, and a thin one listed for grinding invites shattering.",
+        "references": [
+          "abrasive_operation",
+          "wheel_thickness"
+        ]
+      },
+      {
+        "id": "R_SPEED_RATING_PRESENT",
+        "expr": "max_operating_speed is not null or wheel_diameter is null",
+        "severity": "warning",
+        "message": "No maximum safe speed was captured for a wheel of known diameter. The rating is marked on every wheel sold and is the figure that decides whether it may be fitted to a given tool, so its absence is a gap worth showing rather than an acceptable blank. It is deliberately NOT derived from the diameter, which would be a calculation presented as a reading.",
+        "references": [
+          "max_operating_speed",
+          "wheel_diameter"
+        ]
+      }
+    ],
+    "channel_profiles": [
+      {
+        "name": "unilog_delivery",
+        "title_template": "{brand} {product_series} {mpn} {class_name}",
+        "max_title_chars": 200,
+        "unit_system": "imperial_primary",
+        "required": [
+          "mpn"
+        ]
+      },
+      {
+        "name": "schema_org",
+        "title_template": null,
+        "max_title_chars": 200,
+        "unit_system": "metric_primary",
+        "required": [
+          "mpn"
+        ]
+      }
+    ]
+  },
   "policy": {
-    "epsilon": 0.05,
+    "epsilon": 0.02,
     "confidence_level": 0.95,
-    "threshold": 0.6853,
-    "coverage": 1.0,
-    "accepted": 220,
-    "accepted_errors": 1,
-    "observed_error_rate": 0.0045,
-    "error_upper_bound": 0.0201,
+    "threshold": 0.7194,
+    "coverage": 0.7591,
+    "accepted": 167,
+    "accepted_errors": 0,
+    "observed_error_rate": 0.0,
+    "error_upper_bound": 0.0159,
     "calibration_size": 220,
     "achievable": true,
-    "reason": "at threshold 0.685, 100.0% of values are publishable with an error rate of at most 2.0% at 95% confidence"
+    "reason": "at threshold 0.719, 75.9% of values are publishable with an error rate of at most 1.6% at 95% confidence"
   },
   "calibrator": "untrained-heuristic"
 }

@@ -1,0 +1,109 @@
+# Hand tools: knives, snips, files, wrench and socket sets, adapters and test instruments.
+#
+# 28 rows of the client's 1,000-row sample, across Milwaukee, DeWalt, Irwin, Wal-Board and the
+# T-Glide / XTENDER fence range.
+#
+# WHY THIS CLASS IS BROAD AND STAYS BROAD. It covers a genuinely heterogeneous set, and the
+# alternative is worse. Each sub-kind here has two to four rows in this file — one folding-knife
+# pair, two snips, one file, three wrench sets, three socket adapters — and a class per sub-kind
+# would be a dozen classes with nothing to discriminate between them but a single noun each, all
+# sharing brand and size vocabulary. That is the configuration that pushes rows into the ambiguous
+# band and abstains. One class with a required `overall_size` and the tool noun preserved in
+# `product_series` and `additional_information` gives a buyer a navigable listing today, and the
+# cohort can be split later from a file where each sub-kind has enough rows to measure.
+#
+# WHAT IT DELIBERATELY DOES NOT COVER. Power tools, blades, bits and layout instruments each have
+# their own class. A voltage detector sits here rather than with safety devices because it is a test
+# instrument a tradesperson carries, not a life-safety alarm mounted on a wall — the sibling class
+# SAF.DET.GEN deliberately omits "detector" from its identity terms so this stays true.
+#
+# No description recipe and no external scheme mapping — see decking_board.yaml.
+
+class:
+  code: TOL.HND.GEN
+  name: Hand Tool
+  version: v1
+
+  item_type: Hand Tool
+
+  # "fence" is the table-saw and router fence range, which is a hand-adjusted accessory rather than
+  # a powered tool. "joint" catches "3/8" Drive Universal Joint" and does not collide with
+  # "jointer", which the tokeniser keeps whole.
+  # Deliberately EXCLUDES `hammer`, which is a hand tool AND the second word of "Hammer Drill" and
+  # "Rotary Hammer". With it here this class LED on "D25333K Dewalt Hammer Drill" and the row
+  # abstained — a broad class out-ranking the specific one that was right. There are no bare hammers
+  # in this file, so the term earned nothing.
+  #
+  # Deliberately EXCLUDES `wrench` for the same reason, and this one cost the most to establish.
+  # A wrench is a hand tool AND the second word of "Impact Wrench", and because identity terms are
+  # weighted heavily in the scoring vocabulary, holding it in both classes put four M12 impact
+  # wrenches at 0.78 dominance against the power-tool class — close enough to the easiest genuinely
+  # ambiguous case in the whole taxonomy (0.782) that the band DECISIVE_DOMINANCE has to sit in
+  # collapsed to 0.0013. A threshold cannot be pinned inside a gap that narrow.
+  #
+  # That was a vocabulary problem masquerading as a threshold problem. The guard is supposed to ask
+  # whether the text says the product IS this kind of thing, and "Impact Wrench" does not say hand
+  # tool. Removing the term restores the band to 0.032 and makes all four rows decisive.
+  #
+  # The three "Packout 15pc - Metric Wrench Set" rows lose their hand-tool token as a result and are
+  # left to `packout` and the storage class. That is an accepted, visible cost: a boxed wrench set is
+  # genuinely both a hand tool and tool storage, it measures at 0.98 dominance either way, and it
+  # belongs in the adjudication population rather than being forced by a term that breaks four other
+  # rows.
+  # `wrench` lives HERE and deliberately not on the power-tool class, which is the resolution of a
+  # collision that took two attempts. Holding it on BOTH collapsed the dominance band to 0.0013 by
+  # pulling four M12 impact wrenches level with the easiest ambiguous case in the taxonomy. Removing
+  # it from both left "Packout 15pc - Metric Wrench Set" contending between tool storage and power
+  # tools, neither of which is right. Holding it only here gives the impact wrenches to the
+  # power-tool class on `impact`, and the wrench sets to this one.
+  #
+  # `gauge` and `table` each recover a row whose only category word they are: "LNL65301 Digital Tire
+  # Pressure - Inflator Gauge", and "TGI2-T36A 36\" Table Assembly Industrial", which is a saw
+  # extension table and belongs with the fence range already covered here.
+  identity_terms:
+    [knife, snip, snips, file, socket, wrench, plier, pliers, screwdriver, chisel, mechanics,
+     clamp, pencil, holster, joint, adapter, detector, fence, square-drive, opener, gauge, table]
+
+  browse_path:
+    - Tools & Consumables
+    - Hand Tools
+    - Hand Tools
+
+  reporting_path: [Tools, Hand Tools, Hand Tools]
+
+  attributes:
+    - { code: product_series,        requirement: recommended, weight: 3.0, label: Series }
+    - { code: overall_size,          requirement: required,    weight: 3.0, label: Size }
+    - { code: drive_size,            requirement: recommended, weight: 3.0 }
+    - { code: pack_quantity,         requirement: recommended, weight: 3.0, label: Piece Count }
+    - { code: graduation_system,     requirement: optional,    weight: 2.0, label: Graduation }
+    - { code: primary_material,      requirement: optional,    weight: 1.0, label: Material }
+    - { code: finish_color,          requirement: optional,    weight: 1.0, label: Color }
+    - { code: nominal_length,        requirement: optional,    weight: 1.0, label: Length }
+    - { code: each_weight,           requirement: optional,    weight: 1.0 }
+    - { code: selling_uom,           requirement: recommended, weight: 2.0 }
+    - { code: additional_information, requirement: recommended, weight: 2.0 }
+
+    # --- named delivery columns; must stay last ----------------------------------------------
+    - { code: warranty_terms,        requirement: recommended, weight: 2.0 }
+    - { code: approvals,             requirement: optional,    weight: 1.0 }
+    - { code: country_of_origin,     requirement: optional,    weight: 1.0 }
+    - { code: prop65_warning_required, requirement: optional,  weight: 1.0 }
+    - { code: gtin,                  requirement: optional,    weight: 1.0 }
+
+  cross_field_rules:
+    - id: R_SET_STATES_A_PIECE_COUNT
+      expr: "pack_quantity is null or pack_quantity >= 1"
+      references: [pack_quantity]
+      severity: warning
+      message: >
+        Wrench and socket sets are sold by the piece count — "15pc", "242pc" — and it is stated
+        beside real dimensions. A count below one means a dimension was captured instead of the
+        count.
+
+  channel_profiles:
+    - name: unilog_delivery
+      title_template: "{brand} {product_series} {mpn} {class_name}"
+      max_title_chars: 200
+      unit_system: imperial_primary
+      required: [mpn]

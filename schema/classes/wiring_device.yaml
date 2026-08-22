@@ -1,0 +1,91 @@
+# Wiring devices: receptacles, GFCIs, switches, dimmers, timers, wall plates and cord connectors.
+#
+# 25 rows of the client's 1,000-row sample, across Lutron, Leviton-style receptacles and TN-series
+# timers.
+#
+# WHY THESE SHARE A CLASS. They are not variants of one product — a dimmer, a GFCI receptacle and a
+# blank wall plate have almost nothing in common electrically — and they share the thing that
+# decides the purchase: a box opening, a gang count, and an amperage and voltage rating. A buyer
+# shops them from the same page and installs them in the same box. `wiring_device_type` is bound
+# required so the distinction is a filterable value rather than a class boundary, which keeps eleven
+# near-identical classes from competing on a single noun each.
+#
+# THE DECOR-PLATE PRECEDENT, which this class inherits directly. "5522-5EV 2 Port Decor Plate" is
+# the row that forced the identity guard into existence: before it, that plate matched the BALL
+# VALVE class on the strength of the shared attribute name "Port Type" and scored 0.1854 — higher
+# than any real dishwasher scored against the dishwasher class. It now lands here, on `plate`, which
+# is what it is. The lesson is recorded in ClassDefinition.identity_terms and is why every class in
+# this schema declares a guard.
+#
+# THE COVER COLLISION, resolved deliberately. `cover` is an identity term of ELC.BOX.GEN and NOT of
+# this class, even though "WC1V12WSGUPC 1G Cover Wh" is arguably a wall plate. Box covers outnumber
+# ambiguous plate-covers in this file, and a term on both classes would put every one of them into
+# the ambiguous band where a run with no model abstains and delivers nothing. One class owns it.
+#
+# No description recipe and no external scheme mapping — see decking_board.yaml.
+
+class:
+  code: ELC.DEV.WIRING
+  name: Wiring Device
+  version: v1
+
+  item_type: Wiring Device
+
+  # "outet" is a supplier misspelling of outlet in "R2005378P00 6-50R Welder Outet" and is listed
+  # because the part number and the NEMA code both confirm the intent.
+  identity_terms:
+    [gfci, gfi, receptacle, dimmer, timer, switch, outlet, outet, wallplate, plate, tap,
+     plug, sensor, conn]
+
+  browse_path:
+    - Electrical
+    - Wiring Devices
+    - Devices & Plates
+
+  reporting_path: [Electrical, Wiring Devices, Devices]
+
+  attributes:
+    - { code: wiring_device_type,    requirement: required,    weight: 3.0, label: Device Type }
+    - { code: amperage_rating,       requirement: required,    weight: 3.0 }
+    - { code: voltage_rating,        requirement: required,    weight: 3.0 }
+    - { code: gang_count,            requirement: required,    weight: 3.0, label: Gang }
+    - { code: nema_configuration,    requirement: recommended, weight: 3.0, label: NEMA }
+    - { code: finish_color,          requirement: required,    weight: 3.0, label: Color }
+    - { code: primary_material,      requirement: optional,    weight: 1.0, label: Material }
+    - { code: mounting_type,         requirement: optional,    weight: 1.0 }
+    - { code: product_series,        requirement: recommended, weight: 2.0, label: Series }
+    - { code: pack_quantity,         requirement: optional,    weight: 1.0 }
+    - { code: selling_uom,           requirement: recommended, weight: 2.0 }
+    - { code: additional_information, requirement: optional,   weight: 1.0 }
+
+    # --- named delivery columns; must stay last ----------------------------------------------
+    - { code: warranty_terms,        requirement: optional,    weight: 1.0 }
+    - { code: approvals,             requirement: required,    weight: 3.0 }
+    - { code: country_of_origin,     requirement: optional,    weight: 1.0 }
+    - { code: gtin,                  requirement: optional,    weight: 1.0 }
+
+  cross_field_rules:
+    - id: R_NEMA_AGREES_WITH_RATINGS
+      expr: "nema_configuration is null or (amperage_rating is not null and voltage_rating is not null)"
+      references: [nema_configuration, amperage_rating, voltage_rating]
+      severity: warning
+      message: >
+        A NEMA configuration was captured without the amperage and voltage it encodes. The code
+        fixes both — 5-15R is 15 A at 125 V, 6-50R is 50 A at 250 V — so the two ratings should be
+        present and consistent with it. Deliberately a warning rather than a derivation: expanding
+        the code into the ratings would publish a lookup as though it were a reading.
+
+    - id: R_PLATE_HAS_NO_RATING
+      expr: "wiring_device_type != 'Wall Plate' or amperage_rating is null"
+      references: [wiring_device_type, amperage_rating]
+      severity: warning
+      message: >
+        An amperage rating was recorded against a wall plate, which carries no current and has
+        none. Usually means a rating was inherited from an adjacent device row.
+
+  channel_profiles:
+    - name: unilog_delivery
+      title_template: "{brand} {product_series} {mpn} {class_name}"
+      max_title_chars: 200
+      unit_system: imperial_primary
+      required: [mpn]

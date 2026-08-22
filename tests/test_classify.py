@@ -112,7 +112,7 @@ def test_attribute_values_drive_discrimination(index):
 
 
 def test_identity_guard_rejects_attribute_vocabulary_matches(index):
-    """A class must not be a candidate on the strength of its own attribute vocabulary.
+    """A class must not win on the strength of its own attribute vocabulary.
 
     Every string below was a real false positive before the guard existed, measured on the
     1,000-row Unilog sample:
@@ -124,16 +124,95 @@ def test_identity_guard_rejects_attribute_vocabulary_matches(index):
     * A GFCI plug and a bandsaw matched the dishwasher class on `Plug Type` and `Voltage Rating`.
 
     Overlap is the wrong instrument for an identity question, so identity is asked separately.
+
+    ---------------------------------------------------------------------------------------------
+    THIS TEST USED TO ASSERT `index.search(text) == []` FOR ALL SIX, and that assertion has been
+    replaced rather than deleted. It was the right test against a four-class schema in which none of
+    these products had a home: abstaining was the only correct answer available, so "no candidate"
+    and "not the wrong candidate" were the same statement.
+
+    Five of the six now have a home. Keeping the old form would have required refusing to classify a
+    decor plate, a GFCI plug, a bandsaw, a bit assortment and a grinding wheel in a taxonomy that
+    contains a wiring-device class, a power-tool class, a driver-bit class and an abrasive class —
+    that is, it would have pinned the coverage gap in place as though it were a feature.
+
+    What the test protects is unchanged, and it is the half that was always load-bearing: a class
+    must never win a row on vocabulary it merely shares. So each string now names the class that
+    SHOULD win, and the assertion is that the winner is that class and specifically not any of the
+    classes that used to be attracted by attribute overlap.
     """
+    expected = {
+        # The row that forced the guard into existence. `Port Type` on the ball-valve class made
+        # this outscore every real dishwasher; it is a wall plate and now lands as one.
+        "5522-5EV 2 Port Decor Plate": "ELC.DEV.WIRING",
+        # "Castle Gate" is a Landmark AZEK COLOUR NAME. It once matched the bronze gate valve on the
+        # word "gate", and while this taxonomy was being built it did the same to the railing class
+        # until `gate` was removed from that guard.
+        "1x6-20' Castle Gate Grooved - Landmark Azek PVC Decking": "BLD.DCK.BOARD",
+        # Matched the dishwasher class on `Plug Type` and `Voltage Rating`.
+        "R5GSRA1THD 15A GFCI Plug": "ELC.DEV.WIRING",
+        # Matched the dishwasher class on `Voltage Rating`.
+        "JWBS-14SFX 14in Bandsaw JTP-714400K": "TOL.PWR.GEN",
+        # Matched the ball-valve class on the word "Ball".
+        "IBMG90K003 Vessel Impact Ball Torsion Bit Assort 5pc": "TOL.ACC.DRIVERBIT",
+        # Matched the ball-valve class on shared size fractions.
+        '49-94-0533 Milw 7"x1/4"x7/8" Metal Grinding Wheel': "ABR.WHL.BONDED",
+    }
+    # The classes these strings were wrongly attracted to. None may win any of them, whatever else
+    # changes in the schema.
+    never = {BALL_VALVE, GATE_VALVE, "APP.KIT.DISHWASHER.BUILTIN"}
+
+    for text, wanted in expected.items():
+        ranked = index.search(text)
+        assert ranked, f"{text!r} produced no candidate at all"
+        assert ranked[0].code == wanted, (
+            f"{text!r} ranked {ranked[0].code} first, expected {wanted}"
+        )
+        assert never.isdisjoint({c.code for c in ranked}), (
+            f"{text!r} admitted a class it only shares attribute vocabulary with: "
+            f"{sorted(never & {c.code for c in ranked})}"
+        )
+
+
+def test_a_class_never_wins_on_shared_attribute_vocabulary_alone(index, registry):
+    """The generalisation of the test above, applied to every class rather than six strings.
+
+    A winning class must contribute at least one of its own identity terms to the match. That is
+    guaranteed by construction — `ClassProfile.admits` gates on exactly this — so what this checks
+    is the guarantee rather than the behaviour, and it fails the day a class is added with no
+    `identity_terms` at all. An unguarded class is admitted for every query, which is the state the
+    whole guard exists to prevent, and it is silent: it costs precision everywhere and shows up in
+    no single row.
+    """
+    from axiom.classify.candidates import tokenize
+
+    unguarded = [
+        code for code in registry.class_codes
+        if not registry.product_class(code).identity_terms
+    ]
+    assert unguarded == [], (
+        f"these classes declare no identity_terms and are therefore candidates for every query: "
+        f"{unguarded}"
+    )
+
     for text in (
         "5522-5EV 2 Port Decor Plate",
-        "1x6-20' Castle Gate Grooved - Landmark Azek PVC Decking",
-        "R5GSRA1THD 15A GFCI Plug",
         "JWBS-14SFX 14in Bandsaw JTP-714400K",
-        "IBMG90K003 Vessel Impact Ball Torsion Bit Assort 5pc",
         '49-94-0533 Milw 7"x1/4"x7/8" Metal Grinding Wheel',
+        "PDSH4816AF Dishwasher SS - Display Only",
+        BALL_TEXT,
     ):
-        assert index.search(text) == [], f"{text!r} should not be a candidate for any class"
+        query = set(tokenize(text))
+        for candidate in index.search(text, limit=10):
+            terms = frozenset(
+                token
+                for term in registry.product_class(candidate.code).identity_terms
+                for token in tokenize(term)
+            )
+            assert terms & query, (
+                f"{candidate.code} was a candidate for {text!r} without matching any of its own "
+                f"identity terms"
+            )
 
 
 def test_identity_guard_admits_the_real_thing(index):

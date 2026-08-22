@@ -1,0 +1,354 @@
+#
+# WHY THIS CATEGORY EXISTS. Abrasives are the second-largest consumable cohort in the client's
+# 1,000-row sample: 70 rows across bonded wheels (46) and coated products (24), from Milwaukee,
+# Freud/Diablo, 3M and Mirka. Before this file they abstained with `no_viable_candidate`.
+#
+# ---------------------------------------------------------------------------------------------
+# WHAT THE SUPPLIER STRINGS ACTUALLY CONTAIN, because that is what these attributes are shaped to.
+#
+#     49-94-0013     Milw 5"x.045"x7/8" Metal Cut Off Disc
+#     49-94-0048     Milw 12"x7/64"x1" Metal Cut Off Disc General Purpose
+#     49-94-0533     Milw 7"x1/4"x7/8" Metal Grinding Wheel
+#     49-94-0803     Milw 4-1/2"x1/8"x7/8" Dual Metal Cut and Grind Disc
+#     DBDS12125G01F  Diablo 12"x20mm - Speed Demon Metal Cut-Off Disc
+#     DCB518ASTS06G  Diablo 1/2"x18" - Sanding Belt 6pc
+#     3MABR-7100075678  3M 775L Stikit Film P150 - Cubitron II 50 Disc/Box
+#     5B-332-080     5B-332-080 HIOLIT 5" P80
+#     DFBLBLOMFN01G  Diablo 220 Grit - Flat Edge Sanding Sponge
+#
+# The recoverable content is a dimension triple, a grit designation, an operation word, and a
+# pack multiple. Everything else in this file exists so the document path has somewhere to put
+# what a datasheet states, not because a 40-character description will ever say it.
+#
+# ---------------------------------------------------------------------------------------------
+# THE DIMENSION-TRIPLE TRAP. `5"x.045"x7/8"` is diameter x thickness x arbor, in that order, and
+# the order is a convention rather than anything the string declares. Reading it positionally is
+# safe only because all three are separately range-checked and a cut-off wheel's thickness and
+# arbor cannot be confused with its diameter at any real size. `1/2"x18"` on a sanding belt is a
+# DIFFERENT convention — width x length, two values not three — which is why belts bind
+# nominal_length and not wheel_diameter.
+#
+# THE GRIT TRAP, and why abrasive_grit is a string. Grit is written `P150` (FEPA), `150` (ANSI/CAMI)
+# and `220 Grit`, and the two scales are NOT the same number for the same coarseness above about
+# P220. Storing it as an integer would silently equate two different specifications, so the
+# designation is preserved verbatim and comparison is left to a scale-aware rule that does not
+# exist yet. A wrong equivalence is worse than a deferred one.
+
+attributes:
+  # ------------------------------------------------------------------ what it does
+  - code: abrasive_operation
+    name: Operation
+    datatype: enum
+    description: >
+      The material-removal operation the product is built for. Cutting wheels are thin and loaded
+      radially; grinding wheels are thick and loaded on the face. Using one for the other is a
+      safety matter rather than a preference, which is why a dual-rated product is its own value
+      instead of being recorded as both.
+    example_values: ["Cutting", "Grinding", "Cutting and Grinding", "Sanding"]
+    extraction_hints:
+      - '"Cut Off" or "Cut-Off" means Cutting; "Cut and Grind" or "Cut n Grind" means the dual rating'
+      - the operation word is usually adjacent to the form word, e.g. "Metal Cut Off Disc"
+    # "Application" is deliberately absent, and it is the obvious label for this attribute. On an
+    # abrasive spec sheet it far more often heads the list of MATERIALS the product suits than the
+    # operation it performs, so `workpiece_material` claims it. Two attributes claiming one label
+    # makes the second unreachable and the first suspect — pinned by
+    # tests/test_structured_extraction.py::test_no_label_is_contested_in_the_shipped_schema.
+    spec_labels: ["Operation", "Use", "Product Type"]
+    allowed_values:
+      - value: Cutting
+        aliases: ["cut off", "cut-off", "cutoff", "cutting", "cut", "severing"]
+      - value: Grinding
+        aliases: ["grind", "grinding", "surface grinding", "depressed center"]
+      - value: Cutting and Grinding
+        aliases: ["cut and grind", "cut n grind", "dual", "combo", "cut & grind"]
+        note: dual-rated wheel; thickness is a compromise between the two duties
+      - value: Sanding
+        aliases: ["sand", "sanding", "finishing", "smoothing"]
+      - value: Polishing
+        aliases: ["polish", "polishing", "buffing"]
+      - value: Deburring
+        aliases: ["deburr", "deburring", "blending", "conditioning"]
+      - value: Stripping
+        aliases: ["strip", "stripping", "paint removal"]
+    # Critical rather than defining, which is a finer call than it looks. Swapping a cut-off wheel
+    # for a grinding wheel is dangerous rather than merely disappointing — but `defining` is reserved
+    # for differences that make the parts impossible to connect, and a cut-off and a grinding wheel
+    # of the same diameter and arbor mount on the same grinder perfectly well. The danger is in the
+    # use, not the fit. Critical says "not a drop-in" and reports it loudly, which is the accurate
+    # claim.
+    interchange: critical
+
+  - code: abrasive_form
+    name: Form
+    datatype: enum
+    description: >
+      The physical format the abrasive is supplied in, which determines what machine holds it.
+      A belt and a disc of identical grain and grit fit nothing in common, so this is the first
+      thing a buyer filters on.
+    example_values: ["Cut-Off Wheel", "Disc", "Belt", "Sanding Sponge"]
+    extraction_hints:
+      - the last noun of the description is almost always the form
+      - '"Wheel" and "Disc" are used interchangeably by suppliers for bonded abrasives'
+    spec_labels: ["Form", "Type", "Style", "Format"]
+    allowed_values:
+      - value: Cut-Off Wheel
+        aliases: ["cut off disc", "cut-off disc", "cutoff wheel", "cut off wheel", "cutting disc",
+                  "cut-off wheel", "cut and grind disc", "cut n grind disc"]
+      - value: Grinding Wheel
+        aliases: ["grinding disc", "grind wheel", "depressed center wheel", "type 27"]
+      - value: Flap Disc
+        aliases: ["flap wheel", "flap"]
+      - value: Fiber Disc
+        aliases: ["resin fiber disc", "sanding disc", "sand disc", "disc"]
+      - value: Belt
+        aliases: ["sanding belt", "file belt", "abrasive belt"]
+      - value: Sheet
+        aliases: ["sanding sheet", "sandpaper", "sheet", "paper sheet"]
+      - value: Roll
+        aliases: ["abrasive roll", "psa roll", "stikit roll"]
+      - value: Sanding Sponge
+        aliases: ["sponge", "sanding block", "foam pad"]
+      - value: Mesh Disc
+        aliases: ["net disc", "abranet", "mesh"]
+      - value: Wire Wheel
+        aliases: ["wire brush", "wire cup", "knot wheel"]
+    interchange: defining
+
+  # ------------------------------------------------------------------ the abrasive itself
+  - code: abrasive_grain
+    name: Abrasive Grain
+    datatype: enum
+    description: >
+      The mineral doing the cutting. Grain choice is matched to the workpiece rather than to the
+      operation: zirconia and ceramic hold an edge on steel where aluminium oxide dulls, and
+      silicon carbide is for masonry and non-ferrous work where the others glaze.
+    example_values: ["Aluminum Oxide", "Ceramic Aluminum Oxide", "Silicon Carbide", "Diamond"]
+    extraction_hints:
+      - a brand name may imply the grain, e.g. Cubitron is 3M's precision-shaped ceramic
+      - do not infer the grain from the workpiece the description names
+    spec_labels: ["Abrasive", "Grain", "Abrasive Material", "Mineral", "Grain Type"]
+    allowed_values:
+      - value: Aluminum Oxide
+        aliases: ["alox", "a/o", "aluminium oxide", "al2o3", "brown aluminum oxide"]
+      - value: Zirconia Alumina
+        aliases: ["zirconia", "zirc", "zirconium", "za"]
+      - value: Ceramic Aluminum Oxide
+        aliases: ["ceramic", "precision shaped grain", "cubitron", "cubitron ii"]
+      - value: Silicon Carbide
+        aliases: ["sic", "silicon-carbide", "carborundum"]
+      - value: Diamond
+        aliases: ["diamond grit", "industrial diamond"]
+      - value: Cubic Boron Nitride
+        aliases: ["cbn", "borazon"]
+      - value: Garnet
+        aliases: ["garnet paper"]
+      - value: Emery
+        aliases: ["emery cloth"]
+      - value: Aluminum Oxide Blend
+        aliases: ["blend", "mixed grain", "hiolit"]
+    # A metallurgical judgement, not a ranking. Ceramic is not simply "better than" aluminium
+    # oxide for every workpiece, and an ordering here would let a string sort approve a change of
+    # mineral that a process engineer would refuse.
+    interchange: functional
+
+  - code: abrasive_grit
+    name: Grit
+    datatype: string
+    description: >
+      Grit designation exactly as the supplier writes it, including the scale prefix. Recorded as
+      a string on purpose: P150 (FEPA) and 150 (ANSI/CAMI) are different specifications above
+      roughly P220, so storing a bare number would equate two products that are not equivalent.
+    example_values: ["P80", "P150", "P320", "220", "40"]
+    extraction_hints:
+      - 'a leading P means the FEPA scale; a bare number is usually ANSI/CAMI'
+      - 'may be written with a trailing word, e.g. "220 Grit"'
+      - do not strip the P prefix, and do not add one
+    spec_labels: ["Grit", "Grade", "Grit Size", "Mesh", "Abrasive Grade"]
+    # A coarser or finer grit is a different finishing step rather than a cheaper version of the same
+    # one, so a difference is always worth reporting. Functional rather than defining because the
+    # products still fit the same machine, and left at the default `equal` substitution because the
+    # direction is not orderable: P220 on the FEPA scale and 220 on the ANSI scale are not the same
+    # coarseness, so no comparison across the two is safe.
+    interchange: functional
+
+  # ------------------------------------------------------------------ dimensions
+  - code: wheel_diameter
+    name: Diameter
+    datatype: dimension
+    quantity_kind: length
+    canonical_unit: mm
+    display_preference: imperial_fraction
+    unit_hint: in
+    description: >
+      Outside diameter of a wheel, disc or pad. This is the figure the machine's guard limits,
+      so a larger wheel is never a substitute for a smaller one even though it removes more.
+    example_values: ['4-1/2"', '5"', '7"', '12"', '14"']
+    extraction_hints:
+      - the FIRST figure of a dimension triple such as 5"x.045"x7/8"
+      - stated alone on some sheets, e.g. 'Diablo 9" - Metal Cut-Off Disc'
+    # A bare "size" is deliberately absent. On a coated-abrasive ordering table it is equally the
+    # belt's width-by-length pair, which `overall_size` claims, and two attributes claiming one
+    # header makes the second unreachable and the first suspect. The qualified headers below are
+    # unambiguous, so the abstention costs nothing.
+    table_headers: ["diameter", "dia", "wheel diameter", "disc diameter", "od"]
+    spec_labels: ["Diameter", "Wheel Diameter", "Disc Diameter", "Outside Diameter"]
+    tolerance: 0.0
+    # 25 mm covers a die-grinder point; 500 mm covers a walk-behind saw blade.
+    plausible_range: [10.0, 500.0]
+    interchange: defining
+
+  - code: wheel_thickness
+    name: Thickness
+    datatype: dimension
+    quantity_kind: length
+    canonical_unit: mm
+    display_preference: imperial_fraction
+    unit_hint: in
+    description: >
+      Thickness of the wheel at its cutting edge. The single figure that separates a cutting
+      wheel from a grinding wheel of the same diameter, and the reason a thin wheel must never
+      be side-loaded.
+    example_values: ['.045"', '1/16"', '1/8"', '7/64"', '1/4"']
+    extraction_hints:
+      - the SECOND figure of a dimension triple such as 5"x.045"x7/8"
+      - a decimal-inch form like .045" is common and is not a typo for 045
+    table_headers: ["thickness", "thk", "wheel thickness", "width"]
+    spec_labels: ["Thickness", "Wheel Thickness", "Nominal Thickness"]
+    tolerance: 0.0
+    # 0.8 mm is the thinnest production cut-off wheel; 10 mm a heavy grinding wheel.
+    plausible_range: [0.5, 15.0]
+    # Form and fit differ, and so does the duty. Not defining, because a 1/8" and a 3/32" cut-off
+    # wheel of the same diameter genuinely do the same job on the same machine.
+    interchange: critical
+
+  - code: arbor_size
+    name: Arbor
+    datatype: string
+    description: >
+      The centre hole or mounting thread, recorded as written. A string rather than a length
+      because the values are not all lengths: a plain bore is 7/8" or 20 mm, while a threaded hub
+      is 5/8-11, which is a thread designation and would be meaningless as a measurement.
+    example_values: ['7/8"', '5/8"', '1"', "20mm", "5/8-11"]
+    extraction_hints:
+      - the THIRD figure of a dimension triple such as 5"x.045"x7/8"
+      - a hyphenated form like 5/8-11 is a thread, not a fraction; keep it whole
+    table_headers: ["arbor", "arbor size", "bore", "center hole", "mount", "hole size"]
+    spec_labels: ["Arbor", "Arbor Hole", "Bore", "Centre Hole", "Mounting"]
+    # Nothing else matters if it will not go on the machine.
+    interchange: defining
+
+  - code: max_operating_speed
+    name: Maximum Speed (RPM)
+    datatype: integer
+    description: >
+      Maximum safe rotational speed in revolutions per minute, as marked on the wheel. Declared
+      as a plain integer because RPM is a rate the unit registry does not carry; the unit is
+      fixed by this attribute's definition rather than by a canonical_unit.
+    example_values: ["13300", "8500", "6600"]
+    extraction_hints:
+      - marked on the wheel face and printed on the datasheet as "Max RPM"
+      - never infer it from the diameter
+    spec_labels: ["Max RPM", "Maximum Speed", "Max Operating Speed", "RPM", "Speed Rating"]
+    plausible_range: [500.0, 80000.0]
+    # A wheel rated for more speed is always safe on a slower machine; the reverse can burst.
+    interchange: functional
+    substitution: at_least
+
+  - code: workpiece_material
+    name: Material Application
+    datatype: multi_enum
+    multivalued: true
+    description: >
+      The materials the product is intended to be used on. Multivalued because a single wheel is
+      commonly rated for several, and reporting only the first would understate what the buyer
+      can do with it.
+    example_values: ["Metal", "Stainless Steel", "Concrete / Masonry", "Wood"]
+    extraction_hints:
+      - '"Metal" appears explicitly in most Milwaukee cut-off disc descriptions'
+      - report every material the source names, not just the first
+    # A bare "Material" is deliberately absent. On a spec sheet it is what the product is MADE OF,
+    # which `primary_material` and `blade_material` own; this attribute is what the product is used
+    # ON. Holding the label here made the other unreachable on the fastener, saw-blade and driver-bit
+    # classes, which bind both.
+    spec_labels: ["For Use On", "Application", "Materials", "Suitable For"]
+    allowed_values:
+      - value: Metal
+        aliases: ["steel", "ferrous", "mild steel", "iron", "metal cutting", "all metal"]
+      - value: Stainless Steel
+        aliases: ["stainless", "inox", "ss", "304", "316"]
+      - value: Aluminum
+        aliases: ["aluminium", "non-ferrous", "alum", "soft metal"]
+      - value: Cast Iron
+        aliases: ["cast", "ductile iron"]
+      - value: Concrete / Masonry
+        aliases: ["concrete", "masonry", "brick", "block", "stone", "mortar"]
+      - value: Tile
+        aliases: ["ceramic tile", "porcelain", "tile cutting"]
+      - value: Wood
+        aliases: ["timber", "lumber", "softwood", "hardwood", "wood cutting"]
+      - value: Plastic
+        aliases: ["pvc", "acrylic", "composite", "plastics"]
+      - value: Drywall
+        aliases: ["gypsum", "plasterboard", "wallboard"]
+      - value: Paint / Coating
+        aliases: ["paint", "coating", "primer", "finish", "varnish"]
+    # Holding a rating the reference lacks is never a fault, so a superset is acceptable.
+    interchange: functional
+    substitution: superset
+
+  - code: backing_material
+    name: Backing
+    datatype: enum
+    description: >
+      The flexible substrate a coated abrasive's grain is bonded to. Governs how far the product
+      conforms to a contour and whether it survives wet use, which is why the same grain and grit
+      on film and on paper are not interchangeable.
+    example_values: ["Film", "Paper", "Cloth", "Fiber"]
+    extraction_hints:
+      - '3M product names state it, e.g. "775L Stikit Film"'
+      - a bonded wheel has no backing; leave this unset rather than guessing
+    spec_labels: ["Backing", "Backing Material", "Substrate", "Backing Weight"]
+    allowed_values:
+      - value: Film
+        aliases: ["polyester film", "pet film", "film backing"]
+      - value: Paper
+        aliases: ["paper backing", "a-weight", "c-weight", "d-weight", "e-weight"]
+      - value: Cloth
+        aliases: ["cotton cloth", "poly-cotton", "x-weight", "j-weight", "y-weight"]
+      - value: Fiber
+        aliases: ["vulcanised fiber", "vulcanized fibre", "resin fiber"]
+      - value: Mesh
+        aliases: ["net", "open mesh", "screen"]
+      - value: Foam
+        aliases: ["foam backing", "sponge", "foam pad"]
+      - value: Non-Woven
+        aliases: ["non woven", "nonwoven", "surface conditioning"]
+    interchange: functional
+
+  - code: attachment_type
+    name: Attachment
+    datatype: enum
+    description: >
+      How the abrasive fixes to its backing pad or machine. A mismatch here is a hard stop even
+      when diameter and grit are right, so it is recorded separately from the arbor.
+    example_values: ["PSA (Stikit)", "Hook and Loop", "Arbor Hole", "Threaded Hub"]
+    extraction_hints:
+      - '"Stikit" is 3M''s pressure-sensitive adhesive system'
+      - '"Hookit", "Velcro" and "grip" all mean hook and loop'
+    spec_labels: ["Attachment", "Attachment Method", "Backup Pad", "Mount", "Fastening"]
+    allowed_values:
+      - value: PSA (Stikit)
+        aliases: ["psa", "stikit", "stick-it", "pressure sensitive adhesive", "self adhesive"]
+      - value: Hook and Loop
+        aliases: ["hookit", "hook & loop", "velcro", "grip", "h&l"]
+      - value: Arbor Hole
+        aliases: ["arbor", "center hole", "plain bore", "unmounted"]
+      - value: Threaded Hub
+        aliases: ["threaded", "hub", "5/8-11 hub", "quick change hub"]
+      - value: Quick Change
+        aliases: ["roloc", "quick-change", "twist lock", "tr", "ts"]
+      - value: Shank Mounted
+        aliases: ["shank", "mandrel", "1/4 shank"]
+      - value: Spliced Loop
+        aliases: ["spliced", "joint", "belt splice"]
+    interchange: defining

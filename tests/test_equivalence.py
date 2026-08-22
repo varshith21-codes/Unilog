@@ -584,8 +584,11 @@ class TestSchemaSemantics:
         """`defining` ends the conversation, so the bar is impossibility rather than importance.
 
         A difference here cannot be rescued by agreement anywhere else, which makes it the one
-        level that must not be handed out for being merely consequential. Both current holders pass
-        the same test: the parts cannot be made to connect.
+        level that must not be handed out for being merely consequential. Every holder passes the
+        same test: either the parts cannot be made to connect, or the two things are not the same
+        kind of product at all.
+
+        The two original holders, kept as the reference cases:
 
         * `nominal_size` — a 3/4" valve does not join 1" pipe at any price.
         * `lamp_base` — a GU10 lamp does not enter an E26 socket. Binary, and physical.
@@ -597,13 +600,93 @@ class TestSchemaSemantics:
         to catch a case another attribute catches.
 
         Adding a code here is a claim of that kind. Extend the list and the docstring together.
+
+        --------------------------------------------------------------------------------------
+        The catalogue-wide taxonomy added twenty-six more, in four groups. They are grouped
+        because the justification is per-group rather than per-attribute, and because the grouping
+        is what makes a wrong addition visible.
+
+        **It will not mount.** A mechanical interface that either mates or does not:
+        `arbor_size`, `attachment_type`, `shank_type`, `drive_size`, `bit_tip_type`,
+        `battery_platform`, `nema_configuration`, `gang_count`, `shank_diameter`.
+        A 7/8" arbor wheel does not go on a 5/8" spindle; a PSA disc does not stick to a
+        hook-and-loop pad; an M18 pack does not latch onto an 18V LXT tool; a 1-gang plate does not
+        cover a 2-gang box; a .131" nail does not feed a magazine cut for .113".
+
+        **It will not fit the opening.** A dimension the surrounding assembly fixes:
+        `wheel_diameter`, `blade_diameter`, `appliance_width`, `handing`, `nominal_dimensions`,
+        `garment_size`.
+        A 12" wheel does not fit a 5" grinder's guard; a 36" range does not enter a 30" cabinet;
+        a left-hand door does not hang in a right-hand opening, and the opening is cut before anyone
+        finds out.
+
+        **It is a different kind of thing.** Not a variant to be traded off but a separate product,
+        usually bought alongside rather than instead of the other:
+        `wiring_device_type`, `enclosure_form`, `railing_component`, `roofing_component`,
+        `ppe_form`, `fastener_type`, `abrasive_form`, `cable_type`, `conductor_count`.
+        A dimmer is not a wall plate; a post is not a baluster; a shingle is not underlayment; a
+        glove liner is worn under a glove rather than instead of one; SO cord is not building wire
+        and the listing that says otherwise is a code violation.
+
+        **The connection is to a different utility.** `fuel_type`, `edge_profile`.
+        A gas range cannot be fed from a 240 V circuit and an electric one cannot be fed from a gas
+        line. A grooved deck board takes hidden fasteners in the groove and a square-edge board must
+        be face-screwed; neither accepts the other's system.
+
+        --------------------------------------------------------------------------------------
+        Eleven candidates were considered and DEMOTED to `critical` while this list was drawn up,
+        which is the part worth keeping. Each was important — several were the most commercially
+        consequential field in their cohort — and importance is not the bar:
+
+        `abrasive_operation` (a cut-off and a grinding wheel of the same size mount on the same
+        grinder; the danger is in the use, not the fit), `tool_configuration` (bare versus kit is a
+        3x price difference on an identical tool), `power_source`, `abrasive_grit`, `bit_tip_size`,
+        `panel_thickness`, `blade_span`, `wire_gauge`, `heated_garment`, `fastener_length`,
+        `measurement_range`.
         """
         defining = [
             c
             for c in registry.attribute_codes
             if registry.attribute(c).interchange is Interchange.DEFINING
         ]
-        assert defining == ["lamp_base", "nominal_size"]
+        # Compared against the sorted literal so the groups above can stay in reading order. The
+        # grouping is the point of this list — an addition that does not fit one of the four
+        # headings is an addition that has not been justified.
+        assert defining == sorted([
+            # it will not mount
+            "arbor_size",
+            "attachment_type",
+            "battery_platform",
+            "bit_tip_type",
+            "drive_size",
+            "gang_count",
+            "nema_configuration",
+            "shank_diameter",
+            "shank_type",
+            # it will not fit the opening
+            "appliance_width",
+            "blade_diameter",
+            "garment_size",
+            "handing",
+            "nominal_dimensions",
+            "wheel_diameter",
+            # it is a different kind of thing
+            "abrasive_form",
+            "cable_type",
+            "conductor_count",
+            "enclosure_form",
+            "fastener_type",
+            "ppe_form",
+            "railing_component",
+            "roofing_component",
+            "wiring_device_type",
+            # a different utility
+            "edge_profile",
+            "fuel_type",
+            # the two original holders
+            "lamp_base",
+            "nominal_size",
+        ])
 
     def test_ranges_use_enclosure_and_sets_use_superset(self, registry):
         assert registry.attribute("temperature_range").substitution is SubstitutionRule.ENCLOSES

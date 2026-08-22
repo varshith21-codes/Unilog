@@ -2,31 +2,46 @@
   "sku": "S4720",
   "tenant_id": "unilog",
   "brand": "Satco",
-  "class_code": null,
-  "class_name": null,
-  "category_path": [],
+  "class_code": "LGT.LMP.GEN",
+  "class_name": "Lighting",
+  "category_path": [
+    "Electrical",
+    "Lighting",
+    "Lamps & Fixtures"
+  ],
   "document_id": "Unihack__Sample_Dataset_-_Input#S4720",
   "document_sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
-  "gaps": [],
+  "gaps": [
+    {
+      "code": "lamp_technology",
+      "reason": "no_source_available",
+      "sources_searched": [
+        "Unihack__Sample_Dataset_-_Input#S4720"
+      ],
+      "required": true,
+      "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+      "recommended_action": "retry_with_better_source"
+    }
+  ],
   "policy": {
-    "epsilon": 0.05,
+    "epsilon": 0.02,
     "confidence_level": 0.95,
-    "threshold": 0.6853,
-    "coverage": 1.0,
-    "accepted": 220,
-    "accepted_errors": 1,
-    "observed_error_rate": 0.0045,
-    "error_upper_bound": 0.0201,
+    "threshold": 0.7194,
+    "coverage": 0.7591,
+    "accepted": 167,
+    "accepted_errors": 0,
+    "observed_error_rate": 0.0,
+    "error_upper_bound": 0.0159,
     "calibration_size": 220,
     "achievable": true,
-    "reason": "at threshold 0.685, 100.0% of values are publishable with an error rate of at most 2.0% at 95% confidence"
+    "reason": "at threshold 0.719, 75.9% of values are publishable with an error rate of at most 1.6% at 95% confidence"
   },
   "quality": {
-    "completeness": 1.0,
-    "verifiability": 0.0,
+    "completeness": 0.5,
+    "verifiability": 1.0,
     "consistency": 1.0,
-    "richness": 0.0,
-    "composite": 0.6,
+    "richness": 0.5,
+    "composite": 0.775,
     "measured_dimensions": [
       "completeness",
       "consistency",
@@ -34,7 +49,7 @@
       "verifiability"
     ]
   },
-  "created_at": "2026-08-22T12:30:41.880434+00:00",
+  "created_at": "2026-08-22T19:16:15.253397+00:00",
   "decisions": [],
   "pages": [
     {
@@ -50,6 +65,41 @@
       ]
     }
   ],
-  "items": [],
+  "items": [
+    {
+      "attribute_code": "wattage",
+      "attribute_name": "Wattage",
+      "datatype": "quantity",
+      "value_raw": "25W",
+      "value_canonical": {
+        "magnitude": 25.0,
+        "unit": "W"
+      },
+      "value_display": "25 W",
+      "score": 0.8,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.800 >= threshold 0.719",
+      "method": "supplier_feed",
+      "model_tier": null,
+      "is_required": true,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "Unihack__Sample_Dataset_-_Input#S4720",
+          "quote": "25W",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": 1,
+          "table_ref": null,
+          "method": "exact_line"
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": "W"
+    }
+  ],
   "queue": []
 }

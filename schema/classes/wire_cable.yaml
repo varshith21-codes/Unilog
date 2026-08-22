@@ -1,0 +1,88 @@
+# Wire and cable, including the linear-foot lines.
+#
+# Eight rows of the client's 1,000-row sample: SO cord, aluminium service-entrance cable, UD triplex,
+# CAT5e and CL3 stranded wire.
+#
+# THE UNIT OF SALE IS THE POINT. Six of these eight rows end in "(Linear Foot)". Wire is the one
+# cohort in this catalogue priced and stocked by the foot rather than the piece, which means
+# `selling_uom` is not a tidy-up field here — it is the difference between a quote that is right and
+# one that is off by three orders of magnitude. It is bound required for that reason.
+#
+# THE GAUGE GRAMMAR, which is why `wire_gauge` is a string and `conductor_count` is populated only
+# from an explicit statement. Three grammars share the leading token across these eight rows:
+#
+#     12-4          12 AWG, 4 conductors
+#     16/3          16 AWG, 3 conductors
+#     4/0           ONE conductor, four sizes above 1 AWG
+#     2/2/4         a triplex with three conductors of two different sizes
+#
+# A positional parse reads "4/0" as four conductors of gauge zero, which is not a wire that exists.
+# AWG is also inverse — 12 AWG is thicker than 16 AWG — so storing it as a number would make any
+# future comparison rule order it exactly backwards. Both hazards are why the designation is kept
+# verbatim and the count is never derived from it.
+#
+# No description recipe and no external scheme mapping — see decking_board.yaml.
+
+class:
+  code: ELC.WIRE.GEN
+  name: Wire and Cable
+  version: v1
+
+  item_type: Wire
+
+  # `cord` is shared with the wiring-device class's "Cord Conn" and "Cord Grip" rows, which are
+  # connectors rather than cable. Both classes admit those rows and the scorer separates them on
+  # `wiring_device_type` against `cable_type` vocabulary. Kept rather than narrowed because dropping
+  # it would lose the two SO cord rows, which are unambiguously cable.
+  identity_terms: [wire, cable, cord, triplex, romex, conductor]
+
+  browse_path:
+    - Electrical
+    - Wire & Cable
+    - Wire & Cable
+
+  reporting_path: [Electrical, Wire & Cable, Wire & Cable]
+
+  attributes:
+    - { code: wire_gauge,            requirement: required,    weight: 3.0, label: Gauge }
+    - { code: cable_type,            requirement: required,    weight: 3.0, label: Type }
+    - { code: conductor_material,    requirement: required,    weight: 3.0 }
+    - { code: conductor_count,       requirement: recommended, weight: 3.0 }
+    - { code: voltage_rating,        requirement: recommended, weight: 2.0 }
+    - { code: amperage_rating,       requirement: optional,    weight: 2.0, label: Ampacity }
+    - { code: nominal_length,        requirement: recommended, weight: 2.0, label: Put-Up Length }
+    - { code: finish_color,          requirement: optional,    weight: 1.0, label: Jacket Color }
+    - { code: temperature_range,     requirement: optional,    weight: 1.0 }
+    - { code: product_series,        requirement: optional,    weight: 1.0, label: Series }
+    - { code: selling_uom,           requirement: required,    weight: 3.0 }
+    - { code: each_weight,           requirement: optional,    weight: 1.0 }
+    - { code: additional_information, requirement: optional,   weight: 1.0 }
+
+    # --- named delivery columns; must stay last ----------------------------------------------
+    - { code: approvals,             requirement: required,    weight: 3.0 }
+    - { code: country_of_origin,     requirement: optional,    weight: 1.0 }
+    - { code: gtin,                  requirement: optional,    weight: 1.0 }
+
+  cross_field_rules:
+    - id: R_CABLE_STATES_ITS_SELLING_UNIT
+      expr: "selling_uom is not null"
+      references: [selling_uom]
+      severity: error
+      message: >
+        No selling unit was captured. Wire is the one cohort here sold by the linear foot rather than
+        the piece, and six of eight rows say so explicitly, so a missing unit is an unread value
+        rather than an each. Quoting a foot price as an each price is wrong by three orders of
+        magnitude.
+
+    - id: R_TEMP_ORDER
+      expr: "temperature_range.min < temperature_range.max"
+      references: [temperature_range]
+      severity: error
+      message: Conductor temperature rating minimum must be below its maximum.
+
+  channel_profiles:
+    - name: unilog_delivery
+      title_template: "{brand} {mpn} {class_name}"
+      max_title_chars: 200
+      unit_system: imperial_primary
+      required: [mpn]

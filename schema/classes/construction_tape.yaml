@@ -1,0 +1,67 @@
+# Construction tapes and sealants: flashing tape, joist tape, expansion sealant, electrical tape.
+#
+# Six rows of the client's 1,000-row sample once deck joist tape is counted here rather than as a
+# decking accessory: vinyl electrical tape, Legacy Emseal expansion sealant, and Protecto Wrap deck
+# joist tape.
+#
+# WHY JOIST TAPE LIVES HERE AND NOT WITH DECKING. It is sold beside decking and used only on a
+# deck, so the merchandising instinct is to put it there. It is a tape: a roll ordered by width and
+# length, with an adhesive and a substrate, and every attribute a buyer would filter it on is a tape
+# attribute. Classifying by what a product IS rather than by what it is sold next to is the
+# classifier's own first rule, and this is the case that tests whether the schema follows it.
+#
+# THE ROLL-DIMENSION CONVENTION. `2"x50'`, `3/4x60'` and `1.5x1.5x13'` are width x length, width x
+# length, and width x depth x length. Two grammars in three rows. `overall_size` holds the pair
+# verbatim and `nominal_length` holds the run only when the trailing foot figure is unambiguous,
+# because a positional read of the three-figure form would record the depth as the length.
+
+class:
+  code: BLD.TAPE.GEN
+  name: Construction Tape and Sealant
+  version: v1
+
+  item_type: Tape
+
+  identity_terms: [tape, sealant, caulk, emseal, flashing, membrane, adhesive]
+
+  browse_path:
+    - Building Materials
+    - Weatherproofing
+    - Tapes & Sealants
+
+  reporting_path: [Building Materials, Weatherproofing, Tapes & Sealants]
+
+  attributes:
+    - { code: product_series,        requirement: recommended, weight: 2.0, label: Series }
+    - { code: overall_size,          requirement: required,    weight: 3.0, label: Roll Size }
+    - { code: nominal_length,        requirement: recommended, weight: 2.0, label: Length }
+    - { code: material_composition,  requirement: recommended, weight: 2.0, label: Material }
+    - { code: finish_color,          requirement: optional,    weight: 1.0, label: Color }
+    - { code: coverage_area,         requirement: optional,    weight: 1.0, label: Coverage }
+    - { code: temperature_range,     requirement: optional,    weight: 1.0 }
+    - { code: selling_uom,           requirement: required,    weight: 2.0 }
+    - { code: pack_quantity,         requirement: optional,    weight: 1.0 }
+    - { code: additional_information, requirement: optional,   weight: 1.0 }
+
+    # --- named delivery columns; must stay last ----------------------------------------------
+    - { code: approvals,             requirement: optional,    weight: 1.0 }
+    - { code: country_of_origin,     requirement: optional,    weight: 1.0 }
+    - { code: prop65_warning_required, requirement: optional,  weight: 1.0 }
+    - { code: gtin,                  requirement: optional,    weight: 1.0 }
+
+  cross_field_rules:
+    - id: R_TEMP_ORDER
+      expr: "temperature_range.min < temperature_range.max"
+      references: [temperature_range]
+      severity: error
+      message: >
+        Application temperature range minimum must be below its maximum. Self-adhered membranes
+        state a minimum application temperature prominently and a maximum service temperature
+        elsewhere on the sheet, and reading the two as one range inverts them.
+
+  channel_profiles:
+    - name: unilog_delivery
+      title_template: "{brand} {product_series} {mpn} {class_name}"
+      max_title_chars: 200
+      unit_system: imperial_primary
+      required: [mpn]

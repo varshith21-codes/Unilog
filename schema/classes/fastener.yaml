@@ -1,0 +1,118 @@
+# Fasteners: collated nails, screws, bolts, anchors and hidden deck clips.
+#
+# 24 rows of the client's 1,000-row sample, mostly Senco collated nails.
+#
+# THE IDENTITY PROBLEM. The Senco rows do not contain a single fastener word:
+#
+#     K527APBXR  Senco .131x3" SM BB - 500CT
+#
+# `BB` is Senco's code for a collated stick nail and is the only category token available. It is a
+# two-character term, which is normally the kind of thing that makes a guard promiscuous, and it was
+# checked against the whole file before being used: no other row in the 1,000 yields a bare `bb`
+# token, because part numbers tokenise whole. It is specific here and would not be in a larger
+# catalogue, so it is the term that will need narrowing first if false positives appear.
+#
+# THE DIMENSION-PAIR TRAP, which this class exists to keep straight. `.131x3"` is a shank diameter of
+# 0.131 inches by a length of 3 inches. Both are lengths, both are in inches, and they differ by a
+# factor of twenty-three. They are told apart by their decimal form — a leading-decimal figure under
+# half an inch is a diameter, a whole or fractional figure is a length — which is a CONVENTION rather
+# than anything the string declares. `fastener_length` and `shank_diameter` therefore carry
+# deliberately non-overlapping plausible ranges so a transposition is refused by L3 rather than
+# published, and the rule below catches what the ranges cannot.
+#
+# THE FINISH IS A WARRANTY MATTER, not an appearance one. An electro-galvanised nail in treated lumber
+# or a coastal exposure corrodes fast enough to void a deck's warranty, so `fastener_finish` is bound
+# required and is never inferred. Note that `SM` in the Senco string is a smooth shank, NOT a finish;
+# `fastener_finish` carries it as an alias of "Bright / Plain" because that is what a smooth bright
+# nail is, and the extraction hint says so explicitly.
+#
+# No description recipe and no external scheme mapping — see decking_board.yaml.
+
+class:
+  code: FST.GEN
+  name: Fastener
+  version: v1
+
+  item_type: Fastener
+
+  # Deliberately EXCLUDES the singular `washer` and the bare `nut`, both of which are homonyms that
+  # cost more than they earn in this catalogue:
+  #
+  #   * `washer` put eight Speed Queen and GE WASHING MACHINES into contention with this class at
+  #     86-92% dominance, and every one of them abstained. There are no washer-fastener rows in the
+  #     file at all, so the term earned nothing and lost eight laundry rows.
+  #   * `nut` collides with the "Nut Driver" and "Nut Setter" driver bits, which are bits and not
+  #     nuts.
+  #
+  # The plurals are kept: a fastener listing pluralises ("Flat Washers, 100ct") where an appliance
+  # listing never does.
+  # `hanger` covers "16-24 Adjust Hanger", an adjustable joist hanger. A structural connector is a
+  # fastener by every attribute a buyer filters it on — type, finish, and what it is used on — and
+  # it is ordered from the same page as the nails that fix it.
+  identity_terms:
+    [screw, screws, nail, nails, bolt, bolts, anchor, anchors, staple, staples, rivet, rivets,
+     fastener, fasteners, washers, nuts, bb, collated, hanger, connector]
+
+  browse_path:
+    - Fasteners
+    - Fasteners
+    - Nails, Screws & Anchors
+
+  reporting_path: [Fasteners, Fasteners, Nails & Screws]
+
+  attributes:
+    - { code: fastener_type,         requirement: required,    weight: 3.0, label: Type }
+    - { code: fastener_length,       requirement: required,    weight: 3.0, label: Length }
+    - { code: shank_diameter,        requirement: required,    weight: 3.0, label: Shank }
+    - { code: fastener_finish,       requirement: required,    weight: 3.0, label: Finish }
+    - { code: case_quantity,         requirement: required,    weight: 3.0, label: Count }
+    - { code: bit_tip_type,          requirement: optional,    weight: 2.0, label: Drive Type }
+    - { code: workpiece_material,    requirement: recommended, weight: 2.0, label: For Use On }
+    - { code: primary_material,      requirement: recommended, weight: 2.0, label: Material }
+    - { code: product_series,        requirement: recommended, weight: 2.0, label: Series }
+    - { code: pack_quantity,         requirement: optional,    weight: 1.0 }
+    - { code: selling_uom,           requirement: required,    weight: 2.0 }
+    - { code: each_weight,           requirement: optional,    weight: 1.0 }
+    - { code: additional_information, requirement: optional,   weight: 1.0 }
+
+    # --- named delivery columns; must stay last ----------------------------------------------
+    - { code: approvals,             requirement: recommended, weight: 2.0 }
+    - { code: country_of_origin,     requirement: optional,    weight: 1.0 }
+    - { code: prop65_warning_required, requirement: optional,  weight: 1.0 }
+    - { code: gtin,                  requirement: optional,    weight: 1.0 }
+
+  cross_field_rules:
+    - id: R_SHANK_BELOW_LENGTH
+      expr: "shank_diameter < fastener_length"
+      references: [shank_diameter, fastener_length]
+      severity: error
+      message: >
+        Shank diameter is not below the overall length, so the pair was read in the wrong order.
+        ".131x3" states diameter then length, both as inch figures on the same line, and they are
+        distinguished only by decimal form — which is a convention rather than anything the string
+        declares.
+
+    - id: R_COLLATED_NAIL_STATES_A_COUNT
+      expr: "fastener_type != 'Nail (Collated)' or case_quantity is not null"
+      references: [fastener_type, case_quantity]
+      severity: error
+      message: >
+        A collated nail was captured with no box count. Collated nails are bought by the box — "500CT"
+        — and the count is the quantity a price is quoted against, so a blank makes the line
+        unquotable.
+
+    - id: R_TREATED_LUMBER_NEEDS_A_FINISH
+      expr: "fastener_finish is not null"
+      references: [fastener_finish]
+      severity: error
+      message: >
+        No corrosion finish was captured. This is a warranty and code matter rather than an
+        appearance one: an electro-galvanised fastener in treated lumber or a coastal exposure
+        corrodes fast enough to void a deck's warranty, and the finish is never safe to infer.
+
+  channel_profiles:
+    - name: unilog_delivery
+      title_template: "{brand} {product_series} {mpn} {class_name}"
+      max_title_chars: 200
+      unit_system: imperial_primary
+      required: [mpn]

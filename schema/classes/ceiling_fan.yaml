@@ -1,0 +1,92 @@
+# Ceiling fans.
+#
+# Nine rows of the client's 1,000-row sample, across Hunter, Anisten, Gilmour and Cassius.
+#
+# WHY A FAN IS IN THE LIGHTING FAMILY. Fans are merchandised beside lighting, are frequently sold with
+# an integrated light kit, and share this schema's lighting vocabulary for finish and electrical
+# ratings wholesale. The class code sits under LGT for that reason. It is a separate CLASS from
+# LGT.LMP.GEN because a fan has no lamp base, no shape designation and no lumen output, and binding a
+# fan to the lamp class would score every fan row incomplete for lacking a base it cannot have — the
+# same reason batteries are not power tools.
+#
+# THE SPAN IS THE ONLY SPECIFICATION IN THE STRING, and it is stated in every row:
+#
+#     52485  52" MB Anisten Fan
+#     52486  44" MB Anisten Fan
+#
+# Same line, same finish, two spans, two SKUs. `blade_span` is bound required because it has to be
+# matched to the room's square footage and to the wall clearance, and because publishing it as free
+# text in `overall_size` would put the one number a buyer filters on into a column nothing can filter.
+# That is why the attribute was added rather than reusing `overall_size`.
+#
+# THE FINISH ABBREVIATIONS ARE THE OTHER HALF OF THE SKU. `MB`, `WH`, `BZ` and `PB` are matte black,
+# white, bronze and polished brass. They are two-letter codes carried into `finish_color` through the
+# abbreviation table rather than guessed, because `MB` is also a plausible abbreviation for other
+# things and the table is scoped per attribute.
+#
+# No description recipe and no external scheme mapping — see decking_board.yaml.
+
+class:
+  code: LGT.FAN.CEILING
+  name: Ceiling Fan
+  version: v1
+
+  item_type: Ceiling Fan
+
+  identity_terms: [fan, fans]
+
+  browse_path:
+    - Lighting & Fans
+    - Fans
+    - Ceiling Fans
+
+  reporting_path: [Lighting, Fans, Ceiling Fans]
+
+  attributes:
+    - { code: blade_span,            requirement: required,    weight: 3.0, label: Blade Span }
+    - { code: finish_color,          requirement: required,    weight: 3.0, label: Color }
+    - { code: blade_count,           requirement: recommended, weight: 2.0 }
+    - { code: product_series,        requirement: recommended, weight: 3.0, label: Series }
+    - { code: mounting_type,         requirement: recommended, weight: 2.0 }
+    - { code: luminaire_form,        requirement: optional,    weight: 1.0, label: Light Kit }
+    - { code: wattage,               requirement: optional,    weight: 1.0 }
+    - { code: voltage_rating,        requirement: recommended, weight: 2.0 }
+    - { code: dimmable,              requirement: optional,    weight: 1.0 }
+    - { code: no_load_speed,         requirement: optional,    weight: 1.0, label: Speed }
+    - { code: primary_material,      requirement: optional,    weight: 1.0, label: Material }
+    - { code: overall_size,          requirement: optional,    weight: 1.0, label: Size }
+    - { code: each_weight,           requirement: optional,    weight: 1.0 }
+    - { code: selling_uom,           requirement: recommended, weight: 2.0 }
+    - { code: additional_information, requirement: optional,   weight: 1.0 }
+
+    # --- named delivery columns; must stay last ----------------------------------------------
+    - { code: warranty_terms,        requirement: recommended, weight: 2.0 }
+    - { code: included_technology,   requirement: optional,    weight: 1.0 }
+    - { code: approvals,             requirement: recommended, weight: 2.0 }
+    - { code: country_of_origin,     requirement: optional,    weight: 1.0 }
+    - { code: gtin,                  requirement: optional,    weight: 1.0 }
+
+  cross_field_rules:
+    - id: R_FAN_STATES_ITS_SPAN
+      expr: "blade_span is not null"
+      references: [blade_span]
+      severity: error
+      message: >
+        No blade span was captured. It is the only specification most fan descriptions contain and the
+        figure the fan is selected on, because it has to suit the room's area and the clearance from
+        the walls. Two SKUs of the same fan differ by nothing else.
+
+    - id: R_LIGHT_KIT_STATES_A_WATTAGE
+      expr: "luminaire_form is null or wattage is not null"
+      references: [luminaire_form, wattage]
+      severity: warning
+      message: >
+        A light kit was recorded with no wattage. Fan light kits are wattage-limited by the fan's own
+        wiring, so the figure matters more here than on a standalone fitting.
+
+  channel_profiles:
+    - name: unilog_delivery
+      title_template: "{brand} {product_series} {mpn} {class_name}"
+      max_title_chars: 200
+      unit_system: imperial_primary
+      required: [mpn]

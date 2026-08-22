@@ -75,7 +75,21 @@
     "composite": 0.8006
   },
   "created_at": "2026-08-05T03:17:00.825459+00:00",
-  "decisions": [],
+  "decisions": [
+    {
+      "sku": "T-113-100",
+      "attribute_code": "approvals",
+      "action": "accept",
+      "reviewer": "reviewer@local",
+      "before": "UL, MSS",
+      "after": "UL, MSS",
+      "status": "human_approved",
+      "recorded_at": "2026-08-22T15:38:17.293135+00:00",
+      "prior_before": 0.875,
+      "prior_after": 0.9,
+      "sibling_impact": 16
+    }
+  ],
   "pages": [
     {
       "number": 1,
@@ -566,13 +580,13 @@
       ],
       "value_display": "UL, MSS",
       "score": 0.6,
-      "status": "queued_for_review",
-      "reason_code": "blocking_validation",
-      "detail": "R_POTABLE_REQUIRES_NSF61",
+      "status": "human_approved",
+      "reason_code": "human_accept",
+      "detail": "reviewed by reviewer@local",
       "method": "document_extraction",
       "model_tier": "volume",
       "is_required": true,
-      "accepted": false,
+      "accepted": true,
       "evidence": [
         {
           "document_id": "gv200@6e472dd4",
@@ -677,7 +691,6 @@
     }
   ],
   "queue": [
-    "potable_water_approved",
-    "approvals"
+    "potable_water_approved"
   ]
 }

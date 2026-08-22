@@ -2,7 +2,7 @@
   "bundle": {
     "sku": "DDWSSB",
     "document_id": "Unihack__Sample_Dataset_-_Input#DDWSSB",
-    "class_code": null,
+    "class_code": "FST.GEN",
     "record": {
       "tenant_id": "unilog",
       "sku": "DDWSSB",
@@ -14,36 +14,213 @@
       "supplier_id": "2435",
       "parent_sku": null,
       "lifecycle_status": "active",
-      "class_code": null,
-      "schema_version": null,
+      "class_code": "FST.GEN",
+      "schema_version": "FST.GEN@v1",
       "source_document_ids": [
         "Unihack__Sample_Dataset_-_Input#DDWSSB"
       ],
-      "created_at": "2026-08-22T12:30:44.277427+00:00",
-      "updated_at": "2026-08-22T12:30:44.277431+00:00"
+      "created_at": "2026-08-22T19:16:18.117830+00:00",
+      "updated_at": "2026-08-22T19:16:18.117913+00:00"
     },
-    "classifications": [],
+    "classifications": [
+      {
+        "scheme": "internal",
+        "code": "FST.GEN",
+        "path": [
+          "Fasteners",
+          "Fasteners",
+          "Nails, Screws & Anchors"
+        ],
+        "confidence": 0.9133,
+        "level_confidences": [
+          0.9133,
+          0.9133,
+          0.9133
+        ],
+        "rationale": "runner-up BLD.PNL.SHEATHING reached only 11% of the leading score",
+        "method": "retrieval_decisive",
+        "alternatives": [
+          {
+            "code": "BLD.PNL.SHEATHING",
+            "score": 0.030915
+          }
+        ],
+        "reviewed_by": null,
+        "reviewed_at": null
+      }
+    ],
     "classification_summary": {
-      "class_code": null,
-      "confidence": 0.0,
-      "confident_depth": 0,
-      "schemes": [],
-      "candidates_considered": 0,
-      "method": "no_viable_candidate",
-      "abstained": true,
+      "class_code": "FST.GEN",
+      "confidence": 0.9133,
+      "confident_depth": 3,
+      "schemes": [
+        "internal"
+      ],
+      "candidates_considered": 2,
+      "method": "retrieval_decisive",
+      "abstained": false,
       "input_tokens": 0,
       "output_tokens": 0
     },
-    "classification_candidates": [],
-    "values": [],
-    "gaps": [],
+    "classification_candidates": [
+      {
+        "code": "FST.GEN",
+        "score": 0.2754,
+        "path_text": "Fasteners > Fasteners > Nails, Screws & Anchors"
+      },
+      {
+        "code": "BLD.PNL.SHEATHING",
+        "score": 0.0309,
+        "path_text": "Building Materials > Lumber & Panels > Structural Panels & Siding"
+      }
+    ],
+    "values": [
+      {
+        "attribute_code": "workpiece_material",
+        "value_raw": "Drywall",
+        "value_canonical": [
+          "Drywall"
+        ],
+        "value_display": "Drywall",
+        "method": "supplier_feed",
+        "confidence": 0.82,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "desc-workpiece_material-10",
+            "document_id": "Unihack__Sample_Dataset_-_Input#DDWSSB",
+            "document_sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+            "quote": "Drywall",
+            "page": null,
+            "bbox": null,
+            "table_ref": null,
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [],
+        "model_id": null,
+        "model_tier": null,
+        "prompt_version": "description@v1",
+        "schema_version": "FST.GEN@v1",
+        "version": 1,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-22T19:16:18.117667Z",
+        "score": 0.8,
+        "decision": {
+          "attribute_code": "workpiece_material",
+          "score": 0.8,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.800 >= threshold 0.719"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 0.4,
+          "quote_specificity": 1.0,
+          "self_reported_certainty": 0.82,
+          "validation_pass_rate": 0.5,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.5,
+          "source_prior": 0.5,
+          "tier_cost": 0.5
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "citation_summary": [
+          "Unihack__Sample_Dataset_-_Input#DDWSSB"
+        ]
+      }
+    ],
+    "gaps": [
+      {
+        "attribute_code": "fastener_type",
+        "reason": "no_source_available",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#DDWSSB"
+        ],
+        "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-22T19:16:18.117875Z"
+      },
+      {
+        "attribute_code": "fastener_length",
+        "reason": "no_source_available",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#DDWSSB"
+        ],
+        "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-22T19:16:18.117882Z"
+      },
+      {
+        "attribute_code": "shank_diameter",
+        "reason": "no_source_available",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#DDWSSB"
+        ],
+        "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-22T19:16:18.117886Z"
+      },
+      {
+        "attribute_code": "fastener_finish",
+        "reason": "no_source_available",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#DDWSSB"
+        ],
+        "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-22T19:16:18.117891Z"
+      },
+      {
+        "attribute_code": "case_quantity",
+        "reason": "no_source_available",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#DDWSSB"
+        ],
+        "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-22T19:16:18.117896Z"
+      },
+      {
+        "attribute_code": "selling_uom",
+        "reason": "no_source_available",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#DDWSSB"
+        ],
+        "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-22T19:16:18.117901Z"
+      }
+    ],
     "extraction": {
-      "requested": 0,
-      "values": 0,
-      "gaps": 0,
+      "requested": 17,
+      "values": 1,
+      "gaps": 6,
       "rejected_unverifiable": 0,
       "corrected_to_match_evidence": 0,
-      "citation_coverage": 0.0,
+      "citation_coverage": 1.0,
       "input_tokens": 0,
       "output_tokens": 0,
       "escalations": 0,
@@ -53,18 +230,38 @@
     },
     "normalization_issues": [],
     "validation": {
-      "checks": 1,
-      "failures": 1,
+      "checks": 3,
+      "failures": 0,
       "warnings": 0,
-      "skipped_rules": 0,
-      "consistency": 0.0,
+      "skipped_rules": 3,
+      "consistency": 1.0,
       "results": [
         {
-          "layer": "L0",
-          "rule_id": "no_class",
-          "verdict": "fail",
-          "severity": "error",
-          "reason": "record has no product class, so no rules or required attributes apply",
+          "layer": "L2",
+          "rule_id": "R_SHANK_BELOW_LENGTH",
+          "verdict": "skipped",
+          "severity": "info",
+          "reason": "not evaluated: missing fastener_length, shank_diameter",
+          "counterexample": null,
+          "suggested_fix": null,
+          "detail": null
+        },
+        {
+          "layer": "L2",
+          "rule_id": "R_COLLATED_NAIL_STATES_A_COUNT",
+          "verdict": "skipped",
+          "severity": "info",
+          "reason": "not evaluated: missing case_quantity, fastener_type",
+          "counterexample": null,
+          "suggested_fix": null,
+          "detail": null
+        },
+        {
+          "layer": "L2",
+          "rule_id": "R_TREATED_LUMBER_NEEDS_A_FINISH",
+          "verdict": "skipped",
+          "severity": "info",
+          "reason": "not evaluated: missing fastener_finish",
           "counterexample": null,
           "suggested_fix": null,
           "detail": null
@@ -73,27 +270,131 @@
       "per_attribute": {}
     },
     "certificate": {
-      "certificate_id": "ec_0ea951e2ee4d",
+      "certificate_id": "ec_7c0760510bd6",
       "sku": "DDWSSB",
       "tenant_id": "unilog",
-      "generated_at": "2026-08-22T12:30:44.277586Z",
-      "schema_version": null,
+      "generated_at": "2026-08-22T19:16:18.118098Z",
+      "schema_version": "FST.GEN@v1",
       "pipeline_version": "axiom-0.1.0",
-      "classifications": [],
-      "attributes": [],
-      "gaps": [],
+      "classifications": [
+        {
+          "scheme": "internal",
+          "code": "FST.GEN",
+          "path": [
+            "Fasteners",
+            "Fasteners",
+            "Nails, Screws & Anchors"
+          ],
+          "confidence": 0.9133,
+          "method": "retrieval_decisive",
+          "status": "auto",
+          "alternatives": [
+            {
+              "code": "BLD.PNL.SHEATHING",
+              "score": 0.030915
+            }
+          ]
+        }
+      ],
+      "attributes": [
+        {
+          "code": "workpiece_material",
+          "value_canonical": [
+            "Drywall"
+          ],
+          "value_display": "Drywall",
+          "value_raw": "Drywall",
+          "confidence": 0.82,
+          "method": "supplier_feed",
+          "model_tier": null,
+          "status": "auto_accepted",
+          "evidence": [
+            {
+              "document": "Unihack__Sample_Dataset_-_Input#DDWSSB",
+              "sha256": "49efd0b2\u2026",
+              "page": null,
+              "bbox": null,
+              "quote": "Drywall",
+              "verified": true
+            }
+          ],
+          "validations": []
+        }
+      ],
+      "gaps": [
+        {
+          "code": "fastener_type",
+          "reason": "no_source_available",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#DDWSSB"
+          ],
+          "required": true,
+          "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+          "recommended_action": "retry_with_better_source"
+        },
+        {
+          "code": "fastener_length",
+          "reason": "no_source_available",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#DDWSSB"
+          ],
+          "required": true,
+          "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+          "recommended_action": "retry_with_better_source"
+        },
+        {
+          "code": "shank_diameter",
+          "reason": "no_source_available",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#DDWSSB"
+          ],
+          "required": true,
+          "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+          "recommended_action": "retry_with_better_source"
+        },
+        {
+          "code": "fastener_finish",
+          "reason": "no_source_available",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#DDWSSB"
+          ],
+          "required": true,
+          "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+          "recommended_action": "retry_with_better_source"
+        },
+        {
+          "code": "case_quantity",
+          "reason": "no_source_available",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#DDWSSB"
+          ],
+          "required": true,
+          "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+          "recommended_action": "retry_with_better_source"
+        },
+        {
+          "code": "selling_uom",
+          "reason": "no_source_available",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#DDWSSB"
+          ],
+          "required": true,
+          "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+          "recommended_action": "retry_with_better_source"
+        }
+      ],
       "summary": {
-        "attributes_required": 0,
-        "attributes_populated": 0,
-        "attributes_with_evidence": 0,
+        "attributes_required": 6,
+        "attributes_populated": 1,
+        "attributes_with_evidence": 1,
         "attributes_inferred": 0,
-        "auto_accepted": 0,
+        "auto_accepted": 1,
         "queued_for_review": 0,
-        "gaps_total": 0,
-        "gaps_required": 0,
+        "gaps_total": 6,
+        "gaps_required": 6,
         "quality_index": {
-          "completeness": 1.0,
-          "verifiability": 0.0,
+          "completeness": 0.0,
+          "verifiability": 1.0,
           "consistency": 1.0,
           "richness": 0.0,
           "weights": {
@@ -108,12 +409,12 @@
             "richness",
             "verifiability"
           ],
-          "composite": 0.6
+          "composite": 0.55
         },
         "cost_usd": null,
         "wall_clock_seconds": 0.0
       },
-      "signature": "sha256:276fe1facc5c4051cc25507b3f7023526e37c5cc4f1820b59d9c476a196495ef",
+      "signature": "sha256:dc315a6ec1a48e7be472d38038a761ec70b91687c9892f36a8193c95b0a5150c",
       "signature_verified": true
     },
     "channels": [
@@ -128,7 +429,7 @@
           "missing": [],
           "not_publishable": [],
           "warnings": [
-            "record has no product class, so no channel profile applies"
+            "class FST.GEN declares no 'cx1_pim' channel profile"
           ]
         },
         "title": null
@@ -144,20 +445,20 @@
           "missing": [],
           "not_publishable": [],
           "warnings": [
-            "record has no product class, so no channel profile applies"
+            "class FST.GEN declares no 'schema_org' channel profile"
           ]
         },
         "title": null
       }
     ],
     "metrics": {
-      "fill_rate": 1.0,
-      "verifiability": 0.0,
-      "values_total": 0,
-      "values_publishable": 0,
+      "fill_rate": 0.0,
+      "verifiability": 1.0,
+      "values_total": 1,
+      "values_publishable": 1,
       "values_needing_review": 0,
-      "gaps_total": 0,
-      "gaps_required": 0,
+      "gaps_total": 6,
+      "gaps_required": 6,
       "conflicts": []
     },
     "cost": null,
@@ -168,7 +469,7 @@
     "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
     "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
     "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-22T12:30:39.344315Z",
+    "fetched_at": "2026-08-22T19:16:11.275717Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": "unilog",
@@ -260,19 +561,1194 @@
       "tables": []
     }
   ],
-  "class_definition": null,
+  "class_definition": {
+    "code": "FST.GEN",
+    "name": "Fastener",
+    "version": "v1",
+    "schema_version": "FST.GEN@v1",
+    "item_type": "Fastener",
+    "reporting_path": [
+      "Fasteners",
+      "Fasteners",
+      "Nails & Screws"
+    ],
+    "browse_path": [
+      "Fasteners",
+      "Fasteners",
+      "Nails, Screws & Anchors"
+    ],
+    "mappings": {},
+    "required_codes": [
+      "fastener_type",
+      "fastener_length",
+      "shank_diameter",
+      "fastener_finish",
+      "case_quantity",
+      "selling_uom"
+    ],
+    "attributes": [
+      {
+        "code": "fastener_type",
+        "requirement": "required",
+        "weight": 3.0,
+        "name": "Fastener Type",
+        "datatype": "enum",
+        "description": "What kind of fastener it is. Determines the tool that drives it and the hole it needs, so it is the identity of the line rather than a descriptive detail: a screw and a nail of the same length and finish are not alternatives.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Nail (Collated)",
+          "Deck Screw",
+          "Wood Screw",
+          "Anchor"
+        ],
+        "allowed_values": [
+          {
+            "value": "Nail (Collated)",
+            "aliases": [
+              "collated nail",
+              "stick nail",
+              "coil nail",
+              "bb",
+              "paper tape nail",
+              "plastic collated"
+            ],
+            "note": null
+          },
+          {
+            "value": "Nail (Loose)",
+            "aliases": [
+              "nail",
+              "loose nail",
+              "hand drive nail",
+              "bulk nail"
+            ],
+            "note": null
+          },
+          {
+            "value": "Brad",
+            "aliases": [
+              "brad",
+              "brad nail",
+              "finish brad"
+            ],
+            "note": null
+          },
+          {
+            "value": "Staple",
+            "aliases": [
+              "staple",
+              "staples",
+              "crown staple"
+            ],
+            "note": null
+          },
+          {
+            "value": "Deck Screw",
+            "aliases": [
+              "deck screw",
+              "decking screw",
+              "composite screw"
+            ],
+            "note": null
+          },
+          {
+            "value": "Wood Screw",
+            "aliases": [
+              "wood screw",
+              "construction screw",
+              "multi-purpose screw"
+            ],
+            "note": null
+          },
+          {
+            "value": "Self-Drilling Screw",
+            "aliases": [
+              "self drilling",
+              "self-drilling",
+              "tek screw",
+              "metal screw"
+            ],
+            "note": null
+          },
+          {
+            "value": "Lag Screw",
+            "aliases": [
+              "lag",
+              "lag screw",
+              "lag bolt",
+              "structural screw"
+            ],
+            "note": null
+          },
+          {
+            "value": "Bolt",
+            "aliases": [
+              "bolt",
+              "hex bolt",
+              "carriage bolt",
+              "machine bolt"
+            ],
+            "note": null
+          },
+          {
+            "value": "Nut",
+            "aliases": [
+              "nut",
+              "hex nut",
+              "lock nut"
+            ],
+            "note": null
+          },
+          {
+            "value": "Washer",
+            "aliases": [
+              "washer",
+              "flat washer",
+              "lock washer"
+            ],
+            "note": null
+          },
+          {
+            "value": "Anchor",
+            "aliases": [
+              "anchor",
+              "concrete anchor",
+              "wedge anchor",
+              "sleeve anchor",
+              "drop-in anchor"
+            ],
+            "note": null
+          },
+          {
+            "value": "Rivet",
+            "aliases": [
+              "rivet",
+              "blind rivet",
+              "pop rivet"
+            ],
+            "note": null
+          },
+          {
+            "value": "Hidden Deck Fastener",
+            "aliases": [
+              "hidden fastener",
+              "hidden clip",
+              "deck clip",
+              "start clip"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "fastener_length",
+        "requirement": "required",
+        "weight": 3.0,
+        "name": "Length",
+        "datatype": "dimension",
+        "description": "Overall length of the fastener. The figure that decides whether it reaches the framing member, and the one a code inspector measures.\n",
+        "canonical_unit": "mm",
+        "display_preference": "imperial_fraction",
+        "quantity_kind": "length",
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "1-1/4\"",
+          "2-1/2\"",
+          "3\"",
+          "3-1/2\""
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          6.0,
+          400.0
+        ]
+      },
+      {
+        "code": "shank_diameter",
+        "requirement": "required",
+        "weight": 3.0,
+        "name": "Shank Diameter",
+        "datatype": "dimension",
+        "description": "Diameter of the fastener shank, written as a decimal inch on collated nails. Sets the holding power and the gun it fits, and is the reason two nails of identical length are not interchangeable.\n",
+        "canonical_unit": "mm",
+        "display_preference": "imperial_decimal",
+        "quantity_kind": "length",
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          ".113",
+          ".120",
+          ".131",
+          ".148"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          0.5,
+          12.0
+        ]
+      },
+      {
+        "code": "fastener_finish",
+        "requirement": "required",
+        "weight": 3.0,
+        "name": "Finish",
+        "datatype": "enum",
+        "description": "The corrosion protection on the fastener. A code and warranty matter rather than an appearance one: an electro-galvanised nail in treated lumber or in a coastal exposure fails early enough to void the deck's warranty, so this is never inferred.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Hot-Dip Galvanized",
+          "Stainless Steel 316",
+          "Bright / Plain"
+        ],
+        "allowed_values": [
+          {
+            "value": "Bright / Plain",
+            "aliases": [
+              "bright",
+              "plain",
+              "sm",
+              "smooth",
+              "uncoated",
+              "bare"
+            ],
+            "note": null
+          },
+          {
+            "value": "Electro-Galvanized",
+            "aliases": [
+              "eg",
+              "electro galvanized",
+              "electro-galvanised",
+              "zinc plated",
+              "zp"
+            ],
+            "note": null
+          },
+          {
+            "value": "Hot-Dip Galvanized",
+            "aliases": [
+              "hdg",
+              "hot dip",
+              "hot-dip galvanised",
+              "hot dipped"
+            ],
+            "note": null
+          },
+          {
+            "value": "Mechanically Galvanized",
+            "aliases": [
+              "mg",
+              "mechanically galvanized",
+              "mech galv"
+            ],
+            "note": null
+          },
+          {
+            "value": "Stainless Steel 304",
+            "aliases": [
+              "ss304",
+              "304 ss",
+              "304 stainless",
+              "type 304"
+            ],
+            "note": null
+          },
+          {
+            "value": "Stainless Steel 316",
+            "aliases": [
+              "ss316",
+              "316 ss",
+              "316 stainless",
+              "type 316",
+              "marine grade"
+            ],
+            "note": null
+          },
+          {
+            "value": "Polymer Coated",
+            "aliases": [
+              "polymer",
+              "epoxy coated",
+              "ceramic coated",
+              "coated",
+              "climatek"
+            ],
+            "note": null
+          },
+          {
+            "value": "Painted",
+            "aliases": [
+              "painted",
+              "color matched",
+              "colour matched"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "case_quantity",
+        "requirement": "required",
+        "weight": 3.0,
+        "name": "Carton Quantity",
+        "datatype": "integer",
+        "description": "Number of selling units per carton or master pack for this specific part number. Frequently varies by size within one series, so read the ordering-table row that matches the target SKU.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "6",
+          "12",
+          "24"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          1.0,
+          100000.0
+        ]
+      },
+      {
+        "code": "bit_tip_type",
+        "requirement": "optional",
+        "weight": 2.0,
+        "name": "Tip Type",
+        "datatype": "enum",
+        "description": "The recess a driver bit engages. The single most consequential field on a driver bit: a Phillips bit in a square recess destroys the fastener, and the two are visually similar enough at a glance that the listing has to be right.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Phillips",
+          "Square (Robertson)",
+          "Torx",
+          "Slotted"
+        ],
+        "allowed_values": [
+          {
+            "value": "Phillips",
+            "aliases": [
+              "ph",
+              "phillips",
+              "cross",
+              "ph2",
+              "crosshead"
+            ],
+            "note": null
+          },
+          {
+            "value": "Square (Robertson)",
+            "aliases": [
+              "sq",
+              "square",
+              "robertson",
+              "square drive",
+              "sq2"
+            ],
+            "note": null
+          },
+          {
+            "value": "Torx",
+            "aliases": [
+              "torx",
+              "star",
+              "t-star",
+              "6-lobe",
+              "trox",
+              "hexalobular"
+            ],
+            "note": null
+          },
+          {
+            "value": "Torx Plus",
+            "aliases": [
+              "torx plus",
+              "torxplus"
+            ],
+            "note": null
+          },
+          {
+            "value": "Slotted",
+            "aliases": [
+              "flat",
+              "flathead",
+              "slot",
+              "straight",
+              "sl"
+            ],
+            "note": null
+          },
+          {
+            "value": "Hex (Allen)",
+            "aliases": [
+              "hex",
+              "allen",
+              "hex key",
+              "internal hex"
+            ],
+            "note": null
+          },
+          {
+            "value": "Nut Setter",
+            "aliases": [
+              "nut setter",
+              "nut driver",
+              "magnetic nut setter"
+            ],
+            "note": null
+          },
+          {
+            "value": "Combination",
+            "aliases": [
+              "combo",
+              "double ended",
+              "double-ended",
+              "reversible"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "workpiece_material",
+        "requirement": "recommended",
+        "weight": 2.0,
+        "name": "Material Application",
+        "datatype": "multi_enum",
+        "description": "The materials the product is intended to be used on. Multivalued because a single wheel is commonly rated for several, and reporting only the first would understate what the buyer can do with it.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": true,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Metal",
+          "Stainless Steel",
+          "Concrete / Masonry",
+          "Wood"
+        ],
+        "allowed_values": [
+          {
+            "value": "Metal",
+            "aliases": [
+              "steel",
+              "ferrous",
+              "mild steel",
+              "iron",
+              "metal cutting",
+              "all metal"
+            ],
+            "note": null
+          },
+          {
+            "value": "Stainless Steel",
+            "aliases": [
+              "stainless",
+              "inox",
+              "ss",
+              "304",
+              "316"
+            ],
+            "note": null
+          },
+          {
+            "value": "Aluminum",
+            "aliases": [
+              "aluminium",
+              "non-ferrous",
+              "alum",
+              "soft metal"
+            ],
+            "note": null
+          },
+          {
+            "value": "Cast Iron",
+            "aliases": [
+              "cast",
+              "ductile iron"
+            ],
+            "note": null
+          },
+          {
+            "value": "Concrete / Masonry",
+            "aliases": [
+              "concrete",
+              "masonry",
+              "brick",
+              "block",
+              "stone",
+              "mortar"
+            ],
+            "note": null
+          },
+          {
+            "value": "Tile",
+            "aliases": [
+              "ceramic tile",
+              "porcelain",
+              "tile cutting"
+            ],
+            "note": null
+          },
+          {
+            "value": "Wood",
+            "aliases": [
+              "timber",
+              "lumber",
+              "softwood",
+              "hardwood",
+              "wood cutting"
+            ],
+            "note": null
+          },
+          {
+            "value": "Plastic",
+            "aliases": [
+              "pvc",
+              "acrylic",
+              "composite",
+              "plastics"
+            ],
+            "note": null
+          },
+          {
+            "value": "Drywall",
+            "aliases": [
+              "gypsum",
+              "plasterboard",
+              "wallboard"
+            ],
+            "note": null
+          },
+          {
+            "value": "Paint / Coating",
+            "aliases": [
+              "paint",
+              "coating",
+              "primer",
+              "finish",
+              "varnish"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "primary_material",
+        "requirement": "recommended",
+        "weight": 2.0,
+        "name": "Material",
+        "datatype": "string",
+        "description": "Principal material of the appliance's visible construction, most often the tub or body material for a major appliance. Becomes an enum when the LOV supplies the vocabulary; until then it is recorded as published so no value is snapped onto a wrong term.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Stainless Steel",
+          "Plastic",
+          "Porcelain Enamel"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "product_series",
+        "requirement": "recommended",
+        "weight": 2.0,
+        "name": "Product Series",
+        "datatype": "string",
+        "description": "Manufacturer's series or family designation only, without the word \"series\" and without the manufacturer name. The anchor for part-number grammar induction, because the positional encoding of a smart part number is defined per series rather than per manufacturer.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "BA-100",
+          "T-113",
+          "T-585"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "pack_quantity",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Pack Quantity",
+        "datatype": "integer",
+        "description": "Number of units in the consumer pack the part number sells as. Distinct from case_quantity, which counts packs in a shipping carton: a \"3pk\" of lamps is one sellable unit containing three lamps, and confusing the two misprices the line.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "1",
+          "2",
+          "3",
+          "6"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          1.0,
+          100.0
+        ]
+      },
+      {
+        "code": "selling_uom",
+        "requirement": "required",
+        "weight": 2.0,
+        "name": "Selling Unit of Measure",
+        "datatype": "enum",
+        "description": "The unit in which the product is sold, which is not necessarily the unit in which it is priced or stocked. Conflating the three is a classic source of order errors.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Each",
+          "Case",
+          "Box"
+        ],
+        "allowed_values": [
+          {
+            "value": "Each",
+            "aliases": [
+              "ea",
+              "ea.",
+              "each",
+              "pc",
+              "piece",
+              "unit"
+            ],
+            "note": null
+          },
+          {
+            "value": "Box",
+            "aliases": [
+              "bx",
+              "box"
+            ],
+            "note": null
+          },
+          {
+            "value": "Case",
+            "aliases": [
+              "cs",
+              "case",
+              "carton",
+              "ctn"
+            ],
+            "note": null
+          },
+          {
+            "value": "Pair",
+            "aliases": [
+              "pr",
+              "pair"
+            ],
+            "note": null
+          },
+          {
+            "value": "Foot",
+            "aliases": [
+              "ft",
+              "per foot",
+              "lineal foot"
+            ],
+            "note": null
+          },
+          {
+            "value": "Roll",
+            "aliases": [
+              "rl",
+              "roll"
+            ],
+            "note": null
+          },
+          {
+            "value": "Bag",
+            "aliases": [
+              "bg",
+              "bag"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "each_weight",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Weight (Each)",
+        "datatype": "quantity",
+        "description": "Shipping weight of a single unit. Distinguish carefully from carton weight; datasheets often place them in adjacent columns with similar headings.\n",
+        "canonical_unit": "kg",
+        "display_preference": null,
+        "quantity_kind": "mass",
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "0.75 lb",
+          "1.2 kg"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          0.0001,
+          5000.0
+        ]
+      },
+      {
+        "code": "additional_information",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Additional Information",
+        "datatype": "string",
+        "description": "Comma-separated residual specifications the class has no dedicated attribute for, in the client's own overflow convention, e.g. \"240 kW-hr Annual Energy, 1 to 12 hr Delay Start Hours\". A holding pen, not a dumping ground: anything appearing here repeatedly across a category is a missing attribute and should be promoted to one.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "240 kW-hr Annual Energy, 1 to 12 hr Delay Start Hours",
+          "Folding Tines, Leak Detection System, Normal Cycle"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "approvals",
+        "requirement": "recommended",
+        "weight": 2.0,
+        "name": "Approvals and Listings",
+        "datatype": "multi_enum",
+        "description": "Third-party certifications, listings and approvals explicitly stated in the source. Record only what is stated. A listing number without a recognised mark is not an approval, and an approval for one size in a series does not extend to the others.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": true,
+        "compliance_claim": true,
+        "evidence_requirement": "strict",
+        "example_values": [
+          "UL, CSA, NSF-61",
+          "FM approved"
+        ],
+        "allowed_values": [
+          {
+            "value": "UL",
+            "aliases": [
+              "ul listed",
+              "underwriters laboratories",
+              "u.l."
+            ],
+            "note": null
+          },
+          {
+            "value": "CSA",
+            "aliases": [
+              "csa certified",
+              "canadian standards association"
+            ],
+            "note": null
+          },
+          {
+            "value": "ETL",
+            "aliases": [
+              "etl listed",
+              "intertek"
+            ],
+            "note": null
+          },
+          {
+            "value": "FM",
+            "aliases": [
+              "fm approved",
+              "factory mutual",
+              "fm global"
+            ],
+            "note": null
+          },
+          {
+            "value": "NSF-61",
+            "aliases": [
+              "nsf/ansi 61",
+              "nsf 61",
+              "nsf/ansi standard 61"
+            ],
+            "note": null
+          },
+          {
+            "value": "NSF-372",
+            "aliases": [
+              "nsf/ansi 372",
+              "nsf 372"
+            ],
+            "note": null
+          },
+          {
+            "value": "NSF-14",
+            "aliases": [
+              "nsf/ansi 14",
+              "nsf 14"
+            ],
+            "note": null
+          },
+          {
+            "value": "CRN",
+            "aliases": [
+              "canadian registration number"
+            ],
+            "note": null
+          },
+          {
+            "value": "ASME",
+            "aliases": [
+              "asme certified",
+              "asme b16"
+            ],
+            "note": null
+          },
+          {
+            "value": "MSS",
+            "aliases": [
+              "mss sp",
+              "manufacturers standardization society"
+            ],
+            "note": null
+          },
+          {
+            "value": "ATEX",
+            "aliases": [
+              "atex certified",
+              "atex marked"
+            ],
+            "note": null
+          },
+          {
+            "value": "IECEx",
+            "aliases": [
+              "iecex certified"
+            ],
+            "note": null
+          },
+          {
+            "value": "WRAS",
+            "aliases": [
+              "wras approved",
+              "water regulations advisory scheme"
+            ],
+            "note": null
+          },
+          {
+            "value": "cUL Listed",
+            "aliases": [
+              "cul",
+              "cul listed",
+              "c-ul",
+              "culus"
+            ],
+            "note": null
+          },
+          {
+            "value": "ENERGY STAR Certified",
+            "aliases": [
+              "energy star",
+              "energystar",
+              "energy star qualified",
+              "energy star certified"
+            ],
+            "note": null
+          },
+          {
+            "value": "NSF Certified",
+            "aliases": [],
+            "note": "Generic NSF mark with no standard named. Deliberately not aliased onto NSF-61: a potable-water claim needs the specific standard, and treating this as equivalent would let a cross-field rule pass on evidence that does not support it.\n"
+          },
+          {
+            "value": "ASSE 1006",
+            "aliases": [
+              "asse1006",
+              "asse 1006 listed"
+            ],
+            "note": null
+          },
+          {
+            "value": "CEE Tier 2 Qualified",
+            "aliases": [
+              "cee tier 2",
+              "cee tier2",
+              "cee tier 2 qualified"
+            ],
+            "note": null
+          },
+          {
+            "value": "AHAM Verified",
+            "aliases": [
+              "aham",
+              "aham verified"
+            ],
+            "note": null
+          },
+          {
+            "value": "WaterSense",
+            "aliases": [
+              "watersense",
+              "epa watersense"
+            ],
+            "note": null
+          },
+          {
+            "value": "ANSI Z87.1",
+            "aliases": [
+              "z87",
+              "z87.1",
+              "z87+",
+              "ansi z87",
+              "ansi z87.1",
+              "ansi/isea z87.1"
+            ],
+            "note": "eye and face protection impact rating"
+          },
+          {
+            "value": "ANSI/ISEA 105",
+            "aliases": [
+              "isea 105",
+              "ansi cut level",
+              "ansi/isea 105",
+              "a105"
+            ],
+            "note": "hand protection cut, abrasion and puncture rating"
+          },
+          {
+            "value": "EN 388",
+            "aliases": [
+              "en388",
+              "en 388 certified"
+            ],
+            "note": null
+          },
+          {
+            "value": "UL 217",
+            "aliases": [
+              "ul217",
+              "ul 217 listed"
+            ],
+            "note": "smoke alarm standard"
+          },
+          {
+            "value": "UL 2034",
+            "aliases": [
+              "ul2034",
+              "ul 2034 listed"
+            ],
+            "note": "carbon monoxide alarm standard"
+          },
+          {
+            "value": "UL 299",
+            "aliases": [
+              "ul299",
+              "ul 299 listed"
+            ],
+            "note": "portable fire extinguisher standard"
+          },
+          {
+            "value": "OSHA Compliant",
+            "aliases": [
+              "osha",
+              "osha compliant",
+              "meets osha"
+            ],
+            "note": null
+          },
+          {
+            "value": "ICC-ES Evaluated",
+            "aliases": [
+              "icc-es",
+              "icc es",
+              "icc evaluation report",
+              "esr"
+            ],
+            "note": "building-code evaluation report for a structural or envelope product"
+          },
+          {
+            "value": "ASTM D7032",
+            "aliases": [
+              "astm d7032",
+              "d7032"
+            ],
+            "note": "composite decking and railing performance standard"
+          },
+          {
+            "value": "FSC Certified",
+            "aliases": [
+              "fsc",
+              "fsc certified",
+              "forest stewardship council"
+            ],
+            "note": null
+          },
+          {
+            "value": "NFRC Certified",
+            "aliases": [
+              "nfrc",
+              "nfrc certified",
+              "nfrc rated"
+            ],
+            "note": "fenestration thermal performance rating"
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "country_of_origin",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Country of Origin",
+        "datatype": "string",
+        "description": "Country where the product is manufactured, as stated by the manufacturer. Drives tariff treatment and trade-agreement eligibility, so a guess here has direct financial consequences.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": true,
+        "evidence_requirement": "strict",
+        "example_values": [
+          "United States",
+          "Taiwan",
+          "Italy",
+          "China"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "prop65_warning_required",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "California Prop 65 Warning Required",
+        "datatype": "boolean",
+        "description": "True when the source states that a California Proposition 65 warning applies. Absence of a statement is not evidence of absence of a requirement, so record a gap rather than false when the source is silent.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": true,
+        "evidence_requirement": "strict",
+        "example_values": [],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "gtin",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "GTIN / UPC",
+        "datatype": "string",
+        "description": "Global Trade Item Number, 8, 12, 13 or 14 digits. The final digit is a modulo-10 check digit, which L0 validation verifies arithmetically \u2014 a transposed digit is therefore detectable without any external lookup.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "012345678905",
+          "00012345678905"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      }
+    ],
+    "cross_field_rules": [
+      {
+        "id": "R_SHANK_BELOW_LENGTH",
+        "expr": "shank_diameter < fastener_length",
+        "severity": "error",
+        "message": "Shank diameter is not below the overall length, so the pair was read in the wrong order. \".131x3\" states diameter then length, both as inch figures on the same line, and they are distinguished only by decimal form \u2014 which is a convention rather than anything the string declares.",
+        "references": [
+          "shank_diameter",
+          "fastener_length"
+        ]
+      },
+      {
+        "id": "R_COLLATED_NAIL_STATES_A_COUNT",
+        "expr": "fastener_type != 'Nail (Collated)' or case_quantity is not null",
+        "severity": "error",
+        "message": "A collated nail was captured with no box count. Collated nails are bought by the box \u2014 \"500CT\" \u2014 and the count is the quantity a price is quoted against, so a blank makes the line unquotable.",
+        "references": [
+          "fastener_type",
+          "case_quantity"
+        ]
+      },
+      {
+        "id": "R_TREATED_LUMBER_NEEDS_A_FINISH",
+        "expr": "fastener_finish is not null",
+        "severity": "error",
+        "message": "No corrosion finish was captured. This is a warranty and code matter rather than an appearance one: an electro-galvanised fastener in treated lumber or a coastal exposure corrodes fast enough to void a deck's warranty, and the finish is never safe to infer.",
+        "references": [
+          "fastener_finish"
+        ]
+      }
+    ],
+    "channel_profiles": [
+      {
+        "name": "unilog_delivery",
+        "title_template": "{brand} {product_series} {mpn} {class_name}",
+        "max_title_chars": 200,
+        "unit_system": "imperial_primary",
+        "required": [
+          "mpn"
+        ]
+      }
+    ]
+  },
   "policy": {
-    "epsilon": 0.05,
+    "epsilon": 0.02,
     "confidence_level": 0.95,
-    "threshold": 0.6853,
-    "coverage": 1.0,
-    "accepted": 220,
-    "accepted_errors": 1,
-    "observed_error_rate": 0.0045,
-    "error_upper_bound": 0.0201,
+    "threshold": 0.7194,
+    "coverage": 0.7591,
+    "accepted": 167,
+    "accepted_errors": 0,
+    "observed_error_rate": 0.0,
+    "error_upper_bound": 0.0159,
     "calibration_size": 220,
     "achievable": true,
-    "reason": "at threshold 0.685, 100.0% of values are publishable with an error rate of at most 2.0% at 95% confidence"
+    "reason": "at threshold 0.719, 75.9% of values are publishable with an error rate of at most 1.6% at 95% confidence"
   },
   "calibrator": "untrained-heuristic"
 }

@@ -1,0 +1,94 @@
+# Sheet goods for the building envelope: drywall, sheathing, subfloor, siding and soffit.
+#
+# 15 rows of the client's 1,000-row sample, across Huber (ZIP System, PlusOSB), James Hardie
+# (HardiePlank, HardiePanel), LP SmartSide and gypsum board.
+#
+# WHY SIDING AND SHEATHING SHARE A CLASS. They are the same purchase decision expressed in
+# different layers: a 4x8 sheet or a lap board, sold by the piece, ordered by thickness and
+# nominal size, and stocked in the same yard bay. Splitting them would produce two classes whose
+# only reliable distinguishing token is the brand name, which is not a specification.
+#
+# THE THICKNESS-VERSUS-R-VALUE TRAP, which this class exists to keep straight.
+# `1-1/2" 4x8 Huber Zip R6.6 - Insulated R-Sheathing` carries two numbers that are both "how much
+# insulation": 1-1/2 inches of thickness and an R-value of 6.6. They sit four tokens apart and a
+# positional read swaps them readily. Both attributes carry plausible ranges that refuse the
+# other's values, and the rule below catches the swap arithmetically rather than by inspection.
+#
+# No description recipe and no external scheme mapping — see decking_board.yaml.
+
+class:
+  code: BLD.PNL.SHEATHING
+  name: Structural Panel and Siding
+  version: v1
+
+  item_type: Panel
+
+  # `sdg` and `soff` are this supplier's abbreviations for siding and soffit and appear as bare
+  # tokens. The brand-line names are included because, as with decking, the product noun is often
+  # absent: "4'x10' HardiePanel Smooth - Primed" never says panel except inside the brand.
+  #
+  # `r-sheathing` is listed SEPARATELY from `sheathing` and that is not redundancy. The tokeniser
+  # keeps hyphenated compounds whole on purpose — it is what preserves "two-piece" and "NPT/BSPT" —
+  # so "Insulated R-Sheathing" yields the single token `r-sheathing` and the bare `sheathing` never
+  # matches it. Three ZIP System rows were lost to exactly that before this entry existed.
+  #
+  # `pan` is this supplier's truncation in "Smart Pan Cedar", and `zip` covers the Huber ZIP System
+  # rows whose only category word is the brand.
+  identity_terms:
+    [drywall, sheathing, r-sheathing, osb, plusosb, zip, panel, pan, hardiepanel, hardieplank,
+     hardie, siding, sdg, soffit, soff, rainscreen, subfloor, plywood, gypsum, fissured]
+
+  browse_path:
+    - Building Materials
+    - Lumber & Panels
+    - Structural Panels & Siding
+
+  reporting_path: [Building Materials, Panels, Sheathing & Siding]
+
+  attributes:
+    - { code: product_series,        requirement: recommended, weight: 3.0, label: Series }
+    - { code: panel_thickness,       requirement: required,    weight: 3.0, label: Thickness }
+    - { code: nominal_dimensions,    requirement: required,    weight: 3.0, label: Nominal Size }
+    - { code: nominal_length,        requirement: optional,    weight: 1.0, label: Length }
+    - { code: material_composition,  requirement: required,    weight: 3.0, label: Material }
+    - { code: edge_profile,          requirement: recommended, weight: 2.0 }
+    - { code: surface_texture,       requirement: recommended, weight: 2.0, label: Surface }
+    - { code: r_value,               requirement: optional,    weight: 2.0 }
+    - { code: fire_rating,           requirement: optional,    weight: 2.0 }
+    - { code: finish_color,          requirement: optional,    weight: 1.0, label: Color }
+    - { code: coverage_area,         requirement: optional,    weight: 1.0, label: Coverage }
+    - { code: selling_uom,           requirement: recommended, weight: 2.0 }
+    - { code: each_weight,           requirement: optional,    weight: 1.0 }
+    - { code: additional_information, requirement: optional,   weight: 1.0 }
+
+    # --- named delivery columns; must stay last ----------------------------------------------
+    - { code: warranty_terms,        requirement: optional,    weight: 1.0 }
+    - { code: approvals,             requirement: recommended, weight: 2.0 }
+    - { code: country_of_origin,     requirement: optional,    weight: 1.0 }
+    - { code: gtin,                  requirement: optional,    weight: 1.0 }
+
+  cross_field_rules:
+    - id: R_RVALUE_IS_NOT_A_THICKNESS
+      expr: "r_value is null or panel_thickness is null or r_value != panel_thickness"
+      references: [r_value, panel_thickness]
+      severity: error
+      message: >
+        The R-value equals the panel thickness, which on insulated sheathing means one figure was
+        read into both fields. They appear four tokens apart in the same description and a
+        positional read swaps them readily. An error rather than a warning because both values are
+        individually plausible, so nothing else in the stack catches it.
+
+    - id: R_FIRE_RATED_PANEL_IS_GYPSUM
+      expr: "fire_rating not in ('Type X', 'Type C') or material_composition == 'Gypsum'"
+      references: [fire_rating, material_composition]
+      severity: warning
+      message: >
+        Type X and Type C are gypsum-board designations specifically. Recording one against OSB or
+        fibre cement usually means a rating was inherited from a neighbouring drywall row.
+
+  channel_profiles:
+    - name: unilog_delivery
+      title_template: "{brand} {product_series} {mpn} {class_name}"
+      max_title_chars: 200
+      unit_system: imperial_primary
+      required: [mpn]

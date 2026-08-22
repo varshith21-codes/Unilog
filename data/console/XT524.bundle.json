@@ -2,7 +2,7 @@
   "bundle": {
     "sku": "XT524",
     "document_id": "Unihack__Sample_Dataset_-_Input#XT524",
-    "class_code": null,
+    "class_code": "TOL.HND.GEN",
     "record": {
       "tenant_id": "unilog",
       "sku": "XT524",
@@ -14,36 +14,144 @@
       "supplier_id": "BOWPR",
       "parent_sku": null,
       "lifecycle_status": "active",
-      "class_code": null,
-      "schema_version": null,
+      "class_code": "TOL.HND.GEN",
+      "schema_version": "TOL.HND.GEN@v1",
       "source_document_ids": [
         "Unihack__Sample_Dataset_-_Input#XT524"
       ],
-      "created_at": "2026-08-22T12:30:44.634620+00:00",
-      "updated_at": "2026-08-22T12:30:44.634623+00:00"
+      "created_at": "2026-08-22T19:16:19.108484+00:00",
+      "updated_at": "2026-08-22T19:16:19.108534+00:00"
     },
-    "classifications": [],
+    "classifications": [
+      {
+        "scheme": "internal",
+        "code": "TOL.HND.GEN",
+        "path": [
+          "Tools & Consumables",
+          "Hand Tools",
+          "Hand Tools"
+        ],
+        "confidence": 0.7233,
+        "level_confidences": [
+          1.0,
+          1.0,
+          0.7233
+        ],
+        "rationale": "single viable candidate",
+        "method": "retrieval_only",
+        "alternatives": [],
+        "reviewed_by": null,
+        "reviewed_at": null
+      }
+    ],
     "classification_summary": {
-      "class_code": null,
-      "confidence": 0.0,
-      "confident_depth": 0,
-      "schemes": [],
-      "candidates_considered": 0,
-      "method": "no_viable_candidate",
-      "abstained": true,
+      "class_code": "TOL.HND.GEN",
+      "confidence": 0.7233,
+      "confident_depth": 3,
+      "schemes": [
+        "internal"
+      ],
+      "candidates_considered": 1,
+      "method": "retrieval_only",
+      "abstained": false,
       "input_tokens": 0,
       "output_tokens": 0
     },
-    "classification_candidates": [],
-    "values": [],
-    "gaps": [],
+    "classification_candidates": [
+      {
+        "code": "TOL.HND.GEN",
+        "score": 0.1233,
+        "path_text": "Tools & Consumables > Hand Tools > Hand Tools"
+      }
+    ],
+    "values": [
+      {
+        "attribute_code": "nominal_length",
+        "value_raw": "24\"",
+        "value_canonical": {
+          "magnitude": 609.6,
+          "unit": "mm"
+        },
+        "value_display": "24\"",
+        "method": "supplier_feed",
+        "confidence": 0.88,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "desc-nominal_length-6",
+            "document_id": "Unihack__Sample_Dataset_-_Input#XT524",
+            "document_sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+            "quote": "24\"",
+            "page": null,
+            "bbox": null,
+            "table_ref": null,
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [],
+        "model_id": null,
+        "model_tier": null,
+        "prompt_version": "description@v1",
+        "schema_version": "TOL.HND.GEN@v1",
+        "version": 1,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-22T19:16:19.108325Z",
+        "score": 0.8,
+        "decision": {
+          "attribute_code": "nominal_length",
+          "score": 0.8,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.800 >= threshold 0.719"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 0.4,
+          "quote_specificity": 1.0,
+          "self_reported_certainty": 0.88,
+          "validation_pass_rate": 0.5,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.5,
+          "source_prior": 0.5,
+          "tier_cost": 0.5
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "citation_summary": [
+          "Unihack__Sample_Dataset_-_Input#XT524"
+        ]
+      }
+    ],
+    "gaps": [
+      {
+        "attribute_code": "overall_size",
+        "reason": "no_source_available",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#XT524"
+        ],
+        "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-22T19:16:19.108529Z"
+      }
+    ],
     "extraction": {
-      "requested": 0,
-      "values": 0,
-      "gaps": 0,
+      "requested": 16,
+      "values": 1,
+      "gaps": 1,
       "rejected_unverifiable": 0,
       "corrected_to_match_evidence": 0,
-      "citation_coverage": 0.0,
+      "citation_coverage": 1.0,
       "input_tokens": 0,
       "output_tokens": 0,
       "escalations": 0,
@@ -53,18 +161,28 @@
     },
     "normalization_issues": [],
     "validation": {
-      "checks": 1,
-      "failures": 1,
+      "checks": 2,
+      "failures": 0,
       "warnings": 0,
-      "skipped_rules": 0,
-      "consistency": 0.0,
+      "skipped_rules": 1,
+      "consistency": 1.0,
       "results": [
         {
-          "layer": "L0",
-          "rule_id": "no_class",
-          "verdict": "fail",
+          "layer": "L3",
+          "rule_id": "plausible_range",
+          "verdict": "pass",
           "severity": "error",
-          "reason": "record has no product class, so no rules or required attributes apply",
+          "reason": "within the expected range [10, 25000]",
+          "counterexample": null,
+          "suggested_fix": null,
+          "detail": null
+        },
+        {
+          "layer": "L2",
+          "rule_id": "R_SET_STATES_A_PIECE_COUNT",
+          "verdict": "skipped",
+          "severity": "info",
+          "reason": "not evaluated: missing pack_quantity",
           "counterexample": null,
           "suggested_fix": null,
           "detail": null
@@ -73,27 +191,77 @@
       "per_attribute": {}
     },
     "certificate": {
-      "certificate_id": "ec_79704892b523",
+      "certificate_id": "ec_9ee2274d0c18",
       "sku": "XT524",
       "tenant_id": "unilog",
-      "generated_at": "2026-08-22T12:30:44.634720Z",
-      "schema_version": null,
+      "generated_at": "2026-08-22T19:16:19.108761Z",
+      "schema_version": "TOL.HND.GEN@v1",
       "pipeline_version": "axiom-0.1.0",
-      "classifications": [],
-      "attributes": [],
-      "gaps": [],
+      "classifications": [
+        {
+          "scheme": "internal",
+          "code": "TOL.HND.GEN",
+          "path": [
+            "Tools & Consumables",
+            "Hand Tools",
+            "Hand Tools"
+          ],
+          "confidence": 0.7233,
+          "method": "retrieval_only",
+          "status": "auto",
+          "alternatives": []
+        }
+      ],
+      "attributes": [
+        {
+          "code": "nominal_length",
+          "value_canonical": {
+            "magnitude": 609.6,
+            "unit": "mm"
+          },
+          "value_display": "24\"",
+          "value_raw": "24\"",
+          "confidence": 0.88,
+          "method": "supplier_feed",
+          "model_tier": null,
+          "status": "auto_accepted",
+          "evidence": [
+            {
+              "document": "Unihack__Sample_Dataset_-_Input#XT524",
+              "sha256": "49efd0b2\u2026",
+              "page": null,
+              "bbox": null,
+              "quote": "24\"",
+              "verified": true
+            }
+          ],
+          "validations": []
+        }
+      ],
+      "gaps": [
+        {
+          "code": "overall_size",
+          "reason": "no_source_available",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#XT524"
+          ],
+          "required": true,
+          "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+          "recommended_action": "retry_with_better_source"
+        }
+      ],
       "summary": {
-        "attributes_required": 0,
-        "attributes_populated": 0,
-        "attributes_with_evidence": 0,
+        "attributes_required": 1,
+        "attributes_populated": 1,
+        "attributes_with_evidence": 1,
         "attributes_inferred": 0,
-        "auto_accepted": 0,
+        "auto_accepted": 1,
         "queued_for_review": 0,
-        "gaps_total": 0,
-        "gaps_required": 0,
+        "gaps_total": 1,
+        "gaps_required": 1,
         "quality_index": {
-          "completeness": 1.0,
-          "verifiability": 0.0,
+          "completeness": 0.0,
+          "verifiability": 1.0,
           "consistency": 1.0,
           "richness": 0.0,
           "weights": {
@@ -108,12 +276,12 @@
             "richness",
             "verifiability"
           ],
-          "composite": 0.6
+          "composite": 0.55
         },
         "cost_usd": null,
         "wall_clock_seconds": 0.0
       },
-      "signature": "sha256:e1ae776d51c3931e9ffeb296506c0a5cba2c9c236bea73a30aa98966536e327e",
+      "signature": "sha256:0296a676b737d31a2e2fdc67e28af208b02b75d2aebf77f0c3be97c2fc19a15e",
       "signature_verified": true
     },
     "channels": [
@@ -128,7 +296,7 @@
           "missing": [],
           "not_publishable": [],
           "warnings": [
-            "record has no product class, so no channel profile applies"
+            "class TOL.HND.GEN declares no 'cx1_pim' channel profile"
           ]
         },
         "title": null
@@ -144,20 +312,20 @@
           "missing": [],
           "not_publishable": [],
           "warnings": [
-            "record has no product class, so no channel profile applies"
+            "class TOL.HND.GEN declares no 'schema_org' channel profile"
           ]
         },
         "title": null
       }
     ],
     "metrics": {
-      "fill_rate": 1.0,
-      "verifiability": 0.0,
-      "values_total": 0,
-      "values_publishable": 0,
+      "fill_rate": 0.0,
+      "verifiability": 1.0,
+      "values_total": 1,
+      "values_publishable": 1,
       "values_needing_review": 0,
-      "gaps_total": 0,
-      "gaps_required": 0,
+      "gaps_total": 1,
+      "gaps_required": 1,
       "conflicts": []
     },
     "cost": null,
@@ -168,7 +336,7 @@
     "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
     "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
     "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-22T12:30:39.344315Z",
+    "fetched_at": "2026-08-22T19:16:11.275717Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": "unilog",
@@ -260,19 +428,761 @@
       "tables": []
     }
   ],
-  "class_definition": null,
+  "class_definition": {
+    "code": "TOL.HND.GEN",
+    "name": "Hand Tool",
+    "version": "v1",
+    "schema_version": "TOL.HND.GEN@v1",
+    "item_type": "Hand Tool",
+    "reporting_path": [
+      "Tools",
+      "Hand Tools",
+      "Hand Tools"
+    ],
+    "browse_path": [
+      "Tools & Consumables",
+      "Hand Tools",
+      "Hand Tools"
+    ],
+    "mappings": {},
+    "required_codes": [
+      "overall_size"
+    ],
+    "attributes": [
+      {
+        "code": "product_series",
+        "requirement": "recommended",
+        "weight": 3.0,
+        "name": "Product Series",
+        "datatype": "string",
+        "description": "Manufacturer's series or family designation only, without the word \"series\" and without the manufacturer name. The anchor for part-number grammar induction, because the positional encoding of a smart part number is defined per series rather than per manufacturer.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "BA-100",
+          "T-113",
+          "T-585"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "overall_size",
+        "requirement": "required",
+        "weight": 3.0,
+        "name": "Size",
+        "datatype": "string",
+        "description": "The manufacturer's headline size statement, kept as published with its axis labels intact, e.g. \"24 in W x 24-1/4 in D\". Deliberately a string and not a dimension_set: the published form varies in both the number of axes and their order, and the client's ground truth carries no unit column for it, so reformatting into a fixed W x H x D triple would discard information and diverge from the expected output.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "24 in W x 24-1/4 in D",
+          "33-7/16 in H x 23-7/8 in W x 22-5/8 in D"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "drive_size",
+        "requirement": "recommended",
+        "weight": 3.0,
+        "name": "Drive Size",
+        "datatype": "string",
+        "description": "The output drive a powered driver, wrench or ratchet presents. A string because the values mix square-drive fractions with hex designations \u2014 1/2\" square and 1/4\" hex are different interfaces that a bare fraction could not distinguish.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "1/4\" Hex",
+          "1/4\"",
+          "3/8\"",
+          "1/2\""
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "pack_quantity",
+        "requirement": "recommended",
+        "weight": 3.0,
+        "name": "Pack Quantity",
+        "datatype": "integer",
+        "description": "Number of units in the consumer pack the part number sells as. Distinct from case_quantity, which counts packs in a shipping carton: a \"3pk\" of lamps is one sellable unit containing three lamps, and confusing the two misprices the line.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "1",
+          "2",
+          "3",
+          "6"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          1.0,
+          100.0
+        ]
+      },
+      {
+        "code": "graduation_system",
+        "requirement": "optional",
+        "weight": 2.0,
+        "name": "Graduation",
+        "datatype": "enum",
+        "description": "Which unit system the tool is marked in. Recorded because the same model is stocked in both and a metric-only square is unusable on an imperial job, which the part number alone does not reveal.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Imperial",
+          "Metric",
+          "Imperial and Metric"
+        ],
+        "allowed_values": [
+          {
+            "value": "Imperial",
+            "aliases": [
+              "sae",
+              "inch",
+              "imperial",
+              "english",
+              "fractional"
+            ],
+            "note": null
+          },
+          {
+            "value": "Metric",
+            "aliases": [
+              "metric",
+              "mm",
+              "millimetre",
+              "millimeter"
+            ],
+            "note": null
+          },
+          {
+            "value": "Imperial and Metric",
+            "aliases": [
+              "dual",
+              "both",
+              "sae and metric",
+              "metric and sae",
+              "dual marked"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "primary_material",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Material",
+        "datatype": "string",
+        "description": "Principal material of the appliance's visible construction, most often the tub or body material for a major appliance. Becomes an enum when the LOV supplies the vocabulary; until then it is recorded as published so no value is snapped onto a wrong term.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Stainless Steel",
+          "Plastic",
+          "Porcelain Enamel"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "finish_color",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Color",
+        "datatype": "string",
+        "description": "Finish or colourway as the manufacturer names it. A merchandising attribute: buyers filter on it heavily, and the manufacturer's own name for a finish is what shoppers search, so it is recorded verbatim rather than mapped to a generic colour.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Stainless Steel",
+          "White",
+          "Black Stainless"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "nominal_length",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Nominal Length",
+        "datatype": "dimension",
+        "description": "Overall length as the manufacturer designates it, for tubes, strips and linear fixtures. A designation rather than a measurement: a nominal 4' fluorescent tube is 47-3/4\" so that it fits a 4' fixture, and recording the measured figure would contradict every catalogue.\n",
+        "canonical_unit": "mm",
+        "display_preference": "imperial_fraction",
+        "quantity_kind": "length",
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "18\"",
+          "3 ft",
+          "4 ft"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          10.0,
+          25000.0
+        ]
+      },
+      {
+        "code": "each_weight",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Weight (Each)",
+        "datatype": "quantity",
+        "description": "Shipping weight of a single unit. Distinguish carefully from carton weight; datasheets often place them in adjacent columns with similar headings.\n",
+        "canonical_unit": "kg",
+        "display_preference": null,
+        "quantity_kind": "mass",
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "0.75 lb",
+          "1.2 kg"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          0.0001,
+          5000.0
+        ]
+      },
+      {
+        "code": "selling_uom",
+        "requirement": "recommended",
+        "weight": 2.0,
+        "name": "Selling Unit of Measure",
+        "datatype": "enum",
+        "description": "The unit in which the product is sold, which is not necessarily the unit in which it is priced or stocked. Conflating the three is a classic source of order errors.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Each",
+          "Case",
+          "Box"
+        ],
+        "allowed_values": [
+          {
+            "value": "Each",
+            "aliases": [
+              "ea",
+              "ea.",
+              "each",
+              "pc",
+              "piece",
+              "unit"
+            ],
+            "note": null
+          },
+          {
+            "value": "Box",
+            "aliases": [
+              "bx",
+              "box"
+            ],
+            "note": null
+          },
+          {
+            "value": "Case",
+            "aliases": [
+              "cs",
+              "case",
+              "carton",
+              "ctn"
+            ],
+            "note": null
+          },
+          {
+            "value": "Pair",
+            "aliases": [
+              "pr",
+              "pair"
+            ],
+            "note": null
+          },
+          {
+            "value": "Foot",
+            "aliases": [
+              "ft",
+              "per foot",
+              "lineal foot"
+            ],
+            "note": null
+          },
+          {
+            "value": "Roll",
+            "aliases": [
+              "rl",
+              "roll"
+            ],
+            "note": null
+          },
+          {
+            "value": "Bag",
+            "aliases": [
+              "bg",
+              "bag"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "additional_information",
+        "requirement": "recommended",
+        "weight": 2.0,
+        "name": "Additional Information",
+        "datatype": "string",
+        "description": "Comma-separated residual specifications the class has no dedicated attribute for, in the client's own overflow convention, e.g. \"240 kW-hr Annual Energy, 1 to 12 hr Delay Start Hours\". A holding pen, not a dumping ground: anything appearing here repeatedly across a category is a missing attribute and should be promoted to one.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "240 kW-hr Annual Energy, 1 to 12 hr Delay Start Hours",
+          "Folding Tines, Leak Detection System, Normal Cycle"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "warranty_terms",
+        "requirement": "recommended",
+        "weight": 2.0,
+        "name": "Warranty",
+        "datatype": "string",
+        "description": "Warranty coverage as stated by the manufacturer, including duration and what it covers, e.g. \"1 Year Manufacturer, 1 Year Labor and Parts\". Recorded as published: summarising it into a single duration loses the parts/labour distinction that determines what a claim actually pays for.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "1 Year Manufacturer, 1 Year Labor and Parts",
+          "10 Year Limited"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "approvals",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Approvals and Listings",
+        "datatype": "multi_enum",
+        "description": "Third-party certifications, listings and approvals explicitly stated in the source. Record only what is stated. A listing number without a recognised mark is not an approval, and an approval for one size in a series does not extend to the others.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": true,
+        "compliance_claim": true,
+        "evidence_requirement": "strict",
+        "example_values": [
+          "UL, CSA, NSF-61",
+          "FM approved"
+        ],
+        "allowed_values": [
+          {
+            "value": "UL",
+            "aliases": [
+              "ul listed",
+              "underwriters laboratories",
+              "u.l."
+            ],
+            "note": null
+          },
+          {
+            "value": "CSA",
+            "aliases": [
+              "csa certified",
+              "canadian standards association"
+            ],
+            "note": null
+          },
+          {
+            "value": "ETL",
+            "aliases": [
+              "etl listed",
+              "intertek"
+            ],
+            "note": null
+          },
+          {
+            "value": "FM",
+            "aliases": [
+              "fm approved",
+              "factory mutual",
+              "fm global"
+            ],
+            "note": null
+          },
+          {
+            "value": "NSF-61",
+            "aliases": [
+              "nsf/ansi 61",
+              "nsf 61",
+              "nsf/ansi standard 61"
+            ],
+            "note": null
+          },
+          {
+            "value": "NSF-372",
+            "aliases": [
+              "nsf/ansi 372",
+              "nsf 372"
+            ],
+            "note": null
+          },
+          {
+            "value": "NSF-14",
+            "aliases": [
+              "nsf/ansi 14",
+              "nsf 14"
+            ],
+            "note": null
+          },
+          {
+            "value": "CRN",
+            "aliases": [
+              "canadian registration number"
+            ],
+            "note": null
+          },
+          {
+            "value": "ASME",
+            "aliases": [
+              "asme certified",
+              "asme b16"
+            ],
+            "note": null
+          },
+          {
+            "value": "MSS",
+            "aliases": [
+              "mss sp",
+              "manufacturers standardization society"
+            ],
+            "note": null
+          },
+          {
+            "value": "ATEX",
+            "aliases": [
+              "atex certified",
+              "atex marked"
+            ],
+            "note": null
+          },
+          {
+            "value": "IECEx",
+            "aliases": [
+              "iecex certified"
+            ],
+            "note": null
+          },
+          {
+            "value": "WRAS",
+            "aliases": [
+              "wras approved",
+              "water regulations advisory scheme"
+            ],
+            "note": null
+          },
+          {
+            "value": "cUL Listed",
+            "aliases": [
+              "cul",
+              "cul listed",
+              "c-ul",
+              "culus"
+            ],
+            "note": null
+          },
+          {
+            "value": "ENERGY STAR Certified",
+            "aliases": [
+              "energy star",
+              "energystar",
+              "energy star qualified",
+              "energy star certified"
+            ],
+            "note": null
+          },
+          {
+            "value": "NSF Certified",
+            "aliases": [],
+            "note": "Generic NSF mark with no standard named. Deliberately not aliased onto NSF-61: a potable-water claim needs the specific standard, and treating this as equivalent would let a cross-field rule pass on evidence that does not support it.\n"
+          },
+          {
+            "value": "ASSE 1006",
+            "aliases": [
+              "asse1006",
+              "asse 1006 listed"
+            ],
+            "note": null
+          },
+          {
+            "value": "CEE Tier 2 Qualified",
+            "aliases": [
+              "cee tier 2",
+              "cee tier2",
+              "cee tier 2 qualified"
+            ],
+            "note": null
+          },
+          {
+            "value": "AHAM Verified",
+            "aliases": [
+              "aham",
+              "aham verified"
+            ],
+            "note": null
+          },
+          {
+            "value": "WaterSense",
+            "aliases": [
+              "watersense",
+              "epa watersense"
+            ],
+            "note": null
+          },
+          {
+            "value": "ANSI Z87.1",
+            "aliases": [
+              "z87",
+              "z87.1",
+              "z87+",
+              "ansi z87",
+              "ansi z87.1",
+              "ansi/isea z87.1"
+            ],
+            "note": "eye and face protection impact rating"
+          },
+          {
+            "value": "ANSI/ISEA 105",
+            "aliases": [
+              "isea 105",
+              "ansi cut level",
+              "ansi/isea 105",
+              "a105"
+            ],
+            "note": "hand protection cut, abrasion and puncture rating"
+          },
+          {
+            "value": "EN 388",
+            "aliases": [
+              "en388",
+              "en 388 certified"
+            ],
+            "note": null
+          },
+          {
+            "value": "UL 217",
+            "aliases": [
+              "ul217",
+              "ul 217 listed"
+            ],
+            "note": "smoke alarm standard"
+          },
+          {
+            "value": "UL 2034",
+            "aliases": [
+              "ul2034",
+              "ul 2034 listed"
+            ],
+            "note": "carbon monoxide alarm standard"
+          },
+          {
+            "value": "UL 299",
+            "aliases": [
+              "ul299",
+              "ul 299 listed"
+            ],
+            "note": "portable fire extinguisher standard"
+          },
+          {
+            "value": "OSHA Compliant",
+            "aliases": [
+              "osha",
+              "osha compliant",
+              "meets osha"
+            ],
+            "note": null
+          },
+          {
+            "value": "ICC-ES Evaluated",
+            "aliases": [
+              "icc-es",
+              "icc es",
+              "icc evaluation report",
+              "esr"
+            ],
+            "note": "building-code evaluation report for a structural or envelope product"
+          },
+          {
+            "value": "ASTM D7032",
+            "aliases": [
+              "astm d7032",
+              "d7032"
+            ],
+            "note": "composite decking and railing performance standard"
+          },
+          {
+            "value": "FSC Certified",
+            "aliases": [
+              "fsc",
+              "fsc certified",
+              "forest stewardship council"
+            ],
+            "note": null
+          },
+          {
+            "value": "NFRC Certified",
+            "aliases": [
+              "nfrc",
+              "nfrc certified",
+              "nfrc rated"
+            ],
+            "note": "fenestration thermal performance rating"
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "country_of_origin",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Country of Origin",
+        "datatype": "string",
+        "description": "Country where the product is manufactured, as stated by the manufacturer. Drives tariff treatment and trade-agreement eligibility, so a guess here has direct financial consequences.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": true,
+        "evidence_requirement": "strict",
+        "example_values": [
+          "United States",
+          "Taiwan",
+          "Italy",
+          "China"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "prop65_warning_required",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "California Prop 65 Warning Required",
+        "datatype": "boolean",
+        "description": "True when the source states that a California Proposition 65 warning applies. Absence of a statement is not evidence of absence of a requirement, so record a gap rather than false when the source is silent.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": true,
+        "evidence_requirement": "strict",
+        "example_values": [],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "gtin",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "GTIN / UPC",
+        "datatype": "string",
+        "description": "Global Trade Item Number, 8, 12, 13 or 14 digits. The final digit is a modulo-10 check digit, which L0 validation verifies arithmetically \u2014 a transposed digit is therefore detectable without any external lookup.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "012345678905",
+          "00012345678905"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      }
+    ],
+    "cross_field_rules": [
+      {
+        "id": "R_SET_STATES_A_PIECE_COUNT",
+        "expr": "pack_quantity is null or pack_quantity >= 1",
+        "severity": "warning",
+        "message": "Wrench and socket sets are sold by the piece count \u2014 \"15pc\", \"242pc\" \u2014 and it is stated beside real dimensions. A count below one means a dimension was captured instead of the count.",
+        "references": [
+          "pack_quantity"
+        ]
+      }
+    ],
+    "channel_profiles": [
+      {
+        "name": "unilog_delivery",
+        "title_template": "{brand} {product_series} {mpn} {class_name}",
+        "max_title_chars": 200,
+        "unit_system": "imperial_primary",
+        "required": [
+          "mpn"
+        ]
+      }
+    ]
+  },
   "policy": {
-    "epsilon": 0.05,
+    "epsilon": 0.02,
     "confidence_level": 0.95,
-    "threshold": 0.6853,
-    "coverage": 1.0,
-    "accepted": 220,
-    "accepted_errors": 1,
-    "observed_error_rate": 0.0045,
-    "error_upper_bound": 0.0201,
+    "threshold": 0.7194,
+    "coverage": 0.7591,
+    "accepted": 167,
+    "accepted_errors": 0,
+    "observed_error_rate": 0.0,
+    "error_upper_bound": 0.0159,
     "calibration_size": 220,
     "achievable": true,
-    "reason": "at threshold 0.685, 100.0% of values are publishable with an error rate of at most 2.0% at 95% confidence"
+    "reason": "at threshold 0.719, 75.9% of values are publishable with an error rate of at most 1.6% at 95% confidence"
   },
   "calibrator": "untrained-heuristic"
 }

@@ -1,0 +1,88 @@
+# Laundry appliances: dryers, washers and stacked laundry centres.
+#
+# 14 rows of the client's 1,000-row sample, across Speed Queen, GE and LG.
+#
+# THE FUEL SPLIT IS THE WHOLE COHORT. Eleven of these fourteen rows are dryers, and they come in
+# matched pairs that differ by one letter of the part number and one word of the description:
+#
+#     DR7004WE  SQ Elect Dryer Wh
+#     DR7004WG  SQ Gas Dryer Wh
+#
+# Same brand, same colour, same capacity, same cabinet. One needs a gas line and a 120 V circuit,
+# the other a 240 V circuit and no gas. `fuel_type` is bound required at the heaviest weight because
+# getting it wrong sends an installer to the wrong utility, and because the only signal is a single
+# trailing letter on the model and one word in the text.
+#
+# THE COLOUR SUFFIX IS ALSO A SKU. `DR7004BE` versus `DR7004WE` is black versus white, so
+# `finish_color` is required too. Between fuel and colour, four SKUs of one dryer differ only in two
+# characters, which is why this cohort repays extraction accuracy more than its row count suggests.
+#
+# No description recipe and no external scheme mapping — see decking_board.yaml.
+
+class:
+  code: APP.LND.GEN
+  name: Laundry Appliance
+  version: v1
+
+  item_type: Dryer
+
+  identity_terms: [dryer, dryers, washer, washers, laundry, launder]
+
+  browse_path:
+    - Appliances & Consumer Electronics
+    - Laundry Appliances
+    - Washers & Dryers
+
+  reporting_path: [Appliances, Large Appliances, Laundry]
+
+  attributes:
+    - { code: fuel_type,             requirement: required,    weight: 3.0 }
+    - { code: finish_color,          requirement: required,    weight: 3.0, label: Color }
+    - { code: capacity_cubic_feet,   requirement: required,    weight: 3.0, label: Capacity }
+    - { code: appliance_width,       requirement: recommended, weight: 3.0, label: Width }
+    - { code: product_series,        requirement: recommended, weight: 2.0, label: Series }
+    - { code: model_number,          requirement: optional,    weight: 1.0 }
+    - { code: mounting_type,         requirement: recommended, weight: 2.0 }
+    - { code: voltage_rating,        requirement: required,    weight: 3.0 }
+    - { code: amperage_rating,       requirement: optional,    weight: 1.0 }
+    - { code: overall_size,          requirement: recommended, weight: 2.0, label: Size }
+    - { code: plug_type,             requirement: optional,    weight: 1.0 }
+    - { code: sound_level,           requirement: optional,    weight: 1.0 }
+    - { code: selling_uom,           requirement: recommended, weight: 2.0 }
+    - { code: additional_information, requirement: optional,   weight: 1.0 }
+
+    # --- named delivery columns; must stay last ----------------------------------------------
+    - { code: warranty_terms,        requirement: recommended, weight: 2.0 }
+    - { code: included_technology,   requirement: optional,    weight: 1.0 }
+    - { code: approvals,             requirement: recommended, weight: 2.0 }
+    - { code: country_of_origin,     requirement: recommended, weight: 1.0 }
+    - { code: gtin,                  requirement: optional,    weight: 1.0 }
+
+  cross_field_rules:
+    - id: R_GAS_DRYER_IS_120V
+      expr: "fuel_type not in ('Gas (Natural)', 'Gas (Propane)') or voltage_rating is null or voltage_rating <= 130"
+      references: [fuel_type, voltage_rating]
+      severity: error
+      message: >
+        A gas dryer was captured with a 240 V supply. Gas and electric dryers of the same model
+        differ by one letter of the part number, and this pairing is the signature of the two rows
+        being crossed. An error rather than a warning because both values are individually correct
+        for SOME dryer, so nothing else in the stack catches it, and the consequence is an installer
+        running the wrong utility to the wrong appliance.
+
+    - id: R_ELECTRIC_DRYER_STATES_A_VOLTAGE
+      expr: "fuel_type != 'Electric' or voltage_rating is not null"
+      references: [fuel_type, voltage_rating]
+      severity: warning
+      message: >
+        An electric dryer was captured with no supply voltage. Nearly all draw 240 V and the figure
+        decides the circuit, so it is a gap worth surfacing rather than an acceptable blank. It is
+        deliberately not defaulted: assuming 240 V would be right often enough to hide the case where
+        it is wrong.
+
+  channel_profiles:
+    - name: unilog_delivery
+      title_template: "{brand} {product_series} {mpn} {class_name}"
+      max_title_chars: 200
+      unit_system: imperial_primary
+      required: [mpn]

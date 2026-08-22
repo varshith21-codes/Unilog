@@ -2,7 +2,7 @@
   "bundle": {
     "sku": "FS C01 2004S",
     "document_id": "Unihack__Sample_Dataset_-_Input#FS C01 2004S",
-    "class_code": null,
+    "class_code": "BLD.WDW.GEN",
     "record": {
       "tenant_id": "unilog",
       "sku": "FS C01 2004S",
@@ -14,33 +14,111 @@
       "supplier_id": "VELAM",
       "parent_sku": null,
       "lifecycle_status": "active",
-      "class_code": null,
-      "schema_version": null,
+      "class_code": "BLD.WDW.GEN",
+      "schema_version": "BLD.WDW.GEN@v1",
       "source_document_ids": [
         "Unihack__Sample_Dataset_-_Input#FS C01 2004S"
       ],
-      "created_at": "2026-08-22T12:30:40.769479+00:00",
-      "updated_at": "2026-08-22T12:30:40.769483+00:00"
+      "created_at": "2026-08-22T19:16:14.059588+00:00",
+      "updated_at": "2026-08-22T19:16:14.059657+00:00"
     },
-    "classifications": [],
+    "classifications": [
+      {
+        "scheme": "internal",
+        "code": "BLD.WDW.GEN",
+        "path": [
+          "Building Materials",
+          "Windows & Doors",
+          "Windows & Exterior Doors"
+        ],
+        "confidence": 0.6832,
+        "level_confidences": [
+          1.0,
+          1.0,
+          0.6832
+        ],
+        "rationale": "single viable candidate",
+        "method": "retrieval_only",
+        "alternatives": [],
+        "reviewed_by": null,
+        "reviewed_at": null
+      }
+    ],
     "classification_summary": {
-      "class_code": null,
-      "confidence": 0.0,
-      "confident_depth": 0,
-      "schemes": [],
-      "candidates_considered": 0,
-      "method": "no_viable_candidate",
-      "abstained": true,
+      "class_code": "BLD.WDW.GEN",
+      "confidence": 0.6832,
+      "confident_depth": 3,
+      "schemes": [
+        "internal"
+      ],
+      "candidates_considered": 1,
+      "method": "retrieval_only",
+      "abstained": false,
       "input_tokens": 0,
       "output_tokens": 0
     },
-    "classification_candidates": [],
+    "classification_candidates": [
+      {
+        "code": "BLD.WDW.GEN",
+        "score": 0.0832,
+        "path_text": "Building Materials > Windows & Doors > Windows & Exterior Doors"
+      }
+    ],
     "values": [],
-    "gaps": [],
+    "gaps": [
+      {
+        "attribute_code": "handing",
+        "reason": "no_source_available",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#FS C01 2004S"
+        ],
+        "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-22T19:16:14.059616Z"
+      },
+      {
+        "attribute_code": "nominal_dimensions",
+        "reason": "no_source_available",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#FS C01 2004S"
+        ],
+        "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-22T19:16:14.059623Z"
+      },
+      {
+        "attribute_code": "glazing_package",
+        "reason": "no_source_available",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#FS C01 2004S"
+        ],
+        "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-22T19:16:14.059628Z"
+      },
+      {
+        "attribute_code": "finish_color",
+        "reason": "no_source_available",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#FS C01 2004S"
+        ],
+        "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-22T19:16:14.059632Z"
+      }
+    ],
     "extraction": {
-      "requested": 0,
+      "requested": 16,
       "values": 0,
-      "gaps": 0,
+      "gaps": 4,
       "rejected_unverifiable": 0,
       "corrected_to_match_evidence": 0,
       "citation_coverage": 0.0,
@@ -54,17 +132,17 @@
     "normalization_issues": [],
     "validation": {
       "checks": 1,
-      "failures": 1,
+      "failures": 0,
       "warnings": 0,
-      "skipped_rules": 0,
-      "consistency": 0.0,
+      "skipped_rules": 1,
+      "consistency": 1.0,
       "results": [
         {
-          "layer": "L0",
-          "rule_id": "no_class",
-          "verdict": "fail",
-          "severity": "error",
-          "reason": "record has no product class, so no rules or required attributes apply",
+          "layer": "L2",
+          "rule_id": "R_GLAZED_UNIT_STATES_HANDING",
+          "verdict": "skipped",
+          "severity": "info",
+          "reason": "not evaluated: missing glazing_package, handing",
           "counterexample": null,
           "suggested_fix": null,
           "detail": null
@@ -73,26 +151,81 @@
       "per_attribute": {}
     },
     "certificate": {
-      "certificate_id": "ec_24c73b27e3d8",
+      "certificate_id": "ec_fd7ec4eac7a1",
       "sku": "FS C01 2004S",
       "tenant_id": "unilog",
-      "generated_at": "2026-08-22T12:30:40.769580Z",
-      "schema_version": null,
+      "generated_at": "2026-08-22T19:16:14.059769Z",
+      "schema_version": "BLD.WDW.GEN@v1",
       "pipeline_version": "axiom-0.1.0",
-      "classifications": [],
+      "classifications": [
+        {
+          "scheme": "internal",
+          "code": "BLD.WDW.GEN",
+          "path": [
+            "Building Materials",
+            "Windows & Doors",
+            "Windows & Exterior Doors"
+          ],
+          "confidence": 0.6832,
+          "method": "retrieval_only",
+          "status": "auto",
+          "alternatives": []
+        }
+      ],
       "attributes": [],
-      "gaps": [],
+      "gaps": [
+        {
+          "code": "handing",
+          "reason": "no_source_available",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#FS C01 2004S"
+          ],
+          "required": true,
+          "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+          "recommended_action": "retry_with_better_source"
+        },
+        {
+          "code": "nominal_dimensions",
+          "reason": "no_source_available",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#FS C01 2004S"
+          ],
+          "required": true,
+          "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+          "recommended_action": "retry_with_better_source"
+        },
+        {
+          "code": "glazing_package",
+          "reason": "no_source_available",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#FS C01 2004S"
+          ],
+          "required": true,
+          "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+          "recommended_action": "retry_with_better_source"
+        },
+        {
+          "code": "finish_color",
+          "reason": "no_source_available",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#FS C01 2004S"
+          ],
+          "required": true,
+          "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+          "recommended_action": "retry_with_better_source"
+        }
+      ],
       "summary": {
-        "attributes_required": 0,
+        "attributes_required": 4,
         "attributes_populated": 0,
         "attributes_with_evidence": 0,
         "attributes_inferred": 0,
         "auto_accepted": 0,
         "queued_for_review": 0,
-        "gaps_total": 0,
-        "gaps_required": 0,
+        "gaps_total": 4,
+        "gaps_required": 4,
         "quality_index": {
-          "completeness": 1.0,
+          "completeness": 0.0,
           "verifiability": 0.0,
           "consistency": 1.0,
           "richness": 0.0,
@@ -108,12 +241,12 @@
             "richness",
             "verifiability"
           ],
-          "composite": 0.6
+          "composite": 0.25
         },
         "cost_usd": null,
         "wall_clock_seconds": 0.0
       },
-      "signature": "sha256:63eec950ede25fba0a857575723f501a6e556c7e8b3dc1c9e310b59bb81b8396",
+      "signature": "sha256:9516d4158eb1b3c2633a1ab178e4910bcb8302a1f62e308ad80bda48e8306935",
       "signature_verified": true
     },
     "channels": [
@@ -128,7 +261,7 @@
           "missing": [],
           "not_publishable": [],
           "warnings": [
-            "record has no product class, so no channel profile applies"
+            "class BLD.WDW.GEN declares no 'cx1_pim' channel profile"
           ]
         },
         "title": null
@@ -144,20 +277,20 @@
           "missing": [],
           "not_publishable": [],
           "warnings": [
-            "record has no product class, so no channel profile applies"
+            "class BLD.WDW.GEN declares no 'schema_org' channel profile"
           ]
         },
         "title": null
       }
     ],
     "metrics": {
-      "fill_rate": 1.0,
+      "fill_rate": 0.0,
       "verifiability": 0.0,
       "values_total": 0,
       "values_publishable": 0,
       "values_needing_review": 0,
-      "gaps_total": 0,
-      "gaps_required": 0,
+      "gaps_total": 4,
+      "gaps_required": 4,
       "conflicts": []
     },
     "cost": null,
@@ -168,7 +301,7 @@
     "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
     "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
     "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-22T12:30:39.344315Z",
+    "fetched_at": "2026-08-22T19:16:11.275717Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": "unilog",
@@ -260,19 +393,970 @@
       "tables": []
     }
   ],
-  "class_definition": null,
+  "class_definition": {
+    "code": "BLD.WDW.GEN",
+    "name": "Window and Door",
+    "version": "v1",
+    "schema_version": "BLD.WDW.GEN@v1",
+    "item_type": "Window",
+    "reporting_path": [
+      "Building Materials",
+      "Windows & Doors",
+      "Units"
+    ],
+    "browse_path": [
+      "Building Materials",
+      "Windows & Doors",
+      "Windows & Exterior Doors"
+    ],
+    "mappings": {},
+    "required_codes": [
+      "handing",
+      "nominal_dimensions",
+      "glazing_package",
+      "finish_color"
+    ],
+    "attributes": [
+      {
+        "code": "product_series",
+        "requirement": "recommended",
+        "weight": 3.0,
+        "name": "Product Series",
+        "datatype": "string",
+        "description": "Manufacturer's series or family designation only, without the word \"series\" and without the manufacturer name. The anchor for part-number grammar induction, because the positional encoding of a smart part number is defined per series rather than per manufacturer.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "BA-100",
+          "T-113",
+          "T-585"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "handing",
+        "requirement": "required",
+        "weight": 3.0,
+        "name": "Handing",
+        "datatype": "enum",
+        "description": "Which way the unit is hung or which panel slides. A hard fit fact on a door: a left-hand unit cannot be installed in a right-hand opening, and it is the most common ordering error in the category.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Left",
+          "Right",
+          "Reversible"
+        ],
+        "allowed_values": [
+          {
+            "value": "Left",
+            "aliases": [
+              "l",
+              "lh",
+              "left hand",
+              "left-hand",
+              "lhs"
+            ],
+            "note": null
+          },
+          {
+            "value": "Right",
+            "aliases": [
+              "r",
+              "rh",
+              "right hand",
+              "right-hand",
+              "rhs"
+            ],
+            "note": null
+          },
+          {
+            "value": "Reversible",
+            "aliases": [
+              "reversible",
+              "field reversible",
+              "either hand"
+            ],
+            "note": null
+          },
+          {
+            "value": "Non-Handed",
+            "aliases": [
+              "non-handed",
+              "non handed",
+              "n/a",
+              "fixed"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "nominal_dimensions",
+        "requirement": "required",
+        "weight": 3.0,
+        "name": "Nominal Dimensions",
+        "datatype": "string",
+        "description": "The trade size designation of a board, post or panel, recorded verbatim. A string rather than a measurement because a nominal 1x6 deck board actually measures about 0.94\" x 5.5\": the designation names a size class and converting it would publish numbers that are false.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "1x6",
+          "1x8",
+          "1x12",
+          "4x4",
+          "6x6",
+          "4x8"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "overall_size",
+        "requirement": "recommended",
+        "weight": 2.0,
+        "name": "Size",
+        "datatype": "string",
+        "description": "The manufacturer's headline size statement, kept as published with its axis labels intact, e.g. \"24 in W x 24-1/4 in D\". Deliberately a string and not a dimension_set: the published form varies in both the number of axes and their order, and the client's ground truth carries no unit column for it, so reformatting into a fixed W x H x D triple would discard information and diverge from the expected output.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "24 in W x 24-1/4 in D",
+          "33-7/16 in H x 23-7/8 in W x 22-5/8 in D"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "glazing_package",
+        "requirement": "required",
+        "weight": 3.0,
+        "name": "Glazing",
+        "datatype": "multi_enum",
+        "description": "The glass specification of a window or glazed door. Multivalued because the options stack: a unit is commonly low-E AND argon-filled AND tempered, and reporting only the first would understate the thermal package the buyer is paying for.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": true,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Low-E",
+          "Argon Filled",
+          "Double Pane",
+          "Tempered"
+        ],
+        "allowed_values": [
+          {
+            "value": "Low-E",
+            "aliases": [
+              "lowe",
+              "low e",
+              "low-e",
+              "lowe-2",
+              "lowe2",
+              "low-e2",
+              "low emissivity"
+            ],
+            "note": null
+          },
+          {
+            "value": "Argon Filled",
+            "aliases": [
+              "argon",
+              "arg",
+              "gas filled",
+              "argon fill"
+            ],
+            "note": null
+          },
+          {
+            "value": "Double Pane",
+            "aliases": [
+              "double",
+              "dual pane",
+              "insulated glass",
+              "ig",
+              "double glazed"
+            ],
+            "note": null
+          },
+          {
+            "value": "Triple Pane",
+            "aliases": [
+              "triple",
+              "triple glazed",
+              "3 pane"
+            ],
+            "note": null
+          },
+          {
+            "value": "Tempered",
+            "aliases": [
+              "temp",
+              "tempered glass",
+              "safety glass"
+            ],
+            "note": null
+          },
+          {
+            "value": "Obscure",
+            "aliases": [
+              "obscure",
+              "frosted",
+              "privacy glass",
+              "rain glass"
+            ],
+            "note": null
+          },
+          {
+            "value": "Laminated",
+            "aliases": [
+              "laminated",
+              "impact glass",
+              "impact resistant"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "material_composition",
+        "requirement": "recommended",
+        "weight": 2.0,
+        "name": "Composition",
+        "datatype": "enum",
+        "description": "What the board or panel is actually made of. The primary durability and warranty fact in decking, and genuinely different from finish_color or brand: a capped composite and a cellular PVC board of the same colour have different expansion, weight and fire behaviour.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Capped Wood-Plastic Composite",
+          "Cellular PVC",
+          "Douglas Fir",
+          "Aluminum"
+        ],
+        "allowed_values": [
+          {
+            "value": "Capped Wood-Plastic Composite",
+            "aliases": [
+              "capped composite",
+              "wpc",
+              "composite",
+              "capped wpc",
+              "shelled composite"
+            ],
+            "note": null
+          },
+          {
+            "value": "Uncapped Wood-Plastic Composite",
+            "aliases": [
+              "uncapped composite",
+              "uncapped wpc",
+              "first generation composite"
+            ],
+            "note": null
+          },
+          {
+            "value": "Cellular PVC",
+            "aliases": [
+              "pvc",
+              "cellular pvc",
+              "u-pvc",
+              "vinyl",
+              "pvc decking"
+            ],
+            "note": null
+          },
+          {
+            "value": "Capped Polymer",
+            "aliases": [
+              "capped polymer",
+              "polymer",
+              "capped pvc",
+              "mineral-based polymer"
+            ],
+            "note": null
+          },
+          {
+            "value": "Pressure-Treated Wood",
+            "aliases": [
+              "pt",
+              "treated",
+              "pressure treated",
+              "acq",
+              "ground contact"
+            ],
+            "note": null
+          },
+          {
+            "value": "Cedar",
+            "aliases": [
+              "western red cedar",
+              "cedar wood"
+            ],
+            "note": null
+          },
+          {
+            "value": "Douglas Fir",
+            "aliases": [
+              "doug fir",
+              "df",
+              "fir",
+              "douglas-fir"
+            ],
+            "note": null
+          },
+          {
+            "value": "Aluminum",
+            "aliases": [
+              "alum",
+              "aluminium",
+              "extruded aluminum"
+            ],
+            "note": null
+          },
+          {
+            "value": "Fiber Cement",
+            "aliases": [
+              "fibre cement",
+              "fiber-cement",
+              "hardie",
+              "cement board"
+            ],
+            "note": null
+          },
+          {
+            "value": "Engineered Wood",
+            "aliases": [
+              "osb",
+              "oriented strand board",
+              "smartside",
+              "engineered strand",
+              "lp"
+            ],
+            "note": null
+          },
+          {
+            "value": "Gypsum",
+            "aliases": [
+              "gypsum board",
+              "drywall",
+              "plasterboard",
+              "wallboard"
+            ],
+            "note": null
+          },
+          {
+            "value": "Steel",
+            "aliases": [
+              "galvanised steel",
+              "galvanized steel",
+              "steel panel"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "finish_color",
+        "requirement": "required",
+        "weight": 3.0,
+        "name": "Color",
+        "datatype": "string",
+        "description": "Finish or colourway as the manufacturer names it. A merchandising attribute: buyers filter on it heavily, and the manufacturer's own name for a finish is what shoppers search, so it is recorded verbatim rather than mapped to a generic colour.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Stainless Steel",
+          "White",
+          "Black Stainless"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "mounting_type",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Mounting Type",
+        "datatype": "string",
+        "description": "How the appliance is secured in the installation, e.g. leg-levelled, built-in under a counter, or free-standing. Determines what cabinetry work an installation needs, so it is a fitment attribute. Becomes an enum when the LOV supplies the permitted values.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Leg",
+          "Built-in",
+          "Free-standing"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "r_value",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "R-Value",
+        "datatype": "number",
+        "description": "Thermal resistance in hr-ft2-degF/BTU, the imperial R-value as printed. Declared as a plain number because that composite unit is not in the registry; the unit is fixed by this definition. Higher is more insulating.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "3.6",
+          "6.6",
+          "9.6"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          0.1,
+          100.0
+        ]
+      },
+      {
+        "code": "selling_uom",
+        "requirement": "recommended",
+        "weight": 2.0,
+        "name": "Selling Unit of Measure",
+        "datatype": "enum",
+        "description": "The unit in which the product is sold, which is not necessarily the unit in which it is priced or stocked. Conflating the three is a classic source of order errors.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Each",
+          "Case",
+          "Box"
+        ],
+        "allowed_values": [
+          {
+            "value": "Each",
+            "aliases": [
+              "ea",
+              "ea.",
+              "each",
+              "pc",
+              "piece",
+              "unit"
+            ],
+            "note": null
+          },
+          {
+            "value": "Box",
+            "aliases": [
+              "bx",
+              "box"
+            ],
+            "note": null
+          },
+          {
+            "value": "Case",
+            "aliases": [
+              "cs",
+              "case",
+              "carton",
+              "ctn"
+            ],
+            "note": null
+          },
+          {
+            "value": "Pair",
+            "aliases": [
+              "pr",
+              "pair"
+            ],
+            "note": null
+          },
+          {
+            "value": "Foot",
+            "aliases": [
+              "ft",
+              "per foot",
+              "lineal foot"
+            ],
+            "note": null
+          },
+          {
+            "value": "Roll",
+            "aliases": [
+              "rl",
+              "roll"
+            ],
+            "note": null
+          },
+          {
+            "value": "Bag",
+            "aliases": [
+              "bg",
+              "bag"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "each_weight",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Weight (Each)",
+        "datatype": "quantity",
+        "description": "Shipping weight of a single unit. Distinguish carefully from carton weight; datasheets often place them in adjacent columns with similar headings.\n",
+        "canonical_unit": "kg",
+        "display_preference": null,
+        "quantity_kind": "mass",
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "0.75 lb",
+          "1.2 kg"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          0.0001,
+          5000.0
+        ]
+      },
+      {
+        "code": "additional_information",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Additional Information",
+        "datatype": "string",
+        "description": "Comma-separated residual specifications the class has no dedicated attribute for, in the client's own overflow convention, e.g. \"240 kW-hr Annual Energy, 1 to 12 hr Delay Start Hours\". A holding pen, not a dumping ground: anything appearing here repeatedly across a category is a missing attribute and should be promoted to one.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "240 kW-hr Annual Energy, 1 to 12 hr Delay Start Hours",
+          "Folding Tines, Leak Detection System, Normal Cycle"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "warranty_terms",
+        "requirement": "recommended",
+        "weight": 2.0,
+        "name": "Warranty",
+        "datatype": "string",
+        "description": "Warranty coverage as stated by the manufacturer, including duration and what it covers, e.g. \"1 Year Manufacturer, 1 Year Labor and Parts\". Recorded as published: summarising it into a single duration loses the parts/labour distinction that determines what a claim actually pays for.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "1 Year Manufacturer, 1 Year Labor and Parts",
+          "10 Year Limited"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "approvals",
+        "requirement": "recommended",
+        "weight": 2.0,
+        "name": "Approvals and Listings",
+        "datatype": "multi_enum",
+        "description": "Third-party certifications, listings and approvals explicitly stated in the source. Record only what is stated. A listing number without a recognised mark is not an approval, and an approval for one size in a series does not extend to the others.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": true,
+        "compliance_claim": true,
+        "evidence_requirement": "strict",
+        "example_values": [
+          "UL, CSA, NSF-61",
+          "FM approved"
+        ],
+        "allowed_values": [
+          {
+            "value": "UL",
+            "aliases": [
+              "ul listed",
+              "underwriters laboratories",
+              "u.l."
+            ],
+            "note": null
+          },
+          {
+            "value": "CSA",
+            "aliases": [
+              "csa certified",
+              "canadian standards association"
+            ],
+            "note": null
+          },
+          {
+            "value": "ETL",
+            "aliases": [
+              "etl listed",
+              "intertek"
+            ],
+            "note": null
+          },
+          {
+            "value": "FM",
+            "aliases": [
+              "fm approved",
+              "factory mutual",
+              "fm global"
+            ],
+            "note": null
+          },
+          {
+            "value": "NSF-61",
+            "aliases": [
+              "nsf/ansi 61",
+              "nsf 61",
+              "nsf/ansi standard 61"
+            ],
+            "note": null
+          },
+          {
+            "value": "NSF-372",
+            "aliases": [
+              "nsf/ansi 372",
+              "nsf 372"
+            ],
+            "note": null
+          },
+          {
+            "value": "NSF-14",
+            "aliases": [
+              "nsf/ansi 14",
+              "nsf 14"
+            ],
+            "note": null
+          },
+          {
+            "value": "CRN",
+            "aliases": [
+              "canadian registration number"
+            ],
+            "note": null
+          },
+          {
+            "value": "ASME",
+            "aliases": [
+              "asme certified",
+              "asme b16"
+            ],
+            "note": null
+          },
+          {
+            "value": "MSS",
+            "aliases": [
+              "mss sp",
+              "manufacturers standardization society"
+            ],
+            "note": null
+          },
+          {
+            "value": "ATEX",
+            "aliases": [
+              "atex certified",
+              "atex marked"
+            ],
+            "note": null
+          },
+          {
+            "value": "IECEx",
+            "aliases": [
+              "iecex certified"
+            ],
+            "note": null
+          },
+          {
+            "value": "WRAS",
+            "aliases": [
+              "wras approved",
+              "water regulations advisory scheme"
+            ],
+            "note": null
+          },
+          {
+            "value": "cUL Listed",
+            "aliases": [
+              "cul",
+              "cul listed",
+              "c-ul",
+              "culus"
+            ],
+            "note": null
+          },
+          {
+            "value": "ENERGY STAR Certified",
+            "aliases": [
+              "energy star",
+              "energystar",
+              "energy star qualified",
+              "energy star certified"
+            ],
+            "note": null
+          },
+          {
+            "value": "NSF Certified",
+            "aliases": [],
+            "note": "Generic NSF mark with no standard named. Deliberately not aliased onto NSF-61: a potable-water claim needs the specific standard, and treating this as equivalent would let a cross-field rule pass on evidence that does not support it.\n"
+          },
+          {
+            "value": "ASSE 1006",
+            "aliases": [
+              "asse1006",
+              "asse 1006 listed"
+            ],
+            "note": null
+          },
+          {
+            "value": "CEE Tier 2 Qualified",
+            "aliases": [
+              "cee tier 2",
+              "cee tier2",
+              "cee tier 2 qualified"
+            ],
+            "note": null
+          },
+          {
+            "value": "AHAM Verified",
+            "aliases": [
+              "aham",
+              "aham verified"
+            ],
+            "note": null
+          },
+          {
+            "value": "WaterSense",
+            "aliases": [
+              "watersense",
+              "epa watersense"
+            ],
+            "note": null
+          },
+          {
+            "value": "ANSI Z87.1",
+            "aliases": [
+              "z87",
+              "z87.1",
+              "z87+",
+              "ansi z87",
+              "ansi z87.1",
+              "ansi/isea z87.1"
+            ],
+            "note": "eye and face protection impact rating"
+          },
+          {
+            "value": "ANSI/ISEA 105",
+            "aliases": [
+              "isea 105",
+              "ansi cut level",
+              "ansi/isea 105",
+              "a105"
+            ],
+            "note": "hand protection cut, abrasion and puncture rating"
+          },
+          {
+            "value": "EN 388",
+            "aliases": [
+              "en388",
+              "en 388 certified"
+            ],
+            "note": null
+          },
+          {
+            "value": "UL 217",
+            "aliases": [
+              "ul217",
+              "ul 217 listed"
+            ],
+            "note": "smoke alarm standard"
+          },
+          {
+            "value": "UL 2034",
+            "aliases": [
+              "ul2034",
+              "ul 2034 listed"
+            ],
+            "note": "carbon monoxide alarm standard"
+          },
+          {
+            "value": "UL 299",
+            "aliases": [
+              "ul299",
+              "ul 299 listed"
+            ],
+            "note": "portable fire extinguisher standard"
+          },
+          {
+            "value": "OSHA Compliant",
+            "aliases": [
+              "osha",
+              "osha compliant",
+              "meets osha"
+            ],
+            "note": null
+          },
+          {
+            "value": "ICC-ES Evaluated",
+            "aliases": [
+              "icc-es",
+              "icc es",
+              "icc evaluation report",
+              "esr"
+            ],
+            "note": "building-code evaluation report for a structural or envelope product"
+          },
+          {
+            "value": "ASTM D7032",
+            "aliases": [
+              "astm d7032",
+              "d7032"
+            ],
+            "note": "composite decking and railing performance standard"
+          },
+          {
+            "value": "FSC Certified",
+            "aliases": [
+              "fsc",
+              "fsc certified",
+              "forest stewardship council"
+            ],
+            "note": null
+          },
+          {
+            "value": "NFRC Certified",
+            "aliases": [
+              "nfrc",
+              "nfrc certified",
+              "nfrc rated"
+            ],
+            "note": "fenestration thermal performance rating"
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "country_of_origin",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Country of Origin",
+        "datatype": "string",
+        "description": "Country where the product is manufactured, as stated by the manufacturer. Drives tariff treatment and trade-agreement eligibility, so a guess here has direct financial consequences.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": true,
+        "evidence_requirement": "strict",
+        "example_values": [
+          "United States",
+          "Taiwan",
+          "Italy",
+          "China"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "gtin",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "GTIN / UPC",
+        "datatype": "string",
+        "description": "Global Trade Item Number, 8, 12, 13 or 14 digits. The final digit is a modulo-10 check digit, which L0 validation verifies arithmetically \u2014 a transposed digit is therefore detectable without any external lookup.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "012345678905",
+          "00012345678905"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      }
+    ],
+    "cross_field_rules": [
+      {
+        "id": "R_GLAZED_UNIT_STATES_HANDING",
+        "expr": "glazing_package is null or handing is not null",
+        "severity": "error",
+        "message": "A glazed unit was captured with no handing. Handing is carried by a single trailing letter on the size code rather than by any word in the description, so a missing value here almost always means the code was not read rather than that the unit is non-handed. It is the most expensive ordering error in the category: the opening is cut before the mistake is found.",
+        "references": [
+          "glazing_package",
+          "handing"
+        ]
+      }
+    ],
+    "channel_profiles": [
+      {
+        "name": "unilog_delivery",
+        "title_template": "{brand} {product_series} {mpn} {class_name}",
+        "max_title_chars": 200,
+        "unit_system": "imperial_primary",
+        "required": [
+          "mpn"
+        ]
+      }
+    ]
+  },
   "policy": {
-    "epsilon": 0.05,
+    "epsilon": 0.02,
     "confidence_level": 0.95,
-    "threshold": 0.6853,
-    "coverage": 1.0,
-    "accepted": 220,
-    "accepted_errors": 1,
-    "observed_error_rate": 0.0045,
-    "error_upper_bound": 0.0201,
+    "threshold": 0.7194,
+    "coverage": 0.7591,
+    "accepted": 167,
+    "accepted_errors": 0,
+    "observed_error_rate": 0.0,
+    "error_upper_bound": 0.0159,
     "calibration_size": 220,
     "achievable": true,
-    "reason": "at threshold 0.685, 100.0% of values are publishable with an error rate of at most 2.0% at 95% confidence"
+    "reason": "at threshold 0.719, 75.9% of values are publishable with an error rate of at most 1.6% at 95% confidence"
   },
   "calibrator": "untrained-heuristic"
 }

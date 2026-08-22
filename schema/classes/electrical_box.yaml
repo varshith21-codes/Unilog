@@ -1,0 +1,87 @@
+# Electrical boxes, covers and load centres.
+#
+# 19 rows of the client's 1,000-row sample: octagon, square and gang boxes with brackets and
+# hangers, box covers, and three Square D / Homeline load centres.
+#
+# WHY LOAD CENTRES SIT WITH BOXES. Three rows is not enough to shape a class around, and a load
+# centre IS an enclosure: it is specified by its form, its amperage and what mounts inside it, which
+# is the same shape of specification a box has. `enclosure_form` carries the distinction as a
+# required value, and `circuit_capacity` and `amperage_rating` are bound so the load-centre rows are
+# still filterable on the two figures that actually sell them. If a later file brings enough
+# panelboards to measure, they split out and the identity terms move with them.
+#
+# THE "LOAD" TOKEN, chosen carefully. The obvious identity term for a load centre is `center`, and it
+# is deliberately absent: this catalogue also contains "Tall Beverage Center SS" and "LG Laundry
+# Center Wh", so `center` would hand refrigeration and laundry rows to an electrical class. `load` is
+# what actually distinguishes them, and it appears in every load-centre row here.
+#
+# THE BOX-DIMENSION CONVENTION. "4x4x1-1/2 Oct Box" is width x height x DEPTH, three figures where a
+# cover is two. `overall_size` holds the triple verbatim rather than splitting it, because the depth
+# is the figure that decides cubic-inch capacity and a positional read that mistook it for a height
+# would misstate how many conductors the box may legally hold.
+#
+# No description recipe and no external scheme mapping — see decking_board.yaml.
+
+class:
+  code: ELC.BOX.GEN
+  name: Electrical Box and Enclosure
+  version: v1
+
+  item_type: Electrical Box
+
+  # `cover` is owned by this class and deliberately NOT by ELC.DEV.WIRING — see the note in that
+  # file. `oct` is the supplier's abbreviation and appears as a bare token.
+  identity_terms: [box, oct, octagon, cover, enclosure, conduit, load, cntr, panelboard, bracket]
+
+  browse_path:
+    - Electrical
+    - Boxes & Enclosures
+    - Boxes, Covers & Load Centres
+
+  reporting_path: [Electrical, Boxes & Enclosures, Boxes & Covers]
+
+  attributes:
+    - { code: enclosure_form,        requirement: required,    weight: 3.0, label: Form }
+    - { code: overall_size,          requirement: required,    weight: 3.0, label: Size }
+    - { code: gang_count,            requirement: required,    weight: 3.0, label: Gang }
+    - { code: primary_material,      requirement: required,    weight: 3.0, label: Material }
+    - { code: mounting_type,         requirement: recommended, weight: 2.0 }
+    - { code: amperage_rating,       requirement: optional,    weight: 3.0 }
+    - { code: circuit_capacity,      requirement: optional,    weight: 3.0, label: Circuits }
+    - { code: voltage_rating,        requirement: optional,    weight: 1.0 }
+    - { code: finish_color,          requirement: optional,    weight: 1.0, label: Color }
+    - { code: product_series,        requirement: recommended, weight: 2.0, label: Series }
+    - { code: pack_quantity,         requirement: optional,    weight: 1.0 }
+    - { code: selling_uom,           requirement: recommended, weight: 2.0 }
+    - { code: additional_information, requirement: optional,   weight: 1.0 }
+
+    # --- named delivery columns; must stay last ----------------------------------------------
+    - { code: approvals,             requirement: required,    weight: 3.0 }
+    - { code: country_of_origin,     requirement: optional,    weight: 1.0 }
+    - { code: gtin,                  requirement: optional,    weight: 1.0 }
+
+  cross_field_rules:
+    - id: R_LOADCENTER_STATES_AN_AMPERAGE
+      expr: "enclosure_form != 'Load Center' or amperage_rating is not null"
+      references: [enclosure_form, amperage_rating]
+      severity: error
+      message: >
+        A load centre was captured with no main amperage. It is the figure the panel is specified,
+        permitted and priced on, and it is stated in every load-centre description in this
+        catalogue — so a missing value means it was not read rather than that it is unrated.
+
+    - id: R_BOX_HAS_NO_CIRCUIT_COUNT
+      expr: "circuit_capacity is null or enclosure_form == 'Load Center'"
+      references: [circuit_capacity, enclosure_form]
+      severity: warning
+      message: >
+        A circuit capacity was recorded against something that is not a load centre. A junction or
+        device box holds conductors, not breakers, so this usually means a gang count or a dimension
+        was read into the wrong field.
+
+  channel_profiles:
+    - name: unilog_delivery
+      title_template: "{brand} {product_series} {mpn} {class_name}"
+      max_title_chars: 200
+      unit_system: imperial_primary
+      required: [mpn]

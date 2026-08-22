@@ -1,0 +1,86 @@
+# Life-safety devices: smoke and CO alarms, fire extinguishers, and motion alerts.
+#
+# Five rows of the client's 1,000-row sample: two Lith fire extinguishers, two smoke-and-CO alarms and
+# a driveway alert.
+#
+# A SMALL COHORT WITH A DISPROPORTIONATE FAILURE COST, which is why it gets a class at five rows where
+# other five-row groups in this file do not. An understated specification on a life-safety device is
+# not a merchandising inconvenience: `detection_type` is a multi_enum precisely because "Smoke & CO
+# Alarm" detects both, and recording only smoke would sell a combination alarm as a single-sensor one.
+# That is the one place in this schema where a missing value could contribute to physical harm, and it
+# is why `detection_type` and `approvals` are both bound required.
+#
+# WHY `detector` IS NOT AN IDENTITY TERM, deliberately. `3200-20 Milw Voltage Detector` is a
+# tradesperson's test instrument, not a wall-mounted life-safety device, and it belongs in TOL.HND.GEN
+# where it classifies today. Adding `detector` here would pull it in and would also put every real
+# alarm into contention with a hand-tool class. The term this class uses is `alarm`, which is specific.
+#
+# THE UL RATING IS A COMPOUND CODE. `extinguisher_rating` is a string because "2A:10B:C" is not a
+# magnitude: the figure before A is a water-equivalent size, the figure before B is a square-foot
+# area, and C is a bare suitability flag with no number at all. Storing it numerically would compare
+# three incommensurable things.
+#
+# No description recipe and no external scheme mapping — see decking_board.yaml.
+
+class:
+  code: SAF.DET.GEN
+  name: Life-Safety Device
+  version: v1
+
+  item_type: Alarm
+
+  identity_terms: [alarm, alarms, extinguisher, smoke, alert, sprinkler, siren]
+
+  browse_path:
+    - Safety
+    - Life Safety
+    - Alarms & Extinguishers
+
+  reporting_path: [Safety, Life Safety, Alarms & Extinguishers]
+
+  attributes:
+    - { code: detection_type,        requirement: required,    weight: 3.0, label: Detects }
+    - { code: extinguisher_rating,   requirement: optional,    weight: 3.0, label: UL Rating }
+    - { code: mounting_type,         requirement: recommended, weight: 2.0 }
+    - { code: voltage_rating,        requirement: optional,    weight: 2.0 }
+    - { code: product_series,        requirement: recommended, weight: 2.0, label: Series }
+    - { code: model_number,          requirement: optional,    weight: 1.0 }
+    - { code: overall_size,          requirement: optional,    weight: 1.0, label: Size }
+    - { code: each_weight,           requirement: optional,    weight: 1.0 }
+    - { code: finish_color,          requirement: optional,    weight: 1.0, label: Color }
+    - { code: rated_life,            requirement: optional,    weight: 2.0 }
+    - { code: pack_quantity,         requirement: optional,    weight: 1.0 }
+    - { code: selling_uom,           requirement: recommended, weight: 2.0 }
+    - { code: additional_information, requirement: optional,   weight: 1.0 }
+
+    # --- named delivery columns; must stay last ----------------------------------------------
+    - { code: warranty_terms,        requirement: recommended, weight: 2.0 }
+    - { code: approvals,             requirement: required,    weight: 3.0 }
+    - { code: country_of_origin,     requirement: optional,    weight: 1.0 }
+    - { code: gtin,                  requirement: optional,    weight: 1.0 }
+
+  cross_field_rules:
+    - id: R_ALARM_STATES_WHAT_IT_DETECTS
+      expr: "detection_type is not null or extinguisher_rating is not null"
+      references: [detection_type, extinguisher_rating]
+      severity: error
+      message: >
+        A life-safety device was captured stating neither what it detects nor a UL fire rating. One or
+        the other is the entire purpose of the product, and a blank here is the only gap in this
+        schema that could contribute to physical harm rather than to a bad purchase.
+
+    - id: R_EXTINGUISHER_IS_NOT_A_DETECTOR
+      expr: "extinguisher_rating is null or detection_type is null"
+      references: [extinguisher_rating, detection_type]
+      severity: warning
+      message: >
+        Both a UL fire rating and a detection type were captured for one product. Extinguishers
+        suppress and alarms detect; a device recorded as doing both usually means values were merged
+        across two adjacent rows.
+
+  channel_profiles:
+    - name: unilog_delivery
+      title_template: "{brand} {product_series} {mpn} {class_name}"
+      max_title_chars: 200
+      unit_system: imperial_primary
+      required: [mpn]

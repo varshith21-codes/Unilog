@@ -1,0 +1,108 @@
+# Coated abrasives: belts, discs, sheets, rolls, mesh and sanding sponges.
+#
+# 24 rows of the client's 1,000-row sample, across 3M (Stikit, Cubitron II), Mirka (Abranet,
+# HIOLIT), Diablo sanding belts and sponges, and Festool.
+#
+# WHY THIS IS SEPARATE FROM THE BONDED WHEEL CLASS. Bonded and coated abrasives look adjacent on a
+# shelf and are different products with different specifications: a bonded wheel is characterised by
+# a dimension triple and a speed rating, a coated abrasive by a grit designation, a backing and an
+# attachment method. Neither class's required attributes are answerable from the other's
+# description, so merging them would guarantee that most rows in the merged class scored incomplete
+# for lacking specifications they cannot have.
+#
+# THE BELT CONVENTION, which differs from the wheel convention deliberately. `1/2"x18"` on a sanding
+# belt is width x length — TWO figures — where `5"x.045"x7/8"` on a wheel is three. That is why this
+# class binds `overall_size` and `nominal_length` rather than the wheel's diameter and thickness: a
+# positional read across the two conventions would record a belt's length as a wheel thickness.
+#
+# THE FESTOOL GAP, recorded because it is a deliberate omission. Eight rows of the form
+# `578800 Festool 80x133 M GR PRO/10` are coated abrasives and are NOT classified. Their only
+# category token is `gr`, an abbreviation of grit, and admitting a two-letter token would let this
+# class win any row containing a stray "gr". Eight honest abstentions cost less than a promiscuous
+# identity term, and the fix is a brand-and-line alias table rather than a looser guard.
+#
+# No description recipe and no external scheme mapping — see decking_board.yaml.
+
+class:
+  code: ABR.COATED.GEN
+  name: Coated Abrasive
+  version: v1
+
+  item_type: Abrasive
+
+  # Brand-line names carry the identity where the product noun is absent: "9A-570-240 Abranet
+  # 2.75x30" and "5B-332-080 HIOLIT 5" P80" never say what they are.
+  # Deliberately EXCLUDES `sander`. A sander is the TOOL and sandpaper is what goes on it; with the
+  # term here, four Makita, Milwaukee, Kreg and Festool sanders sat in contention with this class at
+  # 73% dominance and abstained. `sanding` is kept because "Sanding Belt" and "Sanding Sponge" are
+  # the consumable, and it does not match "Sander" — the tokeniser yields distinct tokens.
+  # `pro/10` is Festool's pack designation for the Granat abrasive line and is the only category
+  # token on eight rows of the form "578800 Festool 80x133 M GR PRO/10". Those rows are named by
+  # dimensions, a grade letter and a pack code, and never by a product noun.
+  #
+  # This is the same precedent as `lineage` on the decking class and `dozer` on the saw-blade class:
+  # where a supplier writes only a product-line name, the line name IS the identity evidence. It is
+  # preferred over the bare `gr` those rows also carry, which is a two-letter token that would admit
+  # this class to any row containing a stray "gr".
+  # `pro/10-set` is listed alongside `pro/10` for the same reason the panel class lists both
+  # `sheathing` and `r-sheathing`: the tokeniser keeps the hyphen compound whole, so the set variant
+  # is a different token from the pack it contains.
+  identity_terms:
+    [sanding, sandpaper, stikit, abranet, hiolit, grit, sponge, belt, abrasive, flap,
+     pro/10, pro/10-set]
+
+  browse_path:
+    - Tools & Consumables
+    - Abrasives
+    - Coated Abrasives
+
+  reporting_path: [Tools, Abrasives, Coated]
+
+  attributes:
+    - { code: abrasive_form,         requirement: required,    weight: 3.0, label: Form }
+    - { code: abrasive_grit,         requirement: required,    weight: 3.0, label: Grit }
+    - { code: overall_size,          requirement: required,    weight: 3.0, label: Size }
+    - { code: nominal_length,        requirement: optional,    weight: 1.0, label: Length }
+    - { code: wheel_diameter,        requirement: optional,    weight: 2.0, label: Diameter }
+    - { code: abrasive_grain,        requirement: recommended, weight: 2.0, label: Grain }
+    - { code: backing_material,      requirement: recommended, weight: 2.0, label: Backing }
+    - { code: attachment_type,       requirement: required,    weight: 3.0, label: Attachment }
+    - { code: abrasive_operation,    requirement: recommended, weight: 2.0, label: Operation }
+    - { code: workpiece_material,    requirement: recommended, weight: 2.0, label: For Use On }
+    - { code: product_series,        requirement: recommended, weight: 2.0, label: Series }
+    - { code: pack_quantity,         requirement: required,    weight: 3.0 }
+    - { code: selling_uom,           requirement: recommended, weight: 2.0 }
+    - { code: case_quantity,         requirement: optional,    weight: 1.0 }
+    - { code: additional_information, requirement: optional,   weight: 1.0 }
+
+    # --- named delivery columns; must stay last ----------------------------------------------
+    - { code: approvals,             requirement: optional,    weight: 1.0 }
+    - { code: country_of_origin,     requirement: optional,    weight: 1.0 }
+    - { code: prop65_warning_required, requirement: optional,  weight: 1.0 }
+    - { code: gtin,                  requirement: optional,    weight: 1.0 }
+
+  cross_field_rules:
+    - id: R_BELT_HAS_NO_DIAMETER
+      expr: "abrasive_form != 'Belt' or wheel_diameter is null"
+      references: [abrasive_form, wheel_diameter]
+      severity: error
+      message: >
+        A diameter was recorded against a belt, which has none. Belt dimensions are width by length
+        and wheel dimensions are diameter by thickness, so this means a two-figure belt size was
+        read with the three-figure wheel convention.
+
+    - id: R_PACK_MULTIPLE_IS_A_COUNT
+      expr: "pack_quantity is null or pack_quantity >= 1"
+      references: [pack_quantity]
+      severity: warning
+      message: >
+        Coated abrasives are almost always sold in multiples and the count is stated as a bare
+        "6pc" or "50 Disc/Box" that sits beside real dimensions. A pack quantity below one means a
+        dimension was captured instead of the count.
+
+  channel_profiles:
+    - name: unilog_delivery
+      title_template: "{brand} {product_series} {mpn} {class_name}"
+      max_title_chars: 200
+      unit_system: imperial_primary
+      required: [mpn]

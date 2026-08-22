@@ -1,0 +1,128 @@
+# Bonded abrasive wheels: cut-off, grinding, and the dual-rated wheels that do both.
+#
+# 46 rows of the client's 1,000-row sample, across Milwaukee (39) and Freud/Diablo Steel Demon and
+# Speed Demon lines.
+#
+# WHY CUTTING AND GRINDING SHARE A CLASS. The instinct is two classes, because using a cut-off
+# wheel for grinding is a safety violation rather than a preference. The reason not to split is
+# that their vocabularies are nearly identical — same brands, same diameters, same arbors, same
+# workpieces — and the ONLY reliable distinguishing token is the operation word itself. Two classes
+# differing by one token would push most of this cohort into the ambiguous band, where a run with
+# no model attached abstains and delivers nothing. One class with `abrasive_operation` bound as a
+# required attribute keeps the distinction exactly as sharp, records it as a filterable value, and
+# leaves the retrieval decision easy. The dual-rated wheel is a third enum value rather than
+# membership of both, because it is a real product with a compromise thickness and not a wheel that
+# is two things.
+#
+# THE DIMENSION TRIPLE this class exists to keep straight. `5"x.045"x7/8"` is diameter x thickness
+# x arbor, positionally, with nothing in the string to say so. The three attributes carry
+# non-overlapping plausible ranges so a transposition is refused rather than published, and the
+# rule below catches the one transposition the ranges cannot: a thickness that exceeds its own
+# diameter.
+#
+# No description recipe and no external scheme mapping — see decking_board.yaml.
+
+class:
+  code: ABR.WHL.BONDED
+  name: Bonded Abrasive Wheel
+  version: v1
+
+  item_type: Abrasive Wheel
+
+  # "disc" and "wheel" are both here because this supplier uses them interchangeably for the same
+  # product. "wheel" does not collide with the gate valve's "handwheel": the tokeniser keeps that
+  # compound whole, so it never yields a bare "wheel".
+  identity_terms: [disc, wheel, wheels, grinding, cutoff, abrasive]
+
+  browse_path:
+    - Tools & Consumables
+    - Abrasives
+    - Bonded Abrasive Wheels
+
+  reporting_path: [Tools, Abrasives, Wheels]
+
+  attributes:
+    # `abrasive_form` is recommended rather than required, and the reason is a property of the
+    # extraction path rather than of the product. A description span can be claimed by only ONE
+    # attribute, and on "Metal Cut Off Disc" the operation and the form are the SAME WORDS. The
+    # operation is bound first and takes them, because cutting-versus-grinding is a safety
+    # distinction and the form is largely derivable from it. So the form is usually blank on a
+    # bonded wheel, and requiring it would score every row in the cohort incomplete for a value
+    # the text cannot separately evidence.
+    - { code: abrasive_operation,    requirement: required,    weight: 3.0, label: Operation }
+    - { code: abrasive_form,         requirement: recommended, weight: 2.0, label: Form }
+    - { code: wheel_diameter,        requirement: required,    weight: 3.0, label: Diameter }
+    # Thickness and arbor are recommended rather than required, and the reason is again a property of
+    # the extraction path rather than of the product — both ARE stated on every row.
+    #
+    # In "5\"x.045\"x7/8\"" the thickness is written as a DECIMAL INCH with no leading zero and the
+    # arbor as a BARE FRACTION. The quantity pattern requires a digit before the decimal point, and a
+    # fraction without a whole part is not a magnitude it recognises, so neither is readable from a
+    # description today. The diameter is, which is why it stays required.
+    #
+    # What protects the gap from becoming a wrong value is the plausible range: the only other inch
+    # figure in the string is the 8 of the 7/8 arbor, and at 203 mm it is refused against thickness's
+    # [0.5, 15] rather than published. Requiring these would score every abrasive row incomplete for
+    # values the text states and the reader cannot yet reach.
+    - { code: wheel_thickness,       requirement: recommended, weight: 3.0, label: Thickness }
+    - { code: arbor_size,            requirement: recommended, weight: 3.0, label: Arbor }
+    - { code: workpiece_material,    requirement: required,    weight: 3.0, label: For Use On }
+    - { code: abrasive_grain,        requirement: recommended, weight: 2.0, label: Grain }
+    - { code: max_operating_speed,   requirement: recommended, weight: 3.0, label: Max RPM }
+    - { code: attachment_type,       requirement: optional,    weight: 1.0, label: Attachment }
+    - { code: product_series,        requirement: recommended, weight: 2.0, label: Series }
+    - { code: pack_quantity,         requirement: recommended, weight: 2.0 }
+    - { code: selling_uom,           requirement: recommended, weight: 2.0 }
+    - { code: case_quantity,         requirement: optional,    weight: 1.0 }
+    - { code: each_weight,           requirement: optional,    weight: 1.0 }
+    - { code: additional_information, requirement: optional,   weight: 1.0 }
+
+    # --- named delivery columns; must stay last ----------------------------------------------
+    - { code: approvals,             requirement: recommended, weight: 3.0 }
+    - { code: country_of_origin,     requirement: optional,    weight: 1.0 }
+    - { code: prop65_warning_required, requirement: recommended, weight: 2.0 }
+    - { code: gtin,                  requirement: optional,    weight: 1.0 }
+
+  cross_field_rules:
+    - id: R_THICKNESS_BELOW_DIAMETER
+      expr: "wheel_thickness < wheel_diameter"
+      references: [wheel_thickness, wheel_diameter]
+      severity: error
+      message: >
+        Wheel thickness is not less than its diameter, which means the dimension triple was read
+        out of order. The three figures of "5x.045x7/8" are diameter, thickness and arbor
+        positionally with nothing in the string to say so, and this is the transposition the
+        individual plausible ranges cannot catch on their own.
+
+    - id: R_CUTTING_WHEEL_IS_THIN
+      expr: "abrasive_operation != 'Cutting' or wheel_thickness <= 6.0"
+      references: [abrasive_operation, wheel_thickness]
+      severity: error
+      message: >
+        A wheel recorded as a cutting wheel is thicker than 6 mm, which is grinding-wheel
+        territory. One of the two values is wrong, and publishing either would put a wheel on the
+        wrong side of a distinction that is a safety matter rather than a preference: a thick wheel
+        listed as a cut-off invites side loading, and a thin one listed for grinding invites
+        shattering.
+
+    - id: R_SPEED_RATING_PRESENT
+      expr: "max_operating_speed is not null or wheel_diameter is null"
+      references: [max_operating_speed, wheel_diameter]
+      severity: warning
+      message: >
+        No maximum safe speed was captured for a wheel of known diameter. The rating is marked on
+        every wheel sold and is the figure that decides whether it may be fitted to a given tool,
+        so its absence is a gap worth showing rather than an acceptable blank. It is deliberately
+        NOT derived from the diameter, which would be a calculation presented as a reading.
+
+  channel_profiles:
+    - name: unilog_delivery
+      title_template: "{brand} {product_series} {mpn} {class_name}"
+      max_title_chars: 200
+      unit_system: imperial_primary
+      required: [mpn]
+
+    - name: schema_org
+      max_title_chars: 200
+      unit_system: metric_primary
+      required: [mpn]

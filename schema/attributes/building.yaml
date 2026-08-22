@@ -1,0 +1,373 @@
+#
+# WHY THIS CATEGORY EXISTS. Building products are the largest single family in the client's
+# 1,000-row sample after lighting: roughly 240 rows across decking boards and fascia (167),
+# railing and posts (37), structural panels and siding (15), roofing (11) and windows and doors
+# (10), from Trex, AZEK, RDI, Huber, James Hardie, LP SmartSide and Boise Cascade.
+#
+# Decking alone is 167 rows — 17% of the file, and the single largest cohort that abstained before
+# this file existed.
+#
+# ---------------------------------------------------------------------------------------------
+# WHAT THE SUPPLIER STRINGS ACTUALLY CONTAIN, because that is what these attributes are shaped to.
+#
+#     1nx6-12'  Tide Pool Grooved - Trex Enhance Basics Decking
+#     1x6-20'   Castle Gate Grooved - Landmark Azek PVC Decking
+#     1x8-12'   Biscayne - Trex Lineage
+#     1x12-16'  Doug Fir STK Smooth 1S2E
+#     4x4       Wh Heritage Post Trim RDI
+#     6x6-10'   Black Alum Deco - Support Post
+#     8'        Black Alum ADA Rail Trex
+#     1-1/2" 4x8 Huber Zip R6.6 - Insulated R-Sheathing
+#     7-1/4"x12' Hardie Sdg Smooth - Primed HardiePlank
+#     6068R     Gliding Patio Dr 4500 United Blk Ext/WH Int LowE Arg w/J
+#
+# Recoverable with no document and no model: a nominal cross-section, a length, a colour name, an
+# edge profile, a surface texture, and for panels an R-value. That is most of what a decking buyer
+# filters on, which is why this cohort repays a class more than its row count alone suggests.
+#
+# ---------------------------------------------------------------------------------------------
+# THE NOMINAL-DIMENSION TRAP, and why nominal_dimensions is a string. `1x6` is not one inch by six
+# inches. A nominal 1x6 composite deck board is actually 0.94" x 5.5", and a nominal 4x4 post
+# sleeve is 4" x 4" outside but hollow. The nominal figure is a TRADE DESIGNATION that names a
+# size class, not a measurement, and converting it to a dimension_set would produce numbers that
+# are simply false while looking authoritative. It is preserved verbatim and the real dimensions
+# go in overall_size when a datasheet states them.
+#
+# `1nx6` in the first example is the same designation with a supplier's stray "n"; the alias list
+# does not try to repair it, because guessing at typography is how a size class gets corrupted.
+#
+# THE FASCIA DECISION. Fascia boards are not given their own class. A fascia board is a decking
+# line's trim board — same material, same colour range, same brand, different edge profile — so
+# it is an `edge_profile` value on the decking class. Two near-identical classes competing on
+# nearly identical vocabulary is exactly what forces the dominance threshold to adjudicate cases
+# it should never have seen, and the split would buy nothing a buyer could use.
+
+attributes:
+  # ------------------------------------------------------------------ dimensional designation
+  - code: nominal_dimensions
+    name: Nominal Dimensions
+    datatype: string
+    description: >
+      The trade size designation of a board, post or panel, recorded verbatim. A string rather
+      than a measurement because a nominal 1x6 deck board actually measures about 0.94" x 5.5":
+      the designation names a size class and converting it would publish numbers that are false.
+    example_values: ["1x6", "1x8", "1x12", "4x4", "6x6", "4x8"]
+    extraction_hints:
+      - 'the leading token of a board description, before the length: "1x6-12''" is 1x6 at 12 feet'
+      - 'keep it exactly as written, including oddities like "1nx6"; do not repair typography'
+      - a panel is stated in feet, e.g. "4x8" means a 4 by 8 foot sheet
+    # A bare "Size" and a bare "Profile" are deliberately absent. `overall_size` owns Size and
+    # `edge_profile` owns Profile, and holding either here made whichever was bound second
+    # unreachable — the decking, railing, panel and window classes all bind both pairs. The
+    # qualified forms below are unambiguous.
+    table_headers: ["nominal size", "dimension", "nominal", "profile size"]
+    spec_labels: ["Nominal Size", "Dimensions", "Nominal Dimensions"]
+    # A 1x6 board does not substitute for a 1x8 at any price.
+    interchange: defining
+
+  - code: edge_profile
+    name: Edge Profile
+    datatype: enum
+    description: >
+      How the long edges of a board are machined, which decides the fastening system. A grooved
+      board takes hidden fasteners and needs them; a square-edge board must be face-screwed. They
+      are not interchangeable on the same deck frame.
+    example_values: ["Grooved", "Square Edge", "Fascia", "Tongue and Groove"]
+    extraction_hints:
+      - '"Grooved" and "Sq Edge" are the two common decking values and appear as bare words'
+      - '"Fascia" identifies a trim board of the same decking line, not a separate product family'
+      - '"T&G" means Tongue and Groove'
+    spec_labels: ["Edge", "Edge Profile", "Profile", "Edge Type", "Board Profile"]
+    allowed_values:
+      - value: Grooved
+        aliases: ["groove", "grooved edge", "hidden fastener", "gr"]
+        note: takes hidden fasteners in the groove
+      - value: Square Edge
+        aliases: ["sq edge", "square", "sq", "solid edge", "no-groove", "no groove"]
+        note: face-screwed
+      - value: Fascia
+        aliases: ["fascia board", "fascia trim", "riser"]
+      - value: Tongue and Groove
+        aliases: ["t&g", "tg", "tongue & groove", "t and g"]
+      - value: Shiplap
+        aliases: ["ship lap", "shiplap edge", "w/shiplap edges"]
+      - value: Bullnose
+        aliases: ["bull nose", "rounded edge", "radius edge"]
+      - value: Board and Batten
+        aliases: ["b&b", "board & batten", "batten"]
+    interchange: defining
+
+  - code: surface_texture
+    name: Surface
+    datatype: enum
+    description: >
+      The finish of the visible face. A merchandising attribute that buyers filter on heavily in
+      decking and siding, and one of the few things a short description reliably states.
+    example_values: ["Smooth", "Wood Grain", "Brushed", "Variegated"]
+    extraction_hints:
+      - '"Smooth" appears as a bare word in siding and lumber descriptions'
+      - '"1S2E" on lumber means surfaced one side two edges; that is a milling spec, not this'
+    spec_labels: ["Surface", "Texture", "Finish", "Surface Texture", "Grain"]
+    allowed_values:
+      - value: Smooth
+        aliases: ["smooth", "sanded", "plain"]
+      - value: Wood Grain
+        aliases: ["woodgrain", "wood grain", "grained", "embossed grain"]
+      - value: Brushed
+        aliases: ["brushed", "wire brushed", "wirebrushed"]
+      - value: Variegated
+        aliases: ["variegated", "streaked", "multi-tonal", "multi tonal"]
+      - value: Scalloped
+        aliases: ["scallop", "scalloped back", "ribbed back"]
+      - value: Cedar Texture
+        aliases: ["cedar", "cedar grain", "rough cedar"]
+    interchange: cosmetic
+
+  - code: material_composition
+    name: Composition
+    datatype: enum
+    description: >
+      What the board or panel is actually made of. The primary durability and warranty fact in
+      decking, and genuinely different from finish_color or brand: a capped composite and a
+      cellular PVC board of the same colour have different expansion, weight and fire behaviour.
+    example_values: ["Capped Wood-Plastic Composite", "Cellular PVC", "Douglas Fir", "Aluminum"]
+    extraction_hints:
+      - '"PVC" appears explicitly in AZEK descriptions'
+      - '"Doug Fir" is Douglas Fir; "Alum" is Aluminum'
+      - do not infer the composition from the brand name alone
+    spec_labels: ["Material", "Composition", "Substrate", "Construction", "Made From"]
+    allowed_values:
+      - value: Capped Wood-Plastic Composite
+        aliases: ["capped composite", "wpc", "composite", "capped wpc", "shelled composite"]
+      - value: Uncapped Wood-Plastic Composite
+        aliases: ["uncapped composite", "uncapped wpc", "first generation composite"]
+      - value: Cellular PVC
+        aliases: ["pvc", "cellular pvc", "u-pvc", "vinyl", "pvc decking"]
+      - value: Capped Polymer
+        aliases: ["capped polymer", "polymer", "capped pvc", "mineral-based polymer"]
+      - value: Pressure-Treated Wood
+        aliases: ["pt", "treated", "pressure treated", "acq", "ground contact"]
+      - value: Cedar
+        aliases: ["western red cedar", "cedar wood"]
+      - value: Douglas Fir
+        aliases: ["doug fir", "df", "fir", "douglas-fir"]
+      - value: Aluminum
+        aliases: ["alum", "aluminium", "extruded aluminum"]
+      - value: Fiber Cement
+        aliases: ["fibre cement", "fiber-cement", "hardie", "cement board"]
+      - value: Engineered Wood
+        aliases: ["osb", "oriented strand board", "smartside", "engineered strand", "lp"]
+      - value: Gypsum
+        aliases: ["gypsum board", "drywall", "plasterboard", "wallboard"]
+      - value: Steel
+        aliases: ["galvanised steel", "galvanized steel", "steel panel"]
+    interchange: functional
+
+  - code: panel_thickness
+    name: Thickness
+    datatype: dimension
+    quantity_kind: length
+    canonical_unit: mm
+    display_preference: imperial_fraction
+    unit_hint: in
+    description: >
+      Nominal thickness of a sheet or panel product. Unlike a board's nominal cross-section this
+      IS a measurement, stated in inches and load-bearing for span and fire rating.
+    example_values: ['3/8"', '1/2"', '5/8"', '3/4"', '1-1/2"']
+    extraction_hints:
+      - 'the leading fraction of a panel description, e.g. ''1/2" 54"x10 Drywall'''
+      - do not confuse with the R-value figure on insulated sheathing
+    table_headers: ["thickness", "thk", "nominal thickness", "panel thickness"]
+    spec_labels: ["Thickness", "Nominal Thickness", "Panel Thickness", "Gauge"]
+    tolerance: 0.0
+    plausible_range: [1.0, 300.0]
+    # Critical rather than defining: 1/2" and 5/8" drywall both hang on the same studs, so the parts
+    # connect. What the difference actually costs is the fire rating and the span, and `fire_rating`
+    # carries that claim separately.
+    interchange: critical
+
+  - code: r_value
+    name: R-Value
+    datatype: number
+    description: >
+      Thermal resistance in hr-ft2-degF/BTU, the imperial R-value as printed. Declared as a plain
+      number because that composite unit is not in the registry; the unit is fixed by this
+      definition. Higher is more insulating.
+    example_values: ["3.6", "6.6", "9.6"]
+    extraction_hints:
+      - 'stated in the product name on insulated sheathing, e.g. "Zip R6.6" means 6.6'
+      - do not read the panel thickness as the R-value; they appear adjacent
+    spec_labels: ["R-Value", "R Value", "Thermal Resistance", "RSI"]
+    tolerance: 0.0
+    plausible_range: [0.1, 100.0]
+    # More insulation is never a fault in a substitution, provided the thickness still fits.
+    interchange: functional
+    substitution: at_least
+
+  - code: fire_rating
+    name: Fire Rating
+    datatype: enum
+    description: >
+      The fire classification the product carries. A code-compliance fact rather than a
+      performance preference: a non-rated panel cannot be substituted into a rated assembly
+      whatever else agrees, so it is recorded from the source and never inferred.
+    example_values: ["Type X", "Type C", "Class A"]
+    extraction_hints:
+      - '"Firelite" and similar trade names are not by themselves a rating; look for Type or Class'
+    spec_labels: ["Fire Rating", "Fire Classification", "Flame Spread", "Fire Resistance", "Class"]
+    allowed_values:
+      - value: Type X
+        aliases: ["type-x", "typex", "5/8 type x"]
+      - value: Type C
+        aliases: ["type-c", "typec"]
+      - value: Class A
+        aliases: ["class a", "class 1", "a rated"]
+      - value: Class B
+        aliases: ["class b", "class 2"]
+      - value: Class C
+        aliases: ["class c", "class 3"]
+      - value: Non-Rated
+        aliases: ["non rated", "unrated", "no rating"]
+    interchange: critical
+
+  # ------------------------------------------------------------------ railing
+  - code: railing_component
+    name: Component
+    datatype: enum
+    description: >
+      Which part of a railing assembly the item is. A railing order is a bill of several distinct
+      parts that are not substitutable for one another, so the component is the identity of the
+      line rather than a descriptive detail.
+    example_values: ["Post Trim", "Support Post", "Top Rail", "Baluster"]
+    extraction_hints:
+      - the component words appear as a bare noun phrase, e.g. "Post Trim RDI"
+      - '"Blank Post" is an uncut structural post; "Post Wrap" and "Post Sleeve" are cosmetic covers'
+    spec_labels: ["Component", "Part", "Type", "Item Type", "Component Type"]
+    allowed_values:
+      - value: Support Post
+        aliases: ["support post", "structural post", "blank post", "newel post"]
+      - value: Post Sleeve
+        aliases: ["post sleeve", "sleeve", "post wrap", "wrap"]
+      - value: Post Trim
+        aliases: ["post trim", "trim", "post skirt", "base trim"]
+      - value: Post Cap
+        aliases: ["post cap", "cap", "pyramid cap", "flat cap"]
+      - value: Top Rail
+        aliases: ["top rail", "handrail", "hand rail", "rail", "ada rail", "ada handrail"]
+      - value: Bottom Rail
+        aliases: ["bottom rail", "base rail", "foot rail"]
+      - value: Baluster
+        aliases: ["baluster", "bal", "spindle", "picket", "infill"]
+      - value: Rail Kit
+        aliases: ["rail kit", "railing kit", "section kit", "panel kit"]
+      - value: Gate
+        aliases: ["gate", "gate kit", "gate panel"]
+      - value: Gate Hardware
+        aliases: ["gate latch", "gravity latch", "hinge", "latch"]
+      - value: End Cap
+        aliases: ["end cap", "int end cap", "cap trim", "wall mount", "wall bracket"]
+    interchange: defining
+
+  # ------------------------------------------------------------------ windows and doors
+  - code: glazing_package
+    name: Glazing
+    datatype: multi_enum
+    multivalued: true
+    description: >
+      The glass specification of a window or glazed door. Multivalued because the options stack:
+      a unit is commonly low-E AND argon-filled AND tempered, and reporting only the first would
+      understate the thermal package the buyer is paying for.
+    example_values: ["Low-E", "Argon Filled", "Double Pane", "Tempered"]
+    extraction_hints:
+      - '"LowE" and "LowE-2" are Low-E coatings; "Arg" is argon fill'
+      - report every option the source names
+    spec_labels: ["Glazing", "Glass", "Glass Package", "Glazing Options", "Glass Type"]
+    allowed_values:
+      - value: Low-E
+        aliases: ["lowe", "low e", "low-e", "lowe-2", "lowe2", "low-e2", "low emissivity"]
+      - value: Argon Filled
+        aliases: ["argon", "arg", "gas filled", "argon fill"]
+      - value: Double Pane
+        aliases: ["double", "dual pane", "insulated glass", "ig", "double glazed"]
+      - value: Triple Pane
+        aliases: ["triple", "triple glazed", "3 pane"]
+      - value: Tempered
+        aliases: ["temp", "tempered glass", "safety glass"]
+      - value: Obscure
+        aliases: ["obscure", "frosted", "privacy glass", "rain glass"]
+      - value: Laminated
+        aliases: ["laminated", "impact glass", "impact resistant"]
+    interchange: functional
+    substitution: superset
+
+  - code: handing
+    name: Handing
+    datatype: enum
+    description: >
+      Which way the unit is hung or which panel slides. A hard fit fact on a door: a left-hand
+      unit cannot be installed in a right-hand opening, and it is the most common ordering error
+      in the category.
+    example_values: ["Left", "Right", "Reversible"]
+    extraction_hints:
+      - 'a trailing L or R on a size code is the handing, e.g. "6068R" is right-hand'
+      - do not guess when the code has no handing letter
+    spec_labels: ["Handing", "Hand", "Swing", "Operation", "Configuration"]
+    allowed_values:
+      - value: Left
+        aliases: ["l", "lh", "left hand", "left-hand", "lhs"]
+      - value: Right
+        aliases: ["r", "rh", "right hand", "right-hand", "rhs"]
+      - value: Reversible
+        aliases: ["reversible", "field reversible", "either hand"]
+      - value: Non-Handed
+        aliases: ["non-handed", "non handed", "n/a", "fixed"]
+    interchange: defining
+
+  # ------------------------------------------------------------------ coverage
+  - code: coverage_area
+    name: Coverage (sq ft)
+    datatype: number
+    description: >
+      Area one unit covers, in square feet. Declared as a plain number because square feet is not
+      in the unit registry; the unit is fixed by this definition. The figure an estimator actually
+      orders against for roofing and underlayment, where a "roll" or "bundle" means nothing alone.
+    example_values: ["100", "195", "200"]
+    extraction_hints:
+      - 'a roll stated as 3''x65'' covers 195 square feet; prefer an explicit figure when given'
+      - '"2sq" in roofing means 2 squares, which is 200 square feet'
+    spec_labels: ["Coverage", "Coverage Area", "Net Coverage", "Square Feet", "Area"]
+    tolerance: 0.02
+    plausible_range: [0.1, 10000.0]
+    interchange: functional
+    substitution: at_least
+
+  - code: roofing_component
+    name: Component
+    datatype: enum
+    description: >
+      Which layer of a roof assembly the item is. A shingle and an underlayment are ordered
+      together and are never alternatives to each other, so the layer is the item's identity.
+    example_values: ["Architectural Shingle", "Ice and Water Shield", "Metal Panel"]
+    extraction_hints:
+      - '"Ice Guard" and "Eaveguard" are ice-and-water shield membranes'
+      - a ribbed metal profile name such as "Premier Rib" is a metal panel
+    spec_labels: ["Component", "Type", "Product Type", "Roofing Type"]
+    allowed_values:
+      - value: Architectural Shingle
+        aliases: ["architectural", "laminate shingle", "dimensional shingle", "duration"]
+      - value: Three-Tab Shingle
+        aliases: ["3-tab", "3 tab", "three tab", "strip shingle"]
+      - value: Metal Panel
+        aliases: ["metal panel", "rib panel", "standing seam", "premier rib", "corrugated"]
+      - value: Ice and Water Shield
+        aliases: ["ice guard", "ice & water", "eaveguard", "ice and water", "weather lock",
+                  "weathr lk", "self-adhered membrane"]
+      - value: Underlayment
+        aliases: ["underlayment", "felt", "synthetic underlayment", "roof deck protection"]
+      - value: Ridge Vent
+        aliases: ["ridge vent", "ridgevent", "ventilation"]
+      - value: Starter Strip
+        aliases: ["starter", "starter strip", "starter course"]
+      - value: Hip and Ridge
+        aliases: ["hip and ridge", "hip & ridge", "ridge cap"]
+    interchange: defining

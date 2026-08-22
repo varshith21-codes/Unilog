@@ -1,0 +1,94 @@
+# Tool batteries, chargers, starter kits and power supplies.
+#
+# 21 rows of the client's 1,000-row sample, across Milwaukee (M18, M12), Makita, Kreg, Senco and a
+# 12 V 8D lead-acid battery.
+#
+# WHY THESE ARE NOT PART OF THE POWER-TOOL CLASS. A battery is bought on platform, voltage and
+# capacity; a tool is bought on what it does. More concretely: this cohort is what a bare tool
+# listing sends a buyer to look for, so it has to be findable on its own terms. Folding it into the
+# tool class would make `tool_configuration` meaningless for these rows — a battery is not bare and
+# is not a kit — and would leave `battery_capacity` optional across a class where most rows have no
+# capacity at all.
+#
+# THE PLATFORM IS THE PRODUCT HERE. On a tool, the platform is one attribute among many. On a
+# battery it is nearly the whole specification: `48-59-1804 Milw M18 and M12 Rapid Charger` serves
+# two platforms and that phrase IS the reason to buy it. `battery_platform` is a string and the
+# whole phrase is kept, because normalising it to a single platform would discard half of what the
+# charger does.
+#
+# THE STARTER-KIT AMBIGUITY, stated because it is a real limitation. `BL1850BDC1 Makita Starter Kit`
+# and `DCB205C 20V Starter Kit` contain batteries and a charger and no tool. `tool_configuration`
+# carries "Starter Kit" as a value so the distinction is recorded, but the descriptions do not say
+# how many batteries are in the box, and that count is the main thing separating two starter kits at
+# different prices. It stays blank rather than guessed.
+#
+# No description recipe and no external scheme mapping — see decking_board.yaml.
+
+class:
+  code: TOL.PWR.BATTERY
+  name: Battery and Charger
+  version: v1
+
+  item_type: Battery
+
+  # "starter" carries the starter-kit rows, whose only category words are "Starter Kit". It also
+  # admits roofing's "Starter Strip", which the roofing class then out-scores on its own component
+  # vocabulary — the ranking resolving an overlap rather than a leak.
+  # `source` covers "48-11-2330 Milw Heated Gear Power Source", which is the battery pack that powers
+  # the heated apparel range. It is a battery by specification — platform, voltage, capacity — even
+  # though the supplier names it by what it does rather than what it is.
+  identity_terms: [battery, batteries, charger, chargers, jumpstart, starter, source]
+
+  browse_path:
+    - Tools & Consumables
+    - Power Tools
+    - Batteries & Chargers
+
+  reporting_path: [Tools, Power Tools, Batteries & Chargers]
+
+  attributes:
+    - { code: battery_platform,      requirement: required,    weight: 3.0, label: Platform }
+    - { code: battery_voltage,       requirement: required,    weight: 3.0 }
+    - { code: battery_capacity,      requirement: required,    weight: 3.0, label: Capacity }
+    - { code: tool_configuration,    requirement: recommended, weight: 3.0, label: Configuration }
+    - { code: pack_quantity,         requirement: recommended, weight: 3.0 }
+    - { code: product_series,        requirement: recommended, weight: 2.0, label: Series }
+    - { code: voltage_rating,        requirement: optional,    weight: 1.0, label: Input Voltage }
+    - { code: amperage_rating,       requirement: optional,    weight: 1.0 }
+    - { code: overall_size,          requirement: optional,    weight: 1.0, label: Size }
+    - { code: each_weight,           requirement: optional,    weight: 1.0 }
+    - { code: selling_uom,           requirement: recommended, weight: 2.0 }
+    - { code: additional_information, requirement: optional,   weight: 1.0 }
+
+    # --- named delivery columns; must stay last ----------------------------------------------
+    - { code: warranty_terms,        requirement: recommended, weight: 2.0 }
+    - { code: approvals,             requirement: recommended, weight: 2.0 }
+    - { code: country_of_origin,     requirement: optional,    weight: 1.0 }
+    - { code: prop65_warning_required, requirement: recommended, weight: 2.0 }
+    - { code: gtin,                  requirement: optional,    weight: 1.0 }
+
+  cross_field_rules:
+    - id: R_CAPACITY_IS_NOT_A_VOLTAGE
+      expr: "battery_capacity is null or battery_voltage is null or battery_capacity < battery_voltage"
+      references: [battery_capacity, battery_voltage]
+      severity: error
+      message: >
+        Battery capacity is not below its voltage, which for every pack in this catalogue means the
+        two were swapped. "20V 4ah" puts them four characters apart with the same shape, and a
+        20 Ah 4 V pack does not exist.
+
+    - id: R_PACK_STATES_A_PLATFORM
+      expr: "battery_platform is not null or tool_configuration is null"
+      references: [battery_platform, tool_configuration]
+      severity: error
+      message: >
+        No battery platform was captured. On a tool the platform is one attribute among many; on a
+        battery it is nearly the whole specification, because it is the only thing that decides
+        whether the pack fits anything the buyer owns.
+
+  channel_profiles:
+    - name: unilog_delivery
+      title_template: "{brand} {product_series} {mpn} {class_name}"
+      max_title_chars: 200
+      unit_system: imperial_primary
+      required: [mpn]

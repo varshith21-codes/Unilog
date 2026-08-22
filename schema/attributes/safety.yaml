@@ -1,0 +1,197 @@
+#
+# WHY THIS CATEGORY EXISTS. Personal protective equipment and life-safety devices are roughly 39
+# rows of the client's 1,000-row sample: protective apparel (24, mostly Milwaukee and UTW heated
+# gear), safety eyewear (10, Edge) and detection devices (5).
+#
+# ---------------------------------------------------------------------------------------------
+# WHAT THE SUPPLIER STRINGS ACTUALLY CONTAIN, because that is what these attributes are shaped to.
+#
+#     M701B-21L      Milw L Black Heated Work Glove Liners
+#     UTW Pro        Heated Glove Blk XL
+#     MWUG360102 25  BLK SM Aerial Snow Heated Glove
+#     M200B-21XL     Milw M12 BLK - Heated Hoodie Kit XL
+#     TSDKAP218-G2   Edge Safety - Khor Black Frame Polarized
+#     XB11PCVS       Edge Safety Glasses - Photochromic Lense
+#     FEEFX6L        Lith Fire Extinguisher
+#     1046793        Smoke & CO Alarm
+#
+# Recoverable with no document and no model: a garment size, a colour, a lens treatment, and
+# whether the garment is heated. Apparel is the one cohort in this catalogue where SIZE is the
+# whole reason a SKU exists — the same glove in six sizes is six rows — so garment_size carries
+# more weight here than a dimension usually would.
+#
+# ---------------------------------------------------------------------------------------------
+# WHY THE ANSI RATING IS NOT HERE. Impact and cut ratings (ANSI Z87.1, ANSI/ISEA 105) are
+# compliance claims, and this repository already has one place for those: `approvals` in
+# compliance.yaml, which is declared strict-evidence so it can never be satisfied by inference.
+# Duplicating them as an ordinary attribute would create a second, weaker path to the same claim,
+# and the weaker path is the one a batch run would populate.
+#
+# THE SIZE-LETTER TRAP. `M701B-21M` is a MEDIUM glove and `M200B-21M` is a MEDIUM hoodie, but
+# `Milw M12 BLK` in the same string is the BATTERY PLATFORM, not a size. The trailing token is the
+# size and the M12/M18 token is not, which is why garment_size is read from the end of the string
+# and its aliases deliberately do not include a bare "M12".
+
+attributes:
+  # ------------------------------------------------------------------ apparel
+  - code: ppe_form
+    name: Form
+    datatype: enum
+    description: >
+      Which piece of protective equipment the item is. Not a descriptive nicety: a glove and a
+      glove liner are worn together rather than instead of each other, and a listing that
+      conflates them produces an order that leaves the wearer without one of the two.
+    example_values: ["Glove", "Glove Liner", "Hoodie", "Safety Glasses"]
+    extraction_hints:
+      - '"Liners" makes it a Glove Liner rather than a Glove'
+      - '"Safety" alone in an Edge part description means safety glasses'
+    spec_labels: ["Form", "Type", "Product Type", "Garment Type"]
+    allowed_values:
+      - value: Safety Glasses
+        aliases: ["safety glasses", "spectacles", "eyewear", "safety", "glasses"]
+      - value: Goggles
+        aliases: ["goggle", "goggles", "sealed eyewear"]
+      - value: Face Shield
+        aliases: ["face shield", "faceshield", "visor"]
+      - value: Glove
+        aliases: ["glove", "gloves", "work glove"]
+      - value: Glove Liner
+        aliases: ["glove liner", "glove liners", "liner", "liners"]
+        note: worn under a glove, not instead of one
+      - value: Hoodie
+        aliases: ["hoodie", "hooded sweatshirt", "hood"]
+      - value: Jacket
+        aliases: ["jacket", "coat", "softshell"]
+      - value: Vest
+        aliases: ["vest", "hi-vis vest", "safety vest"]
+      - value: Knee Pad
+        aliases: ["knee pad", "kneeling pad", "knee protection"]
+      - value: Hearing Protection
+        aliases: ["hearing protector", "ear muff", "earmuff", "ear protection", "hearing"]
+        note: worn PPE; the AM/FM variants are still hearing protection first
+    interchange: defining
+
+  - code: garment_size
+    name: Size
+    datatype: enum
+    description: >
+      Apparel size. The reason a SKU exists in this cohort — the same glove in six sizes is six
+      rows — so it is an enum with a fixed value set rather than a free string, which lets a
+      buyer's size run be checked for gaps.
+    example_values: ["S", "M", "L", "XL", "2XL"]
+    extraction_hints:
+      - 'the size is the TRAILING token of the description, e.g. "Heated Hoodie Kit XL"'
+      - 'a battery platform token such as M12 or M18 is NOT a size, even though it starts with M'
+      - '"SM", "MD" and "LG" are the two-letter spellings of small, medium and large'
+    table_headers: ["size", "garment size", "apparel size"]
+    spec_labels: ["Size", "Garment Size", "Apparel Size"]
+    allowed_values:
+      - value: XS
+        aliases: ["xs", "x-small", "extra small"]
+      - value: S
+        aliases: ["s", "sm", "small"]
+      - value: M
+        aliases: ["md", "medium", "med"]
+        note: deliberately excludes a bare "m12"/"m18", which are battery platforms
+      - value: L
+        aliases: ["l", "lg", "large"]
+      - value: XL
+        aliases: ["xl", "x-large", "extra large"]
+      - value: 2XL
+        aliases: ["2x", "2xl", "xxl", "xx-large"]
+      - value: 3XL
+        aliases: ["3x", "3xl", "xxxl"]
+      - value: One Size
+        aliases: ["one size", "osfa", "universal", "one size fits all"]
+    interchange: defining
+
+  - code: heated_garment
+    name: Heated
+    datatype: boolean
+    description: >
+      Whether the garment contains a powered heating element. A boolean rather than a feature note
+      because it changes the product category entirely: a heated garment needs a battery and a
+      platform, and its price is several times the unheated equivalent.
+    example_values: ["true", "false"]
+    extraction_hints:
+      - '"Heated" stated in the description sets this true'
+      - absence of the word is not evidence of false; leave it unset
+    spec_labels: ["Heated", "Heating", "Powered Heating"]
+    # Critical rather than defining: both are wearable garments in the same size, so nothing about the
+    # fit is impossible. The difference is a battery, a platform and several times the price, which is
+    # a form-and-fit difference reported loudly rather than an impossibility.
+    interchange: critical
+
+  - code: lens_treatment
+    name: Lens
+    datatype: enum
+    description: >
+      The tint or optical treatment of a protective lens. Selected for the working environment
+      rather than for looks: a smoke lens is unusable indoors and a clear lens is unusable in
+      glare, so the treatment is a fit-for-purpose fact.
+    example_values: ["Clear", "Polarized", "Photochromic", "Smoke / Gray"]
+    extraction_hints:
+      - '"Lense" is a supplier misspelling of lens and still indicates this attribute'
+      - a frame colour is not a lens treatment; "Black Frame" describes the frame
+    spec_labels: ["Lens", "Lens Color", "Lens Tint", "Lens Type", "Tint"]
+    allowed_values:
+      - value: Clear
+        aliases: ["clear", "clear lens", "uncoated"]
+      - value: Smoke / Gray
+        aliases: ["smoke", "gray", "grey", "smoke lens", "tinted"]
+      - value: Amber
+        aliases: ["amber", "yellow", "high contrast"]
+      - value: Polarized
+        aliases: ["polarized", "polarised", "polar"]
+      - value: Photochromic
+        aliases: ["photochromic", "transitions", "variable tint", "light adaptive"]
+      - value: Mirror
+        aliases: ["mirror", "mirrored", "silver mirror", "blue mirror"]
+      - value: Indoor / Outdoor
+        aliases: ["indoor/outdoor", "indoor outdoor", "i/o", "light mirror"]
+      - value: Red
+        aliases: ["red", "red lens", "red lenses"]
+    interchange: functional
+
+  # ------------------------------------------------------------------ life safety
+  - code: detection_type
+    name: Detects
+    datatype: multi_enum
+    multivalued: true
+    description: >
+      What the alarm senses. Multivalued because a combination unit detects smoke AND carbon
+      monoxide, and recording only one would misrepresent a life-safety device — the case where
+      an understated specification does the most harm.
+    example_values: ["Smoke", "Carbon Monoxide"]
+    extraction_hints:
+      - '"Smoke & CO Alarm" detects both; report both values'
+      - '"CO" in this context is carbon monoxide, not a company abbreviation'
+    spec_labels: ["Detects", "Detection", "Sensor Type", "Alarm Type", "Type"]
+    allowed_values:
+      - value: Smoke
+        aliases: ["smoke", "smoke detection", "photoelectric", "ionization"]
+      - value: Carbon Monoxide
+        aliases: ["co", "carbon monoxide", "co detection"]
+      - value: Heat
+        aliases: ["heat", "heat detection", "rate of rise"]
+      - value: Natural Gas
+        aliases: ["natural gas", "methane", "gas"]
+      - value: Motion
+        aliases: ["motion", "pir", "occupancy", "driveway alert"]
+    # A detector that senses more than the reference is never a downgrade.
+    interchange: functional
+    substitution: superset
+
+  - code: extinguisher_rating
+    name: UL Rating
+    datatype: string
+    description: >
+      The UL fire rating of an extinguisher, such as 2A:10B:C. A string because it is a compound
+      code rather than a magnitude: the number before A is a water-equivalent size, the number
+      before B is a square-foot area, and C is a bare suitability flag with no number at all.
+    example_values: ["2A:10B:C", "1A:10B:C", "10B:C"]
+    extraction_hints:
+      - keep the colons and letters exactly as printed
+      - do not split the code into separate figures
+    spec_labels: ["UL Rating", "Rating", "Fire Rating", "Classification", "UL Classification"]
+    interchange: functional

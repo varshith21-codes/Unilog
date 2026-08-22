@@ -1,0 +1,91 @@
+# Cooking appliances: ranges, cooktops, wall ovens and microwaves.
+#
+# 23 rows of the client's 1,000-row sample, across GE, Cafe, Frigidaire, LG, Beko and Whirlpool.
+#
+# THE THREE FIGURES THAT SELL THESE, and they are all in the description. `PS960YPFS 30" GE Electric
+# Range SS - Display Only` states a cabinet width, a fuel, and a finish, which is very nearly the
+# complete buying decision for a range. `appliance_width` and `fuel_type` are therefore both bound
+# required: a 36" range will not go into a 30" opening, and an electric one will not run off a gas
+# line, so either one wrong makes the listing useless rather than merely incomplete.
+#
+# "DISPLAY ONLY" IS NOT A SPECIFICATION, and it appears on nine of these 23 rows. It is a stock
+# condition — a floor model — and it belongs nowhere in the attribute set. It is deliberately not
+# mapped to any attribute, which means it survives only in the source description; inventing a
+# condition attribute from a phrase in a description is how a merchandising note becomes a published
+# product claim. The dishwasher class established this by carrying "PDSH4816AF Dishwasher SS -
+# Display Only" without a condition field, and this class follows it.
+#
+# THE OTR MOUNTING NOTE. "OTR Microwave" means over-the-range, which is a MOUNTING and not a door
+# configuration, so it goes to `mounting_type`. "Microwave Drawer" genuinely is a door configuration.
+# The two look alike in a short description and are recorded in different fields on purpose.
+#
+# No description recipe and no external scheme mapping — see decking_board.yaml.
+
+class:
+  code: APP.KIT.COOKING
+  name: Cooking Appliance
+  version: v1
+
+  item_type: Range
+
+  # "mocrowave" is a supplier misspelling in "WMMS3330RZ OTR Mocrowave SS" and is listed because the
+  # part number and the OTR qualifier both confirm the intent.
+  identity_terms: [range, cooktop, oven, microwave, mocrowave, stove, grill, hood]
+
+  browse_path:
+    - Appliances & Consumer Electronics
+    - Kitchen Appliances
+    - Cooking Appliances
+
+  reporting_path: [Appliances, Large Appliances, Cooking]
+
+  attributes:
+    - { code: fuel_type,             requirement: required,    weight: 3.0 }
+    - { code: appliance_width,       requirement: required,    weight: 3.0, label: Width }
+    - { code: finish_color,          requirement: required,    weight: 3.0, label: Color }
+    - { code: product_series,        requirement: recommended, weight: 3.0, label: Series }
+    - { code: model_number,          requirement: optional,    weight: 1.0 }
+    - { code: mounting_type,         requirement: recommended, weight: 2.0 }
+    - { code: door_configuration,    requirement: optional,    weight: 2.0 }
+    - { code: capacity_cubic_feet,   requirement: recommended, weight: 2.0, label: Capacity }
+    - { code: voltage_rating,        requirement: recommended, weight: 2.0 }
+    - { code: amperage_rating,       requirement: optional,    weight: 1.0 }
+    - { code: overall_size,          requirement: recommended, weight: 2.0, label: Size }
+    - { code: primary_material,      requirement: optional,    weight: 1.0, label: Material }
+    - { code: plug_type,             requirement: optional,    weight: 1.0 }
+    - { code: selling_uom,           requirement: recommended, weight: 2.0 }
+    - { code: additional_information, requirement: optional,   weight: 1.0 }
+
+    # --- named delivery columns; must stay last ----------------------------------------------
+    - { code: warranty_terms,        requirement: recommended, weight: 2.0 }
+    - { code: included_technology,   requirement: optional,    weight: 1.0 }
+    - { code: approvals,             requirement: recommended, weight: 2.0 }
+    - { code: country_of_origin,     requirement: recommended, weight: 1.0 }
+    - { code: prop65_warning_required, requirement: optional,  weight: 1.0 }
+    - { code: gtin,                  requirement: optional,    weight: 1.0 }
+
+  cross_field_rules:
+    - id: R_GAS_APPLIANCE_IS_NOT_240V
+      expr: "fuel_type not in ('Gas (Natural)', 'Gas (Propane)') or voltage_rating is null or voltage_rating <= 130"
+      references: [fuel_type, voltage_rating]
+      severity: warning
+      message: >
+        A gas appliance was captured with a 240 V supply. Gas ranges need only a 120 V circuit for
+        ignition and controls, so a 240 V figure usually means a rating was inherited from an
+        adjacent electric row — and it would send an installer to run the wrong circuit.
+
+    - id: R_ELECTRIC_RANGE_STATES_A_VOLTAGE
+      expr: "fuel_type != 'Electric' or voltage_rating is not null"
+      references: [fuel_type, voltage_rating]
+      severity: warning
+      message: >
+        An electric cooking appliance was captured with no supply voltage. It is the figure the
+        installer sizes the circuit from, and the difference between 120 V and 240 V decides whether
+        the existing one will do.
+
+  channel_profiles:
+    - name: unilog_delivery
+      title_template: "{brand} {product_series} {mpn} {class_name}"
+      max_title_chars: 200
+      unit_system: imperial_primary
+      required: [mpn]

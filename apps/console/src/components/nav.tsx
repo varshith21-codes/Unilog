@@ -61,23 +61,30 @@ function NavGroup({
   pathname,
   variant,
   label,
+  collapsed,
 }: {
   items: NavItem[];
   pathname: string;
   variant: NavVariant;
   label: string;
+  collapsed: boolean;
 }) {
+  const isRail = variant === "desktop" && collapsed;
+
   return (
     <div className="nav-group">
       {variant === "desktop" ? <p className="nav-group-label">{label}</p> : null}
       <ul className={clsx("nav-list", variant === "mobile" && "nav-list-mobile")}>
         {items.map((item) => {
           const active = activeFor(pathname, item.href);
+          const accessibleLabel = `${item.label}. ${item.descriptor}`;
           return (
             <li key={item.href}>
               <Link
                 href={item.href}
                 aria-current={active ? "page" : undefined}
+                aria-label={isRail ? accessibleLabel : undefined}
+                title={isRail ? accessibleLabel : undefined}
                 className={clsx("nav-link", variant === "mobile" && "nav-link-mobile")}
               >
                 <NavGlyph name={item.glyph} />
@@ -100,7 +107,13 @@ export function CurrentSection() {
   return <strong>{ALL.find((item) => activeFor(pathname, item.href))?.label ?? "Workspace"}</strong>;
 }
 
-export function Nav({ variant = "desktop" }: { variant?: NavVariant }) {
+export function Nav({
+  variant = "desktop",
+  collapsed = false,
+}: {
+  variant?: NavVariant;
+  collapsed?: boolean;
+}) {
   const pathname = usePathname();
 
   useEffect(() => {
@@ -115,9 +128,22 @@ export function Nav({ variant = "desktop" }: { variant?: NavVariant }) {
     <nav
       aria-label={variant === "desktop" ? "AXIOM workflows" : "Workflow navigation"}
       className={clsx("workflow-nav", variant === "mobile" && "workflow-nav-mobile")}
+      tabIndex={variant === "desktop" ? 0 : undefined}
     >
-      <NavGroup items={PRIMARY} pathname={pathname} variant={variant} label="Workflows" />
-      <NavGroup items={SECONDARY} pathname={pathname} variant={variant} label="Analysis" />
+      <NavGroup
+        items={PRIMARY}
+        pathname={pathname}
+        variant={variant}
+        label="Workflows"
+        collapsed={collapsed}
+      />
+      <NavGroup
+        items={SECONDARY}
+        pathname={pathname}
+        variant={variant}
+        label="Analysis"
+        collapsed={collapsed}
+      />
     </nav>
   );
 }

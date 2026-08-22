@@ -59,8 +59,11 @@ attributes:
         "master carton",
         "ctn",
         "ctn qty",
-        "pack",
-        "pack qty",
+        # A bare "pack" and "pack qty" were here and are deliberately gone. They are `pack_quantity`'s
+        # headers by name, and holding them on both attributes made whichever was bound second
+        # unreachable — which surfaced the moment a class bound both, as the abrasive and fastener
+        # classes do. This attribute keeps the headers that say CARTON; the consumer pack keeps the
+        # ones that say pack.
       ]
     plausible_range: [1.0, 100000.0]
     # A packing decision, not a property of the valve. Cartons of 12 and 24 hold the same part.

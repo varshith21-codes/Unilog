@@ -1,0 +1,93 @@
+# Railing systems and the posts, sleeves, caps and trim that go with them.
+#
+# 37 rows of the client's 1,000-row sample, across RDI (Heritage, Elite), Trex aluminium ADA rail,
+# DSI post wraps and Deco support posts.
+#
+# WHY THE WHOLE ASSEMBLY IS ONE CLASS. A railing order is a bill of several parts — post, sleeve,
+# trim, cap, top rail, baluster, gate hardware — that are bought together and are never
+# alternatives to one another. The instinct is a class per part; the reason not to is that they
+# share almost all their vocabulary (brand, colour, material, nominal size) and differ by a single
+# noun. Eleven classes competing on one distinguishing token would push most of this cohort into
+# the ambiguous band, where a run with no model attached abstains. One class with
+# `railing_component` as a required attribute keeps the distinction the buyer needs and keeps the
+# retrieval decision easy.
+#
+# THE TREX COLLISION, stated because it is load-bearing. `trex` is an identity term of the decking
+# class too, so "8' Black Alum ADA Rail Trex" is admitted by both. That is correct and deliberate:
+# both classes genuinely could be right from the brand alone, and the scorer then separates them on
+# `railing_component` vocabulary ("rail", "cap", "wall mount") against decking's `edge_profile`
+# vocabulary. Narrowing either identity list to force a win would break the other cohort.
+#
+# No description recipe and no external scheme mapping, for the reasons recorded in
+# decking_board.yaml: neither can be verified against a labelled row that does not exist.
+
+class:
+  code: BLD.RAIL.POST
+  name: Railing and Post
+  version: v1
+
+  item_type: Railing
+
+  # "post" is included even though it is broad, because in this catalogue it is nearly always a
+  # railing post and the alternative is losing a third of the cohort. "bal" is the supplier's
+  # abbreviation for baluster and appears as a bare token in "Custom Finyline Wh Gate Sq Bal".
+  #
+  # Deliberately EXCLUDES "gate", and this repository has already paid for that lesson once: the
+  # bronze gate-valve class matched "Castle Gate" PVC decking before its identity guard was
+  # tightened. Castle Gate is a Landmark AZEK COLOUR NAME, and with "gate" in this list four AZEK
+  # decking rows went ambiguous with railing at 94% dominance and abstained. "latch" covers the one
+  # row that is genuinely gate hardware.
+  # `t-rail` is listed separately from `rail` because the tokeniser keeps hyphenated compounds whole,
+  # so "6' Wh Select T-Rail Kit Horiz" yields `t-rail` and the bare `rail` never matches it. Five
+  # T-Rail kit rows were lost to that before this entry existed — the same behaviour that made
+  # `r-sheathing` a separate term on the panel class.
+  #
+  # Deliberately EXCLUDES `spindle`: it is a synonym for baluster that this supplier never uses, and
+  # it IS the word for a shaper's cutter mount, so it put "Oliver 3HP 230V 1PH Shaper 1-1/4 Spindle"
+  # into contention with a railing class at 94% dominance.
+  identity_terms:
+    [railing, rail, t-rail, baluster, balusters, bal, post, posts, handrail, newel, latch]
+
+  browse_path:
+    - Building Materials
+    - Decking & Railing
+    - Railing Systems
+
+  reporting_path: [Building Materials, Decking, Railing]
+
+  attributes:
+    - { code: railing_component,     requirement: required,    weight: 3.0, label: Component }
+    - { code: product_series,        requirement: recommended, weight: 3.0, label: Series }
+    - { code: nominal_dimensions,    requirement: required,    weight: 3.0, label: Nominal Size }
+    - { code: nominal_length,        requirement: recommended, weight: 2.0, label: Length }
+    - { code: material_composition,  requirement: required,    weight: 3.0, label: Material }
+    - { code: finish_color,          requirement: required,    weight: 3.0, label: Color }
+    - { code: overall_size,          requirement: optional,    weight: 1.0, label: Actual Size }
+    - { code: mounting_type,         requirement: optional,    weight: 1.0 }
+    - { code: pack_quantity,         requirement: recommended, weight: 2.0 }
+    - { code: selling_uom,           requirement: recommended, weight: 2.0 }
+    - { code: each_weight,           requirement: optional,    weight: 1.0 }
+    - { code: additional_information, requirement: optional,   weight: 1.0 }
+
+    # --- named delivery columns; must stay last ----------------------------------------------
+    - { code: warranty_terms,        requirement: recommended, weight: 2.0 }
+    - { code: approvals,             requirement: optional,    weight: 1.0 }
+    - { code: country_of_origin,     requirement: optional,    weight: 1.0 }
+    - { code: gtin,                  requirement: optional,    weight: 1.0 }
+
+  cross_field_rules:
+    - id: R_MULTIPACK_STATES_A_COUNT
+      expr: "pack_quantity is null or pack_quantity >= 1"
+      references: [pack_quantity]
+      severity: warning
+      message: >
+        Post trim and caps are commonly sold in fours, and the count is stated as a bare "4pc" that
+        is easy to read as a dimension. A pack quantity below one means the wrong token was
+        captured.
+
+  channel_profiles:
+    - name: unilog_delivery
+      title_template: "{brand} {product_series} {mpn} {class_name}"
+      max_title_chars: 200
+      unit_system: imperial_primary
+      required: [mpn]

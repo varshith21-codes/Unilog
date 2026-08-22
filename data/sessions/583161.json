@@ -13,17 +13,17 @@
   "document_sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
   "gaps": [],
   "policy": {
-    "epsilon": 0.05,
+    "epsilon": 0.02,
     "confidence_level": 0.95,
-    "threshold": 0.6853,
-    "coverage": 1.0,
-    "accepted": 220,
-    "accepted_errors": 1,
-    "observed_error_rate": 0.0045,
-    "error_upper_bound": 0.0201,
+    "threshold": 0.7194,
+    "coverage": 0.7591,
+    "accepted": 167,
+    "accepted_errors": 0,
+    "observed_error_rate": 0.0,
+    "error_upper_bound": 0.0159,
     "calibration_size": 220,
     "achievable": true,
-    "reason": "at threshold 0.685, 100.0% of values are publishable with an error rate of at most 2.0% at 95% confidence"
+    "reason": "at threshold 0.719, 75.9% of values are publishable with an error rate of at most 1.6% at 95% confidence"
   },
   "quality": {
     "completeness": 1.0,
@@ -38,7 +38,7 @@
       "verifiability"
     ]
   },
-  "created_at": "2026-08-22T12:30:42.686466+00:00",
+  "created_at": "2026-08-22T19:16:16.036515+00:00",
   "decisions": [],
   "pages": [
     {
@@ -65,7 +65,7 @@
       "score": 0.8,
       "status": "auto_accepted",
       "reason_code": "auto_accepted",
-      "detail": "score 0.800 >= threshold 0.685",
+      "detail": "score 0.800 >= threshold 0.719",
       "method": "supplier_feed",
       "model_tier": null,
       "is_required": true,
@@ -109,7 +109,7 @@
       "score": 0.8,
       "status": "auto_accepted",
       "reason_code": "auto_accepted",
-      "detail": "score 0.800 >= threshold 0.685",
+      "detail": "score 0.800 >= threshold 0.719",
       "method": "supplier_feed",
       "model_tier": null,
       "is_required": true,
@@ -140,7 +140,7 @@
       "score": 0.8,
       "status": "auto_accepted",
       "reason_code": "auto_accepted",
-      "detail": "score 0.800 >= threshold 0.685",
+      "detail": "score 0.800 >= threshold 0.719",
       "method": "supplier_feed",
       "model_tier": null,
       "is_required": false,
@@ -183,7 +183,7 @@
       "score": 0.8,
       "status": "auto_accepted",
       "reason_code": "auto_accepted",
-      "detail": "score 0.800 >= threshold 0.685",
+      "detail": "score 0.800 >= threshold 0.719",
       "method": "supplier_feed",
       "model_tier": null,
       "is_required": false,

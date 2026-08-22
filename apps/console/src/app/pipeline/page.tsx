@@ -1,8 +1,6 @@
-import clsx from "clsx";
-import Link from "next/link";
-
 import { PipelineReplay } from "@/components/pipeline-replay";
-import { EmptyState, Overline, PageHeader, Panel } from "@/components/primitives";
+import { EmptyState, PageHeader, Panel } from "@/components/primitives";
+import { RecordedRunCombobox } from "@/components/recorded-run-combobox";
 import {
   getDocument,
   listSkus,
@@ -98,28 +96,10 @@ export default async function PipelinePage({
 
       {skus.length > 1 ? (
         <Panel className="mb-[var(--spacing-section)] p-6">
-          <Overline>Recorded runs</Overline>
-          <ul className="mt-3 flex flex-wrap gap-2">
-            {skus.map((entry) => (
-              <li key={entry.sku}>
-                {/*
-                  `pill-button` carries hover, press and the aria-current exclusion, replacing an
-                  ad-hoc `hover:text-[var(--fg)]` that gave the selected pill a hover state washing
-                  its accent toward neutral — reading as the selection coming undone.
-                */}
-                <Link
-                  href={`/pipeline?sku=${encodeURIComponent(entry.sku)}`}
-                  aria-current={entry.sku === bundle.sku ? "page" : undefined}
-                  className={clsx(
-                    "pill pill-button mono",
-                    entry.sku === bundle.sku ? "pill-accent" : "pill-quiet",
-                  )}
-                >
-                  {entry.sku}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <RecordedRunCombobox
+            options={skus.map((entry) => entry.sku)}
+            selectedSku={bundle.sku}
+          />
         </Panel>
       ) : null}
 

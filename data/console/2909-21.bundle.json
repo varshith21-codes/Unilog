@@ -19,8 +19,8 @@
       "source_document_ids": [
         "Unihack__Sample_Dataset_-_Input#2909-21"
       ],
-      "created_at": "2026-08-22T12:30:44.124122+00:00",
-      "updated_at": "2026-08-22T12:30:44.124126+00:00"
+      "created_at": "2026-08-22T19:16:17.819446+00:00",
+      "updated_at": "2026-08-22T19:16:17.819450+00:00"
     },
     "classifications": [],
     "classification_summary": {
@@ -28,13 +28,24 @@
       "confidence": 0.0,
       "confident_depth": 0,
       "schemes": [],
-      "candidates_considered": 0,
-      "method": "no_viable_candidate",
+      "candidates_considered": 2,
+      "method": "ambiguous_no_model",
       "abstained": true,
       "input_tokens": 0,
       "output_tokens": 0
     },
-    "classification_candidates": [],
+    "classification_candidates": [
+      {
+        "code": "BLD.ROOF.GEN",
+        "score": 0.151,
+        "path_text": "Building Materials > Roofing > Roofing Products"
+      },
+      {
+        "code": "TOL.PWR.GEN",
+        "score": 0.1478,
+        "path_text": "Tools & Consumables > Power Tools > Power Tools"
+      }
+    ],
     "values": [],
     "gaps": [],
     "extraction": {
@@ -73,10 +84,10 @@
       "per_attribute": {}
     },
     "certificate": {
-      "certificate_id": "ec_ad22eabd3b7a",
+      "certificate_id": "ec_3ccccd80e9a2",
       "sku": "2909-21",
       "tenant_id": "unilog",
-      "generated_at": "2026-08-22T12:30:44.124238Z",
+      "generated_at": "2026-08-22T19:16:17.819532Z",
       "schema_version": null,
       "pipeline_version": "axiom-0.1.0",
       "classifications": [],
@@ -113,7 +124,7 @@
         "cost_usd": null,
         "wall_clock_seconds": 0.0
       },
-      "signature": "sha256:55bb27a02a99c88695f2d4be9f273634733dfc26ba9060b1ad46244f43ef3917",
+      "signature": "sha256:09f5fa599ef8d553798624ffc491e80b6051f65c9582efa24046860ec40cd80d",
       "signature_verified": true
     },
     "channels": [
@@ -168,7 +179,7 @@
     "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
     "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
     "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-22T12:30:39.344315Z",
+    "fetched_at": "2026-08-22T19:16:11.275717Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": "unilog",
@@ -262,17 +273,17 @@
   ],
   "class_definition": null,
   "policy": {
-    "epsilon": 0.05,
+    "epsilon": 0.02,
     "confidence_level": 0.95,
-    "threshold": 0.6853,
-    "coverage": 1.0,
-    "accepted": 220,
-    "accepted_errors": 1,
-    "observed_error_rate": 0.0045,
-    "error_upper_bound": 0.0201,
+    "threshold": 0.7194,
+    "coverage": 0.7591,
+    "accepted": 167,
+    "accepted_errors": 0,
+    "observed_error_rate": 0.0,
+    "error_upper_bound": 0.0159,
     "calibration_size": 220,
     "achievable": true,
-    "reason": "at threshold 0.685, 100.0% of values are publishable with an error rate of at most 2.0% at 95% confidence"
+    "reason": "at threshold 0.719, 75.9% of values are publishable with an error rate of at most 1.6% at 95% confidence"
   },
   "calibrator": "untrained-heuristic"
 }

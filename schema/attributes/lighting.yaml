@@ -379,9 +379,19 @@ attributes:
       - in an abbreviated description this is the foot or inch mark figure, e.g. '18"' or "3'"
       - do not confuse with a lamp shape number, which is a diameter in eighths of an inch
     spec_labels: ["Length", "Nominal Length", "Overall Length", "MOL", "Maximum Overall Length"]
-    table_headers: ["length", "nominal length", "size"]
+    # A bare "size" was here and is deliberately gone. `overall_size` is the attribute literally named
+    # Size and it owns that header; holding it here as well made whichever was bound second
+    # unreachable, which surfaced as soon as classes began binding both — the decking, railing, panel,
+    # roofing, tape, hand-tool and cable classes all do. "length" and "nominal length" are unambiguous.
+    table_headers: ["length", "nominal length"]
     tolerance: 0.0
-    plausible_range: [10.0, 5000.0]
+    # Upper bound was 5000 mm, which suited the longest lamp tube and refused most of the building
+    # products that later came to share this attribute: a 20' deck board is 6096 mm and a 65' roll of
+    # rainscreen is 19812 mm, so both were rejected as implausible after being read correctly.
+    # 25000 mm (82 ft) covers the longest run in this catalogue with headroom and still refuses the
+    # figure that would otherwise slip through — a 1000' mason line, which belongs to
+    # `measurement_range` and is two orders of magnitude beyond any nominal length.
+    plausible_range: [10.0, 25000.0]
     interchange: critical
 
   - code: dimmable
@@ -415,4 +425,56 @@ attributes:
     plausible_range: [1.0, 100.0]
     # A 3-pack and a single are the same lamp. The difference is commercial, and the equivalence
     # engine should report it without ever blocking a substitution on it.
+    interchange: cosmetic
+  # ------------------------------------------------------------------ ceiling fans
+  #
+  # Added with the ceiling-fan class. Fans sit in this file rather than a new one because they are
+  # merchandised beside lighting, are frequently sold as a light kit, and reuse this file's
+  # electrical and finish vocabulary wholesale. Nine rows of the client's sample:
+  #
+  #     51334  44" Wh Gilmour Fan
+  #     59210  52" BZ Sent Hunter Fan
+  #     52655  52" MB Xidane Hunter Fan
+  #
+  # A span and a finish, and nothing else. Both attributes below exist because the span is the
+  # only specification in the string and publishing it in `overall_size` as free text would put a
+  # number a buyer filters on into a column nothing can filter.
+
+  - code: blade_span
+    name: Blade Span
+    datatype: dimension
+    quantity_kind: length
+    canonical_unit: mm
+    display_preference: imperial_fraction
+    unit_hint: in
+    description: >
+      Diameter of the circle the blade tips sweep. The figure a ceiling fan is selected on, because
+      it has to be matched to the room's square footage and to the clearance from the walls, and it
+      is the only specification most fan descriptions contain.
+    example_values: ['44"', '52"', '60"']
+    extraction_hints:
+      - 'the leading figure of a fan description, e.g. ''52" MB Anisten Fan'''
+      - a fan has one span; do not read a blade count as a dimension
+    # A bare "size" is deliberately absent — `overall_size` owns it and the fan class binds both.
+    # "Fan Size" is kept because it is unambiguous.
+    table_headers: ["span", "blade span", "sweep", "diameter"]
+    spec_labels: ["Blade Span", "Span", "Sweep", "Fan Size", "Blade Sweep"]
+    tolerance: 0.0
+    # 300 mm covers a small bathroom fan; 2500 mm a large industrial one.
+    plausible_range: [200.0, 2500.0]
+    # Critical rather than defining: a 44" and a 52" fan hang from the same outlet box, so the parts
+    # connect. Undersizing leaves the room unmoved and oversizing crowds the walls, which is a
+    # form-and-fit difference reported loudly rather than an impossibility.
+    interchange: critical
+
+  - code: blade_count
+    name: Blade Count
+    datatype: integer
+    description: >
+      Number of blades. Affects airflow and noise at a given span, but is chosen mostly on
+      appearance, which is why it is recorded and never allowed to block a substitution.
+    example_values: ["3", "4", "5"]
+    spec_labels: ["Blades", "Blade Count", "Number of Blades"]
+    table_headers: ["blades", "blade count", "no. of blades"]
+    plausible_range: [1.0, 24.0]
     interchange: cosmetic

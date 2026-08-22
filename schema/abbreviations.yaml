@@ -257,3 +257,526 @@ abbreviations:
       GU10: GU10
       GU24: GU24
       G13: G13
+  # ================================================================================================
+  # WHOLE-CATALOGUE VOCABULARY
+  #
+  # Added when the taxonomy grew from four classes to thirty-two. Everything below follows the same
+  # rule as the entries above: an entry here is a claim that the term ALWAYS means this value for
+  # THIS attribute. Where a term means two things, it is left out and the cell stays empty, because
+  # an empty cell scores as missed and a wrong one scores as correct until someone checks by hand.
+  #
+  # ONE MECHANIC WORTH KNOWING BEFORE EDITING. A span of the description can be claimed by only one
+  # attribute, and attributes are tried in the order the class binds them. On "Metal Cut Off Disc"
+  # the operation and the form are the same three words, so whichever is bound first takes them and
+  # the other stays blank. That is why `abrasive_form` carries only terms that do NOT overlap an
+  # operation word, and why the bonded-wheel class binds the operation first.
+  # ================================================================================================
+
+  # ---------------------------------------------------------------- abrasives
+  - attribute: abrasive_operation
+    note: >
+      What the abrasive is built to do. Cutting and grinding wheels are not interchangeable and the
+      difference is a safety matter rather than a preference, so these are the highest-value terms
+      in the abrasive cohort. "Cut and Grind" is listed ahead of nothing in particular — the matcher
+      tries longest first, so the dual rating wins over the bare "Cut Off" it contains.
+    terms:
+      Cut Off: Cutting
+      Cut-Off: Cutting
+      Cutoff: Cutting
+      Cut and Grind: Cutting and Grinding
+      Cut n Grind: Cutting and Grinding
+      Grinding: Grinding
+      Sanding: Sanding
+      Polishing: Polishing
+      Deburring: Deburring
+
+  - attribute: abrasive_form
+    note: >
+      DELIBERATELY OMITS the bare words "Disc" and "Wheel", which are the two most common form words
+      in this cohort. Within bonded abrasives a "Disc" is a cut-off wheel or a grinding wheel
+      depending entirely on the operation, so the token alone cannot choose between two permitted
+      values — and choosing wrongly would put a thin cutting wheel on a listing that invites side
+      loading. Only forms that name themselves unambiguously are here.
+    terms:
+      Sanding Belt: Belt
+      Sanding Sponge: Sanding Sponge
+      Sanding Sheet: Sheet
+      Flap Disc: Flap Disc
+      Flap Wheel: Flap Disc
+      Wire Wheel: Wire Wheel
+      Wire Brush: Wire Wheel
+      Belt: Belt
+      Sponge: Sanding Sponge
+
+  - attribute: abrasive_grit
+    note: >
+      Grit designations, P-prefixed only. The FEPA "P" forms are listed and the bare ANSI numbers
+      are NOT, because a bare number in these descriptions is far more often a dimension than a
+      grit: "5B-332-080 HIOLIT 5\" P80" carries both, and "080" is part of the part number. The
+      trailing-word forms are safe because "Grit" disambiguates them.
+    terms:
+      P80: P80
+      P100: P100
+      P120: P120
+      P150: P150
+      P180: P180
+      P220: P220
+      P240: P240
+      P320: P320
+      P400: P400
+      "80 Grit": "80"
+      "120 Grit": "120"
+      "150 Grit": "150"
+      "180 Grit": "180"
+      "220 Grit": "220"
+      "320 Grit": "320"
+
+  - attribute: abrasive_grain
+    note: >
+      The mineral. Brand lines are included only where the line names exactly one grain: Cubitron is
+      3M's precision-shaped ceramic and nothing else. HIOLIT and Abranet are deliberately absent —
+      both are product lines sold in several grains.
+    terms:
+      Cubitron II: Ceramic Aluminum Oxide
+      Cubitron: Ceramic Aluminum Oxide
+      Zirconia: Zirconia Alumina
+      Ceramic: Ceramic Aluminum Oxide
+      Diamond: Diamond
+      Garnet: Garnet
+      Emery: Emery
+
+  - attribute: attachment_type
+    terms:
+      Stikit: PSA (Stikit)
+      Hookit: Hook and Loop
+      Roloc: Quick Change
+      Hook and Loop: Hook and Loop
+
+  - attribute: backing_material
+    terms:
+      Film: Film
+      Cloth: Cloth
+      Mesh: Mesh
+      Fiber: Fiber
+      Non-Woven: Non-Woven
+
+  - attribute: workpiece_material
+    note: >
+      What the consumable is rated to work on. "Masonry" maps to the combined Concrete / Masonry
+      value, which is the enum's own spelling — this is the term that, as an identity guard on the
+      mortar class, wrongly won six Milwaukee masonry cut-off discs. As an ATTRIBUTE reading on an
+      abrasive it is exactly right, which is the distinction between identity and specification.
+    terms:
+      Stainless Steel: Stainless Steel
+      Stainless: Stainless Steel
+      Masonry: Concrete / Masonry
+      Concrete: Concrete / Masonry
+      Metal: Metal
+      Aluminum: Aluminum
+      Wood: Wood
+      Tile: Tile
+      Drywall: Drywall
+
+  # ---------------------------------------------------------------- tools
+  - attribute: tool_configuration
+    note: >
+      What is in the box, and the single most commercially consequential reading in the tool cohort:
+      the same tool bare and as a kit differ by roughly 3x in price. The bare forms are listed in
+      every spelling the suppliers use, because a missed "Tool - Only" prices a battery and charger
+      into a listing that has neither.
+    terms:
+      Tool - Only: Bare Tool
+      Tool Only: Bare Tool
+      Bare Tool: Bare Tool
+      Bare: Bare Tool
+      Combo Kit: Combo Kit
+      Starter Kit: Starter Kit
+      Kit: Kit
+
+  - attribute: power_source
+    terms:
+      Cordless: Cordless (Battery)
+      Corded: Corded Electric
+      Pneumatic: Pneumatic
+      Hydraulic: Hydraulic
+
+  - attribute: battery_platform
+    note: >
+      DELIBERATELY OMITS bare voltage forms such as "18V" and "20V". They are read by the quantity
+      path into `battery_voltage`, and because a span can only be claimed once, listing them here
+      would steal the figure from the attribute that measures it — leaving a platform string where a
+      comparable voltage should be. Only the proprietary names are here, and they are not voltages.
+    terms:
+      M18: M18
+      M12: M12
+      LXT: 18V LXT
+      Packout: M18
+
+  - attribute: bit_tip_type
+    note: >
+      The recess a driver bit engages, and the field where an error destroys the fastener. "Trox" is
+      a supplier misspelling of Torx in "DT252B 2\" #25 Trox Drive Bit"; the part-number prefix DT
+      confirms the intent, so it is an alias rather than a guess.
+    terms:
+      Phillips: Phillips
+      Robertson: Square (Robertson)
+      Square: Square (Robertson)
+      Torx Plus: Torx Plus
+      Torx: Torx
+      Trox: Torx
+      Slotted: Slotted
+      Nut Setter: Nut Setter
+      Nut Driver: Nut Setter
+
+  - attribute: bit_tip_size
+    note: >
+      Size designator within the tip family, kept as written. Only the hash forms are listed: a bare
+      number beside them is the bit LENGTH, and in '2" #2 Phillips' the two figures are adjacent and
+      differ only by their prefix.
+    terms:
+      "#1": "#1"
+      "#2": "#2"
+      "#3": "#3"
+      "#10": "#10"
+      "#15": "#15"
+      "#20": "#20"
+      "#25": "#25"
+      "#30": "#30"
+      "#40": "#40"
+
+  - attribute: shank_type
+    terms:
+      SDS-Plus: SDS-Plus
+      SDS Plus: SDS-Plus
+      SDS-Max: SDS-Max
+      Quik-Lock: Quick Change
+      Quick Change: Quick Change
+      Impact: Impact Hex
+
+  - attribute: blade_material
+    terms:
+      Carbide: Carbide-Tipped
+      Bi-Metal: Bi-Metal
+      Bimetal: Bi-Metal
+      HSS: High Speed Steel
+      Diamond: Diamond
+
+  - attribute: graduation_system
+    note: >
+      Which unit system the tool is marked in. The reason this matters is that the same square is
+      stocked in both under part numbers differing by one digit, and 300 mm and 12 inches are the
+      same length — so the marking has to be read rather than inferred from the figure.
+    terms:
+      Metric: Metric
+      SAE: Imperial
+      Imperial: Imperial
+
+  # ---------------------------------------------------------------- building products
+  - attribute: edge_profile
+    note: >
+      How the long edges are machined, which decides the fastening system: a grooved board takes
+      hidden fasteners and a square-edge board must be face-screwed.
+    terms:
+      Sq Edge: Square Edge
+      Square Edge: Square Edge
+      No-Groove: Square Edge
+      Grooved: Grooved
+      Fascia: Fascia
+      Shiplap: Shiplap
+      T&G: Tongue and Groove
+
+  - attribute: material_composition
+    note: >
+      DELIBERATELY OMITS "Composite" as a bare word for the capped value. AZEK and Trex both sell
+      capped and uncapped lines and the word alone does not say which, so it is listed only in the
+      capped form where the supplier writes it out. "Cedar" is here as a MATERIAL and absent from
+      `surface_texture`, where it would equally plausibly mean the embossed pattern — one token
+      cannot evidence both.
+    terms:
+      Capped Composite: Capped Wood-Plastic Composite
+      PVC: Cellular PVC
+      Doug Fir: Douglas Fir
+      Drywall: Gypsum
+      Gypsum: Gypsum
+      OSB: Engineered Wood
+      Cedar: Cedar
+      Alum: Aluminum
+      Aluminum: Aluminum
+
+  - attribute: surface_texture
+    terms:
+      Smooth: Smooth
+      Wood Grain: Wood Grain
+      Brushed: Brushed
+      Variegated: Variegated
+
+  - attribute: railing_component
+    note: >
+      Which part of a railing assembly the item is. A railing order is a bill of parts that are
+      never alternatives to each other, so this is the identity of the line. "T-Rail" is the
+      supplier's compound for a top rail and is matched whole.
+    terms:
+      Support Post: Support Post
+      Blank Post: Support Post
+      Post Sleeve: Post Sleeve
+      Post Wrap: Post Sleeve
+      Post Trim: Post Trim
+      Post Cap: Post Cap
+      Rail Kit: Rail Kit
+      T-Rail: Top Rail
+      Handrail: Top Rail
+      Baluster: Baluster
+      Balusters: Baluster
+      End Cap: End Cap
+      Gravity Latch: Gate Hardware
+
+  - attribute: roofing_component
+    terms:
+      Ice Guard: Ice and Water Shield
+      Eaveguard: Ice and Water Shield
+      Weathr Lk: Ice and Water Shield
+      Ridge Vent: Ridge Vent
+      Starter Strip: Starter Strip
+      Shingle: Architectural Shingle
+      Rib: Metal Panel
+
+  - attribute: fire_rating
+    terms:
+      Type X: Type X
+      Type C: Type C
+
+  - attribute: glazing_package
+    note: >
+      "Arg" is argon fill and "LowE" the coating; both appear on United's gliding patio doors. The
+      trailing "-2" on LowE-2 names a specific coating generation the enum does not distinguish, so
+      both spellings map to the same value rather than inventing a value for one of them.
+    terms:
+      LowE-2: Low-E
+      Low-E2: Low-E
+      LowE: Low-E
+      Low-E: Low-E
+      Argon: Argon Filled
+      Arg: Argon Filled
+      Tempered: Tempered
+      Laminated: Laminated
+
+  - attribute: handing
+    note: >
+      Which way a door is hung, and the most expensive ordering error in the category because the
+      opening is cut before the mistake is found.
+
+      DELIBERATELY OMITS the bare trailing letters of a size code. "6068R" and "6068L" are the real
+      carriers of handing in this catalogue, and they tokenise whole — a single "R" or "L" pattern
+      would fire on any word ending in one. So those rows produce no handing, the class's cross-field
+      rule reports it, and the gap is visible rather than guessed.
+    terms:
+      Reversible: Reversible
+      Left Hand: Left
+      Right Hand: Right
+      LH: Left
+      RH: Right
+
+  # ---------------------------------------------------------------- electrical
+  - attribute: wiring_device_type
+    note: >
+      "Outet" is a supplier misspelling of outlet in "R2005378P00 6-50R Welder Outet", confirmed by
+      the NEMA code on the same row.
+    terms:
+      GFCI: GFCI Receptacle
+      GFI: GFCI Receptacle
+      Decor Plate: Wall Plate
+      Wallplate: Wall Plate
+      Wall Plate: Wall Plate
+      Cord Conn: Cord Connector
+      Cord Grip: Cord Grip
+      Wall Tap: Wall Tap
+      Receptacle: Receptacle
+      Dimmer: Dimmer
+      Timer: Timer
+      Outlet: Receptacle
+      Outet: Receptacle
+      Switch: Switch
+      Plug: Plug
+
+  - attribute: enclosure_form
+    terms:
+      Load Center: Load Center
+      Load Cntr: Load Center
+      Load Cnt: Load Center
+      Box Cover: Box Cover
+      Square Box: Square Box
+      Oct Box: Octagon Box
+      Junction Box: Junction Box
+
+  - attribute: conductor_material
+    terms:
+      Aluminum: Aluminum
+      Alum: Aluminum
+      Copper: Copper
+
+  - attribute: cable_type
+    terms:
+      Entrance Cable: Service Entrance
+      SO Cord: SO Cord
+      SJEWA: SJ Cord
+      Triplex: Triplex
+      CAT5E: CAT5e
+      CAT6: CAT6
+      Romex: NM-B
+      THHN: THHN
+      CL3: Speaker / Control
+
+  - attribute: wire_gauge
+    note: >
+      The exact designations present in this feed, listed individually rather than parsed. Three
+      grammars share this column — "12-4" is 12 AWG with four conductors, "16/3" is 16 AWG with
+      three, and "4/0" is ONE conductor four sizes above 1 AWG — so a positional parse would read
+      4/0 as four conductors of gauge zero, which is not a wire that exists.
+    terms:
+      "2/2/4": "2/2/4"
+      "6/6/6": "6/6/6"
+      "16/3": "16/3"
+      "4/0": "4/0"
+      "12-4": "12-4"
+      "10-4": "10-4"
+      "16-2": "16-2"
+
+  # ---------------------------------------------------------------- appliances
+  - attribute: fuel_type
+    note: >
+      A hard installation fact: gas needs a gas line and electric needs a 240 V circuit, and neither
+      installation accepts the other appliance. Speed Queen dryers differ by ONE LETTER of the part
+      number between the two, which is why these terms carry more weight than their brevity suggests.
+    terms:
+      Dual Fuel: Dual Fuel
+      Induction: Induction
+      Electric: Electric
+      Elect: Electric
+      Elec: Electric
+      Propane: Gas (Propane)
+      Gas: Gas (Natural)
+
+  - attribute: door_configuration
+    note: >
+      DELIBERATELY OMITS "OTR". It means over-the-range, which is a MOUNTING and belongs in
+      `mounting_type`; reading it as a door style would put a wall-mount microwave's installation
+      requirement into a field an installer does not check.
+    terms:
+      French Door: French Door
+      Side by Side: Side-by-Side
+      Side-by-Side: Side-by-Side
+      Top Freezer: Top Freezer
+      Bottom Freezer: Bottom Freezer
+      Upright: Upright
+      Chest: Chest
+      Drawer: Drawer
+
+  # ---------------------------------------------------------------- safety and PPE
+  - attribute: ppe_form
+    note: >
+      "Liners" makes it a glove LINER rather than a glove, and the two are worn together rather than
+      instead of each other — a listing that conflates them ships an order missing one of the pair.
+      Listed longest-first-safe: the liner forms contain the word glove and win over it.
+    terms:
+      Glove Liners: Glove Liner
+      Glove Liner: Glove Liner
+      Safety Glasses: Safety Glasses
+      Kneeling Pad: Knee Pad
+      Face Shield: Face Shield
+      Goggles: Goggles
+      Goggle: Goggles
+      Hoodie: Hoodie
+      Jacket: Jacket
+      Glove: Glove
+      Vest: Vest
+
+  - attribute: garment_size
+    note: >
+      Apparel size, which in this cohort IS the SKU: one glove ships as six part numbers differing
+      only by a trailing size token.
+
+      THE SINGLE LETTERS ARE THE RISK AND THEY ARE INCLUDED DELIBERATELY. "M701B-21L Milw L Black
+      Heated Work Glove Liners" carries the size as a standalone "L", so without it the whole
+      Milwaukee heated range loses its size. They are safe here for two compounding reasons: the
+      matcher requires a whole-token match, so the "M" in "M12" and "M18" cannot fire; and this
+      table is scoped per attribute, so these rules only run for the two classes that bind
+      `garment_size`. Neither reason holds on its own, which is why both are stated.
+    terms:
+      One Size: One Size
+      XS: XS
+      SM: S
+      MD: M
+      LG: L
+      XL: XL
+      2X: 2XL
+      3X: 3XL
+      S: S
+      M: M
+      L: L
+
+  - attribute: heated_garment
+    note: >
+      Whether the garment contains a powered heating element. A category rather than a feature: a
+      heated garment needs a battery and a platform and costs several times the unheated equivalent.
+      Absence of the word is not evidence of false, so only the true form is listed.
+    terms:
+      Heated: "true"
+
+  - attribute: lens_treatment
+    terms:
+      Photochromic: Photochromic
+      Polarized: Polarized
+      Indoor/Outdoor: Indoor / Outdoor
+      Mirror: Mirror
+      Smoke: Smoke / Gray
+      Amber: Amber
+      Clear: Clear
+
+  - attribute: detection_type
+    note: >
+      What an alarm senses. "CO" is carbon monoxide in this context and nothing else — it is scoped
+      to an attribute bound only by the life-safety class, which is the only place the reading is
+      safe. Understating a combination alarm as single-sensor is the one gap in this schema that
+      could contribute to physical harm rather than to a bad purchase.
+    terms:
+      Carbon Monoxide: Carbon Monoxide
+      Natural Gas: Natural Gas
+      Smoke: Smoke
+      Motion: Motion
+      CO: Carbon Monoxide
+
+  # ---------------------------------------------------------------- fasteners
+  - attribute: fastener_type
+    note: >
+      "BB" is Senco's code for a collated stick nail and is the only category token on those rows.
+      It is a two-character term, which normally makes a rule promiscuous; it is safe here because
+      the match is whole-token and part numbers tokenise whole, and because this attribute is bound
+      by one class.
+    terms:
+      Hidden Fastener: Hidden Deck Fastener
+      Self-Drilling: Self-Drilling Screw
+      Deck Screw: Deck Screw
+      Wood Screw: Wood Screw
+      Lag Screw: Lag Screw
+      Collated: Nail (Collated)
+      Anchor: Anchor
+      Staple: Staple
+      Rivet: Rivet
+      Brad: Brad
+      BB: Nail (Collated)
+
+  - attribute: fastener_finish
+    note: >
+      A warranty and code matter rather than an appearance one: an electro-galvanised fastener in
+      treated lumber corrodes fast enough to void a deck warranty.
+
+      "SM" is Senco's smooth-shank code and maps to Bright / Plain, which is what a smooth bright
+      nail is. DELIBERATELY OMITS "SS": the enum distinguishes 304 from 316 stainless, they differ
+      in marine corrosion resistance, and a two-letter code cannot choose between them.
+    terms:
+      Hot-Dip Galvanized: Hot-Dip Galvanized
+      Mechanically Galvanized: Mechanically Galvanized
+      Polymer Coated: Polymer Coated
+      HDG: Hot-Dip Galvanized
+      EG: Electro-Galvanized
+      SM: Bright / Plain

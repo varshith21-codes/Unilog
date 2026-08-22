@@ -1,0 +1,92 @@
+# Safety eyewear: spectacles, goggles and face shields.
+#
+# 10 rows of the client's 1,000-row sample, all Edge Eyewear.
+#
+# THE IDENTITY PROBLEM THIS CLASS HAD TO SOLVE. Two of the ten rows never say what the product is:
+#
+#     TSDKAP218-G2  Edge Safety - Khor Black Frame Polarized
+#     XPAP418       Edge Safety Glasses - Pumori Black Frame
+#
+# The first has no product noun at all — "Safety" then a model name, a frame colour and a lens
+# treatment. `frame` is therefore an identity term, which reads odd for an eyewear class and is the
+# only token those rows offer. It was checked against the rest of the file first: every occurrence of
+# `frame` in the 1,000 rows is one of these Edge products, so the term is specific here even though it
+# would not be in a larger catalogue. If a picture frame or a saw frame ever arrives, this is the term
+# that will need narrowing.
+#
+# `safety` is deliberately NOT an identity term, despite appearing in both rows above. It is shared
+# with protective apparel and with detection devices, so it would put three classes into contention on
+# every safety row and push them into the ambiguous band where a run with no model abstains.
+#
+# THE LENS IS NOT THE FRAME. "Black Frame Polarized" states a frame colour and a lens treatment in four
+# adjacent words. `finish_color` takes the frame and `lens_treatment` takes the lens, and the two are
+# separate attributes because a clear-lens and a polarized-lens version of the same black frame are
+# different products for different environments — a smoke lens is unusable indoors.
+#
+# THE IMPACT RATING LIVES IN `approvals`. ANSI Z87.1 is a compliance claim and goes through the
+# strict-evidence attribute so it can never be inferred from the product family. It is bound required
+# here, which is stricter than most classes in this schema and deliberate: an uncertified lens sold as
+# safety eyewear is the highest-stakes listing error available in this cohort.
+#
+# No description recipe and no external scheme mapping — see decking_board.yaml.
+
+class:
+  code: SAF.EYE.GEN
+  name: Safety Eyewear
+  version: v1
+
+  item_type: Safety Glasses
+
+  # "lense" is Edge's misspelling of lens in "XB11PCVS Edge Safety Glasses - Photochromic Lense".
+  identity_terms: [glasses, goggle, goggles, eyewear, lens, lense, lenses, spectacles, frame, visor]
+
+  browse_path:
+    - Safety
+    - Personal Protective Equipment
+    - Eye & Face Protection
+
+  reporting_path: [Safety, PPE, Eye & Face Protection]
+
+  attributes:
+    - { code: ppe_form,              requirement: required,    weight: 3.0, label: Form }
+    - { code: lens_treatment,        requirement: required,    weight: 3.0, label: Lens }
+    - { code: finish_color,          requirement: required,    weight: 3.0, label: Frame Color }
+    - { code: product_series,        requirement: required,    weight: 3.0, label: Series }
+    - { code: primary_material,      requirement: optional,    weight: 1.0, label: Material }
+    - { code: garment_size,          requirement: optional,    weight: 1.0, label: Size }
+    - { code: pack_quantity,         requirement: optional,    weight: 1.0 }
+    - { code: each_weight,           requirement: optional,    weight: 1.0 }
+    - { code: selling_uom,           requirement: recommended, weight: 2.0 }
+    - { code: additional_information, requirement: optional,   weight: 1.0 }
+
+    # --- named delivery columns; must stay last ----------------------------------------------
+    - { code: warranty_terms,        requirement: optional,    weight: 1.0 }
+    - { code: approvals,             requirement: required,    weight: 3.0 }
+    - { code: country_of_origin,     requirement: optional,    weight: 1.0 }
+    - { code: gtin,                  requirement: optional,    weight: 1.0 }
+
+  cross_field_rules:
+    - id: R_EYEWEAR_STATES_ITS_LENS
+      expr: "lens_treatment is not null"
+      references: [lens_treatment]
+      severity: error
+      message: >
+        No lens treatment was captured. It is the fit-for-purpose fact for eye protection: a smoke
+        lens is unusable indoors and a clear one is unusable in glare, and the model name alone does
+        not distinguish them — Edge sells the same frame in five lens options.
+
+    - id: R_FRAME_COLOUR_IS_NOT_A_LENS
+      expr: "finish_color is null or lens_treatment is not null"
+      references: [finish_color, lens_treatment]
+      severity: warning
+      message: >
+        A frame colour was captured with no lens treatment, from a description that states them four
+        words apart. Usually means both tokens were read into the colour field, which loses the
+        specification that decides where the eyewear can be worn.
+
+  channel_profiles:
+    - name: unilog_delivery
+      title_template: "{brand} {product_series} {mpn} {class_name}"
+      max_title_chars: 200
+      unit_system: imperial_primary
+      required: [mpn]

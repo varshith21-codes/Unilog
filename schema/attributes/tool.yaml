@@ -1,0 +1,416 @@
+#
+# WHY THIS CATEGORY EXISTS. Tools and tool accessories are the largest cohort in the client's
+# 1,000-row sample after lighting and decking: roughly 240 rows across power tools (103), driver
+# bits (32), hand tools (28), saw blades (26), layout tools (24), batteries and chargers (21) and
+# tool storage (6), from Milwaukee, Makita, DeWalt, Festool, Kreg, Diablo and Irwin.
+#
+# ---------------------------------------------------------------------------------------------
+# WHAT THE SUPPLIER STRINGS ACTUALLY CONTAIN, because that is what these attributes are shaped to.
+#
+#     2761-20   Milw M18 1/4" Hex Hydraulic Driver
+#     3048-20   Milw M12 1/4" Impact Wrench w/Friction Ring
+#     XLT03Z    Makita 3/8" 18V Angle Impact
+#     2834-21HD Milw M18 7-1/4" Circ - Saw Kit
+#     XRU23Z    Makita 18V Trimmer Tool - Only
+#     BATT4A    Kreg 20V 4ah Battery Pack
+#     DPH22B    2" #2 Phillips Drive - Bit
+#     DT2035B   3-1/2" #20 Torx Drive - Bit
+#     49-22-4702 Milw 13pc Quik-Lock Hole Dozer Kit
+#
+# Recoverable with no document and no model: the battery platform or voltage, a drive or tip size,
+# a blade or bit length, a piece count, and whether the item ships as a bare tool or a kit. That
+# last one is the single most commercially consequential field in the cohort and it is stated in
+# nearly every description, usually as "Bare", "Tool Only" or "Kit".
+#
+# ---------------------------------------------------------------------------------------------
+# THE PLATFORM TRAP, and why battery_platform is a string. "M18", "M12", "18V LXT", "20V MAX" and
+# "XR" are proprietary marketing names for mutually incompatible battery interfaces. They are NOT
+# reducible to their voltage: M18 and 18V LXT are both 18 volts and neither battery fits the
+# other's tool. Recording the platform verbatim and the voltage separately keeps the incompatible
+# thing incompatible, where an enum of voltages would have quietly declared them equivalent.
+#
+# THE "BARE" TRAP. `XRU23Z Makita 18V Trimmer Tool - Only` and `XRU23SM1 Makita 18V 13" - String
+# Trimmer Kit` are the same tool at roughly a 3x price difference, because one includes a battery
+# and charger. Getting tool_configuration wrong is the most expensive single error available in
+# this cohort, so its values are drawn from the words suppliers actually print rather than from a
+# tidy scheme.
+
+attributes:
+  # ------------------------------------------------------------------ how it is powered
+  - code: power_source
+    name: Power Source
+    datatype: enum
+    description: >
+      What drives the tool. The first thing a buyer filters on and the thing that decides whether
+      a battery platform is even relevant, so it is recorded even when it seems obvious from the
+      product name.
+    example_values: ["Cordless (Battery)", "Corded Electric", "Pneumatic", "Manual"]
+    extraction_hints:
+      - a battery platform name such as M18 or 20V implies Cordless
+      - a bare voltage like 120V on a stationary machine implies Corded Electric
+    spec_labels: ["Power Source", "Power Type", "Power", "Drive Type"]
+    allowed_values:
+      - value: Cordless (Battery)
+        aliases: ["cordless", "battery", "battery powered", "li-ion", "lithium"]
+      - value: Corded Electric
+        aliases: ["corded", "electric", "ac", "mains", "plug-in"]
+      - value: Pneumatic
+        aliases: ["air", "air powered", "compressed air"]
+      - value: Hydraulic
+        aliases: ["hydraulic"]
+      - value: Gas
+        aliases: ["gasoline", "petrol", "gas powered", "2-cycle", "4-cycle"]
+      - value: Manual
+        aliases: ["hand", "hand powered", "non-powered", "manual"]
+    # Critical rather than defining: a corded drill and a cordless one do the same job on the same
+    # hole, so a difference is a change of working practice rather than an impossibility. It is never
+    # a silent swap, which is what critical says.
+    interchange: critical
+
+  - code: battery_platform
+    name: Battery Platform
+    datatype: string
+    description: >
+      The manufacturer's battery system name, recorded verbatim. A string rather than an enum
+      because the value set is proprietary and open-ended, and because these names are not
+      reducible to voltage: M18 and 18V LXT are both 18 V and neither battery fits the other tool.
+    example_values: ["M18", "M12", "18V LXT", "20V MAX", "20V"]
+    extraction_hints:
+      - usually printed immediately after the brand, e.g. "Milw M18"
+      - '"M18 and M12" on a charger means it serves both; keep the whole phrase'
+      - do not normalise to a voltage — the platform is the compatibility fact
+    spec_labels: ["Battery Platform", "Platform", "Battery System", "System", "Fits Battery"]
+    # Nothing else rescues a battery that will not mount. This is the defining fact of a cordless
+    # tool from the buyer's point of view.
+    interchange: defining
+
+  - code: battery_voltage
+    name: Battery Voltage
+    datatype: quantity
+    quantity_kind: voltage
+    canonical_unit: V
+    unit_hint: V
+    description: >
+      Nominal battery voltage. Distinct from voltage_rating, which is the mains supply a corded
+      tool expects, and distinct from battery_platform, which is the interface. Stated separately
+      because it is the figure that predicts power while the platform predicts fit.
+    example_values: ["12 V", "18 V", "20 V", "40 V"]
+    extraction_hints:
+      - '"20V MAX" is a 20 V nominal pack; record 20 V'
+      - 'M18 means 18 V and M12 means 12 V, but prefer an explicit figure when the text gives one'
+    spec_labels: ["Voltage", "Battery Voltage", "Nominal Voltage", "Volts"]
+    tolerance: 0.0
+    plausible_range: [3.0, 120.0]
+    interchange: critical
+
+  - code: battery_capacity
+    name: Battery Capacity (Ah)
+    datatype: number
+    description: >
+      Pack capacity in ampere-hours, which sets runtime at a given draw. Declared as a plain
+      number because ampere-hour is a charge unit the registry does not carry; the unit is fixed
+      by this attribute's definition.
+    example_values: ["2.0", "4.0", "5.0", "12.0"]
+    extraction_hints:
+      - 'written as "4ah", "2.0 AH" or "XC5.0"'
+      - a two-pack of 2.0 Ah cells is 2.0 Ah each, not 4.0 Ah
+    spec_labels: ["Capacity", "Amp Hours", "Ah", "Battery Capacity", "Rated Capacity"]
+    tolerance: 0.0
+    plausible_range: [0.5, 30.0]
+    # More capacity is always acceptable in the same platform: same fit, longer runtime.
+    interchange: functional
+    substitution: at_least
+
+  - code: tool_configuration
+    name: Configuration
+    datatype: enum
+    description: >
+      What is actually in the box. The most commercially consequential field in this cohort: the
+      same tool as a bare unit and as a kit differ by roughly 3x in price because one includes a
+      battery and charger, and the values below are the words suppliers print rather than a tidy
+      scheme of our own.
+    example_values: ["Bare Tool", "Kit", "Starter Kit", "Combo Kit"]
+    extraction_hints:
+      - '"Bare", "(Bare)", "Tool Only" and "Tool - Only" all mean Bare Tool'
+      - '"Kit" without qualification means the tool with at least one battery and a charger'
+      - absence of any such word is NOT evidence of either; leave it unset
+    spec_labels: ["Configuration", "Includes", "Kit Contents", "Package", "Package Contents"]
+    allowed_values:
+      - value: Bare Tool
+        aliases: ["bare", "tool only", "tool-only", "bare tool", "no battery", "unit only"]
+        note: no battery or charger included
+      - value: Kit
+        aliases: ["kit", "tool kit"]
+      - value: Combo Kit
+        aliases: ["combo", "combo kit", "2-tool kit", "multi-tool kit"]
+      - value: Starter Kit
+        aliases: ["starter kit", "starter", "battery/charger starter kit"]
+        note: batteries and charger without a tool
+      - value: Set
+        aliases: ["set", "assortment", "assort"]
+      - value: Replacement Part
+        aliases: ["replacement", "spare", "refill"]
+    # Critical rather than defining, and the distinction is worth being honest about. Commercially
+    # this is the most consequential field in the tool cohort — bare and kit differ by roughly 3x in
+    # price. But the TOOL is identical, and `defining` is reserved for differences that make the parts
+    # impossible to connect rather than for differences that matter most. Critical is the accurate
+    # claim: not a drop-in, reported loudly, never swapped silently.
+    interchange: critical
+
+  # ------------------------------------------------------------------ drive and chuck
+  - code: drive_size
+    name: Drive Size
+    datatype: string
+    description: >
+      The output drive a powered driver, wrench or ratchet presents. A string because the values
+      mix square-drive fractions with hex designations — 1/2" square and 1/4" hex are different
+      interfaces that a bare fraction could not distinguish.
+    example_values: ['1/4" Hex', '1/4"', '3/8"', '1/2"']
+    extraction_hints:
+      - 'keep any "Hex" qualifier: 1/4" Hex is a bit holder, 1/4" square is a socket drive'
+      - the figure appears before the tool noun, e.g. 'M12 1/4" Impact Wrench'
+    table_headers: ["drive", "drive size", "square drive", "output"]
+    spec_labels: ["Drive Size", "Drive", "Anvil", "Output Drive", "Square Drive"]
+    interchange: defining
+
+  - code: chuck_size
+    name: Chuck Size
+    datatype: dimension
+    quantity_kind: length
+    canonical_unit: mm
+    display_preference: imperial_fraction
+    unit_hint: in
+    description: >
+      Maximum shank diameter the chuck accepts, which caps the bit size the tool can hold.
+      Distinct from drive_size: a drill has a chuck, an impact wrench has an anvil.
+    example_values: ['1/4"', '3/8"', '1/2"']
+    table_headers: ["chuck", "chuck size", "chuck capacity"]
+    spec_labels: ["Chuck Size", "Chuck", "Chuck Capacity", "Collet"]
+    tolerance: 0.0
+    plausible_range: [1.0, 40.0]
+    # A larger chuck holds everything a smaller one does.
+    interchange: functional
+    substitution: at_least
+
+  - code: no_load_speed
+    name: No-Load Speed (RPM)
+    datatype: integer
+    description: >
+      Maximum unloaded output speed in revolutions per minute. Declared as a plain integer
+      because RPM is a rate the unit registry does not carry. A multi-speed tool states a range;
+      record the top figure and put the full range in additional_information.
+    example_values: ["1800", "2900", "3600"]
+    spec_labels: ["No Load Speed", "RPM", "Speed", "No-Load RPM", "Max Speed"]
+    plausible_range: [10.0, 40000.0]
+    interchange: functional
+    substitution: at_least
+
+  # ------------------------------------------------------------------ cutting accessories
+  - code: blade_diameter
+    name: Blade Diameter
+    datatype: dimension
+    quantity_kind: length
+    canonical_unit: mm
+    display_preference: imperial_fraction
+    unit_hint: in
+    description: >
+      Outside diameter of a circular saw blade, or the blade a saw is built to take. Recorded
+      separately from wheel_diameter because a toothed blade and a bonded wheel are different
+      products whose sizes must not be pooled into one column.
+    example_values: ['4-1/2"', '6-1/2"', '7-1/4"', '10"', '12"']
+    extraction_hints:
+      - 'appears before the saw noun, e.g. ''M18 7-1/4" Circ - Saw Kit'''
+      - on a saw this is the blade the tool accepts, not a blade supplied with it
+    table_headers: ["diameter", "blade diameter", "blade size", "dia"]
+    spec_labels: ["Blade Diameter", "Blade Size", "Diameter", "Blade"]
+    tolerance: 0.0
+    plausible_range: [20.0, 900.0]
+    interchange: defining
+
+  - code: tooth_count
+    name: Tooth Count
+    datatype: integer
+    description: >
+      Number of teeth on a saw blade. Sets the finish and the feed rate: a 24-tooth blade rips
+      framing lumber fast and roughly where an 80-tooth blade crosscuts trim cleanly and slowly,
+      so this is a selection criterion rather than a quality measure.
+    example_values: ["24", "40", "60", "80"]
+    extraction_hints:
+      - 'often written with a T suffix, e.g. "24T" or "60 Tooth"'
+    table_headers: ["teeth", "tooth count", "t", "no. of teeth"]
+    spec_labels: ["Teeth", "Tooth Count", "Number of Teeth", "Grind"]
+    plausible_range: [2.0, 200.0]
+    # More teeth is a different cut, not a better one.
+    interchange: functional
+
+  - code: blade_material
+    name: Blade Material
+    datatype: enum
+    description: >
+      Construction of the cutting edge. Governs which workpiece the blade survives and how many
+      times it can be resharpened, and is usually the difference between two otherwise identical
+      blade listings.
+    example_values: ["Carbide-Tipped", "Bi-Metal", "High Speed Steel", "Diamond"]
+    spec_labels: ["Blade Material", "Material", "Tooth Material", "Construction"]
+    allowed_values:
+      - value: Carbide-Tipped
+        aliases: ["carbide", "tct", "tungsten carbide", "carbide tipped"]
+      - value: Bi-Metal
+        aliases: ["bimetal", "bi metal", "bi-metallic"]
+      - value: High Speed Steel
+        aliases: ["hss", "high-speed steel"]
+      - value: Carbon Steel
+        aliases: ["carbon", "high carbon steel", "hcs"]
+      - value: Diamond
+        aliases: ["diamond", "diamond grit", "segmented diamond"]
+      - value: Ceramic
+        aliases: ["ceramic", "ceramic tipped"]
+    interchange: functional
+
+  - code: shank_type
+    name: Shank
+    datatype: enum
+    description: >
+      The shank profile a bit presents to the tool. A hard compatibility fact: an SDS-Plus bit
+      does not go in a keyed chuck and a round-shank bit will not lock into an impact driver, so
+      a mismatch here is a returned order rather than a compromise.
+    example_values: ['1/4" Hex', "SDS-Plus", "Round", "Impact Hex"]
+    extraction_hints:
+      - '"Impact" or "Impact Ready" implies the retaining-groove hex shank'
+      - a quick-change or Quik-Lock name is the manufacturer's proprietary shank
+    spec_labels: ["Shank", "Shank Type", "Shank Size", "Connection", "Fitting"]
+    allowed_values:
+      - value: 1/4" Hex
+        aliases: ["1/4 hex", "quarter inch hex", "hex shank", "1/4in hex"]
+      - value: Impact Hex
+        aliases: ["impact", "impact ready", "impact rated", "1/4 impact hex"]
+      - value: SDS-Plus
+        aliases: ["sds plus", "sds+", "sdsplus"]
+      - value: SDS-Max
+        aliases: ["sds max", "sdsmax"]
+      - value: Round
+        aliases: ["round shank", "straight shank", "smooth shank"]
+      - value: Reduced Round
+        aliases: ["reduced shank", "silver and deming"]
+      - value: Quick Change
+        aliases: ["quick-change", "quik-lock", "quik lock", "quick release"]
+      - value: Threaded
+        aliases: ["threaded shank", "arbor thread"]
+    interchange: defining
+
+  - code: bit_tip_type
+    name: Tip Type
+    datatype: enum
+    description: >
+      The recess a driver bit engages. The single most consequential field on a driver bit: a
+      Phillips bit in a square recess destroys the fastener, and the two are visually similar
+      enough at a glance that the listing has to be right.
+    example_values: ["Phillips", "Square (Robertson)", "Torx", "Slotted"]
+    extraction_hints:
+      - 'Torx may be written TORX, T-, or Star; Square may be written SQ or Robertson'
+      - a supplier typo such as "Trox" is still Torx — the part number confirms it
+    spec_labels: ["Tip Type", "Drive Type", "Point Type", "Recess", "Bit Type"]
+    allowed_values:
+      - value: Phillips
+        aliases: ["ph", "phillips", "cross", "ph2", "crosshead"]
+      - value: Square (Robertson)
+        aliases: ["sq", "square", "robertson", "square drive", "sq2"]
+      - value: Torx
+        aliases: ["torx", "star", "t-star", "6-lobe", "trox", "hexalobular"]
+      - value: Torx Plus
+        aliases: ["torx plus", "torxplus"]
+      - value: Slotted
+        aliases: ["flat", "flathead", "slot", "straight", "sl"]
+      - value: Hex (Allen)
+        aliases: ["hex", "allen", "hex key", "internal hex"]
+      - value: Nut Setter
+        aliases: ["nut setter", "nut driver", "magnetic nut setter"]
+      - value: Combination
+        aliases: ["combo", "double ended", "double-ended", "reversible"]
+    interchange: defining
+
+  - code: bit_tip_size
+    name: Tip Size
+    datatype: string
+    description: >
+      The size designator within the tip type, recorded as written. A string because the numbering
+      is per-family and not comparable across families: #2 Phillips and #2 Square are different
+      sizes, and T20 Torx is not "20" of anything the others measure.
+    example_values: ["#1", "#2", "#3", "#20", "#25"]
+    extraction_hints:
+      - 'keep the # or T prefix as the supplier wrote it'
+      - 'in "2" #2 Phillips" the first figure is the bit length and the second the tip size'
+    # "Drive Size" is deliberately absent: that is `drive_size`'s own label and names the tool's
+    # output interface, not the bit's tip. A bare "Size" is absent for the same reason `overall_size`
+    # owns it. The driver-bit class binds all three.
+    table_headers: ["tip size", "point size"]
+    spec_labels: ["Tip Size", "Point Size"]
+    # Critical rather than defining: a #1 Phillips does enter a #2 recess, badly, so the parts can be
+    # made to connect. `bit_tip_type` is the one that cannot — a Phillips does not engage a square
+    # recess at all — and it already refuses the disqualifying case.
+    interchange: critical
+
+  - code: bit_length
+    name: Overall Length
+    datatype: dimension
+    quantity_kind: length
+    canonical_unit: mm
+    display_preference: imperial_fraction
+    unit_hint: in
+    description: >
+      Overall length of a driver bit or drill bit. Reach rather than capability, but the reason a
+      buyer holds several of the same tip: a 1" insert bit will not reach into a joist hanger.
+    example_values: ['1"', '2"', '3-1/2"', '6"']
+    extraction_hints:
+      - 'the FIRST figure in "2" #2 Phillips Drive - Bit" is this, not the tip size'
+    table_headers: ["length", "overall length", "oal", "bit length"]
+    spec_labels: ["Length", "Overall Length", "OAL", "Bit Length"]
+    tolerance: 0.0
+    plausible_range: [10.0, 1500.0]
+    interchange: critical
+
+  # ------------------------------------------------------------------ measuring and layout
+  - code: measurement_range
+    name: Measuring Range
+    datatype: dimension
+    quantity_kind: length
+    canonical_unit: mm
+    display_preference: imperial_fraction
+    unit_hint: in
+    description: >
+      The span a measuring or layout tool covers — a caliper's capacity, a square's blade length,
+      a line reel's spooled length. The defining specification of the tool and usually the only
+      figure in its description.
+    example_values: ['12"', '24"', "300mm", "500'"]
+    extraction_hints:
+      - 'a dual-marked tool states both, e.g. ''BigCal 12"/300mm'' — record either, they agree'
+      - "a line or tape length such as 500' is this attribute"
+    table_headers: ["range", "capacity", "length", "measuring range"]
+    spec_labels: ["Range", "Measuring Range", "Capacity", "Blade Length", "Length"]
+    tolerance: 0.0
+    plausible_range: [10.0, 500000.0]
+    # Critical rather than defining: a 12" and a 24" square both measure, and a longer line reel is
+    # not a different product. It is the defining SPECIFICATION of the tool commercially, which is not
+    # the same claim as the parts being unable to connect.
+    interchange: critical
+
+  - code: graduation_system
+    name: Graduation
+    datatype: enum
+    description: >
+      Which unit system the tool is marked in. Recorded because the same model is stocked in both
+      and a metric-only square is unusable on an imperial job, which the part number alone does
+      not reveal.
+    example_values: ["Imperial", "Metric", "Imperial and Metric"]
+    extraction_hints:
+      - 'an explicit "(Metric)" or "(SAE)" qualifier is this attribute'
+      - 'a dual marking such as 12"/300mm means Imperial and Metric'
+    spec_labels: ["Graduation", "Graduations", "Units", "Scale", "Marking"]
+    allowed_values:
+      - value: Imperial
+        aliases: ["sae", "inch", "imperial", "english", "fractional"]
+      - value: Metric
+        aliases: ["metric", "mm", "millimetre", "millimeter"]
+      - value: Imperial and Metric
+        aliases: ["dual", "both", "sae and metric", "metric and sae", "dual marked"]
+    interchange: critical

@@ -1,0 +1,88 @@
+# Refrigeration: refrigerators, freezers and beverage centres.
+#
+# 14 rows of the client's 1,000-row sample, across GE, Cafe, Element and XO.
+#
+# CAPACITY IS THE HEADLINE FIGURE, and unusually for this catalogue it is stated: `GDE21EMKES GE 21CF
+# Fridge SL Display Only` gives 21 cubic feet, `EUF17CDBW Element 17CF Freezer - Upright` gives 17.
+# `capacity_cubic_feet` is bound required because it is what buyers compare across brands and what
+# every retail listing leads with.
+#
+# THE DOOR CONFIGURATION IS A CLEARANCE FACT, not a style choice, which is why it is required rather
+# than cosmetic. A French-door and a side-by-side of identical capacity need different door swing
+# clearances, and a chest freezer needs overhead space an upright does not — "EUF17CDBW ... Freezer -
+# Upright" versus "FCM16SLWW 16CF GE Freezer Chest MH" is the same appliance category in two
+# incompatible installations.
+#
+# THE BEVERAGE-CENTRE COLLISION, worth recording. `beverage` is an identity term here, and the load
+# centre in ELC.BOX.GEN deliberately uses `load` rather than `center` for exactly this reason: with
+# `center` on the electrical class, "Tall Beverage Center SS" would have been admitted to it. The two
+# classes now share no identity vocabulary at all.
+#
+# No description recipe and no external scheme mapping — see decking_board.yaml.
+
+class:
+  code: APP.KIT.REFRIGERATION
+  name: Refrigeration Appliance
+  version: v1
+
+  item_type: Refrigerator
+
+  identity_terms: [fridge, refrigerator, freezer, beverage, cooler, icemaker, wine]
+
+  browse_path:
+    - Appliances & Consumer Electronics
+    - Kitchen Appliances
+    - Refrigeration
+
+  reporting_path: [Appliances, Large Appliances, Refrigeration]
+
+  attributes:
+    - { code: capacity_cubic_feet,   requirement: required,    weight: 3.0, label: Capacity }
+    - { code: door_configuration,    requirement: required,    weight: 3.0 }
+    - { code: appliance_width,       requirement: required,    weight: 3.0, label: Width }
+    - { code: finish_color,          requirement: required,    weight: 3.0, label: Color }
+    - { code: product_series,        requirement: recommended, weight: 3.0, label: Series }
+    - { code: model_number,          requirement: optional,    weight: 1.0 }
+    - { code: mounting_type,         requirement: recommended, weight: 2.0 }
+    - { code: overall_size,          requirement: recommended, weight: 2.0, label: Size }
+    - { code: depth_with_door_open,  requirement: optional,    weight: 2.0 }
+    - { code: voltage_rating,        requirement: recommended, weight: 2.0 }
+    - { code: amperage_rating,       requirement: optional,    weight: 1.0 }
+    - { code: primary_material,      requirement: optional,    weight: 1.0, label: Material }
+    - { code: sound_level,           requirement: optional,    weight: 1.0 }
+    - { code: plug_type,             requirement: optional,    weight: 1.0 }
+    - { code: selling_uom,           requirement: recommended, weight: 2.0 }
+    - { code: additional_information, requirement: optional,   weight: 1.0 }
+
+    # --- named delivery columns; must stay last ----------------------------------------------
+    - { code: warranty_terms,        requirement: recommended, weight: 2.0 }
+    - { code: included_technology,   requirement: optional,    weight: 1.0 }
+    - { code: approvals,             requirement: recommended, weight: 2.0 }
+    - { code: country_of_origin,     requirement: recommended, weight: 1.0 }
+    - { code: gtin,                  requirement: optional,    weight: 1.0 }
+
+  cross_field_rules:
+    - id: R_CHEST_FREEZER_IS_NOT_A_DOOR_STYLE
+      expr: "door_configuration not in ('French Door', 'Side-by-Side') or capacity_cubic_feet is null or capacity_cubic_feet >= 10.0"
+      references: [door_configuration, capacity_cubic_feet]
+      severity: warning
+      message: >
+        A French-door or side-by-side unit was captured under ten cubic feet. Those configurations do
+        not exist below roughly fifteen, so either the capacity was misread or the configuration was
+        inherited from a neighbouring row.
+
+    - id: R_DOOR_CLEARANCE_EXCEEDS_WIDTH
+      expr: "depth_with_door_open is null or appliance_width is null or depth_with_door_open > appliance_width"
+      references: [depth_with_door_open, appliance_width]
+      severity: warning
+      message: >
+        Depth with the door open is not greater than the cabinet width, which means a cabinet
+        dimension was captured instead of the clearance dimension. It is the number an installer
+        plans the run against, and the same error the dishwasher class guards.
+
+  channel_profiles:
+    - name: unilog_delivery
+      title_template: "{brand} {product_series} {mpn} {class_name}"
+      max_title_chars: 200
+      unit_system: imperial_primary
+      required: [mpn]
