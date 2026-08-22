@@ -7,6 +7,7 @@
  */
 
 import clsx from "clsx";
+import Link from "next/link";
 import { Children, type ReactNode } from "react";
 
 import {
@@ -682,5 +683,97 @@ export function Skeleton({
         className,
       )}
     />
+  );
+}
+
+/**
+ * Page navigation for a catalogue list, with the range and the total always stated.
+ *
+ * The count is the point, not the arrows. A list view that shows fifty of a thousand records and
+ * says nothing about it reads exactly like a list of fifty — so "51–100 of 1,001" is rendered as
+ * text rather than implied by the controls, and it is what a reader checks against the numbers on
+ * the operations overview.
+ *
+ * Links rather than buttons, because paging is navigation: it is bookmarkable, it works with the
+ * back button, and it needs no client JavaScript. `rel` gives that relationship to a crawler and
+ * an assistive technology as well as to a browser.
+ */
+export function Pager({
+  page,
+  pageCount,
+  from,
+  to,
+  total,
+  hasPrevious,
+  hasNext,
+  href,
+  label,
+  unit = "records",
+}: {
+  page: number;
+  pageCount: number;
+  from: number;
+  to: number;
+  total: number;
+  hasPrevious: boolean;
+  hasNext: boolean;
+  /** Builds the URL for a page number, so the caller keeps ownership of its other query params. */
+  href: (page: number) => string;
+  /** Names the list this pager controls, for the landmark. */
+  label: string;
+  unit?: string;
+}) {
+  if (total === 0) return null;
+
+  return (
+    <nav
+      aria-label={label}
+      className="mt-5 flex flex-wrap items-center justify-between gap-4 text-meta text-[var(--fg-tertiary)]"
+    >
+      <p>
+        Showing{" "}
+        <span className="tabular-nums text-[var(--fg-secondary)]">
+          {from.toLocaleString()}–{to.toLocaleString()}
+        </span>{" "}
+        of <span className="tabular-nums text-[var(--fg-secondary)]">{total.toLocaleString()}</span>{" "}
+        {unit}
+        {pageCount > 1 ? (
+          <>
+            {" · page "}
+            <span className="tabular-nums">{page.toLocaleString()}</span> of{" "}
+            <span className="tabular-nums">{pageCount.toLocaleString()}</span>
+          </>
+        ) : null}
+      </p>
+
+      {pageCount > 1 ? (
+        <div className="action-row">
+          {hasPrevious ? (
+            <Link href={href(page - 1)} rel="prev" className="btn btn-quiet h-7">
+              <ArrowIcon className="rotate-180" />
+              Previous
+            </Link>
+          ) : (
+            // Rendered and disabled rather than removed, so the control does not move under the
+            // cursor between the first page and the second.
+            <span aria-hidden className="btn btn-quiet h-7 opacity-40">
+              <ArrowIcon className="rotate-180" />
+              Previous
+            </span>
+          )}
+          {hasNext ? (
+            <Link href={href(page + 1)} rel="next" className="btn btn-quiet h-7">
+              Next
+              <ArrowIcon />
+            </Link>
+          ) : (
+            <span aria-hidden className="btn btn-quiet h-7 opacity-40">
+              Next
+              <ArrowIcon />
+            </span>
+          )}
+        </div>
+      ) : null}
+    </nav>
   );
 }

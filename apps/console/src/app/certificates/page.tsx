@@ -7,6 +7,7 @@ import {
   EmptyState,
   Meter,
   PageHeader,
+  Pager,
   Panel,
   Section,
   Stat,
@@ -15,20 +16,30 @@ import {
 import { listSkus, portfolioTotals } from "@/lib/data";
 import { composite } from "@/lib/types";
 import { count, dateOnly, percent, shortHash } from "@/lib/format";
+import { pageParam, paginate } from "@/lib/paginate";
+import { certificateHref } from "@/lib/sku";
 
 export const metadata = { title: "Audit" };
 
-export default async function CertificatesPage() {
+export default async function CertificatesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
   const skus = await listSkus();
   const totals = portfolioTotals(skus);
+  // Every signature, not just the page being rendered. A per-page check would report "all valid"
+  // while an invalid one sat two pages down, which is the one claim this screen exists to make.
   const allVerified =
     skus.length > 0 && skus.every((bundle) => bundle.certificate.signature_verified);
+  const invalid = skus.filter((bundle) => !bundle.certificate.signature_verified).length;
 
   const rows = [...skus].sort(
     (a, b) =>
       composite(b.certificate.summary.quality_index) -
       composite(a.certificate.summary.quality_index),
   );
+  const page = paginate(rows, pageParam((await searchParams).page));
 
   return (
     <div className="mx-auto max-w-[var(--container-shell)] px-[var(--spacing-gutter)] pb-24">
@@ -55,7 +66,11 @@ export default async function CertificatesPage() {
         <Stat
           label="Signatures"
           value={allVerified ? "All valid" : "Check failed"}
-          hint="content hash recomputed on read"
+          hint={
+            allVerified
+              ? `content hash recomputed on read for all ${count(rows.length)}`
+              : `${count(invalid)} of ${count(rows.length)} failed the recomputed hash`
+          }
           tone={allVerified ? "pass" : "fail"}
         />
         <Stat
@@ -136,14 +151,14 @@ export default async function CertificatesPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {rows.map((bundle) => {
+                  {page.items.map((bundle) => {
                     const summary = bundle.certificate.summary;
                     const value = composite(summary.quality_index);
                     return (
                       <tr key={bundle.sku} className="grid-row group hairline-b last:border-b-0">
                         <th scope="row" className="px-6 py-4 text-left font-medium">
                           <Link
-                            href={`/certificates/${bundle.sku}`}
+                            href={certificateHref(bundle.sku)}
                             className="rounded-xs transition-colors duration-[var(--duration-fast)] group-hover:text-[var(--accent)] hover:text-[var(--accent)]"
                           >
                             {bundle.sku}
@@ -191,7 +206,7 @@ export default async function CertificatesPage() {
                         </td>
                         <td className="px-6 py-4 text-right">
                           <Link
-                            href={`/certificates/${bundle.sku}`}
+                            href={certificateHref(bundle.sku)}
                             className="btn btn-bare h-7 px-2 text-[var(--fg-quiet)]
                                        transition-colors duration-[var(--duration-fast)]
                                        group-hover:text-[var(--fg)]"
@@ -207,6 +222,19 @@ export default async function CertificatesPage() {
                 </table>
               </div>
             </Panel>
+
+            <Pager
+              page={page.page}
+              pageCount={page.pageCount}
+              from={page.from}
+              to={page.to}
+              total={page.total}
+              hasPrevious={page.hasPrevious}
+              hasNext={page.hasNext}
+              href={(next) => (next === 1 ? "/certificates" : `/certificates?page=${next}`)}
+              label="Audit artifact pages"
+              unit="artifacts, ordered by quality index"
+            />
 
             <p className="mt-4 text-meta text-[var(--fg-quiet)]">
               Generated {dateOnly(rows[0]!.certificate.generated_at)} · process{" "}

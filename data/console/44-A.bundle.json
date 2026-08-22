@@ -19,8 +19,8 @@
       "source_document_ids": [
         "Unihack__Sample_Dataset_-_Input#44-A"
       ],
-      "created_at": "2026-08-22T12:23:47.075107+00:00",
-      "updated_at": "2026-08-22T12:23:47.075193+00:00"
+      "created_at": "2026-08-22T12:30:40.078171+00:00",
+      "updated_at": "2026-08-22T12:30:40.078229+00:00"
     },
     "classifications": [
       {
@@ -89,7 +89,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T12:23:47.075164Z"
+        "detected_at": "2026-08-22T12:30:40.078203Z"
       },
       {
         "attribute_code": "wattage",
@@ -101,7 +101,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T12:23:47.075170Z"
+        "detected_at": "2026-08-22T12:30:40.078209Z"
       }
     ],
     "extraction": {
@@ -150,10 +150,10 @@
       "per_attribute": {}
     },
     "certificate": {
-      "certificate_id": "ec_ccbfff395d64",
+      "certificate_id": "ec_a343ed07f93d",
       "sku": "44-A",
       "tenant_id": "unilog",
-      "generated_at": "2026-08-22T12:23:47.076167Z",
+      "generated_at": "2026-08-22T12:30:40.078486Z",
       "schema_version": "LGT.LMP.GEN@v1",
       "pipeline_version": "axiom-0.1.0",
       "classifications": [
@@ -234,7 +234,7 @@
         "cost_usd": null,
         "wall_clock_seconds": 0.0
       },
-      "signature": "sha256:e1b66ec1abfbbaf24dd1ebc9c785eac5be0865dcd913e3021df14292b4fdeb9c",
+      "signature": "sha256:48300d497c7399abcded54c3ca9d64a3a8db483d7b7581be06cb36e96c253c4b",
       "signature_verified": true
     },
     "channels": [
@@ -287,7 +287,7 @@
     "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
     "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
     "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-22T12:23:46.657093Z",
+    "fetched_at": "2026-08-22T12:30:39.344315Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": "unilog",

@@ -46,7 +46,7 @@ from axiom.delivery.batch import (
     select_rows,
     validate_input_columns,
 )
-from axiom.core.naming import sku_slug
+from axiom.core.naming import is_sku_slug, sku_slug
 from axiom.delivery.source import INPUT_COLUMNS
 from axiom.ingest import IngestError, profile_rows, read_flat_file, sha256_bytes
 from axiom.review import ACCEPT, CORRECT, REJECT, ReviewSession, queue_summary, record_decision
@@ -140,17 +140,26 @@ class DecisionRequest(BaseModel):
 
 
 def _session_path(sku: str) -> Path:
-    # Reject anything that could escape the session directory. The SKU arrives from a URL and
-    # is used to build a filesystem path, which is exactly the shape of a traversal bug.
-    #
-    # The guard runs on the raw value and the *slug* is what names the file. Those are two
-    # different jobs and conflating them is what made real part numbers unreachable: a SKU like
-    # `52C3-5/8-UPC` is not an attack, it is a fractional size, and rejecting it was the only
-    # thing this endpoint could do while the filename was the SKU itself. `sku_slug` escapes the
-    # separator, so the part number is addressable and the path still cannot contain one.
-    if not sku or "/" in sku or "\\" in sku or ".." in sku:
-        raise HTTPException(status_code=400, detail="invalid sku")
-    return SESSION_DIR / f"{sku_slug(sku)}.json"
+    """The session file for a SKU **slug**, which is what this endpoint's path segment carries.
+
+    The SKU arrives from a URL and is used to build a filesystem path, which is exactly the shape
+    of a traversal bug, so the value is whitelist-validated rather than pattern-rejected.
+
+    It is the slug and not the raw part number because industrial part numbers contain separators
+    — ``52C3-5/8-UPC`` is a fractional size, not an attack — and while the filename *was* the SKU
+    there was nothing this endpoint could do with one but refuse it. See ``axiom.core.naming``.
+    A part number needing no escaping is its own slug, so every existing caller is unaffected.
+    """
+    if not is_sku_slug(sku):
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"invalid sku '{sku}': expected a SKU slug, i.e. letters, digits, '-', '_', '.' "
+                f"and '~' escapes. A part number containing a separator is addressed by its "
+                f"slug, e.g. '52C3-5/8-UPC' as '52C3-5~2F8-UPC'."
+            ),
+        )
+    return SESSION_DIR / f"{sku}.json"
 
 
 def _load(sku: str) -> ReviewSession:
@@ -295,7 +304,10 @@ def console_dataset() -> dict:
         # A bundle records what the pipeline produced; the session records what a reviewer
         # decided since. Joining them here means a decision shows up on the dashboards without
         # the pipeline's own output being rewritten underneath it.
-        session_path = SESSION_DIR / f"{bundle['sku']}.json"
+        # Slugged, because the bundle carries the true part number and the filename cannot. A SKU
+        # needing no escaping is its own slug, so this resolves every artifact already on disk.
+        slug = sku_slug(bundle["sku"])
+        session_path = SESSION_DIR / f"{slug}.json"
         if session_path.is_file():
             try:
                 bundle = overlay_review_decisions(bundle, ReviewSession.load(session_path))
@@ -305,7 +317,7 @@ def console_dataset() -> dict:
         # L4's findings arrive the same way, and for the same reason: the bundle is what a
         # single-source run produced, and a multi-source analysis is a later, separate reading of
         # the same SKU. Written by scripts/cross_validate.py --save.
-        cross_path = CROSS_SOURCE_DIR / f"{bundle['sku']}.json"
+        cross_path = CROSS_SOURCE_DIR / f"{slug}.json"
         if cross_path.is_file():
             try:
                 bundle = overlay_cross_source(
@@ -317,7 +329,7 @@ def console_dataset() -> dict:
         # The cross-reference joins the same way, and for the same reason: a bundle records what a
         # single-SKU run produced, and a comparison against the rest of the catalogue is a later
         # reading of it. Written by scripts/cross_reference.py --write.
-        equivalence_path = EQUIVALENCE_DIR / f"{bundle['sku']}.json"
+        equivalence_path = EQUIVALENCE_DIR / f"{slug}.json"
         if equivalence_path.is_file():
             try:
                 bundle = overlay_equivalence(

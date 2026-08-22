@@ -19,8 +19,8 @@
       "source_document_ids": [
         "Unihack__Sample_Dataset_-_Input#KDTS324SPS"
       ],
-      "created_at": "2026-08-22T12:23:46.954464+00:00",
-      "updated_at": "2026-08-22T12:23:46.954513+00:00"
+      "created_at": "2026-08-22T12:30:39.957588+00:00",
+      "updated_at": "2026-08-22T12:30:39.957720+00:00"
     },
     "classifications": [
       {
@@ -109,7 +109,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-22T12:23:46.954430Z",
+        "created_at": "2026-08-22T12:30:39.957487Z",
         "score": 0.8,
         "decision": {
           "attribute_code": "primary_material",
@@ -152,7 +152,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T12:23:46.954492Z"
+        "detected_at": "2026-08-22T12:30:39.957676Z"
       },
       {
         "attribute_code": "amperage_rating",
@@ -164,7 +164,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T12:23:46.954496Z"
+        "detected_at": "2026-08-22T12:30:39.957685Z"
       },
       {
         "attribute_code": "mounting_type",
@@ -176,7 +176,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T12:23:46.954498Z"
+        "detected_at": "2026-08-22T12:30:39.957690Z"
       },
       {
         "attribute_code": "overall_size",
@@ -188,7 +188,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T12:23:46.954501Z"
+        "detected_at": "2026-08-22T12:30:39.957695Z"
       },
       {
         "attribute_code": "sound_level",
@@ -200,7 +200,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T12:23:46.954504Z"
+        "detected_at": "2026-08-22T12:30:39.957699Z"
       }
     ],
     "extraction": {
@@ -249,10 +249,10 @@
       "per_attribute": {}
     },
     "certificate": {
-      "certificate_id": "ec_3fc7980e890d",
+      "certificate_id": "ec_b00861f2bd12",
       "sku": "KDTS324SPS",
       "tenant_id": "unilog",
-      "generated_at": "2026-08-22T12:23:46.954735Z",
+      "generated_at": "2026-08-22T12:30:39.958102Z",
       "schema_version": "APP.KIT.DISHWASHER.BUILTIN@v1",
       "pipeline_version": "axiom-0.1.0",
       "classifications": [
@@ -385,7 +385,7 @@
         "cost_usd": null,
         "wall_clock_seconds": 0.0
       },
-      "signature": "sha256:42df0cfa50af2f709b887de3a9c552064cba9f16a2f67a16f9c27d5fee07b443",
+      "signature": "sha256:7981bb4a6ee1e4c83a01b3b1f871af4c296cbd41dee77080e6bc82d9f38e6864",
       "signature_verified": true
     },
     "channels": [
@@ -438,7 +438,7 @@
     "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
     "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
     "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-22T12:23:46.657093Z",
+    "fetched_at": "2026-08-22T12:30:39.344315Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": "unilog",

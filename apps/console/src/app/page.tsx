@@ -14,13 +14,24 @@ import {
   StatBand,
 } from "@/components/primitives";
 import {
+  blockingWork,
   listSkus,
   loadDataset,
+  needsClassification,
   portfolioTotals,
-  reviewOrder,
   unresolvedConflicts,
 } from "@/lib/data";
 import { count, dateTime, percent } from "@/lib/format";
+import { reviewHref } from "@/lib/sku";
+
+/**
+ * How many blocked records the overview table lists before deferring to the resolve queue.
+ *
+ * This is a landing page, not a work queue: it exists to say how much is blocked and let someone
+ * start on the worst of it. Rendering a thousand rows here would bury that in its own detail, and
+ * the queue it links to is paged and reachable in full.
+ */
+const PREVIEW_ROWS = 12;
 
 export const metadata = {
   title: "Operations",
@@ -32,13 +43,9 @@ export default async function OperationsPage() {
   const skus = await listSkus();
   const warnings = dataset.meta.warnings ?? [];
   const totals = portfolioTotals(skus);
-  const blocking = reviewOrder(skus).filter(
-    (bundle) =>
-      unresolvedConflicts(bundle) > 0 ||
-      bundle.validation.failures > 0 ||
-      bundle.metrics.values_needing_review > 0 ||
-      bundle.metrics.gaps_required > 0,
-  );
+  const blocking = blockingWork(skus);
+  const preview = blocking.slice(0, PREVIEW_ROWS);
+  const unclassified = skus.filter(needsClassification).length;
   const recorded = [...skus]
     .sort(
       (a, b) =>
@@ -56,8 +63,8 @@ export default async function OperationsPage() {
         title={blocking.length > 0 ? "Catalog work that needs intervention" : "Portfolio is clear to progress"}
         detail={
           blocking.length > 0
-            ? `${blocking.length} of ${skus.length} records are blocked by a validation failure, unresolved evidence, or a required decision. Work is ordered by publication risk.`
-            : `All ${skus.length} records have cleared the current decision gates. Review recorded process context or move eligible output into delivery.`
+            ? `${count(blocking.length)} of ${count(skus.length)} records are blocked by a validation failure, unresolved evidence, a required decision, or having no established class. Work is ordered by publication risk.`
+            : `All ${count(skus.length)} records have cleared the current decision gates. Review recorded process context or move eligible output into delivery.`
         }
         actions={
           <>
@@ -98,7 +105,14 @@ export default async function OperationsPage() {
         <Stat
           label="Required gaps"
           value={count(totals.gapsRequired)}
-          hint={`${count(totals.gapsTotal)} gaps recorded in total`}
+          hint={
+            unclassified > 0
+              ? // Stated on the denominator, because it is the denominator that is misleading. A
+                // required gap is defined per class, so the SKUs without one contribute nothing to
+                // this figure — and a reader would otherwise take a low number as good news.
+                `${count(totals.gapsTotal)} recorded; excludes ${count(unclassified)} unclassified records`
+              : `${count(totals.gapsTotal)} gaps recorded in total`
+          }
           tone={totals.gapsRequired > 0 ? "warn" : "pass"}
         />
         <Stat
@@ -158,7 +172,7 @@ export default async function OperationsPage() {
                 </tr>
               </thead>
               <tbody>
-                {blocking.map((bundle) => {
+                {preview.map((bundle) => {
                   const conflicts = unresolvedConflicts(bundle);
                   const primary =
                     conflicts > 0
@@ -167,13 +181,19 @@ export default async function OperationsPage() {
                         ? `${bundle.validation.failures} blocking validation failure${bundle.validation.failures === 1 ? "" : "s"}`
                         : bundle.metrics.gaps_required > 0
                           ? `${bundle.metrics.gaps_required} required attribute gap${bundle.metrics.gaps_required === 1 ? "" : "s"}`
-                          : `${bundle.metrics.values_needing_review} value${bundle.metrics.values_needing_review === 1 ? "" : "s"} below threshold`;
+                          : bundle.metrics.values_needing_review > 0
+                            ? `${bundle.metrics.values_needing_review} value${bundle.metrics.values_needing_review === 1 ? "" : "s"} below threshold`
+                            : // Last, because it is the weakest finding and the one the others
+                              // imply away: a record with a gap or a queued value already has a
+                              // class. Reached only when nothing else is outstanding, which for an
+                              // unclassified record is always.
+                              "no class established; nothing evaluated";
                   const tone = conflicts > 0 || bundle.validation.failures > 0 ? "pill-fail" : "pill-warn";
 
                   return (
                     <tr key={bundle.sku} className="grid-row group hairline-b last:border-b-0">
                       <th scope="row" className="px-5 py-3.5 text-left">
-                        <Link href={`/review/${bundle.sku}`} className="font-medium group-hover:text-[var(--accent)]">
+                        <Link href={reviewHref(bundle.sku)} className="font-medium group-hover:text-[var(--accent)]">
                           {bundle.sku}
                         </Link>
                         <span className="mono mt-1 block text-[var(--fg-quiet)]">
@@ -205,7 +225,7 @@ export default async function OperationsPage() {
                         {bundle.metrics.gaps_required || <span className="figure-zero">0</span>}
                       </td>
                       <td className="px-5 py-3.5 text-right">
-                        <Link href={`/review/${bundle.sku}`} className="btn btn-bare h-7 px-2" aria-label={`Resolve ${bundle.sku}`}>
+                        <Link href={reviewHref(bundle.sku)} className="btn btn-bare h-7 px-2" aria-label={`Resolve ${bundle.sku}`}>
                           <ArrowIcon />
                         </Link>
                       </td>
@@ -217,6 +237,29 @@ export default async function OperationsPage() {
             </div>
           </Panel>
         )}
+
+        {/*
+          Said in text rather than left to the reader to notice. A twelve-row table cut from a
+          thousand-record backlog looks exactly like a twelve-record backlog, and this page's whole
+          job is to report the size of the problem.
+        */}
+        {blocking.length > preview.length ? (
+          <p className="mt-4 text-meta text-[var(--fg-tertiary)]">
+            Showing the {preview.length} highest-risk of {count(blocking.length)} blocked records.{" "}
+            <Link href="/review" className="text-[var(--accent)] hover:underline">
+              Open the full Resolve queue
+            </Link>
+            {unclassified > 0 ? (
+              <>
+                {" — "}
+                {count(unclassified)} of them are blocked only because no class could be
+                established, so nothing has been extracted or scored for them yet.
+              </>
+            ) : (
+              "."
+            )}
+          </p>
+        ) : null}
       </Section>
 
       <Section rhythm="lg" labelledBy="recorded-context-heading">
@@ -250,6 +293,8 @@ export default async function OperationsPage() {
                 {recorded.map((bundle) => (
                   <li key={bundle.sku} className="grid grid-cols-[1fr_auto] gap-4 border-b border-[var(--hairline)] px-5 py-4 last:border-b-0 sm:grid-cols-[1fr_auto_auto]">
                     <div className="min-w-0">
+                      {/* A query parameter, not a path segment, so percent-encoding is correct
+                          here and a slug would be wrong — the pipeline page matches on the SKU. */}
                       <Link href={`/pipeline?sku=${encodeURIComponent(bundle.sku)}`} className="font-medium hover:text-[var(--accent)]">
                         {bundle.sku}
                       </Link>

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowIcon, Overline, Panel, SectionHeading } from "@/components/primitives";
 import type { VariantGroup, VariantMember } from "@/lib/data";
 import { humanise, tableRef } from "@/lib/format";
+import { reviewHref } from "@/lib/sku";
 import type { SkuBundle } from "@/lib/types";
 
 /**
@@ -109,7 +110,7 @@ export function VariantSeriesPanel({ group }: { group: VariantGroup }) {
               <tr key={member.bundle.sku} className="grid-row group hairline-b last:border-b-0">
                 <th scope="row" className="px-5 py-3.5 text-left font-medium">
                   <Link
-                    href={`/review/${member.bundle.sku}`}
+                    href={reviewHref(member.bundle.sku)}
                     className="mono rounded-xs text-[var(--accent)] underline-offset-2 transition-colors duration-[var(--duration-fast)] hover:underline"
                   >
                     {member.bundle.sku}
@@ -148,7 +149,7 @@ export function VariantSeriesPanel({ group }: { group: VariantGroup }) {
                 </td>
                 <td className="px-5 py-3.5 text-right align-top">
                   <Link
-                    href={`/review/${member.bundle.sku}`}
+                    href={reviewHref(member.bundle.sku)}
                     className="btn btn-bare h-7 px-2 text-[var(--fg-quiet)]
                                transition-colors duration-[var(--duration-fast)]
                                group-hover:text-[var(--fg)]"

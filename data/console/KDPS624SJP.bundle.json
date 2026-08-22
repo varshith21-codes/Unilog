@@ -19,8 +19,8 @@
       "source_document_ids": [
         "Unihack__Sample_Dataset_-_Input#KDPS624SJP"
       ],
-      "created_at": "2026-08-22T12:23:46.959041+00:00",
-      "updated_at": "2026-08-22T12:23:46.959416+00:00"
+      "created_at": "2026-08-22T12:30:39.962786+00:00",
+      "updated_at": "2026-08-22T12:30:39.962866+00:00"
     },
     "classifications": [
       {
@@ -89,7 +89,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T12:23:46.959203Z"
+        "detected_at": "2026-08-22T12:30:39.962813Z"
       },
       {
         "attribute_code": "amperage_rating",
@@ -101,7 +101,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T12:23:46.959228Z"
+        "detected_at": "2026-08-22T12:30:39.962819Z"
       },
       {
         "attribute_code": "mounting_type",
@@ -113,7 +113,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T12:23:46.959242Z"
+        "detected_at": "2026-08-22T12:30:39.962825Z"
       },
       {
         "attribute_code": "overall_size",
@@ -125,7 +125,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T12:23:46.959257Z"
+        "detected_at": "2026-08-22T12:30:39.962828Z"
       },
       {
         "attribute_code": "sound_level",
@@ -137,7 +137,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T12:23:46.959266Z"
+        "detected_at": "2026-08-22T12:30:39.962832Z"
       },
       {
         "attribute_code": "primary_material",
@@ -149,7 +149,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T12:23:46.959273Z"
+        "detected_at": "2026-08-22T12:30:39.962837Z"
       }
     ],
     "extraction": {
@@ -198,10 +198,10 @@
       "per_attribute": {}
     },
     "certificate": {
-      "certificate_id": "ec_6a9e775e138a",
+      "certificate_id": "ec_b9a7674da706",
       "sku": "KDPS624SJP",
       "tenant_id": "unilog",
-      "generated_at": "2026-08-22T12:23:46.959983Z",
+      "generated_at": "2026-08-22T12:30:39.963300Z",
       "schema_version": "APP.KIT.DISHWASHER.BUILTIN@v1",
       "pipeline_version": "axiom-0.1.0",
       "classifications": [
@@ -322,7 +322,7 @@
         "cost_usd": null,
         "wall_clock_seconds": 0.0
       },
-      "signature": "sha256:1fe9a44e0308a208564e5017bdc0a650d4352bd5ce4b3150c8f02f7c6fc4c6e8",
+      "signature": "sha256:4197e563c0dc91857b1430bd59981e5a6c48e3f77daa1969bd099fa9dfea25a4",
       "signature_verified": true
     },
     "channels": [
@@ -375,7 +375,7 @@
     "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
     "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
     "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-22T12:23:46.657093Z",
+    "fetched_at": "2026-08-22T12:30:39.344315Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": "unilog",

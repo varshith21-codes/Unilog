@@ -16,7 +16,8 @@ import {
   Section,
   SectionHeading,
 } from "@/components/primitives";
-import { getClassDefinition, getSku, listSkus } from "@/lib/data";
+import { getClassDefinition, getSku } from "@/lib/data";
+import { reviewHref } from "@/lib/sku";
 import {
   ACTION_LABEL,
   GAP_REASON_LABEL,
@@ -29,14 +30,15 @@ import {
 import { composite } from "@/lib/types";
 import type { CanonicalValue } from "@/lib/types";
 
+/** Nothing is prerendered. Same reasoning as the resolve workspace: see `review/[sku]/page.tsx`. */
 export async function generateStaticParams() {
-  const skus = await listSkus();
-  return skus.map((bundle) => ({ sku: bundle.sku }));
+  return [];
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ sku: string }> }) {
   const { sku } = await params;
-  return { title: `Audit ${sku}` };
+  const bundle = await getSku(sku);
+  return { title: `Audit ${bundle?.sku ?? sku}` };
 }
 
 export default async function CertificatePage({
@@ -100,7 +102,7 @@ export default async function CertificatePage({
           </div>
 
           <div className="flex items-center gap-2">
-            <Link href={`/review/${certificate.sku}`} className="btn btn-quiet">
+            <Link href={reviewHref(certificate.sku)} className="btn btn-quiet">
               Resolve workspace
               <ArrowIcon />
             </Link>

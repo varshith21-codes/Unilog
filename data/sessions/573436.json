@@ -1,0 +1,229 @@
+{
+  "sku": "573436",
+  "tenant_id": "unilog",
+  "brand": "Philips",
+  "class_code": "LGT.LMP.GEN",
+  "class_name": "Lighting",
+  "category_path": [
+    "Electrical",
+    "Lighting",
+    "Lamps & Fixtures"
+  ],
+  "document_id": "Unihack__Sample_Dataset_-_Input#573436",
+  "document_sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+  "gaps": [],
+  "policy": {
+    "epsilon": 0.05,
+    "confidence_level": 0.95,
+    "threshold": 0.6853,
+    "coverage": 1.0,
+    "accepted": 220,
+    "accepted_errors": 1,
+    "observed_error_rate": 0.0045,
+    "error_upper_bound": 0.0201,
+    "calibration_size": 220,
+    "achievable": true,
+    "reason": "at threshold 0.685, 100.0% of values are publishable with an error rate of at most 2.0% at 95% confidence"
+  },
+  "quality": {
+    "completeness": 1.0,
+    "verifiability": 1.0,
+    "consistency": 1.0,
+    "richness": 1.0,
+    "composite": 1.0,
+    "measured_dimensions": [
+      "completeness",
+      "consistency",
+      "richness",
+      "verifiability"
+    ]
+  },
+  "created_at": "2026-08-22T12:30:42.363692+00:00",
+  "decisions": [],
+  "pages": [
+    {
+      "number": 1,
+      "lines": [
+        "Mfg_Part_Num: 573436",
+        "Part_Desc: 573436 60W Led A19 Med 27k 2pk",
+        "E1_Brand: -- Unbranded --",
+        "Unilog_Brand: -- No Unilog Brand --",
+        "DIB_Brand: Philips",
+        "Part_Manuf: Phillips Lighting (5831)",
+        ""
+      ]
+    }
+  ],
+  "items": [
+    {
+      "attribute_code": "wattage",
+      "attribute_name": "Wattage",
+      "datatype": "quantity",
+      "value_raw": "60W",
+      "value_canonical": {
+        "magnitude": 60.0,
+        "unit": "W"
+      },
+      "value_display": "60 W",
+      "score": 0.8,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.800 >= threshold 0.685",
+      "method": "supplier_feed",
+      "model_tier": null,
+      "is_required": true,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "Unihack__Sample_Dataset_-_Input#573436",
+          "quote": "60W",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": 1,
+          "table_ref": null,
+          "method": "exact_line"
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": "W"
+    },
+    {
+      "attribute_code": "lamp_technology",
+      "attribute_name": "Lamp Technology",
+      "datatype": "enum",
+      "value_raw": "Led",
+      "value_canonical": "LED",
+      "value_display": "LED",
+      "score": 0.8,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.800 >= threshold 0.685",
+      "method": "supplier_feed",
+      "model_tier": null,
+      "is_required": true,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "Unihack__Sample_Dataset_-_Input#573436",
+          "quote": "Led",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": 1,
+          "table_ref": null,
+          "method": "exact_line"
+        }
+      ],
+      "validations": [],
+      "allowed_values": [
+        "LED",
+        "Fluorescent",
+        "Compact Fluorescent",
+        "Incandescent",
+        "Halogen",
+        "High Pressure Sodium",
+        "Metal Halide",
+        "Mercury Vapor",
+        "Induction"
+      ],
+      "unit": null
+    },
+    {
+      "attribute_code": "lamp_shape",
+      "attribute_name": "Lamp Shape",
+      "datatype": "enum",
+      "value_raw": "A19",
+      "value_canonical": "A19",
+      "value_display": "A19",
+      "score": 0.8,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.800 >= threshold 0.685",
+      "method": "supplier_feed",
+      "model_tier": null,
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "Unihack__Sample_Dataset_-_Input#573436",
+          "quote": "A19",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": 1,
+          "table_ref": null,
+          "method": "exact_line"
+        }
+      ],
+      "validations": [],
+      "allowed_values": [
+        "A15",
+        "A19",
+        "A21",
+        "BR30",
+        "BR40",
+        "PAR16",
+        "PAR20",
+        "PAR30",
+        "PAR38",
+        "MR11",
+        "MR16",
+        "T3",
+        "T4",
+        "T5",
+        "T8",
+        "T9",
+        "T12",
+        "G25",
+        "B11"
+      ],
+      "unit": null
+    },
+    {
+      "attribute_code": "lamp_base",
+      "attribute_name": "Base Type",
+      "datatype": "enum",
+      "value_raw": "Med",
+      "value_canonical": "Medium E26",
+      "value_display": "Medium E26",
+      "score": 0.8,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.800 >= threshold 0.685",
+      "method": "supplier_feed",
+      "model_tier": null,
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "Unihack__Sample_Dataset_-_Input#573436",
+          "quote": "Med",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": 1,
+          "table_ref": null,
+          "method": "exact_line"
+        }
+      ],
+      "validations": [],
+      "allowed_values": [
+        "Medium E26",
+        "Candelabra E12",
+        "Intermediate E17",
+        "Mogul E39",
+        "GU10",
+        "GU5.3",
+        "GU24",
+        "G13",
+        "G5",
+        "GX23",
+        "Integrated"
+      ],
+      "unit": null
+    }
+  ],
+  "queue": []
+}

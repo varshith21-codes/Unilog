@@ -19,6 +19,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { cache } from "react";
 
+import { skuSlug } from "./sku";
 import { composite } from "./types";
 import type {
   AttributeSpec,
@@ -97,9 +98,21 @@ export async function listSkus(): Promise<SkuBundle[]> {
   return skus;
 }
 
+/**
+ * One SKU, addressed by its part number **or** by its slug.
+ *
+ * Both, because the two are the same string for most parts and cannot be for the rest. A route
+ * segment carries the slug — `52C3-5/8-UPC` has no other way to travel through a URL path — while
+ * a bundle records the true part number. Resolving either here keeps that detail out of every
+ * page that looks a SKU up. See `lib/sku.ts`.
+ */
 export async function getSku(sku: string): Promise<SkuBundle | null> {
   const { skus } = await loadDataset();
-  return skus.find((entry) => entry.sku === sku) ?? null;
+  return (
+    skus.find((entry) => entry.sku === sku) ??
+    skus.find((entry) => skuSlug(entry.sku) === sku) ??
+    null
+  );
 }
 
 // ------------------------------------------------------------------ resolving the maps
@@ -205,6 +218,41 @@ export const loadCohort = cache(async (): Promise<CohortStudy> => {
 /** Unresolved cross-source conflicts on a SKU. Zero when no L4 run has been saved for it. */
 export function unresolvedConflicts(bundle: SkuBundle): number {
   return bundle.cross_source?.unresolved ?? 0;
+}
+
+/**
+ * True when no product class could be established for this SKU.
+ *
+ * Worth a named predicate rather than an inline `=== null`, because the alternative reads as a
+ * clean bill of health and is the opposite of one. A SKU with no class has no required attributes,
+ * so it has no gaps and no queued values, so every count on every dashboard reports zero for it —
+ * and a page that treats "nothing to do" and "nothing was evaluated" as the same state will tell a
+ * reviewer their catalogue is finished when most of it has not been looked at.
+ *
+ * At catalogue scale this is the dominant state, not an edge case: retrieval abstains rather than
+ * guessing, and `schema/classes/` covers four classes against an item master spanning abrasives,
+ * lumber, power tools, wire and PPE. Closing it means adding class definitions.
+ */
+export function needsClassification(bundle: SkuBundle): boolean {
+  return bundle.class_code === null;
+}
+
+/**
+ * Every SKU with outstanding work, ordered by publication risk.
+ *
+ * Shared by the operations overview and the resolve queue so the two cannot disagree about what
+ * "blocked" means — they did disagree while each computed its own predicate inline, and the count
+ * on the landing page is the number a reader trusts.
+ */
+export function blockingWork(skus: SkuBundle[]): SkuBundle[] {
+  return reviewOrder(skus).filter(
+    (bundle) =>
+      needsClassification(bundle) ||
+      unresolvedConflicts(bundle) > 0 ||
+      bundle.validation.failures > 0 ||
+      bundle.metrics.values_needing_review > 0 ||
+      bundle.metrics.gaps_required > 0,
+  );
 }
 
 // ------------------------------------------------------------------ variant series
@@ -348,6 +396,14 @@ export function reviewOrder(skus: SkuBundle[]): SkuBundle[] {
     if (a.metrics.values_needing_review !== b.metrics.values_needing_review) {
       return b.metrics.values_needing_review - a.metrics.values_needing_review;
     }
+
+    // Unclassified last among the tiers above, and ahead of a genuinely clean record. Every count
+    // this sort reads is zero for an unclassified SKU, so without this tier it would tie with a
+    // fully accepted one and sort by part number — burying the largest category of work in the
+    // catalogue among the finished records.
+    const unclassified = Number(needsClassification(b)) - Number(needsClassification(a));
+    if (unclassified !== 0) return unclassified;
+
     return a.sku.localeCompare(b.sku);
   });
 }

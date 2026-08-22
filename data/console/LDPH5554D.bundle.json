@@ -19,8 +19,8 @@
       "source_document_ids": [
         "Unihack__Sample_Dataset_-_Input#LDPH5554D"
       ],
-      "created_at": "2026-08-22T12:23:46.930930+00:00",
-      "updated_at": "2026-08-22T12:23:46.931022+00:00"
+      "created_at": "2026-08-22T12:30:39.929771+00:00",
+      "updated_at": "2026-08-22T12:30:39.929861+00:00"
     },
     "classifications": [
       {
@@ -109,7 +109,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-22T12:23:46.930786Z",
+        "created_at": "2026-08-22T12:30:39.929713Z",
         "score": 0.8,
         "decision": {
           "attribute_code": "primary_material",
@@ -152,7 +152,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T12:23:46.930986Z"
+        "detected_at": "2026-08-22T12:30:39.929816Z"
       },
       {
         "attribute_code": "amperage_rating",
@@ -164,7 +164,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T12:23:46.930992Z"
+        "detected_at": "2026-08-22T12:30:39.929828Z"
       },
       {
         "attribute_code": "mounting_type",
@@ -176,7 +176,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T12:23:46.930998Z"
+        "detected_at": "2026-08-22T12:30:39.929833Z"
       },
       {
         "attribute_code": "overall_size",
@@ -188,7 +188,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T12:23:46.931003Z"
+        "detected_at": "2026-08-22T12:30:39.929838Z"
       },
       {
         "attribute_code": "sound_level",
@@ -200,7 +200,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T12:23:46.931007Z"
+        "detected_at": "2026-08-22T12:30:39.929843Z"
       }
     ],
     "extraction": {
@@ -249,10 +249,10 @@
       "per_attribute": {}
     },
     "certificate": {
-      "certificate_id": "ec_4223f6f4f25a",
+      "certificate_id": "ec_c8a4b213e084",
       "sku": "LDPH5554D",
       "tenant_id": "unilog",
-      "generated_at": "2026-08-22T12:23:46.931393Z",
+      "generated_at": "2026-08-22T12:30:39.930273Z",
       "schema_version": "APP.KIT.DISHWASHER.BUILTIN@v1",
       "pipeline_version": "axiom-0.1.0",
       "classifications": [
@@ -385,7 +385,7 @@
         "cost_usd": null,
         "wall_clock_seconds": 0.0
       },
-      "signature": "sha256:a45bcc329be2b4c7a2dc1e7329f68793192e574e0bdbc9d9bea38701dd639076",
+      "signature": "sha256:04182b87e73749d641fa58a064d6f414de24eb52b16de14a56f057875cf9d10c",
       "signature_verified": true
     },
     "channels": [
@@ -438,7 +438,7 @@
     "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
     "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
     "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-22T12:23:46.657093Z",
+    "fetched_at": "2026-08-22T12:30:39.344315Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": "unilog",

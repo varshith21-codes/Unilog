@@ -20,6 +20,7 @@
 import { revalidatePath } from "next/cache";
 
 import { API_BASE } from "./data";
+import { skuSlug } from "./sku";
 import type { DecisionResponse, ReviewAction, RiskPolicyView } from "./types";
 
 export type DecisionResult =
@@ -74,18 +75,21 @@ export async function submitDecision(input: DecisionInput): Promise<DecisionResu
     return { ok: false, error: "A correction needs a replacement value." };
   }
 
-  // `sku` and `attributeCode` land in a URL path. The API guards against traversal too, but a
-  // client that sends a malformed path and gets back a confusing 404 is worse than one that is
-  // told plainly what was wrong.
-  if (!sku || /[/\\]/.test(sku) || sku.includes("..")) {
-    return { ok: false, error: `Invalid SKU: ${sku}` };
+  if (!sku.trim()) {
+    return { ok: false, error: "A decision needs a SKU." };
   }
   if (!attributeCode || /[/\\]/.test(attributeCode)) {
     return { ok: false, error: `Invalid attribute code: ${attributeCode}` };
   }
 
+  // The SKU is slugged rather than percent-encoded, and that is the difference between a decision
+  // that records and one that 404s. `encodeURIComponent("52C3-5/8-UPC")` puts `%2F` in a path
+  // segment, which the server decodes back into a separator before routing — so the request arrives
+  // at a route that does not exist, for a part number that does. The slug carries no character a
+  // path treats specially, and it is the same identifier the session file is named with. See
+  // lib/sku.ts and axiom.core.naming.
   const url =
-    `${API_BASE}/api/session/${encodeURIComponent(sku)}` +
+    `${API_BASE}/api/session/${skuSlug(sku)}` +
     `/decision/${encodeURIComponent(attributeCode)}`;
 
   let response: Response;
@@ -117,9 +121,10 @@ export async function submitDecision(input: DecisionInput): Promise<DecisionResu
 
   const data = (await response.json()) as DecisionResponse;
 
-  // The decision changed the session on disk, so anything rendering it is now stale.
+  // The decision changed the session on disk, so anything rendering it is now stale. The path
+  // revalidated has to be the one that was routed, which is the slug.
   revalidatePath("/review");
-  revalidatePath(`/review/${sku}`);
+  revalidatePath(`/review/${skuSlug(sku)}`);
   revalidatePath("/");
 
   return { ok: true, data };

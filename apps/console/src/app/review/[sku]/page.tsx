@@ -16,15 +16,27 @@ import {
   variantGroupFor,
 } from "@/lib/data";
 import { percent } from "@/lib/format";
+import { certificateHref, reviewHref } from "@/lib/sku";
 
+/**
+ * Nothing is prerendered, deliberately.
+ *
+ * This used to enumerate every SKU in the dataset. At two that was free; at a full item master it
+ * asks the build to render a thousand pages, each of which loads the whole catalogue — and none of
+ * them can be reused anyway, because the dataset is fetched `no-store` so a reviewer's decision
+ * takes effect immediately. An empty list means every part number is still routable and rendered on
+ * demand.
+ */
 export async function generateStaticParams() {
-  const skus = await listSkus();
-  return skus.map((bundle) => ({ sku: bundle.sku }));
+  return [];
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ sku: string }> }) {
   const { sku } = await params;
-  return { title: `Resolve ${sku}` };
+  // The route segment is a slug, so resolve it to the real part number rather than putting an
+  // escape sequence in the browser's title bar.
+  const bundle = await getSku(sku);
+  return { title: `Resolve ${bundle?.sku ?? sku}` };
 }
 
 export default async function ReviewSkuPage({
@@ -128,7 +140,7 @@ export default async function ReviewSkuPage({
                 {siblings.map((member) => (
                   <Link
                     key={member.bundle.sku}
-                    href={`/review/${member.bundle.sku}`}
+                    href={reviewHref(member.bundle.sku)}
                     className="mono rounded-xs text-[var(--accent)] underline-offset-2 transition-colors duration-[var(--duration-fast)] hover:underline"
                   >
                     {member.bundle.sku}
@@ -139,7 +151,7 @@ export default async function ReviewSkuPage({
           </div>
 
           <div className="flex items-center gap-2">
-            <Link href={`/certificates/${bundle.sku}`} className="btn btn-quiet">
+            <Link href={certificateHref(bundle.sku)} className="btn btn-quiet">
               Audit artifact
               <ArrowIcon />
             </Link>

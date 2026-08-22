@@ -19,8 +19,8 @@
       "source_document_ids": [
         "Unihack__Sample_Dataset_-_Input#49-94-0160"
       ],
-      "created_at": "2026-08-22T12:23:46.820821+00:00",
-      "updated_at": "2026-08-22T12:23:46.820824+00:00"
+      "created_at": "2026-08-22T12:30:39.797269+00:00",
+      "updated_at": "2026-08-22T12:30:39.797272+00:00"
     },
     "classifications": [],
     "classification_summary": {
@@ -73,10 +73,10 @@
       "per_attribute": {}
     },
     "certificate": {
-      "certificate_id": "ec_35d9da8239c2",
+      "certificate_id": "ec_453b758e7612",
       "sku": "49-94-0160",
       "tenant_id": "unilog",
-      "generated_at": "2026-08-22T12:23:46.820892Z",
+      "generated_at": "2026-08-22T12:30:39.797364Z",
       "schema_version": null,
       "pipeline_version": "axiom-0.1.0",
       "classifications": [],
@@ -113,7 +113,7 @@
         "cost_usd": null,
         "wall_clock_seconds": 0.0
       },
-      "signature": "sha256:3fcac33e48f476b41a4e8cd58cdbe3527c87800a384e959f976b3cbe140949e7",
+      "signature": "sha256:fca6bf9c74802cb0360ea218d8fd57da1fb241600be056ff0b1f395b12218db3",
       "signature_verified": true
     },
     "channels": [
@@ -168,7 +168,7 @@
     "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
     "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
     "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-22T12:23:46.657093Z",
+    "fetched_at": "2026-08-22T12:30:39.344315Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": "unilog",

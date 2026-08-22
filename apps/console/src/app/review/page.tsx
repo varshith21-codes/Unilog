@@ -7,6 +7,7 @@ import {
   EmptyState,
   Overline,
   PageHeader,
+  Pager,
   Panel,
   Section,
   SectionHeading,
@@ -18,15 +19,22 @@ import {
   attributeRows,
   listSkus,
   loadDataset,
+  needsClassification,
   reviewOrder,
   reviewRows,
   unresolvedConflicts,
 } from "@/lib/data";
 import { GAP_REASON_LABEL, canonical, count, percent, score } from "@/lib/format";
+import { pageParam, paginate } from "@/lib/paginate";
+import { reviewHref } from "@/lib/sku";
 
 export const metadata = { title: "Resolve" };
 
-export default async function ReviewIndexPage() {
+export default async function ReviewIndexPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
   const dataset = await loadDataset();
   const skus = reviewOrder(await listSkus());
 
@@ -52,6 +60,14 @@ export default async function ReviewIndexPage() {
     0,
   );
   const gapsOpen = openTotal - valuesOpen;
+  // Counted over the whole catalogue rather than the page being rendered. An unclassified SKU
+  // contributes nothing to the three counts above — it has no class, so it has no required
+  // attributes to be missing — which is exactly why it needs a count of its own.
+  const unclassified = skus.filter(needsClassification).length;
+
+  // The queue is risk-ordered, so page one is the work that matters. Paged rather than truncated
+  // so a record on page eleven is still reachable. See lib/paginate.ts.
+  const page = paginate(groups, pageParam((await searchParams).page));
 
   return (
     <div className="mx-auto max-w-[var(--container-shell)] px-[var(--spacing-gutter)] pb-24">
@@ -69,7 +85,13 @@ export default async function ReviewIndexPage() {
         meta={
           <>
             <span>{count(openTotal)} open items</span>
-            <span>{groups.length} SKUs evaluated</span>
+            <span>{count(groups.length)} SKUs in the catalogue</span>
+            {unclassified > 0 ? (
+              <span className="pill pill-warn">
+                <AlertIcon />
+                {count(unclassified)} unclassified
+              </span>
+            ) : null}
           </>
         }
       />
@@ -78,37 +100,59 @@ export default async function ReviewIndexPage() {
         <Stat
           label="Open items"
           value={count(openTotal)}
-          hint={`across ${groups.length} SKUs`}
+          hint={`across ${count(groups.length - unclassified)} classified SKUs`}
           tone={openTotal > 0 ? "warn" : "pass"}
         />
         <Stat label="Below threshold" value={count(valuesOpen)} hint="values to confirm" />
         <Stat label="Required gaps" value={count(gapsOpen)} hint="no value could be read" />
-        <Stat
-          label="Threshold"
-          /*
-            An unset threshold is an em-dash, not a zero. A `0.000` threshold would mean every value
-            auto-accepts, which is the opposite of what a missing calibration means.
-          */
-          value={dataset.policy.threshold === null ? "—" : dataset.policy.threshold.toFixed(3)}
-          hint={`${percent(dataset.policy.epsilon)} error budget at ${percent(
-            dataset.policy.confidence_level,
-          )} confidence`}
-        />
+        {/*
+          Unclassified replaces the threshold stat when there is any, and that ordering is
+          deliberate: a threshold is a property of the policy and is repeated on every screen,
+          while "no class could be established" is the largest unstated liability in the catalogue.
+          Nothing else on this page counts these SKUs, because every metric it reads is defined
+          per class and they have none.
+        */}
+        {unclassified > 0 ? (
+          <Stat
+            label="Unclassified"
+            value={count(unclassified)}
+            hint="no class matched; nothing evaluated"
+            tone="warn"
+          />
+        ) : (
+          <Stat
+            label="Threshold"
+            /*
+              An unset threshold is an em-dash, not a zero. A `0.000` threshold would mean every
+              value auto-accepts, which is the opposite of what a missing calibration means.
+            */
+            value={dataset.policy.threshold === null ? "—" : dataset.policy.threshold.toFixed(3)}
+            hint={`${percent(dataset.policy.epsilon)} error budget at ${percent(
+              dataset.policy.confidence_level,
+            )} confidence`}
+          />
+        )}
       </StatBand>
 
       <div className="mt-[var(--spacing-section)] flex flex-col gap-6">
-        {groups.map(({ bundle, open }) => (
+        {page.items.map(({ bundle, open }) => (
           <Panel key={bundle.sku} className="overflow-hidden p-0">
             <div className="hairline-b flex flex-wrap items-center justify-between gap-4 bg-[var(--surface-sunken)] px-6 py-4">
               <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
                 <h2 className="text-lg font-medium">
                   <Link
-                    href={`/review/${bundle.sku}`}
+                    href={reviewHref(bundle.sku)}
                     className="rounded-xs transition-colors duration-[var(--duration-fast)] hover:text-[var(--accent)]"
                   >
                     {bundle.sku}
                   </Link>
                 </h2>
+                {needsClassification(bundle) ? (
+                  <p className="text-meta text-[var(--fg-tertiary)]">
+                    <span className="text-[var(--warn)]">not classified</span> · no attributes
+                    evaluated
+                  </p>
+                ) : (
                 <p className="text-meta text-[var(--fg-tertiary)]">
                   {percent(bundle.metrics.fill_rate)} complete ·{" "}
                   {bundle.validation.failures > 0 ? (
@@ -124,6 +168,7 @@ export default async function ReviewIndexPage() {
                     <span className="text-[var(--pass)]">checks clean</span>
                   )}
                 </p>
+                )}
                 {/*
                   L4 gets its own badge rather than folding into the failure count. An unresolved
                   conflict is not one value the pipeline is unsure about — it is two contradictory
@@ -143,13 +188,25 @@ export default async function ReviewIndexPage() {
                 ) : null}
               </div>
 
-              <Link href={`/review/${bundle.sku}`} className="btn btn-quiet h-7">
+              <Link href={reviewHref(bundle.sku)} className="btn btn-quiet h-7">
                 Resolve SKU
                 <ArrowIcon />
               </Link>
             </div>
 
-            {open.length === 0 ? (
+            {needsClassification(bundle) ? (
+              /*
+                `unmeasured`, and the distinction from the branch below is the whole reason this
+                branch exists. An unclassified SKU has no required attributes, so it has no open
+                items — and rendering the "fully accepted" state for it would tell a reviewer that
+                every attribute cleared the threshold when not one was ever asked for.
+              */
+              <EmptyState
+                kind="unmeasured"
+                title="No class could be established"
+                detail="Retrieval found no class in the schema that this description matches, and it abstains rather than guessing. Nothing has been extracted, scored or gapped for this record: the attributes to ask for are defined per class, and there is no class yet. Closing this means adding a class definition under schema/classes/, not loosening the classifier."
+              />
+            ) : open.length === 0 ? (
               /*
                 `empty`, deliberately. This SKU was measured and came back clean — the reviewer has
                 nothing to do, which is a result rather than an absence of one.
@@ -167,7 +224,7 @@ export default async function ReviewIndexPage() {
                   >
                     <div className="flex min-w-0 items-center gap-2">
                       <Link
-                        href={`/review/${bundle.sku}`}
+                        href={reviewHref(bundle.sku)}
                         className="truncate rounded-xs text-sm font-medium transition-colors duration-[var(--duration-fast)] group-hover:text-[var(--accent)] hover:text-[var(--accent)]"
                       >
                         {row.spec.name}
@@ -217,6 +274,19 @@ export default async function ReviewIndexPage() {
         ))}
       </div>
 
+      <Pager
+        page={page.page}
+        pageCount={page.pageCount}
+        from={page.from}
+        to={page.to}
+        total={page.total}
+        hasPrevious={page.hasPrevious}
+        hasNext={page.hasNext}
+        href={(next) => (next === 1 ? "/review" : `/review?page=${next}`)}
+        label="Resolve queue pages"
+        unit="SKUs, ordered by publication risk"
+      />
+
       {groups.length === 0 ? (
         <Panel className="mt-[var(--spacing-section)]">
           {/*
@@ -228,8 +298,16 @@ export default async function ReviewIndexPage() {
             title="No SKUs loaded"
             detail={
               <>
-                Nothing has been read from a recorded process run. Generate console data with{" "}
-                <span className="mono">python scripts/export_console_fixture.py</span>.
+                Nothing has been read from a recorded process run. Generate console data for one
+                SKU from a datasheet with{" "}
+                <span className="mono">
+                  python scripts/run_pipeline.py &lt;source&gt; --sku &lt;sku&gt; --save-session
+                </span>
+                , or for a whole item master with{" "}
+                <span className="mono">
+                  python scripts/export_console_catalogue.py &lt;input.csv&gt;
+                </span>
+                .
               </>
             }
           />
@@ -237,16 +315,16 @@ export default async function ReviewIndexPage() {
       ) : null}
 
       {/*
-        The legend, at the foot of the page rather than mid-column. It explains the two kinds of row
+        The legend, at the foot of the page rather than mid-column. It explains the kinds of row
         above it and is read once; giving it the same weight as the queue itself would put reference
         material between a reviewer and their work.
       */}
       <Section rhythm="lg">
         <SectionHeading
           title="Why an attribute lands here"
-          detail="Two distinct reasons, worked differently."
+          detail="Three distinct reasons, worked differently."
         />
-        <div className="mt-7 grid gap-6 md:grid-cols-2">
+        <div className="mt-7 grid gap-6 md:grid-cols-3">
           <Panel className="p-6">
             <Overline>Below threshold</Overline>
             <p className="mt-3 max-w-[62ch] text-sm text-[var(--fg-secondary)]">
@@ -261,6 +339,15 @@ export default async function ReviewIndexPage() {
               No source stated the value. Nothing to confirm, so the work is to obtain it —
               usually a supplier request, sometimes a better document. The gap records every
               source already searched so the negative result stays auditable.
+            </p>
+          </Panel>
+          <Panel className="p-6">
+            <Overline>Not classified</Overline>
+            <p className="mt-3 max-w-[62ch] text-sm text-[var(--fg-secondary)]">
+              Neither of the above, because nothing was asked. Retrieval matched no class in the
+              schema and abstained instead of guessing, so this record has no required attributes
+              to be missing and no values to score. It is not clean — it is unexamined, and the
+              work is a class definition rather than a reviewer decision.
             </p>
           </Panel>
         </div>

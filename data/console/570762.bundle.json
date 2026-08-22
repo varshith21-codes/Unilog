@@ -1,0 +1,1807 @@
+{
+  "bundle": {
+    "sku": "570762",
+    "document_id": "Unihack__Sample_Dataset_-_Input#570762",
+    "class_code": "LGT.LMP.GEN",
+    "record": {
+      "tenant_id": "unilog",
+      "sku": "570762",
+      "mpn": "570762",
+      "mpn_normalized": "570762",
+      "gtin": null,
+      "brand": "Philips",
+      "brand_id": null,
+      "supplier_id": "5831",
+      "parent_sku": null,
+      "lifecycle_status": "active",
+      "class_code": "LGT.LMP.GEN",
+      "schema_version": "LGT.LMP.GEN@v1",
+      "source_document_ids": [
+        "Unihack__Sample_Dataset_-_Input#570762"
+      ],
+      "created_at": "2026-08-22T12:30:42.497475+00:00",
+      "updated_at": "2026-08-22T12:30:42.497506+00:00"
+    },
+    "classifications": [
+      {
+        "scheme": "internal",
+        "code": "LGT.LMP.GEN",
+        "path": [
+          "Electrical",
+          "Lighting",
+          "Lamps & Fixtures"
+        ],
+        "confidence": 0.6849,
+        "level_confidences": [
+          1.0,
+          1.0,
+          0.6849
+        ],
+        "rationale": "single viable candidate",
+        "method": "retrieval_only",
+        "alternatives": [],
+        "reviewed_by": null,
+        "reviewed_at": null
+      },
+      {
+        "scheme": "UNSPSC",
+        "code": "39101600",
+        "path": [],
+        "confidence": 0.6507,
+        "level_confidences": [],
+        "rationale": "derived from internal class LGT.LMP.GEN via the mapping declared in the schema, not independently classified",
+        "method": "schema_mapping",
+        "alternatives": [],
+        "reviewed_by": null,
+        "reviewed_at": null
+      }
+    ],
+    "classification_summary": {
+      "class_code": "LGT.LMP.GEN",
+      "confidence": 0.6849,
+      "confident_depth": 3,
+      "schemes": [
+        "internal",
+        "UNSPSC"
+      ],
+      "candidates_considered": 1,
+      "method": "retrieval_only",
+      "abstained": false,
+      "input_tokens": 0,
+      "output_tokens": 0
+    },
+    "classification_candidates": [
+      {
+        "code": "LGT.LMP.GEN",
+        "score": 0.0849,
+        "path_text": "Electrical > Lighting > Lamps & Fixtures"
+      }
+    ],
+    "values": [
+      {
+        "attribute_code": "lamp_shape",
+        "value_raw": "Par16",
+        "value_canonical": "PAR16",
+        "value_display": "PAR16",
+        "method": "supplier_feed",
+        "confidence": 0.82,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "desc-lamp_shape-15",
+            "document_id": "Unihack__Sample_Dataset_-_Input#570762",
+            "document_sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+            "quote": "Par16",
+            "page": null,
+            "bbox": null,
+            "table_ref": null,
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [],
+        "model_id": null,
+        "model_tier": null,
+        "prompt_version": "description@v1",
+        "schema_version": "LGT.LMP.GEN@v1",
+        "version": 1,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-22T12:30:42.497268Z",
+        "score": 0.8,
+        "decision": {
+          "attribute_code": "lamp_shape",
+          "score": 0.8,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.800 >= threshold 0.685"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 0.4,
+          "quote_specificity": 1.0,
+          "self_reported_certainty": 0.82,
+          "validation_pass_rate": 0.5,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.5,
+          "source_prior": 0.5,
+          "tier_cost": 0.5
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "citation_summary": [
+          "Unihack__Sample_Dataset_-_Input#570762"
+        ]
+      },
+      {
+        "attribute_code": "lamp_technology",
+        "value_raw": "Led",
+        "value_canonical": "LED",
+        "value_display": "LED",
+        "method": "supplier_feed",
+        "confidence": 0.82,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "desc-lamp_technology-11",
+            "document_id": "Unihack__Sample_Dataset_-_Input#570762",
+            "document_sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+            "quote": "Led",
+            "page": null,
+            "bbox": null,
+            "table_ref": null,
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [],
+        "model_id": null,
+        "model_tier": null,
+        "prompt_version": "description@v1",
+        "schema_version": "LGT.LMP.GEN@v1",
+        "version": 1,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-22T12:30:42.497256Z",
+        "score": 0.8,
+        "decision": {
+          "attribute_code": "lamp_technology",
+          "score": 0.8,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.800 >= threshold 0.685"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 0.4,
+          "quote_specificity": 1.0,
+          "self_reported_certainty": 0.82,
+          "validation_pass_rate": 0.5,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.5,
+          "source_prior": 0.5,
+          "tier_cost": 0.5
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "citation_summary": [
+          "Unihack__Sample_Dataset_-_Input#570762"
+        ]
+      },
+      {
+        "attribute_code": "wattage",
+        "value_raw": "50W",
+        "value_canonical": {
+          "magnitude": 50.0,
+          "unit": "W"
+        },
+        "value_display": "50 W",
+        "method": "supplier_feed",
+        "confidence": 0.88,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "desc-wattage-7",
+            "document_id": "Unihack__Sample_Dataset_-_Input#570762",
+            "document_sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+            "quote": "50W",
+            "page": null,
+            "bbox": null,
+            "table_ref": null,
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [],
+        "model_id": null,
+        "model_tier": null,
+        "prompt_version": "description@v1",
+        "schema_version": "LGT.LMP.GEN@v1",
+        "version": 1,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-22T12:30:42.497232Z",
+        "score": 0.8,
+        "decision": {
+          "attribute_code": "wattage",
+          "score": 0.8,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.800 >= threshold 0.685"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 0.4,
+          "quote_specificity": 1.0,
+          "self_reported_certainty": 0.88,
+          "validation_pass_rate": 0.5,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.5,
+          "source_prior": 0.5,
+          "tier_cost": 0.5
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "citation_summary": [
+          "Unihack__Sample_Dataset_-_Input#570762"
+        ]
+      }
+    ],
+    "gaps": [],
+    "extraction": {
+      "requested": 21,
+      "values": 3,
+      "gaps": 0,
+      "rejected_unverifiable": 0,
+      "corrected_to_match_evidence": 0,
+      "citation_coverage": 1.0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "escalations": 0,
+      "latency_ms": 0,
+      "sku_found_in_document": null,
+      "targeting_failed": false
+    },
+    "normalization_issues": [],
+    "validation": {
+      "checks": 3,
+      "failures": 0,
+      "warnings": 0,
+      "skipped_rules": 2,
+      "consistency": 1.0,
+      "results": [
+        {
+          "layer": "L3",
+          "rule_id": "plausible_range",
+          "verdict": "pass",
+          "severity": "error",
+          "reason": "within the expected range [0.5, 2000]",
+          "counterexample": null,
+          "suggested_fix": null,
+          "detail": null
+        },
+        {
+          "layer": "L2",
+          "rule_id": "R_BEAM_ANGLE_NEEDS_DIRECTIONAL_SHAPE",
+          "verdict": "skipped",
+          "severity": "info",
+          "reason": "not evaluated: missing beam_angle",
+          "counterexample": null,
+          "suggested_fix": null,
+          "detail": null
+        },
+        {
+          "layer": "L2",
+          "rule_id": "R_EFFICACY_IS_PHYSICALLY_POSSIBLE",
+          "verdict": "skipped",
+          "severity": "info",
+          "reason": "not evaluated: missing lumen_output",
+          "counterexample": null,
+          "suggested_fix": null,
+          "detail": null
+        }
+      ],
+      "per_attribute": {}
+    },
+    "certificate": {
+      "certificate_id": "ec_5a88b8454ba7",
+      "sku": "570762",
+      "tenant_id": "unilog",
+      "generated_at": "2026-08-22T12:30:42.498086Z",
+      "schema_version": "LGT.LMP.GEN@v1",
+      "pipeline_version": "axiom-0.1.0",
+      "classifications": [
+        {
+          "scheme": "internal",
+          "code": "LGT.LMP.GEN",
+          "path": [
+            "Electrical",
+            "Lighting",
+            "Lamps & Fixtures"
+          ],
+          "confidence": 0.6849,
+          "method": "retrieval_only",
+          "status": "auto",
+          "alternatives": []
+        },
+        {
+          "scheme": "UNSPSC",
+          "code": "39101600",
+          "path": [],
+          "confidence": 0.6507,
+          "method": "schema_mapping",
+          "status": "auto",
+          "alternatives": []
+        }
+      ],
+      "attributes": [
+        {
+          "code": "wattage",
+          "value_canonical": {
+            "magnitude": 50.0,
+            "unit": "W"
+          },
+          "value_display": "50 W",
+          "value_raw": "50W",
+          "confidence": 0.88,
+          "method": "supplier_feed",
+          "model_tier": null,
+          "status": "auto_accepted",
+          "evidence": [
+            {
+              "document": "Unihack__Sample_Dataset_-_Input#570762",
+              "sha256": "49efd0b2\u2026",
+              "page": null,
+              "bbox": null,
+              "quote": "50W",
+              "verified": true
+            }
+          ],
+          "validations": []
+        },
+        {
+          "code": "lamp_technology",
+          "value_canonical": "LED",
+          "value_display": "LED",
+          "value_raw": "Led",
+          "confidence": 0.82,
+          "method": "supplier_feed",
+          "model_tier": null,
+          "status": "auto_accepted",
+          "evidence": [
+            {
+              "document": "Unihack__Sample_Dataset_-_Input#570762",
+              "sha256": "49efd0b2\u2026",
+              "page": null,
+              "bbox": null,
+              "quote": "Led",
+              "verified": true
+            }
+          ],
+          "validations": []
+        },
+        {
+          "code": "lamp_shape",
+          "value_canonical": "PAR16",
+          "value_display": "PAR16",
+          "value_raw": "Par16",
+          "confidence": 0.82,
+          "method": "supplier_feed",
+          "model_tier": null,
+          "status": "auto_accepted",
+          "evidence": [
+            {
+              "document": "Unihack__Sample_Dataset_-_Input#570762",
+              "sha256": "49efd0b2\u2026",
+              "page": null,
+              "bbox": null,
+              "quote": "Par16",
+              "verified": true
+            }
+          ],
+          "validations": []
+        }
+      ],
+      "gaps": [],
+      "summary": {
+        "attributes_required": 2,
+        "attributes_populated": 3,
+        "attributes_with_evidence": 3,
+        "attributes_inferred": 0,
+        "auto_accepted": 3,
+        "queued_for_review": 0,
+        "gaps_total": 0,
+        "gaps_required": 0,
+        "quality_index": {
+          "completeness": 1.0,
+          "verifiability": 1.0,
+          "consistency": 1.0,
+          "richness": 1.0,
+          "weights": {
+            "completeness": 0.35,
+            "verifiability": 0.3,
+            "consistency": 0.25,
+            "richness": 0.1
+          },
+          "measured_dimensions": [
+            "completeness",
+            "consistency",
+            "richness",
+            "verifiability"
+          ],
+          "composite": 1.0
+        },
+        "cost_usd": null,
+        "wall_clock_seconds": 0.0
+      },
+      "signature": "sha256:7781716ad9e00b3580eabc5acf322b1c50c765c73dab262058a332e0a0fa4f2d",
+      "signature_verified": true
+    },
+    "channels": [
+      {
+        "name": "cx1_pim",
+        "published": true,
+        "value_count": 3,
+        "withheld": [],
+        "readiness": {
+          "channel": "cx1_pim",
+          "ready": true,
+          "missing": [],
+          "not_publishable": [],
+          "warnings": []
+        },
+        "title": null
+      },
+      {
+        "name": "schema_org",
+        "published": true,
+        "value_count": 3,
+        "withheld": [],
+        "readiness": {
+          "channel": "schema_org",
+          "ready": true,
+          "missing": [],
+          "not_publishable": [],
+          "warnings": []
+        },
+        "title": null
+      }
+    ],
+    "metrics": {
+      "fill_rate": 1.0,
+      "verifiability": 1.0,
+      "values_total": 3,
+      "values_publishable": 3,
+      "values_needing_review": 0,
+      "gaps_total": 0,
+      "gaps_required": 0,
+      "conflicts": []
+    },
+    "cost": null,
+    "copy": null
+  },
+  "document": {
+    "document_id": "Unihack__Sample_Dataset_-_Input#570762",
+    "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
+    "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+    "doc_type": "supplier_feed",
+    "fetched_at": "2026-08-22T12:30:39.344315Z",
+    "page_count": 1,
+    "revision_label": null,
+    "supplier_id": "unilog",
+    "license_note": null,
+    "parser": "text",
+    "line_count": 7,
+    "table_count": 0,
+    "warnings": [],
+    "size_bytes": 127673,
+    "storage_uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv"
+  },
+  "pages": [
+    {
+      "number": 1,
+      "width": 612.0,
+      "height": 792.0,
+      "lines": [
+        {
+          "line_index": 0,
+          "text": "Mfg_Part_Num: 570762",
+          "bbox": [
+            54.0,
+            54.0,
+            174.0,
+            66.0
+          ]
+        },
+        {
+          "line_index": 1,
+          "text": "Part_Desc: 570762 50W Led Par16 30k 3pk",
+          "bbox": [
+            54.0,
+            66.0,
+            288.0,
+            78.0
+          ]
+        },
+        {
+          "line_index": 2,
+          "text": "E1_Brand: -- Unbranded --",
+          "bbox": [
+            54.0,
+            78.0,
+            204.0,
+            90.0
+          ]
+        },
+        {
+          "line_index": 3,
+          "text": "Unilog_Brand: -- No Unilog Brand --",
+          "bbox": [
+            54.0,
+            90.0,
+            264.0,
+            102.0
+          ]
+        },
+        {
+          "line_index": 4,
+          "text": "DIB_Brand: Philips",
+          "bbox": [
+            54.0,
+            102.0,
+            162.0,
+            114.0
+          ]
+        },
+        {
+          "line_index": 5,
+          "text": "Part_Manuf: Phillips Lighting (5831)",
+          "bbox": [
+            54.0,
+            114.0,
+            270.0,
+            126.0
+          ]
+        },
+        {
+          "line_index": 6,
+          "text": "",
+          "bbox": [
+            54.0,
+            126.0,
+            60.0,
+            138.0
+          ]
+        }
+      ],
+      "tables": []
+    }
+  ],
+  "class_definition": {
+    "code": "LGT.LMP.GEN",
+    "name": "Lighting",
+    "version": "v1",
+    "schema_version": "LGT.LMP.GEN@v1",
+    "item_type": "Light",
+    "reporting_path": [
+      "Electrical",
+      "Lighting",
+      "Lamps"
+    ],
+    "browse_path": [
+      "Electrical",
+      "Lighting",
+      "Lamps & Fixtures"
+    ],
+    "mappings": {
+      "unspsc": "39101600"
+    },
+    "required_codes": [
+      "lamp_technology",
+      "wattage"
+    ],
+    "attributes": [
+      {
+        "code": "product_series",
+        "requirement": "recommended",
+        "weight": 2.0,
+        "name": "Product Series",
+        "datatype": "string",
+        "description": "Manufacturer's series or family designation only, without the word \"series\" and without the manufacturer name. The anchor for part-number grammar induction, because the positional encoding of a smart part number is defined per series rather than per manufacturer.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "BA-100",
+          "T-113",
+          "T-585"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "luminaire_form",
+        "requirement": "recommended",
+        "weight": 3.0,
+        "name": "Form",
+        "datatype": "enum",
+        "description": "What kind of fitting this is, for a luminaire rather than a replaceable lamp. A chandelier and a troffer share every electrical attribute and are not remotely the same purchase, so the form is the first thing that distinguishes them.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Pendant",
+          "Chandelier",
+          "Troffer"
+        ],
+        "allowed_values": [
+          {
+            "value": "Pendant",
+            "aliases": [
+              "pendant light",
+              "pendant lt",
+              "mini pendant",
+              "pend"
+            ],
+            "note": null
+          },
+          {
+            "value": "Chandelier",
+            "aliases": [
+              "chand",
+              "chandelier lt"
+            ],
+            "note": null
+          },
+          {
+            "value": "Ceiling Mount",
+            "aliases": [
+              "ceiling",
+              "ceiling light",
+              "ceiling lt",
+              "flush mount",
+              "semi-flush",
+              "close to ceiling"
+            ],
+            "note": null
+          },
+          {
+            "value": "Wall Mount",
+            "aliases": [
+              "wall",
+              "wall light",
+              "wall lt",
+              "sconce",
+              "wall sconce",
+              "vanity"
+            ],
+            "note": null
+          },
+          {
+            "value": "Bath Bar",
+            "aliases": [
+              "bath",
+              "bath light",
+              "bath lt",
+              "bath bar",
+              "vanity bar"
+            ],
+            "note": null
+          },
+          {
+            "value": "Recessed Downlight",
+            "aliases": [
+              "downlight",
+              "down light",
+              "recessed",
+              "retro",
+              "retrofit",
+              "can light",
+              "recessed can"
+            ],
+            "note": null
+          },
+          {
+            "value": "Strip Light",
+            "aliases": [
+              "strip",
+              "strip light",
+              "strip lt",
+              "linear strip"
+            ],
+            "note": null
+          },
+          {
+            "value": "Troffer",
+            "aliases": [
+              "troffer light",
+              "lay-in",
+              "recessed troffer"
+            ],
+            "note": null
+          },
+          {
+            "value": "Flat Panel",
+            "aliases": [
+              "panel",
+              "flat panel",
+              "led panel",
+              "edge-lit panel"
+            ],
+            "note": null
+          },
+          {
+            "value": "High Bay",
+            "aliases": [
+              "highbay",
+              "high bay light",
+              "hi-bay"
+            ],
+            "note": null
+          },
+          {
+            "value": "Under Cabinet",
+            "aliases": [
+              "undercabinet",
+              "under counter",
+              "task light"
+            ],
+            "note": null
+          },
+          {
+            "value": "Track Head",
+            "aliases": [
+              "track",
+              "track light",
+              "track fixture"
+            ],
+            "note": null
+          },
+          {
+            "value": "Landscape",
+            "aliases": [
+              "path light",
+              "landscape light",
+              "well light"
+            ],
+            "note": null
+          },
+          {
+            "value": "Flood",
+            "aliases": [
+              "flood light",
+              "floodlight",
+              "security light"
+            ],
+            "note": null
+          },
+          {
+            "value": "Lamp",
+            "aliases": [
+              "bulb",
+              "replacement lamp",
+              "light bulb"
+            ],
+            "note": "a replaceable lamp rather than a fitting; the shape and base attributes apply"
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "lamp_technology",
+        "requirement": "required",
+        "weight": 3.0,
+        "name": "Lamp Technology",
+        "datatype": "enum",
+        "description": "The light-producing mechanism. Determines efficacy, dimming behaviour, warm-up time and disposal obligation, so it is the first thing a specifier looks at and the attribute most reliably present in an abbreviated description.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "LED",
+          "Fluorescent",
+          "High Pressure Sodium"
+        ],
+        "allowed_values": [
+          {
+            "value": "LED",
+            "aliases": [
+              "l.e.d.",
+              "light emitting diode",
+              "led retrofit",
+              "solid state"
+            ],
+            "note": null
+          },
+          {
+            "value": "Fluorescent",
+            "aliases": [
+              "flor",
+              "fluor",
+              "fl",
+              "linear fluorescent",
+              "fluorescent tube"
+            ],
+            "note": null
+          },
+          {
+            "value": "Compact Fluorescent",
+            "aliases": [
+              "cfl",
+              "compact fluor",
+              "twist"
+            ],
+            "note": null
+          },
+          {
+            "value": "Incandescent",
+            "aliases": [
+              "inc",
+              "incand",
+              "filament"
+            ],
+            "note": null
+          },
+          {
+            "value": "Halogen",
+            "aliases": [
+              "hal",
+              "quartz halogen",
+              "tungsten halogen"
+            ],
+            "note": null
+          },
+          {
+            "value": "High Pressure Sodium",
+            "aliases": [
+              "hps",
+              "sodium",
+              "son",
+              "high pressure sod"
+            ],
+            "note": null
+          },
+          {
+            "value": "Metal Halide",
+            "aliases": [
+              "mh",
+              "halide",
+              "ceramic metal halide",
+              "cmh"
+            ],
+            "note": null
+          },
+          {
+            "value": "Mercury Vapor",
+            "aliases": [
+              "mv",
+              "mercury",
+              "mercury vapour"
+            ],
+            "note": null
+          },
+          {
+            "value": "Induction",
+            "aliases": [
+              "induction lamp"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "wattage",
+        "requirement": "required",
+        "weight": 3.0,
+        "name": "Wattage",
+        "datatype": "quantity",
+        "description": "Nominal power the lamp or luminaire consumes at its rated voltage. For a retrofit LED this is the actual draw, not the incandescent wattage it replaces \u2014 suppliers print both and the equivalence figure is marketing, not a specification.\n",
+        "canonical_unit": "W",
+        "display_preference": null,
+        "quantity_kind": "power",
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "15 W",
+          "60 W",
+          "150 W"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          0.5,
+          2000.0
+        ]
+      },
+      {
+        "code": "color_temperature",
+        "requirement": "recommended",
+        "weight": 3.0,
+        "name": "Color Temperature",
+        "datatype": "quantity",
+        "description": "Correlated colour temperature of the emitted light, in kelvin. Lower is warmer: 2700 K is domestic warm white, 4000 K neutral, 6500 K daylight. See this file's header for why the supplier shorthand \"27k\" is not expanded automatically.\n",
+        "canonical_unit": "K",
+        "display_preference": null,
+        "quantity_kind": "temperature",
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "2700 K",
+          "3000 K",
+          "5000 K"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          1500.0,
+          10000.0
+        ]
+      },
+      {
+        "code": "lumen_output",
+        "requirement": "recommended",
+        "weight": 3.0,
+        "name": "Lumen Output",
+        "datatype": "integer",
+        "description": "Initial luminous flux in lumens. The figure a lamp is actually chosen on \u2014 wattage is a cost, lumens are the product. Declared as an integer rather than a quantity because the unit registry has no luminous-flux kind, so there is no lumen unit to convert to or from and a quantity would fail schema load. The consequence is a blank UOM cell in the delivery grid.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "800",
+          "1600",
+          "2450"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          1.0,
+          100000.0
+        ]
+      },
+      {
+        "code": "voltage_rating",
+        "requirement": "recommended",
+        "weight": 2.0,
+        "name": "Voltage Rating",
+        "datatype": "quantity",
+        "description": "Nominal supply voltage the appliance is designed to operate on. Read the nameplate or electrical-specification row, not the motor or component rating, which may differ.\n",
+        "canonical_unit": "V",
+        "display_preference": null,
+        "quantity_kind": "voltage",
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "120 V",
+          "240 V",
+          "208 V"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          1.0,
+          600.0
+        ]
+      },
+      {
+        "code": "voltage_range_supported",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Voltage Range",
+        "datatype": "range",
+        "description": "Supply voltage window the product operates across, for universal-input drivers stated as a span rather than a single figure. Distinct from voltage_rating, which is a single nominal value; a 120-277 V driver genuinely has no single nominal voltage.\n",
+        "canonical_unit": "V",
+        "display_preference": null,
+        "quantity_kind": "voltage",
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "120 V to 277 V",
+          "12 V to 24 V"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          1.0,
+          600.0
+        ]
+      },
+      {
+        "code": "lamp_shape",
+        "requirement": "optional",
+        "weight": 2.0,
+        "name": "Lamp Shape",
+        "datatype": "enum",
+        "description": "ANSI/IEC envelope designation. The letter names the profile and the number is the maximum diameter in eighths of an inch, so A19 is a 2-3/8\" A-shape and T12 a 1-1/2\" tube. Governs whether the lamp physically fits the fixture and, for reflector shapes, how it throws light.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "A19",
+          "PAR38",
+          "MR16",
+          "T8"
+        ],
+        "allowed_values": [
+          {
+            "value": "A15",
+            "aliases": [
+              "a-15"
+            ],
+            "note": null
+          },
+          {
+            "value": "A19",
+            "aliases": [
+              "a-19",
+              "a19 standard",
+              "standard a"
+            ],
+            "note": null
+          },
+          {
+            "value": "A21",
+            "aliases": [
+              "a-21"
+            ],
+            "note": null
+          },
+          {
+            "value": "BR30",
+            "aliases": [
+              "br-30"
+            ],
+            "note": null
+          },
+          {
+            "value": "BR40",
+            "aliases": [
+              "br-40"
+            ],
+            "note": null
+          },
+          {
+            "value": "PAR16",
+            "aliases": [
+              "par-16"
+            ],
+            "note": null
+          },
+          {
+            "value": "PAR20",
+            "aliases": [
+              "par-20"
+            ],
+            "note": null
+          },
+          {
+            "value": "PAR30",
+            "aliases": [
+              "par-30",
+              "par30 long neck",
+              "par30ln"
+            ],
+            "note": null
+          },
+          {
+            "value": "PAR38",
+            "aliases": [
+              "par-38"
+            ],
+            "note": null
+          },
+          {
+            "value": "MR11",
+            "aliases": [
+              "mr-11"
+            ],
+            "note": null
+          },
+          {
+            "value": "MR16",
+            "aliases": [
+              "mr-16"
+            ],
+            "note": null
+          },
+          {
+            "value": "T3",
+            "aliases": [
+              "t-3"
+            ],
+            "note": null
+          },
+          {
+            "value": "T4",
+            "aliases": [
+              "t-4"
+            ],
+            "note": null
+          },
+          {
+            "value": "T5",
+            "aliases": [
+              "t-5"
+            ],
+            "note": null
+          },
+          {
+            "value": "T8",
+            "aliases": [
+              "t-8"
+            ],
+            "note": null
+          },
+          {
+            "value": "T9",
+            "aliases": [
+              "t-9"
+            ],
+            "note": null
+          },
+          {
+            "value": "T12",
+            "aliases": [
+              "t-12"
+            ],
+            "note": null
+          },
+          {
+            "value": "G25",
+            "aliases": [
+              "g-25",
+              "globe 25"
+            ],
+            "note": null
+          },
+          {
+            "value": "B11",
+            "aliases": [
+              "b-11",
+              "candle"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "lamp_base",
+        "requirement": "optional",
+        "weight": 2.0,
+        "name": "Base Type",
+        "datatype": "enum",
+        "description": "The cap that engages the socket. An exact match is required for the product to function at all, which makes this the one lighting attribute where a difference is disqualifying rather than merely consequential.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Medium E26",
+          "GU10",
+          "G13"
+        ],
+        "allowed_values": [
+          {
+            "value": "Medium E26",
+            "aliases": [
+              "med",
+              "medium",
+              "e26",
+              "e-26",
+              "medium screw",
+              "standard base",
+              "es"
+            ],
+            "note": null
+          },
+          {
+            "value": "Candelabra E12",
+            "aliases": [
+              "cand",
+              "candelabra",
+              "e12",
+              "e-12",
+              "ses"
+            ],
+            "note": null
+          },
+          {
+            "value": "Intermediate E17",
+            "aliases": [
+              "int",
+              "intermediate",
+              "e17",
+              "e-17"
+            ],
+            "note": null
+          },
+          {
+            "value": "Mogul E39",
+            "aliases": [
+              "mog",
+              "mogul",
+              "e39",
+              "e-39",
+              "goliath"
+            ],
+            "note": null
+          },
+          {
+            "value": "GU10",
+            "aliases": [
+              "gu-10",
+              "gu 10"
+            ],
+            "note": null
+          },
+          {
+            "value": "GU5.3",
+            "aliases": [
+              "gu-5.3",
+              "gu53",
+              "mr16 bi-pin",
+              "bi-pin"
+            ],
+            "note": null
+          },
+          {
+            "value": "GU24",
+            "aliases": [
+              "gu-24",
+              "twist and lock"
+            ],
+            "note": null
+          },
+          {
+            "value": "G13",
+            "aliases": [
+              "g-13",
+              "medium bi-pin",
+              "t8 base"
+            ],
+            "note": null
+          },
+          {
+            "value": "G5",
+            "aliases": [
+              "g-5",
+              "miniature bi-pin"
+            ],
+            "note": null
+          },
+          {
+            "value": "GX23",
+            "aliases": [
+              "gx-23"
+            ],
+            "note": null
+          },
+          {
+            "value": "Integrated",
+            "aliases": [
+              "no base",
+              "hardwired",
+              "integral",
+              "built-in led"
+            ],
+            "note": "LED array not replaceable; the luminaire is the lamp"
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "beam_angle",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Beam Angle",
+        "datatype": "quantity",
+        "description": "Angle of the cone within which intensity stays above half its peak. Applies to directional lamps such as MR16, PAR and BR shapes; an omnidirectional A-shape lamp has none, and recording one for it is an error rather than a default.\n",
+        "canonical_unit": "deg",
+        "display_preference": null,
+        "quantity_kind": "angle",
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "25 deg",
+          "40 deg",
+          "60 deg"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          4.0,
+          360.0
+        ]
+      },
+      {
+        "code": "color_rendering_index",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Color Rendering Index",
+        "datatype": "number",
+        "description": "CRI, the fidelity with which the source renders colour against a reference, on a 0-100 scale. Dimensionless by definition, so no unit is declared. Retail and gallery lighting specifies 90+; a high-pressure sodium street lamp sits near 25.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "80",
+          "90",
+          "97"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          0.0,
+          100.0
+        ]
+      },
+      {
+        "code": "rated_life",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Rated Life",
+        "datatype": "quantity",
+        "description": "Hours at which the stated proportion of a population is expected to have failed, or for LED to have depreciated to a stated fraction of initial output. The threshold differs by technology and manufacturer, so the figure is only comparable within a technology.\n",
+        "canonical_unit": "h",
+        "display_preference": null,
+        "quantity_kind": "time",
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "1000 h",
+          "15000 h",
+          "50000 h"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          100.0,
+          200000.0
+        ]
+      },
+      {
+        "code": "dimmable",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Dimmable",
+        "datatype": "boolean",
+        "description": "Whether the product is designed to dim on a compatible control. Stated explicitly or not at all: an LED lamp on an incompatible dimmer flickers or fails early, so absence of a claim is meaningful and must not be read as either value.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "true",
+          "false"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "nominal_length",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Nominal Length",
+        "datatype": "dimension",
+        "description": "Overall length as the manufacturer designates it, for tubes, strips and linear fixtures. A designation rather than a measurement: a nominal 4' fluorescent tube is 47-3/4\" so that it fits a 4' fixture, and recording the measured figure would contradict every catalogue.\n",
+        "canonical_unit": "mm",
+        "display_preference": "imperial_fraction",
+        "quantity_kind": "length",
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "18\"",
+          "3 ft",
+          "4 ft"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          10.0,
+          5000.0
+        ]
+      },
+      {
+        "code": "pack_quantity",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Pack Quantity",
+        "datatype": "integer",
+        "description": "Number of units in the consumer pack the part number sells as. Distinct from case_quantity, which counts packs in a shipping carton: a \"3pk\" of lamps is one sellable unit containing three lamps, and confusing the two misprices the line.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "1",
+          "2",
+          "3",
+          "6"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          1.0,
+          100.0
+        ]
+      },
+      {
+        "code": "finish_color",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Color",
+        "datatype": "string",
+        "description": "Finish or colourway as the manufacturer names it. A merchandising attribute: buyers filter on it heavily, and the manufacturer's own name for a finish is what shoppers search, so it is recorded verbatim rather than mapped to a generic colour.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Stainless Steel",
+          "White",
+          "Black Stainless"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "approvals",
+        "requirement": "recommended",
+        "weight": 2.0,
+        "name": "Approvals and Listings",
+        "datatype": "multi_enum",
+        "description": "Third-party certifications, listings and approvals explicitly stated in the source. Record only what is stated. A listing number without a recognised mark is not an approval, and an approval for one size in a series does not extend to the others.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": true,
+        "compliance_claim": true,
+        "evidence_requirement": "strict",
+        "example_values": [
+          "UL, CSA, NSF-61",
+          "FM approved"
+        ],
+        "allowed_values": [
+          {
+            "value": "UL",
+            "aliases": [
+              "ul listed",
+              "underwriters laboratories",
+              "u.l."
+            ],
+            "note": null
+          },
+          {
+            "value": "CSA",
+            "aliases": [
+              "csa certified",
+              "canadian standards association"
+            ],
+            "note": null
+          },
+          {
+            "value": "ETL",
+            "aliases": [
+              "etl listed",
+              "intertek"
+            ],
+            "note": null
+          },
+          {
+            "value": "FM",
+            "aliases": [
+              "fm approved",
+              "factory mutual",
+              "fm global"
+            ],
+            "note": null
+          },
+          {
+            "value": "NSF-61",
+            "aliases": [
+              "nsf/ansi 61",
+              "nsf 61",
+              "nsf/ansi standard 61"
+            ],
+            "note": null
+          },
+          {
+            "value": "NSF-372",
+            "aliases": [
+              "nsf/ansi 372",
+              "nsf 372"
+            ],
+            "note": null
+          },
+          {
+            "value": "NSF-14",
+            "aliases": [
+              "nsf/ansi 14",
+              "nsf 14"
+            ],
+            "note": null
+          },
+          {
+            "value": "CRN",
+            "aliases": [
+              "canadian registration number"
+            ],
+            "note": null
+          },
+          {
+            "value": "ASME",
+            "aliases": [
+              "asme certified",
+              "asme b16"
+            ],
+            "note": null
+          },
+          {
+            "value": "MSS",
+            "aliases": [
+              "mss sp",
+              "manufacturers standardization society"
+            ],
+            "note": null
+          },
+          {
+            "value": "ATEX",
+            "aliases": [
+              "atex certified",
+              "atex marked"
+            ],
+            "note": null
+          },
+          {
+            "value": "IECEx",
+            "aliases": [
+              "iecex certified"
+            ],
+            "note": null
+          },
+          {
+            "value": "WRAS",
+            "aliases": [
+              "wras approved",
+              "water regulations advisory scheme"
+            ],
+            "note": null
+          },
+          {
+            "value": "cUL Listed",
+            "aliases": [
+              "cul",
+              "cul listed",
+              "c-ul",
+              "culus"
+            ],
+            "note": null
+          },
+          {
+            "value": "ENERGY STAR Certified",
+            "aliases": [
+              "energy star",
+              "energystar",
+              "energy star qualified",
+              "energy star certified"
+            ],
+            "note": null
+          },
+          {
+            "value": "NSF Certified",
+            "aliases": [],
+            "note": "Generic NSF mark with no standard named. Deliberately not aliased onto NSF-61: a potable-water claim needs the specific standard, and treating this as equivalent would let a cross-field rule pass on evidence that does not support it.\n"
+          },
+          {
+            "value": "ASSE 1006",
+            "aliases": [
+              "asse1006",
+              "asse 1006 listed"
+            ],
+            "note": null
+          },
+          {
+            "value": "CEE Tier 2 Qualified",
+            "aliases": [
+              "cee tier 2",
+              "cee tier2",
+              "cee tier 2 qualified"
+            ],
+            "note": null
+          },
+          {
+            "value": "AHAM Verified",
+            "aliases": [
+              "aham",
+              "aham verified"
+            ],
+            "note": null
+          },
+          {
+            "value": "WaterSense",
+            "aliases": [
+              "watersense",
+              "epa watersense"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "country_of_origin",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Country of Origin",
+        "datatype": "string",
+        "description": "Country where the product is manufactured, as stated by the manufacturer. Drives tariff treatment and trade-agreement eligibility, so a guess here has direct financial consequences.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": true,
+        "evidence_requirement": "strict",
+        "example_values": [
+          "United States",
+          "Taiwan",
+          "Italy",
+          "China"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "warranty_terms",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Warranty",
+        "datatype": "string",
+        "description": "Warranty coverage as stated by the manufacturer, including duration and what it covers, e.g. \"1 Year Manufacturer, 1 Year Labor and Parts\". Recorded as published: summarising it into a single duration loses the parts/labour distinction that determines what a claim actually pays for.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "1 Year Manufacturer, 1 Year Labor and Parts",
+          "10 Year Limited"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "gtin",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "GTIN / UPC",
+        "datatype": "string",
+        "description": "Global Trade Item Number, 8, 12, 13 or 14 digits. The final digit is a modulo-10 check digit, which L0 validation verifies arithmetically \u2014 a transposed digit is therefore detectable without any external lookup.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "012345678905",
+          "00012345678905"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      }
+    ],
+    "cross_field_rules": [
+      {
+        "id": "R_BEAM_ANGLE_NEEDS_DIRECTIONAL_SHAPE",
+        "expr": "beam_angle > 0",
+        "severity": "warning",
+        "message": "A beam angle was recorded. It is only meaningful for a directional envelope \u2014 PAR, BR and MR shapes \u2014 and an omnidirectional A-shape or a linear tube does not have one. Where the shape is non-directional this usually means a field angle was copied from an adjacent column. A warning rather than an error because a luminaire legitimately has a beam angle and no lamp shape at all, which is the majority of the fixture half of this class.",
+        "references": [
+          "beam_angle",
+          "lamp_shape"
+        ]
+      },
+      {
+        "id": "R_EFFICACY_IS_PHYSICALLY_POSSIBLE",
+        "expr": "lumen_output <= wattage * 250",
+        "severity": "error",
+        "message": "Lumens divided by watts exceeds 250 lm/W, which is above the demonstrated laboratory ceiling for a white LED and far above anything commercially available. Effectively always a decimal error in one of the two figures, or a lumen value read from a multi-lamp fixture's total against a single lamp's wattage. An error rather than a warning because both figures are individually plausible, so nothing else in the stack will catch it.",
+        "references": [
+          "lumen_output",
+          "wattage"
+        ]
+      }
+    ],
+    "channel_profiles": [
+      {
+        "name": "unilog_delivery",
+        "title_template": "{brand} {wattage} {lamp_technology} {class_name}",
+        "max_title_chars": 200,
+        "unit_system": "imperial_primary",
+        "required": [
+          "mpn"
+        ]
+      },
+      {
+        "name": "cx1_pim",
+        "title_template": "{brand} {mpn} {wattage} {lamp_technology} {class_name}",
+        "max_title_chars": 200,
+        "unit_system": "imperial_primary",
+        "required": [
+          "mpn",
+          "lamp_technology"
+        ]
+      },
+      {
+        "name": "schema_org",
+        "title_template": null,
+        "max_title_chars": 200,
+        "unit_system": "metric_primary",
+        "required": [
+          "mpn"
+        ]
+      }
+    ]
+  },
+  "policy": {
+    "epsilon": 0.05,
+    "confidence_level": 0.95,
+    "threshold": 0.6853,
+    "coverage": 1.0,
+    "accepted": 220,
+    "accepted_errors": 1,
+    "observed_error_rate": 0.0045,
+    "error_upper_bound": 0.0201,
+    "calibration_size": 220,
+    "achievable": true,
+    "reason": "at threshold 0.685, 100.0% of values are publishable with an error rate of at most 2.0% at 95% confidence"
+  },
+  "calibrator": "untrained-heuristic"
+}
