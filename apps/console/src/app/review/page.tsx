@@ -6,6 +6,7 @@ import {
   CheckIcon,
   EmptyState,
   Overline,
+  PageHeader,
   Panel,
   Section,
   SectionHeading,
@@ -23,7 +24,7 @@ import {
 } from "@/lib/data";
 import { GAP_REASON_LABEL, canonical, count, percent, score } from "@/lib/format";
 
-export const metadata = { title: "Review" };
+export const metadata = { title: "Resolve" };
 
 export default async function ReviewIndexPage() {
   const dataset = await loadDataset();
@@ -54,16 +55,24 @@ export default async function ReviewIndexPage() {
 
   return (
     <div className="mx-auto max-w-[var(--container-shell)] px-[var(--spacing-gutter)] pb-24">
-      <header className="py-[var(--spacing-section-lg)]">
-        <Overline>Work list</Overline>
-        <h1 className="mt-4 max-w-[26ch] text-display font-medium tracking-[var(--tracking-display)]">
-          {openTotal === 0 ? "Nothing waiting on review" : "Attributes needing a decision"}
-        </h1>
-        <p className="mt-5 max-w-[58ch] text-body text-[var(--fg-secondary)]">
-          Values that fell below the acceptance threshold, plus required attributes no source
-          could establish. Ordered so blocking failures come first.
-        </p>
-      </header>
+      <PageHeader
+        eyebrow="Resolve"
+        title={
+          openTotal === 0 ? "Nothing waiting on resolution" : "Attributes needing a decision"
+        }
+        detail={
+          <>
+            Values below the acceptance threshold, plus required attributes no source could
+            establish. Ordered so blocking failures come first.
+          </>
+        }
+        meta={
+          <>
+            <span>{count(openTotal)} open items</span>
+            <span>{groups.length} SKUs evaluated</span>
+          </>
+        }
+      />
 
       <StatBand>
         <Stat
@@ -135,7 +144,7 @@ export default async function ReviewIndexPage() {
               </div>
 
               <Link href={`/review/${bundle.sku}`} className="btn btn-quiet h-7">
-                Open workspace
+                Resolve SKU
                 <ArrowIcon />
               </Link>
             </div>
@@ -219,7 +228,7 @@ export default async function ReviewIndexPage() {
             title="No SKUs loaded"
             detail={
               <>
-                Nothing has been read from a pipeline run. Generate console data with{" "}
+                Nothing has been read from a recorded process run. Generate console data with{" "}
                 <span className="mono">python scripts/export_console_fixture.py</span>.
               </>
             }

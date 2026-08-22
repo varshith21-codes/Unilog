@@ -93,8 +93,8 @@ const on = (token, backdrop) => ({ __rgb: resolve(token, backdrop) });
 const T = {
   ink100: "oklch(0.972 0.003 265)",
   ink150: "oklch(0.955 0.004 265)",
-  ink175: "oklch(0.94 0.005 265)",
-  ink200: "oklch(0.928 0.005 265)",
+  ink175: "oklch(0.955 0.005 265)",
+  ink200: "oklch(0.938 0.006 265)",
   ink300: "oklch(0.86 0.007 265)",
   ink350: "oklch(0.775 0.01 265)",
   ink450: "oklch(0.66 0.011 265)",
@@ -110,8 +110,10 @@ const T = {
   ink950: "oklch(0.163 0.006 265)",
   ink1000: "oklch(0.115 0.005 265)",
 
-  surfaceL: "oklch(0.995 0.001 265)",
-  raisedL: "oklch(1 0 0)",
+  canvasL: "oklch(0.975 0.006 82)",
+  surfaceL: "oklch(0.996 0.002 82)",
+  raisedL: "oklch(0.998 0.001 82)",
+  hoverL: "oklch(0.948 0.008 255)",
 
   accent300: "oklch(0.788 0.096 255)",
   accent400: "oklch(0.652 0.148 255)",
@@ -158,22 +160,22 @@ const STEP = 1.06;
 // [theme, kind, label, foreground, backdrop, required]
 const checks = [
   // ================================================================ LIGHT — text
-  ["light", "TEXT", "fg on canvas", T.ink950, T.ink150, TEXT],
+  ["light", "TEXT", "fg on canvas", T.ink950, T.canvasL, TEXT],
   ["light", "TEXT", "fg on surface", T.ink950, T.surfaceL, TEXT],
-  ["light", "TEXT", "fg-secondary on canvas", T.ink700, T.ink150, TEXT],
+  ["light", "TEXT", "fg-secondary on canvas", T.ink700, T.canvasL, TEXT],
   ["light", "TEXT", "fg-secondary on surface", T.ink700, T.surfaceL, TEXT],
   ["light", "TEXT", "fg-secondary on sunken", T.ink700, T.ink175, TEXT],
   ["light", "TEXT", "fg-secondary on inset (pill-quiet)", T.ink700, T.ink200, TEXT],
-  ["light", "TEXT", "fg-tertiary on canvas", T.ink650, T.ink150, TEXT],
+  ["light", "TEXT", "fg-tertiary on canvas", T.ink650, T.canvasL, TEXT],
   ["light", "TEXT", "fg-tertiary on surface", T.ink650, T.surfaceL, TEXT],
   ["light", "TEXT", "fg-tertiary on sunken", T.ink650, T.ink175, TEXT],
   ["light", "TEXT", "fg-tertiary on inset", T.ink650, T.ink200, TEXT],
-  ["light", "TEXT", "fg-quiet (overline) on canvas", T.ink600, T.ink150, TEXT],
+  ["light", "TEXT", "fg-quiet (overline) on canvas", T.ink600, T.canvasL, TEXT],
   ["light", "TEXT", "fg-quiet on surface", T.ink600, T.surfaceL, TEXT],
   ["light", "TEXT", "fg-quiet on raised", T.ink600, T.raisedL, TEXT],
   ["light", "TEXT", "fg-quiet on sunken", T.ink600, T.ink175, TEXT],
   ["light", "TEXT", "fg-quiet on inset", T.ink600, T.ink200, TEXT],
-  ["light", "TEXT", "accent link on canvas", T.accent600, T.ink150, TEXT],
+  ["light", "TEXT", "accent link on canvas", T.accent600, T.canvasL, TEXT],
   ["light", "TEXT", "accent link on surface", T.accent600, T.surfaceL, TEXT],
   ["light", "TEXT", "on-accent on primary button", T.raisedL, T.accent600, TEXT],
   ["light", "TEXT", "on-accent on primary hover", T.raisedL, T.accent700, TEXT],
@@ -192,14 +194,14 @@ const checks = [
   // makes the next such drift visible: a reader comparing the two files now compares like with
   // like instead of having to notice a digit.
   ["light", "OBJECT", "control border vs button face", T.borderControlL, T.raisedL, OBJECT],
-  ["light", "OBJECT", "control border vs canvas", T.borderControlL, T.ink150, OBJECT],
+  ["light", "OBJECT", "control border vs canvas", T.borderControlL, T.canvasL, OBJECT],
   ["light", "OBJECT", "control border vs surface", T.borderControlL, T.surfaceL, OBJECT],
   ["light", "OBJECT", "meter fill (accent) vs track", T.accent600, T.ink300, OBJECT],
   ["light", "OBJECT", "meter fill (accent) vs surface", T.accent600, T.surfaceL, OBJECT],
   // The risk dial's budget slider puts a meter directly on the page canvas rather than inside a
   // panel, which is a darker backdrop in light mode than any surface — so the fill is checked
   // against it too.
-  ["light", "OBJECT", "meter fill (accent) vs canvas", T.accent600, T.ink150, OBJECT],
+  ["light", "OBJECT", "meter fill (accent) vs canvas", T.accent600, T.canvasL, OBJECT],
   ["light", "OBJECT", "meter fill (pass) vs track", T.pass700, T.ink300, OBJECT],
   ["light", "OBJECT", "meter fill (warn) vs track", T.warn700, T.ink300, OBJECT],
   ["light", "OBJECT", "meter fill (fail) vs track", T.fail700, T.ink300, OBJECT],
@@ -210,20 +212,20 @@ const checks = [
   ["light", "OBJECT", "meter threshold tick vs pass fill", T.surfaceL, T.pass700, OBJECT],
   ["light", "OBJECT", "meter threshold tick vs warn fill", T.surfaceL, T.warn700, OBJECT],
   // Slider thumb: an accent disc ringed in the raised surface, sitting on the page canvas.
-  ["light", "OBJECT", "slider thumb vs canvas", T.accent600, T.ink150, OBJECT],
-  ["light", "OBJECT", "slider thumb pressed vs canvas", T.accent700, T.ink150, OBJECT],
+  ["light", "OBJECT", "slider thumb vs canvas", T.accent600, T.canvasL, OBJECT],
+  ["light", "OBJECT", "slider thumb pressed vs canvas", T.accent700, T.canvasL, OBJECT],
   // Empty-state mark: the dashed border is the only thing separating "not measured" from "nothing to
   // show", so it conveys information and is held to 3:1 rather than to the decorative hairline.
   ["light", "OBJECT", "empty-state dashed mark vs sunken", T.ink600, T.ink175, OBJECT],
-  ["light", "OBJECT", "focus ring vs canvas", T.accent500, T.ink150, OBJECT],
+  ["light", "OBJECT", "focus ring vs canvas", T.accent500, T.canvasL, OBJECT],
   ["light", "OBJECT", "focus ring vs surface", T.accent500, T.surfaceL, OBJECT],
   ["light", "OBJECT", "focus ring vs raised", T.accent500, T.raisedL, OBJECT],
-  ["light", "OBJECT", "nav active indicator vs canvas", T.accent600, T.ink150, OBJECT],
+  ["light", "OBJECT", "nav active indicator vs canvas", T.accent600, T.canvasL, OBJECT],
 
   // ================================================================ LIGHT — steps
-  ["light", "STEP", "canvas -> surface (elevation)", T.surfaceL, T.ink150, STEP],
-  ["light", "STEP", "surface -> hover", T.ink200, T.surfaceL, STEP],
-  ["light", "STEP", "canvas -> sunken", T.ink175, T.ink150, 1.015],
+  ["light", "STEP", "canvas -> surface (elevation)", T.surfaceL, T.canvasL, STEP],
+  ["light", "STEP", "surface -> hover", T.hoverL, T.surfaceL, STEP],
+  ["light", "STEP", "canvas -> sunken", T.ink175, T.canvasL, 1.015],
   ["light", "STEP", "surface -> track", T.ink300, T.surfaceL, 1.35],
   ["light", "STEP", "document border vs surface", on(T.hairlineStrongL, T.raisedL), T.surfaceL, 1.15],
 

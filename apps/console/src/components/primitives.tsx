@@ -248,6 +248,41 @@ export function SectionHeading({
 }
 
 /**
+ * Compact workflow masthead used by every route. The eyebrow names the operating area,
+ * while the title names the task on this screen; keeping those separate makes detail routes
+ * legible without repeating the product name in every heading.
+ */
+export function PageHeader({
+  eyebrow,
+  title,
+  detail,
+  actions,
+  meta,
+  compact = false,
+}: {
+  eyebrow: string;
+  title: string;
+  detail: ReactNode;
+  actions?: ReactNode;
+  meta?: ReactNode;
+  compact?: boolean;
+}) {
+  return (
+    <header className={clsx("page-header", compact && "page-header-compact")}>
+      <div className="page-header-grid">
+        <div className="min-w-0">
+          <Overline className="page-eyebrow">{eyebrow}</Overline>
+          <h1 className="page-title">{title}</h1>
+          <p className="page-intro">{detail}</p>
+          {meta ? <div className="page-meta">{meta}</div> : null}
+        </div>
+        {actions ? <div className="page-actions">{actions}</div> : null}
+      </div>
+    </header>
+  );
+}
+
+/**
  * Designed empty state.
  *
  * `kind` is the load-bearing prop, and it is not styling. This product distinguishes "there is

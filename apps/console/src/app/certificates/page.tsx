@@ -6,7 +6,7 @@ import {
   CheckIcon,
   EmptyState,
   Meter,
-  Overline,
+  PageHeader,
   Panel,
   Section,
   Stat,
@@ -16,12 +16,13 @@ import { listSkus, portfolioTotals } from "@/lib/data";
 import { composite } from "@/lib/types";
 import { count, dateOnly, percent, shortHash } from "@/lib/format";
 
-export const metadata = { title: "Certificates" };
+export const metadata = { title: "Audit" };
 
 export default async function CertificatesPage() {
   const skus = await listSkus();
   const totals = portfolioTotals(skus);
-  const allVerified = skus.every((bundle) => bundle.certificate.signature_verified);
+  const allVerified =
+    skus.length > 0 && skus.every((bundle) => bundle.certificate.signature_verified);
 
   const rows = [...skus].sort(
     (a, b) =>
@@ -31,20 +32,26 @@ export default async function CertificatesPage() {
 
   return (
     <div className="mx-auto max-w-[var(--container-shell)] px-[var(--spacing-gutter)] pb-24">
-      <header className="py-[var(--spacing-section-lg)]">
-        <Overline>Audit artifacts</Overline>
-        <h1 className="mt-4 max-w-[24ch] text-display font-medium tracking-[var(--tracking-display)]">
-          Enrichment certificates
-        </h1>
-        <p className="mt-5 max-w-[62ch] text-body text-[var(--fg-secondary)]">
-          One signed record per SKU listing every certified value, the span it came from, and
-          every gap that remains. Only publishable values are certified — candidates and
-          queued values are counted but never presented as established facts.
-        </p>
-      </header>
+      <PageHeader
+        eyebrow="Audit"
+        title="Signed enrichment records"
+        detail={
+          <>
+            One signed record per SKU listing every certified value, the span it came from, and
+            every gap that remains. Only publishable values are certified — candidates and queued
+            values are counted but never presented as established facts.
+          </>
+        }
+        meta={
+          <>
+            <span>{count(rows.length)} artifacts</span>
+            <span>{allVerified ? "Signatures verified" : "Signature check required"}</span>
+          </>
+        }
+      />
 
       <StatBand>
-        <Stat label="Certificates" value={count(rows.length)} hint="one per SKU in this run" />
+        <Stat label="Audit artifacts" value={count(rows.length)} hint="one per SKU in this run" />
         <Stat
           label="Signatures"
           value={allVerified ? "All valid" : "Check failed"}
@@ -72,11 +79,11 @@ export default async function CertificatesPage() {
               never happened. Both are gone.
             */}
             <EmptyState
-              title="No certificates"
+              title="No audit artifacts"
               detail={
                 <>
-                  A certificate is written when a SKU completes a pipeline run, so there is nothing
-                  to sign until one has. Produce a run with{" "}
+                  A certificate is signed when a SKU completes a recorded process, so there is
+                  nothing to audit until one has. Produce a run with{" "}
                   <span className="mono">python scripts/run_pipeline.py --save-session</span>.
                 </>
               }
@@ -84,9 +91,10 @@ export default async function CertificatesPage() {
           </Panel>
         ) : (
           <>
-            <Panel className="scroll-x overflow-hidden p-0">
-              <table className="w-full min-w-[56rem] border-collapse text-sm">
-                <caption className="sr-only">Certificates ordered by quality index</caption>
+            <Panel className="overflow-hidden p-0">
+              <div className="scroll-x" tabIndex={0} role="region" aria-label="Signed audit artifacts">
+                <table className="w-full min-w-[56rem] border-collapse text-sm">
+                <caption className="sr-only">Audit artifacts ordered by quality index</caption>
                 {/*
                   The certificate id is monospace and fixed-length, and the four columns after it
                   have known ceilings — so only the SKU column needs to flex. Declaring the rest
@@ -187,7 +195,7 @@ export default async function CertificatesPage() {
                             className="btn btn-bare h-7 px-2 text-[var(--fg-quiet)]
                                        transition-colors duration-[var(--duration-fast)]
                                        group-hover:text-[var(--fg)]"
-                            aria-label={`Open certificate for ${bundle.sku}`}
+                            aria-label={`Open audit artifact for ${bundle.sku}`}
                           >
                             <ArrowIcon />
                           </Link>
@@ -196,11 +204,12 @@ export default async function CertificatesPage() {
                     );
                   })}
                 </tbody>
-              </table>
+                </table>
+              </div>
             </Panel>
 
             <p className="mt-4 text-meta text-[var(--fg-quiet)]">
-              Generated {dateOnly(rows[0]!.certificate.generated_at)} · pipeline{" "}
+              Generated {dateOnly(rows[0]!.certificate.generated_at)} · process{" "}
               {rows[0]!.certificate.pipeline_version}
             </p>
           </>

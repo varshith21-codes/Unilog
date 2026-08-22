@@ -66,8 +66,9 @@ export function VariantSeriesPanel({ group }: { group: VariantGroup }) {
         </Panel>
       )}
 
-      <Panel className="scroll-x mt-6 overflow-hidden p-0">
-        <table className="w-full min-w-[56rem] border-collapse text-sm">
+      <Panel className="mt-6 overflow-hidden p-0">
+        <div className="scroll-x" tabIndex={0} role="region" aria-label={`Variants in the ${group.seriesSku} series`}>
+          <table className="w-full min-w-[56rem] border-collapse text-sm">
           <caption className="sr-only">
             Products in the {group.seriesSku} series, the attributes the ordering table supplied for
             each, and where each variant&rsquo;s values came from
@@ -159,7 +160,8 @@ export function VariantSeriesPanel({ group }: { group: VariantGroup }) {
               </tr>
             ))}
           </tbody>
-        </table>
+          </table>
+        </div>
       </Panel>
 
       <div className="mt-6 grid gap-6 sm:grid-cols-3">

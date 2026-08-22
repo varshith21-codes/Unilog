@@ -314,7 +314,12 @@ function Curve({
   const plotBottom = HEIGHT - PAD.bottom;
 
   return (
-    <figure className="panel p-4">
+    <figure
+      className="panel scroll-x p-4"
+      tabIndex={0}
+      role="region"
+      aria-label="Scrollable risk coverage chart"
+    >
       <figcaption className="sr-only">
         Risk–coverage curve. Each point is a candidate threshold, showing what share of values
         would publish automatically and the worst-case error rate on them.
@@ -322,7 +327,7 @@ function Curve({
 
       <svg
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-        className="h-auto w-full"
+        className="h-auto w-full min-w-[35rem]"
         role="img"
         aria-label={
           operating
@@ -372,7 +377,7 @@ function Curve({
               x={PAD.left - 8}
               y={scales.y(tick) + 3.5}
               textAnchor="end"
-              className="fill-[var(--fg-quiet)] text-[9px] tabular-nums"
+              className="fill-[var(--fg-quiet)] text-micro tabular-nums"
             >
               {percent(tick, 0)}
             </text>
@@ -386,7 +391,7 @@ function Curve({
             x={scales.x(tick)}
             y={plotBottom + 15}
             textAnchor="middle"
-            className="fill-[var(--fg-quiet)] text-[9px] tabular-nums"
+            className="fill-[var(--fg-quiet)] text-micro tabular-nums"
           >
             {percent(tick, 0)}
           </text>
@@ -396,7 +401,7 @@ function Curve({
           x={PAD.left + (plotRight - PAD.left) / 2}
           y={HEIGHT - 6}
           textAnchor="middle"
-          className="fill-[var(--fg-tertiary)] text-[10px]"
+          className="fill-[var(--fg-tertiary)] text-micro"
         >
           Coverage — share of values published without a reviewer
         </text>
@@ -465,7 +470,7 @@ function Curve({
         <text
           x={PAD.left}
           y={PAD.top - 4}
-          className="fill-[var(--fg-tertiary)] text-[10px]"
+          className="fill-[var(--fg-tertiary)] text-micro"
         >
           Worst-case error rate
         </text>

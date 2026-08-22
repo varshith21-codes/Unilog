@@ -3,8 +3,9 @@ import { notFound } from "next/navigation";
 
 import { CrossSourcePanel } from "@/components/cross-source-panel";
 import { EquivalencePanel } from "@/components/equivalence-panel";
-import { ArrowIcon, Meter, Section } from "@/components/primitives";
+import { ArrowIcon, Meter, Overline, Section } from "@/components/primitives";
 import { ReviewWorkspace } from "@/components/review-workspace";
+import { VariantSeriesPanel } from "@/components/variant-series-panel";
 import {
   attributeRows,
   getClassDefinition,
@@ -23,7 +24,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ sku: string }> }) {
   const { sku } = await params;
-  return { title: `Review ${sku}` };
+  return { title: `Resolve ${sku}` };
 }
 
 export default async function ReviewSkuPage({
@@ -68,7 +69,7 @@ export default async function ReviewSkuPage({
                 href="/review"
                 className="rounded-xs transition-colors duration-[var(--duration-fast)] hover:text-[var(--fg)]"
               >
-                Review
+                Resolve
               </Link>
             </li>
             <li aria-hidden>/</li>
@@ -80,7 +81,8 @@ export default async function ReviewSkuPage({
 
         <div className="mt-5 flex flex-wrap items-end justify-between gap-x-10 gap-y-6">
           <div className="min-w-0">
-            <h1 className="text-display font-medium tracking-[var(--tracking-display)]">
+            <Overline>Resolve record</Overline>
+            <h1 className="mt-3 text-display font-medium tracking-[var(--tracking-display)]">
               {bundle.sku}
             </h1>
             <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-[var(--fg-secondary)]">
@@ -138,7 +140,7 @@ export default async function ReviewSkuPage({
 
           <div className="flex items-center gap-2">
             <Link href={`/certificates/${bundle.sku}`} className="btn btn-quiet">
-              Certificate
+              Audit artifact
               <ArrowIcon />
             </Link>
           </div>
@@ -224,6 +226,12 @@ export default async function ReviewSkuPage({
         threshold={dataset.policy.threshold}
         live={dataset.meta.live}
       />
+
+      {series ? (
+        <Section rhythm="lg">
+          <VariantSeriesPanel group={series} />
+        </Section>
+      ) : null}
 
       {/*
         L4 sits below the workspace rather than inside it. The workspace is a per-value queue driven

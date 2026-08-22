@@ -51,8 +51,17 @@ from axiom.delivery.source import (
     resolve_manufacturer,
     strip_supplier_code,
 )
+from axiom.delivery.xlsx import (
+    WORKBOOK_MEDIA_TYPE,
+    WORKBOOK_SUFFIX,
+    DeliveryWorkbook,
+    DeliveryWorkbookExporter,
+    to_workbook_bytes,
+)
 
 __all__ = [
+    "WORKBOOK_MEDIA_TYPE",
+    "WORKBOOK_SUFFIX",
     "BrandResolution",
     "Casing",
     "Cell",
@@ -65,6 +74,8 @@ __all__ = [
     "DeliveryRow",
     "DeliveryRowBuilder",
     "DeliverySection",
+    "DeliveryWorkbook",
+    "DeliveryWorkbookExporter",
     "ManufacturerResolution",
     "Provenance",
     "RowScore",
@@ -79,4 +90,5 @@ __all__ = [
     "resolve_manufacturer",
     "score_rows",
     "strip_supplier_code",
+    "to_workbook_bytes",
 ]

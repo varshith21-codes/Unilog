@@ -36,7 +36,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ sku: string }> }) {
   const { sku } = await params;
-  return { title: `Certificate ${sku}` };
+  return { title: `Audit ${sku}` };
 }
 
 export default async function CertificatePage({
@@ -80,7 +80,7 @@ export default async function CertificatePage({
                 href="/certificates"
                 className="rounded-xs transition-colors duration-[var(--duration-fast)] hover:text-[var(--fg)]"
               >
-                Certificates
+                Audit
               </Link>
             </li>
             <li aria-hidden>/</li>
@@ -90,7 +90,7 @@ export default async function CertificatePage({
 
         <div className="mt-5 flex flex-wrap items-end justify-between gap-x-10 gap-y-6">
           <div>
-            <Overline>Enrichment certificate</Overline>
+            <Overline>Audit artifact</Overline>
             <h1 className="mt-3 text-display font-medium tracking-[var(--tracking-display)]">
               {certificate.sku}
             </h1>
@@ -101,7 +101,7 @@ export default async function CertificatePage({
 
           <div className="flex items-center gap-2">
             <Link href={`/review/${certificate.sku}`} className="btn btn-quiet">
-              Review workspace
+              Resolve workspace
               <ArrowIcon />
             </Link>
           </div>
@@ -172,14 +172,14 @@ export default async function CertificatePage({
               </KeyValue>
               <KeyValue label="Inferred">{summary.attributes_inferred}</KeyValue>
               <KeyValue label="Auto-accepted">{summary.auto_accepted}</KeyValue>
-              <KeyValue label="Queued for review">{summary.queued_for_review}</KeyValue>
+              <KeyValue label="Queued for resolution">{summary.queued_for_review}</KeyValue>
               <KeyValue label="Gaps">
                 {summary.gaps_required} required of {summary.gaps_total}
               </KeyValue>
               <KeyValue label="Schema" mono>
                 {certificate.schema_version ?? "—"}
               </KeyValue>
-              <KeyValue label="Pipeline" mono>
+              <KeyValue label="Process" mono>
                 {certificate.pipeline_version}
               </KeyValue>
               <KeyValue label="Tenant">{certificate.tenant_id}</KeyValue>
@@ -394,8 +394,9 @@ export default async function CertificatePage({
             />
           </Panel>
         ) : (
-          <Panel className="scroll-x mt-7 overflow-hidden p-0">
-            <table className="w-full min-w-[48rem] border-collapse text-sm">
+          <Panel className="mt-7 overflow-hidden p-0">
+            <div className="scroll-x" tabIndex={0} role="region" aria-label="Recorded attribute gaps">
+              <table className="w-full min-w-[48rem] border-collapse text-sm">
               <caption className="sr-only">Attributes no source could establish</caption>
               <colgroup>
                 <col className="w-[18rem]" />
@@ -454,7 +455,8 @@ export default async function CertificatePage({
                   </tr>
                 ))}
               </tbody>
-            </table>
+              </table>
+            </div>
           </Panel>
         )}
       </Section>

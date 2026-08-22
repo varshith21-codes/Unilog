@@ -113,6 +113,10 @@ jobs:
         # Asserted against the client's own CSV rather than a fixture we wrote, because a fixture
         # we wrote would agree with our mistakes. Skips cleanly when the CSV is absent so a fork
         # without the dataset is not blocked, but says so rather than reporting a silent pass.
+        #
+        # This checks the *contract*. The artifacts built from it are checked separately below and
+        # in tests/test_delivery_xlsx.py, because a correct contract does not by itself prove the
+        # exporter emitted it.
         run: |
           python - <<'PY'
           import csv
@@ -161,9 +165,64 @@ jobs:
             exit 0
           fi
           python scripts/export_delivery.py "Unihack_ Sample Dataset - Input.csv" \
-            --mpn PDSH4816AF --mpn WDTS7024RZ --out data/delivery --quiet
+            --mpn PDSH4816AF --mpn WDTS7024RZ --out data/delivery --quiet --xlsx
           python scripts/score_delivery.py \
             data/delivery/Unihack__Sample_Dataset_-_Input.delivery.csv
+
+      - name: The delivered workbook carries the client's columns, not just the contract
+        # The gate above scores the CSV and the one before it checks the contract. Neither reads the
+        # XLSX, which is the artifact a human on the client side actually opens — so a writer that
+        # prepended a title row or dropped an empty trailing column would have shipped green.
+        #
+        # Checked against the client's file, on the bytes, by parsing the workbook back the way
+        # their importer will. Cheap: the file was already written by the step above.
+        run: |
+          if [ ! -f "Unihack_ Expected Output - Delivery Format.csv" ]; then
+            echo "SKIP: expected-output file is not in this checkout"
+            exit 0
+          fi
+          python - <<'PY'
+          import csv
+          import sys
+          from pathlib import Path
+
+          from openpyxl import load_workbook
+
+          book = Path("data/delivery/Unihack__Sample_Dataset_-_Input.delivery.xlsx")
+          if not book.is_file():
+              print(f"FAIL: {book} was not written", file=sys.stderr)
+              sys.exit(1)
+
+          with open(
+              "Unihack_ Expected Output - Delivery Format.csv", newline="", encoding="utf-8-sig"
+          ) as handle:
+              theirs = next(csv.reader(handle))
+
+          sheet = load_workbook(book, read_only=True, data_only=True)["Delivery"]
+          rows = sheet.iter_rows(values_only=True)
+          ours = ["" if cell is None else cell for cell in next(rows)]
+
+          problems = []
+          if len(ours) != len(theirs):
+              problems.append(
+                  f"workbook has {len(ours)} columns, client file has {len(theirs)}"
+              )
+          for index, (t, o) in enumerate(zip(theirs, ours)):
+              if t != o:
+                  problems.append(f"column {index}: client {t!r} != workbook {o!r}")
+
+          # A ragged row puts every value after the gap under the wrong header, which a header
+          # check alone would not notice.
+          widths = {len(row) for row in rows}
+          if widths - {len(theirs)}:
+              problems.append(f"data rows are not all {len(theirs)} wide: {sorted(widths)}")
+
+          for problem in problems[:10]:
+              print(f"FAIL: {problem}", file=sys.stderr)
+          if problems:
+              sys.exit(1)
+          print(f"delivered workbook ok: {len(ours)} columns, byte-identical to the client's")
+          PY
 
       - name: Document extraction agrees with a human reading and invents nothing
         # The accuracy measurement for the model-free path, gated on every push because it costs

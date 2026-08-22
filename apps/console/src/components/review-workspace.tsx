@@ -113,10 +113,14 @@ export function ReviewWorkspace({
    */
   const [outcomes, setOutcomes] = useState<Record<string, ReviewOutcome>>({});
   const [inFlight, setInFlight] = useState<Set<string>>(new Set());
+  const inFlightRef = useRef<Set<string>>(new Set());
+  const [dismissedRecorded, setDismissedRecorded] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
   const decide = useCallback(
     async (code: string, action: ReviewAction, name: string, correctedValue?: string) => {
+      if (inFlightRef.current.has(code)) return;
+
       if (!live) {
         setError(
           "This page is rendering the offline fixture, so a decision has nowhere to go. " +
@@ -126,6 +130,7 @@ export function ReviewWorkspace({
       }
 
       setError(null);
+      inFlightRef.current.add(code);
       setInFlight((current) => new Set(current).add(code));
       setAnnouncement(`Recording ${action} for ${name}`);
 
@@ -136,6 +141,7 @@ export function ReviewWorkspace({
         correctedValue,
       });
 
+      inFlightRef.current.delete(code);
       setInFlight((current) => {
         const next = new Set(current);
         next.delete(code);
@@ -198,13 +204,13 @@ export function ReviewWorkspace({
   );
 
   /*
-   * Keyboard-first triage, scoped to the workspace.
+   * Keyboard-first triage, scoped to the focused attribute queue.
    *
-   * A document-level listener would fire `a` and `x` while focus was on the theme toggle or
-   * a nav link, recording decisions the user never asked for. Requiring focus to be inside
-   * the workspace subtree keeps the shortcuts local without forcing the reviewer to click
-   * into a specific control first. Arrow keys are handled by the listbox itself, so they
-   * are deliberately absent here — intercepting them globally would break page scrolling.
+   * These keys persist decisions immediately, so "inside the workspace" is too broad: a reviewer
+   * can legitimately press A, X, or E while focused on an action button or another control. The
+   * visible instruction says "Focus queue", and keeping the character shortcuts active only while
+   * that listbox owns focus makes the scope explicit and satisfies character-key shortcut safety.
+   * Arrow keys remain on the listbox itself so ordinary page scrolling is never intercepted.
    */
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -221,9 +227,9 @@ export function ReviewWorkspace({
 
       const root = rootRef.current;
       const focused = document.activeElement;
-      const insideWorkspace =
-        root !== null && (focused === document.body || root.contains(focused));
-      if (!insideWorkspace) return;
+      const insideWorkspace = root !== null && focused !== null && root.contains(focused);
+      const queueFocused = focused === listRef.current;
+      if (!insideWorkspace || !queueFocused) return;
 
       switch (event.key) {
         case "j":
@@ -284,25 +290,22 @@ export function ReviewWorkspace({
   const activeSpan = active?.value?.evidence[0] ?? null;
 
   return (
-    <div ref={rootRef} className="grid gap-6 lg:grid-cols-12">
-      {/* Staged decisions are announced here; the visible confirmation is the bottom bar. */}
+    <div
+      ref={rootRef}
+      className={clsx(
+        "grid gap-6 xl:grid-cols-12 xl:items-start xl:gap-0",
+        (error !== null || recorded.length > dismissedRecorded) && "pb-32 sm:pb-24",
+      )}
+    >
+      {/* Keep the live region mounted so persistence announcements are reliably spoken. */}
       <p role="status" aria-live="polite" className="sr-only">
         {announcement}
       </p>
 
-      {/* ------------------------------------------------------------ attribute list */}
-      <div className="lg:col-span-5">
-        <div className="flex items-center justify-between gap-3">
-          {/*
-            A group of toggle buttons, not a tablist. There are no tabpanels and no roving
-            tabindex here, so `role="tablist"` would promise a keyboard contract this does
-            not implement. `aria-pressed` describes what these actually are.
-          */}
-          <div
-            role="group"
-            aria-label="Filter attributes"
-            className="flex gap-0.5 rounded-lg bg-[var(--surface-inset)] p-0.5"
-          >
+      {/* ------------------------------------------------------------ attribute rail */}
+      <div className="min-w-0 xl:sticky xl:top-6 xl:col-span-4 xl:self-start xl:pr-6">
+        <div className="flex flex-wrap items-end justify-between gap-3 border-b border-[var(--hairline-strong)] pb-3">
+          <div role="group" aria-label="Filter attributes" className="flex items-center gap-1">
             {FILTERS.map((option) => {
               const count = countFor(rows, option.id);
               return (
@@ -311,29 +314,16 @@ export function ReviewWorkspace({
                   type="button"
                   aria-pressed={filter === option.id}
                   onClick={() => setFilter(option.id)}
-                  /*
-                    Press feedback and a hover fill on the unselected segments, neither of which this
-                    control had: an unselected segment changed text colour only, which on a tinted
-                    inset track is close to no feedback at all.
-                  */
                   className={clsx(
-                    "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-meta font-medium",
-                    "transition-[background-color,color,transform] duration-[var(--duration-fast)] ease-[var(--ease-out-quart)]",
-                    "active:scale-[0.97]",
+                    "flex min-h-11 items-center gap-1.5 rounded-sm border px-2.5 py-1 text-meta font-medium",
+                    "transition-transform duration-[var(--duration-fast)] ease-[var(--ease-out-quart)]",
+                    "active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100",
                     filter === option.id
-                      ? "bg-[var(--surface-raised)] text-[var(--fg)] shadow-xs"
-                      : "text-[var(--fg-tertiary)] hover:bg-[var(--surface-hover)] hover:text-[var(--fg)]",
+                      ? "border-[var(--hairline-strong)] bg-[var(--surface-raised)] text-[var(--fg)]"
+                      : "border-transparent text-[var(--fg-tertiary)] hover:bg-[var(--surface-hover)] hover:text-[var(--fg)]",
                   )}
                 >
                   {option.label}
-                  {/*
-                    The count per filter, so a reviewer can see there are no gaps without switching
-                    to the gaps view and finding it empty. Rendered when zero rather than hidden — a
-                    missing badge reads as "not counted", which is the one thing it must not say.
-
-                    Zero is a step quieter than a real count, not a different colour: same reading as
-                    a zero in a table cell.
-                  */}
                   <span
                     className={clsx(
                       "tabular-nums",
@@ -352,12 +342,8 @@ export function ReviewWorkspace({
         </div>
 
         {/*
-          Single-select listbox using the `aria-activedescendant` pattern.
-
-          The `ul` owns focus and key handling; options are `li role="option"` directly, so
-          ownership is `listbox > option` as the spec requires. Options are deliberately not
-          individually focusable — a focusable child inside an activedescendant listbox sets
-          up two competing focus models, and 17 attributes would become 18 tab stops.
+          The listbox remains the single focus owner. Its option children stay direct descendants
+          so aria-activedescendant, keyboard movement, and scrollIntoView keep one precise model.
         */}
         <ul
           ref={listRef}
@@ -387,15 +373,9 @@ export function ReviewWorkspace({
                 break;
             }
           }}
-          className="panel mt-3 max-h-[min(38rem,calc(100dvh-16rem))] overflow-y-auto p-1"
+          className="mt-3 max-h-[min(38rem,calc(100dvh-16rem))] overflow-y-auto border-y border-[var(--hairline-strong)] divide-y divide-[var(--hairline-strong)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
         >
           {visible.length === 0 ? (
-            /*
-              `role="presentation"` because a listbox may only own options, and this is a message
-              rather than something selectable. The three filters need three different messages: an
-              empty review view is a result, an empty gaps view is a different result, and an empty
-              "all" view means the class declared no attributes — which is a defect, not either.
-            */
             <li role="presentation" className="px-4 py-8 text-center">
               <p className="text-sm font-medium">
                 {filter === "review"
@@ -425,102 +405,94 @@ export function ReviewWorkspace({
 
             return (
               <li
-                  key={row.spec.code}
-                  id={`row-${row.spec.code}`}
-                  data-code={row.spec.code}
-                  role="option"
-                  aria-selected={isActive}
-                  aria-busy={busy || undefined}
-                  onClick={() => setSelected(row.spec.code)}
-                  className={clsx(
-                    "grid w-full cursor-pointer grid-cols-[1fr_auto] items-center gap-x-3 gap-y-1",
-                    "rounded-lg px-3.5 py-2.5 text-left",
-                    "transition-colors duration-[var(--duration-instant)]",
-                    isActive
-                      ? "bg-[var(--accent-quiet)] shadow-[inset_2px_0_0_0_var(--accent)]"
-                      : "hover:bg-[var(--surface-hover)]",
-                    busy && "cursor-progress",
-                  )}
-                >
-                  <span className="flex min-w-0 items-center gap-2">
-                    <span className="truncate text-sm font-medium">{row.spec.name}</span>
-                    {row.spec.compliance_claim ? (
-                      <span
-                        className="pill pill-accent shrink-0"
-                        title="Compliance claim: never satisfiable by inference"
-                      >
-                        Claim
-                      </span>
-                    ) : null}
-                  </span>
-
-                  <span className="flex shrink-0 items-center gap-1.5">
-                    {busy ? (
-                      /*
-                        A loading state that occupies the same box as the pill it replaces, so the
-                        row does not reflow mid-save. `aria-busy` on the row carries it for a screen
-                        reader; the visible text is for everyone else.
-                      */
-                      <span className="pill pill-quiet animate-pulse motion-reduce:animate-none">
-                        Saving…
-                      </span>
-                    ) : outcome ? (
-                      /*
-                        The one moment in this app where something changes because the reviewer acted.
-                        A pill that swaps with no transition looks like a re-render; a short fade says
-                        a decision landed on this row and not on the one above it.
-                      */
-                      <span className="animate-fade-in">
-                        <StatusPill status={outcome.status} />
-                      </span>
-                    ) : blocking ? (
-                      <span className="pill pill-fail">
-                        <AlertIcon />
-                        Blocked
-                      </span>
-                    ) : row.value ? (
-                      <StatusPill status={row.value.status} />
-                    ) : row.gap ? (
-                      <span
-                        className={clsx("pill", row.gap.is_required ? "pill-warn" : "pill-quiet")}
-                      >
-                        Gap
-                      </span>
-                    ) : (
-                      <span className="pill pill-quiet">Not attempted</span>
-                    )}
-                  </span>
-
-                  <span className="col-span-2 flex items-baseline gap-2 text-meta">
+                key={row.spec.code}
+                id={`row-${row.spec.code}`}
+                data-code={row.spec.code}
+                role="option"
+                aria-selected={isActive}
+                aria-busy={busy || undefined}
+                onClick={() => {
+                  setSelected(row.spec.code);
+                  listRef.current?.focus();
+                }}
+                className={clsx(
+                  "grid min-h-11 w-full cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1",
+                  "border-l-2 border-l-transparent px-3 py-2.5 text-left",
+                  isActive
+                    ? "border-l-[var(--accent)] bg-[var(--accent-quiet)]"
+                    : "hover:bg-[var(--surface-hover)] active:bg-[var(--surface-inset)]",
+                  busy && "cursor-progress",
+                )}
+              >
+                <span className="flex min-w-0 items-center gap-2">
+                  <span className="truncate text-sm font-medium">{row.spec.name}</span>
+                  {row.spec.compliance_claim ? (
                     <span
-                      className={clsx(
-                        "truncate",
-                        row.value ? "text-[var(--fg-secondary)]" : "text-[var(--fg-quiet)]",
-                      )}
+                      className="pill pill-accent shrink-0"
+                      title="Compliance claim: never satisfiable by inference"
                     >
-                      {row.value
-                        ? (outcome?.after ??
-                          row.value.value_display ??
-                          canonical(row.value.value_canonical) ??
-                          row.value.value_raw)
-                        : row.gap
-                          ? GAP_REASON_LABEL[row.gap.reason]
-                          : "No candidate produced"}
+                      Claim
                     </span>
-                    {row.value ? (
-                      <span className="ml-auto shrink-0 tabular-nums text-[var(--fg-quiet)]">
-                        {fmtScore(row.value.score)}
-                      </span>
-                    ) : null}
+                  ) : null}
+                </span>
+
+                <span className="flex shrink-0 items-center gap-1.5">
+                  {busy ? (
+                    <span className="pill pill-quiet animate-pulse motion-reduce:animate-none">
+                      Saving…
+                    </span>
+                  ) : outcome ? (
+                    <span className="animate-fade-in motion-reduce:animate-none">
+                      <StatusPill status={outcome.status} />
+                    </span>
+                  ) : blocking ? (
+                    <span className="pill pill-fail">
+                      <AlertIcon />
+                      Blocked
+                    </span>
+                  ) : row.value ? (
+                    <StatusPill status={row.value.status} />
+                  ) : row.gap ? (
+                    <span
+                      className={clsx("pill", row.gap.is_required ? "pill-warn" : "pill-quiet")}
+                    >
+                      Gap
+                    </span>
+                  ) : (
+                    <span className="pill pill-quiet">Not attempted</span>
+                  )}
+                </span>
+
+                <span className="col-span-2 flex min-w-0 items-baseline gap-2 text-meta">
+                  <span
+                    className={clsx(
+                      "min-w-0 truncate",
+                      row.value ? "text-[var(--fg-secondary)]" : "text-[var(--fg-quiet)]",
+                    )}
+                  >
+                    {row.value
+                      ? (outcome?.after ??
+                        row.value.value_display ??
+                        canonical(row.value.value_canonical) ??
+                        row.value.value_raw)
+                      : row.gap
+                        ? GAP_REASON_LABEL[row.gap.reason]
+                        : "No candidate produced"}
                   </span>
+                  {row.value ? (
+                    <span className="ml-auto shrink-0 tabular-nums text-[var(--fg-quiet)]">
+                      {fmtScore(row.value.score)}
+                    </span>
+                  ) : null}
+                </span>
               </li>
             );
           })}
         </ul>
 
-        <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-meta text-[var(--fg-quiet)]">
+        <p className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-[var(--hairline-strong)] py-3 text-meta text-[var(--fg-quiet)]">
           <span>
-            <Kbd>J</Kbd> <Kbd>K</Kbd> move
+            Focus queue, then <Kbd>J</Kbd> <Kbd>K</Kbd> move
           </span>
           <span>
             <Kbd>A</Kbd> accept
@@ -534,14 +506,17 @@ export function ReviewWorkspace({
         </p>
       </div>
 
-      {/* ------------------------------------------------------------ evidence pane */}
-      <div className="lg:col-span-7">
+      {/* ------------------------------------------------------------ evidence workplane */}
+      <div className="min-w-0 xl:col-span-8 xl:border-l xl:border-[var(--hairline-strong)] xl:pl-6">
         {active ? (
-          <div key={active.spec.code} className="animate-fade-in flex flex-col gap-5">
-            {/* ---- attribute header ---- */}
-            <div className="panel p-6">
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div className="min-w-0">
+          <div
+            key={active.spec.code}
+            className="animate-fade-in flex min-w-0 flex-col motion-reduce:animate-none"
+          >
+            {/* ---- selected attribute / value anchor ---- */}
+            <div className="border-b border-[var(--hairline-strong)] pb-5">
+              <div className="grid gap-5 sm:grid-cols-5 sm:items-end">
+                <div className="min-w-0 sm:col-span-3">
                   <div className="flex flex-wrap items-center gap-2">
                     <RequirementPill requirement={active.spec.requirement} />
                     <span className="pill pill-quiet">{active.spec.datatype}</span>
@@ -554,21 +529,23 @@ export function ReviewWorkspace({
                       weight ×{active.spec.weight}
                     </span>
                   </div>
-                  <h2 className="mt-3 text-xl font-medium tracking-[var(--tracking-heading)]">
+                  <h2 className="mt-3 break-words text-xl font-medium tracking-[var(--tracking-heading)]">
                     {active.spec.name}
                   </h2>
-                  <p className="mono mt-1 text-[var(--fg-quiet)]">{active.spec.code}</p>
+                  <p className="mono mt-1 text-[var(--fg-quiet)] [overflow-wrap:anywhere]">
+                    {active.spec.code}
+                  </p>
                 </div>
 
                 {active.value ? (
-                  <div className="text-right">
+                  <div className="min-w-0 border-l-2 border-[var(--accent)] pl-3 sm:col-span-2 sm:text-right">
                     <Overline>Value</Overline>
-                    <p className="mt-1.5 text-xl font-medium">
+                    <p className="mt-1.5 text-2xl font-medium tracking-[var(--tracking-heading)] [overflow-wrap:anywhere]">
                       {active.value.value_display ?? canonical(active.value.value_canonical)}
                     </p>
                     {active.value.value_raw &&
                     active.value.value_raw !== active.value.value_display ? (
-                      <p className="mono mt-1 text-[var(--fg-quiet)]">
+                      <p className="mono mt-1 text-[var(--fg-quiet)] [overflow-wrap:anywhere]">
                         raw: {active.value.value_raw}
                       </p>
                     ) : null}
@@ -601,7 +578,7 @@ export function ReviewWorkspace({
             )}
           </div>
         ) : (
-          <div className="panel">
+          <div className="border-y border-[var(--hairline-strong)]">
             <EmptyState
               title="Nothing selected"
               detail="Choose an attribute on the left to see the value, its confidence, and the exact region of the source page it was read from."
@@ -611,12 +588,9 @@ export function ReviewWorkspace({
       </div>
 
       {/* ------------------------------------------------------------ recorded / errors */}
-      {error !== null || recorded.length > 0 ? (
-        <div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 flex justify-center p-3 sm:p-4">
-          <div
-            className="animate-rise panel-raised pointer-events-auto flex max-w-full flex-wrap
-                       items-center justify-center gap-x-4 gap-y-2 px-4 py-3 shadow-lg"
-          >
+      {error !== null || recorded.length > dismissedRecorded ? (
+        <div className="resolve-toast-shell pointer-events-none fixed inset-x-0 bottom-0 z-30 flex justify-center px-3 pt-3 sm:px-4 sm:pt-4">
+          <div className="animate-rise panel-raised pointer-events-auto flex max-w-full flex-wrap items-center justify-center gap-x-4 gap-y-2 px-4 py-3 motion-reduce:animate-none">
             {error !== null ? (
               <>
                 <span className="pill pill-fail">
@@ -624,7 +598,11 @@ export function ReviewWorkspace({
                   Not recorded
                 </span>
                 <p className="max-w-[60ch] text-sm text-[var(--fg-secondary)]">{error}</p>
-                <button type="button" className="btn btn-bare h-7" onClick={() => setError(null)}>
+                <button
+                  type="button"
+                  className="btn btn-bare min-h-11"
+                  onClick={() => setError(null)}
+                >
                   Dismiss
                 </button>
               </>
@@ -638,12 +616,14 @@ export function ReviewWorkspace({
                   <CheckIcon />
                   Persisted
                 </span>
-                {/*
-                  The reason a reviewer should care that this persisted: it moved the priors,
-                  which moves what gets auto-accepted next run. Showing the aggregate movement
-                  is what makes the flywheel legible instead of asserted.
-                */}
                 <PriorMovement outcomes={recorded} />
+                <button
+                  type="button"
+                  className="btn btn-bare min-h-11"
+                  onClick={() => setDismissedRecorded(recorded.length)}
+                >
+                  Dismiss
+                </button>
               </>
             )}
           </div>
@@ -715,8 +695,8 @@ function ValueDetail({
 
   return (
     <>
-      {/* ---- confidence ---- */}
-      <div className="panel p-6">
+      {/* ---- confidence + immediate resolution ---- */}
+      <div className="border-b border-[var(--hairline-strong)] py-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Overline>Confidence</Overline>
           <div className="flex items-center gap-2">
@@ -725,38 +705,110 @@ function ValueDetail({
           </div>
         </div>
 
-        <div className="mt-5 flex items-baseline gap-3">
-          <p className="figure">{fmtScore(value.score)}</p>
-          {threshold !== null ? (
-            <p className="text-sm text-[var(--fg-tertiary)]">
-              threshold {threshold.toFixed(3)}
-            </p>
-          ) : null}
+        <div className="mt-4 grid gap-5 sm:grid-cols-2 sm:items-start">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-baseline gap-3">
+              <p className="figure">{fmtScore(value.score)}</p>
+              {threshold !== null ? (
+                <p className="text-sm text-[var(--fg-tertiary)] tabular-nums">
+                  threshold {threshold.toFixed(3)}
+                </p>
+              ) : null}
+            </div>
+
+            <div className="mt-4">
+              <Meter
+                value={value.score}
+                threshold={threshold}
+                tone={value.status === "auto_accepted" ? "pass" : "warn"}
+                label={`Calibrated score ${fmtScore(value.score)}`}
+              />
+            </div>
+
+            {value.decision ? (
+              <p className="mt-3">
+                <DecisionNote
+                  reason={value.decision.reason_code}
+                  detail={value.decision.detail}
+                />
+              </p>
+            ) : null}
+          </div>
+
+          <div className="min-w-0 sm:border-l sm:border-[var(--hairline-strong)] sm:pl-5">
+            <Overline>Resolve</Overline>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                className={clsx(
+                  "btn",
+                  outcome?.action === "accept" ? "btn-primary" : "btn-quiet",
+                )}
+                onClick={() => onDecide("accept")}
+                disabled={busy || !live}
+                aria-pressed={outcome?.action === "accept"}
+              >
+                <CheckIcon />
+                {outcome?.action === "accept" ? "Accepted" : "Accept"}
+              </button>
+
+              <button
+                type="button"
+                className={clsx(
+                  "btn",
+                  outcome?.action === "reject" ? "btn-danger" : "btn-quiet",
+                )}
+                onClick={() => onDecide("reject")}
+                disabled={busy || !live}
+                aria-pressed={outcome?.action === "reject"}
+              >
+                {outcome?.action === "reject" ? "Rejected" : "Reject"}
+              </button>
+
+              <button
+                type="button"
+                className={clsx(
+                  "btn",
+                  outcome?.action === "correct" ? "btn-primary" : "btn-quiet",
+                )}
+                onClick={() => {
+                  const replacement = window.prompt(
+                    `Corrected value for ${row.spec.name}`,
+                    outcome?.after ?? value.value_display ?? value.value_raw ?? "",
+                  );
+                  if (replacement?.trim()) onDecide("correct", replacement.trim());
+                }}
+                disabled={busy || !live}
+                aria-pressed={outcome?.action === "correct"}
+              >
+                {outcome?.action === "correct" ? "Corrected" : "Correct"}
+              </button>
+
+              {busy ? (
+                <span className="basis-full text-meta text-[var(--fg-quiet)]" role="status">
+                  Saving…
+                </span>
+              ) : null}
+
+              {outcome ? (
+                <p className="basis-full text-meta text-[var(--fg-quiet)]">
+                  Reliability for <span className="mono">{row.spec.code}</span>{" "}
+                  {outcome.prior_after >= outcome.prior_before ? "rose" : "fell"} to{" "}
+                  <span className="tabular-nums text-[var(--fg-secondary)]">
+                    {outcome.prior_after.toFixed(3)}
+                  </span>{" "}
+                  from {outcome.prior_before.toFixed(3)} over {outcome.sibling_impact}{" "}
+                  {outcome.sibling_impact === 1 ? "sample" : "samples"}
+                </p>
+              ) : !live ? (
+                <p className="basis-full text-meta text-[var(--warn)]">
+                  Offline fixture — start the API to record decisions.
+                </p>
+              ) : null}
+            </div>
+          </div>
         </div>
 
-        <div className="mt-4">
-          <Meter
-            value={value.score}
-            threshold={threshold}
-            tone={value.status === "auto_accepted" ? "pass" : "warn"}
-            label={`Calibrated score ${fmtScore(value.score)}`}
-          />
-        </div>
-
-        {value.decision ? (
-          <p className="mt-3">
-            <DecisionNote
-              reason={value.decision.reason_code}
-              detail={value.decision.detail}
-            />
-          </p>
-        ) : null}
-
-        {/*
-          The default disclosure triangle was showing through here at platform size and colour.
-          `.disclosure` replaces it with a chevron that rotates on open, which is what ties the
-          panel below to the row that opened it.
-        */}
         <details className="hairline-t mt-5 pt-4">
           <summary className="disclosure text-sm">Signals behind this score</summary>
 
@@ -768,14 +820,17 @@ function ValueDetail({
           ) : (
             <dl className="mt-4 flex flex-col gap-2.5">
               {features.map(([key, magnitude]) => (
-                <div key={key} className="grid grid-cols-[11rem_1fr_2.75rem] items-center gap-3">
-                  <dt className="truncate text-meta text-[var(--fg-secondary)]">
+                <div
+                  key={key}
+                  className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 sm:grid-cols-[11rem_minmax(0,1fr)_2.75rem]"
+                >
+                  <dt className="min-w-0 truncate text-meta text-[var(--fg-secondary)]">
                     {featureLabel(key)}
                   </dt>
-                  <dd>
+                  <dd className="col-span-2 row-start-2 sm:col-span-1 sm:row-auto">
                     <Meter value={magnitude} tone="quiet" label={featureLabel(key)} />
                   </dd>
-                  <dd className="text-right text-meta tabular-nums text-[var(--fg-tertiary)]">
+                  <dd className="col-start-2 row-start-1 text-right text-meta tabular-nums text-[var(--fg-tertiary)] sm:col-auto sm:row-auto">
                     {magnitude.toFixed(2)}
                   </dd>
                 </div>
@@ -785,8 +840,8 @@ function ValueDetail({
         </details>
       </div>
 
-      {/* ---- evidence ---- */}
-      <div className="panel p-6">
+      {/* ---- verified evidence + provenance ---- */}
+      <div className="border-b border-[var(--hairline-strong)] py-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Overline>Evidence</Overline>
           {span ? (
@@ -800,7 +855,9 @@ function ValueDetail({
 
         {span ? (
           <>
-            <Quote className="mt-4">{span.quote}</Quote>
+            <div className="mt-4 border-l-2 border-[var(--accent)] pl-4">
+              <Quote>{span.quote}</Quote>
+            </div>
 
             <dl className="mt-5 grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4">
               <KeyValue label="Document">{span.document_id}</KeyValue>
@@ -814,9 +871,9 @@ function ValueDetail({
             </dl>
 
             <div className="mt-6">
-              <div className="mb-2.5 flex items-center gap-2">
-                <AnchorIcon className="text-[var(--fg-quiet)]" />
-                <p className="text-meta text-[var(--fg-quiet)]">
+              <div className="mb-3 flex min-w-0 items-center gap-2 border-y border-[var(--hairline-strong)] py-2.5">
+                <AnchorIcon className="shrink-0 text-[var(--fg-quiet)]" />
+                <p className="min-w-0 text-meta text-[var(--fg-quiet)] [overflow-wrap:anywhere]">
                   {sourceDocument?.revision_label ??
                     sourceDocument?.document_id ??
                     span.document_id}
@@ -852,7 +909,7 @@ function ValueDetail({
       </div>
 
       {/* ---- validation ---- */}
-      <div className="panel p-6">
+      <div className="border-b border-[var(--hairline-strong)] py-5">
         <Overline>Validation</Overline>
 
         {blocking.length === 0 && other.length === 0 ? (
@@ -860,30 +917,41 @@ function ValueDetail({
             No checks were applicable to this value.
           </p>
         ) : (
-          <ul className="mt-4 flex flex-col gap-3">
+          <ul className="mt-4 border-y border-[var(--hairline-strong)] divide-y divide-[var(--hairline-strong)]">
             {[...blocking, ...other].map((result) => (
               <li
                 key={`${result.layer}-${result.rule_id}`}
-                className="flex flex-col gap-2 rounded-lg bg-[var(--surface-sunken)] p-3.5"
+                className={clsx(
+                  "flex flex-col gap-2 border-l-2 px-3 py-3.5",
+                  result.verdict === "fail" && result.severity === "error"
+                    ? "border-l-[var(--fail)]"
+                    : "border-l-transparent",
+                )}
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <VerdictPill verdict={result.verdict} />
-                  <span className="mono text-[var(--fg-secondary)]">{result.rule_id}</span>
+                  <span className="mono text-[var(--fg-secondary)] [overflow-wrap:anywhere]">
+                    {result.rule_id}
+                  </span>
                   <span className="text-meta text-[var(--fg-quiet)]">
                     {result.layer} · {LAYER_LABEL[result.layer]}
                   </span>
                 </div>
-                <p className="text-sm text-[var(--fg-secondary)]">{result.reason}</p>
+                <p className="text-sm text-[var(--fg-secondary)] [overflow-wrap:anywhere]">
+                  {result.reason}
+                </p>
                 {result.detail ? (
-                  <p className="mono text-[var(--fg-quiet)]">{result.detail}</p>
+                  <p className="mono text-[var(--fg-quiet)] [overflow-wrap:anywhere]">
+                    {result.detail}
+                  </p>
                 ) : null}
                 {result.counterexample ? (
-                  <p className="text-meta text-[var(--fail)]">
+                  <p className="text-meta text-[var(--fail)] [overflow-wrap:anywhere]">
                     Counterexample: {result.counterexample}
                   </p>
                 ) : null}
                 {result.suggested_fix ? (
-                  <p className="text-meta text-[var(--fg-secondary)]">
+                  <p className="text-meta text-[var(--fg-secondary)] [overflow-wrap:anywhere]">
                     Fix: {result.suggested_fix}
                   </p>
                 ) : null}
@@ -893,10 +961,10 @@ function ValueDetail({
         )}
       </div>
 
-      {/* ---- provenance + actions ---- */}
-      <div className="panel p-6">
+      {/* ---- reproducibility ---- */}
+      <div className="py-5">
         <Overline>Reproducibility</Overline>
-        <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4">
+        <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-4 border-y border-[var(--hairline-strong)] py-4 sm:grid-cols-4">
           <KeyValue label="Model" mono>
             {value.model_id ?? "—"}
           </KeyValue>
@@ -908,73 +976,6 @@ function ValueDetail({
             {value.schema_version ?? "—"}
           </KeyValue>
         </dl>
-
-        <div className="hairline-t mt-6 flex flex-wrap items-center gap-2 pt-5">
-          <button
-            type="button"
-            className={clsx("btn", outcome?.action === "accept" ? "btn-primary" : "btn-quiet")}
-            onClick={() => onDecide("accept")}
-            disabled={busy || !live}
-            aria-pressed={outcome?.action === "accept"}
-          >
-            <CheckIcon />
-            {outcome?.action === "accept" ? "Accepted" : "Accept"}
-          </button>
-
-          {/* Destructive, so it must not resolve to the same accent fill as Accept. */}
-          <button
-            type="button"
-            className={clsx("btn", outcome?.action === "reject" ? "btn-danger" : "btn-quiet")}
-            onClick={() => onDecide("reject")}
-            disabled={busy || !live}
-            aria-pressed={outcome?.action === "reject"}
-          >
-            {outcome?.action === "reject" ? "Rejected" : "Reject"}
-          </button>
-
-          <button
-            type="button"
-            className={clsx("btn", outcome?.action === "correct" ? "btn-primary" : "btn-quiet")}
-            onClick={() => {
-              const replacement = window.prompt(
-                `Corrected value for ${row.spec.name}`,
-                outcome?.after ?? value.value_display ?? value.value_raw ?? "",
-              );
-              if (replacement?.trim()) onDecide("correct", replacement.trim());
-            }}
-            disabled={busy || !live}
-            aria-pressed={outcome?.action === "correct"}
-          >
-            {outcome?.action === "correct" ? "Corrected" : "Correct"}
-          </button>
-
-          {busy ? (
-            <span className="text-meta text-[var(--fg-quiet)]" role="status">
-              Saving…
-            </span>
-          ) : null}
-
-          {/*
-            The prior movement, shown next to the value that caused it. A reviewer who cannot
-            see that their decision changed anything has no reason to believe the queue will
-            ever get shorter.
-          */}
-          {outcome ? (
-            <p className="ml-auto text-meta text-[var(--fg-quiet)]">
-              Reliability for <span className="mono">{row.spec.code}</span>{" "}
-              {outcome.prior_after >= outcome.prior_before ? "rose" : "fell"} to{" "}
-              <span className="tabular-nums text-[var(--fg-secondary)]">
-                {outcome.prior_after.toFixed(3)}
-              </span>{" "}
-              from {outcome.prior_before.toFixed(3)} over {outcome.sibling_impact}{" "}
-              {outcome.sibling_impact === 1 ? "sample" : "samples"}
-            </p>
-          ) : !live ? (
-            <p className="ml-auto text-meta text-[var(--warn)]">
-              Offline fixture — start the API to record decisions.
-            </p>
-          ) : null}
-        </div>
       </div>
     </>
   );
@@ -987,7 +988,7 @@ function GapDetail({ row }: { row: AttributeRow }) {
 
   if (!gap) {
     return (
-      <div className="panel p-6">
+      <div className="border-b border-[var(--hairline-strong)] py-5">
         <Overline>No candidate</Overline>
         <p className="mt-4 max-w-[62ch] text-sm text-[var(--fg-secondary)]">
           Extraction produced neither a value nor a gap for this attribute. That is itself a
@@ -999,7 +1000,7 @@ function GapDetail({ row }: { row: AttributeRow }) {
   }
 
   return (
-    <div className="panel p-6">
+    <div className="border-b border-[var(--hairline-strong)] py-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Overline>Gap</Overline>
         <span className={clsx("pill", gap.is_required ? "pill-warn" : "pill-quiet")}>
@@ -1018,7 +1019,10 @@ function GapDetail({ row }: { row: AttributeRow }) {
           {gap.sources_searched.length > 0 ? (
             <ul className="flex flex-col gap-1">
               {gap.sources_searched.map((source) => (
-                <li key={source} className="mono text-[var(--fg-secondary)]">
+                <li
+                  key={source}
+                  className="mono min-w-0 text-[var(--fg-secondary)] [overflow-wrap:anywhere]"
+                >
                   {source}
                 </li>
               ))}
@@ -1042,7 +1046,7 @@ function GapDetail({ row }: { row: AttributeRow }) {
       </dl>
 
       {row.spec.compliance_claim ? (
-        <div className="mt-6 flex gap-3 rounded-lg bg-[var(--accent-quiet)] p-3.5">
+        <div className="mt-6 flex gap-3 border-l-2 border-[var(--accent)] bg-[var(--accent-quiet)] p-3.5">
           <AlertIcon className="mt-0.5 shrink-0 text-[var(--accent)]" />
           <p className="text-sm text-[var(--fg-secondary)]">
             This attribute is a compliance claim, so it may never be satisfied by inference.

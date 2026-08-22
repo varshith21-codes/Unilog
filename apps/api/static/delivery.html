@@ -1,0 +1,609 @@
+<html lang="en" class="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AXIOM — Delivery Export</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+          mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Consolas', 'monospace'],
+        },
+      },
+    },
+  };
+</script>
+<style>
+  /* Same visual language as the review workspace, one screen rather than three panes:
+     this is a single linear task — pick a file, run it, take the result. */
+  :root { color-scheme: dark; }
+  body { background: #0a0a0b; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  .fade-in { animation: fade .18s ease-out; }
+  @keyframes fade { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: none; } }
+  .drop-active { border-color: #f59e0b !important; background: rgba(245, 158, 11, 0.06); }
+  /* The preview grid is 252 columns wide. Horizontal scroll with a sticky header is the only
+     honest way to show it; shrinking columns to fit would make every cell unreadable. */
+  .grid-scroll { overflow: auto; max-height: 26rem; }
+  .grid-scroll th { position: sticky; top: 0; background: #18181b; z-index: 2; }
+  .grid-scroll td, .grid-scroll th { white-space: nowrap; }
+  input[type="file"]::file-selector-button {
+    background: #27272a; color: #d4d4d8; border: 0; border-radius: 4px;
+    padding: 4px 10px; margin-right: 10px; font-size: 11px; cursor: pointer;
+  }
+</style>
+</head>
+<body class="font-sans text-zinc-300 antialiased min-h-screen">
+
+<header class="border-b border-zinc-800 bg-zinc-950/80 backdrop-blur px-4 py-2.5 flex items-center gap-4 sticky top-0 z-20">
+  <div class="flex items-center gap-2.5">
+    <div class="w-6 h-6 rounded bg-gradient-to-br from-amber-400 to-amber-600 grid place-items-center">
+      <span class="text-[11px] font-bold text-zinc-950">A</span>
+    </div>
+    <div class="leading-none">
+      <div class="text-[13px] font-semibold text-zinc-100">AXIOM</div>
+      <div class="text-[10px] text-zinc-500 mt-0.5">Delivery Export</div>
+    </div>
+  </div>
+  <nav class="flex items-center gap-1 text-[11px] ml-2">
+    <a href="/" class="px-2.5 py-1 rounded text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900">Review workspace</a>
+    <span class="px-2.5 py-1 rounded bg-zinc-800 text-zinc-100">Delivery export</span>
+  </nav>
+  <div id="contract" class="ml-auto text-[11px] text-zinc-500 font-mono"></div>
+</header>
+
+<main class="max-w-6xl mx-auto px-4 py-6 space-y-5">
+
+  <!-- ── what this does ───────────────────────────────────────────────── -->
+  <section>
+    <h1 class="text-lg font-semibold text-zinc-100">Supplier item master in, delivery file out</h1>
+    <p class="text-[13px] text-zinc-400 mt-1.5 leading-relaxed max-w-3xl">
+      Upload your item master and get back the client's
+      <span id="col-count" class="font-mono text-zinc-200">252</span>-column delivery format as an
+      Excel workbook. Runs entirely offline and makes no model calls, so nothing here needs
+      credentials. Classification abstains rather than guessing when retrieval is not decisive.
+    </p>
+  </section>
+
+  <!-- ── the form ─────────────────────────────────────────────────────── -->
+  <form id="form" class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-4 items-start">
+
+    <div class="space-y-4">
+      <!-- item master -->
+      <div id="drop" class="border border-dashed border-zinc-700 rounded-lg p-5 bg-zinc-950/40 transition-colors">
+        <label for="file" class="block text-[11px] uppercase tracking-wider text-zinc-500">Item master</label>
+        <p class="text-[11px] text-zinc-500 mt-1">
+          CSV, TSV or XLSX. Drop it here or pick a file.
+        </p>
+        <input id="file" name="file" type="file" required
+               accept=".csv,.tsv,.txt,.xlsx,.xls"
+               class="mt-3 block w-full text-[12px] text-zinc-300 bg-zinc-900 border border-zinc-800
+                      rounded px-2 py-2 focus:outline-none focus:border-zinc-600" />
+        <div id="file-meta" class="text-[11px] text-zinc-500 font-mono mt-2"></div>
+
+        <div class="mt-3 pt-3 border-t border-zinc-800">
+          <div class="text-[11px] text-zinc-500">Required columns</div>
+          <div id="required-cols" class="flex flex-wrap gap-1.5 mt-1.5"></div>
+        </div>
+      </div>
+
+      <!-- documents -->
+      <div class="border border-zinc-800 rounded-lg p-5 bg-zinc-950/40">
+        <label for="documents" class="block text-[11px] uppercase tracking-wider text-zinc-500">
+          Manufacturer documents <span class="text-zinc-600 normal-case tracking-normal">— optional</span>
+        </label>
+        <p class="text-[11px] text-zinc-500 mt-1 leading-relaxed">
+          Datasheets, spec sheets or price pages, as PDF, HTML or text. This is what fills the
+          attribute grid. Without them there is nothing to extract from, so the grid comes back
+          carrying its labels and few values — the row is structurally complete and
+          specification-poor. Each value read from a document cites the line or table cell it came
+          from.
+        </p>
+        <input id="documents" name="documents" type="file" multiple
+               class="mt-3 block w-full text-[12px] text-zinc-300 bg-zinc-900 border border-zinc-800
+                      rounded px-2 py-2 focus:outline-none focus:border-zinc-600" />
+        <div id="doc-meta" class="text-[11px] text-zinc-500 font-mono mt-2"></div>
+      </div>
+    </div>
+
+    <!-- options -->
+    <aside class="border border-zinc-800 rounded-lg bg-zinc-950/40 divide-y divide-zinc-800">
+      <div class="px-4 py-3">
+        <div class="text-[10px] uppercase tracking-wider text-zinc-500">Output</div>
+        <div class="mt-2 space-y-1.5">
+          <label class="flex items-start gap-2 text-[12px] cursor-pointer">
+            <input type="radio" name="output" value="xlsx" checked class="mt-0.5 accent-amber-500" />
+            <span>
+              <span class="text-zinc-200">Excel workbook</span>
+              <span class="block text-[10px] text-zinc-500">Delivery sheet plus provenance. Text-typed, so Excel cannot turn 50-1/4 into a date.</span>
+            </span>
+          </label>
+          <label class="flex items-start gap-2 text-[12px] cursor-pointer">
+            <input type="radio" name="output" value="csv" class="mt-0.5 accent-amber-500" />
+            <span>
+              <span class="text-zinc-200">CSV</span>
+              <span class="block text-[10px] text-zinc-500">Exactly what the pipeline writes to disk.</span>
+            </span>
+          </label>
+          <label class="flex items-start gap-2 text-[12px] cursor-pointer">
+            <input type="radio" name="output" value="json" class="mt-0.5 accent-amber-500" />
+            <span>
+              <span class="text-zinc-200">Preview only</span>
+              <span class="block text-[10px] text-zinc-500">Run it and show the result here, no download.</span>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <div class="px-4 py-3 space-y-2.5">
+        <div class="text-[10px] uppercase tracking-wider text-zinc-500">Rows</div>
+        <label class="block text-[12px]">
+          <span class="text-zinc-400">Limit</span>
+          <input name="limit" type="number" min="1" placeholder="all rows"
+                 class="mt-1 w-full bg-zinc-900 border border-zinc-800 rounded px-2 py-1.5 text-[12px]
+                        font-mono focus:outline-none focus:border-zinc-600" />
+        </label>
+        <label class="block text-[12px]">
+          <span class="text-zinc-400">Only these part numbers</span>
+          <input name="mpns" type="text" placeholder="PDSH4816AF, WDTS7024RZ"
+                 class="mt-1 w-full bg-zinc-900 border border-zinc-800 rounded px-2 py-1.5 text-[12px]
+                        font-mono focus:outline-none focus:border-zinc-600" />
+        </label>
+      </div>
+
+      <div class="px-4 py-3 space-y-2">
+        <div class="text-[10px] uppercase tracking-wider text-zinc-500">Behaviour</div>
+        <label class="flex items-center gap-2 text-[12px] cursor-pointer">
+          <input type="checkbox" name="read_descriptions" checked class="accent-amber-500" />
+          <span class="text-zinc-300">Read attributes from the description</span>
+        </label>
+        <label class="flex items-center gap-2 text-[12px] cursor-pointer">
+          <input type="checkbox" name="include_audit" checked class="accent-amber-500" />
+          <span class="text-zinc-300">Include provenance sheets</span>
+        </label>
+        <label class="flex items-center gap-2 text-[12px] cursor-pointer">
+          <input type="checkbox" name="classified_only" class="accent-amber-500" />
+          <span class="text-zinc-300">Drop rows that would not classify</span>
+        </label>
+      </div>
+
+      <div class="px-4 py-3">
+        <button id="submit" type="submit"
+                class="w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed
+                       text-zinc-950 font-medium text-[13px] rounded px-3 py-2 transition-colors">
+          Generate delivery file
+        </button>
+        <div id="progress" class="text-[11px] text-zinc-500 mt-2 text-center"></div>
+      </div>
+    </aside>
+  </form>
+
+  <!-- ── result ───────────────────────────────────────────────────────── -->
+  <section id="result" class="hidden space-y-4"></section>
+</main>
+
+<div id="toast-host" class="fixed bottom-4 right-4 flex flex-col gap-2 items-end z-50"></div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// Helpers. Same escaping discipline as the review workspace: every value that
+// reaches innerHTML is supplier text and is escaped at the point of insertion.
+// ─────────────────────────────────────────────────────────────────────────────
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+const bytes = (n) => n < 1024 ? `${n} B`
+  : n < 1024 * 1024 ? `${(n / 1024).toFixed(1)} KiB`
+  : `${(n / (1024 * 1024)).toFixed(1)} MiB`;
+
+const PROVENANCE_TONE = {
+  passthrough: 'text-zinc-400 bg-zinc-500/10',
+  derived:     'text-sky-400 bg-sky-500/10',
+  extracted:   'text-emerald-400 bg-emerald-500/10',
+  generated:   'text-violet-400 bg-violet-500/10',
+  evidence:    'text-amber-400 bg-amber-500/10',
+  unavailable: 'text-zinc-500 bg-zinc-500/10',
+};
+
+let contract = null;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Boot: describe the contract from the API rather than hard-coding it, so this
+// page cannot claim a column list the exporter does not produce.
+// ─────────────────────────────────────────────────────────────────────────────
+async function boot() {
+  const response = await fetch('/api/delivery/format');
+  if (!response.ok) throw new Error(`could not load the delivery contract (${response.status})`);
+  contract = await response.json();
+
+  document.getElementById('contract').textContent =
+    `${contract.format} · ${contract.columns} columns · join on ${contract.join_key}`;
+  document.getElementById('col-count').textContent = contract.columns;
+
+  document.getElementById('required-cols').innerHTML = contract.input_columns
+    .map((c) => `<code class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300">${esc(c)}</code>`)
+    .join('');
+
+  const upload = contract.upload;
+  document.getElementById('file-meta').textContent =
+    `accepts ${upload.accepts.join(' ')} · up to ${bytes(upload.max_bytes)} · ${upload.max_rows.toLocaleString()} rows per request`;
+  document.getElementById('doc-meta').textContent =
+    `up to ${upload.max_documents} documents, ${bytes(upload.max_document_bytes)} each`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// File pickers
+// ─────────────────────────────────────────────────────────────────────────────
+const fileInput = document.getElementById('file');
+const drop = document.getElementById('drop');
+
+fileInput.addEventListener('change', () => {
+  const file = fileInput.files[0];
+  const meta = document.getElementById('file-meta');
+  if (!file) { boot(); return; }
+  meta.innerHTML = `<span class="text-zinc-300">${esc(file.name)}</span> · ${bytes(file.size)}`;
+});
+
+document.getElementById('documents').addEventListener('change', (event) => {
+  const files = [...event.target.files];
+  const meta = document.getElementById('doc-meta');
+  if (!files.length) { meta.textContent = ''; return; }
+  meta.innerHTML = files
+    .map((f) => `<div><span class="text-zinc-300">${esc(f.name)}</span> · ${bytes(f.size)}</div>`)
+    .join('');
+});
+
+['dragenter', 'dragover'].forEach((type) =>
+  drop.addEventListener(type, (event) => {
+    event.preventDefault();
+    drop.classList.add('drop-active');
+  }));
+['dragleave', 'drop'].forEach((type) =>
+  drop.addEventListener(type, (event) => {
+    event.preventDefault();
+    drop.classList.remove('drop-active');
+  }));
+drop.addEventListener('drop', (event) => {
+  const file = event.dataTransfer.files[0];
+  if (!file) return;
+  const transfer = new DataTransfer();
+  transfer.items.add(file);
+  fileInput.files = transfer.files;
+  fileInput.dispatchEvent(new Event('change'));
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Submit
+// ─────────────────────────────────────────────────────────────────────────────
+const form = document.getElementById('form');
+const button = document.getElementById('submit');
+const progress = document.getElementById('progress');
+
+form.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  if (!fileInput.files[0]) { toast('Pick a file first', 'An item master is required', 'amber'); return; }
+
+  const data = new FormData(form);
+  // Unchecked boxes are absent from FormData; the API reads them as booleans, so send them
+  // explicitly rather than relying on absence to mean false.
+  for (const name of ['read_descriptions', 'include_audit', 'classified_only']) {
+    data.set(name, form.elements[name].checked ? 'true' : 'false');
+  }
+  if (!data.get('limit')) data.delete('limit');
+  if (!data.get('mpns')) data.delete('mpns');
+  // An empty multiple-file input still submits one empty part, which the API would have to
+  // filter. Dropping it here keeps the request honest about what was attached.
+  if (!document.getElementById('documents').files.length) data.delete('documents');
+
+  const wanted = data.get('output');
+  button.disabled = true;
+  progress.textContent = 'Processing. A thousand rows takes about twenty seconds.';
+  document.getElementById('result').classList.add('hidden');
+
+  try {
+    const response = await fetch('/api/delivery/export', { method: 'POST', body: data });
+    if (!response.ok) { await showError(response); return; }
+
+    if (wanted === 'json') {
+      renderPreview(await response.json());
+      toast('Done', 'Preview only, nothing downloaded', 'emerald');
+    } else {
+      const blob = await response.blob();
+      const name = filenameFrom(response) ?? `delivery.${wanted}`;
+      download(blob, name);
+      renderDownload(response, name, blob.size);
+      toast('Downloaded', name, 'emerald');
+    }
+  } catch (error) {
+    toast('Request failed', error.message, 'red');
+    progress.textContent = '';
+  } finally {
+    button.disabled = false;
+  }
+});
+
+function filenameFrom(response) {
+  const header = response.headers.get('content-disposition') ?? '';
+  const star = header.match(/filename\*=UTF-8''([^;]+)/i);
+  if (star) return decodeURIComponent(star[1]);
+  const plain = header.match(/filename="([^"]+)"/i);
+  return plain ? plain[1] : null;
+}
+
+function download(blob, name) {
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = name;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  // Revoked on a delay: Safari cancels an in-flight download if the URL dies too early.
+  setTimeout(() => URL.revokeObjectURL(url), 30_000);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Errors. The API returns a structured detail for the two failures a user can
+// actually fix, so those get named columns rather than a status code.
+// ─────────────────────────────────────────────────────────────────────────────
+async function showError(response) {
+  progress.textContent = '';
+  let detail;
+  try { detail = (await response.json()).detail; } catch { detail = await response.text(); }
+
+  const host = document.getElementById('result');
+  host.classList.remove('hidden');
+
+  if (detail && detail.error === 'missing_input_columns') {
+    host.innerHTML = `
+      <div class="border border-red-500/40 bg-red-500/5 rounded-lg p-4 fade-in">
+        <div class="text-[13px] font-medium text-red-300">This does not look like a Unilog item master</div>
+        <p class="text-[12px] text-zinc-400 mt-1.5">
+          The delivery format joins on <code class="font-mono text-zinc-300">${esc(contract.join_key)}</code>,
+          so the six input columns have to be present and spelled exactly.
+        </p>
+        <div class="grid sm:grid-cols-2 gap-4 mt-3">
+          <div>
+            <div class="text-[10px] uppercase tracking-wider text-zinc-500">Missing</div>
+            <div class="flex flex-wrap gap-1.5 mt-1.5">${detail.missing
+              .map((c) => `<code class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-red-500/15 text-red-300">${esc(c)}</code>`)
+              .join('')}</div>
+          </div>
+          <div>
+            <div class="text-[10px] uppercase tracking-wider text-zinc-500">Found in your file</div>
+            <div class="flex flex-wrap gap-1.5 mt-1.5">${detail.found
+              .map((c) => `<code class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">${esc(c)}</code>`)
+              .join('')}</div>
+          </div>
+        </div>
+      </div>`;
+    toast('Wrong file', `${detail.missing.length} required column(s) missing`, 'red');
+    return;
+  }
+
+  const message = typeof detail === 'object' && detail
+    ? (detail.message ?? JSON.stringify(detail))
+    : String(detail ?? response.statusText);
+  host.innerHTML = `
+    <div class="border border-red-500/40 bg-red-500/5 rounded-lg p-4 fade-in">
+      <div class="text-[13px] font-medium text-red-300">Export failed (${response.status})</div>
+      <p class="text-[12px] text-zinc-400 mt-1.5 font-mono whitespace-pre-wrap">${esc(message)}</p>
+    </div>`;
+  toast('Export failed', `${response.status}`, 'red');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Results
+// ─────────────────────────────────────────────────────────────────────────────
+function renderDownload(response, name, size) {
+  progress.textContent = '';
+  const stat = (label, value, tone = 'text-zinc-100') =>
+    `<div><div class="text-[10px] uppercase tracking-wider text-zinc-500">${esc(label)}</div>
+     <div class="text-[15px] font-mono ${tone} mt-0.5">${esc(value)}</div></div>`;
+
+  const populated = Number(response.headers.get('x-axiom-columns-populated'));
+  const total = Number(response.headers.get('x-axiom-columns-total'));
+  const compliant = response.headers.get('x-axiom-compliant') === 'true';
+
+  document.getElementById('result').classList.remove('hidden');
+  document.getElementById('result').innerHTML = `
+    <div class="border border-emerald-500/30 bg-emerald-500/5 rounded-lg p-4 fade-in">
+      <div class="flex items-baseline gap-2">
+        <span class="text-[13px] font-medium text-emerald-300">Delivery file ready</span>
+        <span class="text-[11px] text-zinc-500 font-mono">${esc(name)} · ${bytes(size)}</span>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-4 mt-3.5">
+        ${stat('Rows', Number(response.headers.get('x-axiom-rows')).toLocaleString())}
+        ${stat('Columns populated', `${populated}/${total}`)}
+        ${stat('Withheld cells', response.headers.get('x-axiom-withheld'), 'text-amber-400')}
+        ${stat('Character limits', compliant ? 'PASS' : 'FAIL', compliant ? 'text-emerald-400' : 'text-red-400')}
+        ${stat('Content hash', String(response.headers.get('x-axiom-content-hash')).slice(0, 12))}
+      </div>
+      <p class="text-[11px] text-zinc-500 mt-3.5 leading-relaxed border-t border-zinc-800 pt-3">
+        ${total - populated} of ${total} columns came back empty, and that is deliberate — a column
+        is left blank when nothing in the input or the attached documents evidenced a value for it.
+        Withheld cells are refusals, not gaps: a value existed but was not allowed to publish. Both
+        are itemised on the workbook's Provenance and Withheld sheets.
+      </p>
+    </div>`;
+}
+
+function renderPreview(payload) {
+  progress.textContent = '';
+  const host = document.getElementById('result');
+  host.classList.remove('hidden');
+
+  const e = payload.export;
+  const b = payload.batch;
+  const stat = (label, value, tone = 'text-zinc-100') =>
+    `<div><div class="text-[10px] uppercase tracking-wider text-zinc-500">${esc(label)}</div>
+     <div class="text-[15px] font-mono ${tone} mt-0.5">${esc(value)}</div></div>`;
+
+  const provenance = Object.entries(e.provenance ?? {})
+    .sort((a, b2) => b2[1] - a[1])
+    .map(([name, count]) => `
+      <span class="text-[10px] font-mono px-1.5 py-0.5 rounded ${PROVENANCE_TONE[name] ?? 'text-zinc-400 bg-zinc-500/10'}">
+        ${esc(name)} ${count}
+      </span>`)
+    .join('');
+
+  const documents = payload.documents.length
+    ? payload.documents.map((d) => `
+        <div class="text-[11px] font-mono text-zinc-400">
+          ${esc(d.document_id)} · ${d.pages} page(s) · ${d.tables} table(s) · ${esc(d.parser)}
+        </div>`).join('')
+    : `<div class="text-[11px] text-zinc-500">None attached.</div>`;
+
+  const dead = payload.source.dead_columns.length
+    ? `<p class="text-[11px] text-amber-400/90 mt-2">
+         Carries no data: ${payload.source.dead_columns.map(esc).join(', ')}. A column that is
+         entirely sentinel values is one the supplier believes they are sending and are not.
+       </p>`
+    : '';
+
+  host.innerHTML = `
+    <div class="border border-zinc-800 rounded-lg bg-zinc-950/40 p-4 fade-in">
+      <div class="flex items-baseline gap-2">
+        <span class="text-[13px] font-medium text-zinc-100">Run complete</span>
+        <span class="text-[11px] text-zinc-500 font-mono">${esc(payload.source.filename)} · ${esc(e.format)}</span>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-4 mt-3.5">
+        ${stat('Rows produced', Number(b.rows).toLocaleString())}
+        ${stat('Rows skipped', b.skipped, b.skipped ? 'text-amber-400' : 'text-zinc-100')}
+        ${stat('Columns populated', `${e.columns_populated}/${contract.columns}`)}
+        ${stat('Withheld cells', e.withheld, e.withheld ? 'text-amber-400' : 'text-zinc-100')}
+        ${stat('Character limits', e.compliant ? 'PASS' : 'FAIL', e.compliant ? 'text-emerald-400' : 'text-red-400')}
+      </div>
+      <div class="flex flex-wrap gap-1.5 mt-3.5">${provenance}</div>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="border border-zinc-800 rounded-lg bg-zinc-950/40 p-4">
+        <div class="text-[10px] uppercase tracking-wider text-zinc-500">Where values came from</div>
+        <dl class="mt-2 space-y-1 text-[12px]">
+          <div class="flex justify-between"><dt class="text-zinc-400">Description</dt>
+            <dd class="font-mono text-zinc-200">${b.from_description.extracted} kept, ${b.from_description.refused} refused</dd></div>
+          <div class="flex justify-between"><dt class="text-zinc-400">Documents</dt>
+            <dd class="font-mono text-zinc-200">${b.from_documents.extracted} kept, ${b.from_documents.refused} refused</dd></div>
+        </dl>
+        <div class="text-[10px] uppercase tracking-wider text-zinc-500 mt-3">Classification</div>
+        <dl class="mt-1.5 space-y-1 text-[12px]">
+          ${Object.entries(b.classification).map(([m, n]) =>
+            `<div class="flex justify-between"><dt class="text-zinc-400">${esc(m)}</dt>
+             <dd class="font-mono text-zinc-200">${n}</dd></div>`).join('')}
+        </dl>
+      </div>
+
+      <div class="border border-zinc-800 rounded-lg bg-zinc-950/40 p-4">
+        <div class="text-[10px] uppercase tracking-wider text-zinc-500">Documents read</div>
+        <div class="mt-2 space-y-1">${documents}</div>
+        <div class="text-[10px] uppercase tracking-wider text-zinc-500 mt-3">Input file</div>
+        <div class="text-[11px] font-mono text-zinc-400 mt-1.5">
+          ${Number(payload.source.rows_in_file).toLocaleString()} rows,
+          ${Number(payload.source.rows_selected).toLocaleString()} selected
+        </div>
+        ${dead}
+      </div>
+
+      <div class="border border-zinc-800 rounded-lg bg-zinc-950/40 p-4">
+        <div class="text-[10px] uppercase tracking-wider text-zinc-500">Notes</div>
+        <ul class="mt-2 space-y-2 text-[11px] text-zinc-400 leading-relaxed list-disc pl-4">
+          ${payload.notes.map((n) => `<li>${esc(n)}</li>`).join('')}
+        </ul>
+      </div>
+    </div>
+
+    ${rowTable(payload)}
+    ${previewGrid(payload)}`;
+}
+
+function rowTable(payload) {
+  return `
+    <div class="border border-zinc-800 rounded-lg bg-zinc-950/40 overflow-hidden">
+      <div class="px-4 py-2.5 border-b border-zinc-800 text-[10px] uppercase tracking-wider text-zinc-500">
+        Per row
+      </div>
+      <div class="grid-scroll">
+        <table class="w-full text-[11px]">
+          <thead>
+            <tr class="text-left text-zinc-500">
+              <th class="px-4 py-2 font-medium">Part number</th>
+              <th class="px-4 py-2 font-medium">Class</th>
+              <th class="px-4 py-2 font-medium">How</th>
+              <th class="px-4 py-2 font-medium text-right">Cells</th>
+              <th class="px-4 py-2 font-medium text-right">From description</th>
+              <th class="px-4 py-2 font-medium text-right">From documents</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-zinc-800/70 font-mono">
+            ${payload.rows.map((r) => `
+              <tr class="${r.skipped ? 'text-zinc-600' : 'text-zinc-300'}">
+                <td class="px-4 py-1.5">${esc(r.mpn ?? '—')}</td>
+                <td class="px-4 py-1.5 text-zinc-400">${esc(r.class_code ?? '—')}</td>
+                <td class="px-4 py-1.5 ${r.skipped ? 'text-amber-500/80' : 'text-zinc-500'}">
+                  ${esc(r.skipped ? `skipped: ${r.skipped}` : r.method)}
+                </td>
+                <td class="px-4 py-1.5 text-right">${r.populated}</td>
+                <td class="px-4 py-1.5 text-right ${r.from_description ? 'text-emerald-400' : 'text-zinc-600'}">${r.from_description}</td>
+                <td class="px-4 py-1.5 text-right ${r.from_documents ? 'text-emerald-400' : 'text-zinc-600'}">${r.from_documents}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function previewGrid(payload) {
+  if (!payload.preview.length) return '';
+  // Only the columns something actually populated. Rendering all 252 would be 224 empty columns
+  // of scrolling, which hides the ones that matter.
+  const columns = payload.columns_populated.map((c) => c.column);
+  return `
+    <div class="border border-zinc-800 rounded-lg bg-zinc-950/40 overflow-hidden">
+      <div class="px-4 py-2.5 border-b border-zinc-800 flex items-baseline gap-2">
+        <span class="text-[10px] uppercase tracking-wider text-zinc-500">Delivery cells</span>
+        <span class="text-[10px] text-zinc-600">
+          ${columns.length} populated columns of ${contract.columns}, first ${payload.preview.length} row(s).
+          Empty columns are hidden here; the file has all ${contract.columns}.
+        </span>
+      </div>
+      <div class="grid-scroll">
+        <table class="text-[11px]">
+          <thead>
+            <tr class="text-left">
+              ${columns.map((c) => `
+                <th class="px-3 py-2 font-medium text-zinc-400 border-b border-zinc-800">${esc(c)}</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-zinc-800/70 font-mono text-zinc-300">
+            ${payload.preview.map((row) => `
+              <tr>${columns.map((c) => `<td class="px-3 py-1.5">${esc(row[c] ?? '')}</td>`).join('')}</tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function toast(title, detail, tone) {
+  const colors = { emerald: 'border-emerald-500/40', amber: 'border-amber-500/40', red: 'border-red-500/40' };
+  const node = document.createElement('div');
+  node.className = `fade-in bg-zinc-900 border ${colors[tone] ?? 'border-zinc-700'} rounded-lg px-3 py-2 shadow-xl max-w-xs`;
+  node.innerHTML = `<div class="text-[11px] font-medium text-zinc-100">${esc(title)}</div>
+                    <div class="text-[10px] text-zinc-400 font-mono mt-0.5">${esc(detail)}</div>`;
+  document.getElementById('toast-host').appendChild(node);
+  setTimeout(() => node.remove(), 3600);
+}
+
+boot().catch((error) => {
+  document.getElementById('contract').textContent = `error: ${error.message}`;
+  toast('Could not reach the API', error.message, 'red');
+});
+</script>
+</body>
+</html>

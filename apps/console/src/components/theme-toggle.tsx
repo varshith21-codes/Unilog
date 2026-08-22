@@ -30,9 +30,9 @@ export function ThemeToggle() {
       type="button"
       className="btn btn-bare icon-target size-8 px-0"
       onClick={toggle}
-      aria-label="Toggle dark mode"
-      title="Toggle dark mode"
     >
+      <span className="sr-only dark:hidden">Use dark theme</span>
+      <span className="sr-only hidden dark:block">Use light theme</span>
       {/* Sun: shown in dark mode, where the action is to return to light. */}
       <svg
         viewBox="0 0 16 16"

@@ -1,0 +1,152 @@
+{
+  "sku": "KDTS424SBE",
+  "tenant_id": "unilog",
+  "brand": null,
+  "class_code": "APP.KIT.DISHWASHER.BUILTIN",
+  "class_name": "Built-In Dishwasher",
+  "category_path": [
+    "Appliances & Consumer Electronics",
+    "Kitchen Appliances",
+    "Built-In Dishwashers"
+  ],
+  "document_id": "Unihack__Sample_Dataset_-_Input#KDTS424SBE",
+  "document_sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+  "gaps": [
+    {
+      "code": "voltage_rating",
+      "reason": "no_source_available",
+      "sources_searched": [
+        "Unihack__Sample_Dataset_-_Input#KDTS424SBE"
+      ],
+      "required": true,
+      "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+      "recommended_action": "retry_with_better_source"
+    },
+    {
+      "code": "amperage_rating",
+      "reason": "no_source_available",
+      "sources_searched": [
+        "Unihack__Sample_Dataset_-_Input#KDTS424SBE"
+      ],
+      "required": true,
+      "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+      "recommended_action": "retry_with_better_source"
+    },
+    {
+      "code": "mounting_type",
+      "reason": "no_source_available",
+      "sources_searched": [
+        "Unihack__Sample_Dataset_-_Input#KDTS424SBE"
+      ],
+      "required": true,
+      "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+      "recommended_action": "retry_with_better_source"
+    },
+    {
+      "code": "overall_size",
+      "reason": "no_source_available",
+      "sources_searched": [
+        "Unihack__Sample_Dataset_-_Input#KDTS424SBE"
+      ],
+      "required": true,
+      "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+      "recommended_action": "retry_with_better_source"
+    },
+    {
+      "code": "sound_level",
+      "reason": "no_source_available",
+      "sources_searched": [
+        "Unihack__Sample_Dataset_-_Input#KDTS424SBE"
+      ],
+      "required": true,
+      "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+      "recommended_action": "retry_with_better_source"
+    },
+    {
+      "code": "primary_material",
+      "reason": "no_source_available",
+      "sources_searched": [
+        "Unihack__Sample_Dataset_-_Input#KDTS424SBE"
+      ],
+      "required": true,
+      "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+      "recommended_action": "retry_with_better_source"
+    }
+  ],
+  "policy": {
+    "epsilon": 0.05,
+    "confidence_level": 0.95,
+    "threshold": 0.6853,
+    "coverage": 1.0,
+    "accepted": 220,
+    "accepted_errors": 1,
+    "observed_error_rate": 0.0045,
+    "error_upper_bound": 0.0201,
+    "calibration_size": 220,
+    "achievable": true,
+    "reason": "at threshold 0.685, 100.0% of values are publishable with an error rate of at most 2.0% at 95% confidence"
+  },
+  "quality": {
+    "completeness": 0.0,
+    "verifiability": 1.0,
+    "consistency": 1.0,
+    "richness": 0.5,
+    "composite": 0.6,
+    "measured_dimensions": [
+      "completeness",
+      "consistency",
+      "richness",
+      "verifiability"
+    ]
+  },
+  "created_at": "2026-08-22T12:23:46.952696+00:00",
+  "decisions": [],
+  "pages": [
+    {
+      "number": 1,
+      "lines": [
+        "Mfg_Part_Num: KDTS424SBE",
+        "Part_Desc: KDTS424SBE Kitchen Aid Dishwasher Bk",
+        "E1_Brand: -- Unbranded --",
+        "Unilog_Brand: -- No Unilog Brand --",
+        "DIB_Brand: -- No DIB Brand --",
+        "Part_Manuf: Appliance Dealers Cooperative (APPDE)",
+        ""
+      ]
+    }
+  ],
+  "items": [
+    {
+      "attribute_code": "finish_color",
+      "attribute_name": "Color",
+      "datatype": "string",
+      "value_raw": "Bk",
+      "value_canonical": "Bk",
+      "value_display": "Bk",
+      "score": 0.8,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.800 >= threshold 0.685",
+      "method": "supplier_feed",
+      "model_tier": null,
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "Unihack__Sample_Dataset_-_Input#KDTS424SBE",
+          "quote": "Bk",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": 1,
+          "table_ref": null,
+          "method": "exact_line"
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": null
+    }
+  ],
+  "queue": []
+}

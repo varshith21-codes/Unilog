@@ -18,8 +18,9 @@ from __future__ import annotations
 
 import json
 import re
+import urllib.parse
 from pathlib import Path
-from typing import Literal
+from typing import Annotated, Literal
 
 from axiom.confidence import Priors, select_threshold
 from axiom.console import (
@@ -30,9 +31,28 @@ from axiom.console import (
     overlay_equivalence,
     overlay_review_decisions,
 )
+from axiom.delivery import (
+    WORKBOOK_MEDIA_TYPE,
+    DeliveryFormatExporter,
+    DeliveryWorkbookExporter,
+)
+from axiom.delivery import load_default as load_delivery_format
+from axiom.delivery.batch import (
+    BatchOptions,
+    DocumentSource,
+    InputColumnsError,
+    parse_documents,
+    run_batch,
+    select_rows,
+    validate_input_columns,
+)
+from axiom.core.naming import sku_slug
+from axiom.delivery.source import INPUT_COLUMNS
+from axiom.ingest import IngestError, profile_rows, read_flat_file, sha256_bytes
 from axiom.review import ACCEPT, CORRECT, REJECT, ReviewSession, queue_summary, record_decision
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from axiom.schema import load_default as load_schema
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.responses import FileResponse, JSONResponse, Response
 from pydantic import BaseModel, Field
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -45,6 +65,43 @@ ARTIFACT_DIR = REPO_ROOT / "data" / "cache" / "artifacts"
 COHORT_PATH = REPO_ROOT / "evals" / "cohort.json"
 
 _SHA256 = re.compile(r"[0-9a-f]{64}")
+
+# ---------------------------------------------------------------------- upload limits
+#
+# Every other endpoint here reads a file off disk. This one accepts bytes from a caller and does
+# real work on them — parse, classify, extract, project 252 columns — so it is the only place in
+# this API where an unbounded request costs CPU and memory rather than a directory listing. The
+# caps exist because there is no authentication in front of them (see the note on the endpoint),
+# and an unauthenticated unbounded compute endpoint is a denial-of-service primitive.
+MAX_UPLOAD_BYTES = 25 * 1024 * 1024
+"""25 MiB. The client's own 1,000-row sample is 96 KB, so this is three orders of magnitude of
+headroom and still bounded."""
+
+MAX_DOCUMENT_BYTES = 25 * 1024 * 1024
+MAX_DOCUMENTS = 10
+MAX_ROWS = 5_000
+"""Rows processed per request. Beyond this the answer is the CLI, not an HTTP request that will
+outlive its own timeout."""
+
+# Suffixes `read_flat_file` can route. An allowlist, on the same principle as `_MEDIA_TYPES`: the
+# reader dispatches on the suffix, and handing it something it cannot route produces a confusing
+# parse error rather than a clear rejection.
+UPLOAD_SUFFIXES = {".csv", ".tsv", ".txt", ".xlsx", ".xls"}
+
+OUTPUT_FORMATS = ("xlsx", "csv", "json")
+
+# Header values must be latin-1 encodable, so these carry numbers and hex only. They exist because
+# the response body is a file: a caller that wants the run summary without parsing the workbook has
+# nowhere else to read it from.
+_SUMMARY_HEADERS = (
+    "X-Axiom-Rows",
+    "X-Axiom-Rows-Skipped",
+    "X-Axiom-Columns-Populated",
+    "X-Axiom-Columns-Total",
+    "X-Axiom-Withheld",
+    "X-Axiom-Compliant",
+    "X-Axiom-Content-Hash",
+)
 
 # Suffixes the artifact endpoint will serve, and the type it declares for each. An allowlist rather
 # than a lookup: the store holds whatever suppliers sent, and guessing a content type for an
@@ -67,6 +124,7 @@ _MEDIA_TYPES = {
     ".jpeg": "image/jpeg",
 }
 CONSOLE = Path(__file__).resolve().parent / "static" / "index.html"
+DELIVERY_CONSOLE = Path(__file__).resolve().parent / "static" / "delivery.html"
 
 app = FastAPI(
     title="AXIOM Review Workspace",
@@ -84,9 +142,15 @@ class DecisionRequest(BaseModel):
 def _session_path(sku: str) -> Path:
     # Reject anything that could escape the session directory. The SKU arrives from a URL and
     # is used to build a filesystem path, which is exactly the shape of a traversal bug.
+    #
+    # The guard runs on the raw value and the *slug* is what names the file. Those are two
+    # different jobs and conflating them is what made real part numbers unreachable: a SKU like
+    # `52C3-5/8-UPC` is not an attack, it is a fractional size, and rejecting it was the only
+    # thing this endpoint could do while the filename was the SKU itself. `sku_slug` escapes the
+    # separator, so the part number is addressable and the path still cannot contain one.
     if not sku or "/" in sku or "\\" in sku or ".." in sku:
         raise HTTPException(status_code=400, detail="invalid sku")
-    return SESSION_DIR / f"{sku}.json"
+    return SESSION_DIR / f"{sku_slug(sku)}.json"
 
 
 def _load(sku: str) -> ReviewSession:
@@ -456,8 +520,434 @@ def policy(epsilon: float = 0.05) -> dict:
     }
 
 
+async def _read_upload(upload: UploadFile, cap: int, *, label: str) -> bytes:
+    """Read an upload into memory, refusing anything over ``cap``.
+
+    Read in chunks and checked as it goes, rather than reading it all and measuring afterwards.
+    ``UploadFile`` spools to a temp file past a threshold, so trusting a declared size or reading
+    first and asking later would let a caller decide how much memory and disk this process uses.
+    """
+    chunks: list[bytes] = []
+    total = 0
+    while True:
+        chunk = await upload.read(1024 * 1024)
+        if not chunk:
+            break
+        total += len(chunk)
+        if total > cap:
+            raise HTTPException(
+                status_code=413,
+                detail=(
+                    f"{label} exceeds the {cap // (1024 * 1024)} MiB limit. "
+                    f"For a file this size use scripts/export_delivery.py, which streams to disk "
+                    f"and has no request timeout."
+                ),
+            )
+        chunks.append(chunk)
+    await upload.close()
+
+    if total == 0:
+        raise HTTPException(status_code=400, detail=f"{label} is empty")
+    return b"".join(chunks)
+
+
+async def _read_documents(uploads: list[UploadFile] | None):
+    """Read and parse the optional manufacturer documents attached to an export.
+
+    Parsing failures are fatal rather than skipped. A document that was attached and silently
+    dropped would produce a thinner file with no explanation, and the caller would reasonably read
+    the missing values as an extraction failure instead of a parse one.
+    """
+    # An empty multipart field arrives as one UploadFile with no filename, which is not a document.
+    present = [u for u in (uploads or []) if u.filename]
+    if not present:
+        return []
+    if len(present) > MAX_DOCUMENTS:
+        raise HTTPException(
+            status_code=413,
+            detail=f"at most {MAX_DOCUMENTS} documents per request; got {len(present)}",
+        )
+
+    sources = []
+    for upload in present:
+        data = await _read_upload(
+            upload, MAX_DOCUMENT_BYTES, label=f"document {upload.filename!r}"
+        )
+        sources.append(DocumentSource(data=data, name=upload.filename or "document"))
+
+    try:
+        return parse_documents(sources)
+    except Exception as exc:  # noqa: BLE001 - the parser raises per-format errors
+        raise HTTPException(
+            status_code=400, detail=f"could not parse an attached document: {exc}"
+        ) from exc
+
+
+def _safe_stem(filename: str) -> str:
+    """A filename stem safe to put in a header and on a filesystem.
+
+    The upload's name is caller-controlled and ends up in ``Content-Disposition``, so anything that
+    could terminate a header value or traverse a path is removed rather than escaped.
+    """
+    stem = Path(filename).stem.strip() or "delivery"
+    cleaned = re.sub(r"[^A-Za-z0-9._-]+", "_", stem).strip("._-")
+    return (cleaned or "delivery")[:96]
+
+
+def _headers_for(export, fmt) -> dict[str, str]:
+    """The run summary, as response headers.
+
+    The body is a file, so a caller wanting the numbers has nowhere else to read them. Values are
+    digits and hex only: header values must be latin-1 encodable and nothing here should ever be
+    able to carry supplier text into a header.
+    """
+    return {
+        "X-Axiom-Rows": str(export.row_count),
+        "X-Axiom-Columns-Populated": str(len(export.populated_by_column)),
+        "X-Axiom-Columns-Total": str(len(fmt)),
+        "X-Axiom-Withheld": str(export.withheld_count),
+        "X-Axiom-Compliant": "true" if export.compliant else "false",
+        "X-Axiom-Content-Hash": export.content_hash,
+    }
+
+
+def _file_response(
+    body: bytes, *, filename: str, media_type: str, summary: dict[str, str]
+) -> Response:
+    """A download, with the summary headers attached.
+
+    ``filename*`` as well as ``filename`` so a non-ASCII name survives, though `_safe_stem` has
+    already reduced it to ASCII; the pair is what browsers agree on.
+    """
+    quoted = urllib.parse.quote(filename)
+    return Response(
+        content=body,
+        media_type=media_type,
+        headers={
+            "Content-Disposition": (
+                f'attachment; filename="{filename}"; filename*=UTF-8\'\'{quoted}'
+            ),
+            "X-Content-Type-Options": "nosniff",
+            # Named explicitly so the headers survive a cross-origin fetch. Nothing needs that
+            # today — the console proxies through its own server — but a header a caller cannot
+            # read is a header that looks broken.
+            "Access-Control-Expose-Headers": ", ".join(_SUMMARY_HEADERS),
+            **summary,
+        },
+    )
+
+
+def _run_summary(
+    result,
+    fmt,
+    *,
+    filename: str,
+    documents,
+    rows_in_file: int,
+    selected: list[dict],
+    sheet_name: str | None,
+) -> dict:
+    """What the run did, without the file.
+
+    Exists so a UI can show the outcome before offering a download, and so the numbers it shows
+    come from the same export the file would be built from rather than a second count of its own.
+    """
+    exporter = DeliveryFormatExporter(fmt)
+    export = exporter.to_csv(result.rows)
+    profiles = profile_rows(list(INPUT_COLUMNS), selected)
+
+    populated = sorted(export.populated_by_column.items(), key=lambda kv: -kv[1])
+    return {
+        "source": {
+            "filename": filename,
+            "sheet": sheet_name,
+            "rows_in_file": rows_in_file,
+            "rows_selected": len(selected),
+            "input_profile": [profiles[column].summary() for column in INPUT_COLUMNS],
+            "dead_columns": [c for c in INPUT_COLUMNS if not profiles[c].carries_data],
+        },
+        "documents": [
+            {
+                "document_id": parsed.document.document_id,
+                "pages": parsed.page_count,
+                "tables": len(parsed.all_tables()),
+                "parser": parsed.parser,
+                "doc_type": parsed.document.doc_type.value
+                if hasattr(parsed.document.doc_type, "value")
+                else str(parsed.document.doc_type),
+            }
+            for parsed in documents
+        ],
+        "batch": result.summary(),
+        "export": export.summary(),
+        "columns_populated": [{"column": name, "rows": count} for name, count in populated],
+        "rows": [outcome.summary() for outcome in result.outcomes],
+        "preview": [
+            {
+                name: value
+                for name, value in row.as_dict().items()
+                if value and name in export.populated_by_column
+            }
+            for row in result.rows[:25]
+        ],
+        "notes": [
+            "Blank cells are deliberate: a column is left empty when nothing in the input or the "
+            "attached documents evidenced a value for it.",
+            "No model calls were made. Classification is deterministic retrieval and abstains "
+            "rather than guessing; extraction reads the description string and any attached "
+            "documents by layout.",
+        ]
+        + (
+            [
+                "No manufacturer documents were attached, so the attribute grid carries its "
+                "labels and few values. Attach datasheets to close that gap."
+            ]
+            if not documents
+            else []
+        ),
+    }
+
+
+@app.get("/api/delivery/format")
+def delivery_format() -> dict:
+    """The output contract, so a caller can see what an upload will produce before uploading.
+
+    Served from the same ``schema/delivery/*.yaml`` the exporter builds against, rather than a
+    hand-copied list. A UI that showed a stale header would be describing a file we do not produce.
+    """
+    fmt = load_delivery_format()
+    return {
+        "name": fmt.name,
+        "version": fmt.version,
+        "format": f"{fmt.name}@{fmt.version}",
+        "columns": len(fmt),
+        "join_key": fmt.join_key,
+        "description": fmt.description,
+        "populated_in_ground_truth": fmt.populated_in_ground_truth,
+        "header": list(fmt.header),
+        "sections": [
+            {
+                "group": section.group,
+                "provenance": section.provenance.value,
+                "columns": len(section.columns),
+                "note": section.note,
+            }
+            for section in fmt.sections
+        ],
+        "unavailable_columns": list(fmt.unavailable_columns()),
+        "input_columns": list(INPUT_COLUMNS),
+        "upload": {
+            "accepts": sorted(UPLOAD_SUFFIXES),
+            "outputs": list(OUTPUT_FORMATS),
+            "max_bytes": MAX_UPLOAD_BYTES,
+            "max_rows": MAX_ROWS,
+            "max_documents": MAX_DOCUMENTS,
+            "max_document_bytes": MAX_DOCUMENT_BYTES,
+        },
+    }
+
+
+@app.post("/api/delivery/export")
+async def delivery_export(
+    file: Annotated[UploadFile, File(description="supplier item master: CSV, TSV or XLSX")],
+    documents: Annotated[
+        list[UploadFile] | None,
+        File(description="optional manufacturer documents to extract from"),
+    ] = None,
+    output: Annotated[str, Form(description="xlsx, csv or json")] = "xlsx",
+    limit: Annotated[int | None, Form(description="process only the first N rows")] = None,
+    mpns: Annotated[str, Form(description="comma-separated part numbers to process")] = "",
+    class_code: Annotated[
+        str | None, Form(description="force this class on every row")
+    ] = None,
+    classified_only: Annotated[
+        bool, Form(description="drop rows retrieval could not classify")
+    ] = False,
+    read_descriptions: Annotated[
+        bool, Form(description="read attributes out of Part_Desc")
+    ] = True,
+    include_audit: Annotated[
+        bool, Form(description="include the provenance sheets in the workbook")
+    ] = True,
+) -> Response:
+    """Upload an item master, get the delivery file back.
+
+    The same projection ``scripts/export_delivery.py`` runs, over the same
+    :func:`axiom.delivery.batch.run_batch`, so an upload and a CLI run of the same file produce the
+    same cells. That shared path is the point: a second implementation here would be one CI does not
+    gate, and it would drift.
+
+    **Runs entirely offline and makes no model calls**, so it needs no credentials. Classification
+    is the deterministic retrieval step and abstains rather than guessing; extraction reads the
+    description string and any attached documents by layout. The honest consequence, stated because
+    a caller seeing 28 of 252 columns filled will otherwise assume a bug: with no documents
+    attached there is nothing to extract from, so the attribute grid emits its labels and few
+    values. Attach datasheets to close that gap.
+
+    ``output=xlsx`` (default) returns a workbook whose ``Delivery`` sheet is the 252-column
+    contract and whose other sheets carry the provenance record. XLSX rather than CSV by default
+    because Excel reinterprets a CSV on import — ``0123`` loses its zero and ``50-1/4`` becomes a
+    date — and a part number that survives the pipeline and dies in the client's spreadsheet is
+    still a failed delivery. ``output=csv`` returns exactly what the CLI writes. ``output=json``
+    returns the summary and a preview without a file, for a UI that wants to show the result before
+    offering the download.
+
+    **No authentication**, like every other endpoint here, and that is a sharper gap on this one
+    than on the read-only routes: it accepts bytes and spends CPU on them. The caps above are the
+    only thing bounding that. Anything beyond a laptop needs auth in front of it.
+    """
+    if output not in OUTPUT_FORMATS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"output must be one of {', '.join(OUTPUT_FORMATS)}; got {output!r}",
+        )
+
+    filename = file.filename or "upload.csv"
+    suffix = Path(filename).suffix.lower()
+    if suffix not in UPLOAD_SUFFIXES:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"cannot read {suffix or 'a file with no extension'!r}; "
+                f"expected one of {', '.join(sorted(UPLOAD_SUFFIXES))}"
+            ),
+        )
+
+    payload = await _read_upload(file, MAX_UPLOAD_BYTES, label="item master")
+
+    try:
+        flat = read_flat_file(payload, filename=filename)
+    except IngestError as exc:
+        raise HTTPException(status_code=400, detail=f"could not read {filename}: {exc}") from exc
+
+    if not flat.rows:
+        raise HTTPException(status_code=400, detail=f"{filename} has a header but no data rows")
+
+    try:
+        validate_input_columns(flat.headers)
+    except InputColumnsError as exc:
+        # 422 rather than 400: the request was well-formed and the file was readable, it is the
+        # wrong file. The lists travel structured so a UI can name the missing header instead of
+        # asking someone to read a paragraph.
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "error": "missing_input_columns",
+                "message": "this does not look like a Unilog item master",
+                "missing": list(exc.missing),
+                "found": list(exc.found),
+                "expected": list(INPUT_COLUMNS),
+            },
+        ) from exc
+
+    fmt = load_delivery_format()
+    registry = load_schema()
+    if class_code and class_code not in registry.class_codes:
+        raise HTTPException(
+            status_code=400,
+            detail=f"unknown class {class_code!r}; known: {', '.join(registry.class_codes)}",
+        )
+
+    requested = [m for m in (mpns or "").split(",") if m.strip()]
+    effective_limit = min(limit, MAX_ROWS) if limit and limit > 0 else MAX_ROWS
+    selected = select_rows(flat.rows, mpns=requested, limit=effective_limit)
+    if not selected:
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                f"no rows selected. {filename} has {len(flat.rows)} row(s) and the part-number "
+                f"filter matched none of them."
+                if requested
+                else f"no rows selected from {filename}"
+            ),
+        )
+
+    parsed_documents = await _read_documents(documents)
+
+    # The item master is itself the document description-derived values are cited against, so it is
+    # content-hashed like any other arrival. The id is the uploaded name pinned to its bytes: two
+    # uploads of a corrected file are two different documents, and a citation has to say which.
+    document_sha256 = sha256_bytes(payload)
+    stem = _safe_stem(filename)
+
+    result = run_batch(
+        selected,
+        fmt=fmt,
+        registry=registry,
+        document_id=f"{stem}@{document_sha256[:8]}",
+        document_sha256=document_sha256,
+        options=BatchOptions(
+            class_code=class_code,
+            classified_only=classified_only,
+            read_descriptions=read_descriptions,
+        ),
+        documents=parsed_documents,
+    )
+
+    if not result.rows:
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "error": "every_row_skipped",
+                "message": (
+                    "nothing to write: every selected row was skipped. Rows without a part "
+                    "number cannot be identified, and with classified_only set, rows that "
+                    "retrieval could not classify are dropped."
+                ),
+                "rows_selected": len(selected),
+                "skipped": result.skipped,
+                "classification": dict(result.methods),
+            },
+        )
+
+    if output == "json":
+        return JSONResponse(
+            _run_summary(
+                result,
+                fmt,
+                filename=filename,
+                documents=parsed_documents,
+                rows_in_file=len(flat.rows),
+                selected=selected,
+                sheet_name=flat.sheet_name,
+            )
+        )
+
+    if output == "csv":
+        exporter = DeliveryFormatExporter(fmt)
+        export = exporter.to_csv(result.rows)
+        return _file_response(
+            export.csv_text.encode("utf-8"),
+            filename=f"{stem}.delivery.csv",
+            media_type="text/csv; charset=utf-8",
+            summary=_headers_for(export, fmt),
+        )
+
+    workbook = DeliveryWorkbookExporter(fmt).to_workbook(
+        result.rows, source_name=filename, include_audit=include_audit
+    )
+    return _file_response(
+        workbook.data,
+        filename=f"{stem}.delivery.xlsx",
+        media_type=WORKBOOK_MEDIA_TYPE,
+        summary=_headers_for(workbook.export, fmt),
+    )
+
+
 @app.get("/")
 def console() -> FileResponse:
     if not CONSOLE.is_file():
         raise HTTPException(status_code=404, detail="console not found")
     return FileResponse(CONSOLE)
+
+
+@app.get("/delivery")
+def delivery_console() -> FileResponse:
+    """The upload page.
+
+    Its own route rather than a panel in the review workspace: that layout is a three-pane
+    keyboard-driven tool for one SKU, and this is a linear task over a whole file.
+    """
+    if not DELIVERY_CONSOLE.is_file():
+        raise HTTPException(status_code=404, detail="delivery console not found")
+    return FileResponse(DELIVERY_CONSOLE)

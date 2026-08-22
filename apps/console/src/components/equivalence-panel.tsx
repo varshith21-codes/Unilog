@@ -182,7 +182,7 @@ export function EquivalencePanel({ view }: { view: EquivalenceView }) {
               a merchandiser can act on.
             </p>
           </div>
-          <div className="scroll-x">
+          <div className="scroll-x" tabIndex={0} role="region" aria-label="Rejected equivalence candidates">
             <table className="w-full text-sm">
               <caption className="sr-only">
                 Candidates that cannot replace {view.reference_sku}, and the attribute that refused

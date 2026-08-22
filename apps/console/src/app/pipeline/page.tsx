@@ -2,17 +2,16 @@ import clsx from "clsx";
 import Link from "next/link";
 
 import { PipelineReplay } from "@/components/pipeline-replay";
-import { EmptyState, Overline, Panel, SectionHeading } from "@/components/primitives";
+import { EmptyState, Overline, PageHeader, Panel } from "@/components/primitives";
 import {
   getDocument,
   listSkus,
   loadDataset,
-  variantGroupFor,
 } from "@/lib/data";
 import { dateTime } from "@/lib/format";
 import { modelStageShare, pipelineStages } from "@/lib/stages";
 
-export const metadata = { title: "Pipeline" };
+export const metadata = { title: "Process" };
 
 /**
  * The demo's second beat, on its own address.
@@ -37,7 +36,13 @@ export default async function PipelinePage({
 
   if (skus.length === 0) {
     return (
-      <div className="mx-auto max-w-[var(--container-shell)] px-[var(--spacing-gutter)] py-[var(--spacing-section-lg)]">
+      <div className="mx-auto max-w-[var(--container-shell)] px-[var(--spacing-gutter)] pb-24">
+        <PageHeader
+          eyebrow="Process"
+          title="Recorded process replay"
+          detail="Inspect persisted process output without starting a live execution. This view only replays work that has already been recorded."
+          meta={<span className="pill pill-quiet">Replay only</span>}
+        />
         <Panel>
           {/*
             `unmeasured`: this page reads persisted output, so an absent run means nothing was
@@ -47,8 +52,8 @@ export default async function PipelinePage({
             kind="unmeasured"
             title="No recorded run to replay"
             detail={
-            <>
-                This page reads persisted pipeline output rather than running anything, so it has
+              <>
+                This page reads persisted process output rather than running anything, so it has
                 nothing to show until a run has been saved. Produce one with{" "}
                 <span className="mono">
                   python scripts/run_pipeline.py data/samples/ba100.txt --sku BA-100-075
@@ -68,54 +73,55 @@ export default async function PipelinePage({
   // than quietly showing a real run.
   const bundle = skus.find((entry) => entry.sku === requested) ?? skus[0]!;
   const document = await getDocument(bundle);
-  const series = variantGroupFor(bundle, skus);
-  const stages = pipelineStages(bundle, document, dataset.policy, series);
+  const stages = pipelineStages(bundle, document, dataset.policy, null);
   const share = modelStageShare(stages);
 
   return (
     <div className="mx-auto max-w-[var(--container-shell)] px-[var(--spacing-gutter)] pb-24">
-      <header className="py-[var(--spacing-section-lg)]">
-        {/*
-          Counted, not asserted. The stage list is shorter when a bundle's document is missing and
-          longer for an exploded series, so a hardcoded number here would be wrong on most runs.
-        */}
-        <SectionHeading
-          title="What the pipeline did"
-          detail={
-            <>
-              {stages.length} stages from a supplier document to a signed, publishable record.{" "}
-              {share.model} of them call a model.
-            </>
-          }
-        />
+      <PageHeader
+        eyebrow="Process"
+        title="What the recorded process did"
+        detail={
+          <>
+            A replay of {stages.length} persisted stages from supplier document to signed,
+            publishable record. This view never starts a live execution; {share.model} stages used a
+            model when the run was recorded.
+          </>
+        }
+        meta={
+          <>
+            <span className="pill pill-quiet">Recorded replay</span>
+            <span className="mono">{bundle.sku}</span>
+          </>
+        }
+      />
 
-        {skus.length > 1 ? (
-          <Panel className="mt-6 p-6">
-            <Overline>Recorded runs</Overline>
-            <ul className="mt-3 flex flex-wrap gap-2">
-              {skus.map((entry) => (
-                <li key={entry.sku}>
-                  {/*
-                    `pill-button` carries hover, press and the aria-current exclusion, replacing an
-                    ad-hoc `hover:text-[var(--fg)]` that gave the selected pill a hover state washing
-                    its accent toward neutral — reading as the selection coming undone.
-                  */}
-                  <Link
-                    href={`/pipeline?sku=${encodeURIComponent(entry.sku)}`}
-                    aria-current={entry.sku === bundle.sku ? "page" : undefined}
-                    className={clsx(
-                      "pill pill-button mono",
-                      entry.sku === bundle.sku ? "pill-accent" : "pill-quiet",
-                    )}
-                  >
-                    {entry.sku}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </Panel>
-        ) : null}
-      </header>
+      {skus.length > 1 ? (
+        <Panel className="mb-[var(--spacing-section)] p-6">
+          <Overline>Recorded runs</Overline>
+          <ul className="mt-3 flex flex-wrap gap-2">
+            {skus.map((entry) => (
+              <li key={entry.sku}>
+                {/*
+                  `pill-button` carries hover, press and the aria-current exclusion, replacing an
+                  ad-hoc `hover:text-[var(--fg)]` that gave the selected pill a hover state washing
+                  its accent toward neutral — reading as the selection coming undone.
+                */}
+                <Link
+                  href={`/pipeline?sku=${encodeURIComponent(entry.sku)}`}
+                  aria-current={entry.sku === bundle.sku ? "page" : undefined}
+                  className={clsx(
+                    "pill pill-button mono",
+                    entry.sku === bundle.sku ? "pill-accent" : "pill-quiet",
+                  )}
+                >
+                  {entry.sku}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </Panel>
+      ) : null}
 
       <PipelineReplay
         stages={stages}

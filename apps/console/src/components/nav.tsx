@@ -3,56 +3,121 @@
 import clsx from "clsx";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect } from "react";
 
-const SECTIONS = [
-  { href: "/", label: "Overview" },
-  { href: "/pipeline", label: "Pipeline" },
-  { href: "/review", label: "Review" },
-  { href: "/certificates", label: "Certificates" },
-  { href: "/quality", label: "Quality Index" },
-] as const;
+type NavVariant = "desktop" | "mobile";
+type NavItem = {
+  href: string;
+  label: string;
+  descriptor: string;
+  glyph: "operations" | "resolve" | "process" | "publish" | "audit" | "intelligence";
+};
 
-export function Nav() {
-  const pathname = usePathname();
+const PRIMARY: NavItem[] = [
+  { href: "/", label: "Operations", descriptor: "Portfolio command", glyph: "operations" },
+  { href: "/review", label: "Resolve", descriptor: "Decision queue", glyph: "resolve" },
+  { href: "/pipeline", label: "Process", descriptor: "Recorded runs", glyph: "process" },
+  { href: "/delivery", label: "Publish", descriptor: "Delivery studio", glyph: "publish" },
+  { href: "/certificates", label: "Audit", descriptor: "Certified records", glyph: "audit" },
+];
 
-  function isActive(href: string): boolean {
-    if (href === "/") return pathname === "/";
-    return pathname === href || pathname.startsWith(`${href}/`);
-  }
+const SECONDARY: NavItem[] = [
+  {
+    href: "/quality",
+    label: "Intelligence",
+    descriptor: "Impact, policy & cost",
+    glyph: "intelligence",
+  },
+];
+
+const ALL = [...PRIMARY, ...SECONDARY];
+
+function activeFor(pathname: string, href: string): boolean {
+  if (href === "/") return pathname === "/";
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+function NavGlyph({ name }: { name: NavItem["glyph"] }) {
+  const paths = {
+    operations: <path d="M2.5 3.5h11v3h-11zm0 6h5v3h-5zm8 0h3v3h-3z" />,
+    resolve: <path d="M3 3.5h6m-6 4h10m-10 4h7m2.5-9v3m-4 4v3" />,
+    process: <path d="M2.5 4h4l1.5 2.5L9.5 4h4M2.5 12h4L8 9.5 9.5 12h4" />,
+    publish: <path d="M8 2.5v7m0-7L5.5 5M8 2.5 10.5 5M3 9.5v3h10v-3" />,
+    audit: <path d="M4 2.5h8v11H4zM2.5 5H4m-1.5 3H4m-1.5 3H4m2.5-5h3m-3 3h3" />,
+    intelligence: <path d="M2.5 12.5V9m3.5 3.5V5.5m3.5 7V7.5m3.5 5v-10" />,
+  }[name];
 
   return (
-    <nav aria-label="Sections" className="scroll-x -mx-1 min-w-0">
-      <ul className="flex items-center gap-0.5 px-1">
-        {SECTIONS.map((section) => {
-          const active = isActive(section.href);
+    <svg viewBox="0 0 16 16" aria-hidden className="nav-glyph" fill="none">
+      <g stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round">
+        {paths}
+      </g>
+    </svg>
+  );
+}
+
+function NavGroup({
+  items,
+  pathname,
+  variant,
+  label,
+}: {
+  items: NavItem[];
+  pathname: string;
+  variant: NavVariant;
+  label: string;
+}) {
+  return (
+    <div className="nav-group">
+      {variant === "desktop" ? <p className="nav-group-label">{label}</p> : null}
+      <ul className={clsx("nav-list", variant === "mobile" && "nav-list-mobile")}>
+        {items.map((item) => {
+          const active = activeFor(pathname, item.href);
           return (
-            <li key={section.href}>
+            <li key={item.href}>
               <Link
-                href={section.href}
+                href={item.href}
                 aria-current={active ? "page" : undefined}
-                className={clsx(
-                  "relative block rounded-md px-2.5 py-1.5 text-sm whitespace-nowrap",
-                  "transition-[color,background-color,transform] duration-[var(--duration-fast)] ease-[var(--ease-out-quart)]",
-                  /*
-                   * The active state is carried by an accent underline rather than a tinted
-                   * background. A background step subtle enough to suit this palette lands
-                   * near 1.02:1 against the bar, which is not a state anyone can see; a 2px
-                   * accent rule clears 3:1 and reads instantly.
-                   */
-                  // Press feedback. Cheap, and its absence is why web nav feels less responsive
-                  // than native — the click had no acknowledgement until the route resolved.
-                  "active:scale-[0.97]",
-                  active
-                    ? "font-medium text-[var(--fg)] after:absolute after:inset-x-2.5 after:-bottom-px after:h-0.5 after:rounded-full after:bg-[var(--accent)]"
-                    : "text-[var(--fg-tertiary)] hover:bg-[var(--surface-hover)] hover:text-[var(--fg)]",
-                )}
+                className={clsx("nav-link", variant === "mobile" && "nav-link-mobile")}
               >
-                {section.label}
+                <NavGlyph name={item.glyph} />
+                <span className="nav-copy">
+                  <strong>{item.label}</strong>
+                  {variant === "desktop" ? <small>{item.descriptor}</small> : null}
+                </span>
+                {variant === "desktop" ? <span className="nav-active-mark" aria-hidden /> : null}
               </Link>
             </li>
           );
         })}
       </ul>
+    </div>
+  );
+}
+
+export function CurrentSection() {
+  const pathname = usePathname();
+  return <strong>{ALL.find((item) => activeFor(pathname, item.href))?.label ?? "Workspace"}</strong>;
+}
+
+export function Nav({ variant = "desktop" }: { variant?: NavVariant }) {
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (variant !== "mobile") return;
+    const active = document.querySelector<HTMLElement>(
+      '.workflow-nav-mobile [aria-current="page"]',
+    );
+    active?.scrollIntoView({ block: "nearest", inline: "center" });
+  }, [pathname, variant]);
+
+  return (
+    <nav
+      aria-label={variant === "desktop" ? "AXIOM workflows" : "Workflow navigation"}
+      className={clsx("workflow-nav", variant === "mobile" && "workflow-nav-mobile")}
+    >
+      <NavGroup items={PRIMARY} pathname={pathname} variant={variant} label="Workflows" />
+      <NavGroup items={SECONDARY} pathname={pathname} variant={variant} label="Analysis" />
     </nav>
   );
 }

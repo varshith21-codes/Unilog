@@ -24,48 +24,31 @@ import argparse
 import csv
 import sys
 from collections import Counter
-from datetime import UTC, datetime
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "packages"))
 
 import yaml  # noqa: E402
-from axiom.classify import Classifier  # noqa: E402
-from axiom.core.evidence import EvidenceSpan, SourceDocument  # noqa: E402
-from axiom.core.product import ProductRecord  # noqa: E402
-from axiom.core.values import (  # noqa: E402
-    AttributeValue,
-    DerivationMethod,
-    ValueStatus,
-)
 from axiom.delivery import (  # noqa: E402
     DeliveryFormatExporter,
-    DeliveryRow,
-    DeliveryRowBuilder,
-    SupplierRow,
+    DeliveryWorkbookExporter,
     load_default,
 )
+from axiom.delivery.batch import (  # noqa: E402
+    NO_PART_NUMBER,
+    BatchOptions,
+    DocumentSource,
+    InputColumnsError,
+    RowOutcome,
+    parse_documents,
+    run_batch,
+    select_rows,
+    validate_input_columns,
+)
 from axiom.delivery.source import INPUT_COLUMNS  # noqa: E402
-from axiom.docintel import ParsedDocument, parse_artifact  # noqa: E402
-from axiom.extract.description import (  # noqa: E402
-    AbbreviationTable,
-    extract_from_description,
-)
-from axiom.extract.description import (  # noqa: E402
-    to_attribute_values as description_values,
-)
-from axiom.extract.structured import (  # noqa: E402
-    extract_structured,
-    reject_unresolved,
-    to_attribute_values,
-)
-from axiom.ingest import (  # noqa: E402
-    detect_document_type,  # noqa: E402
-    profile_rows,
-    sha256_bytes,
-)
-from axiom.normalize import normalize_all  # noqa: E402
+from axiom.docintel import ParsedDocument  # noqa: E402
+from axiom.ingest import profile_rows, sha256_bytes  # noqa: E402
 from axiom.schema import load_default as load_schema  # noqa: E402
 
 DEFAULT_OUT = REPO_ROOT / "data" / "delivery"
@@ -122,6 +105,13 @@ def main() -> int:
         "given correct extraction, and says nothing about extraction itself. Always report it "
         "alongside the unseeded run, never instead of it.",
     )
+    parser.add_argument(
+        "--xlsx",
+        action="store_true",
+        help="also write the delivery file as an XLSX workbook, with the provenance sidecar "
+        "rendered onto its own sheets. What to hand a human: Excel reinterprets a CSV on import, "
+        "turning 50-1/4 into a date and 0123 into 123.",
+    )
     parser.add_argument("--quiet", action="store_true", help="suppress the per-row log")
     args = parser.parse_args()
 
@@ -143,13 +133,10 @@ def main() -> int:
         print(f"{args.source} contains no data rows", file=sys.stderr)
         return 1
 
-    missing = [c for c in INPUT_COLUMNS if c not in rows[0]]
-    if missing:
-        print(
-            f"input is missing expected columns: {', '.join(missing)}\n"
-            f"found: {', '.join(rows[0])}",
-            file=sys.stderr,
-        )
+    try:
+        validate_input_columns(rows[0].keys())
+    except InputColumnsError as exc:
+        print(exc, file=sys.stderr)
         return 1
 
     # Profile before processing. A column that is 100% sentinel is a column the supplier believes
@@ -167,10 +154,7 @@ def main() -> int:
             )
         print()
 
-    selected = _select(rows, args)
-    classifier = Classifier(registry)
-    builder = DeliveryRowBuilder(fmt, registry)
-    abbreviations = None if args.no_description_extraction else AbbreviationTable.load()
+    selected = select_rows(rows, mpns=args.mpn, limit=args.limit)
 
     # The item master is itself the source document these values are cited against, so it is
     # content-hashed the same way any other arrival is. A citation that named the file without
@@ -180,7 +164,7 @@ def main() -> int:
 
     documents = _load_documents(args.document)
     if documents and not args.quiet:
-        for parsed, _sha in documents:
+        for parsed in documents:
             tables = len(parsed.all_tables())
             print(
                 f"document {parsed.document.document_id}: {parsed.page_count} page(s), "
@@ -196,117 +180,29 @@ def main() -> int:
             f"     extraction — the values come from the client's own answer sheet.\n"
         )
 
-    built: list[DeliveryRow] = []
-    methods: Counter[str] = Counter()
-    extracted_total = 0
-    refused_total = 0
-    seeded_total = 0
-    from_documents_total = 0
-    document_refused_total = 0
-    skipped = 0
+    result = run_batch(
+        selected,
+        fmt=fmt,
+        registry=registry,
+        document_id=document_id,
+        document_sha256=document_sha256,
+        options=BatchOptions(
+            class_code=args.class_code,
+            classified_only=args.classified_only,
+            read_descriptions=not args.no_description_extraction,
+        ),
+        documents=documents,
+        golden=golden,
+        on_row=None if args.quiet else _log,
+    )
 
-    for raw in selected:
-        source = SupplierRow.parse(raw)
-        if not source.identified:
-            skipped += 1
-            if not args.quiet:
-                print("  SKIP  (no part number)")
-            continue
-
-        class_code, method = _classify(classifier, source, args.class_code)
-        methods[method] += 1
-
-        if class_code is None and args.classified_only:
-            skipped += 1
-            if not args.quiet:
-                print(f"  SKIP  {source.mpn:24s} unclassified ({method})")
-            continue
-
-        record = ProductRecord(
-            tenant_id="unilog",
-            sku=source.mpn or "",
-            mpn=source.mpn,
-            class_code=class_code,
-            source_document_ids=[document_id],
-        )
-        if class_code:
-            record.classifications.extend(_classifications(classifier, source))
-
-        # Read what the description itself evidences. Deterministic, class-scoped, and every value
-        # cites the substring it came from — which is why these are allowed through the publish
-        # gate while a legacy item-master value is not.
-        extracted = 0
-        if abbreviations is not None and class_code and source.description:
-            result = extract_from_description(
-                source.description,
-                registry=registry,
-                class_code=class_code,
-                abbreviations=abbreviations,
-            )
-            values = description_values(
-                result,
-                document_id=document_id,
-                document_sha256=document_sha256,
-                schema_version=registry.product_class(class_code).schema_version,
-            )
-            for value in values:
-                record.add_value(value)
-            extracted = len(values)
-            extracted_total += extracted
-            refused_total += len(result.refused)
-
-        # Real extraction from a manufacturer document, deterministically. Runs AFTER the
-        # description pass so a cited document value supersedes a reading of an abbreviation: both
-        # are evidenced, but a datasheet states the fact where a description only implies it.
-        from_documents = 0
-        if class_code and documents:
-            from_documents, document_refused = _extract_from_documents(
-                record, documents, registry, class_code, source.mpn or ""
-            )
-            from_documents_total += from_documents
-            document_refused_total += document_refused
-
-        # The supplied arm. Seeded after everything real so a golden value supersedes a weaker
-        # reading of the same attribute rather than colliding with it.
-        seeded = 0
-        entry = golden.get(source.mpn or "")
-        if entry:
-            if entry.get("class_code") and not record.class_code:
-                record.class_code = entry["class_code"]
-            seeded = _seed_from_golden(record, entry, document_sha256, registry)
-            seeded_total += seeded
-
-        row = builder.build(
-            record,
-            source=source,
-            reference_urls=list(entry.get("reference_urls", [])) if entry else None,
-            # Brand and manufacturer cannot be resolved from a six-column input, so the arm
-            # supplies them. Retrieval will supply them the same way.
-            brand=entry.get("brand") if entry else None,
-            manufacturer=entry.get("manufacturer") if entry else None,
-        )
-        built.append(row)
-        if not args.quiet:
-            notes = []
-            if extracted:
-                notes.append(f"+{extracted} desc")
-            if from_documents:
-                notes.append(f"+{from_documents} doc")
-            if seeded:
-                notes.append(f"+{seeded} golden")
-            suffix = f"  ({', '.join(notes)})" if notes else ""
-            print(
-                f"  {source.mpn:24s} {class_code or '-':28s} "
-                f"{row.populated_count:3d} cells  {method}{suffix}"
-            )
-
-    if not built:
+    if not result.rows:
         print("nothing to write: every row was skipped", file=sys.stderr)
         return 1
 
     exporter = DeliveryFormatExporter(fmt)
-    export = exporter.to_csv(built)
-    sidecar = exporter.sidecar(built)
+    export = exporter.to_csv(result.rows)
+    sidecar = exporter.sidecar(result.rows)
 
     args.out.mkdir(parents=True, exist_ok=True)
     stem = args.source.stem.replace(" ", "_")
@@ -315,20 +211,52 @@ def main() -> int:
     csv_path.write_text(export.csv_text, encoding="utf-8", newline="")
     sidecar_path.write_text(sidecar, encoding="utf-8")
 
+    xlsx_path = None
+    if args.xlsx:
+        workbook = DeliveryWorkbookExporter(fmt).to_workbook(
+            result.rows, source_name=args.source.name
+        )
+        xlsx_path = args.out / f"{stem}.delivery.xlsx"
+        xlsx_path.write_bytes(workbook.data)
+
     _report(
         export,
-        methods,
-        skipped,
+        result.methods,
+        result.skipped,
         csv_path,
         sidecar_path,
-        extracted_total=extracted_total,
-        refused_total=refused_total,
-        seeded_total=seeded_total,
-        from_documents_total=from_documents_total,
-        document_refused_total=document_refused_total,
+        xlsx_path=xlsx_path,
+        extracted_total=result.extracted_total,
+        refused_total=result.refused_total,
+        seeded_total=result.seeded_total,
+        from_documents_total=result.from_documents_total,
+        document_refused_total=result.document_refused_total,
         golden_path=args.golden,
     )
     return 0
+
+
+def _log(outcome: RowOutcome) -> None:
+    """The per-row line. Formatting stays here because it is a console concern."""
+    if outcome.skipped == NO_PART_NUMBER:
+        print("  SKIP  (no part number)")
+        return
+    if outcome.skipped:
+        print(f"  SKIP  {outcome.mpn:24s} {outcome.skipped} ({outcome.method})")
+        return
+
+    notes = []
+    if outcome.from_description:
+        notes.append(f"+{outcome.from_description} desc")
+    if outcome.from_documents:
+        notes.append(f"+{outcome.from_documents} doc")
+    if outcome.from_golden:
+        notes.append(f"+{outcome.from_golden} golden")
+    suffix = f"  ({', '.join(notes)})" if notes else ""
+    print(
+        f"  {outcome.mpn:24s} {outcome.class_code or '-':28s} "
+        f"{outcome.populated:3d} cells  {outcome.method}{suffix}"
+    )
 
 
 def _read(path: Path) -> list[dict[str, str]]:
@@ -336,155 +264,34 @@ def _read(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(handle))
 
 
-def _load_documents(paths: list[Path]) -> list[tuple[ParsedDocument, str]]:
-    """Parse each manufacturer document once, paired with its content hash.
+def _load_documents(paths: list[Path]) -> list[ParsedDocument]:
+    """Read each ``--document`` off disk and hand it to the shared parser.
 
-    Parsed up front rather than per row: a thousand-row batch against one datasheet would otherwise
-    re-parse the PDF a thousand times. The hash travels with it because a citation that named the
-    file without pinning its content would not survive the supplier issuing a revision.
+    A missing path is reported and skipped rather than fatal: the interesting failure is a batch
+    that produced no citations, and that shows up in the report either way.
     """
-    loaded: list[tuple[ParsedDocument, str]] = []
+    sources = []
     for path in paths:
         if not path.is_file():
             print(f"no such document: {path}", file=sys.stderr)
             continue
-        raw = path.read_bytes()
-        sha = sha256_bytes(raw)
-        document = SourceDocument(
-            document_id=f"{path.stem}@{sha[:8]}",
-            # Resolved first: `as_uri` refuses a relative path, and a caller naturally types
-            # `--document data/samples/ba100.txt`.
-            uri=path.resolve().as_uri(),
-            sha256=sha,
-            doc_type=detect_document_type(raw, path.name),
-            fetched_at=datetime.now(UTC),
+        sources.append(
+            DocumentSource(
+                data=path.read_bytes(),
+                name=path.name,
+                # Resolved first: `as_uri` refuses a relative path, and a caller naturally types
+                # `--document data/samples/ba100.txt`.
+                uri=path.resolve().as_uri(),
+                stem=path.stem,
+            )
         )
-        loaded.append((parse_artifact(raw, document), sha))
-    return loaded
-
-
-def _extract_from_documents(
-    record: ProductRecord,
-    documents: list[tuple[ParsedDocument, str]],
-    registry,
-    class_code: str,
-    target_sku: str,
-) -> tuple[int, int]:
-    """Read every attached document deterministically. Returns (values added, values refused).
-
-    Values are normalised and then filtered through ``reject_unresolved``, because an enum value
-    that normalisation could not snap keeps its accepted status and its verified citation — so it
-    would publish as a null with a perfect quote attached.
-    """
-    added = refused = 0
-    for parsed, sha in documents:
-        result = extract_structured(
-            parsed, registry, class_code=class_code, target_sku=target_sku or None
-        )
-        refused += len(result.refused)
-        if not result.matches:
-            continue
-
-        values = to_attribute_values(
-            result, sha, schema_version=registry.product_class(class_code).schema_version
-        )
-        normalized, _issues = normalize_all(values, registry, class_code=class_code)
-        kept, dropped = reject_unresolved(normalized, registry)
-        refused += len(dropped)
-
-        for value in kept:
-            record.add_value(value)
-            added += 1
-        if parsed.document.document_id not in record.source_document_ids:
-            record.source_document_ids.append(parsed.document.document_id)
-    return added, refused
+    return parse_documents(sources)
 
 
 def _load_golden(path: Path) -> dict[str, dict]:
     """Golden products keyed by SKU."""
     payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     return {p["sku"]: p for p in payload.get("products", []) if p.get("sku")}
-
-
-def _seed_from_golden(
-    record: ProductRecord, entry: dict, document_sha256: str, registry
-) -> int:
-    """Attach golden attribute values to a record, citing the golden set as their source.
-
-    The citation names the golden file rather than pretending to a datasheet page. A span that
-    claimed a manufacturer document we never opened would be the exact dishonesty this system is
-    built to prevent, and it would also make the arm impossible to tell apart from a real run.
-
-    Values are written in SOURCE FORM ("120 V", "50-1/4 in") and pushed through the same
-    `normalize_all` the extractor's output goes through — the convention
-    `data/golden/pvf_valves.yaml` already establishes. That matters for a concrete reason: the grid
-    keeps magnitude
-    and unit in separate columns, and only normalisation turns "120 V" into a Quantity the exporter
-    can split. Seeding pre-normalised values would leave the unit welded to the magnitude and score
-    every quantity cell wrong.
-    """
-    attributes = entry.get("attributes") or {}
-    if not attributes:
-        return 0
-
-    values = [
-        AttributeValue(
-            attribute_code=code,
-            value_raw=str(value),
-            method=DerivationMethod.SUPPLIER_FEED,
-            confidence=1.0,
-            status=ValueStatus.AUTO_ACCEPTED,
-            evidence=[
-                EvidenceSpan(
-                    span_id=f"golden-{entry['sku']}-{code}",
-                    document_id="golden:unilog_dishwashers_v1",
-                    document_sha256=document_sha256,
-                    quote=str(value),
-                    quote_verified=True,
-                    match_score=1.0,
-                )
-            ],
-            prompt_version="golden@v1",
-        )
-        for code, value in attributes.items()
-    ]
-
-    normalized, _ = normalize_all(values, registry, class_code=entry.get("class_code"))
-    for value in normalized:
-        record.add_value(value)
-    return len(normalized)
-
-
-def _select(rows: list[dict[str, str]], args) -> list[dict[str, str]]:
-    if args.mpn:
-        wanted = {m.strip() for m in args.mpn}
-        rows = [r for r in rows if (r.get("Mfg_Part_Num") or "").strip() in wanted]
-    if args.limit:
-        rows = rows[: args.limit]
-    return rows
-
-
-def _classify(
-    classifier: Classifier, source: SupplierRow, forced: str | None
-) -> tuple[str | None, str]:
-    if forced:
-        return forced, "forced"
-    if not source.description:
-        return None, "no_description"
-    result = classifier.classify(source.description, sku=source.mpn)
-    return result.class_code, result.method
-
-
-def _classifications(classifier: Classifier, source: SupplierRow):
-    """Re-run classification to capture the Classification objects, not just the code.
-
-    Called only for rows that classified, so the cost is one extra deterministic retrieval pass
-    over a 35-character string. Restructuring `_classify` to return both would be tidier and is
-    worth doing if this ever runs over a million rows; at a thousand it is not measurable.
-    """
-    if not source.description:
-        return []
-    return classifier.classify(source.description, sku=source.mpn).classifications
 
 
 def _display(path: Path) -> str:
@@ -507,6 +314,7 @@ def _report(
     csv_path,
     sidecar_path,
     *,
+    xlsx_path: Path | None = None,
     extracted_total: int,
     refused_total: int,
     seeded_total: int = 0,
@@ -518,6 +326,8 @@ def _report(
     print("=" * 78)
     print(f"wrote {_display(csv_path)}")
     print(f"      {_display(sidecar_path)}")
+    if xlsx_path is not None:
+        print(f"      {_display(xlsx_path)}")
     print()
     print(f"rows            {export.row_count}   (skipped {skipped})")
     print(f"columns         {len(export.populated_by_column)} of 252 populated at least once")

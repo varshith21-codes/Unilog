@@ -149,8 +149,9 @@ export function CohortPanel({ study }: { study: CohortStudy }) {
           title="Per SKU"
           detail="Sorted by composite lift, least improved first — that is where the remaining work is."
         />
-        <Panel className="scroll-x mt-7 overflow-hidden p-0">
-          <table className="w-full min-w-[58rem] text-sm">
+        <Panel className="mt-7 overflow-hidden p-0">
+          <div className="scroll-x" tabIndex={0} role="region" aria-label="Cohort impact by SKU">
+            <table className="w-full min-w-[58rem] text-sm">
             {/* This table had no caption. Every other one in the console does. */}
             <caption className="sr-only">
               Each SKU in the study, its arm, and how each quality dimension moved, ordered by
@@ -175,7 +176,8 @@ export function CohortPanel({ study }: { study: CohortStudy }) {
                   <MemberRow key={member.sku} member={member} />
                 ))}
             </tbody>
-          </table>
+            </table>
+          </div>
         </Panel>
       </Section>
 

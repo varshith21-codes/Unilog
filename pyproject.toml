@@ -35,6 +35,15 @@ api = [
     # two faces of the same catalogue — so the older cap was the thing that had to move.
     "fastapi==0.141.1",
     "uvicorn==0.34.0",
+    # Multipart parsing, required by the delivery upload endpoint's `UploadFile`/`Form`. Declared
+    # rather than inherited: it already arrives transitively in a venv with every extra installed,
+    # which is exactly how the httpx2 failure below stayed invisible until CI installed a narrower
+    # set. An endpoint whose only dependency is implicit fails at request time, not import time.
+    "python-multipart==0.0.32",
+    # The upload returns the delivery file as a workbook, and writing one needs openpyxl. Already
+    # pinned in `ingest` (for reading supplier XLSX) and in `dev`; repeated here so installing
+    # `[api]` alone gives a working export rather than a 500 on the first upload.
+    "openpyxl==3.1.5",
 ]
 mcp = [
     # The MCP server transport. Optional because the tool layer in axiom.agents.tools carries
