@@ -1,0 +1,292 @@
+{
+  "package": "Unilog wireframe atlas",
+  "version": "1.0.0",
+  "artifacts": {
+    "interactiveAtlas": "docs/wireframes/unilog-wireframe-atlas.html",
+    "svgContactSheet": "docs/wireframes/unilog-wireframes.svg",
+    "routeMapSource": "docs/wireframes/unilog-route-map.mmd",
+    "stateFlowSource": "docs/wireframes/unilog-state-flows.mmd",
+    "pngDirectory": "docs/wireframes/png"
+  },
+  "visualDirection": "Technical blueprint; deliberately low fidelity; monochrome neutral canvas; one blue annotation accent; compact grotesk and monospace; 1px structure lines.",
+  "viewports": {
+    "desktop": "1440x1024",
+    "tablet": "768px reflow notes",
+    "mobile": "390x844"
+  },
+  "canonicalWorkspaceNavigation": {
+    "primary": [
+      { "label": "Operations", "route": "/operations" },
+      { "label": "Enrich", "route": "/enrich" },
+      { "label": "Resolve", "route": "/review" },
+      { "label": "Process", "route": "/pipeline" },
+      { "label": "Publish", "route": "/delivery" },
+      { "label": "Audit", "route": "/certificates" }
+    ],
+    "secondary": [
+      { "label": "Intelligence", "route": "/quality" }
+    ]
+  },
+  "families": [
+    {
+      "id": "public-landing",
+      "area": "marketing",
+      "family": "Public landing",
+      "runtime": "Next.js console :3000",
+      "routes": ["/"],
+      "sourceImplementation": ["apps/console/src/app/page.tsx", "apps/console/src/components/marketing-header.tsx"],
+      "desktopIncluded": true,
+      "mobileIncluded": true,
+      "tabletNotes": "At 768px the hero becomes a single reading column; the product-definition rule follows the primary actions, and the evidence proof remains value-before-source.",
+      "annotations": [
+        { "number": 1, "title": "Shell boundary", "detail": "Public marketing header only; do not mount the workspace navigation." },
+        { "number": 2, "title": "Specific promise", "detail": "Lead with sparse input to evidence-backed output, not generic AI automation." },
+        { "number": 3, "title": "Proof specimen", "detail": "Use BA-100-025, body_material, Bronze C84400, score 0.728, and policy gate 0.707." },
+        { "number": 4, "title": "Primary handoff", "detail": "Enter operations is primary; Enrich a record is the direct secondary workflow." }
+      ],
+      "coveredStates": ["default", "evidence-proof", "mobile-stacked"]
+    },
+    {
+      "id": "marketing-404",
+      "area": "marketing",
+      "family": "Global marketing 404",
+      "runtime": "Next.js console :3000",
+      "routes": ["* (outside workspace route group)"],
+      "sourceImplementation": ["apps/console/src/app/not-found.tsx"],
+      "desktopIncluded": true,
+      "mobileIncluded": true,
+      "tabletNotes": "At 768px the message and actions stack while the public header remains; no workspace rail appears.",
+      "annotations": [
+        { "number": 1, "title": "Global boundary", "detail": "This 404 belongs to the public marketing surface." },
+        { "number": 2, "title": "Exact message", "detail": "This record path does not exist." },
+        { "number": 3, "title": "Two recoveries", "detail": "Return to AXIOM overview or enter Operations." }
+      ],
+      "coveredStates": ["route-unavailable", "desktop-actions-inline", "mobile-actions-stacked"]
+    },
+    {
+      "id": "workspace-shell",
+      "area": "shell",
+      "family": "Workspace shell and boundaries",
+      "runtime": "Next.js console :3000",
+      "routes": ["/operations", "/enrich", "/review", "/review/[sku]", "/pipeline", "/delivery", "/certificates", "/certificates/[sku]", "/quality"],
+      "sourceImplementation": ["apps/console/src/app/(workspace)/layout.tsx", "apps/console/src/components/desktop-sidebar.tsx", "apps/console/src/components/nav.tsx", "apps/console/src/components/data-source-banner.tsx", "apps/console/src/app/(workspace)/loading.tsx", "apps/console/src/app/(workspace)/error.tsx", "apps/console/src/app/(workspace)/not-found.tsx"],
+      "desktopIncluded": true,
+      "mobileIncluded": true,
+      "tabletNotes": "At 768px the persistent desktop rail is replaced by the app bar plus horizontally scrollable workflow navigation. Preserve the data-source banner above main content and keep the active route in view.",
+      "annotations": [
+        { "number": 1, "title": "Canonical order", "detail": "Operations, Enrich, Resolve, Process, Publish, Audit; Intelligence is secondary." },
+        { "number": 2, "title": "Collapsible rail", "detail": "Expanded rail shows descriptors; collapsed rail retains glyphs, tooltips, labels, and active state." },
+        { "number": 3, "title": "Truth banner", "detail": "Offline fixture is persistent and cannot be mistaken for live persisted data." },
+        { "number": 4, "title": "Boundaries stay inside shell", "detail": "Loading, error, and workspace 404 preserve navigation and recovery context." }
+      ],
+      "coveredStates": ["live-expanded", "live-collapsed", "mobile-navigation", "offline-fixture", "loading", "error", "workspace-404"]
+    },
+    {
+      "id": "operations",
+      "area": "workflow",
+      "family": "Operations",
+      "runtime": "Next.js console :3000",
+      "routes": ["/operations"],
+      "sourceImplementation": ["apps/console/src/app/(workspace)/operations/page.tsx", "apps/console/src/lib/data.ts"],
+      "desktopIncluded": true,
+      "mobileIncluded": true,
+      "tabletNotes": "At 768px use a two-by-two stat band and retain the risk-ordered blocking list as rows; recent activity moves below the intervention list.",
+      "annotations": [
+        { "number": 1, "title": "Operational headline", "detail": "Blocked catalogues say Catalog work that needs intervention; clear catalogues say Portfolio is clear to progress." },
+        { "number": 2, "title": "Portfolio denominator", "detail": "Required-gap counts explicitly exclude unclassified records." },
+        { "number": 3, "title": "Risk order", "detail": "The preview exposes only the highest-risk blocked records and hands off to Resolve." },
+        { "number": 4, "title": "Recorded, not live execution", "detail": "Recent activity links to persisted Process and Audit context." }
+      ],
+      "coveredStates": ["blocked", "clear", "recent-empty", "live-data", "offline-fixture"]
+    },
+    {
+      "id": "enrich",
+      "area": "workflow",
+      "family": "Enrich",
+      "runtime": "Next.js console :3000",
+      "routes": ["/enrich"],
+      "sourceImplementation": ["apps/console/src/app/(workspace)/enrich/page.tsx", "apps/console/src/components/enrich-form.tsx", "apps/console/src/lib/enrich.ts", "apps/api/main.py:1278-1720"],
+      "desktopIncluded": true,
+      "mobileIncluded": true,
+      "tabletNotes": "At 768px the run-control rail drops below identity and source fields. Cost and real-model-call disclosure must remain before the submit control.",
+      "annotations": [
+        { "number": 1, "title": "Only live run", "detail": "This is the only console workflow that starts model work and incurs cost." },
+        { "number": 2, "title": "Input gate", "detail": "MPN and manufacturer are required; with retrieval off, description or HTTPS source URL is also required." },
+        { "number": 3, "title": "Cost before action", "detail": "Show two calls per run, three with generated copy, and one concurrent run." },
+        { "number": 4, "title": "Refusals are remedies", "detail": "Refused, unavailable, and conflict states stay distinct; conflict alone offers deliberate replacement." }
+      ],
+      "coveredStates": ["unavailable", "incomplete", "ready", "running", "refused", "conflict", "success"]
+    },
+    {
+      "id": "resolve-queue",
+      "area": "workflow",
+      "family": "Resolve queue",
+      "runtime": "Next.js console :3000",
+      "routes": ["/review"],
+      "sourceImplementation": ["apps/console/src/app/(workspace)/review/page.tsx", "apps/console/src/components/review-queue.tsx"],
+      "desktopIncluded": true,
+      "mobileIncluded": true,
+      "tabletNotes": "At 768px summary figures become a two-column band. Search and filters wrap above full-width SKU groups; paging remains after the queue and never inside a clipped table.",
+      "annotations": [
+        { "number": 1, "title": "Decision work", "detail": "Separate below-threshold values, required gaps, no-class records, and ambiguous classification." },
+        { "number": 2, "title": "Risk-ranked groups", "detail": "Each SKU exposes open counts and the actual values or gaps before navigation." },
+        { "number": 3, "title": "Filter truth", "detail": "No match differs from no SKUs: one clears filters, the other explains how to create recorded output." },
+        { "number": 4, "title": "Accepted remains legible", "detail": "Fully accepted records are a state, not silently removed from every view." }
+      ],
+      "coveredStates": ["open", "search", "filter", "no-match", "no-SKUs", "pagination", "accepted", "no-class", "ambiguous"]
+    },
+    {
+      "id": "resolve-detail",
+      "area": "workflow",
+      "family": "Resolve detail",
+      "runtime": "Next.js console :3000",
+      "routes": ["/review/[sku]"],
+      "sourceImplementation": ["apps/console/src/app/(workspace)/review/[sku]/page.tsx", "apps/console/src/components/review-workspace.tsx", "apps/console/src/components/evidence-viewer.tsx", "apps/console/src/components/sources-panel.tsx", "apps/console/src/components/variant-series-panel.tsx", "apps/console/src/components/cross-source-panel.tsx", "apps/console/src/components/equivalence-panel.tsx"],
+      "desktopIncluded": true,
+      "mobileIncluded": true,
+      "tabletNotes": "At 768px retain a single-column reading order: record summary, attribute queue, selected value, evidence, validation, sources, variants, cross-source, equivalence. Do not create a persistent three-pane layout.",
+      "annotations": [
+        { "number": 1, "title": "Keyboard queue", "detail": "Queue focus owns J/K movement and A/X/E decisions; ordinary page input never intercepts those keys." },
+        { "number": 2, "title": "Confidence is structural", "detail": "Calibrated score, policy threshold, reason, provenance method, and status form the decision header." },
+        { "number": 3, "title": "Evidence is the demo", "detail": "Exact source span is highlighted over a stable PDF page; zoom changes coordinates, not page identity." },
+        { "number": 4, "title": "Immediate persistence", "detail": "Saving, success with prior movement, error, and offline-disabled states are explicit." },
+        { "number": 5, "title": "Context below decision", "detail": "Validation, source inventory, variants, cross-source findings, and equivalence remain reachable without obscuring evidence." }
+      ],
+      "coveredStates": ["value-selected", "gap-selected", "no-selection", "decision-saving", "decision-success", "decision-error", "offline-decision-disabled", "evidence-pdf-highlight", "evidence-text-fallback", "evidence-derived-no-span", "evidence-missing-artifact", "evidence-unverified", "validation-pass-warn-fail", "sources", "variant", "cross-source", "equivalence"]
+    },
+    {
+      "id": "process",
+      "area": "workflow",
+      "family": "Process",
+      "runtime": "Next.js console :3000",
+      "routes": ["/pipeline"],
+      "sourceImplementation": ["apps/console/src/app/(workspace)/pipeline/page.tsx", "apps/console/src/components/pipeline-replay.tsx", "apps/console/src/components/recorded-run-combobox.tsx", "apps/console/src/lib/stages.ts"],
+      "desktopIncluded": true,
+      "mobileIncluded": true,
+      "tabletNotes": "At 768px the selector stays above a two-column stage grid. Below that, stages become one column in pipeline order with no horizontal timeline dependency.",
+      "annotations": [
+        { "number": 1, "title": "Replay-only boundary", "detail": "No upload and no Run control; every stage is reconstructed from persisted output." },
+        { "number": 2, "title": "Nine-stage order", "detail": "Ingest, Parse, Resolve, Classify, Extract, Normalize, Validate, Decide, Activate." },
+        { "number": 3, "title": "Model confinement", "detail": "Each stage identifies whether the recorded run used a model or deterministic code." },
+        { "number": 4, "title": "Reduced motion", "detail": "Replay progress becomes an immediate static complete state without travel or stagger." }
+      ],
+      "coveredStates": ["no-runs", "selector", "replay-stages", "complete", "reduced-motion"]
+    },
+    {
+      "id": "publish",
+      "area": "workflow",
+      "family": "Publish",
+      "runtime": "Next.js console :3000",
+      "routes": ["/delivery"],
+      "sourceImplementation": ["apps/console/src/app/(workspace)/delivery/page.tsx", "apps/console/src/components/delivery-upload.tsx", "apps/console/src/app/api/delivery/export/route.ts", "apps/api/main.py:859-1276"],
+      "desktopIncluded": true,
+      "mobileIncluded": true,
+      "tabletNotes": "At 768px the item-master and optional-document steps precede output settings. The 252-column preview remains a labelled horizontal-scroll region rather than compressed cells.",
+      "annotations": [
+        { "number": 1, "title": "Contract is live", "detail": "Format, column count, join key, file limits, and accepted outputs come from the export service." },
+        { "number": 2, "title": "Staging gate", "detail": "Export stays locked until an item master is staged; optional documents explain why sparse output can be correct." },
+        { "number": 3, "title": "Result taxonomy", "detail": "Rejected input, interrupted export, downloaded file, and JSON preview have different next actions." },
+        { "number": 4, "title": "Sparse is not failed", "detail": "Populated, blank, and withheld columns and empty subsections are reported separately." }
+      ],
+      "coveredStates": ["unavailable", "empty", "drag", "staged", "running", "rejected", "failed", "downloaded", "preview", "empty-item-master", "empty-documents", "empty-row-filter", "empty-preview-sections"]
+    },
+    {
+      "id": "audit-list",
+      "area": "workflow",
+      "family": "Audit list",
+      "runtime": "Next.js console :3000",
+      "routes": ["/certificates"],
+      "sourceImplementation": ["apps/console/src/app/(workspace)/certificates/page.tsx"],
+      "desktopIncluded": true,
+      "mobileIncluded": true,
+      "tabletNotes": "At 768px preserve the horizontally scrollable audit table with a named region. Signature status and SKU remain the first scan columns; pagination follows the complete list.",
+      "annotations": [
+        { "number": 1, "title": "Corpus-level claim", "detail": "All signatures valid is computed across the whole catalogue, not only the current page." },
+        { "number": 2, "title": "Signed facts only", "detail": "Queued candidates are counted but never presented as certified values." },
+        { "number": 3, "title": "Empty means no artifact", "detail": "Do not render a table header or invented generation date when no run exists." }
+      ],
+      "coveredStates": ["populated", "empty", "pagination", "signature-failure"]
+    },
+    {
+      "id": "audit-detail",
+      "area": "workflow",
+      "family": "Audit detail",
+      "runtime": "Next.js console :3000",
+      "routes": ["/certificates/[sku]"],
+      "sourceImplementation": ["apps/console/src/app/(workspace)/certificates/[sku]/page.tsx", "apps/console/src/components/generated-copy.tsx", "apps/console/src/components/sources-panel.tsx"],
+      "desktopIncluded": true,
+      "mobileIncluded": true,
+      "tabletNotes": "At 768px quality and contents stack, then signature, certified values, gaps, channel readiness, sources, and generated copy. Long hashes wrap in monospace without truncating the verification claim.",
+      "annotations": [
+        { "number": 1, "title": "Signature first", "detail": "Valid or invalid recomputed content hash is visible before the certified value table." },
+        { "number": 2, "title": "Measured quality", "detail": "Unmeasured richness has no zero-width bar and is excluded from the renormalized composite." },
+        { "number": 3, "title": "Certified set", "detail": "Every value pairs method, exact citation locator, and evidence status; an empty certified set is explained." },
+        { "number": 4, "title": "Downstream readiness", "detail": "Gaps, channels, and generated-copy variants remain separate audit sections." }
+      ],
+      "coveredStates": ["signature-valid", "signature-invalid", "quality-measured", "quality-partial", "certified-values", "certified-empty", "gaps-empty", "gaps-present", "channels-empty", "channels-ready-blocked", "copy-absent", "copy-verified", "copy-withheld"]
+    },
+    {
+      "id": "intelligence",
+      "area": "workflow",
+      "family": "Intelligence",
+      "runtime": "Next.js console :3000",
+      "routes": ["/quality"],
+      "sourceImplementation": ["apps/console/src/app/(workspace)/quality/page.tsx", "apps/console/src/components/cohort-panel.tsx", "apps/console/src/components/risk-dial.tsx", "apps/api/main.py:617-679"],
+      "desktopIncluded": true,
+      "mobileIncluded": true,
+      "tabletNotes": "At 768px impact arms, policy figures, and cost tiers each become stacked sections. The policy control retains a full-width curve plot or an explicit no-curve explanation.",
+      "annotations": [
+        { "number": 1, "title": "Three claims, three sections", "detail": "Cohort impact, acceptance policy, and unit economics never collapse into one blended score." },
+        { "number": 2, "title": "Trust context", "detail": "Treatment/control trust variants identify measured, drifting, or absent comparisons." },
+        { "number": 3, "title": "Policy is a what-if", "detail": "Pending, error, achievable, unachievable, and no-curve are explicit and do not silently reclassify values." },
+        { "number": 4, "title": "Missing cost is unknown", "detail": "Absent and partial pricing stay unavailable rather than becoming zero dollars." }
+      ],
+      "coveredStates": ["cohort-absent", "cohort-trust-valid", "cohort-trust-drift", "policy-pending", "policy-error", "policy-achievable", "policy-unachievable", "policy-no-curve", "cost-absent", "cost-partial", "cost-complete"]
+    },
+    {
+      "id": "legacy-review",
+      "area": "legacy",
+      "family": "Legacy FastAPI Review",
+      "runtime": "FastAPI :8000",
+      "routes": ["/"],
+      "sourceImplementation": ["apps/api/main.py:1724-1730", "apps/api/static/index.html", "apps/api/main.py:315-392"],
+      "desktopIncluded": true,
+      "mobileIncluded": true,
+      "tabletNotes": "At 768px the current fixed 280px + two minmax panes already become compressed. This is documented as a limitation; no responsive redesign is implied.",
+      "annotations": [
+        { "number": 1, "title": "Historical surface", "detail": "This root route belongs to FastAPI, not the Next.js public landing." },
+        { "number": 2, "title": "Fixed three panes", "detail": "Queue, value, and evidence are always grid columns with global overflow hidden." },
+        { "number": 3, "title": "Narrow-screen limitation", "detail": "At 390px the 280px queue consumes most of the viewport while value/evidence compress and clip; header controls also overflow." },
+        { "number": 4, "title": "Legacy behavior", "detail": "Session selection, error-budget policy, keyboard decisions, and line evidence remain represented as current behavior." }
+      ],
+      "coveredStates": ["sessions-empty", "session-loaded", "decision", "evidence-verified", "evidence-missing", "policy-achievable", "policy-unachievable", "request-error", "fixed-three-pane-mobile-clipping"]
+    },
+    {
+      "id": "legacy-delivery",
+      "area": "legacy",
+      "family": "Legacy FastAPI Delivery",
+      "runtime": "FastAPI :8000",
+      "routes": ["/delivery"],
+      "sourceImplementation": ["apps/api/main.py:1732-1738", "apps/api/static/delivery.html", "apps/api/main.py:859-1276"],
+      "desktopIncluded": true,
+      "mobileIncluded": true,
+      "tabletNotes": "At 768px the existing two-column form becomes its one-column layout; the 252-column result preview remains horizontally scrollable with a sticky header.",
+      "annotations": [
+        { "number": 1, "title": "Linear legacy task", "detail": "Supplier item master in, delivery file out; distinct from the three-pane legacy Review." },
+        { "number": 2, "title": "Contract readout", "detail": "The page loads the live delivery format before describing the output." },
+        { "number": 3, "title": "File and output errors", "detail": "Unreadable files, wrong columns, empty row selection, and output failures require distinct messages." },
+        { "number": 4, "title": "Success split", "detail": "Downloaded XLSX/CSV and JSON preview are separate successful outcomes." }
+      ],
+      "coveredStates": ["contract-loading", "contract-error", "file-empty", "file-staged", "file-error", "output-xlsx", "output-csv", "output-json", "result-running", "result-error", "result-download-success", "result-preview-success"]
+    }
+  ],
+  "summary": {
+    "familyCount": 14,
+    "routeEntries": 20,
+    "desktopPairs": 14,
+    "mobilePairs": 14,
+    "allFamiliesHaveTabletNotes": true,
+    "externalAssets": false,
+    "productionFilesModified": false
+  }
+}

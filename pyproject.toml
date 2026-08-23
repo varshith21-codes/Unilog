@@ -23,6 +23,12 @@ docintel = [
     # is the heaviest dependency in the tree. HTML needs nothing: html.parser is stdlib.
     "pdfplumber==0.11.7",
 ]
+browser = [
+    # Optional last-mile renderer for JavaScript product pages. Browser binaries are installed
+    # separately with `python -m playwright install chromium`; keeping this out of the base/API
+    # extras lets static-only deployments remain small.
+    "playwright==1.62.0",
+]
 ingest = [
     # XLSX reading for supplier flat files. Optional on the same principle as pdfplumber: CSV
     # and TSV go through the csv module, so a deployment that only ever sees delimited files

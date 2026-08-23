@@ -28,7 +28,7 @@ import { reviewHref } from "@/lib/sku";
 /**
  * How many blocked records the overview table lists before deferring to the resolve queue.
  *
- * This is a landing page, not a work queue: it exists to say how much is blocked and let someone
+ * This is the portfolio overview, not a work queue: it exists to say how much is blocked and let someone
  * start on the worst of it. Rendering a thousand rows here would bury that in its own detail, and
  * the queue it links to is paged and reachable in full.
  */

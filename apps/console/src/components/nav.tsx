@@ -21,7 +21,7 @@ type NavItem = {
 };
 
 const PRIMARY: NavItem[] = [
-  { href: "/", label: "Operations", descriptor: "Portfolio command", glyph: "operations" },
+  { href: "/operations", label: "Operations", descriptor: "Portfolio command", glyph: "operations" },
   // First after Operations because it is where a catalogue starts: one product, from a part number.
   // The descriptor says "live" because this is the only entry here that spends money.
   { href: "/enrich", label: "Enrich", descriptor: "Live single run", glyph: "enrich" },
@@ -43,7 +43,6 @@ const SECONDARY: NavItem[] = [
 const ALL = [...PRIMARY, ...SECONDARY];
 
 function activeFor(pathname: string, href: string): boolean {
-  if (href === "/") return pathname === "/";
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 

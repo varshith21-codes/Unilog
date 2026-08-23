@@ -287,6 +287,7 @@ def enrich_one(
     library=None,
     source_policy=None,
     search=None,
+    renderer=None,
 ) -> EnrichmentResult:
     """Enrich one SKU end to end. Makes real model calls through ``client``.
 
@@ -331,6 +332,7 @@ def enrich_one(
             brand=request.brand,
             policy=source_policy,
             search=search,
+            renderer=renderer,
             fetcher=fetcher,
             library=library,
         )

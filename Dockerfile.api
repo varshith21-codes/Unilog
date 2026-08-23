@@ -1,0 +1,45 @@
+# syntax=docker/dockerfile:1.7
+
+# Python 3.12 is the version exercised by CI. The digest pins the exact official
+# multi-architecture image rather than allowing the tag to drift between deploys.
+FROM python:3.12.13-slim-bookworm@sha256:4766d8b510c428e595d74b9cc5bbb2fae8e26316fffb4adc89908d79aacd58a2
+
+# The governed schema/config loaders intentionally resolve repository-relative files
+# from source. Prefer /app/packages over the installed wheel so those paths reach
+# /app/schema and package YAML remains available exactly as it is in development/CI.
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PYTHONPATH=/app/packages \
+    PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+
+WORKDIR /app
+
+RUN groupadd --gid 1000 axiom \
+    && useradd --uid 1000 --gid axiom --create-home --shell /usr/sbin/nologin axiom
+
+# Install the package before application code so dependency layers stay cached.
+COPY pyproject.toml ./
+COPY packages ./packages
+RUN python -m pip install ".[api,browser,docintel,ingest]" \
+    && python -m playwright install --with-deps chromium \
+    && chmod -R a+rX /ms-playwright
+
+COPY --chown=axiom:axiom apps/api ./apps/api
+COPY --chown=axiom:axiom schema ./schema
+COPY --chown=axiom:axiom evals ./evals
+
+# /app/data is replaced by the durable host mount in compose.yaml.
+RUN mkdir -p /app/data && chown axiom:axiom /app/data
+
+USER axiom
+
+EXPOSE 8000
+
+HEALTHCHECK --interval=15s --timeout=5s --start-period=20s --retries=4 \
+  CMD ["python", "-c", "from pathlib import Path; import urllib.request; from axiom.schema import load_default as load_schema; from axiom.delivery import load_default as load_delivery_format; load_schema(); load_delivery_format(); p=Path('/app/data/.container-write-check'); p.write_text('ok', encoding='utf-8'); p.unlink(); urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=3).read()"]
+
+# One process and one worker are required while sessions, priors, library state,
+# and the enrichment mutex remain local to this container.
+CMD ["python", "-m", "uvicorn", "apps.api.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--proxy-headers"]

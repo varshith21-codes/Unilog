@@ -42,7 +42,7 @@ export function DesktopSidebar({ brandMark }: DesktopSidebarProps) {
       data-collapsed={collapsed ? "true" : "false"}
     >
       <div className="sidebar-header">
-        <Link href="/" className="brand-link" aria-label="AXIOM Operations">
+        <Link href="/operations" className="brand-link" aria-label="AXIOM Operations">
           {brandMark}
           {!collapsed ? (
             <span className="sidebar-brand-copy">

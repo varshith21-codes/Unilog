@@ -1,0 +1,32 @@
+{$AXIOM_ORIGIN} {
+	encode zstd gzip
+
+	# The application does not implement authentication yet. Keep the entire
+	# prototype—including immutable supplier artifacts—behind one credential.
+	basic_auth {
+		{$AXIOM_AUTH_USER} {$AXIOM_AUTH_HASH}
+	}
+
+	header {
+		-Server
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "same-origin"
+		X-Frame-Options "SAMEORIGIN"
+	}
+
+	# The evidence viewer fetches this route directly in the browser. All other
+	# browser/API traffic stays on Next.js, whose route handlers and server actions
+	# call FastAPI over the private Compose network.
+	handle /api/artifact/* {
+		reverse_proxy api:8000
+	}
+
+	handle {
+		reverse_proxy console:3000
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}

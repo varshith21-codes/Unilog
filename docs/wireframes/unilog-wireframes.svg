@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1400" height="6220" viewBox="0 0 1400 6220" role="img" aria-labelledby="title description">
+  <title id="title">Unilog responsive wireframe contact sheet</title>
+  <desc id="description">Fourteen route families shown as paired 1440 by 1024 desktop and 390 by 844 mobile technical blueprint wireframes.</desc>
+  <metadata>Generated for the Unilog repository. No external assets. Blue denotes active state, annotation, or evidence target.</metadata>
+  <defs>
+    <style><![CDATA[
+      .paper{fill:#f7f8fa}.surface{fill:#fff}.muted{fill:#edf0f4}.ink{fill:#222936}.ink2{fill:#5d6674}.line{stroke:#9aa4b2;stroke-width:1;fill:none}.strong{stroke:#343d4b;stroke-width:1.4;fill:none}.accent{stroke:#2266dd;stroke-width:1.4;fill:#edf4ff}.dash{stroke:#2266dd;stroke-width:1.2;stroke-dasharray:5 4;fill:#edf4ff}.title{font:700 24px 'Arial Narrow','Segoe UI',sans-serif;fill:#222936}.route{font:12px Consolas,monospace;fill:#5d6674}.label{font:700 10px 'Arial Narrow','Segoe UI',sans-serif;fill:#222936;letter-spacing:.5px}.micro{font:9px Consolas,monospace;fill:#5d6674}.blue{fill:#174ea6}.num{font:700 10px Consolas,monospace;fill:#174ea6;text-anchor:middle;dominant-baseline:middle}.rowbg{fill:#f7f8fa;stroke:#343d4b;stroke-width:1}.state{font:9px Consolas,monospace;fill:#174ea6}.note{font:11px 'Segoe UI',sans-serif;fill:#343d4b}.small{font:10px 'Segoe UI',sans-serif;fill:#5d6674}.screenTitle{font:700 12px 'Arial Narrow','Segoe UI',sans-serif;fill:#222936}.screenMeta{font:8px Consolas,monospace;fill:#5d6674}
+    ]]></style>
+    <g id="workspace-desktop">
+      <rect class="surface strong" width="600" height="330"/>
+      <rect class="muted line" x="0" y="0" width="102" height="330"/>
+      <text class="label" x="14" y="24">AXIOM</text>
+      <text class="micro" x="14" y="49">WORKFLOWS</text>
+      <rect class="accent" x="10" y="59" width="82" height="22"/>
+      <rect class="line" x="10" y="88" width="82" height="22"/>
+      <rect class="line" x="10" y="117" width="82" height="22"/>
+      <rect class="line" x="10" y="146" width="82" height="22"/>
+      <rect class="line" x="10" y="175" width="82" height="22"/>
+      <rect class="line" x="10" y="204" width="82" height="22"/>
+      <text class="micro" x="14" y="248">ANALYSIS</text>
+      <rect class="line" x="10" y="258" width="82" height="22"/>
+      <line class="line" x1="102" y1="31" x2="600" y2="31"/>
+      <rect class="line" x="122" y="52" width="300" height="34"/>
+      <rect class="line" x="122" y="99" width="109" height="48"/>
+      <rect class="line" x="240" y="99" width="109" height="48"/>
+      <rect class="line" x="358" y="99" width="109" height="48"/>
+      <rect class="line" x="476" y="99" width="104" height="48"/>
+      <rect class="line" x="122" y="164" width="295" height="142"/>
+      <rect class="line" x="432" y="164" width="148" height="88"/>
+      <rect class="dash" x="432" y="264" width="148" height="42"/>
+    </g>
+    <g id="workspace-mobile">
+      <rect class="surface strong" width="152" height="330"/>
+      <rect class="line" x="0" y="0" width="152" height="26"/>
+      <text class="label" x="9" y="17">AXIOM</text>
+      <rect class="muted line" x="0" y="26" width="152" height="26"/>
+      <rect class="accent" x="7" y="32" width="34" height="14"/>
+      <rect class="line" x="45" y="32" width="30" height="14"/>
+      <rect class="line" x="79" y="32" width="30" height="14"/>
+      <rect class="line" x="113" y="32" width="32" height="14"/>
+      <rect class="line" x="11" y="67" width="107" height="31"/>
+      <rect class="line" x="11" y="110" width="61" height="43"/>
+      <rect class="line" x="80" y="110" width="61" height="43"/>
+      <rect class="line" x="11" y="163" width="130" height="89"/>
+      <rect class="dash" x="11" y="263" width="130" height="45"/>
+    </g>
+    <g id="public-desktop">
+      <rect class="surface strong" width="600" height="330"/>
+      <line class="line" x1="0" y1="34" x2="600" y2="34"/>
+      <text class="label" x="16" y="22">AXIOM</text>
+      <rect class="accent" x="500" y="9" width="82" height="18"/>
+      <rect class="line" x="28" y="64" width="340" height="92"/>
+      <rect class="line" x="410" y="64" width="162" height="92"/>
+      <rect class="line" x="28" y="181" width="190" height="118"/>
+      <rect class="line" x="230" y="181" width="342" height="118"/>
+      <rect class="accent" x="256" y="242" width="274" height="16"/>
+    </g>
+    <g id="public-mobile">
+      <rect class="surface strong" width="152" height="330"/>
+      <line class="line" x1="0" y1="27" x2="152" y2="27"/>
+      <text class="label" x="8" y="18">AXIOM</text>
+      <rect class="accent" x="101" y="7" width="43" height="14"/>
+      <rect class="line" x="11" y="45" width="130" height="85"/>
+      <rect class="line" x="11" y="141" width="130" height="49"/>
+      <rect class="line" x="11" y="201" width="130" height="105"/>
+      <rect class="accent" x="24" y="256" width="103" height="13"/>
+    </g>
+    <g id="legacy-desktop">
+      <rect class="surface strong" width="600" height="330"/>
+      <line class="line" x1="0" y1="34" x2="600" y2="34"/>
+      <text class="label" x="14" y="22">AXIOM LEGACY</text>
+      <rect class="muted line" x="0" y="34" width="145" height="296"/>
+      <rect class="line" x="145" y="34" width="220" height="296"/>
+      <rect class="line" x="365" y="34" width="235" height="296"/>
+      <rect class="accent" x="10" y="68" width="125" height="30"/>
+      <rect class="line" x="166" y="62" width="176" height="66"/>
+      <rect class="dash" x="166" y="145" width="176" height="55"/>
+      <rect class="line" x="389" y="62" width="187" height="218"/>
+      <rect class="accent" x="411" y="170" width="142" height="20"/>
+    </g>
+    <g id="legacy-mobile">
+      <rect class="surface strong" width="152" height="330"/>
+      <line class="line" x1="0" y1="27" x2="152" y2="27"/>
+      <rect class="muted line" x="0" y="27" width="109" height="269"/>
+      <rect class="line" x="109" y="27" width="96" height="269"/>
+      <rect class="line" x="205" y="27" width="108" height="269"/>
+      <rect class="accent" x="7" y="52" width="94" height="27"/>
+      <path class="dash" d="M7 307H145V322H7Z"/>
+      <text class="micro blue" x="12" y="318">FIXED GRID CLIPS AT 390PX</text>
+    </g>
+    <g id="annotation-dot"><circle class="accent" r="10"/><text class="num" y=".5">1</text></g>
+  </defs>
+  <rect class="paper" width="1400" height="6220"/>
+  <text class="route blue" x="70" y="66">TECHNICAL BLUEPRINT / RESPONSIVE CONTACT SHEET</text>
+  <text class="title" x="70" y="110" style="font-size:42px">Unilog wireframe atlas</text>
+  <text class="note" x="70" y="140">14 route families · paired 1440×1024 desktop and 390×844 mobile frames · 768px reflow notes in the HTML atlas</text>
+  <text class="micro" x="70" y="169">BLUE = ACTIVE / ANNOTATION / EVIDENCE TARGET · MONOCHROME = STRUCTURE · DASHED = ALTERNATE STATE</text>
+
+  <!-- 01 Public landing -->
+  <g id="public-landing" transform="translate(0 210)"><rect class="rowbg" x="50" width="1300" height="392"/><text class="title" x="74" y="34">01  Public landing</text><text class="route" x="74" y="55">Next.js :3000 · /</text><g transform="translate(74 72)"><use xlink:href="#public-desktop"/><text class="screenTitle" x="30" y="88">Sparse input → trusted catalog intelligence</text><text class="screenMeta" x="30" y="108">Enter operations · Enrich a record</text><use xlink:href="#annotation-dot" x="550" y="72"/></g><g transform="translate(696 72)"><use xlink:href="#public-mobile"/><text class="screenTitle" x="17" y="67">Public hero</text></g><text class="label" x="882" y="88">ANNOTATIONS</text><text class="note" x="882" y="112">1 Public shell only</text><text class="note" x="882" y="134">2 Specific evidence-backed promise</text><text class="note" x="882" y="156">3 Proof specimen and exact source span</text><text class="note" x="882" y="178">4 Primary handoff to Operations</text><text class="state" x="882" y="218">default · evidence-proof · mobile-stacked</text></g>
+
+  <!-- 02 Marketing 404 -->
+  <g id="marketing-404" transform="translate(0 622)"><rect class="rowbg" x="50" width="1300" height="392"/><text class="title" x="74" y="34">02  Global marketing 404</text><text class="route" x="74" y="55">Next.js :3000 · outside workspace route group</text><g transform="translate(74 72)"><use xlink:href="#public-desktop"/><text class="screenTitle" x="50" y="105">This record path does not exist.</text><text class="screenMeta" x="50" y="126">AXIOM overview · Enter operations</text></g><g transform="translate(696 72)"><use xlink:href="#public-mobile"/><text class="screenTitle" x="18" y="72">404 recovery</text></g><text class="label" x="882" y="88">ANNOTATIONS</text><text class="note" x="882" y="112">1 Public—not workspace—boundary</text><text class="note" x="882" y="134">2 Exact missing-path message</text><text class="note" x="882" y="156">3 Two recovery destinations</text><text class="state" x="882" y="198">route-unavailable · actions inline / stacked</text></g>
+
+  <!-- 03 Workspace shell -->
+  <g id="workspace-shell" transform="translate(0 1034)"><rect class="rowbg" x="50" width="1300" height="392"/><text class="title" x="74" y="34">03  Workspace shell and boundaries</text><text class="route" x="74" y="55">Next.js :3000 · all (workspace) routes</text><g transform="translate(74 72)"><use xlink:href="#workspace-desktop"/><text class="screenTitle" x="132" y="72">Persistent workflow context</text><text class="screenMeta" x="132" y="87">expanded / collapsed rail · route boundaries</text></g><g transform="translate(696 72)"><use xlink:href="#workspace-mobile"/><text class="screenTitle" x="16" y="87">Mobile shell</text></g><text class="label" x="882" y="88">ANNOTATIONS</text><text class="note" x="882" y="112">1 Canonical workflow order</text><text class="note" x="882" y="134">2 Collapsible accessible rail</text><text class="note" x="882" y="156">3 Persistent offline truth banner</text><text class="note" x="882" y="178">4 Loading, error, and 404 stay in shell</text><text class="state" x="882" y="218">live · collapsed · mobile · offline · loading · error · 404</text></g>
+
+  <!-- 04 Operations -->
+  <g id="operations" transform="translate(0 1446)"><rect class="rowbg" x="50" width="1300" height="392"/><text class="title" x="74" y="34">04  Operations</text><text class="route" x="74" y="55">/operations</text><g transform="translate(74 72)"><use xlink:href="#workspace-desktop"/><text class="screenTitle" x="132" y="72">Catalog work that needs intervention</text><text class="screenMeta" x="132" y="87">blocked records · portfolio stats · recent runs</text></g><g transform="translate(696 72)"><use xlink:href="#workspace-mobile"/><text class="screenTitle" x="16" y="87">Blocked work</text></g><text class="label" x="882" y="88">ANNOTATIONS</text><text class="note" x="882" y="112">1 Blocked and clear headlines differ</text><text class="note" x="882" y="134">2 Honest unclassified denominator</text><text class="note" x="882" y="156">3 Highest publication risk first</text><text class="note" x="882" y="178">4 Recent context is recorded, not live</text><text class="state" x="882" y="218">blocked · clear · recent-empty · live / offline</text></g>
+
+  <!-- 05 Enrich -->
+  <g id="enrich" transform="translate(0 1858)"><rect class="rowbg" x="50" width="1300" height="392"/><text class="title" x="74" y="34">05  Enrich</text><text class="route" x="74" y="55">/enrich</text><g transform="translate(74 72)"><use xlink:href="#workspace-desktop"/><text class="screenTitle" x="132" y="72">Identify product · add source · run</text><text class="screenMeta" x="132" y="87">live model calls · cost before submit</text></g><g transform="translate(696 72)"><use xlink:href="#workspace-mobile"/><text class="screenTitle" x="16" y="87">Run control stacks</text></g><text class="label" x="882" y="88">ANNOTATIONS</text><text class="note" x="882" y="112">1 Only live, paid workflow</text><text class="note" x="882" y="134">2 Input gate is stated</text><text class="note" x="882" y="156">3 Model-call cost precedes action</text><text class="note" x="882" y="178">4 Refusal and conflict remedies differ</text><text class="state" x="882" y="218">unavailable · incomplete · ready · running · refused · conflict · success</text></g>
+
+  <!-- 06 Resolve queue -->
+  <g id="resolve-queue" transform="translate(0 2270)"><rect class="rowbg" x="50" width="1300" height="392"/><text class="title" x="74" y="34">06  Resolve queue</text><text class="route" x="74" y="55">/review</text><g transform="translate(74 72)"><use xlink:href="#workspace-desktop"/><text class="screenTitle" x="132" y="72">Attributes needing a decision</text><text class="screenMeta" x="132" y="87">search · filters · risk-ranked SKU cards · paging</text></g><g transform="translate(696 72)"><use xlink:href="#workspace-mobile"/><text class="screenTitle" x="16" y="87">Filtered queue</text></g><text class="label" x="882" y="88">ANNOTATIONS</text><text class="note" x="882" y="112">1 Decision categories stay distinct</text><text class="note" x="882" y="134">2 Actual open items precede navigation</text><text class="note" x="882" y="156">3 No match differs from no catalogue</text><text class="note" x="882" y="178">4 Fully accepted remains visible</text><text class="state" x="882" y="218">open · no-match · no-SKUs · accepted · no-class · ambiguous</text></g>
+
+  <!-- 07 Resolve detail -->
+  <g id="resolve-detail" transform="translate(0 2682)"><rect class="rowbg" x="50" width="1300" height="392"/><text class="title" x="74" y="34">07  Resolve detail</text><text class="route" x="74" y="55">/review/[sku]</text><g transform="translate(74 72)"><use xlink:href="#workspace-desktop"/><rect class="accent" x="124" y="172" width="128" height="24"/><rect class="accent" x="278" y="220" width="210" height="18"/><text class="screenTitle" x="132" y="72">Queue + decision + exact evidence</text><text class="screenMeta" x="132" y="87">J/K · A/X/E · score 0.7045 · gate 0.707</text></g><g transform="translate(696 72)"><use xlink:href="#workspace-mobile"/><text class="screenTitle" x="16" y="87">Single reading order</text></g><text class="label" x="882" y="88">ANNOTATIONS</text><text class="note" x="882" y="112">1 Keyboard queue owns shortcuts</text><text class="note" x="882" y="134">2 Score, threshold, method, status</text><text class="note" x="882" y="156">3 Stable highlighted source span</text><text class="note" x="882" y="178">4 Immediate decision persistence</text><text class="note" x="882" y="200">5 Context panels remain below</text><text class="state" x="882" y="234">value · gap · save/error · PDF/text/derived · validation · context</text></g>
+
+  <!-- 08 Process -->
+  <g id="process" transform="translate(0 3094)"><rect class="rowbg" x="50" width="1300" height="392"/><text class="title" x="74" y="34">08  Process</text><text class="route" x="74" y="55">/pipeline</text><g transform="translate(74 72)"><use xlink:href="#workspace-desktop"/><text class="screenTitle" x="132" y="72">What the recorded process did</text><text class="screenMeta" x="132" y="87">Ingest → Parse → Resolve → Classify → Extract → Normalize → Validate → Decide → Activate</text></g><g transform="translate(696 72)"><use xlink:href="#workspace-mobile"/><text class="screenTitle" x="16" y="87">Ordered stages</text></g><text class="label" x="882" y="88">ANNOTATIONS</text><text class="note" x="882" y="112">1 Replay-only boundary</text><text class="note" x="882" y="134">2 Nine-stage recorded order</text><text class="note" x="882" y="156">3 Model versus deterministic work</text><text class="note" x="882" y="178">4 Reduced motion shows all immediately</text><text class="state" x="882" y="218">no-runs · selector · replay · complete · reduced-motion</text></g>
+
+  <!-- 09 Publish -->
+  <g id="publish" transform="translate(0 3506)"><rect class="rowbg" x="50" width="1300" height="392"/><text class="title" x="74" y="34">09  Publish</text><text class="route" x="74" y="55">/delivery</text><g transform="translate(74 72)"><use xlink:href="#workspace-desktop"/><text class="screenTitle" x="132" y="72">Stage item master · attach evidence · export</text><text class="screenMeta" x="132" y="87">UniLog@1.0 · 252 columns · blank ≠ withheld</text></g><g transform="translate(696 72)"><use xlink:href="#workspace-mobile"/><text class="screenTitle" x="16" y="87">Linear publish task</text></g><text class="label" x="882" y="88">ANNOTATIONS</text><text class="note" x="882" y="112">1 Contract data is live</text><text class="note" x="882" y="134">2 Item master gates export</text><text class="note" x="882" y="156">3 Rejected, failed, download, preview</text><text class="note" x="882" y="178">4 Sparse output can be correct</text><text class="state" x="882" y="218">unavailable · drag · staged · running · rejected · failed · downloaded · preview</text></g>
+
+  <!-- 10 Audit list -->
+  <g id="audit-list" transform="translate(0 3918)"><rect class="rowbg" x="50" width="1300" height="392"/><text class="title" x="74" y="34">10  Audit list</text><text class="route" x="74" y="55">/certificates</text><g transform="translate(74 72)"><use xlink:href="#workspace-desktop"/><text class="screenTitle" x="132" y="72">Signed enrichment records</text><text class="screenMeta" x="132" y="87">quality-sorted table · signatures · pagination</text></g><g transform="translate(696 72)"><use xlink:href="#workspace-mobile"/><text class="screenTitle" x="16" y="87">Audit table scrolls</text></g><text class="label" x="882" y="88">ANNOTATIONS</text><text class="note" x="882" y="112">1 Corpus-level signature claim</text><text class="note" x="882" y="134">2 Queued values are not certified</text><text class="note" x="882" y="156">3 Empty means no artifact</text><text class="state" x="882" y="198">populated · empty · pagination · signature-failure</text></g>
+
+  <!-- 11 Audit detail -->
+  <g id="audit-detail" transform="translate(0 4330)"><rect class="rowbg" x="50" width="1300" height="392"/><text class="title" x="74" y="34">11  Audit detail</text><text class="route" x="74" y="55">/certificates/[sku]</text><g transform="translate(74 72)"><use xlink:href="#workspace-desktop"/><rect class="accent" x="438" y="170" width="136" height="30"/><text class="screenTitle" x="132" y="72">Signed certificate and exact citations</text><text class="screenMeta" x="132" y="87">quality · signature · values · gaps · channels · copy</text></g><g transform="translate(696 72)"><use xlink:href="#workspace-mobile"/><text class="screenTitle" x="16" y="87">Audit reading order</text></g><text class="label" x="882" y="88">ANNOTATIONS</text><text class="note" x="882" y="112">1 Recomputed signature first</text><text class="note" x="882" y="134">2 Unmeasured quality is not zero</text><text class="note" x="882" y="156">3 Method + locator + evidence status</text><text class="note" x="882" y="178">4 Gaps, channels and copy are separate</text><text class="state" x="882" y="218">valid / invalid · values / empty · gaps · channels · copy variants</text></g>
+
+  <!-- 12 Intelligence -->
+  <g id="intelligence" transform="translate(0 4742)"><rect class="rowbg" x="50" width="1300" height="392"/><text class="title" x="74" y="34">12  Intelligence</text><text class="route" x="74" y="55">/quality</text><g transform="translate(74 72)"><use xlink:href="#workspace-desktop"/><text class="screenTitle" x="132" y="72">Impact, policy, and unit economics</text><text class="screenMeta" x="132" y="87">three claims · separate trust and missing-data states</text></g><g transform="translate(696 72)"><use xlink:href="#workspace-mobile"/><text class="screenTitle" x="16" y="87">Three stacked claims</text></g><text class="label" x="882" y="88">ANNOTATIONS</text><text class="note" x="882" y="112">1 Cohort, policy and cost stay separate</text><text class="note" x="882" y="134">2 Control can hold, drift, or be absent</text><text class="note" x="882" y="156">3 Policy what-if does not reclassify</text><text class="note" x="882" y="178">4 Missing cost remains unknown</text><text class="state" x="882" y="218">cohort absent / drift · policy pending / error / no curve · cost absent / partial</text></g>
+
+  <!-- 13 Legacy review -->
+  <g id="legacy-review" transform="translate(0 5154)"><rect class="rowbg" x="50" width="1300" height="392"/><text class="title" x="74" y="34">13  Legacy FastAPI Review</text><text class="route" x="74" y="55">FastAPI :8000 · /</text><g transform="translate(74 72)"><use xlink:href="#legacy-desktop"/><text class="screenTitle" x="162" y="55">Fixed queue | value | evidence</text></g><g transform="translate(696 72)"><use xlink:href="#legacy-mobile"/></g><text class="label" x="882" y="88">ANNOTATIONS</text><text class="note" x="882" y="112">1 Historical FastAPI root</text><text class="note" x="882" y="134">2 Fixed three-pane implementation</text><text class="note" x="882" y="156">3 390px clipping is documented, not redesigned</text><text class="note" x="882" y="178">4 Sessions, decisions, policy and evidence</text><text class="state" x="882" y="218">sessions empty / loaded · decision · evidence · policy · request error · clipping</text></g>
+
+  <!-- 14 Legacy delivery -->
+  <g id="legacy-delivery" transform="translate(0 5566)"><rect class="rowbg" x="50" width="1300" height="392"/><text class="title" x="74" y="34">14  Legacy FastAPI Delivery</text><text class="route" x="74" y="55">FastAPI :8000 · /delivery</text><g transform="translate(74 72)"><use xlink:href="#public-desktop"/><text class="screenTitle" x="34" y="82">Supplier item master in, delivery file out</text><text class="screenMeta" x="34" y="101">live contract · files · output · result preview</text></g><g transform="translate(696 72)"><use xlink:href="#public-mobile"/><text class="screenTitle" x="15" y="68">Linear upload</text></g><text class="label" x="882" y="88">ANNOTATIONS</text><text class="note" x="882" y="112">1 Linear task separate from Review</text><text class="note" x="882" y="134">2 Contract read before output promises</text><text class="note" x="882" y="156">3 File and output errors stay distinct</text><text class="note" x="882" y="178">4 Download and preview success differ</text><text class="state" x="882" y="218">contract load / error · file empty / staged · output variants · error / success</text></g>
+
+  <text class="micro" x="70" y="6030">SOURCE OF TRUTH: docs/wireframes/coverage.json · INTERACTIVE DETAIL: unilog-wireframe-atlas.html</text>
+  <text class="micro" x="70" y="6050">TABLET: every family includes an explicit 768px reflow note in the HTML atlas and coverage manifest.</text>
+</svg>

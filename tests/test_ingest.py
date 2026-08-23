@@ -19,11 +19,13 @@ from axiom.ingest import (
     LocalArtifactStore,
     MappingMemory,
     UrlFetchError,
+    check_url,
     detect_document_type,
     filename_for,
     fold_header,
     infer_mapping,
     ingest_bytes,
+    ingest_fetched_resource,
     ingest_file,
     ingest_url,
     is_url,
@@ -573,6 +575,35 @@ def test_loopback_and_private_addresses_are_refused(tmp_path: Path, url: str):
         ingest_url(url, store, fetcher=stub_fetch())
 
 
+def test_a_dns_name_resolving_private_is_refused(monkeypatch):
+    import socket
+
+    monkeypatch.setattr(
+        socket,
+        "getaddrinfo",
+        lambda *_args, **_kwargs: [
+            (socket.AF_INET, socket.SOCK_STREAM, 6, "", ("10.0.0.5", 0))
+        ],
+    )
+
+    with pytest.raises(UrlFetchError, match="non-public"):
+        check_url("https://metadata.example/x", verify_public_address=True)
+
+
+def test_the_global_nat64_prefix_is_not_mistaken_for_a_private_address(monkeypatch):
+    import socket
+
+    monkeypatch.setattr(
+        socket,
+        "getaddrinfo",
+        lambda *_args, **_kwargs: [
+            (socket.AF_INET6, socket.SOCK_STREAM, 6, "", ("64:ff9b::96ab:6e53", 0, 0, 0))
+        ],
+    )
+
+    assert check_url("https://manufacturer.example/x", verify_public_address=True)
+
+
 def test_an_unexpected_content_type_is_refused(tmp_path: Path):
     """A login wall stored as a datasheet is worse than a failed fetch, because it gets cited."""
     store = LocalArtifactStore(tmp_path / "artifacts")
@@ -592,6 +623,49 @@ def test_an_empty_body_is_refused(tmp_path: Path):
     store = LocalArtifactStore(tmp_path / "artifacts")
     with pytest.raises(UrlFetchError, match="empty body"):
         ingest_url("https://example.com/x.html", store, fetcher=stub_fetch(data=b""))
+
+
+def test_a_browser_resource_cannot_bypass_the_byte_ceiling(tmp_path: Path):
+    store = LocalArtifactStore(tmp_path / "artifacts")
+    resource = FetchedResource(
+        data=b"x" * 11,
+        url="https://example.com/rendered.html",
+        content_type="text/html",
+    )
+
+    with pytest.raises(UrlFetchError, match="10-byte ceiling"):
+        ingest_fetched_resource(resource, store, max_bytes=10)
+
+
+def test_a_browser_resource_cannot_turn_an_http_error_into_evidence(tmp_path: Path):
+    store = LocalArtifactStore(tmp_path / "artifacts")
+    resource = FetchedResource(
+        data=b"<html><body>SKU-1 not found</body></html>",
+        url="https://manufacturer.example/missing",
+        content_type="text/html",
+        status=404,
+    )
+
+    with pytest.raises(UrlFetchError, match="returned HTTP 404"):
+        ingest_fetched_resource(resource, store)
+
+
+def test_a_browser_resource_uses_its_final_url_as_provenance(tmp_path: Path):
+    store = LocalArtifactStore(tmp_path / "artifacts")
+    resource = FetchedResource(
+        data=b"<html><body>SKU-1</body></html>",
+        url="https://manufacturer.example/final/product",
+        content_type="text/html",
+    )
+
+    artifact = ingest_fetched_resource(
+        resource,
+        store,
+        requested_url="https://manufacturer.example/redirect",
+    )
+
+    assert artifact.document.uri == "https://manufacturer.example/final/product"
+    assert artifact.document.doc_type is DocumentType.WEB_PAGE
 
 
 def test_last_modified_becomes_the_revision_label(tmp_path: Path):

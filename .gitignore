@@ -1,6 +1,8 @@
 # --- secrets: never commit ---
 .env
 .env.*
+# Safe deployment template only; real .env.deploy remains ignored by the rule above.
+!.env.deploy.example
 *.pem
 *.key
 credentials

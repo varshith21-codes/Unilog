@@ -47,14 +47,16 @@ from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from axiom.docintel import ParsedDocument
+from axiom.docintel import ParsedDocument, extract_links
 from axiom.ingest.store import LocalArtifactStore
 from axiom.retrieve import (
+    Candidate,
     Discovery,
     DocumentEntry,
     DocumentLibrary,
     FetchOutcome,
     Manufacturer,
+    RenderedFetcher,
     Resolution,
     Resolver,
     RetrievalSession,
@@ -64,15 +66,21 @@ from axiom.retrieve import (
 )
 from axiom.retrieve import load_default as load_source_policy
 
-MAX_FETCHES = 8
-"""Requests one submission may make.
+MAX_FETCHES = 12
+"""Static page/document fetch attempts across discovery and candidate retrieval.
 
-Deliberately low, and lower than the CLI's 50. That budget is for a batch run somebody is watching;
-this one sits inside an HTTP request on an endpoint with no authentication, so it bounds what a
-single caller can aim at a third party's website. Discovery's own per-part budget is 4 pages, so
-this
-allows roughly one discovery attempt plus a couple of resolved candidates.
+Search-provider calls, robots.txt checks, and bounded browser subrequests have independent limits
+and accounting; this ceiling does not claim to include them.
 """
+
+MIN_RESOLVER_FETCHES = 4
+"""Capacity reserved for supplied, patterned and search-derived candidates.
+
+A large sitemap must never consume the whole submission budget before open search gets a chance.
+"""
+
+MAX_DISCOVERY_FETCHES = 8
+"""Maximum sitemap and manufacturer-site requests before candidate resolution takes over."""
 
 
 @dataclass(frozen=True)
@@ -97,6 +105,7 @@ class RetrievalAttempt:
     resolution: Resolution | None = None
     outcomes: tuple[FetchOutcome, ...] = ()
     requests_made: int = 0
+    browser_requests_made: int = 0
     bytes_fetched: int = 0
     notes: tuple[str, ...] = field(default=())
 
@@ -135,6 +144,7 @@ class RetrievalAttempt:
                 for parsed in self.documents
             ],
             "requests_made": self.requests_made,
+            "browser_requests_made": self.browser_requests_made,
             "bytes_fetched": self.bytes_fetched,
             "discovery": self.discovery.summary() if self.discovery else None,
             "resolution": self.resolution.summary() if self.resolution else None,
@@ -156,8 +166,10 @@ def retrieve_documents(
     supplied: Sequence[str] = (),
     policy: SourcePolicy | None = None,
     search: SearchProvider | None = None,
+    renderer: RenderedFetcher | None = None,
     fetcher=None,
     max_fetches: int = MAX_FETCHES,
+    max_browser_pages: int = 2,
     discover: bool = True,
     library: DocumentLibrary | None = None,
 ) -> RetrievalAttempt:
@@ -222,8 +234,17 @@ def retrieve_documents(
                 f"this part number into a retrievable one."
             )
 
-    session = RetrievalSession(
-        policy=policy, store=store, library=library, fetcher=fetcher
+    # Reserve candidate capacity before site discovery starts. Sitemap indexes can fan out into
+    # dozens of child files; they are useful, but never more useful than leaving room for a direct
+    # search result or supplied URL.
+    reserved = min(MIN_RESOLVER_FETCHES, max(0, max_fetches))
+    discovery_limit = min(MAX_DISCOVERY_FETCHES, max(0, max_fetches - reserved))
+    discovery_session = RetrievalSession(
+        policy=policy,
+        store=store,
+        library=library,
+        fetcher=fetcher,
+        max_requests=discovery_limit,
     )
 
     discovery: Discovery | None = None
@@ -239,10 +260,10 @@ def retrieve_documents(
     #
     # First because it needs no API key and no bill, and because a manufacturer's own page is the
     # only tier citable as `MFR URL`.
-    if discover and maker is not None:
-        discovery = SiteDiscovery(policy=policy, session=session, library=library).discover(
-            mpn, maker
-        )
+    if discover and maker is not None and discovery_limit > 0:
+        discovery = SiteDiscovery(
+            policy=policy, session=discovery_session, library=library
+        ).discover(mpn, maker)
         if discovery.found:
             documents = _harvest()
             if documents:
@@ -257,14 +278,25 @@ def retrieve_documents(
                     entries=discovery.documents,
                     manufacturer=maker,
                     discovery=discovery,
-                    requests_made=session.requests_made,
-                    bytes_fetched=session.bytes_fetched,
+                    requests_made=discovery_session.requests_made,
+                    bytes_fetched=discovery_session.bytes_fetched,
                     notes=tuple(notes),
                 )
         notes.extend(discovery.notes)
 
     # --- step 3: supplied URLs, declared patterns, then search ---------------------
-    if session.requests_made < max_fetches:
+    # A fresh session gets every request discovery did not use. The separate hard ceiling is what
+    # prevents sitemap fan-out from suppressing this arm while preserving one total budget.
+    resolver_limit = max(0, max_fetches - discovery_session.requests_made)
+    session = RetrievalSession(
+        policy=policy,
+        store=store,
+        library=library,
+        fetcher=fetcher,
+        max_requests=resolver_limit,
+        renderer=renderer,
+    )
+    if resolver_limit > 0:
         resolution = Resolver(policy, search=search).resolve(
             mpn,
             brand=brand,
@@ -273,8 +305,29 @@ def retrieve_documents(
             supplied=supplied,
         )
         notes.extend(resolution.notes)
+        rendered_pages = 0
+
+        def _completed_attempt() -> RetrievalAttempt | None:
+            documents = _harvest()
+            if not documents:
+                return None
+            library.save()
+            return RetrievalAttempt(
+                mpn=mpn,
+                documents=documents,
+                entries=tuple(o.entry for o in outcomes if o.entry is not None),
+                manufacturer=maker,
+                discovery=discovery,
+                resolution=resolution,
+                outcomes=tuple(outcomes),
+                requests_made=discovery_session.requests_made + session.requests_made,
+                browser_requests_made=session.browser_requests_made,
+                bytes_fetched=discovery_session.bytes_fetched + session.bytes_fetched,
+                notes=tuple(notes),
+            )
+
         for candidate in resolution.candidates:
-            if session.requests_made >= max_fetches:
+            if session.exhausted:
                 notes.append(
                     f"stopped at the {max_fetches}-request ceiling for one submission; "
                     f"{len(resolution.candidates)} candidate(s) were available."
@@ -285,24 +338,56 @@ def retrieve_documents(
             # Coverage, not merely a successful fetch. A landing page that never names the part
             # number is not a source for it, and storing it as one would put an unrelated document
             # behind a citation.
-            if outcome.usable and library.coverage_for(mpn):
-                documents = _harvest()
-                if documents:
-                    library.save()
-                    return RetrievalAttempt(
-                        mpn=mpn,
-                        documents=documents,
-                        entries=tuple(o.entry for o in outcomes if o.entry is not None),
-                        manufacturer=maker,
-                        discovery=discovery,
-                        resolution=resolution,
-                        outcomes=tuple(outcomes),
-                        requests_made=session.requests_made,
-                        bytes_fetched=session.bytes_fetched,
-                        notes=tuple(notes),
-                    )
+            if not outcome.usable:
+                continue
+            if completed := _completed_attempt():
+                return completed
 
-    if session.requests_made:
+            if renderer is None or rendered_pages >= max_browser_pages:
+                continue
+            rendered_pages += 1
+            rendered_outcomes, rendered_notes = session.render(candidate)
+            outcomes.extend(rendered_outcomes)
+            notes.extend(rendered_notes)
+
+            # A rendered DOM often reveals a normal PDF link absent from the server-side shell.
+            # Fetch it through RetrievalSession rather than browser APIs so redirects, robots, byte
+            # limits and final-URL policy remain exactly the static path's rules.
+            for rendered_outcome in rendered_outcomes:
+                entry = rendered_outcome.entry
+                if entry is None or session.exhausted:
+                    continue
+                markup = library.text(entry)
+                if not markup:
+                    continue
+                links = [
+                    link
+                    for link in extract_links(markup, entry.source_uri)
+                    if link.is_pdf and policy.allows(link.url)
+                ]
+                links.sort(key=lambda link: -policy.spec_score(link.url))
+                for link in links[:2]:
+                    if session.exhausted:
+                        break
+                    verdict = policy.classify(link.url)
+                    pdf_candidate = Candidate(
+                        url=link.url,
+                        verdict=verdict,
+                        origin="browser_link",
+                        rank=candidate.rank + policy.spec_score(link.url),
+                        query=candidate.query,
+                        manufacturer_id=verdict.manufacturer_id,
+                    )
+                    pdf_outcome = session.fetch(pdf_candidate)
+                    outcomes.append(pdf_outcome)
+                    if pdf_outcome.usable and (completed := _completed_attempt()):
+                        return completed
+            if completed := _completed_attempt():
+                return completed
+
+    total_requests = discovery_session.requests_made + session.requests_made
+    total_bytes = discovery_session.bytes_fetched + session.bytes_fetched
+    if total_requests:
         library.save()
 
     return RetrievalAttempt(
@@ -311,8 +396,9 @@ def retrieve_documents(
         discovery=discovery,
         resolution=resolution,
         outcomes=tuple(outcomes),
-        requests_made=session.requests_made,
-        bytes_fetched=session.bytes_fetched,
+        requests_made=total_requests,
+        browser_requests_made=session.browser_requests_made,
+        bytes_fetched=total_bytes,
         notes=tuple(notes),
     )
 

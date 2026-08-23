@@ -112,7 +112,11 @@ class Fetcher(Protocol):
 
 
 def _refuse_private(address: ipaddress.IPv4Address | ipaddress.IPv6Address, shown: str) -> None:
-    if address.is_loopback or address.is_private or address.is_link_local or address.is_reserved:
+    # ``64:ff9b::/96`` (the well-known NAT64 prefix) is both global and ``is_reserved`` in
+    # Python's address tables. Rejecting every reserved address therefore blocks ordinary public
+    # sites on NAT64 networks. Global unicast is the intended boundary; multicast is never a
+    # product source even where an address table labels it global.
+    if not address.is_global or address.is_multicast:
         raise UrlFetchError(
             f"refusing to fetch a non-public address: {shown}. A product source lives on the "
             f"public internet; an internal address here is a mistake or an attempt at one."
@@ -321,6 +325,67 @@ def filename_for(url: str, media_type: str = "") -> str:
     return stem
 
 
+def ingest_fetched_resource(
+    resource: FetchedResource,
+    store: ArtifactStore,
+    *,
+    requested_url: str | None = None,
+    supplier_id: str | None = None,
+    max_bytes: int = DEFAULT_MAX_BYTES,
+    allow_any_content_type: bool = False,
+    license_note: str | None = None,
+    revision_label: str | None = None,
+    verify_public_address: bool = False,
+) -> IngestedArtifact:
+    """Validate and store bytes already obtained by an approved transport.
+
+    Browser rendering is a transport, not a second ingestion path. Keeping final-URL checks,
+    content-type validation, byte ceilings, hashing and provenance here makes static and rendered
+    resources obey the same evidence contract.
+    """
+    source_url = requested_url or resource.url
+    _check_url(
+        resource.url,
+        allow_insecure_http=True,
+        verify_public_address=verify_public_address,
+    )
+    if not 200 <= resource.status < 300:
+        raise UrlFetchError(f"{source_url} returned HTTP {resource.status}")
+    if not resource.data:
+        raise UrlFetchError(f"{source_url} returned an empty body")
+    if len(resource.data) > max_bytes:
+        raise UrlFetchError(
+            f"{source_url} exceeds the {max_bytes:,}-byte ceiling; refusing to buffer it"
+        )
+
+    media = resource.media_type
+    if media and media not in _CONTENT_TYPES and not allow_any_content_type:
+        raise UrlFetchError(
+            f"{source_url} returned {media!r}, which is not an ingestable document type. This is "
+            "usually a login wall or an error page; storing it would put an unrelated document "
+            "behind a citation. Pass allow_any_content_type=True to store it anyway."
+        )
+
+    filename = filename_for(resource.url, media)
+    declared_type = _CONTENT_TYPES.get(media, (DocumentType.UNKNOWN, ""))[0]
+    note = license_note
+    if urlparse(resource.url).scheme.lower() == "http":
+        insecure = "fetched over plain http; bytes are not integrity-protected in transit"
+        note = f"{note}; {insecure}" if note else insecure
+
+    return ingest_bytes(
+        resource.data,
+        store,
+        filename=filename,
+        source_uri=resource.url,
+        supplier_id=supplier_id,
+        doc_type=declared_type if declared_type is not DocumentType.UNKNOWN else None,
+        revision_label=revision_label or resource.last_modified,
+        license_note=note,
+        fetched_at=datetime.now(UTC),
+    )
+
+
 def ingest_url(
     url: str,
     store: ArtifactStore,
@@ -366,40 +431,16 @@ def ingest_url(
     else:
         fetch = fetch_url
     resource = fetch(url, timeout=timeout, max_bytes=max_bytes)
-
-    if not resource.data:
-        raise UrlFetchError(f"{url} returned an empty body")
-
-    media = resource.media_type
-    if media and media not in _CONTENT_TYPES and not allow_any_content_type:
-        raise UrlFetchError(
-            f"{url} returned {media!r}, which is not an ingestable document type. This is usually "
-            f"a login wall or an error page; storing it would put an unrelated document behind a "
-            f"citation. Pass allow_any_content_type=True to store it anyway."
-        )
-
-    filename = filename_for(resource.url, media)
-    declared_type = _CONTENT_TYPES.get(media, (DocumentType.UNKNOWN, ""))[0]
-
-    note = license_note
-    if urlparse(resource.url).scheme.lower() == "http":
-        # Recorded rather than merely warned about. Six months later the only way to know a
-        # citation's bytes arrived unauthenticated is if the document says so.
-        insecure = "fetched over plain http; bytes are not integrity-protected in transit"
-        note = f"{note}; {insecure}" if note else insecure
-
-    return ingest_bytes(
-        resource.data,
+    return ingest_fetched_resource(
+        resource,
         store,
-        filename=filename,
-        # The URL, not the store path. This is the field that makes a web citation resolvable.
-        source_uri=resource.url,
+        requested_url=url,
         supplier_id=supplier_id,
-        # None lets ingest_bytes sniff magic bytes, which beats a declared header.
-        doc_type=declared_type if declared_type is not DocumentType.UNKNOWN else None,
-        revision_label=revision_label or resource.last_modified,
-        license_note=note,
-        fetched_at=datetime.now(UTC),
+        max_bytes=max_bytes,
+        allow_any_content_type=allow_any_content_type,
+        license_note=license_note,
+        revision_label=revision_label,
+        verify_public_address=verify_public_address and fetcher is None,
     )
 
 

@@ -1,11 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono, Manrope } from "next/font/google";
-import Link from "next/link";
-
-import { DataSourceBanner } from "@/components/data-source-banner";
-import { DesktopSidebar } from "@/components/desktop-sidebar";
-import { CurrentSection, Nav } from "@/components/nav";
-import { ThemeToggle } from "@/components/theme-toggle";
 
 import "./globals.css";
 
@@ -24,11 +18,11 @@ const mono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Operations · AXIOM",
+    default: "AXIOM · Verifiable Product Intelligence",
     template: "%s · AXIOM",
   },
   description:
-    "Catalog operations for evidence-backed enrichment, review, process replay, delivery, and audit.",
+    "AXIOM turns sparse product inputs into evidence-backed, reviewable, delivery-ready records without guessing.",
   applicationName: "AXIOM",
 };
 
@@ -48,15 +42,6 @@ try {
 } catch (e) {}
 `;
 
-function ProductMark() {
-  return (
-    <span className="product-mark" aria-hidden>
-      <span>A</span>
-      <i />
-    </span>
-  );
-}
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
@@ -71,30 +56,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <a href="#main" className="skip-link">
           Skip to content
         </a>
-
-        <div className="app-shell">
-          <DesktopSidebar brandMark={<ProductMark />} />
-
-          <div className="app-content">
-            <div className="desktop-theme-control">
-              <ThemeToggle />
-            </div>
-            <header className="mobile-header app-bar">
-              <Link href="/" className="brand-link" aria-label="AXIOM Operations">
-                <ProductMark />
-                <strong>AXIOM</strong>
-              </Link>
-              <div className="mobile-section">
-                <span>Workspace</span>
-                <CurrentSection />
-              </div>
-              <ThemeToggle />
-            </header>
-            <Nav variant="mobile" />
-            <DataSourceBanner />
-            <main id="main">{children}</main>
-          </div>
-        </div>
+        {children}
       </body>
     </html>
   );

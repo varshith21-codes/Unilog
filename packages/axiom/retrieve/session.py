@@ -31,8 +31,14 @@ from dataclasses import dataclass
 from enum import Enum
 from urllib.parse import urlparse
 
-from axiom.ingest import IngestError, LocalArtifactStore, ingest_url
-from axiom.ingest.web import DEFAULT_MAX_BYTES, USER_AGENT, Fetcher, fetch_url
+from axiom.ingest import (
+    IngestError,
+    LocalArtifactStore,
+    ingest_fetched_resource,
+    ingest_url,
+)
+from axiom.ingest.web import DEFAULT_MAX_BYTES, USER_AGENT, Fetcher, check_url, fetch_url
+from axiom.retrieve.browser import BrowserFetchError, RenderedFetcher
 from axiom.retrieve.library import DocumentEntry, DocumentLibrary
 from axiom.retrieve.policy import SourcePolicy, SourceTier
 from axiom.retrieve.resolver import Candidate
@@ -47,6 +53,9 @@ class FetchStatus(str, Enum):
 
     REFUSED_POLICY = "refused_policy"
     REFUSED_ROBOTS = "refused_robots"
+    OVER_BUDGET = "over_budget"
+    """The session request ceiling was reached before touching the network."""
+
     FAILED = "failed"
     """The request was made and did not produce an ingestable document."""
 
@@ -190,6 +199,9 @@ class RetrievalSession:
         clock: Callable[[], float] | None = None,
         timeout: float = 30.0,
         supplier_id: str | None = None,
+        max_requests: int | None = None,
+        renderer: RenderedFetcher | None = None,
+        max_bytes: int = DEFAULT_MAX_BYTES,
     ) -> None:
         self._policy = policy
         self._store = store
@@ -198,6 +210,9 @@ class RetrievalSession:
         self._robots = robots if robots is not None else RobotsCache()
         self._timeout = timeout
         self._supplier_id = supplier_id
+        self._max_requests = max_requests
+        self._renderer = renderer
+        self._max_bytes = max_bytes
 
         import time
 
@@ -206,7 +221,18 @@ class RetrievalSession:
         self._last_request: dict[str, float] = {}
 
         self.requests_made = 0
+        self.browser_requests_made = 0
         self.bytes_fetched = 0
+
+    @property
+    def exhausted(self) -> bool:
+        return self._max_requests is not None and self.requests_made >= self._max_requests
+
+    @property
+    def remaining_requests(self) -> int | None:
+        if self._max_requests is None:
+            return None
+        return max(0, self._max_requests - self.requests_made)
 
     def fetch(self, candidate: Candidate) -> FetchOutcome:
         """Fetch one candidate, or explain why it was not fetched."""
@@ -226,13 +252,25 @@ class RetrievalSession:
                 entry=existing,
             )
 
-        # 3. robots.txt.
+        # 3. Transport safety and the hard request ceiling, both before robots can make a request.
+        try:
+            check_url(candidate.url, verify_public_address=self._fetcher is None)
+        except IngestError as exc:
+            return FetchOutcome(candidate, FetchStatus.FAILED, str(exc))
+        if self.exhausted:
+            return FetchOutcome(
+                candidate,
+                FetchStatus.OVER_BUDGET,
+                f"session reached its {self._max_requests}-request ceiling",
+            )
+
+        # 4. robots.txt.
         if self._policy.respect_robots_txt:
             allowed, why = self._robots.allows(candidate.url)
             if not allowed:
                 return FetchOutcome(candidate, FetchStatus.REFUSED_ROBOTS, why)
 
-        # 4. Politeness, per origin.
+        # 5. Politeness, per origin.
         self._wait_for(candidate.url)
 
         try:
@@ -242,6 +280,8 @@ class RetrievalSession:
                 supplier_id=self._supplier_id,
                 fetcher=self._fetcher,
                 timeout=self._timeout,
+                max_bytes=self._max_bytes,
+                verify_public_address=self._fetcher is None,
                 license_note=(
                     f"retrieved from {candidate.verdict.host} "
                     f"({candidate.verdict.tier.value} tier) for product data enrichment; "
@@ -253,12 +293,23 @@ class RetrievalSession:
         finally:
             self.requests_made += 1
 
+        # Redirects are security-checked by ingest, then business-policy checked here. A URL that
+        # starts on a manufacturer domain must not retain manufacturer trust after redirecting to a
+        # marketplace or unrelated host.
+        final_verdict = self._policy.classify(artifact.document.uri)
+        if not final_verdict.fetchable:
+            return FetchOutcome(
+                candidate,
+                FetchStatus.REFUSED_POLICY,
+                f"final URL was refused after redirect: {final_verdict.reason}",
+            )
+
         self.bytes_fetched += artifact.size_bytes
         entry = self._library.register(
             artifact,
-            host=candidate.verdict.host,
-            tier=candidate.verdict.tier.value,
-            manufacturer_id=candidate.manufacturer_id,
+            host=final_verdict.host,
+            tier=final_verdict.tier.value,
+            manufacturer_id=final_verdict.manufacturer_id,
         )
         detail = (
             "identical bytes were already stored under a different URL"
@@ -266,6 +317,105 @@ class RetrievalSession:
             else f"{artifact.size_bytes:,} bytes"
         )
         return FetchOutcome(candidate, FetchStatus.FETCHED, detail, entry=entry)
+
+    def render(self, candidate: Candidate) -> tuple[tuple[FetchOutcome, ...], tuple[str, ...]]:
+        """Render a statically usable candidate that still failed SKU coverage.
+
+        URL reuse is intentionally bypassed: the stored static HTML is the reason rendering is
+        needed. Every returned resource is nevertheless reclassified by its final URL and ingested
+        through the same immutable artifact path as ordinary HTTP bytes.
+        """
+        if self._renderer is None:
+            return (), ()
+        if not candidate.verdict.fetchable:
+            return (
+                (FetchOutcome(candidate, FetchStatus.REFUSED_POLICY, candidate.verdict.reason),),
+                (),
+            )
+        try:
+            check_url(candidate.url, verify_public_address=self._fetcher is None)
+        except IngestError as exc:
+            return ((FetchOutcome(candidate, FetchStatus.FAILED, str(exc)),), ())
+        if self._policy.respect_robots_txt:
+            allowed, why = self._robots.allows(candidate.url)
+            if not allowed:
+                return ((FetchOutcome(candidate, FetchStatus.REFUSED_ROBOTS, why),), ())
+
+        def authorize(url: str) -> None:
+            check_url(url, verify_public_address=self._fetcher is None)
+            verdict = self._policy.classify(url)
+            if not verdict.fetchable:
+                raise BrowserFetchError(verdict.reason)
+
+        try:
+            rendered = self._renderer(
+                candidate.url,
+                timeout=self._timeout,
+                max_bytes=self._max_bytes,
+                authorize=authorize,
+            )
+        except BrowserFetchError as exc:
+            self.browser_requests_made += exc.requests_made
+            return (
+                (FetchOutcome(candidate, FetchStatus.FAILED, str(exc)),),
+                (str(exc),),
+            )
+
+        self.browser_requests_made += rendered.requests_made
+        outcomes: list[FetchOutcome] = []
+        for resource in rendered.resources:
+            verdict = self._policy.classify(resource.url)
+            rendered_candidate = Candidate(
+                url=resource.url,
+                verdict=verdict,
+                origin="browser",
+                rank=candidate.rank,
+                query=candidate.query,
+                manufacturer_id=verdict.manufacturer_id,
+            )
+            if not verdict.fetchable:
+                outcomes.append(
+                    FetchOutcome(
+                        rendered_candidate,
+                        FetchStatus.REFUSED_POLICY,
+                        f"rendered final URL was refused: {verdict.reason}",
+                    )
+                )
+                continue
+            try:
+                artifact = ingest_fetched_resource(
+                    resource,
+                    self._store,
+                    requested_url=candidate.url,
+                    supplier_id=self._supplier_id,
+                    max_bytes=self._max_bytes,
+                    verify_public_address=self._fetcher is None,
+                    license_note=(
+                        f"rendered from {verdict.host} ({verdict.tier.value} tier) for product "
+                        "data enrichment; review the site's terms before republishing any asset"
+                    ),
+                )
+            except IngestError as exc:
+                outcomes.append(
+                    FetchOutcome(rendered_candidate, FetchStatus.FAILED, str(exc))
+                )
+                continue
+            self.bytes_fetched += artifact.size_bytes
+            entry = self._library.register(
+                artifact,
+                host=verdict.host,
+                tier=verdict.tier.value,
+                manufacturer_id=verdict.manufacturer_id,
+            )
+            outcomes.append(
+                FetchOutcome(
+                    rendered_candidate,
+                    FetchStatus.FETCHED,
+                    f"{artifact.size_bytes:,} rendered bytes",
+                    entry=entry,
+                )
+            )
+        return tuple(outcomes), rendered.notes
 
     def fetch_transient(
         self, url: str, *, max_bytes: int | None = None
@@ -282,6 +432,17 @@ class RetrievalSession:
         verdict = self._policy.classify(url)
         if not verdict.fetchable:
             return TransientFetch(url, FetchStatus.REFUSED_POLICY, detail=verdict.reason)
+
+        try:
+            check_url(url, verify_public_address=self._fetcher is None)
+        except IngestError as exc:
+            return TransientFetch(url, FetchStatus.FAILED, detail=str(exc))
+        if self.exhausted:
+            return TransientFetch(
+                url,
+                FetchStatus.OVER_BUDGET,
+                detail=f"session reached its {self._max_requests}-request ceiling",
+            )
 
         if self._policy.respect_robots_txt:
             allowed, why = self._robots.allows(url)
@@ -334,6 +495,7 @@ class RetrievalSession:
     def stats(self) -> dict[str, object]:
         return {
             "requests_made": self.requests_made,
+            "browser_requests_made": self.browser_requests_made,
             "bytes_fetched": self.bytes_fetched,
             "origins_touched": len(self._last_request),
         }

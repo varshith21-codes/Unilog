@@ -14,7 +14,7 @@ export default function NotFound() {
         detail="The requested address is unavailable or may have moved. Return to the workflow overview or continue in Resolve."
         actions={
           <>
-            <Link href="/" className="btn btn-primary">
+            <Link href="/operations" className="btn btn-primary">
               Workflow overview
               <ArrowIcon />
             </Link>

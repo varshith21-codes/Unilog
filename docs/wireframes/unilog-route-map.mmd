@@ -1,0 +1,50 @@
+flowchart LR
+  Public["Public landing / — Next.js :3000"]
+  Marketing404["Global marketing 404"]
+  Operations["Operations /operations"]
+  Enrich["Enrich /enrich"]
+  Resolve["Resolve queue /review"]
+  ResolveSKU["Resolve detail /review/[sku]"]
+  Process["Process /pipeline"]
+  Publish["Publish /delivery"]
+  Audit["Audit list /certificates"]
+  AuditSKU["Audit detail /certificates/[sku]"]
+  Intelligence["Intelligence /quality"]
+  Workspace404["Workspace 404"]
+  LegacyReview["Legacy Review / — FastAPI :8000"]
+  LegacyDelivery["Legacy Delivery /delivery — FastAPI :8000"]
+
+  Public -->|"Enter operations"| Operations
+  Public -->|"Enrich a record"| Enrich
+  Marketing404 -->|"AXIOM overview"| Public
+  Marketing404 -->|"Enter operations"| Operations
+
+  Operations -->|"Resolve blocking work"| Resolve
+  Operations -->|"Open Publish"| Publish
+  Operations -->|"Replay recorded run"| Process
+  Operations -->|"Open signed artifact"| Audit
+
+  Enrich -->|"Run persisted"| ResolveSKU
+  Enrich -->|"View certificate"| AuditSKU
+  Enrich -->|"Recorded context"| Process
+  Enrich -->|"Portfolio metrics"| Operations
+  Enrich -->|"Cost and impact"| Intelligence
+
+  Resolve -->|"Choose SKU"| ResolveSKU
+  ResolveSKU -->|"Audit artifact"| AuditSKU
+  ResolveSKU -->|"Sibling variant"| ResolveSKU
+  ResolveSKU -->|"Back to queue"| Resolve
+
+  Process -->|"Select raw SKU query"| Process
+  Process -->|"Inspect record decisions"| ResolveSKU
+  Publish -->|"Preview or export"| Publish
+
+  Audit -->|"Choose certificate"| AuditSKU
+  AuditSKU -->|"Resolve workspace"| ResolveSKU
+
+  Intelligence -->|"Inspect portfolio work"| Operations
+  Workspace404 -->|"Operations"| Operations
+  Workspace404 -->|"Resolve"| Resolve
+
+  LegacyReview -->|"Delivery Export"| LegacyDelivery
+  LegacyDelivery -->|"Review Workspace"| LegacyReview

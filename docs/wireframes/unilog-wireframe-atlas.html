@@ -1,0 +1,740 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Unilog Wireframe Atlas</title>
+<style>
+:root {
+  --paper: oklch(0.975 0.004 252);
+  --canvas: oklch(0.94 0.006 252);
+  --surface: oklch(0.99 0.002 252);
+  --surface-2: oklch(0.955 0.005 252);
+  --surface-3: oklch(0.91 0.007 252);
+  --ink: oklch(0.22 0.012 252);
+  --ink-2: oklch(0.39 0.012 252);
+  --ink-3: oklch(0.53 0.01 252);
+  --line: oklch(0.68 0.01 252);
+  --line-strong: oklch(0.43 0.012 252);
+  --accent: oklch(0.55 0.2 255);
+  --accent-soft: oklch(0.93 0.03 255);
+  --accent-ink: oklch(0.38 0.18 255);
+  --font-sans: "Arial Narrow", "Aptos Narrow", "Segoe UI", Arial, sans-serif;
+  --font-mono: Consolas, "Cascadia Mono", "SFMono-Regular", monospace;
+  --line-width: 1px;
+  --line-heavy: 2px;
+  --focus-size: 2px;
+  --radius-xs: 0.125rem;
+  --radius-sm: 0.25rem;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --gutter: clamp(1rem, 3vw, 2.5rem);
+  --container: 94rem;
+  --control-h: 2.75rem;
+  --duration-fast: 140ms;
+  --ease-precise: cubic-bezier(0.25, 1, 0.5, 1);
+  --wf-micro: 0.52rem;
+  --wf-meta: 0.63rem;
+  --wf-body: 0.72rem;
+  --wf-title: clamp(0.82rem, 1.3vw, 1.15rem);
+}
+html[data-theme="dark"] {
+  --paper: oklch(0.18 0.01 252);
+  --canvas: oklch(0.14 0.012 252);
+  --surface: oklch(0.205 0.011 252);
+  --surface-2: oklch(0.24 0.012 252);
+  --surface-3: oklch(0.29 0.012 252);
+  --ink: oklch(0.94 0.007 252);
+  --ink-2: oklch(0.78 0.009 252);
+  --ink-3: oklch(0.65 0.009 252);
+  --line: oklch(0.48 0.012 252);
+  --line-strong: oklch(0.72 0.012 252);
+  --accent: oklch(0.69 0.16 255);
+  --accent-soft: oklch(0.28 0.06 255);
+  --accent-ink: oklch(0.82 0.1 255);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
+}
+button, input, select { font: inherit; }
+a { color: inherit; }
+code, .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+button, input, select, summary, a {
+  border-radius: var(--radius-xs);
+}
+button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible, a:focus-visible {
+  outline: var(--focus-size) solid var(--accent);
+  outline-offset: var(--focus-size);
+}
+.skip-link {
+  position: fixed;
+  z-index: 100;
+  inset-block-start: var(--space-2);
+  inset-inline-start: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--ink);
+  color: var(--paper);
+  transform: translateY(-180%);
+}
+.skip-link:focus { transform: translateY(0); }
+.page-header {
+  border-block-end: var(--line-width) solid var(--line-strong);
+  background: var(--paper);
+}
+.header-inner, .atlas, .cover-inner {
+  width: min(100%, var(--container));
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+.header-inner {
+  min-height: 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+.brand-lockup { display: flex; align-items: baseline; gap: var(--space-3); }
+.brand-lockup strong { letter-spacing: -0.03em; }
+.brand-lockup span { color: var(--ink-3); font: 0.72rem/1 var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; }
+.theme-toggle, .reset-button {
+  min-height: var(--control-h);
+  border: var(--line-width) solid var(--line-strong);
+  background: var(--surface);
+  color: var(--ink);
+  padding-inline: var(--space-3);
+  cursor: pointer;
+  transition: transform var(--duration-fast) var(--ease-precise), opacity var(--duration-fast) var(--ease-precise);
+}
+.theme-toggle:hover, .reset-button:hover { background: var(--accent-soft); border-color: var(--accent); transform: translateY(-1px); }
+.theme-toggle:active, .reset-button:active { transform: translateY(1px) scale(0.98); }
+.theme-toggle:disabled, .reset-button:disabled { cursor: not-allowed; opacity: 0.45; transform: none; }
+.theme-toggle[aria-busy="true"], .reset-button[aria-busy="true"] { cursor: progress; opacity: 0.7; }
+.cover { background: var(--paper); border-block-end: var(--line-width) solid var(--line-strong); }
+.cover-inner { padding-block: clamp(3.5rem, 8vw, 7rem); }
+.cover-grid { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(18rem, 0.8fr); gap: var(--space-7); align-items: end; }
+.overline { margin: 0; color: var(--accent-ink); font: 0.72rem/1.2 var(--font-mono); letter-spacing: 0.1em; text-transform: uppercase; }
+h1 { max-width: 18ch; margin: var(--space-4) 0 0; font-size: clamp(2.5rem, 7vw, 6.2rem); line-height: 0.96; letter-spacing: -0.055em; text-wrap: balance; }
+.cover-deck { max-width: 67ch; margin: var(--space-5) 0 0; color: var(--ink-2); font-size: clamp(1rem, 1.5vw, 1.24rem); text-wrap: pretty; }
+.cover-meta { border-block: var(--line-width) solid var(--line-strong); }
+.cover-meta div { display: grid; grid-template-columns: 6rem 1fr; gap: var(--space-3); padding-block: var(--space-2); border-block-end: var(--line-width) solid var(--line); }
+.cover-meta div:last-child { border-block-end: 0; }
+.cover-meta dt { color: var(--ink-3); font: 0.67rem/1.4 var(--font-mono); text-transform: uppercase; }
+.cover-meta dd { margin: 0; font-size: 0.82rem; }
+.summary-band { background: var(--surface-2); border-block-end: var(--line-width) solid var(--line-strong); }
+.summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
+.summary-cell { padding: var(--space-5) var(--gutter); border-inline-end: var(--line-width) solid var(--line); }
+.summary-cell:last-child { border-inline-end: 0; }
+.summary-cell strong { display: block; font: 1.8rem/1 var(--font-mono); }
+.summary-cell span { display: block; margin-top: var(--space-2); color: var(--ink-3); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.controls-wrap { position: sticky; z-index: 20; inset-block-start: 0; background: var(--paper); border-block-end: var(--line-width) solid var(--line-strong); }
+.controls { width: min(100%, var(--container)); margin-inline: auto; padding: var(--space-3) var(--gutter); display: grid; grid-template-columns: repeat(2, minmax(9rem, 0.8fr)) minmax(14rem, 1.5fr) auto auto; gap: var(--space-3); align-items: end; }
+.field { display: grid; gap: var(--space-1); }
+.field label { color: var(--ink-3); font: 0.65rem/1.2 var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; }
+.field select, .field input {
+  width: 100%;
+  min-height: var(--control-h);
+  border: var(--line-width) solid var(--line-strong);
+  background: var(--surface);
+  color: var(--ink);
+  padding-inline: var(--space-3);
+  transition: transform var(--duration-fast) var(--ease-precise), opacity var(--duration-fast) var(--ease-precise);
+}
+.field select:hover, .field input:hover { border-color: var(--accent); background: var(--accent-soft); transform: translateY(-1px); }
+.field select:active, .field input:active { transform: translateY(1px); }
+.field select:disabled, .field input:disabled { cursor: not-allowed; opacity: 0.45; transform: none; }
+.coverage-status { min-height: var(--control-h); display: flex; align-items: center; white-space: nowrap; color: var(--ink-2); font: 0.72rem/1 var(--font-mono); }
+.atlas { padding-block: var(--space-7); }
+.legend { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); padding-block-end: var(--space-7); }
+.legend h2, .section-title { margin: 0; font-size: 1.5rem; line-height: 1.1; letter-spacing: -0.025em; }
+.legend p { margin: var(--space-3) 0 0; max-width: 68ch; color: var(--ink-2); }
+.legend-list { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: 1fr 1fr; border-block-start: var(--line-width) solid var(--line-strong); }
+.legend-list li { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2); border-block-end: var(--line-width) solid var(--line); }
+.legend-swatch { inline-size: 1.5rem; block-size: 1rem; border: var(--line-width) solid var(--line-strong); background: var(--surface); }
+.legend-swatch.accent { border-color: var(--accent); background: var(--accent-soft); }
+.legend-swatch.dashed { border-style: dashed; }
+.legend-swatch.double { border-block-end: 3px double var(--line-strong); }
+.route-family { padding-block: var(--space-7); border-block-start: var(--line-heavy) solid var(--line-strong); break-inside: avoid; }
+.route-family[hidden] { display: none; }
+.family-header { display: grid; grid-template-columns: minmax(0, 1fr) minmax(18rem, 0.55fr); gap: var(--space-6); margin-bottom: var(--space-5); }
+.family-index { color: var(--accent-ink); font: 0.72rem/1 var(--font-mono); }
+.family-header h2 { margin: var(--space-2) 0 0; font-size: clamp(1.65rem, 3vw, 2.7rem); line-height: 1; letter-spacing: -0.04em; text-wrap: balance; }
+.family-route { margin: var(--space-2) 0 0; color: var(--ink-2); font: 0.78rem/1.45 var(--font-mono); overflow-wrap: anywhere; }
+.family-deck { max-width: 66ch; margin: var(--space-3) 0 0; color: var(--ink-2); }
+.source-note { margin: 0; align-self: end; padding-block: var(--space-3); border-block: var(--line-width) solid var(--line); color: var(--ink-3); font: 0.68rem/1.55 var(--font-mono); overflow-wrap: anywhere; }
+.pair { display: grid; grid-template-columns: minmax(0, 3.65fr) minmax(14rem, 1fr); gap: var(--space-4); align-items: start; }
+.viewport-card { min-width: 0; margin: 0; }
+.viewport-card[hidden] { display: none; }
+.viewport-label { display: flex; justify-content: space-between; gap: var(--space-2); margin-bottom: var(--space-2); color: var(--ink-3); font: 0.67rem/1 var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em; }
+.screen { position: relative; overflow: hidden; border: var(--line-width) solid var(--line-strong); background: var(--surface); color: var(--ink); }
+.screen.desktop { aspect-ratio: 1440 / 1024; }
+.screen.mobile { aspect-ratio: 390 / 844; }
+.screen::before { content: attr(data-size); position: absolute; z-index: 8; inset-block-end: var(--space-1); inset-inline-end: var(--space-1); color: var(--ink-3); font: var(--wf-micro)/1 var(--font-mono); }
+.wf-mark { position: absolute; z-index: 9; display: grid; place-items: center; inline-size: 1.1rem; block-size: 1.1rem; border: var(--line-width) solid var(--accent); border-radius: 50%; background: var(--surface); color: var(--accent-ink); font: 0.56rem/1 var(--font-mono); }
+.mark-1 { inset-block-start: 1.6rem; inset-inline-end: 1rem; }
+.mark-2 { inset-block-start: 23%; inset-inline-start: 42%; }
+.mark-3 { inset-block-start: 52%; inset-inline-end: 8%; }
+.mark-4 { inset-block-end: 8%; inset-inline-start: 22%; }
+.mark-5 { inset-block-end: 3%; inset-inline-end: 36%; }
+.wf-topbar { min-height: 7%; padding-inline: 2%; display: flex; align-items: center; justify-content: space-between; gap: 2%; border-block-end: var(--line-width) solid var(--line-strong); font-size: var(--wf-meta); }
+.wf-brand { font-weight: 700; letter-spacing: -0.03em; }
+.wf-links { display: flex; align-items: center; gap: 1rem; color: var(--ink-3); }
+.wf-button { display: inline-flex; align-items: center; justify-content: center; min-height: 1.5rem; padding-inline: 0.65rem; border: var(--line-width) solid var(--line-strong); background: var(--surface); font-size: var(--wf-meta); }
+.wf-button.primary { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-ink); }
+.workspace { block-size: 100%; display: grid; grid-template-columns: minmax(7rem, 16%) 1fr; }
+.wf-sidebar { min-width: 0; display: flex; flex-direction: column; border-inline-end: var(--line-width) solid var(--line-strong); background: var(--surface-2); padding: 3.5% 5%; }
+.wf-sidebar .wf-brand { margin-bottom: 12%; font-size: var(--wf-title); }
+.wf-nav-label { margin: 7% 0 3%; color: var(--ink-3); font: var(--wf-micro)/1 var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; }
+.wf-nav-item { display: grid; grid-template-columns: 0.7rem 1fr; gap: 0.35rem; align-items: center; padding: 4% 3%; border-inline-start: var(--line-heavy) solid transparent; font-size: var(--wf-meta); }
+.wf-nav-item::before { content: ""; inline-size: 0.5rem; block-size: 0.5rem; border: var(--line-width) solid var(--line-strong); }
+.wf-nav-item.active { border-inline-start-color: var(--accent); background: var(--accent-soft); color: var(--accent-ink); }
+.wf-sidebar-foot { margin-top: auto; padding-top: 8%; border-block-start: var(--line-width) solid var(--line); color: var(--ink-3); font-size: var(--wf-micro); }
+.wf-app { min-width: 0; display: flex; flex-direction: column; }
+.wf-appbar { min-height: 6%; display: flex; justify-content: flex-end; align-items: center; padding-inline: 2%; border-block-end: var(--line-width) solid var(--line); color: var(--ink-3); font-size: var(--wf-meta); }
+.wf-banner { padding: 0.45rem 2%; border-block-end: var(--line-width) solid var(--line-strong); background: var(--accent-soft); color: var(--accent-ink); font: var(--wf-micro)/1.2 var(--font-mono); }
+.wf-main { min-height: 0; flex: 1; overflow: hidden; padding: 2.7%; }
+.mobile-shell { block-size: 100%; display: flex; flex-direction: column; }
+.mobile-shell .wf-topbar { min-height: 7.5%; padding-inline: 4%; }
+.mobile-nav { min-height: 6%; display: flex; gap: 0.25rem; overflow: hidden; padding: 0.35rem 0.55rem; border-block-end: var(--line-width) solid var(--line-strong); background: var(--surface-2); }
+.mobile-nav span { flex: 0 0 auto; padding: 0.22rem 0.35rem; border-block-end: var(--line-heavy) solid transparent; font-size: var(--wf-micro); }
+.mobile-nav span.active { border-color: var(--accent); color: var(--accent-ink); }
+.mobile-shell .wf-main { overflow: hidden; padding: 5%; }
+.mobile-shell .wf-banner { padding-inline: 4%; }
+.wf-eyebrow { margin: 0; color: var(--accent-ink); font: var(--wf-micro)/1.2 var(--font-mono); text-transform: uppercase; letter-spacing: 0.07em; }
+.wf-title { margin: 0.35rem 0 0; font-size: var(--wf-title); line-height: 1.05; letter-spacing: -0.03em; }
+.wf-copy { margin: 0.35rem 0 0; max-width: 66ch; color: var(--ink-2); font-size: var(--wf-meta); line-height: 1.35; }
+.wf-head { display: flex; justify-content: space-between; gap: 4%; align-items: end; padding-bottom: 2%; border-block-end: var(--line-width) solid var(--line-strong); }
+.mobile .wf-head { display: block; padding-bottom: 5%; }
+.mobile .wf-head .wf-actions { margin-top: 0.55rem; }
+.wf-actions { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); border-block-end: var(--line-width) solid var(--line-strong); }
+.stat { min-width: 0; padding: 3%; border-inline-end: var(--line-width) solid var(--line); }
+.stat:last-child { border-inline-end: 0; }
+.stat span { color: var(--ink-3); font-size: var(--wf-micro); text-transform: uppercase; }
+.stat strong { display: block; margin-top: 0.18rem; font: 1.05rem/1 var(--font-mono); }
+.stat small { display: block; margin-top: 0.2rem; color: var(--ink-3); font-size: var(--wf-micro); line-height: 1.25; }
+.mobile .stat-grid { grid-template-columns: 1fr 1fr; }
+.mobile .stat:nth-child(2) { border-inline-end: 0; }
+.mobile .stat:nth-child(-n+2) { border-block-end: var(--line-width) solid var(--line); }
+.panel-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(8rem, 0.7fr); gap: 2%; margin-top: 2.5%; }
+.mobile .panel-grid { grid-template-columns: 1fr; gap: 0.55rem; margin-top: 5%; }
+.wf-panel { min-width: 0; border: var(--line-width) solid var(--line-strong); background: var(--surface); }
+.wf-panel-head { display: flex; justify-content: space-between; gap: 0.4rem; padding: 0.45rem 0.55rem; border-block-end: var(--line-width) solid var(--line-strong); font-size: var(--wf-meta); font-weight: 700; }
+.wf-panel-body { padding: 0.55rem; }
+.wf-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.35rem; padding: 0.42rem 0.2rem; border-block-end: var(--line-width) solid var(--line); font-size: var(--wf-meta); }
+.wf-row:last-child { border-block-end: 0; }
+.wf-row small { display: block; color: var(--ink-3); font-size: var(--wf-micro); }
+.wf-status { align-self: start; padding: 0.08rem 0.25rem; border: var(--line-width) solid var(--line-strong); font: var(--wf-micro)/1.2 var(--font-mono); text-transform: uppercase; }
+.wf-status.accent { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-ink); }
+.state-inset { border: var(--line-width) dashed var(--accent); background: var(--accent-soft); padding: 0.45rem; color: var(--accent-ink); font-size: var(--wf-meta); }
+.state-inset strong { display: block; font: var(--wf-micro)/1.2 var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em; }
+.state-inset p { margin: 0.25rem 0 0; line-height: 1.3; }
+.wf-field { margin-top: 0.45rem; }
+.wf-field label { display: block; color: var(--ink-3); font-size: var(--wf-micro); }
+.wf-input { min-height: 1.65rem; margin-top: 0.15rem; border: var(--line-width) solid var(--line-strong); background: var(--surface-2); padding: 0.3rem; font: var(--wf-meta)/1.2 var(--font-mono); }
+.wf-textarea { min-height: 3.2rem; }
+.wf-check { display: flex; gap: 0.3rem; align-items: center; margin-top: 0.35rem; font-size: var(--wf-meta); }
+.wf-check::before { content: ""; inline-size: 0.7rem; block-size: 0.7rem; border: var(--line-width) solid var(--line-strong); background: var(--surface); }
+.wf-drop { display: grid; place-items: center; min-height: 4.3rem; margin-top: 0.45rem; border: var(--line-width) dashed var(--line-strong); background: var(--surface-2); color: var(--ink-3); font-size: var(--wf-meta); text-align: center; }
+.wf-drop.active { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-ink); }
+.wf-meter { position: relative; height: 0.42rem; margin-top: 0.3rem; border: var(--line-width) solid var(--line-strong); background: var(--surface-2); }
+.wf-meter span { display: block; width: var(--meter, 70%); height: 100%; background: var(--ink-2); }
+.wf-meter .threshold { position: absolute; inset-block: -0.2rem; inset-inline-start: var(--threshold, 72%); width: var(--line-heavy); height: 0.8rem; background: var(--accent); }
+.queue-layout { display: grid; grid-template-columns: minmax(8rem, 0.62fr) minmax(0, 1.38fr); min-height: 72%; margin-top: 2%; border: var(--line-width) solid var(--line-strong); }
+.queue-rail { min-width: 0; border-inline-end: var(--line-width) solid var(--line-strong); }
+.queue-item { padding: 0.42rem; border-block-end: var(--line-width) solid var(--line); font-size: var(--wf-meta); }
+.queue-item.active { border-inline-start: var(--line-heavy) solid var(--accent); background: var(--accent-soft); }
+.queue-item strong, .queue-item small { display: block; }
+.queue-item small { color: var(--ink-3); font-size: var(--wf-micro); }
+.workplane { min-width: 0; display: grid; grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr); }
+.value-pane, .evidence-pane { min-width: 0; padding: 3%; }
+.evidence-pane { border-inline-start: var(--line-width) solid var(--line-strong); background: var(--surface-2); }
+.document-page { position: relative; min-height: 10rem; margin-top: 0.45rem; border: var(--line-width) solid var(--line-strong); background: var(--surface); padding: 5%; }
+.doc-line { height: 0.28rem; margin-bottom: 0.4rem; background: var(--surface-3); }
+.doc-line.short { width: 58%; }
+.doc-line.highlight { width: 84%; height: 0.65rem; border: var(--line-heavy) solid var(--accent); background: var(--accent-soft); }
+.mobile .queue-layout { display: block; border: 0; margin-top: 5%; }
+.mobile .queue-rail { border: var(--line-width) solid var(--line-strong); max-height: 28%; overflow: hidden; }
+.mobile .workplane { display: block; margin-top: 0.55rem; border: var(--line-width) solid var(--line-strong); }
+.mobile .evidence-pane { border-inline-start: 0; border-block-start: var(--line-width) solid var(--line-strong); }
+.mobile .document-page { min-height: 8rem; }
+.stage-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.4rem; margin-top: 2.5%; }
+.stage { min-width: 0; min-height: 4rem; border: var(--line-width) solid var(--line-strong); padding: 0.4rem; }
+.stage strong { display: block; font-size: var(--wf-meta); }
+.stage small { display: block; margin-top: 0.2rem; color: var(--ink-3); font-size: var(--wf-micro); }
+.stage.active { border-color: var(--accent); background: var(--accent-soft); }
+.mobile .stage-grid { grid-template-columns: 1fr; gap: 0.28rem; max-height: 74%; overflow: hidden; }
+.mobile .stage { min-height: auto; display: grid; grid-template-columns: 4.5rem 1fr; align-items: center; }
+.wf-chart { position: relative; min-height: 5rem; border-inline-start: var(--line-width) solid var(--line-strong); border-block-end: var(--line-width) solid var(--line-strong); }
+.wf-chart::before { content: ""; position: absolute; inset-inline: 8%; inset-block-end: 18%; height: var(--line-heavy); background: var(--accent); transform: rotate(-12deg); transform-origin: left; }
+.wf-bars { height: 5rem; display: flex; align-items: end; gap: 0.35rem; }
+.wf-bars span { flex: 1; height: var(--bar); border: var(--line-width) solid var(--line-strong); background: var(--surface-2); }
+.marketing-screen { height: 100%; display: flex; flex-direction: column; }
+.marketing-main { flex: 1; padding: 5%; }
+.hero-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(8rem, 0.55fr); gap: 7%; align-items: center; min-height: 42%; border-block-end: var(--line-width) solid var(--line-strong); }
+.hero-grid h3 { margin: 0.4rem 0 0; max-width: 17ch; font-size: clamp(1.05rem, 2.5vw, 2.3rem); line-height: 0.98; letter-spacing: -0.045em; }
+.hero-grid p { max-width: 55ch; color: var(--ink-2); font-size: var(--wf-meta); }
+.hero-rule { border-block: var(--line-width) solid var(--line-strong); padding-block: 8%; font-size: var(--wf-meta); }
+.proof-grid { display: grid; grid-template-columns: 0.75fr 1.25fr; min-height: 40%; margin-top: 3%; border: var(--line-width) solid var(--line-strong); }
+.proof-copy { padding: 5%; border-inline-end: var(--line-width) solid var(--line-strong); }
+.proof-copy .value { margin: 0.4rem 0; font: 1.1rem/1.1 var(--font-mono); }
+.proof-doc { padding: 3%; background: var(--surface-2); }
+.mobile .marketing-main { padding: 6%; }
+.mobile .hero-grid { display: block; min-height: 45%; }
+.mobile .hero-rule { margin-top: 8%; padding-block: 5%; }
+.mobile .proof-grid { display: block; margin-top: 6%; }
+.mobile .proof-copy { border-inline-end: 0; border-block-end: var(--line-width) solid var(--line-strong); }
+.not-found { min-height: 75%; display: grid; place-items: center; text-align: center; }
+.not-found > div { max-width: 42rem; }
+.not-found h3 { margin: 0.5rem 0 0; font-size: clamp(1.5rem, 4vw, 3.4rem); line-height: 1; letter-spacing: -0.045em; }
+.not-found .wf-actions { justify-content: center; margin-top: 1rem; }
+.boundary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem; margin-top: 2.5%; }
+.boundary-card { min-height: 4.8rem; border: var(--line-width) solid var(--line-strong); padding: 0.45rem; }
+.boundary-card strong { font-size: var(--wf-meta); }
+.boundary-card p { margin: 0.25rem 0 0; color: var(--ink-3); font-size: var(--wf-micro); }
+.skeleton-line { height: 0.42rem; margin-top: 0.35rem; background: var(--surface-3); }
+.skeleton-line.short { width: 62%; }
+.mobile .boundary-grid { grid-template-columns: 1fr; }
+.table-wrap { overflow: hidden; border: var(--line-width) solid var(--line-strong); }
+.wf-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: var(--wf-micro); }
+.wf-table th, .wf-table td { padding: 0.35rem; border-block-end: var(--line-width) solid var(--line); text-align: left; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.wf-table th { background: var(--surface-2); text-transform: uppercase; color: var(--ink-3); }
+.mobile .table-wrap { border-block-end: 3px double var(--line-strong); }
+.legacy-screen { height: 100%; display: flex; flex-direction: column; background: var(--surface); }
+.legacy-screen .wf-topbar { background: var(--surface-2); }
+.legacy-review-grid { flex: 1; min-height: 0; display: grid; grid-template-columns: 20% 39% 41%; }
+.legacy-review-grid > div { min-width: 0; overflow: hidden; padding: 2%; border-inline-end: var(--line-width) solid var(--line-strong); }
+.legacy-review-grid > div:last-child { border-inline-end: 0; }
+.legacy-mobile-crop { width: 196%; height: 100%; display: flex; flex-direction: column; }
+.mobile .legacy-review-grid { grid-template-columns: 280px minmax(0, 1fr) minmax(0, 1.05fr); width: 62rem; }
+.mobile .legacy-screen { overflow: hidden; }
+.overflow-note { position: absolute; z-index: 10; inset-inline: 0.3rem; inset-block-end: 0.3rem; padding: 0.3rem; border: var(--line-width) solid var(--accent); background: var(--accent-soft); color: var(--accent-ink); font: var(--wf-micro)/1.25 var(--font-mono); }
+.state-strip { margin-top: var(--space-3); display: flex; flex-wrap: wrap; gap: var(--space-1); }
+.state-chip { padding: 0.25rem 0.45rem; border: var(--line-width) solid var(--line); background: var(--surface-2); color: var(--ink-2); font: 0.62rem/1.2 var(--font-mono); }
+.state-chip.primary { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-ink); }
+.tablet-note { margin: var(--space-4) 0 0; padding: var(--space-3); border-inline-start: var(--line-heavy) solid var(--accent); background: var(--surface-2); color: var(--ink-2); font-size: 0.82rem; }
+.tablet-note strong { color: var(--accent-ink); font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.annotations { margin-top: var(--space-4); }
+.annotations summary { cursor: pointer; font-weight: 700; }
+.annotations ol { counter-reset: notes; margin: var(--space-3) 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: 1fr 1fr; border-block-start: var(--line-width) solid var(--line-strong); }
+.annotations li { position: relative; min-height: 5rem; padding: var(--space-3) var(--space-3) var(--space-3) 2.5rem; border-block-end: var(--line-width) solid var(--line); }
+.annotations li:nth-child(odd) { border-inline-end: var(--line-width) solid var(--line); }
+.annotations li::before { content: attr(data-number); position: absolute; inset-inline-start: var(--space-2); inset-block-start: var(--space-3); display: grid; place-items: center; inline-size: 1.35rem; block-size: 1.35rem; border: var(--line-width) solid var(--accent); border-radius: 50%; color: var(--accent-ink); font: 0.65rem/1 var(--font-mono); }
+.annotations strong { display: block; font-size: 0.82rem; }
+.annotations span { display: block; margin-top: 0.2rem; color: var(--ink-2); font-size: 0.76rem; }
+.empty-filter { padding: var(--space-7); border-block: var(--line-width) solid var(--line-strong); text-align: center; }
+.empty-filter[hidden] { display: none; }
+.footer { border-block-start: var(--line-heavy) solid var(--line-strong); background: var(--paper); }
+.footer-inner { width: min(100%, var(--container)); margin-inline: auto; padding: var(--space-5) var(--gutter); display: flex; justify-content: space-between; gap: var(--space-5); color: var(--ink-2); font-size: 0.78rem; }
+body[data-viewport="desktop"] .viewport-card.mobile-card { display: none; }
+body[data-viewport="desktop"] .pair { grid-template-columns: 1fr; }
+body[data-viewport="mobile"] .viewport-card.desktop-card { display: none; }
+body[data-viewport="mobile"] .pair { grid-template-columns: minmax(14rem, 24rem); }
+@media (max-width: 68rem) {
+  .cover-grid, .legend, .family-header { grid-template-columns: 1fr; }
+  .controls { grid-template-columns: 1fr 1fr; }
+  .coverage-status { white-space: normal; }
+  .pair { grid-template-columns: 1fr; }
+  .viewport-card.mobile-card { width: min(100%, 24rem); }
+}
+@media (max-width: 48rem) {
+  .header-inner { align-items: center; }
+  .brand-lockup span { display: none; }
+  .summary-grid { grid-template-columns: 1fr 1fr; }
+  .summary-cell:nth-child(2) { border-inline-end: 0; }
+  .summary-cell:nth-child(-n+2) { border-block-end: var(--line-width) solid var(--line); }
+  .controls { position: static; grid-template-columns: 1fr; }
+  .controls-wrap { position: static; }
+  .legend-list, .annotations ol { grid-template-columns: 1fr; }
+  .annotations li:nth-child(odd) { border-inline-end: 0; }
+  .family-header { gap: var(--space-3); }
+  .footer-inner { display: block; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+@media (prefers-contrast: more) {
+  :root { --line: var(--ink-2); --line-strong: var(--ink); }
+}
+@media print {
+  @page { size: A3 landscape; margin: 10mm; }
+  :root { --paper: white; --canvas: white; --surface: white; --surface-2: #f5f5f5; --surface-3: #dddddd; --ink: black; --ink-2: #222222; --ink-3: #444444; --line: #888888; --line-strong: black; --accent: #0057b8; --accent-soft: #eef5ff; --accent-ink: #003f87; }
+  body { background: white; }
+  .page-header, .controls-wrap, .theme-toggle, .footer { display: none !important; }
+  .cover-inner { padding-block: 1rem; }
+  .atlas { width: 100%; padding: 0; }
+  .legend { padding-block: 1rem; }
+  .route-family, .route-family[hidden] { display: block !important; break-before: page; padding-block: 0; border-block-start: 0; }
+  .viewport-card, body[data-viewport] .viewport-card { display: block !important; }
+  .pair, body[data-viewport] .pair { grid-template-columns: 3.65fr 1fr !important; }
+  .screen { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .annotations { display: block; }
+  .annotations[open] summary { margin-bottom: 0; }
+}
+</style>
+</head>
+<body data-viewport="paired">
+<a class="skip-link" href="#atlas">Skip to wireframes</a>
+<header class="page-header">
+  <div class="header-inner">
+    <div class="brand-lockup"><strong>UNILOG</strong><span>local wireframe package / v1.0</span></div>
+    <button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false">Dark canvas</button>
+  </div>
+</header>
+<main id="main">
+  <section class="cover" aria-labelledby="cover-title">
+    <div class="cover-inner">
+      <div class="cover-grid">
+        <div>
+          <p class="overline">Technical blueprint / complete route atlas</p>
+          <h1 id="cover-title">Unilog console wireframes.</h1>
+          <p class="cover-deck">A deliberately low-fidelity map of the public surface, workspace shell, operational workflows, audit and intelligence views, plus the current legacy FastAPI tools. Every value is drawn as structure, state, and evidence—not visual polish.</p>
+        </div>
+        <dl class="cover-meta">
+          <div><dt>Desktop</dt><dd class="mono">1440 × 1024</dd></div>
+          <div><dt>Mobile</dt><dd class="mono">390 × 844</dd></div>
+          <div><dt>Tablet</dt><dd class="mono">768px reflow notes</dd></div>
+          <div><dt>Accent</dt><dd>Blue = annotation, active state, or evidence target</dd></div>
+          <div><dt>Assets</dt><dd>All CSS and JavaScript inline; no network dependencies</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+  <section class="summary-band" aria-label="Coverage summary">
+    <div class="summary-grid">
+      <div class="summary-cell"><strong>14</strong><span>coverage families</span></div>
+      <div class="summary-cell"><strong>28</strong><span>viewport frames</span></div>
+      <div class="summary-cell"><strong>20</strong><span>route entries</span></div>
+      <div class="summary-cell"><strong>0</strong><span>external assets</span></div>
+    </div>
+  </section>
+  <div class="controls-wrap">
+    <form class="controls" id="filters" aria-label="Filter wireframe atlas">
+      <div class="field">
+        <label for="area-filter">Area</label>
+        <select id="area-filter" name="area">
+          <option value="all">All areas</option>
+          <option value="marketing">Marketing</option>
+          <option value="shell">Workspace shell</option>
+          <option value="workflow">Modern workflows</option>
+          <option value="legacy">Legacy FastAPI</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="viewport-filter">Viewport</label>
+        <select id="viewport-filter" name="viewport">
+          <option value="paired">Paired desktop + mobile</option>
+          <option value="desktop">Desktop only</option>
+          <option value="mobile">Mobile only</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="route-search">Route or state</label>
+        <input id="route-search" name="query" type="search" placeholder="e.g. /review, offline, signature">
+      </div>
+      <button class="reset-button" type="reset">Reset filters</button>
+      <output class="coverage-status" id="coverage-status" for="area-filter viewport-filter route-search" aria-live="polite">14 families shown</output>
+    </form>
+  </div>
+  <div class="atlas" id="atlas">
+    <section class="legend" aria-labelledby="legend-title">
+      <div>
+        <p class="overline">Reading the atlas</p>
+        <h2 id="legend-title">Legend and scope.</h2>
+        <p>Frames show information architecture and hard states, not a replacement visual design. Text is real route language from the current implementation. State chips enumerate the full family coverage; dashed blue insets show representative alternate states. The modern console uses the workspace shell wherever applicable.</p>
+      </div>
+      <ul class="legend-list">
+        <li><span class="wf-mark" style="position:static">1</span><span>Numbered design annotation</span></li>
+        <li><span class="legend-swatch"></span><span>Primary structure or content region</span></li>
+        <li><span class="legend-swatch dashed"></span><span>Alternate or boundary state inset</span></li>
+        <li><span class="legend-swatch accent"></span><span>Active route, evidence, or annotation</span></li>
+        <li><span class="legend-swatch double"></span><span>Intentional horizontal-scroll region</span></li>
+        <li><span class="mono">A / X / E</span><span>Keyboard decision controls</span></li>
+      </ul>
+    </section>
+    <div id="family-list"></div>
+    <div class="empty-filter" id="empty-filter" hidden>
+      <h2>No wireframe family matches.</h2>
+      <p>Clear the route or state search, or choose a different area.</p>
+    </div>
+  </div>
+</main>
+<footer class="footer">
+  <div class="footer-inner">
+    <span>Local documentation artifact. Production application files are not referenced at runtime.</span>
+    <span class="mono">docs/wireframes / deterministic / no external assets</span>
+  </div>
+</footer>
+<noscript><p>This atlas needs JavaScript enabled to render and filter its inline coverage model. The standalone SVG and Mermaid files remain available without JavaScript.</p></noscript>
+<script>
+const families = [
+  {
+    id: "public-landing", area: "marketing", family: "Public landing", route: "/", runtime: "Next.js console :3000", pattern: "landing", active: "",
+    title: "From sparse product data to trusted catalog intelligence.", eyebrow: "Verifiable Product Intelligence for Industrial Commerce",
+    deck: "AXIOM turns six-field inputs into evidence-backed, reviewable, delivery-ready records—without guessing.",
+    sources: "apps/console/src/app/page.tsx · marketing-header.tsx",
+    tablet: "At 768px the hero becomes one reading column; the product-definition rule follows the actions, and the evidence proof remains value-before-source.",
+    states: ["default", "evidence-proof", "mobile-stacked"],
+    annotations: [
+      ["Shell boundary", "Public marketing header only; do not mount workspace navigation."],
+      ["Specific promise", "Lead with sparse input to evidence-backed output, not generic AI automation."],
+      ["Proof specimen", "BA-100-025 · body_material · Bronze C84400 · score 0.728 / gate 0.707."],
+      ["Primary handoff", "Enter operations is primary; Enrich a record is the direct secondary workflow."]
+    ]
+  },
+  {
+    id: "marketing-404", area: "marketing", family: "Global marketing 404", route: "* / global not-found", runtime: "Next.js console :3000", pattern: "marketing404", active: "",
+    title: "This record path does not exist.", eyebrow: "404 / Route unavailable", deck: "Return to the public overview or continue into catalog operations.",
+    sources: "apps/console/src/app/not-found.tsx",
+    tablet: "At 768px the message and actions stack while the public header remains; no workspace rail appears.",
+    states: ["route-unavailable", "desktop-actions-inline", "mobile-actions-stacked"],
+    annotations: [["Global boundary", "This 404 belongs to the public marketing surface."], ["Exact recovery", "Name the missing record path without leaking framework language."], ["Two exits", "AXIOM overview and Enter operations are both available."]]
+  },
+  {
+    id: "workspace-shell", area: "shell", family: "Workspace shell and boundaries", route: "(workspace) route group", runtime: "Next.js console :3000", pattern: "shell", active: "Operations",
+    title: "Persistent workflow context.", eyebrow: "Workspace shell", deck: "Canonical navigation, data truth, and route boundaries stay present around every modern operational workflow.",
+    sources: "(workspace)/layout.tsx · desktop-sidebar.tsx · nav.tsx · loading.tsx · error.tsx · not-found.tsx",
+    tablet: "At 768px the desktop rail is replaced by the app bar and horizontally scrollable workflow navigation; the data-source banner remains above main.",
+    states: ["live-expanded", "live-collapsed", "mobile-navigation", "offline-fixture", "loading", "error", "workspace-404"],
+    annotations: [["Canonical order", "Operations, Enrich, Resolve, Process, Publish, Audit; Intelligence is secondary."], ["Collapsible rail", "Expanded labels/descriptors collapse to an accessible glyph rail."], ["Truth banner", "Offline fixture stays persistent and cannot resemble live persisted data."], ["Boundaries in context", "Loading, error, and workspace 404 preserve navigation and recovery."]]
+  },
+  {
+    id: "operations", area: "workflow", family: "Operations", route: "/operations", runtime: "Next.js console :3000", pattern: "operations", active: "Operations",
+    title: "Catalog work that needs intervention", eyebrow: "Operations / portfolio control", deck: "Records blocked by validation, unresolved evidence, a required decision, or no established class—ordered by publication risk.",
+    sources: "(workspace)/operations/page.tsx · lib/data.ts",
+    tablet: "At 768px use a two-by-two stat band; preserve risk-ordered rows, then move recent recorded activity below.",
+    states: ["blocked", "clear", "recent-empty", "live-data", "offline-fixture"],
+    annotations: [["Operational headline", "Blocked and clear portfolios use different, direct page titles."], ["Honest denominator", "Required gaps explicitly exclude unclassified records."], ["Risk order", "Only highest-risk rows appear before the Resolve handoff."], ["Recorded context", "Recent Process and Audit links never imply a live run."]]
+  },
+  {
+    id: "enrich", area: "workflow", family: "Enrich", route: "/enrich", runtime: "Next.js console :3000", pattern: "enrich", active: "Enrich",
+    title: "Enrich one product from what you know about it", eyebrow: "Enrich / single product", deck: "A part number, a manufacturer, and either a description or manufacturer link become a cited catalogue record.",
+    sources: "(workspace)/enrich/page.tsx · components/enrich-form.tsx · apps/api/main.py",
+    tablet: "At 768px run control drops below identity and source fields. Cost and real-model-call disclosure stay before submit.",
+    states: ["unavailable", "incomplete", "ready", "running", "refused", "conflict", "success"],
+    annotations: [["Only live run", "This is the only console workflow that starts model work and incurs cost."], ["Input gate", "MPN + manufacturer; source text or HTTPS URL is required when retrieval is off."], ["Cost before action", "Two calls per run, three with copy, one run at a time."], ["Refusals have remedies", "Unavailable, refused, and conflict remain distinct; only conflict offers replace."]]
+  },
+  {
+    id: "resolve-queue", area: "workflow", family: "Resolve queue", route: "/review", runtime: "Next.js console :3000", pattern: "reviewQueue", active: "Resolve",
+    title: "Attributes needing a decision", eyebrow: "Resolve", deck: "Risk-ranked SKUs separate below-threshold values, required gaps, no-class records, and ambiguous classification.",
+    sources: "(workspace)/review/page.tsx · components/review-queue.tsx",
+    tablet: "At 768px search and filters wrap above full-width SKU groups; paging remains after the queue, never inside a clipped table.",
+    states: ["open", "search", "filter", "no-match", "no-SKUs", "pagination", "accepted", "no-class", "ambiguous"],
+    annotations: [["Decision categories", "Below threshold, required gap, no class, and ambiguous class require different work."], ["Risk groups", "Each SKU exposes actual open values or gaps before navigation."], ["Empty-state distinction", "No filter match clears controls; no SKUs explains how to record output."], ["Accepted visibility", "Fully accepted records remain a legible filter state."]]
+  },
+  {
+    id: "resolve-detail", area: "workflow", family: "Resolve detail", route: "/review/[sku]", runtime: "Next.js console :3000", pattern: "reviewDetail", active: "Resolve",
+    title: "BA-100-025", eyebrow: "Resolve record", deck: "Milwaukee Valve · 1/4 in two-piece ball valve · schema PLB.VLV.BALL.2PC.",
+    sources: "review/[sku]/page.tsx · review-workspace.tsx · evidence-viewer.tsx · source/variant/cross-source/equivalence panels",
+    tablet: "At 768px keep one reading column: summary, queue, value, evidence, validation, sources, variants, cross-source, equivalence. Never introduce a fixed three-pane layout.",
+    states: ["value", "gap", "no-selection", "saving", "decision-success", "decision-error", "offline", "PDF highlight", "text fallback", "derived/no span", "missing artifact", "unverified", "validation", "sources", "variant", "cross-source", "equivalence"],
+    annotations: [["Keyboard queue", "Queue focus owns J/K movement and A/X/E decisions."], ["Confidence structure", "Score, 0.707 threshold, reason, method, and status precede action."], ["Evidence is the demo", "The exact span stays aligned over a stable PDF page at every zoom."], ["Immediate persistence", "Saving, prior movement, error, and offline-disabled states are explicit."], ["Context below", "Validation, sources, variants, cross-source, and equivalence remain reachable."]]
+  },
+  {
+    id: "process", area: "workflow", family: "Process", route: "/pipeline", runtime: "Next.js console :3000", pattern: "process", active: "Process",
+    title: "What the recorded process did", eyebrow: "Process", deck: "A replay of persisted stages from supplier document to signed, publishable record. This view never starts live execution.",
+    sources: "(workspace)/pipeline/page.tsx · pipeline-replay.tsx · recorded-run-combobox.tsx · lib/stages.ts",
+    tablet: "At 768px the selector stays above a two-column stage grid; smaller screens use one ordered column without a horizontal timeline.",
+    states: ["no-runs", "selector", "replay-stages", "complete", "reduced-motion"],
+    annotations: [["Replay only", "No upload and no Run control; every stage is persisted context."], ["Nine-stage order", "Ingest, Parse, Resolve, Classify, Extract, Normalize, Validate, Decide, Activate."], ["Model confinement", "Each stage names model or deterministic work."], ["Reduced motion", "Stages render immediately complete without travel or stagger."]]
+  },
+  {
+    id: "publish", area: "workflow", family: "Publish", route: "/delivery", runtime: "Next.js console :3000", pattern: "publish", active: "Publish",
+    title: "Prepare a contracted catalog delivery", eyebrow: "Publish / delivery studio", deck: "Bring an item master and optional manufacturer documents; receive the 252-column UniLog contract with blank and withheld cells kept distinct.",
+    sources: "(workspace)/delivery/page.tsx · delivery-upload.tsx · api/delivery/export/route.ts · apps/api/main.py",
+    tablet: "At 768px files precede output settings. The 252-column preview remains a named horizontal-scroll region instead of compressing cells.",
+    states: ["unavailable", "empty", "drag", "staged", "running", "rejected", "failed", "downloaded", "preview", "empty subsections"],
+    annotations: [["Live contract", "Format, columns, join key, limits, and outputs come from the service."], ["Staging gate", "Export stays locked until an item master is staged."], ["Outcome taxonomy", "Rejected, failed, downloaded, and preview each give a different next action."], ["Sparse is valid", "Populated, blank, withheld, and empty subsections are separate findings."]]
+  },
+  {
+    id: "audit-list", area: "workflow", family: "Audit list", route: "/certificates", runtime: "Next.js console :3000", pattern: "auditList", active: "Audit",
+    title: "Signed enrichment records", eyebrow: "Audit", deck: "One signed record per SKU lists every certified value, exact source span, and every gap that remains.",
+    sources: "(workspace)/certificates/page.tsx",
+    tablet: "At 768px preserve a named horizontal-scroll table. Signature and SKU stay first; pagination follows the complete list.",
+    states: ["populated", "empty", "pagination", "signature-failure"],
+    annotations: [["Corpus-level claim", "All valid is computed across every artifact, not only the current page."], ["Signed facts only", "Queued candidates are counted, never certified."], ["Honest empty", "No table header or invented generated date appears without artifacts."]]
+  },
+  {
+    id: "audit-detail", area: "workflow", family: "Audit detail", route: "/certificates/[sku]", runtime: "Next.js console :3000", pattern: "auditDetail", active: "Audit",
+    title: "BA-100-025", eyebrow: "Audit artifact", deck: "Signed certificate, measured quality, certified values and citations, remaining gaps, channel readiness, sources, and generated copy.",
+    sources: "certificates/[sku]/page.tsx · generated-copy.tsx · sources-panel.tsx",
+    tablet: "At 768px quality and contents stack, followed by signature, values, gaps, channels, sources, and copy. Long hashes wrap without hiding verification.",
+    states: ["signature-valid", "signature-invalid", "quality", "quality-partial", "certified-empty", "gaps", "channels", "copy-absent", "copy-verified", "copy-withheld"],
+    annotations: [["Signature first", "Recomputed hash validity appears before the certified values."], ["Measured quality", "Unmeasured richness has no zero-width bar and leaves the composite denominator."], ["Certified set", "Every value carries method, locator, and evidence status."], ["Downstream sections", "Gaps, channels, and copy variants remain distinct."]]
+  },
+  {
+    id: "intelligence", area: "workflow", family: "Intelligence", route: "/quality", runtime: "Next.js console :3000", pattern: "quality", active: "Intelligence",
+    title: "Impact, policy, and unit economics", eyebrow: "Intelligence / measured decisions", deck: "Separate what enrichment changed, what confidence policy permits, and what the recorded model cascade cost.",
+    sources: "(workspace)/quality/page.tsx · cohort-panel.tsx · risk-dial.tsx · apps/api/main.py",
+    tablet: "At 768px impact arms, policy figures, and cost tiers stack. The policy plot becomes full width or is replaced by an explicit no-curve explanation.",
+    states: ["cohort-absent", "trust-valid", "trust-drift", "policy-pending", "policy-error", "achievable", "unachievable", "no-curve", "cost-absent", "cost-partial", "cost-complete"],
+    annotations: [["Three claims", "Cohort, policy, and economics never collapse into one blended score."], ["Trust variants", "Treatment/control comparison can be valid, drifting, or absent."], ["Policy what-if", "Pending, error, achievable, unachievable, and no-curve do not reclassify records."], ["Unknown cost", "Absent or partial pricing never renders as zero dollars."]]
+  },
+  {
+    id: "legacy-review", area: "legacy", family: "Legacy FastAPI Review", route: "/", runtime: "FastAPI :8000", pattern: "legacyReview", active: "",
+    title: "AXIOM Review Workspace", eyebrow: "Legacy FastAPI surface", deck: "Current fixed three-pane keyboard review tool: queue, value, and line-level evidence.",
+    sources: "apps/api/main.py:1724-1730 · apps/api/static/index.html · /api/sessions · /api/session/{sku}",
+    tablet: "At 768px the fixed 280px + two minmax panes already compress. This atlas documents the limitation; it does not imply a responsive redesign.",
+    states: ["sessions-empty", "session-loaded", "decision", "evidence-verified", "evidence-missing", "policy-achievable", "policy-unachievable", "request-error", "fixed mobile clipping"],
+    annotations: [["Historical root", "This / belongs to FastAPI, not the Next.js public landing."], ["Fixed three panes", "Queue, value, and evidence always remain columns with overflow hidden."], ["Narrow-screen defect", "At 390px the 280px queue leaves value/evidence compressed and clipped; the header also overflows."], ["Legacy behavior", "Sessions, error-budget policy, keyboard decisions, and line evidence remain current."]]
+  },
+  {
+    id: "legacy-delivery", area: "legacy", family: "Legacy FastAPI Delivery", route: "/delivery", runtime: "FastAPI :8000", pattern: "legacyDelivery", active: "",
+    title: "Supplier item master in, delivery file out", eyebrow: "AXIOM / Delivery Export", deck: "Upload a supplier item master and get the client's 252-column delivery format. Runs offline and makes no model calls.",
+    sources: "apps/api/main.py:1732-1738 · apps/api/static/delivery.html · /api/delivery/format · /api/delivery/export",
+    tablet: "At 768px the existing two-column form becomes one column; the 252-column preview remains horizontally scrollable with a sticky header.",
+    states: ["contract-loading", "contract-error", "file-empty", "file-staged", "file-error", "output-xlsx", "output-csv", "output-json", "result-running", "result-error", "download-success", "preview-success"],
+    annotations: [["Linear task", "Supplier item master in, delivery file out; distinct from legacy Review."], ["Contract readout", "Live format data arrives before output promises."], ["Error taxonomy", "Unreadable file, missing columns, empty selection, and output failure stay distinct."], ["Success split", "Downloaded XLSX/CSV and JSON preview are separate outcomes."]]
+  }
+];
+const nav = ["Operations", "Enrich", "Resolve", "Process", "Publish", "Audit"];
+function marker(number) { return `<span class="wf-mark mark-${number}" aria-hidden="true">${number}</span>`; }
+function status(text, accent = false) { return `<span class="wf-status${accent ? " accent" : ""}">${text}</span>`; }
+function row(primary, secondary, state) { return `<div class="wf-row"><span><strong>${primary}</strong><small>${secondary}</small></span>${status(state, state === "open" || state === "verified" || state === "active")}</div>`; }
+function stats(items) { return `<div class="stat-grid">${items.map(item => `<div class="stat"><span>${item[0]}</span><strong>${item[1]}</strong><small>${item[2]}</small></div>`).join("")}</div>`; }
+function head(item, actions = "") { return `<div class="wf-head"><div><p class="wf-eyebrow">${item.eyebrow}</p><h3 class="wf-title">${item.title}</h3><p class="wf-copy">${item.deck}</p></div>${actions ? `<div class="wf-actions">${actions}</div>` : ""}</div>`; }
+function workspaceNav(active) {
+  return `<aside class="wf-sidebar"><div class="wf-brand">AXIOM</div><p class="wf-nav-label">Workflows</p>${nav.map(label => `<div class="wf-nav-item${label === active ? " active" : ""}">${label}</div>`).join("")}<p class="wf-nav-label">Analysis</p><div class="wf-nav-item${active === "Intelligence" ? " active" : ""}">Intelligence</div><div class="wf-sidebar-foot">Collapse rail · theme</div></aside>`;
+}
+function mobileNav(active) { return `<div class="mobile-nav">${[...nav, "Intelligence"].map(label => `<span class="${label === active ? "active" : ""}">${label}</span>`).join("")}</div>`; }
+function shellFrame(item, mode, body, offline = false) {
+  if (mode === "desktop") {
+    return `<div class="workspace">${workspaceNav(item.active)}<div class="wf-app"><div class="wf-appbar">theme · local workspace</div>${offline ? `<div class="wf-banner">OFFLINE FIXTURE · decisions cannot persist · start the API and reload</div>` : ""}<div class="wf-main">${body}</div></div></div>`;
+  }
+  return `<div class="mobile-shell"><div class="wf-topbar"><span class="wf-brand">AXIOM</span><span>Workspace / ${item.active || "Section"}</span><span>theme</span></div>${mobileNav(item.active)}${offline ? `<div class="wf-banner">OFFLINE FIXTURE · read only</div>` : ""}<div class="wf-main">${body}</div></div>`;
+}
+function landingBody(item, mode) {
+  return `<div class="marketing-screen"><div class="wf-topbar"><span class="wf-brand">AXIOM</span><span class="wf-links">${mode === "desktop" ? "Product intelligence · Method · " : ""}<span class="wf-button primary">Enter operations</span></span></div><div class="marketing-main"><div class="hero-grid"><div><p class="wf-eyebrow">${item.eyebrow}</p><h3>${item.title}</h3><p>${item.deck}</p><div class="wf-actions"><span class="wf-button primary">Enter operations</span><span class="wf-button">Enrich a record</span></div></div><div class="hero-rule"><span class="wf-eyebrow">Product category</span><strong>An evidence-gated compiler for product data.</strong><p>No independent evidence means no automatic publication.</p></div></div><div class="proof-grid"><div class="proof-copy"><p class="wf-eyebrow">Field / body_material</p><strong>Body material</strong><p class="value">Bronze C84400</p>${status("publishable · auto-accepted", true)}<p class="wf-copy">score 0.728 / gate 0.707<br>Evidence verified · PDF page 1</p></div><div class="proof-doc"><div class="wf-panel-head"><span>Manufacturer specification</span><span>PDF · page 1</span></div><div class="document-page"><div class="doc-line short"></div><div class="doc-line"></div><div class="doc-line highlight"></div><div class="doc-line"></div><div class="doc-line short"></div></div></div></div></div>${marker(1)}${marker(2)}${marker(3)}${marker(4)}</div>`;
+}
+function marketing404Body(item) {
+  return `<div class="marketing-screen"><div class="wf-topbar"><span class="wf-brand">AXIOM</span><span class="wf-button">Enter operations</span></div><div class="marketing-main not-found"><div><p class="wf-eyebrow">${item.eyebrow}</p><h3>${item.title}</h3><p class="wf-copy">${item.deck}</p><div class="wf-actions"><span class="wf-button">AXIOM overview</span><span class="wf-button primary">Enter operations</span></div></div></div>${marker(1)}${marker(2)}${marker(3)}</div>`;
+}
+function shellBody(item, mode) {
+  const content = `${head(item)}<div class="boundary-grid"><div class="boundary-card"><strong>Loading workflow</strong><div class="skeleton-line"></div><div class="skeleton-line short"></div></div><div class="boundary-card"><strong>This workflow could not load</strong><p>Try again · fixture recovery</p></div><div class="boundary-card"><strong>Page not found</strong><p>Workflow overview · Open Resolve</p></div><div class="state-inset"><strong>Collapsed rail</strong><p>Glyphs + accessible labels + active mark.</p></div></div>${marker(1)}${marker(2)}${marker(3)}${marker(4)}`;
+  return shellFrame(item, mode, content, mode === "mobile");
+}
+function operationsBody(item, mode) {
+  const body = `${head(item, `<span class="wf-button primary">Resolve blocking work</span><span class="wf-button">Open Publish</span>`)}${stats([["Records blocked","18","of 126 catalog records"],["Decisions waiting","31","values routed to review"],["Required gaps","7","excludes 4 unclassified"],["Delivery readiness","82%","41 of 50 channels"]])}<div class="panel-grid"><div class="wf-panel"><div class="wf-panel-head"><span>Blocking work</span><span>highest risk first</span></div>${row("BA-100-025 · Milwaukee Valve","1 decision · case quantity 24 · score 0.7045","open")}${row("PDSH4816AF · Frigidaire","required gap · energy certification","blocked")}${row("52C3-5/8-UPC · series variant","classification needs adjudication","ambiguous")}</div><div><div class="wf-panel"><div class="wf-panel-head"><span>Recent recorded runs</span><span>5</span></div>${row("BA-100-075","Process replay · signed artifact","recorded")}${row("WDTS7024RZ","Audit · 91.4% quality","valid")}</div><div class="state-inset"><strong>Clear / recent-empty</strong><p>Portfolio is clear to progress. No recorded activity is not zero activity.</p></div></div></div>${marker(1)}${marker(2)}${marker(3)}${marker(4)}`;
+  return shellFrame(item, mode, body, false);
+}
+function enrichBody(item, mode) {
+  const body = `${head(item)}<div class="panel-grid"><div class="wf-panel"><div class="wf-panel-head"><span>01 · Identify the product</span>${status("required")}</div><div class="wf-panel-body"><div class="wf-field"><label>Manufacturer part number</label><div class="wf-input">PDSH4816AF</div></div><div class="wf-field"><label>Manufacturer</label><div class="wf-input">Frigidaire</div></div></div><div class="wf-panel-head"><span>02 · Add anything you already know</span>${status("optional")}</div><div class="wf-panel-body"><div class="wf-field"><label>Description</label><div class="wf-input wf-textarea">24IN BUILT IN DISHWASHER STAINLESS STEEL 47DBA</div></div><div class="wf-field"><label>Manufacturer HTTPS URL</label><div class="wf-input">https://example.com/spec/pdsh4816af.pdf</div></div><div class="state-inset"><strong>Input gate · ready</strong><p>The datasheet is the source; the description is read too.</p></div></div></div><aside class="wf-panel"><div class="wf-panel-head"><span>03 · Run control</span>${status("live", true)}</div><div class="wf-panel-body"><div class="wf-check">Retrieve manufacturer document</div><div class="wf-check">Include optional attributes</div><div class="wf-check">Generate claim-checked copy</div><hr><p class="wf-copy"><strong>What this run costs</strong><br><span class="mono">2 model calls · 1 at a time</span></p><span class="wf-button primary">Enrich this product</span><p class="wf-copy">Ready to run.</p></div><div class="state-inset"><strong>Refused / conflict</strong><p>Nothing was run. Replacement is deliberate only after an existing-session conflict.</p></div></aside></div>${marker(1)}${marker(2)}${marker(3)}${marker(4)}`;
+  return shellFrame(item, mode, body);
+}
+function reviewQueueBody(item, mode) {
+  const body = `${head(item)}${stats([["Open items","31","across 18 records"],["Values","24","below threshold"],["Required gaps","7","class-defined gaps"],["Unclassified","4","2 ambiguous"]])}<div class="wf-panel" style="margin-top:2%"><div class="wf-panel-head"><span>Search MPN, brand, GTIN, supplier ID</span><span>Filters · Open · Accepted · No class</span></div>${row("BA-100-025 · Milwaukee Valve","Body material verified · case quantity 24 below threshold","open")}${row("PDSH4816AF · Frigidaire","2 values · 1 required gap · quality 76%","open")}${row("52C3-5/8-UPC","No established class · two candidates tied","ambiguous")}${row("WDTS7024RZ","Every value cleared the gate","accepted")}<div class="wf-panel-body"><span class="wf-button">Previous</span> <span class="mono">Page 1 of 4</span> <span class="wf-button">Next</span></div></div><div class="state-inset" style="margin-top:1%"><strong>No match ≠ no SKUs</strong><p>Clear filters for no match. Explain how to create persisted output when the catalogue itself is empty.</p></div>${marker(1)}${marker(2)}${marker(3)}${marker(4)}`;
+  return shellFrame(item, mode, body);
+}
+function reviewDetailBody(item, mode) {
+  const body = `${head(item, `<span class="wf-button">Audit artifact</span>`)}${stats([["Completeness","84%","required + optional"],["Verifiability","92%","exact spans"],["Consistency","100%","validation"],["Open decisions","1","below gate"]])}<div class="queue-layout"><div class="queue-rail"><div class="wf-panel-head"><span>Review 1 · Gaps 2 · All 14</span><span>J K</span></div><div class="queue-item active"><strong>Case quantity</strong><small>24 · 0.7045 · below threshold</small></div><div class="queue-item"><strong>Body material</strong><small>Bronze C84400 · accepted</small></div><div class="queue-item"><strong>Lead-free claim</strong><small>required gap · no cited value</small></div><div class="queue-item"><strong>End connection</strong><small>NPT · verified</small></div></div><div class="workplane"><div class="value-pane"><p class="wf-eyebrow">Value / case_quantity</p><h4 class="wf-title mono">24</h4><p class="wf-copy">Calibrated confidence <strong class="mono">0.7045</strong> · threshold <span class="mono">0.707</span></p><div class="wf-meter" style="--meter:70.45%;--threshold:70.7%"><span></span><i class="threshold"></i></div><div class="wf-actions" style="margin-top:.5rem"><span class="wf-button primary">Accept A</span><span class="wf-button">Reject X</span><span class="wf-button">Correct E</span></div><div class="state-inset" style="margin-top:.5rem"><strong>Saving → persisted</strong><p>Prior 0.68 → 0.71 · 12 sibling samples. Error/offline stays actionable.</p></div><p class="wf-copy"><strong>Validation</strong><br>datatype pass · range pass · cross-field warning</p></div><div class="evidence-pane"><div class="wf-panel-head"><span>Evidence · quote verified</span><span>PDF p.1 · 125%</span></div><blockquote class="wf-copy">“Standard carton quantity: 24”</blockquote><div class="document-page"><div class="doc-line short"></div><div class="doc-line"></div><div class="doc-line"></div><div class="doc-line highlight"></div><div class="doc-line"></div><div class="doc-line short"></div></div><p class="wf-copy mono">sha256 8c23f3… · table row 12</p></div></div></div>${marker(1)}${marker(2)}${marker(3)}${marker(4)}${marker(5)}`;
+  return shellFrame(item, mode, body, mode === "mobile");
+}
+function processBody(item, mode) {
+  const stages = [["01 Ingest","hash stored"],["02 Parse","12 pages"],["03 Resolve","source identity"],["04 Classify","PLB.VLV…"],["05 Extract","34 attributes"],["06 Normalize","canonical units"],["07 Validate","48 checks"],["08 Decide","31 / 1 queued"],["09 Activate","signed + ready"]];
+  const body = `${head(item, status("recorded replay"))}<div class="wf-panel" style="margin-top:2%"><div class="wf-panel-body"><span class="wf-eyebrow">Recorded run selector</span><div class="wf-input">BA-100-025 · recorded 2026-08-23</div></div></div><div class="stage-grid">${stages.map((stage, index) => `<div class="stage${index < 9 ? " active" : ""}"><strong>${stage[0]}</strong><small>${stage[1]} · ${[3,4].includes(index) ? "model" : "deterministic"}</small></div>`).join("")}</div><div class="state-inset" style="margin-top:1%"><strong>No runs / reduced motion</strong><p>No run explains how to persist one. Reduced motion renders all recorded stages immediately complete.</p></div>${marker(1)}${marker(2)}${marker(3)}${marker(4)}`;
+  return shellFrame(item, mode, body);
+}
+function publishBody(item, mode) {
+  const body = `${head(item)}<div class="panel-grid"><div><div class="wf-panel"><div class="wf-panel-head"><span>01 · Item master</span>${status("required")}</div><div class="wf-panel-body"><div class="wf-drop active">Release to stage this item master<br><span class="mono">Unihack_Sample_Dataset_Input.csv · 84 KB</span></div><p class="wf-copy">Required: MPN · Manufacturer · Part_Desc</p></div><div class="wf-panel-head"><span>02 · Manufacturer documents</span>${status("optional")}</div><div class="wf-panel-body"><div class="wf-drop">Choose PDFs, HTML, or text · no documents staged</div><p class="wf-copy">Without documents, the row can be structurally complete and specification-poor.</p></div></div><div class="state-inset" style="margin-top:.5rem"><strong>Result preview</strong><p>18 rows · 252 columns · 28 populated · 219 blank · 5 withheld. Preview scrolls horizontally.</p></div></div><aside class="wf-panel"><div class="wf-panel-head"><span>03 · Delivery settings</span><span class="mono">UniLog@1.0</span></div><div class="wf-panel-body"><div class="wf-check">Excel workbook + provenance</div><div class="wf-check">CSV</div><div class="wf-check">Preview only</div><div class="wf-field"><label>Rows / part-number filter</label><div class="wf-input">all rows</div></div><div class="wf-check">Read descriptions</div><div class="wf-check">Include provenance sheets</div><span class="wf-button primary">Generate delivery file</span><p class="wf-copy">252 columns · join on <span class="mono">MPN</span></p></div><div class="state-inset"><strong>Rejected / failed / downloaded</strong><p>Missing columns are a refusal; service interruption is failure; download and preview are separate success states.</p></div></aside></div>${marker(1)}${marker(2)}${marker(3)}${marker(4)}`;
+  return shellFrame(item, mode, body);
+}
+function auditListBody(item, mode) {
+  const table = `<div class="table-wrap"><table class="wf-table"><thead><tr><th>SKU</th><th>Certificate</th><th>Signature</th><th>Quality</th><th>Certified</th></tr></thead><tbody><tr><td>BA-100-025</td><td>cert_8c23…</td><td>valid</td><td>91.4%</td><td>13 / 14</td></tr><tr><td>PDSH4816AF</td><td>cert_17fe…</td><td>valid</td><td>84.2%</td><td>21 / 26</td></tr><tr><td>52C3-5/8-UPC</td><td>cert_bad0…</td><td>FAILED</td><td>—</td><td>0</td></tr></tbody></table></div>`;
+  const body = `${head(item)}${stats([["Audit artifacts","126","one per SKU"],["Signatures","Check failed","1 of 126 invalid"],["Certified values","1,842","of 1,973 extracted"],["Mean quality","88.6%","weighted composite"]])}<div style="margin-top:2%">${table}<div class="wf-panel-body"><span class="wf-button">Previous</span> <span class="mono">Page 1 of 13</span> <span class="wf-button">Next</span></div></div><div class="state-inset"><strong>Empty list</strong><p>No table shell and no invented date—only how to produce a signed recorded run.</p></div>${marker(1)}${marker(2)}${marker(3)}`;
+  return shellFrame(item, mode, body);
+}
+function auditDetailBody(item, mode) {
+  const body = `${head(item, `<span class="wf-button">Resolve workspace</span>`)}<div class="panel-grid"><div class="wf-panel"><div class="wf-panel-head"><span>Quality index</span><span class="mono">91.4%</span></div><div class="wf-panel-body"><p class="wf-copy">Completeness 84% ×0.35</p><div class="wf-meter" style="--meter:84%"><span></span></div><p class="wf-copy">Verifiability 92% ×0.35</p><div class="wf-meter" style="--meter:92%"><span></span></div><p class="wf-copy">Consistency 100% ×0.20</p><div class="wf-meter" style="--meter:100%"><span></span></div><p class="wf-copy">Richness — not measured; excluded</p></div></div><div><div class="wf-panel"><div class="wf-panel-head"><span>Signature</span>${status("valid", true)}</div><div class="wf-panel-body"><p class="wf-copy mono">sha256 8c23f3a9… recomputed on read</p><p class="wf-copy">13 certified · 1 queued · 2 required gaps</p></div></div><div class="state-inset"><strong>Invalid signature</strong><p>Block the trust claim and name the changed digest; do not hide the artifact.</p></div></div></div><div class="wf-panel" style="margin-top:2%"><div class="wf-panel-head"><span>Certified values and exact citations</span><span>13 facts</span></div>${row("Body material · Bronze C84400","document extraction · PDF p.1 · quote verified","certified")}${row("Nominal size · 1/4 in","table cell A12 · normalized from 0.25 IN","certified")}${row("Case quantity · 24","queued value excluded from signed facts","excluded")}</div><div class="panel-grid"><div class="state-inset"><strong>Gaps / channels</strong><p>2 required gaps · Amazon blocked · distributor CSV ready.</p></div><div class="state-inset"><strong>Generated copy</strong><p>Verified copy / withheld unsupported claim / absent copy are distinct.</p></div></div>${marker(1)}${marker(2)}${marker(3)}${marker(4)}`;
+  return shellFrame(item, mode, body);
+}
+function qualityBody(item, mode) {
+  const body = `${head(item)}<div class="panel-grid"><div class="wf-panel"><div class="wf-panel-head"><span>Cohort impact</span>${status("measured", true)}</div><div class="wf-panel-body"><div class="wf-bars"><span style="--bar:34%"></span><span style="--bar:72%"></span><span style="--bar:36%"></span><span style="--bar:81%"></span></div><p class="wf-copy">Before / after treatment · untouched control checks drift.</p></div></div><div class="state-inset"><strong>Trust variants</strong><p>Valid control · control drift · no cohort study.</p></div></div><div class="panel-grid"><div class="wf-panel"><div class="wf-panel-head"><span>Acceptance policy · what-if</span><span class="mono">ε 5%</span></div><div class="wf-panel-body"><div class="wf-chart"></div><p class="wf-copy mono">threshold 0.707 · coverage 68% · error upper bound 4.9%</p></div></div><div class="state-inset"><strong>Policy states</strong><p>Pending · error · achievable · unachievable · no curve.</p></div></div><div class="panel-grid"><div class="wf-panel"><div class="wf-panel-head"><span>Enrichment economics</span><span class="mono">$0.041 / SKU</span></div><div class="wf-panel-body">${row("small model tier","184 calls · 1.2M tokens","$3.88")}${row("large model escalations","21 calls · 410K tokens","$1.31")}</div></div><div class="state-inset"><strong>Cost truth</strong><p>Absent ≠ $0. Partial pricing excludes unknown runs from totals.</p></div></div>${marker(1)}${marker(2)}${marker(3)}${marker(4)}`;
+  return shellFrame(item, mode, body);
+}
+function legacyReviewBody(item, mode) {
+  const grid = `<div class="legacy-review-grid"><div><div class="wf-panel-head"><span>Queue</span><span>3 / 14</span></div><div class="queue-item active"><strong>Body material</strong><small>Bronze C84400 · 73</small></div><div class="queue-item"><strong>Case quantity</strong><small>24 · 70</small></div><div class="queue-item"><strong>Lead-free</strong><small>gap · required</small></div></div><div><p class="wf-eyebrow">Proposed value</p><h4 class="wf-title">Bronze C84400</h4><p class="wf-copy mono">body_material · string · score 0.728</p><div class="wf-actions"><span class="wf-button primary">Accept A</span><span class="wf-button">Reject R</span><span class="wf-button">Correct E</span></div><div class="state-inset" style="margin-top:.5rem"><strong>Policy</strong><p>5% error budget · 68% coverage · threshold 0.707</p></div></div><div><div class="wf-panel-head"><span>Evidence</span><span>verified · p.1</span></div><div class="document-page"><div class="doc-line"></div><div class="doc-line short"></div><div class="doc-line highlight"></div><div class="doc-line"></div></div></div></div>`;
+  return `<div class="legacy-screen"><div class="wf-topbar"><span class="wf-brand">AXIOM · Review Workspace</span><span>Delivery export · SKU BA-100-025 · Error budget 5%</span></div><div class="wf-banner">Legacy FastAPI :8000 · fixed queue | value | evidence grid</div>${grid}${mode === "mobile" ? `<div class="overflow-note">CURRENT LIMITATION: fixed 280px queue + value + evidence panes exceed 390px. Content is compressed/clipped; no invented mobile tabs.</div>` : ""}${marker(1)}${marker(2)}${marker(3)}${marker(4)}</div>`;
+}
+function legacyDeliveryBody(item, mode) {
+  const body = `${head(item)}<div class="panel-grid"><div><div class="wf-panel"><div class="wf-panel-head"><span>Item master</span>${status("required")}</div><div class="wf-panel-body"><div class="wf-drop">CSV, TSV, XLSX · drop or pick a file</div><p class="wf-copy">Required columns loaded from /api/delivery/format.</p></div></div><div class="wf-panel" style="margin-top:.5rem"><div class="wf-panel-head"><span>Manufacturer documents</span>${status("optional")}</div><div class="wf-panel-body"><div class="wf-drop">PDF, HTML, or text</div></div></div></div><aside class="wf-panel"><div class="wf-panel-head"><span>Output</span><span class="mono">252 columns</span></div><div class="wf-panel-body"><div class="wf-check">Excel workbook</div><div class="wf-check">CSV</div><div class="wf-check">Preview only</div><div class="wf-field"><label>Rows / only these MPNs</label><div class="wf-input">all rows</div></div><span class="wf-button primary">Generate delivery file</span></div><div class="state-inset"><strong>Contract / file / output</strong><p>Loading and contract error; empty and bad file; output errors; download or preview success.</p></div></aside></div><div class="table-wrap" style="margin-top:2%"><table class="wf-table"><thead><tr><th>MPN</th><th>Manufacturer</th><th>Body_Material</th><th>... 249 more</th></tr></thead><tbody><tr><td>BA-100-025</td><td>Milwaukee Valve</td><td>Bronze C84400</td><td>blank / withheld distinct</td></tr></tbody></table></div>${marker(1)}${marker(2)}${marker(3)}${marker(4)}`;
+  return `<div class="legacy-screen"><div class="wf-topbar"><span class="wf-brand">AXIOM · Delivery Export</span><span>Review workspace · UniLog@1.0</span></div><div class="wf-main">${body}</div></div>`;
+}
+function frameContent(item, mode) {
+  switch (item.pattern) {
+    case "landing": return landingBody(item, mode);
+    case "marketing404": return marketing404Body(item);
+    case "shell": return shellBody(item, mode);
+    case "operations": return operationsBody(item, mode);
+    case "enrich": return enrichBody(item, mode);
+    case "reviewQueue": return reviewQueueBody(item, mode);
+    case "reviewDetail": return reviewDetailBody(item, mode);
+    case "process": return processBody(item, mode);
+    case "publish": return publishBody(item, mode);
+    case "auditList": return auditListBody(item, mode);
+    case "auditDetail": return auditDetailBody(item, mode);
+    case "quality": return qualityBody(item, mode);
+    case "legacyReview": return legacyReviewBody(item, mode);
+    case "legacyDelivery": return legacyDeliveryBody(item, mode);
+    default: return "";
+  }
+}
+function viewportFigure(item, mode) {
+  const dimensions = mode === "desktop" ? "1440 × 1024" : "390 × 844";
+  const label = mode === "desktop" ? "Desktop" : "Mobile";
+  return `<figure class="viewport-card ${mode}-card"><figcaption class="viewport-label"><span>${label} wireframe</span><span>${dimensions}</span></figcaption><div class="screen ${mode} ${item.area === "legacy" ? "legacy" : ""}" data-size="${dimensions}" role="img" aria-label="${item.family}, ${label.toLowerCase()} wireframe">${frameContent(item, mode)}</div></figure>`;
+}
+function familyArticle(item, index) {
+  const searchable = [item.family, item.route, item.runtime, item.title, item.deck, item.tablet, ...item.states, ...item.annotations.flat()].join(" ").toLowerCase();
+  return `<article class="route-family" id="${item.id}" data-area="${item.area}" data-search="${searchable}"><header class="family-header"><div><span class="family-index">${String(index + 1).padStart(2, "0")} / 14</span><h2>${item.family}</h2><p class="family-route">${item.runtime} · <code>${item.route}</code></p><p class="family-deck">${item.deck}</p></div><p class="source-note">SOURCE IMPLEMENTATION<br>${item.sources}</p></header><div class="pair">${viewportFigure(item, "desktop")}${viewportFigure(item, "mobile")}</div><div class="state-strip" aria-label="Covered states">${item.states.map((state, i) => `<span class="state-chip${i === 0 ? " primary" : ""}">${state}</span>`).join("")}</div><p class="tablet-note"><strong>768px reflow</strong><br>${item.tablet}</p><details class="annotations" open><summary>${item.annotations.length} numbered annotations</summary><ol>${item.annotations.map((note, i) => `<li data-number="${i + 1}"><strong>${note[0]}</strong><span>${note[1]}</span></li>`).join("")}</ol></details></article>`;
+}
+const list = document.getElementById("family-list");
+list.innerHTML = families.map(familyArticle).join("");
+const filters = document.getElementById("filters");
+const areaFilter = document.getElementById("area-filter");
+const viewportFilter = document.getElementById("viewport-filter");
+const routeSearch = document.getElementById("route-search");
+const statusOutput = document.getElementById("coverage-status");
+const emptyFilter = document.getElementById("empty-filter");
+function applyFilters() {
+  const area = areaFilter.value;
+  const query = routeSearch.value.trim().toLowerCase();
+  document.body.dataset.viewport = viewportFilter.value;
+  let visible = 0;
+  document.querySelectorAll(".route-family").forEach(article => {
+    const matchesArea = area === "all" || article.dataset.area === area;
+    const matchesSearch = !query || article.dataset.search.includes(query);
+    article.hidden = !(matchesArea && matchesSearch);
+    if (!article.hidden) visible += 1;
+  });
+  statusOutput.textContent = `${visible} ${visible === 1 ? "family" : "families"} shown`;
+  emptyFilter.hidden = visible !== 0;
+}
+filters.addEventListener("input", applyFilters);
+filters.addEventListener("reset", () => {
+  window.setTimeout(applyFilters, 0);
+});
+const themeToggle = document.getElementById("theme-toggle");
+themeToggle.addEventListener("click", () => {
+  const dark = document.documentElement.dataset.theme !== "dark";
+  document.documentElement.dataset.theme = dark ? "dark" : "light";
+  themeToggle.setAttribute("aria-pressed", String(dark));
+  themeToggle.textContent = dark ? "Light canvas" : "Dark canvas";
+});
+applyFilters();
+</script>
+</body>
+</html>

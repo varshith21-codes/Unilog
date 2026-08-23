@@ -301,9 +301,102 @@ def test_the_site_restricted_query_runs_before_the_open_one(policy):
 
     Resolver(policy, search=recording_search).resolve("49-94-0013", vendor_code="4031")
     assert seen[0] == "site:milwaukeetool.com 49-94-0013"
-    # And the open arm is skipped once the manufacturer's own site answered — it exists for the
-    # parts that cannot be found there, not to pad every row with more links.
-    assert len(seen) == 1
+    # Candidate discovery cannot know whether that URL actually covers the SKU. The open query is
+    # retained so downstream coverage failure still has somewhere authoritative to recover from.
+    assert len(seen) == 2
+    assert seen[1] == "Milwaukee Tool 49-94-0013 specifications datasheet"
+
+
+def test_the_candidate_budget_reserves_an_open_web_recovery_slot(policy):
+    def crowded_search(query: str, *, limit: int):
+        if query.startswith("site:"):
+            return [f"https://milwaukeetool.com/product/{n}" for n in range(8)]
+        return ["https://www.nsf.org/datasheet/recovery.pdf"]
+
+    resolution = Resolver(policy, search=crowded_search).resolve(
+        "49-94-0013", vendor_code="4031", limit=3
+    )
+
+    assert len(resolution.candidates) == 3
+    assert resolution.candidates[-1].origin == "open_search"
+    assert any("recovery.pdf" in candidate.url for candidate in resolution.candidates)
+
+
+def test_open_search_never_evicts_supplied_candidates(policy):
+    supplied = [f"https://milwaukeetool.com/known/{n}" for n in range(3)]
+
+    def search(query: str, *, limit: int):
+        if query.startswith("site:"):
+            return ["https://milwaukeetool.com/product/search-result"]
+        return ["https://www.nsf.org/datasheet/recovery.pdf"]
+
+    resolution = Resolver(policy, search=search).resolve(
+        "49-94-0013",
+        vendor_code="4031",
+        supplied=supplied,
+        limit=3,
+    )
+
+    assert [candidate.url for candidate in resolution.candidates] == supplied
+    assert all(candidate.origin == "supplied" for candidate in resolution.candidates)
+
+
+def test_open_search_replaces_only_site_search_and_preserves_patterns(policy):
+    def crowded_search(query: str, *, limit: int):
+        if query.startswith("site:"):
+            return [f"https://trex.com/product/{n}" for n in range(4)]
+        return ["https://www.nsf.org/datasheet/trex-recovery.pdf"]
+
+    resolution = Resolver(policy, search=crowded_search).resolve(
+        "TX-1",
+        brand="trex",
+        limit=3,
+    )
+
+    assert [candidate.origin for candidate in resolution.candidates] == [
+        "pattern",
+        "site_search",
+        "open_search",
+    ]
+    assert resolution.candidates[0].url == "https://www.trex.com/products/tx-1/spec"
+
+
+def test_open_search_fills_the_budget_when_only_one_preferred_candidate_exists(policy):
+    def open_search(query: str, *, limit: int):
+        return [f"https://www.nsf.org/datasheet/{n}.pdf" for n in range(5)]
+
+    resolution = Resolver(policy, search=open_search).resolve(
+        "SKU-9",
+        supplied=["https://milwaukeetool.com/known/sku-9"],
+        limit=3,
+    )
+
+    assert len(resolution.candidates) == 3
+    assert resolution.candidates[0].origin == "supplied"
+    assert [candidate.origin for candidate in resolution.candidates[1:]] == [
+        "open_search",
+        "open_search",
+    ]
+
+
+def test_an_explicit_zero_candidate_budget_is_zero(policy):
+    resolution = Resolver(policy, search=marketplace_heavy_search).resolve(
+        "49-94-0013", vendor_code="4031", limit=0
+    )
+    assert resolution.candidates == ()
+
+
+def test_a_search_provider_failure_is_reported_without_aborting_resolution(policy):
+    def broken_search(query: str, *, limit: int):
+        raise TimeoutError("provider timed out")
+
+    resolution = Resolver(policy, search=broken_search).resolve(
+        "49-94-0013", vendor_code="4031"
+    )
+
+    assert resolution.candidates == ()
+    assert len(resolution.queries) == 2
+    assert any("provider timed out" in note for note in resolution.notes)
 
 
 # ------------------------------------------------------------------ the library
@@ -442,7 +535,15 @@ class RecordingFetcher:
         return FetchedResource(data=self.body, url=url, content_type="text/plain")
 
 
-def session_for(policy, tmp_path, fetcher, *, robots_text: str | None = None):
+def session_for(
+    policy,
+    tmp_path,
+    fetcher,
+    *,
+    robots_text: str | None = None,
+    max_requests: int | None = None,
+    renderer=None,
+):
     store = LocalArtifactStore(tmp_path / "store")
     library = DocumentLibrary.load(store, tmp_path / "index.json")
     clock = {"now": 0.0}
@@ -460,6 +561,8 @@ def session_for(policy, tmp_path, fetcher, *, robots_text: str | None = None):
         robots=RobotsCache(reader=lambda _url: robots_text),
         sleep=sleep,
         clock=lambda: clock["now"],
+        max_requests=max_requests,
+        renderer=renderer,
     )
     return session, library, slept, clock
 
@@ -499,6 +602,21 @@ def test_a_permitted_url_is_fetched_stored_and_indexed(policy, tmp_path):
     assert library.entries[0].tier == SourceTier.MANUFACTURER.value
     # The URL, not the store path. This is the field that makes a web citation resolvable.
     assert library.entries[0].source_uri == "https://milwaukeetool.com/spec.txt"
+
+
+def test_the_session_request_ceiling_blocks_before_the_network(policy, tmp_path):
+    fetcher = RecordingFetcher()
+    session, _library, _slept, _clock = session_for(
+        policy, tmp_path, fetcher, max_requests=1
+    )
+
+    first = session.fetch(candidate_for(policy, "https://milwaukeetool.com/first.txt"))
+    second = session.fetch(candidate_for(policy, "https://milwaukeetool.com/second.txt"))
+
+    assert first.status is FetchStatus.FETCHED
+    assert second.status is FetchStatus.OVER_BUDGET
+    assert fetcher.urls == ["https://milwaukeetool.com/first.txt"]
+    assert session.requests_made == 1
 
 
 def test_a_url_already_in_the_library_is_not_requested_again(policy, tmp_path):

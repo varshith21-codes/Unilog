@@ -123,8 +123,9 @@ Under the governed record, show three outcomes: **Publish**, **Review**, **Withh
 #### 1. Minimal input → rich intelligence
 
 - **A part number and a manufacturer are enough**—retrieval finds the document.
-- Three arms: stored library → the manufacturer's own site → **the open web**.
-- Keyless and model-free: HTTP, parsing, and a policy gate.
+- Four stages: stored library → manufacturer site → **Brave/open-web discovery** → bounded browser fallback.
+- Retrieval is model-free: Brave when configured, keyless fallback otherwise.
+- Exact or separator-normalized SKU coverage is required before evidence is accepted.
 - Classify into the correct product schema—or abstain.
 - Extract, normalize, and render delivery-ready fields.
 
@@ -158,7 +159,7 @@ AXIOM uses a staged workflow:
 
 1. **Ingest minimal identity.** Accept a manufacturer part number and manufacturer, plus an optional description, brand, source URL, or source documents. Batch mode reads CSV, TSV, and XLSX item masters.
 2. **Resolve identity signals.** Normalize the part number and reconcile brand/manufacturer information without silently treating a supplier or buying group as the actual manufacturer.
-3. **Acquire evidence.** A part number and a manufacturer are sufficient—retrieval goes and finds the document. Three arms escalate in cost order: a **stored document library** (a hit means no network request at all, and recorded absences mean a negative answer is paid for once); the **manufacturer's own site**, read through the search form that site already publishes, needing no search API and no key; then **open-web search, on by default**, which is the only arm that reaches a manufacturer nobody has declared. Every request is policy-gated—marketplaces, mass retail, distributors, and aggregators are refused, `robots.txt` is honoured, and requests to one origin are spaced. **No stage of retrieval calls a model:** it is HTTP and parsing, so retrieval spends bandwidth where extraction spends tokens. Content is hashed so decisions remain tied to the exact source bytes.
+3. **Acquire evidence.** A part number and a manufacturer are sufficient—retrieval goes and finds the document through four bounded layers. It first checks the **content-addressed document library**; then tries declared manufacturer patterns, site discovery, and sitemaps; then uses **Brave Search URL discovery** when an API key is configured, automatically falling back to DuckDuckGo when it is not; finally, a **Playwright 1.62.0 fallback** renders JavaScript-dependent product pages only after static retrieval succeeds without proving exact SKU coverage. Search snippets are discarded—they are discovery hints, not citable evidence. Candidate capacity is reserved so sitemap fan-out cannot suppress open search, and repeated browser requests consume a separate hard cap. Every retained resource returns through the same final-URL policy, byte ceiling, content hashing, provenance, parsing, and exact/separator-normalized SKU gate. Marketplaces, mass retail, distributors, private-network targets, and disallowed redirects are refused before their content can support a claim. **No retrieval stage calls a model:** models process verified source artifacts only after retrieval.
 4. **Parse content.** Convert text, HTML, tables, and optional PDF layouts into a common representation while preserving source context.
 5. **Classify before extraction.** Rank candidate product classes from the description/document. If no class is defensible, abstain and skip extraction rather than inventing an attribute schema.
 6. **Extract schema-bound candidates.** Combine deterministic structured extraction with a tiered AWS Bedrock model cascade (ZAI GLM: flash → mid → frontier). The cheapest tier runs first and escalates only when a validator rejects the output, so cost follows difficulty instead of a guess made before the call. A model response is only a candidate; it is not automatically published.
@@ -169,6 +170,12 @@ AXIOM uses a staged workflow:
 11. **Project to the client contract.** Map approved data into the exact 252-column UniLog format and create a sidecar explaining every populated and withheld field.
 
 This can turn a terse abrasive-product description into normalized dimensions, grit, product form, pack quantity, brand/manufacturer identity, taxonomy, and channel descriptions—but only where independent evidence supports those values.
+
+#### Implemented retrieval proof point — Mirka `9190153001`
+
+A final hardened live smoke run started with only the SKU and manufacturer and automatically found Mirka's own product page at `https://www.mirka.com/en/p/9190153001/`. The retained evidence contained exact SKU `9190153001` plus `M14` and `Grip`. The run used **8 ordinary retrieval requests** and **41 browser subrequests across bounded render attempts**. No Brave credential was available, so the run used the automatic DuckDuckGo fallback and proves the manufacturer/open-web/browser path—not a live Brave API call. It ran against a temporary artifact store and did not overwrite the existing Mirka session or bundle. The full non-live Python suite, console typecheck, 222 console tests, production build, compile/Ruff checks, and final security review all passed.
+
+Use this as a demo case, not as a universal accuracy claim: one successful SKU proves the execution path, while the broader evaluation metrics remain separately qualified.
 
 ### Detailed answer 2 — How does the solution ensure accuracy and trust?
 
@@ -289,9 +296,9 @@ Place generic AI at high automation/low verifiability and AXIOM at high automati
 1. CSV, TSV, and XLSX item-master ingestion
 2. URL, text, HTML, table, and optional PDF ingestion
 3. Part-number cleanup and brand/manufacturer resolution
-4. **Keyless evidence retrieval: document library, manufacturer site, open web**
-5. Robots-aware, policy-gated fetching with per-origin rate spacing
-6. Classification with candidate ranking and abstention
+4. **High-coverage retrieval: library, site/sitemap, Brave or keyless search, bounded browser fallback**
+5. Robots, SSRF, redirect, request-count, byte, and source-authority gates
+6. Exact SKU verification, immutable source hashing, candidate ranking, and class abstention
 7. Deterministic extraction plus a tiered Bedrock model cascade
 
 #### Govern
@@ -336,10 +343,15 @@ flowchart LR
     A[Six-field item-master row] --> B[Resolve product identity]
     B --> C{Evidence supplied?}
     C -->|Yes| D[Ingest URL / PDF / HTML / text]
-    C -->|No| E["Retrieve — library, then mfr site, then open web"]
-    E --> E2{"Policy gate — robots, no distributors"}
+    C -->|No| E["Retrieve — library, mfr site/sitemap, then Brave or keyless search"]
+    E --> E2{"Policy + SSRF + request budgets"}
     E2 -->|Refused, or nothing found| H
-    E2 -->|Allowed| F
+    E2 -->|Allowed| E3{Exact SKU evidence?}
+    E3 -->|Yes| F
+    E3 -->|No; JavaScript shell| E4["Bounded Playwright render + PDF-link discovery"]
+    E4 --> E5{Exact SKU evidence?}
+    E5 -->|Yes| F
+    E5 -->|No| H
     D --> F[Parse + hash exact source]
     F --> G{Classify product}
     G -->|No defensible class| H["Abstain — identity-only record"]
@@ -471,7 +483,8 @@ flowchart TB
     subgraph EXTNL[Evidence and model services]
         LIB["Document library — hash-keyed, cached"]
         SRC[Manufacturer sites / supplied documents]
-        WEB["Open-web search — keyless, policy-gated"]
+        SEARCH["URL discovery — Brave API / DuckDuckGo fallback"]
+        BROWSER["Bounded Playwright 1.62 renderer"]
         BED["AWS Bedrock Converse — GLM cascade"]
     end
 
@@ -491,7 +504,8 @@ flowchart TB
     QUEUE -.dispatch.-> CORE
     LIB --> RET
     SRC --> RET
-    WEB --> RET
+    SEARCH --> RET
+    RET <--> BROWSER
     EXT <--> BED
     CLS -.only on a near-tie.-> BED
     PARSE --> HASH
@@ -513,7 +527,7 @@ flowchart TB
 
 Candidate generation and publication are intentionally separate. Retrieval and models can propose facts; only governance can authorize them for downstream use. The delivery builder uses the same publishability property as the console and certificate, so no output channel can silently bypass evidence and validation.
 
-Note the two edges into Bedrock, because they are not equivalent. Extraction always calls a model. Classification calls one **only on a near-tie**—hence the dotted edge—and returns deterministically the rest of the time. Nothing in the evidence-acquisition layer touches a model at all: the three retrieval arms are HTTP, parsing, and a policy gate.
+Note the two edges into Bedrock, because they are not equivalent. Extraction always calls a model. Classification calls one **only on a near-tie**—hence the dotted edge—and returns deterministically the rest of the time. Nothing in evidence acquisition calls a model. Retrieval uses a hash-keyed library, manufacturer patterns/site maps, URL-only search discovery, and a bounded renderer. Brave titles and snippets are discarded; only bytes fetched from the final source URL can become evidence. Static discovery/candidate requests and browser subrequests have separate ceilings so a large sitemap or polling page cannot silently consume unlimited work.
 
 Implemented components include the FastAPI service, Next.js console, provider interfaces, file-backed prototype artifacts, evaluation harnesses, and AWS CDK definitions. Components drawn as **production target** are roadmap hardening and should not be presented as deployed or load-tested.
 
@@ -540,16 +554,18 @@ Use dotted outlines for target production components.
 | Core | Python 3.11+, Pydantic 2.13.4, PyYAML | Typed values, schemas, rules, provenance |
 | API | FastAPI 0.141.1, Uvicorn 0.34.0 | Enrichment, batch delivery, review endpoints |
 | AI/cloud | AWS Bedrock Converse — ZAI GLM-4.7-flash / GLM-4.7 / GLM-5, Qwen3-VL (vision), boto3 1.40.15 | Tiered cascade; used by 2 of 9 stages |
-| Retrieval | DuckDuckGo lite HTML, published site search forms, `robots.txt` gate | Keyless open-web evidence discovery |
-| Data/docs | pdfplumber, openpyxl, Python CSV/HTML tools | PDF, XLSX, CSV/TSV, HTML ingestion |
+| Retrieval | Brave Search API, DuckDuckGo fallback, Playwright 1.62.0, `robots.txt`, URL/SSRF policy | URL-only discovery plus bounded JavaScript rendering |
+| Data/docs | pdfplumber, openpyxl, Python CSV/HTML tools, content-addressed artifacts | PDF, XLSX, CSV/TSV, HTML ingestion and immutable provenance |
 | Console | Next.js 16.2.12, React 19.2.8, TypeScript 7.0.2, Tailwind CSS 4.3.3 | Review, quality, certificate, delivery UI |
 | Integration | REST, optional MCP 2.0 | Human and agent workflows |
 | Quality | pytest, Vitest, Ruff, evaluation/regression harnesses | Backend, UI, lint, behavior gates |
-| Delivery/infra | GitHub Actions, AWS CDK definitions | CI and infrastructure as code |
+| Delivery/infra | Docker/Compose, GitHub Actions, AWS CDK definitions | Reproducible packaging, CI, and infrastructure as code |
 
 ### Speaker notes / detailed answer
 
 The architecture is hybrid by design. Pydantic provides strict domain models; YAML-backed schemas make classes and rules inspectable and versionable; FastAPI exposes the same pipeline used by offline scripts; and Next.js provides operational review and audit views.
+
+Deployment wiring now installs the API with its browser/document extras, pins Playwright `1.62.0`, installs Chromium into the container, and exposes `AXIOM_SEARCH=auto`, `AXIOM_BROWSER=auto`, and the optional Brave key through Compose. Present this as **configured packaging**, not a verified image: Docker was not available in the local validation environment, so the container build remains an explicit pre-demo check.
 
 AWS Bedrock is an optional bounded component, not the whole solution. Deterministic parsing, normalization, validation, policy, and delivery remain first-class. The offline batch delivery path can operate without model credentials; online enrichment uses real model calls when configured.
 
@@ -581,7 +597,7 @@ Use a stack grid with **Hybrid by design** in the center, connecting determinist
 | AI inference — **measured** | 2 live single-SKU runs, 1 model call each | **US$0.00039–$0.00065/SKU** |
 | AI inference — modelled ceiling | Escalation to frontier tier + copy generation | **~US$0.02/SKU** |
 | 100k-SKU first pass | Inference only, at the measured rate | **~US$40–$65** |
-| Search / retrieval | Keyless provider; library hit costs nothing | **US$0** |
+| Search / retrieval | Library/site paths are free; DuckDuckGo fallback is keyless; Brave follows account pricing | **US$0 fallback / provider-dependent API usage** |
 
 **Cost controls:** deterministic first, abstain early, tiered cascade, cache sources by content hash, process only changes, and review only exceptions.
 
@@ -596,7 +612,7 @@ The project uses open-source application dependencies, so there is no mandatory 
 
 One call rather than two in both cases, because candidate ranking resolved the product class decisively and classification never reached the model. Both stayed on the flash tier with no escalation. Actual token usage came in well below the 12,000-input/2,000-output figure this slide used to assume, which is why the measured cost is roughly an order of magnitude under the earlier estimate.
 
-Retrieval added **no** inference cost in either run: the Kichler document was already in the library (zero network requests), and the Frigidaire document was found by keyless open-web search. The search provider has no per-query fee.
+Retrieval added **no inference cost** in either measured model run: the Kichler document was already in the library (zero network requests), and the Frigidaire document was found by keyless open-web search. The current provider mode is `auto`: it selects Brave when `AXIOM_BRAVE_API_KEY` is available and falls back to DuckDuckGo otherwise. No live Brave cost or latency measurement is claimed because the validation environment did not contain a Brave key.
 
 Keep the modelled ~US$0.02/SKU ceiling on the slide, because it is the honest upper bound when a response fails validation and escalates to the frontier tier and copy generation is enabled. State the caveat: **two SKUs is a measurement, not a distribution.** The range excludes retries, unusually large documents, OCR, data transfer, taxes, support, and human review. The engineering estimate covers authentication, authorization, tenant controls, queues, durable storage, connectors, observability, security review, deployment, and evaluation expansion. A pilot should still measure reviewer minutes, exception rate, latency, and cost per publishable field across a full catalogue.
 
@@ -636,7 +652,7 @@ Separate **one-time engineering** from **variable per-SKU operations**. Display 
 
 The MVP supports the complete user journey: submit a single product or batch file, inspect processing stages, resolve uncertain values, review a certificate, and produce contract-correct delivery output without re-running the model during download.
 
-Use one representative sample record across all screenshots—for example, the Diablo sanding belt or a 3M abrasive disc. Start with its six-field input row, then show the chosen class and attributes, open one source quote, perform one review action, and finish with the delivery preview. Include one intentionally withheld field: a blank supported by an explanation demonstrates trust, not failure.
+Use Mirka `9190153001` across the retrieval screenshots because it demonstrates the newly implemented path with minimal input. Start with only the SKU and manufacturer, show automatic retrieval reaching Mirka's own `en/p/9190153001/` page, open the exact SKU/product evidence, then continue through class, attributes, review, certificate, and delivery preview. Keep one intentionally withheld field: a blank supported by an explanation demonstrates trust, not failure. If a later stage uses fixture data rather than the live Mirka run, label that screen explicitly.
 
 ### Screenshot checklist
 
@@ -664,7 +680,9 @@ Create a numbered journey: **1 Submit → 2 Trace → 3 Resolve → 4 Prove → 
 
 - Authentication, authorization, tenant isolation, quotas, and audit logs
 - Durable async jobs, retries, idempotency, and controlled egress
+- Expand live browser-retrieval evaluation across more manufacturers and portal patterns
 - Source-change detection and retrieval snapshots
+- Validate the container image and live Brave provider in a credentialed environment
 - Larger independently labeled, class-stratified evaluations
 
 #### 3–6 months — Integrate and scale
@@ -702,7 +720,9 @@ Review feedback currently records decisions and can update priors/calibration. I
 - Per-SKU cost is measured on **two** live runs. It is a real measurement, not a distribution across a catalogue.
 - No customer adoption, external competitor benchmark, production SLO, or high-volume load test is proven.
 - The current API lacks built-in production authentication and must not be exposed publicly as-is.
-- The open-web search arm uses a public HTML interface, not a contracted API. It is rate-spaced and honestly identified, and the provider interface is deliberately one method wide so it can be replaced, but it carries no availability guarantee.
+- Brave Search is implemented as the preferred URL-discovery provider, but the validation environment had no Brave API key; live Brave behavior and cost remain unverified. `auto` mode falls back to DuckDuckGo's public HTML interface, which has no availability guarantee.
+- Playwright rendering is request- and byte-bounded, blocks WebSockets, measures DOM output in an isolated browser world, and accepts downloads only when they bind unambiguously to a successful observed PDF response. This conservative policy intentionally discards repeated/ambiguous download URLs and requires Chromium, so the browser path has higher latency than static retrieval.
+- Docker/Compose deployment wiring is present, including Chromium installation, but the image was not built locally because Docker was unavailable in the validation environment.
 - About 9.5% of measured rows name only a distributor, never a manufacturer. No search provider can resolve those; they need better upstream data.
 - An embedding model is pinned in config but never called. Classification is lexical, not semantic.
 - The strongest implemented output is the fixed 252-column UniLog contract; universal PIM/channel compatibility is future work.
@@ -783,9 +803,9 @@ Show one attribute linked to one exact source quote and one green **Publishable*
 
 ## 0:40–1:10 — Submit and process
 
-> “We submit two fields—a part number and a manufacturer. That is genuinely enough, because AXIOM goes and finds the document itself: it checks its own library, then the manufacturer’s site, then the open web, with no search API key anywhere. It hashes whatever it finds, selects a product class or abstains, and extracts only the attributes that class defines.”
+> “We submit two fields—a part number and a manufacturer. AXIOM checks its content-addressed library, manufacturer patterns and site maps, then URL-only web discovery—Brave when configured, with a keyless fallback. If a static product page is only a JavaScript shell, a separately capped Playwright fallback renders it and discovers source documents. Search snippets are never treated as evidence; the exact source bytes must contain the SKU before the pipeline proceeds.”
 
-**Show:** `/enrich` with description and URL left empty, then `/pipeline`.
+**Show:** `/enrich` with Mirka `9190153001`, description and URL left empty; then show the retrieved Mirka product evidence and `/pipeline`.
 
 *Presenter note: leaving the optional fields blank is the strongest version of this demo. Filling them in makes it look like the operator did the research.*
 
@@ -827,9 +847,9 @@ So the framing is: **a model reads documents; arithmetic decides what to trust.*
 
 ## “Are you paying for a search API? What happens when it breaks?”
 
-No. Retrieval escalates through three arms in cost order: the stored document library (a hit means zero network requests, and recorded absences mean a negative answer is paid for once, not per row), the manufacturer’s own published site search, then keyless open-web search. On 1,000 real rows, 80.2% are reachable without any search provider at all.
+Not necessarily. AXIOM now supports the Brave Search API as the preferred production discovery provider, but keeps an automatic keyless DuckDuckGo fallback. On the measured 1,000-row sample, **80.2% are reachable without any search provider at all** through the stored library or a declared manufacturer domain. Brave pricing applies only when an operator configures a Brave key; we do not claim a live Brave cost measurement yet.
 
-The open-web arm is deliberately the thinnest part of the system—the provider interface is one method wide, so swapping in a paid API is a one-line change. It is treated as a public HTML interface rather than a licensed API: one query per part number, honestly identified, spaced two seconds apart, links taken and snippets discarded. If it goes away, the 80.2% path is untouched and the remainder degrades to “add this manufacturer’s domain to config,” which the run reports by name.
+The provider interface is deliberately one method wide: query in, ranked URLs out. Titles and snippets are discarded because they are not source evidence. A provider timeout or missing key becomes an explicit diagnostic and falls back rather than aborting enrichment. Resolver capacity is reserved so manufacturer sitemap work cannot crowd out a search-derived candidate, and a bounded Playwright step is available only when static evidence still fails exact SKU coverage.
 
 ## “Why not use a general-purpose LLM with a spreadsheet prompt?”
 

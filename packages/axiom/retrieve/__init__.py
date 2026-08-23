@@ -45,6 +45,12 @@ Nothing here makes a model call. The expensive, non-deterministic step is extrac
 after a document has been chosen and is unchanged by any of this.
 """
 
+from axiom.retrieve.browser import (
+    BrowserFetchError,
+    PlaywrightRenderer,
+    RenderedFetcher,
+    RenderedResult,
+)
 from axiom.retrieve.discover import Discovery, DiscoveryStep, SiteDiscovery, rank_links
 from axiom.retrieve.library import Coverage, DocumentEntry, DocumentLibrary
 from axiom.retrieve.policy import (
@@ -63,6 +69,7 @@ from axiom.retrieve.resolver import (
     Resolver,
     SearchProvider,
 )
+from axiom.retrieve.search_brave import BraveSearch, BraveSearchError
 from axiom.retrieve.search_duckduckgo import DuckDuckGoSearch
 from axiom.retrieve.session import (
     FetchOutcome,
@@ -72,6 +79,9 @@ from axiom.retrieve.session import (
 )
 
 __all__ = [
+    "BraveSearch",
+    "BraveSearchError",
+    "BrowserFetchError",
     "Candidate",
     "Coverage",
     "Discovery",
@@ -83,6 +93,9 @@ __all__ = [
     "FetchOutcome",
     "FetchStatus",
     "Manufacturer",
+    "PlaywrightRenderer",
+    "RenderedFetcher",
+    "RenderedResult",
     "Resolution",
     "Resolver",
     "RetrievalSession",

@@ -1,0 +1,25 @@
+{
+  "generatedFrom": "docs/wireframes/unilog-wireframe-atlas.html",
+  "renderer": "Google Chrome headless",
+  "deviceScaleFactor": 1,
+  "overview": [
+    "atlas-overview.png",
+    "svg-contact-sheet-preview.png"
+  ],
+  "families": [
+    { "id": "public-landing", "desktop": "public-landing-desktop.png", "mobile": "public-landing-mobile.png" },
+    { "id": "marketing-404", "desktop": "marketing-404-desktop.png", "mobile": "marketing-404-mobile.png" },
+    { "id": "workspace-shell", "desktop": "workspace-shell-desktop.png", "mobile": "workspace-shell-mobile.png" },
+    { "id": "operations", "desktop": "operations-desktop.png", "mobile": "operations-mobile.png" },
+    { "id": "enrich", "desktop": "enrich-desktop.png", "mobile": "enrich-mobile.png" },
+    { "id": "resolve-queue", "desktop": "resolve-queue-desktop.png", "mobile": "resolve-queue-mobile.png" },
+    { "id": "resolve-detail", "desktop": "resolve-detail-desktop.png", "mobile": "resolve-detail-mobile.png" },
+    { "id": "process", "desktop": "process-desktop.png", "mobile": "process-mobile.png" },
+    { "id": "publish", "desktop": "publish-desktop.png", "mobile": "publish-mobile.png" },
+    { "id": "audit-list", "desktop": "audit-list-desktop.png", "mobile": "audit-list-mobile.png" },
+    { "id": "audit-detail", "desktop": "audit-detail-desktop.png", "mobile": "audit-detail-mobile.png" },
+    { "id": "intelligence", "desktop": "intelligence-desktop.png", "mobile": "intelligence-mobile.png" },
+    { "id": "legacy-review", "desktop": "legacy-review-desktop.png", "mobile": "legacy-review-mobile.png" },
+    { "id": "legacy-delivery", "desktop": "legacy-delivery-desktop.png", "mobile": "legacy-delivery-mobile.png" }
+  ]
+}

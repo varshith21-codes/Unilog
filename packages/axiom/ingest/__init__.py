@@ -47,6 +47,7 @@ from axiom.ingest.web import (
     check_url,
     fetch_url,
     filename_for,
+    ingest_fetched_resource,
     ingest_url,
     is_url,
 )
@@ -83,6 +84,7 @@ __all__ = [
     "infer_mapping",
     "ingest_bytes",
     "ingest_file",
+    "ingest_fetched_resource",
     "ingest_url",
     "is_placeholder",
     "is_url",

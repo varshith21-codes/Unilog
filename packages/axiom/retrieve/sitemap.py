@@ -52,6 +52,9 @@ MAX_CHILDREN = 30
 """Child sitemaps followed from an index. Large retailers publish hundreds, split by locale and
 category; a manufacturer publishes a handful. This is a cap on a pathological case, not a target."""
 
+MAX_REQUESTS = 4
+"""Cold-domain sitemap requests before homepage/search-form discovery gets its turn."""
+
 MAX_URLS = 400_000
 """Stop accumulating past this. Guards memory on a site that publishes its entire catalogue."""
 
@@ -139,9 +142,16 @@ class SiteMap:
 class SitemapReader:
     """Fetches and caches one sitemap per domain."""
 
-    def __init__(self, session: RetrievalSession, *, max_children: int = MAX_CHILDREN) -> None:
+    def __init__(
+        self,
+        session: RetrievalSession,
+        *,
+        max_children: int = MAX_CHILDREN,
+        max_requests: int = MAX_REQUESTS,
+    ) -> None:
         self._session = session
         self._max_children = max_children
+        self._max_requests = max_requests
         self._cache: dict[str, SiteMap] = {}
 
     def for_domain(self, domain: str) -> SiteMap:
@@ -161,8 +171,9 @@ class SitemapReader:
 
     def _load(self, domain: str) -> SiteMap:
         notes: list[str] = []
-        declared = self._declared_sitemaps(domain, notes)
-        if not declared:
+        started_at = self._session.requests_made
+        declared = self._declared_sitemaps(domain, notes, started_at)
+        if not declared and self._has_budget(started_at):
             # The protocol's registered default location. A fallback rather than a guess — but it is
             # still weaker than a declaration, so it is recorded as such.
             declared = [f"https://www.{domain}/sitemap.xml"]
@@ -176,7 +187,7 @@ class SitemapReader:
         children_followed = 0
         seen: set[str] = set()
 
-        while queue and len(urls) < MAX_URLS:
+        while queue and len(urls) < MAX_URLS and self._has_budget(started_at):
             target = queue.pop(0)
             if target in seen:
                 continue
@@ -215,6 +226,12 @@ class SitemapReader:
 
             urls.extend(urljoin(target, url) for url in found)
 
+        if queue and not self._has_budget(started_at):
+            notes.append(
+                f"stopped after {self._max_requests} sitemap requests to preserve "
+                "site-search budget"
+            )
+
         return SiteMap(
             domain=domain,
             urls=tuple(urls[:MAX_URLS]),
@@ -223,7 +240,9 @@ class SitemapReader:
             notes=tuple(notes),
         )
 
-    def _declared_sitemaps(self, domain: str, notes: list[str]) -> list[str]:
+    def _declared_sitemaps(
+        self, domain: str, notes: list[str], started_at: int
+    ) -> list[str]:
         """Sitemaps the site announces in robots.txt: the site telling us where its own list is.
 
         Both ``www.`` and the bare domain are tried, because manufacturers are inconsistent about
@@ -231,6 +250,8 @@ class SitemapReader:
         be worth the second request.
         """
         for host in (f"www.{domain}", domain):
+            if not self._has_budget(started_at):
+                break
             result = self._session.fetch_transient(f"https://{host}/robots.txt", max_bytes=1 << 20)
             if not result.ok:
                 continue
@@ -239,6 +260,9 @@ class SitemapReader:
                 return [url.strip() for url in declared]
             notes.append(f"https://{host}/robots.txt published no Sitemap: line")
         return []
+
+    def _has_budget(self, started_at: int) -> bool:
+        return self._session.requests_made - started_at < self._max_requests
 
 
 def _mostly_sitemaps(locs: list[str]) -> bool:
@@ -278,6 +302,7 @@ def _fold(text: str) -> str:
 
 __all__ = [
     "MAX_CHILDREN",
+    "MAX_REQUESTS",
     "MAX_SITEMAP_BYTES",
     "MAX_URLS",
     "SiteMap",

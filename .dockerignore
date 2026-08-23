@@ -1,0 +1,19 @@
+# Keep the API build context small and prevent local state or credentials from
+# entering an image. This is a whitelist because the repository also contains a
+# full frontend dependency tree and large runtime artifact caches.
+*
+!Dockerfile.api
+!pyproject.toml
+!packages/
+!packages/**
+!apps/
+!apps/api/
+!apps/api/**
+!schema/
+!schema/**
+!evals/
+!evals/**
+
+**/__pycache__/
+**/*.py[cod]
+**/.pytest_cache/

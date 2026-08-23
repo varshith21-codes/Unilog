@@ -150,7 +150,7 @@ class Resolver:
         supplied: Sequence[str] = (),
         limit: int | None = None,
     ) -> Resolution:
-        budget = limit or self._policy.max_candidates_per_sku
+        budget = self._policy.max_candidates_per_sku if limit is None else max(0, limit)
         maker = self._policy.manufacturer_for(
             vendor_code=vendor_code, vendor_name=vendor_name, brand=brand
         )
@@ -208,7 +208,15 @@ class Resolver:
                 mpn, maker, brand, vendor_name=vendor_name, vendor_code=vendor_code
             ):
                 queries.append(query)
-                for url in self._search(query, limit=self._per_query):
+                try:
+                    urls = self._search(query, limit=self._per_query)
+                except Exception as exc:  # noqa: BLE001 - one provider failure must not end a batch
+                    notes.append(
+                        f"search provider {type(self._search).__name__} failed for {query!r}: "
+                        f"{type(exc).__name__}: {exc}"
+                    )
+                    continue
+                for url in urls:
                     verdict = self._policy.classify(url)
                     if not verdict.fetchable:
                         rejected.append(verdict)
@@ -227,18 +235,16 @@ class Resolver:
                             manufacturer_id=verdict.manufacturer_id,
                         )
                     )
-                # Stop as soon as the manufacturer's own site answered. The open arm exists for
-                # the parts it cannot, not to pad every row with four more links.
-                if origin == "site_search" and any(
-                    c.tier is SourceTier.MANUFACTURER for c in candidates
-                ):
-                    break
 
-        ranked = _dedupe(sorted(candidates, key=lambda c: (-c.rank, c.url)))
+        # Python's sort is stable, so equal-scored results retain the search provider's relevance
+        # order. Sorting ties by URL used to promote arbitrary locales (for example ``de-de`` before
+        # ``en-gb``), making classification and extraction harder despite a better-ranked result.
+        ranked = _dedupe(sorted(candidates, key=lambda c: -c.rank))
+        selected = _select_candidates(ranked, budget)
         return Resolution(
             mpn=mpn,
             manufacturer=maker,
-            candidates=tuple(ranked[:budget]),
+            candidates=tuple(selected),
             rejected=tuple(_dedupe_verdicts(rejected)),
             queries=tuple(queries),
             notes=tuple(notes),
@@ -317,6 +323,40 @@ def _pattern_urls(maker: Manufacturer, mpn: str) -> list[str]:
             # A malformed template is a data error in the YAML, not a reason to abandon the row.
             continue
     return urls
+
+
+def _select_candidates(candidates: Sequence[Candidate], budget: int) -> list[Candidate]:
+    """Keep the stable ranking while reserving safe capacity for open-web recovery.
+
+    The normal ranked slice is authoritative. Only a lower-trust site-search candidate may be
+    replaced to admit the first open-search result; supplied URLs and deterministic manufacturer
+    patterns are never evicted. Starting from the full slice also prevents sparse preferred arms
+    from under-filling a budget that open search can satisfy.
+    """
+    if budget <= 0:
+        return []
+    selected = list(candidates[:budget])
+    if any(candidate.origin == "open_search" for candidate in selected):
+        return selected
+
+    open_candidate = next(
+        (candidate for candidate in candidates if candidate.origin == "open_search"),
+        None,
+    )
+    if open_candidate is None:
+        return selected
+
+    replace_at = next(
+        (
+            index
+            for index in range(len(selected) - 1, -1, -1)
+            if selected[index].origin == "site_search"
+        ),
+        None,
+    )
+    if replace_at is not None:
+        selected[replace_at] = open_candidate
+    return selected
 
 
 def _dedupe(candidates: Sequence[Candidate]) -> list[Candidate]:

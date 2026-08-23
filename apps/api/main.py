@@ -1184,42 +1184,86 @@ def retrieval_fetcher():
     return None
 
 
+def browser_renderer():
+    """Optional browser fallback for static candidates without SKU coverage."""
+    import importlib.util
+    import os
+
+    choice = (os.environ.get("AXIOM_BROWSER") or "auto").strip().lower()
+    if choice in {"off", "none", "0", "false"}:
+        return None
+    if choice not in {"auto", "playwright", "on", "1", "true"}:
+        print(
+            f"[axiom] unknown AXIOM_BROWSER value {choice!r}; browser fallback is disabled",
+            file=sys.stderr,
+        )
+        return None
+    if importlib.util.find_spec("playwright") is None:
+        if choice != "auto":
+            print(
+                "[axiom] Playwright browser fallback requested but not installed; "
+                "install axiom[browser] and run `python -m playwright install chromium`",
+                file=sys.stderr,
+            )
+        return None
+
+    from axiom.retrieve import PlaywrightRenderer
+
+    return PlaywrightRenderer()
+
+
 def search_provider():
-    """The open-web search arm. **On by default.**
+    """The open-web search arm, preferring Brave when credentials are configured.
 
-    This used to return None on the grounds that search is an external service with a key and a
-    bill, so defaulting it on would make the endpoint's reach depend on ambient credentials. That
-    reasoning was right about a keyed provider and wrong about the outcome: it left the arm that
-    reaches an *undeclared* manufacturer switched off, which is the arm that matters most — a
-    manufacturer with a declared domain is already served by site discovery.
-
-    :class:`~axiom.retrieve.DuckDuckGoSearch` needs no key, no account and no bill, so there is no
-    ambient credential to depend on and nothing to leave unconfigured. Measured on this repository's
-    own item master it returns the manufacturer's own product page as the first result for long-tail
-    industrial part numbers.
-
-    Set ``AXIOM_SEARCH=off`` to disable it — worth doing for a run that must make no third-party
-    request at all. ``AXIOM_SEARCH=bedrock`` selects the Bedrock Web Search arm instead, which keeps
-    the query inside the AWS boundary but needs OpenAI GPT model access on the account.
+    ``AXIOM_SEARCH=auto`` (the default) selects Brave when ``AXIOM_BRAVE_API_KEY`` or
+    ``BRAVE_SEARCH_API_KEY`` is present and otherwise uses the keyless DuckDuckGo fallback.
+    Explicit ``brave`` configuration degrades to DuckDuckGo when its key is unavailable so one
+    missing secret does not disable product discovery entirely.
     """
     import os
 
-    choice = (os.environ.get("AXIOM_SEARCH") or "duckduckgo").strip().lower()
+    choice = (os.environ.get("AXIOM_SEARCH") or "auto").strip().lower()
     if choice in {"off", "none", "0", "false"}:
         return None
+
+    brave_key = os.environ.get("AXIOM_BRAVE_API_KEY") or os.environ.get(
+        "BRAVE_SEARCH_API_KEY"
+    )
+    if choice == "auto":
+        choice = "brave" if brave_key else "duckduckgo"
+
+    if choice == "brave":
+        from axiom.retrieve import BraveSearch, BraveSearchError
+
+        try:
+            return BraveSearch.from_env()
+        except BraveSearchError as exc:
+            print(
+                f"[axiom] AXIOM_SEARCH=brave but that provider is unavailable: {exc}; "
+                "falling back to DuckDuckGo",
+                file=sys.stderr,
+            )
+            from axiom.retrieve import DuckDuckGoSearch
+
+            return DuckDuckGoSearch()
+
     if choice == "bedrock":
         from axiom.retrieve.search_bedrock import BedrockWebSearch, BedrockWebSearchError
 
         try:
             return BedrockWebSearch.from_env()
         except BedrockWebSearchError as exc:
-            # Degraded rather than fatal: the run still has the library and site discovery, and a
-            # missing search key should not take the endpoint down.
             print(
                 f"[axiom] AXIOM_SEARCH=bedrock but that provider is unavailable: {exc}",
                 file=sys.stderr,
             )
             return None
+
+    if choice != "duckduckgo":
+        print(
+            f"[axiom] unknown AXIOM_SEARCH value {choice!r}; falling back to DuckDuckGo",
+            file=sys.stderr,
+        )
 
     from axiom.retrieve import DuckDuckGoSearch
 
@@ -1432,6 +1476,7 @@ def _run_enrichment(request: EnrichRequest) -> JSONResponse:
             library_path=LIBRARY_INDEX,
             fetcher=retrieval_fetcher(),
             search=search_provider(),
+            renderer=browser_renderer(),
         )
     except (UrlFetchError, IngestError) as exc:
         # 502 rather than 400. The request was fine; the *upstream* document could not be retrieved,
