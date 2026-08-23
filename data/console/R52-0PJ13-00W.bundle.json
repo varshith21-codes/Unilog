@@ -19,8 +19,8 @@
       "source_document_ids": [
         "Unihack__Sample_Dataset_-_Input#R52-0PJ13-00W"
       ],
-      "created_at": "2026-08-22T19:16:16.644090+00:00",
-      "updated_at": "2026-08-22T19:16:16.644140+00:00"
+      "created_at": "2026-08-23T11:45:32.037740+00:00",
+      "updated_at": "2026-08-23T11:45:32.037836+00:00"
     },
     "classifications": [
       {
@@ -70,7 +70,7 @@
         "value_raw": "Wh",
         "value_canonical": "Wh",
         "value_display": "Wh",
-        "method": "supplier_feed",
+        "method": "item_master_parse",
         "confidence": 0.82,
         "status": "auto_accepted",
         "evidence": [
@@ -96,7 +96,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-22T19:16:16.644001Z",
+        "created_at": "2026-08-23T11:45:32.037608Z",
         "score": 0.8,
         "decision": {
           "attribute_code": "finish_color",
@@ -121,8 +121,10 @@
           "source_prior": 0.5,
           "tier_cost": 0.5
         },
-        "is_publishable": true,
+        "is_publishable": false,
         "has_verified_evidence": true,
+        "is_self_declared": true,
+        "is_independent": false,
         "citation_summary": [
           "Unihack__Sample_Dataset_-_Input#R52-0PJ13-00W"
         ]
@@ -132,7 +134,7 @@
         "value_raw": "Wallplate",
         "value_canonical": "Wall Plate",
         "value_display": "Wall Plate",
-        "method": "supplier_feed",
+        "method": "item_master_parse",
         "confidence": 0.82,
         "status": "auto_accepted",
         "evidence": [
@@ -158,7 +160,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-22T19:16:16.643986Z",
+        "created_at": "2026-08-23T11:45:32.037587Z",
         "score": 0.8,
         "decision": {
           "attribute_code": "wiring_device_type",
@@ -183,14 +185,28 @@
           "source_prior": 0.5,
           "tier_cost": 0.5
         },
-        "is_publishable": true,
+        "is_publishable": false,
         "has_verified_evidence": true,
+        "is_self_declared": true,
+        "is_independent": false,
         "citation_summary": [
           "Unihack__Sample_Dataset_-_Input#R52-0PJ13-00W"
         ]
       }
     ],
     "gaps": [
+      {
+        "attribute_code": "wiring_device_type",
+        "reason": "self_declared_only",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#R52-0PJ13-00W"
+        ],
+        "detail": "the customer's own description implies 'Wall Plate' (from 'Wallplate'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-23T11:45:32.037790Z"
+      },
       {
         "attribute_code": "amperage_rating",
         "reason": "no_source_available",
@@ -201,7 +217,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:16.644122Z"
+        "detected_at": "2026-08-23T11:45:32.037797Z"
       },
       {
         "attribute_code": "voltage_rating",
@@ -213,7 +229,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:16.644126Z"
+        "detected_at": "2026-08-23T11:45:32.037802Z"
       },
       {
         "attribute_code": "gang_count",
@@ -225,7 +241,19 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:16.644130Z"
+        "detected_at": "2026-08-23T11:45:32.037806Z"
+      },
+      {
+        "attribute_code": "finish_color",
+        "reason": "self_declared_only",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#R52-0PJ13-00W"
+        ],
+        "detail": "the customer's own description implies 'Wh' (from 'Wh'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-23T11:45:32.037813Z"
       },
       {
         "attribute_code": "approvals",
@@ -237,13 +265,13 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:16.644133Z"
+        "detected_at": "2026-08-23T11:45:32.037817Z"
       }
     ],
     "extraction": {
       "requested": 16,
       "values": 2,
-      "gaps": 4,
+      "gaps": 6,
       "rejected_unverifiable": 0,
       "corrected_to_match_evidence": 0,
       "citation_coverage": 1.0,
@@ -286,10 +314,10 @@
       "per_attribute": {}
     },
     "certificate": {
-      "certificate_id": "ec_cf5e442babef",
+      "certificate_id": "ec_60fdbbc463ba",
       "sku": "R52-0PJ13-00W",
       "tenant_id": "unilog",
-      "generated_at": "2026-08-22T19:16:16.644318Z",
+      "generated_at": "2026-08-23T11:45:32.038196Z",
       "schema_version": "ELC.DEV.WIRING@v1",
       "pipeline_version": "axiom-0.1.0",
       "classifications": [
@@ -307,51 +335,18 @@
           "alternatives": []
         }
       ],
-      "attributes": [
+      "attributes": [],
+      "gaps": [
         {
           "code": "wiring_device_type",
-          "value_canonical": "Wall Plate",
-          "value_display": "Wall Plate",
-          "value_raw": "Wallplate",
-          "confidence": 0.82,
-          "method": "supplier_feed",
-          "model_tier": null,
-          "status": "auto_accepted",
-          "evidence": [
-            {
-              "document": "Unihack__Sample_Dataset_-_Input#R52-0PJ13-00W",
-              "sha256": "49efd0b2\u2026",
-              "page": null,
-              "bbox": null,
-              "quote": "Wallplate",
-              "verified": true
-            }
+          "reason": "self_declared_only",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#R52-0PJ13-00W"
           ],
-          "validations": []
+          "required": true,
+          "detail": "the customer's own description implies 'Wall Plate' (from 'Wallplate'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+          "recommended_action": "retry_with_better_source"
         },
-        {
-          "code": "finish_color",
-          "value_canonical": "Wh",
-          "value_display": "Wh",
-          "value_raw": "Wh",
-          "confidence": 0.82,
-          "method": "supplier_feed",
-          "model_tier": null,
-          "status": "auto_accepted",
-          "evidence": [
-            {
-              "document": "Unihack__Sample_Dataset_-_Input#R52-0PJ13-00W",
-              "sha256": "49efd0b2\u2026",
-              "page": null,
-              "bbox": null,
-              "quote": "Wh",
-              "verified": true
-            }
-          ],
-          "validations": []
-        }
-      ],
-      "gaps": [
         {
           "code": "amperage_rating",
           "reason": "no_source_available",
@@ -383,6 +378,16 @@
           "recommended_action": "retry_with_better_source"
         },
         {
+          "code": "finish_color",
+          "reason": "self_declared_only",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#R52-0PJ13-00W"
+          ],
+          "required": true,
+          "detail": "the customer's own description implies 'Wh' (from 'Wh'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+          "recommended_action": "retry_with_better_source"
+        },
+        {
           "code": "approvals",
           "reason": "no_source_available",
           "sources_searched": [
@@ -395,18 +400,20 @@
       ],
       "summary": {
         "attributes_required": 6,
-        "attributes_populated": 2,
-        "attributes_with_evidence": 2,
+        "attributes_populated": 0,
+        "attributes_with_evidence": 0,
         "attributes_inferred": 0,
         "auto_accepted": 2,
         "queued_for_review": 0,
-        "gaps_total": 4,
-        "gaps_required": 4,
+        "gaps_total": 6,
+        "gaps_required": 6,
         "quality_index": {
-          "completeness": 0.3333333333333333,
-          "verifiability": 1.0,
+          "completeness": 0.0,
+          "verifiability": 0.0,
           "consistency": 1.0,
           "richness": 0.0,
+          "self_declared": 0.3333333333333333,
+          "corroborated": 0.0,
           "weights": {
             "completeness": 0.35,
             "verifiability": 0.3,
@@ -419,12 +426,12 @@
             "richness",
             "verifiability"
           ],
-          "composite": 0.6667
+          "composite": 0.25
         },
         "cost_usd": null,
         "wall_clock_seconds": 0.0
       },
-      "signature": "sha256:cd3d78ecc750e00070dc83eef73951909ac81bbfb807ced26d54f78f27e50418",
+      "signature": "sha256:e7ab8e3e605c45fa9d3f3fd901996b481422219bdf1e0aa22920c24ed67a7e0d",
       "signature_verified": true
     },
     "channels": [
@@ -432,7 +439,10 @@
         "name": "cx1_pim",
         "published": false,
         "value_count": 0,
-        "withheld": [],
+        "withheld": [
+          "finish_color",
+          "wiring_device_type"
+        ],
         "readiness": {
           "channel": "cx1_pim",
           "ready": false,
@@ -448,7 +458,10 @@
         "name": "schema_org",
         "published": false,
         "value_count": 0,
-        "withheld": [],
+        "withheld": [
+          "finish_color",
+          "wiring_device_type"
+        ],
         "readiness": {
           "channel": "schema_org",
           "ready": false,
@@ -462,15 +475,32 @@
       }
     ],
     "metrics": {
-      "fill_rate": 0.3333,
-      "verifiability": 1.0,
+      "fill_rate": 0.0,
+      "verifiability": 0.0,
+      "self_declared_rate": 0.3333,
+      "corroborated_rate": 0.0,
       "values_total": 2,
-      "values_publishable": 2,
+      "values_publishable": 0,
+      "values_self_declared": 2,
       "values_needing_review": 0,
-      "gaps_total": 4,
-      "gaps_required": 4,
+      "gaps_total": 6,
+      "gaps_required": 6,
       "conflicts": []
     },
+    "sources": [
+      {
+        "document_id": "Unihack__Sample_Dataset_-_Input#R52-0PJ13-00W",
+        "url": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
+        "host": "",
+        "tier": "item_master",
+        "doc_type": "supplier_feed",
+        "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+        "covers_this_sku": "row",
+        "citable_as_manufacturer": false,
+        "license_note": null,
+        "revision_label": null
+      }
+    ],
     "cost": null,
     "copy": null
   },
@@ -479,7 +509,7 @@
     "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
     "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
     "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-22T19:16:11.275717Z",
+    "fetched_at": "2026-08-23T11:45:10.364455Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": "unilog",

@@ -14,43 +14,47 @@
   "gaps": [
     {
       "code": "railing_component",
-      "reason": "no_source_available",
+      "reason": "not_present_in_any_source",
       "sources_searched": [
-        "Unihack__Sample_Dataset_-_Input#59025BK"
+        "Unihack__Sample_Dataset_-_Input#59025BK",
+        "barras-post-light-59025bk@033ad65f"
       ],
       "required": true,
-      "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
-      "recommended_action": "retry_with_better_source"
+      "detail": "read the item-master row and 1 retrieved document(s) (barras-post-light-59025bk@033ad65f); the part number was located but this attribute is not stated in any of them. A better document will not close this one, so it is a supplier request.",
+      "recommended_action": "request_from_supplier"
     },
     {
       "code": "nominal_dimensions",
-      "reason": "no_source_available",
+      "reason": "not_present_in_any_source",
       "sources_searched": [
-        "Unihack__Sample_Dataset_-_Input#59025BK"
+        "Unihack__Sample_Dataset_-_Input#59025BK",
+        "barras-post-light-59025bk@033ad65f"
       ],
       "required": true,
-      "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
-      "recommended_action": "retry_with_better_source"
+      "detail": "read the item-master row and 1 retrieved document(s) (barras-post-light-59025bk@033ad65f); the part number was located but this attribute is not stated in any of them. A better document will not close this one, so it is a supplier request.",
+      "recommended_action": "request_from_supplier"
     },
     {
       "code": "material_composition",
-      "reason": "no_source_available",
+      "reason": "not_present_in_any_source",
       "sources_searched": [
-        "Unihack__Sample_Dataset_-_Input#59025BK"
+        "Unihack__Sample_Dataset_-_Input#59025BK",
+        "barras-post-light-59025bk@033ad65f"
       ],
       "required": true,
-      "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
-      "recommended_action": "retry_with_better_source"
+      "detail": "read the item-master row and 1 retrieved document(s) (barras-post-light-59025bk@033ad65f); the part number was located but this attribute is not stated in any of them. A better document will not close this one, so it is a supplier request.",
+      "recommended_action": "request_from_supplier"
     },
     {
       "code": "finish_color",
-      "reason": "no_source_available",
+      "reason": "not_present_in_any_source",
       "sources_searched": [
-        "Unihack__Sample_Dataset_-_Input#59025BK"
+        "Unihack__Sample_Dataset_-_Input#59025BK",
+        "barras-post-light-59025bk@033ad65f"
       ],
       "required": true,
-      "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
-      "recommended_action": "retry_with_better_source"
+      "detail": "read the item-master row and 1 retrieved document(s) (barras-post-light-59025bk@033ad65f); the part number was located but this attribute is not stated in any of them. A better document will not close this one, so it is a supplier request.",
+      "recommended_action": "request_from_supplier"
     }
   ],
   "policy": {
@@ -68,10 +72,12 @@
   },
   "quality": {
     "completeness": 0.0,
-    "verifiability": 0.0,
+    "verifiability": 1.0,
     "consistency": 1.0,
     "richness": 0.0,
-    "composite": 0.25,
+    "self_declared": 0.0,
+    "corroborated": 0.0,
+    "composite": 0.55,
     "measured_dimensions": [
       "completeness",
       "consistency",
@@ -79,7 +85,7 @@
       "verifiability"
     ]
   },
-  "created_at": "2026-08-22T19:16:16.418489+00:00",
+  "created_at": "2026-08-23T11:45:31.777437+00:00",
   "decisions": [],
   "pages": [
     {
@@ -95,6 +101,38 @@
       ]
     }
   ],
-  "items": [],
+  "items": [
+    {
+      "attribute_code": "overall_size",
+      "attribute_name": "Size",
+      "datatype": "string",
+      "value_raw": "8.25\" W x 23.25\" H",
+      "value_canonical": "8.25\" W x 23.25\" H",
+      "value_display": "8.25\" W x 23.25\" H",
+      "score": 0.775,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.775 >= threshold 0.719",
+      "method": "document_extraction",
+      "model_tier": null,
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "barras-post-light-59025bk@033ad65f",
+          "quote": "Size: 8.25\" W x 23.25\" H",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": null,
+          "table_ref": null,
+          "method": null
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": null
+    }
+  ],
   "queue": []
 }

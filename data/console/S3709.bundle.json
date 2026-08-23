@@ -19,8 +19,8 @@
       "source_document_ids": [
         "Unihack__Sample_Dataset_-_Input#S3709"
       ],
-      "created_at": "2026-08-22T19:16:15.247375+00:00",
-      "updated_at": "2026-08-22T19:16:15.247401+00:00"
+      "created_at": "2026-08-23T11:45:30.201038+00:00",
+      "updated_at": "2026-08-23T11:45:30.201078+00:00"
     },
     "classifications": [
       {
@@ -86,7 +86,7 @@
           "unit": "W"
         },
         "value_display": "25 W",
-        "method": "supplier_feed",
+        "method": "item_master_parse",
         "confidence": 0.88,
         "status": "auto_accepted",
         "evidence": [
@@ -112,7 +112,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-22T19:16:15.247293Z",
+        "created_at": "2026-08-23T11:45:30.200943Z",
         "score": 0.8,
         "decision": {
           "attribute_code": "wattage",
@@ -137,8 +137,10 @@
           "source_prior": 0.5,
           "tier_cost": 0.5
         },
-        "is_publishable": true,
+        "is_publishable": false,
         "has_verified_evidence": true,
+        "is_self_declared": true,
+        "is_independent": false,
         "citation_summary": [
           "Unihack__Sample_Dataset_-_Input#S3709"
         ]
@@ -155,13 +157,25 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:15.247398Z"
+        "detected_at": "2026-08-23T11:45:30.201068Z"
+      },
+      {
+        "attribute_code": "wattage",
+        "reason": "self_declared_only",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#S3709"
+        ],
+        "detail": "the customer's own description implies '25 W' (from '25W'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-23T11:45:30.201074Z"
       }
     ],
     "extraction": {
       "requested": 21,
       "values": 1,
-      "gaps": 1,
+      "gaps": 2,
       "rejected_unverifiable": 0,
       "corrected_to_match_evidence": 0,
       "citation_coverage": 1.0,
@@ -214,10 +228,10 @@
       "per_attribute": {}
     },
     "certificate": {
-      "certificate_id": "ec_ad331f088fda",
+      "certificate_id": "ec_f50281d46b27",
       "sku": "S3709",
       "tenant_id": "unilog",
-      "generated_at": "2026-08-22T19:16:15.247613Z",
+      "generated_at": "2026-08-23T11:45:30.201307Z",
       "schema_version": "LGT.LMP.GEN@v1",
       "pipeline_version": "axiom-0.1.0",
       "classifications": [
@@ -244,32 +258,7 @@
           "alternatives": []
         }
       ],
-      "attributes": [
-        {
-          "code": "wattage",
-          "value_canonical": {
-            "magnitude": 25.0,
-            "unit": "W"
-          },
-          "value_display": "25 W",
-          "value_raw": "25W",
-          "confidence": 0.88,
-          "method": "supplier_feed",
-          "model_tier": null,
-          "status": "auto_accepted",
-          "evidence": [
-            {
-              "document": "Unihack__Sample_Dataset_-_Input#S3709",
-              "sha256": "49efd0b2\u2026",
-              "page": null,
-              "bbox": null,
-              "quote": "25W",
-              "verified": true
-            }
-          ],
-          "validations": []
-        }
-      ],
+      "attributes": [],
       "gaps": [
         {
           "code": "lamp_technology",
@@ -280,22 +269,34 @@
           "required": true,
           "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
           "recommended_action": "retry_with_better_source"
+        },
+        {
+          "code": "wattage",
+          "reason": "self_declared_only",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#S3709"
+          ],
+          "required": true,
+          "detail": "the customer's own description implies '25 W' (from '25W'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+          "recommended_action": "retry_with_better_source"
         }
       ],
       "summary": {
         "attributes_required": 2,
-        "attributes_populated": 1,
-        "attributes_with_evidence": 1,
+        "attributes_populated": 0,
+        "attributes_with_evidence": 0,
         "attributes_inferred": 0,
         "auto_accepted": 1,
         "queued_for_review": 0,
-        "gaps_total": 1,
-        "gaps_required": 1,
+        "gaps_total": 2,
+        "gaps_required": 2,
         "quality_index": {
-          "completeness": 0.5,
-          "verifiability": 1.0,
+          "completeness": 0.0,
+          "verifiability": 0.0,
           "consistency": 1.0,
           "richness": 0.5,
+          "self_declared": 0.5,
+          "corroborated": 0.0,
           "weights": {
             "completeness": 0.35,
             "verifiability": 0.3,
@@ -308,12 +309,12 @@
             "richness",
             "verifiability"
           ],
-          "composite": 0.775
+          "composite": 0.3
         },
         "cost_usd": null,
         "wall_clock_seconds": 0.0
       },
-      "signature": "sha256:8e7d66c89a5ee1e2e47240b8b617d2d0cf35b466d72cbec56a5c393dfef66efc",
+      "signature": "sha256:b9c21d3b35578f091fb89b597ceb3d86a35fac3cad28920e50ec59eff4db0c2d",
       "signature_verified": true
     },
     "channels": [
@@ -321,7 +322,9 @@
         "name": "cx1_pim",
         "published": false,
         "value_count": 0,
-        "withheld": [],
+        "withheld": [
+          "wattage"
+        ],
         "readiness": {
           "channel": "cx1_pim",
           "ready": false,
@@ -336,8 +339,10 @@
       {
         "name": "schema_org",
         "published": true,
-        "value_count": 1,
-        "withheld": [],
+        "value_count": 0,
+        "withheld": [
+          "wattage"
+        ],
         "readiness": {
           "channel": "schema_org",
           "ready": true,
@@ -349,15 +354,32 @@
       }
     ],
     "metrics": {
-      "fill_rate": 0.5,
-      "verifiability": 1.0,
+      "fill_rate": 0.0,
+      "verifiability": 0.0,
+      "self_declared_rate": 0.5,
+      "corroborated_rate": 0.0,
       "values_total": 1,
-      "values_publishable": 1,
+      "values_publishable": 0,
+      "values_self_declared": 1,
       "values_needing_review": 0,
-      "gaps_total": 1,
-      "gaps_required": 1,
+      "gaps_total": 2,
+      "gaps_required": 2,
       "conflicts": []
     },
+    "sources": [
+      {
+        "document_id": "Unihack__Sample_Dataset_-_Input#S3709",
+        "url": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
+        "host": "",
+        "tier": "item_master",
+        "doc_type": "supplier_feed",
+        "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+        "covers_this_sku": "row",
+        "citable_as_manufacturer": false,
+        "license_note": null,
+        "revision_label": null
+      }
+    ],
     "cost": null,
     "copy": null
   },
@@ -366,7 +388,7 @@
     "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
     "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
     "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-22T19:16:11.275717Z",
+    "fetched_at": "2026-08-23T11:45:10.364455Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": "unilog",

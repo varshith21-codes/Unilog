@@ -19,8 +19,8 @@
       "source_document_ids": [
         "Unihack__Sample_Dataset_-_Input#F200B-21L"
       ],
-      "created_at": "2026-08-22T19:16:17.321139+00:00",
-      "updated_at": "2026-08-22T19:16:17.321179+00:00"
+      "created_at": "2026-08-23T11:45:32.938316+00:00",
+      "updated_at": "2026-08-23T11:45:32.938627+00:00"
     },
     "classifications": [
       {
@@ -70,7 +70,7 @@
         "value_raw": "M12",
         "value_canonical": "M12",
         "value_display": "M12",
-        "method": "supplier_feed",
+        "method": "item_master_parse",
         "confidence": 0.82,
         "status": "queued_for_review",
         "evidence": [
@@ -107,7 +107,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-22T19:16:17.320994Z",
+        "created_at": "2026-08-23T11:45:32.937803Z",
         "score": 0.6,
         "decision": {
           "attribute_code": "battery_platform",
@@ -134,6 +134,8 @@
         },
         "is_publishable": false,
         "has_verified_evidence": true,
+        "is_self_declared": true,
+        "is_independent": false,
         "citation_summary": [
           "Unihack__Sample_Dataset_-_Input#F200B-21L"
         ]
@@ -143,7 +145,7 @@
         "value_raw": "BLK",
         "value_canonical": "BLK",
         "value_display": "BLK",
-        "method": "supplier_feed",
+        "method": "item_master_parse",
         "confidence": 0.82,
         "status": "auto_accepted",
         "evidence": [
@@ -169,7 +171,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-22T19:16:17.321006Z",
+        "created_at": "2026-08-23T11:45:32.937825Z",
         "score": 0.8,
         "decision": {
           "attribute_code": "finish_color",
@@ -194,8 +196,10 @@
           "source_prior": 0.5,
           "tier_cost": 0.5
         },
-        "is_publishable": true,
+        "is_publishable": false,
         "has_verified_evidence": true,
+        "is_self_declared": true,
+        "is_independent": false,
         "citation_summary": [
           "Unihack__Sample_Dataset_-_Input#F200B-21L"
         ]
@@ -205,7 +209,7 @@
         "value_raw": "L",
         "value_canonical": "L",
         "value_display": "L",
-        "method": "supplier_feed",
+        "method": "item_master_parse",
         "confidence": 0.82,
         "status": "auto_accepted",
         "evidence": [
@@ -231,7 +235,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-22T19:16:17.321037Z",
+        "created_at": "2026-08-23T11:45:32.937880Z",
         "score": 0.8,
         "decision": {
           "attribute_code": "garment_size",
@@ -256,8 +260,10 @@
           "source_prior": 0.5,
           "tier_cost": 0.5
         },
-        "is_publishable": true,
+        "is_publishable": false,
         "has_verified_evidence": true,
+        "is_self_declared": true,
+        "is_independent": false,
         "citation_summary": [
           "Unihack__Sample_Dataset_-_Input#F200B-21L"
         ]
@@ -267,7 +273,7 @@
         "value_raw": "Heated",
         "value_canonical": "true",
         "value_display": "true",
-        "method": "supplier_feed",
+        "method": "item_master_parse",
         "confidence": 0.82,
         "status": "queued_for_review",
         "evidence": [
@@ -304,7 +310,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-22T19:16:17.321014Z",
+        "created_at": "2026-08-23T11:45:32.937838Z",
         "score": 0.6,
         "decision": {
           "attribute_code": "heated_garment",
@@ -331,6 +337,8 @@
         },
         "is_publishable": false,
         "has_verified_evidence": true,
+        "is_self_declared": true,
+        "is_independent": false,
         "citation_summary": [
           "Unihack__Sample_Dataset_-_Input#F200B-21L"
         ]
@@ -340,7 +348,7 @@
         "value_raw": "Hoodie",
         "value_canonical": "Hoodie",
         "value_display": "Hoodie",
-        "method": "supplier_feed",
+        "method": "item_master_parse",
         "confidence": 0.82,
         "status": "auto_accepted",
         "evidence": [
@@ -366,7 +374,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-22T19:16:17.321022Z",
+        "created_at": "2026-08-23T11:45:32.937850Z",
         "score": 0.8,
         "decision": {
           "attribute_code": "ppe_form",
@@ -391,8 +399,10 @@
           "source_prior": 0.5,
           "tier_cost": 0.5
         },
-        "is_publishable": true,
+        "is_publishable": false,
         "has_verified_evidence": true,
+        "is_self_declared": true,
+        "is_independent": false,
         "citation_summary": [
           "Unihack__Sample_Dataset_-_Input#F200B-21L"
         ]
@@ -402,7 +412,7 @@
         "value_raw": "Kit",
         "value_canonical": "Kit",
         "value_display": "Kit",
-        "method": "supplier_feed",
+        "method": "item_master_parse",
         "confidence": 0.82,
         "status": "auto_accepted",
         "evidence": [
@@ -428,7 +438,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-22T19:16:17.321028Z",
+        "created_at": "2026-08-23T11:45:32.937864Z",
         "score": 0.8,
         "decision": {
           "attribute_code": "tool_configuration",
@@ -453,14 +463,64 @@
           "source_prior": 0.5,
           "tier_cost": 0.5
         },
-        "is_publishable": true,
+        "is_publishable": false,
         "has_verified_evidence": true,
+        "is_self_declared": true,
+        "is_independent": false,
         "citation_summary": [
           "Unihack__Sample_Dataset_-_Input#F200B-21L"
         ]
       }
     ],
     "gaps": [
+      {
+        "attribute_code": "garment_size",
+        "reason": "self_declared_only",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#F200B-21L"
+        ],
+        "detail": "the customer's own description implies 'L' (from 'L'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-23T11:45:32.938457Z"
+      },
+      {
+        "attribute_code": "ppe_form",
+        "reason": "self_declared_only",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#F200B-21L"
+        ],
+        "detail": "the customer's own description implies 'Hoodie' (from 'Hoodie'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-23T11:45:32.938575Z"
+      },
+      {
+        "attribute_code": "heated_garment",
+        "reason": "self_declared_only",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#F200B-21L"
+        ],
+        "detail": "the customer's own description implies 'true' (from 'Heated'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-23T11:45:32.938589Z"
+      },
+      {
+        "attribute_code": "finish_color",
+        "reason": "self_declared_only",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#F200B-21L"
+        ],
+        "detail": "the customer's own description implies 'BLK' (from 'BLK'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-23T11:45:32.938596Z"
+      },
       {
         "attribute_code": "approvals",
         "reason": "no_source_available",
@@ -471,13 +531,13 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:17.321176Z"
+        "detected_at": "2026-08-23T11:45:32.938602Z"
       }
     ],
     "extraction": {
       "requested": 17,
       "values": 6,
-      "gaps": 1,
+      "gaps": 5,
       "rejected_unverifiable": 0,
       "corrected_to_match_evidence": 0,
       "citation_coverage": 1.0,
@@ -566,10 +626,10 @@
       }
     },
     "certificate": {
-      "certificate_id": "ec_40d49e6ffaac",
+      "certificate_id": "ec_084870261500",
       "sku": "F200B-21L",
       "tenant_id": "unilog",
-      "generated_at": "2026-08-22T19:16:17.322935Z",
+      "generated_at": "2026-08-23T11:45:32.940336Z",
       "schema_version": "SAF.APP.GEN@v1",
       "pipeline_version": "axiom-0.1.0",
       "classifications": [
@@ -587,93 +647,48 @@
           "alternatives": []
         }
       ],
-      "attributes": [
+      "attributes": [],
+      "gaps": [
         {
-          "code": "finish_color",
-          "value_canonical": "BLK",
-          "value_display": "BLK",
-          "value_raw": "BLK",
-          "confidence": 0.82,
-          "method": "supplier_feed",
-          "model_tier": null,
-          "status": "auto_accepted",
-          "evidence": [
-            {
-              "document": "Unihack__Sample_Dataset_-_Input#F200B-21L",
-              "sha256": "49efd0b2\u2026",
-              "page": null,
-              "bbox": null,
-              "quote": "BLK",
-              "verified": true
-            }
+          "code": "garment_size",
+          "reason": "self_declared_only",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#F200B-21L"
           ],
-          "validations": []
+          "required": true,
+          "detail": "the customer's own description implies 'L' (from 'L'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+          "recommended_action": "retry_with_better_source"
         },
         {
           "code": "ppe_form",
-          "value_canonical": "Hoodie",
-          "value_display": "Hoodie",
-          "value_raw": "Hoodie",
-          "confidence": 0.82,
-          "method": "supplier_feed",
-          "model_tier": null,
-          "status": "auto_accepted",
-          "evidence": [
-            {
-              "document": "Unihack__Sample_Dataset_-_Input#F200B-21L",
-              "sha256": "49efd0b2\u2026",
-              "page": null,
-              "bbox": null,
-              "quote": "Hoodie",
-              "verified": true
-            }
+          "reason": "self_declared_only",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#F200B-21L"
           ],
-          "validations": []
+          "required": true,
+          "detail": "the customer's own description implies 'Hoodie' (from 'Hoodie'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+          "recommended_action": "retry_with_better_source"
         },
         {
-          "code": "tool_configuration",
-          "value_canonical": "Kit",
-          "value_display": "Kit",
-          "value_raw": "Kit",
-          "confidence": 0.82,
-          "method": "supplier_feed",
-          "model_tier": null,
-          "status": "auto_accepted",
-          "evidence": [
-            {
-              "document": "Unihack__Sample_Dataset_-_Input#F200B-21L",
-              "sha256": "49efd0b2\u2026",
-              "page": null,
-              "bbox": null,
-              "quote": "Kit",
-              "verified": true
-            }
+          "code": "heated_garment",
+          "reason": "self_declared_only",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#F200B-21L"
           ],
-          "validations": []
+          "required": true,
+          "detail": "the customer's own description implies 'true' (from 'Heated'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+          "recommended_action": "retry_with_better_source"
         },
         {
-          "code": "garment_size",
-          "value_canonical": "L",
-          "value_display": "L",
-          "value_raw": "L",
-          "confidence": 0.82,
-          "method": "supplier_feed",
-          "model_tier": null,
-          "status": "auto_accepted",
-          "evidence": [
-            {
-              "document": "Unihack__Sample_Dataset_-_Input#F200B-21L",
-              "sha256": "49efd0b2\u2026",
-              "page": null,
-              "bbox": null,
-              "quote": "L",
-              "verified": true
-            }
+          "code": "finish_color",
+          "reason": "self_declared_only",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#F200B-21L"
           ],
-          "validations": []
-        }
-      ],
-      "gaps": [
+          "required": true,
+          "detail": "the customer's own description implies 'BLK' (from 'BLK'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+          "recommended_action": "retry_with_better_source"
+        },
         {
           "code": "approvals",
           "reason": "no_source_available",
@@ -687,18 +702,20 @@
       ],
       "summary": {
         "attributes_required": 5,
-        "attributes_populated": 4,
-        "attributes_with_evidence": 4,
+        "attributes_populated": 0,
+        "attributes_with_evidence": 0,
         "attributes_inferred": 0,
         "auto_accepted": 4,
         "queued_for_review": 2,
-        "gaps_total": 1,
-        "gaps_required": 1,
+        "gaps_total": 5,
+        "gaps_required": 5,
         "quality_index": {
-          "completeness": 0.6,
-          "verifiability": 1.0,
+          "completeness": 0.0,
+          "verifiability": 0.0,
           "consistency": 0.6666666666666666,
           "richness": 0.0,
+          "self_declared": 0.8,
+          "corroborated": 0.0,
           "weights": {
             "completeness": 0.35,
             "verifiability": 0.3,
@@ -711,12 +728,12 @@
             "richness",
             "verifiability"
           ],
-          "composite": 0.6767
+          "composite": 0.1667
         },
         "cost_usd": null,
         "wall_clock_seconds": 0.0
       },
-      "signature": "sha256:e67fd6b859e49c8af73a76114aa08f0f9959617e333582325d55f4b9234d837d",
+      "signature": "sha256:e0b3d22891e6c2704d4581d3c751005605882c4a0fed79a8eaa00beedf766f54",
       "signature_verified": true
     },
     "channels": [
@@ -726,7 +743,11 @@
         "value_count": 0,
         "withheld": [
           "battery_platform",
-          "heated_garment"
+          "finish_color",
+          "garment_size",
+          "heated_garment",
+          "ppe_form",
+          "tool_configuration"
         ],
         "readiness": {
           "channel": "cx1_pim",
@@ -745,7 +766,11 @@
         "value_count": 0,
         "withheld": [
           "battery_platform",
-          "heated_garment"
+          "finish_color",
+          "garment_size",
+          "heated_garment",
+          "ppe_form",
+          "tool_configuration"
         ],
         "readiness": {
           "channel": "schema_org",
@@ -760,15 +785,32 @@
       }
     ],
     "metrics": {
-      "fill_rate": 0.6,
-      "verifiability": 1.0,
+      "fill_rate": 0.0,
+      "verifiability": 0.0,
+      "self_declared_rate": 0.8,
+      "corroborated_rate": 0.0,
       "values_total": 6,
-      "values_publishable": 4,
+      "values_publishable": 0,
+      "values_self_declared": 6,
       "values_needing_review": 2,
-      "gaps_total": 1,
-      "gaps_required": 1,
+      "gaps_total": 5,
+      "gaps_required": 5,
       "conflicts": []
     },
+    "sources": [
+      {
+        "document_id": "Unihack__Sample_Dataset_-_Input#F200B-21L",
+        "url": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
+        "host": "",
+        "tier": "item_master",
+        "doc_type": "supplier_feed",
+        "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+        "covers_this_sku": "row",
+        "citable_as_manufacturer": false,
+        "license_note": null,
+        "revision_label": null
+      }
+    ],
     "cost": null,
     "copy": null
   },
@@ -777,7 +819,7 @@
     "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
     "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
     "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-22T19:16:11.275717Z",
+    "fetched_at": "2026-08-23T11:45:10.364455Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": "unilog",

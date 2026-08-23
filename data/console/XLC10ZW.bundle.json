@@ -19,8 +19,8 @@
       "source_document_ids": [
         "Unihack__Sample_Dataset_-_Input#XLC10ZW"
       ],
-      "created_at": "2026-08-22T19:16:17.011416+00:00",
-      "updated_at": "2026-08-22T19:16:17.011444+00:00"
+      "created_at": "2026-08-23T11:45:32.517033+00:00",
+      "updated_at": "2026-08-23T11:45:32.517129+00:00"
     },
     "classifications": [
       {
@@ -73,7 +73,7 @@
           "unit": "V"
         },
         "value_display": "18 V",
-        "method": "supplier_feed",
+        "method": "item_master_parse",
         "confidence": 0.88,
         "status": "auto_accepted",
         "evidence": [
@@ -99,7 +99,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-22T19:16:17.011222Z",
+        "created_at": "2026-08-23T11:45:32.516830Z",
         "score": 0.8,
         "decision": {
           "attribute_code": "battery_voltage",
@@ -124,8 +124,10 @@
           "source_prior": 0.5,
           "tier_cost": 0.5
         },
-        "is_publishable": true,
+        "is_publishable": false,
         "has_verified_evidence": true,
+        "is_self_declared": true,
+        "is_independent": false,
         "citation_summary": [
           "Unihack__Sample_Dataset_-_Input#XLC10ZW"
         ]
@@ -135,7 +137,7 @@
         "value_raw": "Cordless",
         "value_canonical": "Cordless (Battery)",
         "value_display": "Cordless (Battery)",
-        "method": "supplier_feed",
+        "method": "item_master_parse",
         "confidence": 0.82,
         "status": "auto_accepted",
         "evidence": [
@@ -161,7 +163,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-22T19:16:17.011247Z",
+        "created_at": "2026-08-23T11:45:32.516852Z",
         "score": 0.8,
         "decision": {
           "attribute_code": "power_source",
@@ -186,8 +188,10 @@
           "source_prior": 0.5,
           "tier_cost": 0.5
         },
-        "is_publishable": true,
+        "is_publishable": false,
         "has_verified_evidence": true,
+        "is_self_declared": true,
+        "is_independent": false,
         "citation_summary": [
           "Unihack__Sample_Dataset_-_Input#XLC10ZW"
         ]
@@ -197,7 +201,7 @@
         "value_raw": "Bare",
         "value_canonical": "Bare Tool",
         "value_display": "Bare Tool",
-        "method": "supplier_feed",
+        "method": "item_master_parse",
         "confidence": 0.82,
         "status": "auto_accepted",
         "evidence": [
@@ -223,7 +227,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-22T19:16:17.011259Z",
+        "created_at": "2026-08-23T11:45:32.516863Z",
         "score": 0.8,
         "decision": {
           "attribute_code": "tool_configuration",
@@ -248,18 +252,45 @@
           "source_prior": 0.5,
           "tier_cost": 0.5
         },
-        "is_publishable": true,
+        "is_publishable": false,
         "has_verified_evidence": true,
+        "is_self_declared": true,
+        "is_independent": false,
         "citation_summary": [
           "Unihack__Sample_Dataset_-_Input#XLC10ZW"
         ]
       }
     ],
-    "gaps": [],
+    "gaps": [
+      {
+        "attribute_code": "tool_configuration",
+        "reason": "self_declared_only",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#XLC10ZW"
+        ],
+        "detail": "the customer's own description implies 'Bare Tool' (from 'Bare'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-23T11:45:32.517108Z"
+      },
+      {
+        "attribute_code": "power_source",
+        "reason": "self_declared_only",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#XLC10ZW"
+        ],
+        "detail": "the customer's own description implies 'Cordless (Battery)' (from 'Cordless'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-23T11:45:32.517119Z"
+      }
+    ],
     "extraction": {
       "requested": 24,
       "values": 3,
-      "gaps": 0,
+      "gaps": 2,
       "rejected_unverifiable": 0,
       "corrected_to_match_evidence": 0,
       "citation_coverage": 1.0,
@@ -322,10 +353,10 @@
       "per_attribute": {}
     },
     "certificate": {
-      "certificate_id": "ec_d5f6f55e6d95",
+      "certificate_id": "ec_e040bd26cace",
       "sku": "XLC10ZW",
       "tenant_id": "unilog",
-      "generated_at": "2026-08-22T19:16:17.012063Z",
+      "generated_at": "2026-08-23T11:45:32.517830Z",
       "schema_version": "TOL.PWR.GEN@v1",
       "pipeline_version": "axiom-0.1.0",
       "classifications": [
@@ -343,89 +374,45 @@
           "alternatives": []
         }
       ],
-      "attributes": [
+      "attributes": [],
+      "gaps": [
         {
-          "code": "battery_voltage",
-          "value_canonical": {
-            "magnitude": 18.0,
-            "unit": "V"
-          },
-          "value_display": "18 V",
-          "value_raw": "18V",
-          "confidence": 0.88,
-          "method": "supplier_feed",
-          "model_tier": null,
-          "status": "auto_accepted",
-          "evidence": [
-            {
-              "document": "Unihack__Sample_Dataset_-_Input#XLC10ZW",
-              "sha256": "49efd0b2\u2026",
-              "page": null,
-              "bbox": null,
-              "quote": "18V",
-              "verified": true
-            }
+          "code": "tool_configuration",
+          "reason": "self_declared_only",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#XLC10ZW"
           ],
-          "validations": []
+          "required": true,
+          "detail": "the customer's own description implies 'Bare Tool' (from 'Bare'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+          "recommended_action": "retry_with_better_source"
         },
         {
           "code": "power_source",
-          "value_canonical": "Cordless (Battery)",
-          "value_display": "Cordless (Battery)",
-          "value_raw": "Cordless",
-          "confidence": 0.82,
-          "method": "supplier_feed",
-          "model_tier": null,
-          "status": "auto_accepted",
-          "evidence": [
-            {
-              "document": "Unihack__Sample_Dataset_-_Input#XLC10ZW",
-              "sha256": "49efd0b2\u2026",
-              "page": null,
-              "bbox": null,
-              "quote": "Cordless",
-              "verified": true
-            }
+          "reason": "self_declared_only",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#XLC10ZW"
           ],
-          "validations": []
-        },
-        {
-          "code": "tool_configuration",
-          "value_canonical": "Bare Tool",
-          "value_display": "Bare Tool",
-          "value_raw": "Bare",
-          "confidence": 0.82,
-          "method": "supplier_feed",
-          "model_tier": null,
-          "status": "auto_accepted",
-          "evidence": [
-            {
-              "document": "Unihack__Sample_Dataset_-_Input#XLC10ZW",
-              "sha256": "49efd0b2\u2026",
-              "page": null,
-              "bbox": null,
-              "quote": "Bare",
-              "verified": true
-            }
-          ],
-          "validations": []
+          "required": true,
+          "detail": "the customer's own description implies 'Cordless (Battery)' (from 'Cordless'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+          "recommended_action": "retry_with_better_source"
         }
       ],
-      "gaps": [],
       "summary": {
         "attributes_required": 2,
-        "attributes_populated": 3,
-        "attributes_with_evidence": 3,
+        "attributes_populated": 0,
+        "attributes_with_evidence": 0,
         "attributes_inferred": 0,
         "auto_accepted": 3,
         "queued_for_review": 0,
-        "gaps_total": 0,
-        "gaps_required": 0,
+        "gaps_total": 2,
+        "gaps_required": 2,
         "quality_index": {
-          "completeness": 1.0,
-          "verifiability": 1.0,
+          "completeness": 0.0,
+          "verifiability": 0.0,
           "consistency": 1.0,
           "richness": 0.5,
+          "self_declared": 1.0,
+          "corroborated": 0.0,
           "weights": {
             "completeness": 0.35,
             "verifiability": 0.3,
@@ -438,12 +425,12 @@
             "richness",
             "verifiability"
           ],
-          "composite": 0.95
+          "composite": 0.3
         },
         "cost_usd": null,
         "wall_clock_seconds": 0.0
       },
-      "signature": "sha256:2ae4cce0041062b093eb4cc1276eae8a254f43b16b0614e59163d68bfcf4fd22",
+      "signature": "sha256:ad694170d536d0f5c797d048ac7089696befb95869552283959ae4c439603fb2",
       "signature_verified": true
     },
     "channels": [
@@ -451,7 +438,11 @@
         "name": "cx1_pim",
         "published": false,
         "value_count": 0,
-        "withheld": [],
+        "withheld": [
+          "battery_voltage",
+          "power_source",
+          "tool_configuration"
+        ],
         "readiness": {
           "channel": "cx1_pim",
           "ready": false,
@@ -466,8 +457,12 @@
       {
         "name": "schema_org",
         "published": true,
-        "value_count": 3,
-        "withheld": [],
+        "value_count": 0,
+        "withheld": [
+          "battery_voltage",
+          "power_source",
+          "tool_configuration"
+        ],
         "readiness": {
           "channel": "schema_org",
           "ready": true,
@@ -479,15 +474,32 @@
       }
     ],
     "metrics": {
-      "fill_rate": 1.0,
-      "verifiability": 1.0,
+      "fill_rate": 0.0,
+      "verifiability": 0.0,
+      "self_declared_rate": 1.0,
+      "corroborated_rate": 0.0,
       "values_total": 3,
-      "values_publishable": 3,
+      "values_publishable": 0,
+      "values_self_declared": 3,
       "values_needing_review": 0,
-      "gaps_total": 0,
-      "gaps_required": 0,
+      "gaps_total": 2,
+      "gaps_required": 2,
       "conflicts": []
     },
+    "sources": [
+      {
+        "document_id": "Unihack__Sample_Dataset_-_Input#XLC10ZW",
+        "url": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
+        "host": "",
+        "tier": "item_master",
+        "doc_type": "supplier_feed",
+        "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+        "covers_this_sku": "row",
+        "citable_as_manufacturer": false,
+        "license_note": null,
+        "revision_label": null
+      }
+    ],
     "cost": null,
     "copy": null
   },
@@ -496,7 +508,7 @@
     "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
     "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
     "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-22T19:16:11.275717Z",
+    "fetched_at": "2026-08-23T11:45:10.364455Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": "unilog",

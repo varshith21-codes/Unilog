@@ -19,8 +19,8 @@
       "source_document_ids": [
         "Unihack__Sample_Dataset_-_Input#25-A"
       ],
-      "created_at": "2026-08-22T19:16:12.083249+00:00",
-      "updated_at": "2026-08-22T19:16:12.083304+00:00"
+      "created_at": "2026-08-23T11:45:18.632094+00:00",
+      "updated_at": "2026-08-23T11:45:18.633847+00:00"
     },
     "classifications": [
       {
@@ -68,39 +68,48 @@
     "gaps": [
       {
         "attribute_code": "product_series",
-        "reason": "no_source_available",
+        "reason": "not_present_in_any_source",
         "sources_searched": [
-          "Unihack__Sample_Dataset_-_Input#25-A"
+          "Unihack__Sample_Dataset_-_Input#25-A",
+          "DBDS12125A01F@97a2480f",
+          "DBDS14125A01F@cc7010ca",
+          "product@ecf61602"
         ],
-        "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+        "detail": "read the item-master row and 3 retrieved document(s) (DBDS12125A01F@97a2480f, DBDS14125A01F@cc7010ca, product@ecf61602); the part number was located but this attribute is not stated in any of them. A better document will not close this one, so it is a supplier request.",
         "revenue_exposure_usd": null,
-        "recommended_action": "retry_with_better_source",
+        "recommended_action": "request_from_supplier",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:12.083272Z"
+        "detected_at": "2026-08-23T11:45:18.633814Z"
       },
       {
         "attribute_code": "finish_color",
-        "reason": "no_source_available",
+        "reason": "not_present_in_any_source",
         "sources_searched": [
-          "Unihack__Sample_Dataset_-_Input#25-A"
+          "Unihack__Sample_Dataset_-_Input#25-A",
+          "DBDS12125A01F@97a2480f",
+          "DBDS14125A01F@cc7010ca",
+          "product@ecf61602"
         ],
-        "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+        "detail": "read the item-master row and 3 retrieved document(s) (DBDS12125A01F@97a2480f, DBDS14125A01F@cc7010ca, product@ecf61602); the part number was located but this attribute is not stated in any of them. A better document will not close this one, so it is a supplier request.",
         "revenue_exposure_usd": null,
-        "recommended_action": "retry_with_better_source",
+        "recommended_action": "request_from_supplier",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:12.083279Z"
+        "detected_at": "2026-08-23T11:45:18.633820Z"
       },
       {
         "attribute_code": "selling_uom",
-        "reason": "no_source_available",
+        "reason": "not_present_in_any_source",
         "sources_searched": [
-          "Unihack__Sample_Dataset_-_Input#25-A"
+          "Unihack__Sample_Dataset_-_Input#25-A",
+          "DBDS12125A01F@97a2480f",
+          "DBDS14125A01F@cc7010ca",
+          "product@ecf61602"
         ],
-        "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+        "detail": "read the item-master row and 3 retrieved document(s) (DBDS12125A01F@97a2480f, DBDS14125A01F@cc7010ca, product@ecf61602); the part number was located but this attribute is not stated in any of them. A better document will not close this one, so it is a supplier request.",
         "revenue_exposure_usd": null,
-        "recommended_action": "retry_with_better_source",
+        "recommended_action": "request_from_supplier",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:12.083284Z"
+        "detected_at": "2026-08-23T11:45:18.633823Z"
       }
     ],
     "extraction": {
@@ -139,10 +148,10 @@
       "per_attribute": {}
     },
     "certificate": {
-      "certificate_id": "ec_ac9a350a9e74",
+      "certificate_id": "ec_d89a70602eb4",
       "sku": "25-A",
       "tenant_id": "unilog",
-      "generated_at": "2026-08-22T19:16:12.083405Z",
+      "generated_at": "2026-08-23T11:45:18.633926Z",
       "schema_version": "BLD.MAS.MORTAR@v1",
       "pipeline_version": "axiom-0.1.0",
       "classifications": [
@@ -164,33 +173,42 @@
       "gaps": [
         {
           "code": "product_series",
-          "reason": "no_source_available",
+          "reason": "not_present_in_any_source",
           "sources_searched": [
-            "Unihack__Sample_Dataset_-_Input#25-A"
+            "Unihack__Sample_Dataset_-_Input#25-A",
+            "DBDS12125A01F@97a2480f",
+            "DBDS14125A01F@cc7010ca",
+            "product@ecf61602"
           ],
           "required": true,
-          "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
-          "recommended_action": "retry_with_better_source"
+          "detail": "read the item-master row and 3 retrieved document(s) (DBDS12125A01F@97a2480f, DBDS14125A01F@cc7010ca, product@ecf61602); the part number was located but this attribute is not stated in any of them. A better document will not close this one, so it is a supplier request.",
+          "recommended_action": "request_from_supplier"
         },
         {
           "code": "finish_color",
-          "reason": "no_source_available",
+          "reason": "not_present_in_any_source",
           "sources_searched": [
-            "Unihack__Sample_Dataset_-_Input#25-A"
+            "Unihack__Sample_Dataset_-_Input#25-A",
+            "DBDS12125A01F@97a2480f",
+            "DBDS14125A01F@cc7010ca",
+            "product@ecf61602"
           ],
           "required": true,
-          "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
-          "recommended_action": "retry_with_better_source"
+          "detail": "read the item-master row and 3 retrieved document(s) (DBDS12125A01F@97a2480f, DBDS14125A01F@cc7010ca, product@ecf61602); the part number was located but this attribute is not stated in any of them. A better document will not close this one, so it is a supplier request.",
+          "recommended_action": "request_from_supplier"
         },
         {
           "code": "selling_uom",
-          "reason": "no_source_available",
+          "reason": "not_present_in_any_source",
           "sources_searched": [
-            "Unihack__Sample_Dataset_-_Input#25-A"
+            "Unihack__Sample_Dataset_-_Input#25-A",
+            "DBDS12125A01F@97a2480f",
+            "DBDS14125A01F@cc7010ca",
+            "product@ecf61602"
           ],
           "required": true,
-          "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
-          "recommended_action": "retry_with_better_source"
+          "detail": "read the item-master row and 3 retrieved document(s) (DBDS12125A01F@97a2480f, DBDS14125A01F@cc7010ca, product@ecf61602); the part number was located but this attribute is not stated in any of them. A better document will not close this one, so it is a supplier request.",
+          "recommended_action": "request_from_supplier"
         }
       ],
       "summary": {
@@ -207,6 +225,8 @@
           "verifiability": 0.0,
           "consistency": 1.0,
           "richness": 0.0,
+          "self_declared": 0.0,
+          "corroborated": 0.0,
           "weights": {
             "completeness": 0.35,
             "verifiability": 0.3,
@@ -224,7 +244,7 @@
         "cost_usd": null,
         "wall_clock_seconds": 0.0
       },
-      "signature": "sha256:754ea9053254ec11f4b093dd599676808d34faf4ce8bee4b8d0bb80a3be7c307",
+      "signature": "sha256:5b1f64d293f4a6256173dc8c12767a13b79d12b05c9cd85c8792274a807d84f0",
       "signature_verified": true
     },
     "channels": [
@@ -264,13 +284,66 @@
     "metrics": {
       "fill_rate": 0.0,
       "verifiability": 0.0,
+      "self_declared_rate": 0.0,
+      "corroborated_rate": 0.0,
       "values_total": 0,
       "values_publishable": 0,
+      "values_self_declared": 0,
       "values_needing_review": 0,
       "gaps_total": 3,
       "gaps_required": 3,
       "conflicts": []
     },
+    "sources": [
+      {
+        "document_id": "Unihack__Sample_Dataset_-_Input#25-A",
+        "url": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
+        "host": "",
+        "tier": "item_master",
+        "doc_type": "supplier_feed",
+        "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+        "covers_this_sku": "row",
+        "citable_as_manufacturer": false,
+        "license_note": null,
+        "revision_label": null
+      },
+      {
+        "document_id": "DBDS12125A01F@97a2480f",
+        "url": "https://diablotools.com/products/DBDS12125A01F",
+        "host": "www.diablotools.com",
+        "tier": "manufacturer",
+        "doc_type": "web_page",
+        "sha256": "97a2480fc120b1c2b7335d265e0c182a5adbdd0d74f051f556ad1a90f7233113",
+        "covers_this_sku": "text",
+        "citable_as_manufacturer": true,
+        "license_note": "retrieved from www.diablotools.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
+        "revision_label": null
+      },
+      {
+        "document_id": "DBDS14125A01F@cc7010ca",
+        "url": "https://diablotools.com/products/DBDS14125A01F",
+        "host": "www.diablotools.com",
+        "tier": "manufacturer",
+        "doc_type": "web_page",
+        "sha256": "cc7010ca184ec6ffdde324331a22c44c180acb81c53571e9425c35149df65836",
+        "covers_this_sku": "text",
+        "citable_as_manufacturer": true,
+        "license_note": "retrieved from www.diablotools.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
+        "revision_label": null
+      },
+      {
+        "document_id": "product@ecf61602",
+        "url": "https://www.signify.com/global/prof/outdoor-luminaires/road-and-street/philips-aluroad-gen2/910925869095_EU/product",
+        "host": "www.lighting.philips.com",
+        "tier": "manufacturer",
+        "doc_type": "web_page",
+        "sha256": "ecf61602050ef99d5cad7ed648717c23054793e103dbc1aa2796a07c71917e5d",
+        "covers_this_sku": "text",
+        "citable_as_manufacturer": true,
+        "license_note": "retrieved from www.lighting.philips.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
+        "revision_label": "Fri, 21 Aug 2026 18:35:04 GMT"
+      }
+    ],
     "cost": null,
     "copy": null
   },
@@ -279,7 +352,7 @@
     "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
     "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
     "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-22T19:16:11.275717Z",
+    "fetched_at": "2026-08-23T11:45:10.364455Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": "unilog",

@@ -111,6 +111,28 @@ class QualityIndex(BaseModel):
     up to ten points, for a reason that had nothing to do with the data.
     """
 
+    self_declared: float | None = Field(default=None, ge=0.0, le=1.0)
+    """Share of required attributes the *client's own input* suggests a value for.
+
+    Diagnostic, and deliberately **not** part of the composite. It exists so a zero completeness
+    can be read correctly: "nothing established" and "nothing there" are very different states, and
+    without this number they are indistinguishable. A SKU at ``completeness 0.0`` with
+    ``self_declared 0.45`` has a rich description and no retrieved document — the work item is
+    retrieval. At ``self_declared 0.0`` the description is uninformative too, and the work item is
+    a supplier request.
+
+    Scoring it would defeat the purpose. The composite is what a distributor is asked to trust, and
+    folding the input into it would let a catalogue raise its own score by restating itself.
+    """
+
+    corroborated: float | None = Field(default=None, ge=0.0, le=1.0)
+    """Share of required attributes an independent source *confirmed* the input's suggestion on.
+
+    Also unscored, and the most useful of the three for telling whether retrieval is working rather
+    than merely running: high ``self_declared`` with near-zero ``corroborated`` means documents are
+    arriving that do not speak to what the descriptions claim.
+    """
+
     weights: dict[str, float] = Field(
         default_factory=lambda: {
             "completeness": 0.35,
@@ -122,7 +144,13 @@ class QualityIndex(BaseModel):
 
     @property
     def measured(self) -> dict[str, float]:
-        """The dimensions that actually hold a value."""
+        """The dimensions the composite is computed over.
+
+        ``self_declared`` and ``corroborated`` are excluded by construction, not by omission from
+        ``weights``: they are provenance diagnostics rather than quality dimensions, and a future
+        edit that gave them a weight would silently reintroduce input-as-enrichment into the one
+        number the console leads with.
+        """
         scored = {
             "completeness": self.completeness,
             "verifiability": self.verifiability,
@@ -171,6 +199,12 @@ class QualityIndex(BaseModel):
             "verifiability": round(self.verifiability, 4),
             "consistency": round(self.consistency, 4),
             "richness": None if self.richness is None else round(self.richness, 4),
+            "self_declared": (
+                None if self.self_declared is None else round(self.self_declared, 4)
+            ),
+            "corroborated": (
+                None if self.corroborated is None else round(self.corroborated, 4)
+            ),
             "composite": self.composite,
             # So a reader can tell a composite over four dimensions from one over three.
             "measured_dimensions": sorted(self.measured),
@@ -325,6 +359,8 @@ def quality_index_for(
         verifiability=record.verifiability(),
         consistency=consistency,
         richness=richness,
+        self_declared=record.self_declared_rate(required_attribute_codes),
+        corroborated=record.corroborated_rate(required_attribute_codes),
     )
 
 

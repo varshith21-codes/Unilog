@@ -19,8 +19,8 @@
       "source_document_ids": [
         "Unihack__Sample_Dataset_-_Input#AAS-P"
       ],
-      "created_at": "2026-08-22T19:16:19.380966+00:00",
-      "updated_at": "2026-08-22T19:16:19.381052+00:00"
+      "created_at": "2026-08-23T11:45:35.077135+00:00",
+      "updated_at": "2026-08-23T11:45:35.077254+00:00"
     },
     "classifications": [
       {
@@ -76,7 +76,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:19.380995Z"
+        "detected_at": "2026-08-23T11:45:35.077179Z"
       },
       {
         "attribute_code": "amperage_rating",
@@ -88,7 +88,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:19.381002Z"
+        "detected_at": "2026-08-23T11:45:35.077189Z"
       },
       {
         "attribute_code": "voltage_rating",
@@ -100,7 +100,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:19.381007Z"
+        "detected_at": "2026-08-23T11:45:35.077195Z"
       },
       {
         "attribute_code": "gang_count",
@@ -112,7 +112,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:19.381012Z"
+        "detected_at": "2026-08-23T11:45:35.077201Z"
       },
       {
         "attribute_code": "finish_color",
@@ -124,7 +124,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:19.381017Z"
+        "detected_at": "2026-08-23T11:45:35.077207Z"
       },
       {
         "attribute_code": "approvals",
@@ -136,7 +136,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:19.381021Z"
+        "detected_at": "2026-08-23T11:45:35.077213Z"
       }
     ],
     "extraction": {
@@ -185,10 +185,10 @@
       "per_attribute": {}
     },
     "certificate": {
-      "certificate_id": "ec_44bc015c0a02",
+      "certificate_id": "ec_764ce48086a6",
       "sku": "AAS-P",
       "tenant_id": "unilog",
-      "generated_at": "2026-08-22T19:16:19.381174Z",
+      "generated_at": "2026-08-23T11:45:35.077423Z",
       "schema_version": "ELC.DEV.WIRING@v1",
       "pipeline_version": "axiom-0.1.0",
       "classifications": [
@@ -283,6 +283,8 @@
           "verifiability": 0.0,
           "consistency": 1.0,
           "richness": 0.0,
+          "self_declared": 0.0,
+          "corroborated": 0.0,
           "weights": {
             "completeness": 0.35,
             "verifiability": 0.3,
@@ -300,7 +302,7 @@
         "cost_usd": null,
         "wall_clock_seconds": 0.0
       },
-      "signature": "sha256:118d4aea5f68a94b10922b2a107f9bb455040ebf87968b4828a55c24106364e7",
+      "signature": "sha256:4fa3ab7d820a85939592aefc5e7e10dd744aa7540282ee25fc947d9b87b15172",
       "signature_verified": true
     },
     "channels": [
@@ -340,13 +342,30 @@
     "metrics": {
       "fill_rate": 0.0,
       "verifiability": 0.0,
+      "self_declared_rate": 0.0,
+      "corroborated_rate": 0.0,
       "values_total": 0,
       "values_publishable": 0,
+      "values_self_declared": 0,
       "values_needing_review": 0,
       "gaps_total": 6,
       "gaps_required": 6,
       "conflicts": []
     },
+    "sources": [
+      {
+        "document_id": "Unihack__Sample_Dataset_-_Input#AAS-P",
+        "url": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
+        "host": "",
+        "tier": "item_master",
+        "doc_type": "supplier_feed",
+        "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+        "covers_this_sku": "row",
+        "citable_as_manufacturer": false,
+        "license_note": null,
+        "revision_label": null
+      }
+    ],
     "cost": null,
     "copy": null
   },
@@ -355,7 +374,7 @@
     "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
     "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
     "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-22T19:16:11.275717Z",
+    "fetched_at": "2026-08-23T11:45:10.364455Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": "unilog",

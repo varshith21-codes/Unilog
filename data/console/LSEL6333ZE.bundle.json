@@ -19,8 +19,8 @@
       "source_document_ids": [
         "Unihack__Sample_Dataset_-_Input#LSEL6333ZE"
       ],
-      "created_at": "2026-08-22T19:16:16.779882+00:00",
-      "updated_at": "2026-08-22T19:16:16.779915+00:00"
+      "created_at": "2026-08-23T11:45:32.206299+00:00",
+      "updated_at": "2026-08-23T11:45:32.206457+00:00"
     },
     "classifications": [
       {
@@ -73,7 +73,7 @@
           "unit": "mm"
         },
         "value_display": "30\"",
-        "method": "supplier_feed",
+        "method": "item_master_parse",
         "confidence": 0.88,
         "status": "auto_accepted",
         "evidence": [
@@ -99,7 +99,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-22T19:16:16.779765Z",
+        "created_at": "2026-08-23T11:45:32.205982Z",
         "score": 0.8,
         "decision": {
           "attribute_code": "appliance_width",
@@ -124,8 +124,10 @@
           "source_prior": 0.5,
           "tier_cost": 0.5
         },
-        "is_publishable": true,
+        "is_publishable": false,
         "has_verified_evidence": true,
+        "is_self_declared": true,
+        "is_independent": false,
         "citation_summary": [
           "Unihack__Sample_Dataset_-_Input#LSEL6333ZE"
         ]
@@ -135,7 +137,7 @@
         "value_raw": "Elec",
         "value_canonical": "Electric",
         "value_display": "Electric",
-        "method": "supplier_feed",
+        "method": "item_master_parse",
         "confidence": 0.82,
         "status": "auto_accepted",
         "evidence": [
@@ -161,7 +163,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-22T19:16:16.779781Z",
+        "created_at": "2026-08-23T11:45:32.206012Z",
         "score": 0.8,
         "decision": {
           "attribute_code": "fuel_type",
@@ -186,14 +188,40 @@
           "source_prior": 0.5,
           "tier_cost": 0.5
         },
-        "is_publishable": true,
+        "is_publishable": false,
         "has_verified_evidence": true,
+        "is_self_declared": true,
+        "is_independent": false,
         "citation_summary": [
           "Unihack__Sample_Dataset_-_Input#LSEL6333ZE"
         ]
       }
     ],
     "gaps": [
+      {
+        "attribute_code": "fuel_type",
+        "reason": "self_declared_only",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#LSEL6333ZE"
+        ],
+        "detail": "the customer's own description implies 'Electric' (from 'Elec'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-23T11:45:32.206399Z"
+      },
+      {
+        "attribute_code": "appliance_width",
+        "reason": "self_declared_only",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#LSEL6333ZE"
+        ],
+        "detail": "the customer's own description implies '30\"' (from '30\"'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-23T11:45:32.206423Z"
+      },
       {
         "attribute_code": "finish_color",
         "reason": "no_source_available",
@@ -204,13 +232,13 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:16.779911Z"
+        "detected_at": "2026-08-23T11:45:32.206434Z"
       }
     ],
     "extraction": {
       "requested": 21,
       "values": 2,
-      "gaps": 1,
+      "gaps": 3,
       "rejected_unverifiable": 0,
       "corrected_to_match_evidence": 0,
       "citation_coverage": 1.0,
@@ -263,10 +291,10 @@
       "per_attribute": {}
     },
     "certificate": {
-      "certificate_id": "ec_b4804d9b5552",
+      "certificate_id": "ec_cbd40027c9f8",
       "sku": "LSEL6333ZE",
       "tenant_id": "unilog",
-      "generated_at": "2026-08-22T19:16:16.780092Z",
+      "generated_at": "2026-08-23T11:45:32.207330Z",
       "schema_version": "APP.KIT.COOKING@v1",
       "pipeline_version": "axiom-0.1.0",
       "classifications": [
@@ -284,54 +312,28 @@
           "alternatives": []
         }
       ],
-      "attributes": [
-        {
-          "code": "appliance_width",
-          "value_canonical": {
-            "magnitude": 762.0,
-            "unit": "mm"
-          },
-          "value_display": "30\"",
-          "value_raw": "30\"",
-          "confidence": 0.88,
-          "method": "supplier_feed",
-          "model_tier": null,
-          "status": "auto_accepted",
-          "evidence": [
-            {
-              "document": "Unihack__Sample_Dataset_-_Input#LSEL6333ZE",
-              "sha256": "49efd0b2\u2026",
-              "page": null,
-              "bbox": null,
-              "quote": "30\"",
-              "verified": true
-            }
-          ],
-          "validations": []
-        },
+      "attributes": [],
+      "gaps": [
         {
           "code": "fuel_type",
-          "value_canonical": "Electric",
-          "value_display": "Electric",
-          "value_raw": "Elec",
-          "confidence": 0.82,
-          "method": "supplier_feed",
-          "model_tier": null,
-          "status": "auto_accepted",
-          "evidence": [
-            {
-              "document": "Unihack__Sample_Dataset_-_Input#LSEL6333ZE",
-              "sha256": "49efd0b2\u2026",
-              "page": null,
-              "bbox": null,
-              "quote": "Elec",
-              "verified": true
-            }
+          "reason": "self_declared_only",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#LSEL6333ZE"
           ],
-          "validations": []
-        }
-      ],
-      "gaps": [
+          "required": true,
+          "detail": "the customer's own description implies 'Electric' (from 'Elec'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+          "recommended_action": "retry_with_better_source"
+        },
+        {
+          "code": "appliance_width",
+          "reason": "self_declared_only",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#LSEL6333ZE"
+          ],
+          "required": true,
+          "detail": "the customer's own description implies '30\"' (from '30\"'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+          "recommended_action": "retry_with_better_source"
+        },
         {
           "code": "finish_color",
           "reason": "no_source_available",
@@ -345,18 +347,20 @@
       ],
       "summary": {
         "attributes_required": 3,
-        "attributes_populated": 2,
-        "attributes_with_evidence": 2,
+        "attributes_populated": 0,
+        "attributes_with_evidence": 0,
         "attributes_inferred": 0,
         "auto_accepted": 2,
         "queued_for_review": 0,
-        "gaps_total": 1,
-        "gaps_required": 1,
+        "gaps_total": 3,
+        "gaps_required": 3,
         "quality_index": {
-          "completeness": 0.6666666666666666,
-          "verifiability": 1.0,
+          "completeness": 0.0,
+          "verifiability": 0.0,
           "consistency": 1.0,
           "richness": 0.0,
+          "self_declared": 0.6666666666666666,
+          "corroborated": 0.0,
           "weights": {
             "completeness": 0.35,
             "verifiability": 0.3,
@@ -369,12 +373,12 @@
             "richness",
             "verifiability"
           ],
-          "composite": 0.7833
+          "composite": 0.25
         },
         "cost_usd": null,
         "wall_clock_seconds": 0.0
       },
-      "signature": "sha256:0981ea408f989a302167a046fec650334b3ccfe2b23041e99c847fa2199f4b2b",
+      "signature": "sha256:d0042af665602d87c10cf244715d297a318709330becafe0e75662ee80832bf7",
       "signature_verified": true
     },
     "channels": [
@@ -382,7 +386,10 @@
         "name": "cx1_pim",
         "published": false,
         "value_count": 0,
-        "withheld": [],
+        "withheld": [
+          "appliance_width",
+          "fuel_type"
+        ],
         "readiness": {
           "channel": "cx1_pim",
           "ready": false,
@@ -398,7 +405,10 @@
         "name": "schema_org",
         "published": false,
         "value_count": 0,
-        "withheld": [],
+        "withheld": [
+          "appliance_width",
+          "fuel_type"
+        ],
         "readiness": {
           "channel": "schema_org",
           "ready": false,
@@ -412,15 +422,32 @@
       }
     ],
     "metrics": {
-      "fill_rate": 0.6667,
-      "verifiability": 1.0,
+      "fill_rate": 0.0,
+      "verifiability": 0.0,
+      "self_declared_rate": 0.6667,
+      "corroborated_rate": 0.0,
       "values_total": 2,
-      "values_publishable": 2,
+      "values_publishable": 0,
+      "values_self_declared": 2,
       "values_needing_review": 0,
-      "gaps_total": 1,
-      "gaps_required": 1,
+      "gaps_total": 3,
+      "gaps_required": 3,
       "conflicts": []
     },
+    "sources": [
+      {
+        "document_id": "Unihack__Sample_Dataset_-_Input#LSEL6333ZE",
+        "url": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
+        "host": "",
+        "tier": "item_master",
+        "doc_type": "supplier_feed",
+        "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+        "covers_this_sku": "row",
+        "citable_as_manufacturer": false,
+        "license_note": null,
+        "revision_label": null
+      }
+    ],
     "cost": null,
     "copy": null
   },
@@ -429,7 +456,7 @@
     "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
     "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
     "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-22T19:16:11.275717Z",
+    "fetched_at": "2026-08-23T11:45:10.364455Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": "unilog",

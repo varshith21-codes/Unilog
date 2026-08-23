@@ -103,6 +103,8 @@ export type DerivationMethod =
   | "image_extraction"
   | "web_extraction"
   | "supplier_feed"
+  // self-declared: read off the client's own item master. Cited, but never publishable.
+  | "item_master_parse"
   // derivation family
   | "unit_conversion"
   | "enum_resolution"
@@ -422,6 +424,7 @@ const EXTRACTION_FAMILY: ReadonlySet<DerivationMethod> = new Set<DerivationMetho
   "image_extraction",
   "web_extraction",
   "supplier_feed",
+  "item_master_parse",
 ]);
 
 const INFERENCE_FAMILY: ReadonlySet<DerivationMethod> = new Set<DerivationMethod>([
@@ -430,12 +433,34 @@ const INFERENCE_FAMILY: ReadonlySet<DerivationMethod> = new Set<DerivationMethod
   "statistical_default",
 ]);
 
+/**
+ * Methods whose only possible source is the catalogue we were asked to enrich.
+ *
+ * Mirrors `_SELF_DECLARED_FAMILY` in axiom.core.values. These carry a real, verified citation and
+ * must still never read as enrichment: the span proves the client's own file says so, which is the
+ * question rather than the answer.
+ */
+const SELF_DECLARED_FAMILY: ReadonlySet<DerivationMethod> = new Set<DerivationMethod>([
+  "item_master_parse",
+  "legacy_record",
+]);
+
 export function requiresEvidence(method: DerivationMethod): boolean {
   return EXTRACTION_FAMILY.has(method);
 }
 
 export function isInference(method: DerivationMethod): boolean {
   return INFERENCE_FAMILY.has(method);
+}
+
+/** True when a value rests on nothing but the client's own input. */
+export function isSelfDeclared(method: DerivationMethod): boolean {
+  return SELF_DECLARED_FAMILY.has(method);
+}
+
+/** True when the method is capable of resting on a source outside the client's own file. */
+export function isIndependent(method: DerivationMethod): boolean {
+  return !SELF_DECLARED_FAMILY.has(method);
 }
 
 export function isHuman(method: DerivationMethod): boolean {
@@ -450,6 +475,14 @@ export type GapReason =
   | "no_source_available"
   | "referred_elsewhere"
   | "extracted_but_unverifiable"
+  /**
+   * The customer's own item master suggests a value; nothing independent confirms it.
+   *
+   * A gap with a candidate already attached, and the commonest state in a real catalogue. Ranks
+   * ahead of the others in a backlog: the value to check is already known, so closing it is
+   * confirmation rather than discovery.
+   */
+  | "self_declared_only"
   | "failed_validation"
   | "conflicting_sources"
   | "awaiting_review";
@@ -689,6 +722,18 @@ export interface QualityIndex {
   verifiability: number;
   consistency: number;
   richness: number | null;
+  /**
+   * Share of required attributes the *customer's own input* suggests a value for.
+   *
+   * Reported beside `completeness`, never inside it, and absent from `measured_dimensions` — this
+   * is a provenance diagnostic, not a quality dimension. It exists so a `completeness` of 0 can be
+   * read correctly: with `self_declared` high, the description said plenty and nothing has
+   * confirmed it yet, so the work item is retrieval. With both at 0 the description is
+   * uninformative too, and the work item is a supplier request.
+   */
+  self_declared: number | null;
+  /** Share of required attributes an independent source confirmed the input's suggestion on. */
+  corroborated: number | null;
   composite: number;
   measured_dimensions: string[];
   weights?: Record<string, number>;
@@ -1013,6 +1058,34 @@ export interface ValidationReport {
   per_attribute: Record<string, ValidationResult[]>;
 }
 
+/**
+ * One source behind a record. Written by `scripts/export_console_catalogue.py`.
+ *
+ * `tier` is the judgement `schema/sourcing.yaml` made about the host, and it is the field that
+ * decides how much the URL is worth: `manufacturer` is the maker's own page, `unknown` is real
+ * evidence from an unrecognised host, and `item_master` is the client's own file. Marketplaces and
+ * distributors never appear because they are refused before the request is made.
+ */
+export interface RecordSource {
+  document_id: string;
+  /** The URL actually fetched, after redirects. A `local://` URI for the item master itself. */
+  url: string;
+  host: string;
+  tier: "manufacturer" | "unknown" | "item_master" | string;
+  doc_type: string;
+  sha256: string;
+  /**
+   * How this document covers this SKU: `table` for an ordering row, `text` for a mention, `row` for
+   * the item-master row itself. An ordering row is the strongest claim — the document *offers* the
+   * part rather than referring to it.
+   */
+  covers_this_sku: string;
+  /** Whether this URL may be published as the manufacturer's own page. Stated, never inferred. */
+  citable_as_manufacturer: boolean;
+  license_note: string | null;
+  revision_label: string | null;
+}
+
 export interface ExtractionSummary {
   requested: number;
   values: number;
@@ -1026,10 +1099,23 @@ export interface ExtractionSummary {
 }
 
 export interface SkuMetrics {
+  /**
+   * Share of required attributes established by an **independent** source.
+   *
+   * Zero on a SKU whose only source is the customer's own item-master row, however descriptive that
+   * row is. Read it together with `self_declared_rate`, which is what distinguishes "we have leads
+   * nobody has confirmed" from "there is nothing to go on".
+   */
   fill_rate: number;
   verifiability: number;
+  /** Share of required attributes the customer's own description suggests a value for. */
+  self_declared_rate: number;
+  /** Share of required attributes an independent source confirmed the description's suggestion on. */
+  corroborated_rate: number;
   values_total: number;
   values_publishable: number;
+  /** Values resting only on the customer's own input. Cited, but not evidence about the product. */
+  values_self_declared: number;
   values_needing_review: number;
   gaps_total: number;
   gaps_required: number;
@@ -1050,6 +1136,13 @@ export interface SkuBundle {
   classification_candidates: { code: string; score: number; path_text: string }[];
   values: AttributeValue[];
   gaps: Gap[];
+  /**
+   * Where the data came from, with the URL fetched and the tier that host was judged at.
+   *
+   * Absent on bundles produced before retrieval existed, and on any run without a document library —
+   * so it is optional, and a missing list means "not recorded" rather than "no sources".
+   */
+  sources?: RecordSource[];
   extraction: ExtractionSummary;
   normalization_issues: ValidationResult[];
   validation: ValidationReport;

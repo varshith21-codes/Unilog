@@ -11,6 +11,7 @@
  * a shape the API stopped emitting.
  */
 
+import type { EnrichLimits, EnrichResponse, EnrichSummary } from "@/lib/enrich";
 import type {
   AttributeValue,
   CohortMember,
@@ -303,6 +304,12 @@ export function qualityIndex(overrides: Partial<QualityIndex> = {}): QualityInde
     verifiability: 1,
     consistency: 1,
     richness: 0.5,
+    // Provenance diagnostics, reported beside completeness and never inside it. Non-null here
+    // because the interesting fixture is one where the input suggested values and something
+    // confirmed some of them — `null` is the "nothing observable" case, which is not the default
+    // worth having.
+    self_declared: 0.5,
+    corroborated: 0.25,
     composite: 0.83,
     measured_dimensions: ["completeness", "consistency", "richness", "verifiability"],
     weights: { completeness: 0.35, verifiability: 0.3, consistency: 0.25, richness: 0.1 },
@@ -520,4 +527,193 @@ export function stageBundle(): SkuBundle {
     cost: { calls: 3, escalations: 0, latency_ms: 13319 },
     copy: null,
   } as unknown as SkuBundle;
+}
+
+// ------------------------------------------------------------------ enrichment
+//
+// Shaped against the real `POST /api/enrich` response, which is asserted field by field in
+// `tests/test_enrich.py`. The default is the *awkward* case rather than the flattering one: a
+// description-only submission on a cold start, so nothing auto-publishes, the source is the
+// submission rather than a datasheet, and the delivery row is sparse. That is what a first run
+// actually looks like, and a fixture showing a fully-populated row would let the screen's honesty
+// about sparseness go untested.
+
+export function enrichLimits(overrides: Partial<EnrichLimits> = {}): EnrichLimits {
+  return {
+    required: ["mpn", "manufacturer"],
+    optional: ["description", "source_url", "brand", "class_code"],
+    one_of: ["description", "source_url"],
+    max_description_chars: 4000,
+    max_url_chars: 2048,
+    max_document_bytes: 8 * 1024 * 1024,
+    fetch_timeout_seconds: 20,
+    url_schemes: ["https"],
+    concurrent_runs: 1,
+    outputs: ["csv", "xlsx"],
+    model_calls_per_run: { without_copy: 2, with_copy: 3 },
+    notes: ["Runs the online pipeline, so this endpoint costs money per submission."],
+    ...overrides,
+  };
+}
+
+export function enrichSummary(overrides: Partial<EnrichSummary> = {}): EnrichSummary {
+  return {
+    sku: "PDSH4816AF",
+    class_code: "APP.KIT.DISHWASHER.BUILTIN",
+    class_from_fallback: false,
+    classification: { method: "retrieval_only", abstained: false, candidates_considered: 1 },
+    extraction: {
+      requested: 20,
+      values: 0,
+      gaps: 20,
+      rejected_unverifiable: 0,
+      citation_coverage: 0,
+      escalations: 0,
+      latency_ms: 1,
+    },
+    from_description: { extracted: 2, refused: 0 },
+    // A cold start: no calibration data, so nothing clears a validated threshold.
+    values: { total: 2, publishable: 0, needing_review: 2 },
+    gaps: { total: 20, required: 8 },
+    validation: { checks: 2, failures: 0, warnings: 0, skipped_rules: 6, consistency: 1 },
+    certificate: {
+      certificate_id: "ec_d5f5a99e2e9a",
+      signature_verified: true,
+      pipeline_version: "axiom-0.1.0",
+      generated_at: "2026-08-23T07:11:29.655340+00:00",
+      quality_index: qualityIndex({
+        // A first run against a typed description: barely anything is complete and nothing is
+        // independently verified, but the description itself suggested a couple of values — which
+        // is exactly the state `self_declared` exists to make readable. A completeness of 0.08 with
+        // self_declared above it means the work item is retrieval, not a supplier request.
+        completeness: 0.08,
+        verifiability: 0,
+        richness: 0,
+        self_declared: 0.25,
+        corroborated: 0,
+        composite: 0.28,
+      }),
+      attributes_populated: 2,
+      attributes_with_evidence: 2,
+    },
+    cost: {
+      usd: 0.000_412,
+      calls: 1,
+      escalations: 0,
+      input_tokens: 812,
+      output_tokens: 14,
+      latency_ms: 1_940,
+    },
+    policy: policySummary({
+      threshold: null,
+      achievable: false,
+      coverage: 0,
+      calibration_size: 0,
+      reason: "no calibration data",
+    }),
+    calibrator: "untrained-heuristic",
+    // Attempted and found nothing, which is the awkward case: `Frigidaire` has no declared domain,
+    // so there was nowhere to look. The note names the remedy rather than reporting a dead end.
+    retrieval: {
+      attempted: true,
+      found: false,
+      from_library: false,
+      manufacturer: null,
+      documents: [],
+      requests_made: 0,
+      bytes_fetched: 0,
+      notes: [
+        "no manufacturer domain is declared for 'Frigidaire', so there was no site to search. " +
+          "Add it to schema/sourcing.yaml.",
+      ],
+    },
+    source: {
+      kind: "submission",
+      document_id: "PDSH4816AF.submission@f9d857ff",
+      sha256: "f9d857ff" + "0".repeat(56),
+      uri: "submission:PDSH4816AF",
+      doc_type: "supplier_feed",
+      size_bytes: 118,
+      pages: 1,
+      tables: 0,
+      parser: "text",
+      was_already_stored: false,
+      warnings: [],
+      evidential_weight:
+        "The submission itself. Values cite the field they were read from, which records what " +
+        "was supplied rather than what a manufacturer published.",
+    },
+    manufacturer: {
+      name: "Frigidaire",
+      supplier_code: null,
+      looks_like_a_distributor: false,
+      publishable_as_manufacturer: true,
+    },
+    brand: { requested: null, resolved: null, method: null },
+    channels: [
+      { name: "cx1_pim", published: false, value_count: 0, withheld: [] },
+      { name: "schema_org", published: false, value_count: 0, withheld: [] },
+    ],
+    notes: [
+      "no manufacturer URL was supplied, so the submission itself is the source document. Every " +
+        "citation resolves to a field you typed, at its hash — a real provenance claim, and a " +
+        "weaker one than a datasheet.",
+    ],
+    ...overrides,
+  };
+}
+
+export function enrichResponse(overrides: Partial<EnrichResponse> = {}): EnrichResponse {
+  const summary = overrides.summary ?? enrichSummary();
+  return {
+    sku: summary.sku,
+    slug: summary.sku,
+    replaced: false,
+    summary,
+    queue: {
+      pending: 2,
+      accepted: 0,
+      total: 2,
+      by_reason: { below_threshold: 2 },
+      blocking_failures: 0,
+      warnings: 0,
+    },
+    bundle: stageBundle(),
+    document: sourceDocument(),
+    policy: summary.policy,
+    calibrator: summary.calibrator,
+    delivery: {
+      // 29 of 252, measured from a real description-only run. Sparse is the correct answer: the
+      // client's own ground truth leaves 173 columns blank.
+      populated: 29,
+      columns: 252,
+      blank: 223,
+      withheld: 0,
+      compliant: true,
+      content_hash: "a1b2c3d4" + "0".repeat(56),
+      provenance: { passthrough: 6, derived: 21, extracted: 2 },
+      cited_columns: ["Attribute Value 1"],
+      notes: [],
+      input_notes: [],
+      files: {
+        csv: "PDSH4816AF.delivery.csv",
+        xlsx: "PDSH4816AF.delivery.xlsx",
+        provenance: "PDSH4816AF.provenance.json",
+      },
+    },
+    persisted: {
+      session: "data/sessions/PDSH4816AF.json",
+      bundle: "data/console/PDSH4816AF.bundle.json",
+      delivery_csv: "data/enrich/PDSH4816AF.delivery.csv",
+      delivery_xlsx: "data/enrich/PDSH4816AF.delivery.xlsx",
+      provenance: "data/enrich/PDSH4816AF.provenance.json",
+    },
+    links: {
+      review: "/api/session/PDSH4816AF",
+      delivery_csv: "/api/enrich/PDSH4816AF/delivery?output=csv",
+      delivery_xlsx: "/api/enrich/PDSH4816AF/delivery?output=xlsx",
+      source_artifact: "/api/artifact/" + summary.source.sha256,
+    },
+    ...overrides,
+  };
 }

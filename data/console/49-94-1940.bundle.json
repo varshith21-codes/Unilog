@@ -17,10 +17,11 @@
       "class_code": "ABR.WHL.BONDED",
       "schema_version": "ABR.WHL.BONDED@v1",
       "source_document_ids": [
-        "Unihack__Sample_Dataset_-_Input#49-94-1940"
+        "Unihack__Sample_Dataset_-_Input#49-94-1940",
+        "2026_Bonded-Abrasives_Solutions-Guide@bb06f364"
       ],
-      "created_at": "2026-08-22T19:16:11.786237+00:00",
-      "updated_at": "2026-08-22T19:16:11.786269+00:00"
+      "created_at": "2026-08-23T11:45:17.030914+00:00",
+      "updated_at": "2026-08-23T11:45:17.035394+00:00"
     },
     "classifications": [
       {
@@ -70,7 +71,7 @@
         "value_raw": "Cut Off",
         "value_canonical": "Cutting",
         "value_display": "Cutting",
-        "method": "supplier_feed",
+        "method": "item_master_parse",
         "confidence": 0.82,
         "status": "auto_accepted",
         "evidence": [
@@ -96,7 +97,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-22T19:16:11.786011Z",
+        "created_at": "2026-08-23T11:45:17.030762Z",
         "score": 0.8,
         "decision": {
           "attribute_code": "abrasive_operation",
@@ -121,32 +122,36 @@
           "source_prior": 0.5,
           "tier_cost": 0.5
         },
-        "is_publishable": true,
+        "is_publishable": false,
         "has_verified_evidence": true,
+        "is_self_declared": true,
+        "is_independent": false,
         "citation_summary": [
           "Unihack__Sample_Dataset_-_Input#49-94-1940"
         ]
       },
       {
-        "attribute_code": "wheel_diameter",
-        "value_raw": "14\"",
-        "value_canonical": {
-          "magnitude": 355.6,
-          "unit": "mm"
-        },
-        "value_display": "14\"",
-        "method": "supplier_feed",
-        "confidence": 0.88,
+        "attribute_code": "arbor_size",
+        "value_raw": "1\"",
+        "value_canonical": "1\"",
+        "value_display": "1\"",
+        "method": "table_extraction",
+        "confidence": 0.94,
         "status": "auto_accepted",
         "evidence": [
           {
-            "span_id": "desc-wheel_diameter-16",
-            "document_id": "Unihack__Sample_Dataset_-_Input#49-94-1940",
-            "document_sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
-            "quote": "14\"",
-            "page": null,
-            "bbox": null,
-            "table_ref": null,
+            "span_id": "struct-arbor_size-t15:r15:c2",
+            "document_id": "2026_Bonded-Abrasives_Solutions-Guide@bb06f364",
+            "document_sha256": "bb06f364d97f6b89b7bb5dc6ea83e3921e5fcbb575130ca1dd126363197d722c",
+            "quote": "Diameter | Thickness | Arbor | Max\nRPM | Type | Tool\nCompatibility | LONG LIFE.\nFAST CUTS. || 14\" | 1/8\" | 1\" | 5,500 | 1 | 49-94-1940 (10pk Bulk)",
+            "page": 6,
+            "bbox": {
+              "x0": 144.20925454545454,
+              "y0": 350.1886888888889,
+              "x1": 198.20517999999998,
+              "y1": 370.2820777777778
+            },
+            "table_ref": "t15:r15:c2",
             "quote_verified": true,
             "match_score": 1.0
           }
@@ -154,29 +159,29 @@
         "validations": [],
         "model_id": null,
         "model_tier": null,
-        "prompt_version": "description@v1",
+        "prompt_version": "structured@v1",
         "schema_version": "ABR.WHL.BONDED@v1",
         "version": 1,
         "superseded_by": null,
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-22T19:16:11.785972Z",
-        "score": 0.8,
+        "created_at": "2026-08-23T11:45:17.035007Z",
+        "score": 0.8514,
         "decision": {
-          "attribute_code": "wheel_diameter",
-          "score": 0.8,
+          "attribute_code": "arbor_size",
+          "score": 0.8514,
           "accepted": true,
           "status": "auto_accepted",
           "reason_code": "auto_accepted",
-          "detail": "score 0.800 >= threshold 0.719"
+          "detail": "score 0.851 >= threshold 0.719"
         },
         "features": {
           "evidence_match_score": 1.0,
           "evidence_verified": 1.0,
-          "citation_precision": 0.4,
-          "quote_specificity": 1.0,
-          "self_reported_certainty": 0.88,
+          "citation_precision": 1.0,
+          "quote_specificity": 0.0137,
+          "self_reported_certainty": 0.94,
           "validation_pass_rate": 0.5,
           "validation_clean": 1.0,
           "is_extraction": 1.0,
@@ -188,8 +193,234 @@
         },
         "is_publishable": true,
         "has_verified_evidence": true,
+        "is_self_declared": false,
+        "is_independent": true,
         "citation_summary": [
-          "Unihack__Sample_Dataset_-_Input#49-94-1940"
+          "2026_Bonded-Abrasives_Solutions-Guide@bb06f364 p.6 t15:r15:c2"
+        ]
+      },
+      {
+        "attribute_code": "max_operating_speed",
+        "value_raw": "5,500",
+        "value_canonical": 5,
+        "value_display": "5",
+        "method": "table_extraction",
+        "confidence": 0.94,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "struct-max_operating_speed-t15:r15:c3",
+            "document_id": "2026_Bonded-Abrasives_Solutions-Guide@bb06f364",
+            "document_sha256": "bb06f364d97f6b89b7bb5dc6ea83e3921e5fcbb575130ca1dd126363197d722c",
+            "quote": "Diameter | Thickness | Arbor | Max\nRPM | Type | Tool\nCompatibility | LONG LIFE.\nFAST CUTS. || 14\" | 1/8\" | 1\" | 5,500 | 1 | 49-94-1940 (10pk Bulk)",
+            "page": 6,
+            "bbox": {
+              "x0": 198.20517999999998,
+              "y0": 350.1886888888889,
+              "x1": 253.3185542857143,
+              "y1": 386.18865
+            },
+            "table_ref": "t15:r15:c3",
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [
+          {
+            "layer": "L3",
+            "rule_id": "plausible_range",
+            "verdict": "warn",
+            "severity": "warning",
+            "reason": "attribute 'max_operating_speed' value 5  is outside the expected range [500, 80000] for this attribute",
+            "counterexample": null,
+            "suggested_fix": null,
+            "detail": "raw source text: '5,500'"
+          }
+        ],
+        "model_id": null,
+        "model_tier": null,
+        "prompt_version": "structured@v1",
+        "schema_version": "ABR.WHL.BONDED@v1",
+        "version": 1,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-23T11:45:17.035014Z",
+        "score": 0.8034,
+        "decision": {
+          "attribute_code": "max_operating_speed",
+          "score": 0.8034,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.803 >= threshold 0.719"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 1.0,
+          "quote_specificity": 0.0342,
+          "self_reported_certainty": 0.94,
+          "validation_pass_rate": 0.0,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.5,
+          "source_prior": 0.5,
+          "tier_cost": 0.5
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "is_self_declared": false,
+        "is_independent": true,
+        "citation_summary": [
+          "2026_Bonded-Abrasives_Solutions-Guide@bb06f364 p.6 t15:r15:c3"
+        ]
+      },
+      {
+        "attribute_code": "wheel_diameter",
+        "value_raw": "14\"",
+        "value_canonical": {
+          "magnitude": 355.6,
+          "unit": "mm"
+        },
+        "value_display": "14\"",
+        "method": "table_extraction",
+        "confidence": 0.94,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "struct-wheel_diameter-t15:r15:c0",
+            "document_id": "2026_Bonded-Abrasives_Solutions-Guide@bb06f364",
+            "document_sha256": "bb06f364d97f6b89b7bb5dc6ea83e3921e5fcbb575130ca1dd126363197d722c",
+            "quote": "Diameter | Thickness | Arbor | Max\nRPM | Type | Tool\nCompatibility | LONG LIFE.\nFAST CUTS. || 14\" | 1/8\" | 1\" | 5,500 | 1 | 49-94-1940 (10pk Bulk)",
+            "page": 6,
+            "bbox": {
+              "x0": 36.20615652173913,
+              "y0": 350.1886888888889,
+              "x1": 90.20925454545454,
+              "y1": 386.18865
+            },
+            "table_ref": "t15:r15:c0",
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [],
+        "model_id": null,
+        "model_tier": null,
+        "prompt_version": "structured@v1",
+        "schema_version": "ABR.WHL.BONDED@v1",
+        "version": 2,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-23T11:45:17.034988Z",
+        "score": 0.8521,
+        "decision": {
+          "attribute_code": "wheel_diameter",
+          "score": 0.8521,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.852 >= threshold 0.719"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 1.0,
+          "quote_specificity": 0.0205,
+          "self_reported_certainty": 0.94,
+          "validation_pass_rate": 0.5,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.5,
+          "source_prior": 0.5,
+          "tier_cost": 0.5
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "is_self_declared": false,
+        "is_independent": true,
+        "citation_summary": [
+          "2026_Bonded-Abrasives_Solutions-Guide@bb06f364 p.6 t15:r15:c0"
+        ]
+      },
+      {
+        "attribute_code": "wheel_thickness",
+        "value_raw": "1/8\"",
+        "value_canonical": {
+          "magnitude": 3.175,
+          "unit": "mm"
+        },
+        "value_display": "1/8\"",
+        "method": "table_extraction",
+        "confidence": 0.94,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "struct-wheel_thickness-t15:r15:c1",
+            "document_id": "2026_Bonded-Abrasives_Solutions-Guide@bb06f364",
+            "document_sha256": "bb06f364d97f6b89b7bb5dc6ea83e3921e5fcbb575130ca1dd126363197d722c",
+            "quote": "Diameter | Thickness | Arbor | Max\nRPM | Type | Tool\nCompatibility | LONG LIFE.\nFAST CUTS. || 14\" | 1/8\" | 1\" | 5,500 | 1 | 49-94-1940 (10pk Bulk)",
+            "page": 6,
+            "bbox": {
+              "x0": 90.20925454545454,
+              "y0": 350.1886888888889,
+              "x1": 144.20925454545454,
+              "y1": 370.2820777777778
+            },
+            "table_ref": "t15:r15:c1",
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [],
+        "model_id": null,
+        "model_tier": null,
+        "prompt_version": "structured@v1",
+        "schema_version": "ABR.WHL.BONDED@v1",
+        "version": 1,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-23T11:45:17.035000Z",
+        "score": 0.8527,
+        "decision": {
+          "attribute_code": "wheel_thickness",
+          "score": 0.8527,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.853 >= threshold 0.719"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 1.0,
+          "quote_specificity": 0.0274,
+          "self_reported_certainty": 0.94,
+          "validation_pass_rate": 0.5,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.5,
+          "source_prior": 0.5,
+          "tier_cost": 0.5
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "is_self_declared": false,
+        "is_independent": true,
+        "citation_summary": [
+          "2026_Bonded-Abrasives_Solutions-Guide@bb06f364 p.6 t15:r15:c1"
         ]
       },
       {
@@ -199,7 +430,7 @@
           "Concrete / Masonry"
         ],
         "value_display": "Concrete / Masonry",
-        "method": "supplier_feed",
+        "method": "item_master_parse",
         "confidence": 0.82,
         "status": "auto_accepted",
         "evidence": [
@@ -225,7 +456,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-22T19:16:11.785998Z",
+        "created_at": "2026-08-23T11:45:17.030751Z",
         "score": 0.8,
         "decision": {
           "attribute_code": "workpiece_material",
@@ -250,18 +481,47 @@
           "source_prior": 0.5,
           "tier_cost": 0.5
         },
-        "is_publishable": true,
+        "is_publishable": false,
         "has_verified_evidence": true,
+        "is_self_declared": true,
+        "is_independent": false,
         "citation_summary": [
           "Unihack__Sample_Dataset_-_Input#49-94-1940"
         ]
       }
     ],
-    "gaps": [],
+    "gaps": [
+      {
+        "attribute_code": "abrasive_operation",
+        "reason": "self_declared_only",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#49-94-1940",
+          "2026_Bonded-Abrasives_Solutions-Guide@bb06f364"
+        ],
+        "detail": "the customer's own description implies 'Cutting' (from 'Cut Off'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-23T11:45:17.035383Z"
+      },
+      {
+        "attribute_code": "workpiece_material",
+        "reason": "self_declared_only",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#49-94-1940",
+          "2026_Bonded-Abrasives_Solutions-Guide@bb06f364"
+        ],
+        "detail": "the customer's own description implies 'Concrete / Masonry' (from 'Masonry'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-23T11:45:17.035389Z"
+      }
+    ],
     "extraction": {
       "requested": 19,
       "values": 3,
-      "gaps": 0,
+      "gaps": 2,
       "rejected_unverifiable": 0,
       "corrected_to_match_evidence": 1,
       "citation_coverage": 1.0,
@@ -274,11 +534,11 @@
     },
     "normalization_issues": [],
     "validation": {
-      "checks": 4,
+      "checks": 6,
       "failures": 0,
-      "warnings": 0,
-      "skipped_rules": 3,
-      "consistency": 1.0,
+      "warnings": 1,
+      "skipped_rules": 0,
+      "consistency": 0.8333,
       "results": [
         {
           "layer": "L3",
@@ -291,11 +551,31 @@
           "detail": null
         },
         {
+          "layer": "L3",
+          "rule_id": "plausible_range",
+          "verdict": "pass",
+          "severity": "error",
+          "reason": "within the expected range [0.5, 15]",
+          "counterexample": null,
+          "suggested_fix": null,
+          "detail": null
+        },
+        {
+          "layer": "L3",
+          "rule_id": "plausible_range",
+          "verdict": "warn",
+          "severity": "warning",
+          "reason": "attribute 'max_operating_speed' value 5  is outside the expected range [500, 80000] for this attribute",
+          "counterexample": null,
+          "suggested_fix": null,
+          "detail": "raw source text: '5,500'"
+        },
+        {
           "layer": "L2",
           "rule_id": "R_THICKNESS_BELOW_DIAMETER",
-          "verdict": "skipped",
-          "severity": "info",
-          "reason": "not evaluated: missing wheel_thickness",
+          "verdict": "pass",
+          "severity": "error",
+          "reason": "Wheel thickness is not less than its diameter, which means the dimension triple was read out of order. The three figures of \"5x.045x7/8\" are diameter, thickness and arbor positionally with nothing in the string to say so, and this is the transposition the individual plausible ranges cannot catch on their own.",
           "counterexample": null,
           "suggested_fix": null,
           "detail": null
@@ -303,9 +583,9 @@
         {
           "layer": "L2",
           "rule_id": "R_CUTTING_WHEEL_IS_THIN",
-          "verdict": "skipped",
-          "severity": "info",
-          "reason": "not evaluated: missing wheel_thickness",
+          "verdict": "pass",
+          "severity": "error",
+          "reason": "A wheel recorded as a cutting wheel is thicker than 6 mm, which is grinding-wheel territory. One of the two values is wrong, and publishing either would put a wheel on the wrong side of a distinction that is a safety matter rather than a preference: a thick wheel listed as a cut-off invites side loading, and a thin one listed for grinding invites shattering.",
           "counterexample": null,
           "suggested_fix": null,
           "detail": null
@@ -313,21 +593,34 @@
         {
           "layer": "L2",
           "rule_id": "R_SPEED_RATING_PRESENT",
-          "verdict": "skipped",
-          "severity": "info",
-          "reason": "not evaluated: missing max_operating_speed",
+          "verdict": "pass",
+          "severity": "error",
+          "reason": "No maximum safe speed was captured for a wheel of known diameter. The rating is marked on every wheel sold and is the figure that decides whether it may be fitted to a given tool, so its absence is a gap worth showing rather than an acceptable blank. It is deliberately NOT derived from the diameter, which would be a calculation presented as a reading.",
           "counterexample": null,
           "suggested_fix": null,
           "detail": null
         }
       ],
-      "per_attribute": {}
+      "per_attribute": {
+        "max_operating_speed": [
+          {
+            "layer": "L3",
+            "rule_id": "plausible_range",
+            "verdict": "warn",
+            "severity": "warning",
+            "reason": "attribute 'max_operating_speed' value 5  is outside the expected range [500, 80000] for this attribute",
+            "counterexample": null,
+            "suggested_fix": null,
+            "detail": "raw source text: '5,500'"
+          }
+        ]
+      }
     },
     "certificate": {
-      "certificate_id": "ec_ea63a75ff39f",
+      "certificate_id": "ec_74f34dfff1c3",
       "sku": "49-94-1940",
       "tenant_id": "unilog",
-      "generated_at": "2026-08-22T19:16:11.786698Z",
+      "generated_at": "2026-08-23T11:45:17.035963Z",
       "schema_version": "ABR.WHL.BONDED@v1",
       "pipeline_version": "axiom-0.1.0",
       "classifications": [
@@ -354,82 +647,156 @@
           },
           "value_display": "14\"",
           "value_raw": "14\"",
-          "confidence": 0.88,
-          "method": "supplier_feed",
+          "confidence": 0.94,
+          "method": "table_extraction",
           "model_tier": null,
           "status": "auto_accepted",
           "evidence": [
             {
-              "document": "Unihack__Sample_Dataset_-_Input#49-94-1940",
-              "sha256": "49efd0b2\u2026",
-              "page": null,
-              "bbox": null,
-              "quote": "14\"",
+              "document": "2026_Bonded-Abrasives_Solutions-Guide@bb06f364",
+              "sha256": "bb06f364\u2026",
+              "page": 6,
+              "bbox": [
+                36.20615652173913,
+                350.1886888888889,
+                90.20925454545454,
+                386.18865
+              ],
+              "quote": "Diameter | Thickness | Arbor | Max\nRPM | Type | Tool\nCompatibility | LONG LIFE.\nFAST CUTS. || 14\" | 1/8\" | 1\" | 5,500 | 1 | 49-94-1940 (10pk Bulk)",
               "verified": true
             }
           ],
           "validations": []
+        },
+        {
+          "code": "wheel_thickness",
+          "value_canonical": {
+            "magnitude": 3.175,
+            "unit": "mm"
+          },
+          "value_display": "1/8\"",
+          "value_raw": "1/8\"",
+          "confidence": 0.94,
+          "method": "table_extraction",
+          "model_tier": null,
+          "status": "auto_accepted",
+          "evidence": [
+            {
+              "document": "2026_Bonded-Abrasives_Solutions-Guide@bb06f364",
+              "sha256": "bb06f364\u2026",
+              "page": 6,
+              "bbox": [
+                90.20925454545454,
+                350.1886888888889,
+                144.20925454545454,
+                370.2820777777778
+              ],
+              "quote": "Diameter | Thickness | Arbor | Max\nRPM | Type | Tool\nCompatibility | LONG LIFE.\nFAST CUTS. || 14\" | 1/8\" | 1\" | 5,500 | 1 | 49-94-1940 (10pk Bulk)",
+              "verified": true
+            }
+          ],
+          "validations": []
+        },
+        {
+          "code": "arbor_size",
+          "value_canonical": "1\"",
+          "value_display": "1\"",
+          "value_raw": "1\"",
+          "confidence": 0.94,
+          "method": "table_extraction",
+          "model_tier": null,
+          "status": "auto_accepted",
+          "evidence": [
+            {
+              "document": "2026_Bonded-Abrasives_Solutions-Guide@bb06f364",
+              "sha256": "bb06f364\u2026",
+              "page": 6,
+              "bbox": [
+                144.20925454545454,
+                350.1886888888889,
+                198.20517999999998,
+                370.2820777777778
+              ],
+              "quote": "Diameter | Thickness | Arbor | Max\nRPM | Type | Tool\nCompatibility | LONG LIFE.\nFAST CUTS. || 14\" | 1/8\" | 1\" | 5,500 | 1 | 49-94-1940 (10pk Bulk)",
+              "verified": true
+            }
+          ],
+          "validations": []
+        },
+        {
+          "code": "max_operating_speed",
+          "value_canonical": 5,
+          "value_display": "5",
+          "value_raw": "5,500",
+          "confidence": 0.94,
+          "method": "table_extraction",
+          "model_tier": null,
+          "status": "auto_accepted",
+          "evidence": [
+            {
+              "document": "2026_Bonded-Abrasives_Solutions-Guide@bb06f364",
+              "sha256": "bb06f364\u2026",
+              "page": 6,
+              "bbox": [
+                198.20517999999998,
+                350.1886888888889,
+                253.3185542857143,
+                386.18865
+              ],
+              "quote": "Diameter | Thickness | Arbor | Max\nRPM | Type | Tool\nCompatibility | LONG LIFE.\nFAST CUTS. || 14\" | 1/8\" | 1\" | 5,500 | 1 | 49-94-1940 (10pk Bulk)",
+              "verified": true
+            }
+          ],
+          "validations": [
+            {
+              "layer": "L3",
+              "rule": "plausible_range",
+              "verdict": "warn",
+              "detail": "raw source text: '5,500'"
+            }
+          ]
+        }
+      ],
+      "gaps": [
+        {
+          "code": "abrasive_operation",
+          "reason": "self_declared_only",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#49-94-1940",
+            "2026_Bonded-Abrasives_Solutions-Guide@bb06f364"
+          ],
+          "required": true,
+          "detail": "the customer's own description implies 'Cutting' (from 'Cut Off'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+          "recommended_action": "retry_with_better_source"
         },
         {
           "code": "workpiece_material",
-          "value_canonical": [
-            "Concrete / Masonry"
+          "reason": "self_declared_only",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#49-94-1940",
+            "2026_Bonded-Abrasives_Solutions-Guide@bb06f364"
           ],
-          "value_display": "Concrete / Masonry",
-          "value_raw": "Masonry",
-          "confidence": 0.82,
-          "method": "supplier_feed",
-          "model_tier": null,
-          "status": "auto_accepted",
-          "evidence": [
-            {
-              "document": "Unihack__Sample_Dataset_-_Input#49-94-1940",
-              "sha256": "49efd0b2\u2026",
-              "page": null,
-              "bbox": null,
-              "quote": "Masonry",
-              "verified": true
-            }
-          ],
-          "validations": []
-        },
-        {
-          "code": "abrasive_operation",
-          "value_canonical": "Cutting",
-          "value_display": "Cutting",
-          "value_raw": "Cut Off",
-          "confidence": 0.82,
-          "method": "supplier_feed",
-          "model_tier": null,
-          "status": "auto_accepted",
-          "evidence": [
-            {
-              "document": "Unihack__Sample_Dataset_-_Input#49-94-1940",
-              "sha256": "49efd0b2\u2026",
-              "page": null,
-              "bbox": null,
-              "quote": "Cut Off",
-              "verified": true
-            }
-          ],
-          "validations": []
+          "required": true,
+          "detail": "the customer's own description implies 'Concrete / Masonry' (from 'Masonry'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+          "recommended_action": "retry_with_better_source"
         }
       ],
-      "gaps": [],
       "summary": {
         "attributes_required": 3,
-        "attributes_populated": 3,
-        "attributes_with_evidence": 3,
+        "attributes_populated": 4,
+        "attributes_with_evidence": 4,
         "attributes_inferred": 0,
-        "auto_accepted": 3,
+        "auto_accepted": 6,
         "queued_for_review": 0,
-        "gaps_total": 0,
-        "gaps_required": 0,
+        "gaps_total": 2,
+        "gaps_required": 2,
         "quality_index": {
-          "completeness": 1.0,
+          "completeness": 0.3333333333333333,
           "verifiability": 1.0,
           "consistency": 1.0,
           "richness": 0.5,
+          "self_declared": 1.0,
+          "corroborated": 0.3333333333333333,
           "weights": {
             "completeness": 0.35,
             "verifiability": 0.3,
@@ -442,12 +809,12 @@
             "richness",
             "verifiability"
           ],
-          "composite": 0.95
+          "composite": 0.7167
         },
         "cost_usd": null,
         "wall_clock_seconds": 0.0
       },
-      "signature": "sha256:a7fbaa50717597628024bc31d89c6a8c53f9757676a0e531c6fa176b5e1618c4",
+      "signature": "sha256:8e1edc1713539e30e8f1f07053347f32f9081237f3f8a3cedff94736213c7bf3",
       "signature_verified": true
     },
     "channels": [
@@ -455,7 +822,10 @@
         "name": "cx1_pim",
         "published": false,
         "value_count": 0,
-        "withheld": [],
+        "withheld": [
+          "abrasive_operation",
+          "workpiece_material"
+        ],
         "readiness": {
           "channel": "cx1_pim",
           "ready": false,
@@ -470,8 +840,11 @@
       {
         "name": "schema_org",
         "published": true,
-        "value_count": 3,
-        "withheld": [],
+        "value_count": 4,
+        "withheld": [
+          "abrasive_operation",
+          "workpiece_material"
+        ],
         "readiness": {
           "channel": "schema_org",
           "ready": true,
@@ -483,15 +856,44 @@
       }
     ],
     "metrics": {
-      "fill_rate": 1.0,
+      "fill_rate": 0.3333,
       "verifiability": 1.0,
-      "values_total": 3,
-      "values_publishable": 3,
+      "self_declared_rate": 1.0,
+      "corroborated_rate": 0.3333,
+      "values_total": 6,
+      "values_publishable": 4,
+      "values_self_declared": 2,
       "values_needing_review": 0,
-      "gaps_total": 0,
-      "gaps_required": 0,
+      "gaps_total": 2,
+      "gaps_required": 2,
       "conflicts": []
     },
+    "sources": [
+      {
+        "document_id": "Unihack__Sample_Dataset_-_Input#49-94-1940",
+        "url": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
+        "host": "",
+        "tier": "item_master",
+        "doc_type": "supplier_feed",
+        "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+        "covers_this_sku": "row",
+        "citable_as_manufacturer": false,
+        "license_note": null,
+        "revision_label": null
+      },
+      {
+        "document_id": "2026_Bonded-Abrasives_Solutions-Guide@bb06f364",
+        "url": "https://www.milwaukeetool.com/-/media/PDFs/Objective-Data/2026_Bonded-Abrasives_Solutions-Guide.pdf",
+        "host": "www.milwaukeetool.com",
+        "tier": "manufacturer",
+        "doc_type": "spec_sheet",
+        "sha256": "bb06f364d97f6b89b7bb5dc6ea83e3921e5fcbb575130ca1dd126363197d722c",
+        "covers_this_sku": "table",
+        "citable_as_manufacturer": true,
+        "license_note": "retrieved from www.milwaukeetool.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
+        "revision_label": null
+      }
+    ],
     "cost": null,
     "copy": null
   },
@@ -500,7 +902,7 @@
     "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
     "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
     "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-22T19:16:11.275717Z",
+    "fetched_at": "2026-08-23T11:45:10.364455Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": "unilog",
@@ -1804,7 +2206,7 @@
       },
       {
         "id": "R_CUTTING_WHEEL_IS_THIN",
-        "expr": "abrasive_operation != 'Cutting' or wheel_thickness <= 6.0",
+        "expr": "abrasive_operation != 'Cutting' or wheel_thickness.magnitude <= 6.0",
         "severity": "error",
         "message": "A wheel recorded as a cutting wheel is thicker than 6 mm, which is grinding-wheel territory. One of the two values is wrong, and publishing either would put a wheel on the wrong side of a distinction that is a safety matter rather than a preference: a thick wheel listed as a cut-off invites side loading, and a thin one listed for grinding invites shattering.",
         "references": [

@@ -157,6 +157,9 @@ export const METHOD_LABEL: Record<DerivationMethod, string> = {
   image_extraction: "Image",
   web_extraction: "Web",
   supplier_feed: "Supplier feed",
+  // Named for what it is from the reader's point of view. "Item master" alone would sound like a
+  // source; this has to read as the client's own words, because that is the whole caveat.
+  item_master_parse: "Customer description",
   unit_conversion: "Unit conversion",
   enum_resolution: "Enum resolution",
   computed: "Computed",
@@ -191,6 +194,7 @@ export const GAP_REASON_LABEL: Record<GapReason, string> = {
   no_source_available: "No source available",
   referred_elsewhere: "Source defers the value",
   extracted_but_unverifiable: "Quote could not be verified",
+  self_declared_only: "Customer description only, unconfirmed",
   failed_validation: "Failed validation",
   conflicting_sources: "Sources disagree",
   awaiting_review: "Awaiting review",

@@ -111,7 +111,58 @@ class Fetcher(Protocol):
     ) -> FetchedResource: ...
 
 
-def _check_url(url: str, *, allow_insecure_http: bool) -> str:
+def _refuse_private(address: ipaddress.IPv4Address | ipaddress.IPv6Address, shown: str) -> None:
+    if address.is_loopback or address.is_private or address.is_link_local or address.is_reserved:
+        raise UrlFetchError(
+            f"refusing to fetch a non-public address: {shown}. A product source lives on the "
+            f"public internet; an internal address here is a mistake or an attempt at one."
+        )
+
+
+def _check_resolved(host: str) -> None:
+    """Resolve ``host`` and refuse if *any* address it answers with is not public.
+
+    This is the guard the literal check cannot be. ``http://169.254.169.254/`` is caught by
+    inspecting the URL; ``http://metadata.attacker.example/`` resolving to the same address is not,
+    and that is the shape a real SSRF attempt takes against an endpoint that fetches caller-supplied
+    URLs.
+
+    Every resolved address is checked rather than the first, because a hostname answering with one
+    public address and one private one would otherwise pass and then connect to whichever the
+    resolver handed the socket.
+
+    This does **not** close the race: DNS is re-resolved when the connection is actually made, so a
+    record with a one-second TTL can answer publicly here and privately there. Closing that requires
+    connecting to a pinned address, which the stdlib opener does not expose. Treat this as raising
+    the cost of the attack, not as egress control — the module docstring's point about needing a
+    network policy stands, and it stands harder for the HTTP endpoint than for a CLI operator.
+
+    Off by default. Turning it on unconditionally would put a DNS lookup on the path of every
+    unit test that ingests a URL through an injected fetcher, which is most of them, and a test
+    suite that needs a resolver is a test suite that gets skipped.
+    """
+    import socket
+
+    try:
+        infos = socket.getaddrinfo(host, None)
+    except OSError as exc:
+        raise UrlFetchError(f"could not resolve {host!r}: {exc}") from exc
+
+    if not infos:
+        raise UrlFetchError(f"{host!r} resolved to no addresses")
+
+    for info in infos:
+        literal = info[4][0]
+        try:
+            address = ipaddress.ip_address(literal)
+        except ValueError:  # pragma: no cover - getaddrinfo does not return non-literals
+            continue
+        _refuse_private(address, f"{host!r} resolves to {literal}")
+
+
+def _check_url(
+    url: str, *, allow_insecure_http: bool, verify_public_address: bool = False
+) -> str:
     parsed = urlparse(url)
 
     if parsed.scheme.lower() not in ALLOWED_SCHEMES:
@@ -135,22 +186,78 @@ def _check_url(url: str, *, allow_insecure_http: bool) -> str:
     try:
         address = ipaddress.ip_address(host)
     except ValueError:
+        if verify_public_address:
+            _check_resolved(host)
         return url
-    if address.is_loopback or address.is_private or address.is_link_local or address.is_reserved:
-        raise UrlFetchError(
-            f"refusing to fetch a non-public address: {host!r}. A product source lives on the "
-            f"public internet; an internal address here is a mistake or an attempt at one."
-        )
+    _refuse_private(address, repr(host))
     return url
 
 
+def _guarded_opener(verify_public_address: bool):
+    """An opener that re-checks every redirect target before following it.
+
+    Checking only the URL the caller gave us and only the URL we ended up at leaves the hops in
+    between unguarded, and a redirect chain is the ordinary way past a front-door check: the caller
+    supplies a public URL whose only job is to 302 at an internal address. urllib follows redirects
+    inside ``urlopen``, so by the time the final URL is available the request has already been made.
+    """
+    import urllib.request
+
+    class _CheckedRedirect(urllib.request.HTTPRedirectHandler):
+        def redirect_request(self, req, fp, code, msg, headers, newurl):  # noqa: N802 - stdlib name
+            # allow_insecure_http is True here to match the pre-existing behaviour: a redirect that
+            # downgrades to http is followed and then *recorded* in the document's licence note,
+            # rather than refused. The scheme allowlist and the address guard still apply.
+            _check_url(
+                newurl,
+                allow_insecure_http=True,
+                verify_public_address=verify_public_address,
+            )
+            return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+    return urllib.request.build_opener(_CheckedRedirect)
+
+
+def check_url(
+    url: str, *, allow_insecure_http: bool = False, verify_public_address: bool = False
+) -> str:
+    """Apply the fetch guard without fetching. Raises :class:`UrlFetchError` on a refusal.
+
+    Exists for a caller that wants to refuse a URL *early* — before it does other work, or
+    before it reports a different problem that would mask this one. The single-SKU
+    enrichment endpoint uses it so an internal address is refused ahead of its
+    already-enriched check, because a security refusal should not be hidden behind a
+    bookkeeping one.
+
+    Public so that caller does not need a second copy of the scheme and address rules. A guard that
+    disagrees with the thing it guards is worse than no guard.
+
+    ``verify_public_address`` defaults to False here, which makes this the free, no-DNS half
+    of the check. Leave it that way in a pre-flight: resolving would put a lookup in front of
+    every request and would report an unresolvable host as a validation error, when the
+    honest answer for that is a failed fetch.
+    """
+    return _check_url(
+        url,
+        allow_insecure_http=allow_insecure_http,
+        verify_public_address=verify_public_address,
+    )
+
+
 def fetch_url(
-    url: str, *, timeout: float = DEFAULT_TIMEOUT, max_bytes: int = DEFAULT_MAX_BYTES
+    url: str,
+    *,
+    timeout: float = DEFAULT_TIMEOUT,
+    max_bytes: int = DEFAULT_MAX_BYTES,
+    verify_public_address: bool = False,
 ) -> FetchedResource:
     """Fetch a URL with the standard library, capped and timed out.
 
     Stdlib rather than ``requests`` on purpose: this is the only place in the codebase that makes
     an outbound HTTP call that is not AWS, and it is not worth a dependency.
+
+    ``verify_public_address`` resolves the hostname and refuses any non-public answer, at every hop.
+    See :func:`_check_resolved` for what it does and does not buy.
     """
     import urllib.error
     import urllib.request
@@ -158,8 +265,9 @@ def fetch_url(
     request = urllib.request.Request(  # noqa: S310 - scheme is validated by _check_url
         url, headers={"User-Agent": USER_AGENT, "Accept": "*/*"}
     )
+    opener = _guarded_opener(verify_public_address)
     try:
-        with urllib.request.urlopen(request, timeout=timeout) as response:  # noqa: S310
+        with opener.open(request, timeout=timeout) as response:  # noqa: S310
             # One byte past the ceiling is enough to know it was exceeded, and stops here rather
             # than reading the rest of an arbitrarily large body.
             payload = response.read(max_bytes + 1)
@@ -177,9 +285,11 @@ def fetch_url(
     except TimeoutError as exc:
         raise UrlFetchError(f"{url} timed out after {timeout:g}s") from exc
 
-    # A redirect can leave the allowed-scheme set. urllib refuses most of that itself; re-checking
-    # costs nothing and this is the value that becomes the citation.
-    _check_url(final_url, allow_insecure_http=True)
+    # A redirect can leave the allowed-scheme set. The opener above checks each hop before following
+    # it; re-checking the destination costs nothing and this is the value that becomes the citation.
+    _check_url(
+        final_url, allow_insecure_http=True, verify_public_address=verify_public_address
+    )
 
     return FetchedResource(
         data=payload,
@@ -223,6 +333,7 @@ def ingest_url(
     allow_any_content_type: bool = False,
     license_note: str | None = None,
     revision_label: str | None = None,
+    verify_public_address: bool = False,
 ) -> IngestedArtifact:
     """Fetch a URL and store it as a content-addressed artifact.
 
@@ -233,9 +344,27 @@ def ingest_url(
     ``license_note`` is worth filling in for web sources specifically. Crawled manufacturer
     content carries terms that a supplier-supplied PDF does not, and the certificate is the place
     an auditor will look for it.
+
+    ``verify_public_address`` should be set by any caller whose URL came from someone else. It
+    resolves the hostname and refuses a non-public answer at every hop, which is the difference
+    between a guard that stops a typo and one that stops an attempt. It is off by default because
+    the literal check needs no resolver and most callers here are tests with an injected fetcher;
+    see :func:`_check_resolved`. When a ``fetcher`` is injected the flag applies to the front-door
+    check only — the injected function decides its own network behaviour.
     """
-    _check_url(url, allow_insecure_http=allow_insecure_http)
-    fetch = fetcher or fetch_url
+    _check_url(
+        url,
+        allow_insecure_http=allow_insecure_http,
+        verify_public_address=verify_public_address,
+    )
+    if fetcher is not None:
+        fetch: Fetcher = fetcher
+    elif verify_public_address:
+        from functools import partial
+
+        fetch = partial(fetch_url, verify_public_address=True)
+    else:
+        fetch = fetch_url
     resource = fetch(url, timeout=timeout, max_bytes=max_bytes)
 
     if not resource.data:

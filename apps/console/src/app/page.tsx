@@ -13,6 +13,7 @@ import {
   Stat,
   StatBand,
 } from "@/components/primitives";
+import { ProvenanceSplit } from "@/components/provenance-note";
 import {
   blockingWork,
   listSkus,
@@ -217,6 +218,10 @@ export default async function OperationsPage() {
                             {percent(bundle.metrics.fill_rate)}
                           </span>
                         </div>
+                        {/* What the customer's own description implies and nobody has confirmed.
+                            Shown beside the meter, never inside it: folding the two together is
+                            what made an un-retrieved catalogue look four-tenths enriched. */}
+                        <ProvenanceSplit metrics={bundle.metrics} />
                       </td>
                       <td className="px-5 py-3.5 text-right tabular-nums">
                         {bundle.metrics.values_needing_review || <span className="figure-zero">0</span>}

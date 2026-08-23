@@ -19,8 +19,8 @@
       "source_document_ids": [
         "Unihack__Sample_Dataset_-_Input#KDTS624SBE"
       ],
-      "created_at": "2026-08-22T19:16:11.929662+00:00",
-      "updated_at": "2026-08-22T19:16:11.929750+00:00"
+      "created_at": "2026-08-23T11:45:17.819336+00:00",
+      "updated_at": "2026-08-23T11:45:17.819397+00:00"
     },
     "classifications": [
       {
@@ -89,7 +89,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:11.929693Z"
+        "detected_at": "2026-08-23T11:45:17.819361Z"
       },
       {
         "attribute_code": "amperage_rating",
@@ -101,7 +101,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:11.929700Z"
+        "detected_at": "2026-08-23T11:45:17.819366Z"
       },
       {
         "attribute_code": "mounting_type",
@@ -113,7 +113,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:11.929705Z"
+        "detected_at": "2026-08-23T11:45:17.819369Z"
       },
       {
         "attribute_code": "overall_size",
@@ -125,7 +125,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:11.929709Z"
+        "detected_at": "2026-08-23T11:45:17.819371Z"
       },
       {
         "attribute_code": "sound_level",
@@ -137,7 +137,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:11.929715Z"
+        "detected_at": "2026-08-23T11:45:17.819374Z"
       },
       {
         "attribute_code": "primary_material",
@@ -149,7 +149,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:11.929720Z"
+        "detected_at": "2026-08-23T11:45:17.819377Z"
       }
     ],
     "extraction": {
@@ -198,10 +198,10 @@
       "per_attribute": {}
     },
     "certificate": {
-      "certificate_id": "ec_de055794b6b9",
+      "certificate_id": "ec_6bcdfa89f595",
       "sku": "KDTS624SBE",
       "tenant_id": "unilog",
-      "generated_at": "2026-08-22T19:16:11.930021Z",
+      "generated_at": "2026-08-23T11:45:17.819594Z",
       "schema_version": "APP.KIT.DISHWASHER.BUILTIN@v1",
       "pipeline_version": "axiom-0.1.0",
       "classifications": [
@@ -305,6 +305,8 @@
           "verifiability": 0.0,
           "consistency": 1.0,
           "richness": 0.5,
+          "self_declared": 0.0,
+          "corroborated": 0.0,
           "weights": {
             "completeness": 0.35,
             "verifiability": 0.3,
@@ -322,7 +324,7 @@
         "cost_usd": null,
         "wall_clock_seconds": 0.0
       },
-      "signature": "sha256:f4767a2da0757cb06679d7b202b03b7c45094c6a78b0cf0b2deac02d61ee4d5d",
+      "signature": "sha256:ce79e945926faab905382b5c9d1617efd2faf62c0b72bbfade0db3aa8969f1d7",
       "signature_verified": true
     },
     "channels": [
@@ -360,13 +362,30 @@
     "metrics": {
       "fill_rate": 0.0,
       "verifiability": 0.0,
+      "self_declared_rate": 0.0,
+      "corroborated_rate": 0.0,
       "values_total": 0,
       "values_publishable": 0,
+      "values_self_declared": 0,
       "values_needing_review": 0,
       "gaps_total": 6,
       "gaps_required": 6,
       "conflicts": []
     },
+    "sources": [
+      {
+        "document_id": "Unihack__Sample_Dataset_-_Input#KDTS624SBE",
+        "url": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
+        "host": "",
+        "tier": "item_master",
+        "doc_type": "supplier_feed",
+        "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+        "covers_this_sku": "row",
+        "citable_as_manufacturer": false,
+        "license_note": null,
+        "revision_label": null
+      }
+    ],
     "cost": null,
     "copy": null
   },
@@ -375,7 +394,7 @@
     "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
     "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
     "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-22T19:16:11.275717Z",
+    "fetched_at": "2026-08-23T11:45:10.364455Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": "unilog",

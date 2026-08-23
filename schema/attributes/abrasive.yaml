@@ -54,6 +54,11 @@ attributes:
     # makes the second unreachable and the first suspect — pinned by
     # tests/test_structured_extraction.py::test_no_label_is_contested_in_the_shipped_schema.
     spec_labels: ["Operation", "Use", "Product Type"]
+    # An ordering table names the duty in its own short forms. Without these the column was dropped
+    # into `unmapped_headers` on every catalogue read, which is why a required attribute stayed
+    # description-only on documents that state it outright. "Application" stays with
+    # `workpiece_material` here for the same reason it does above.
+    table_headers: ["operation", "cut type", "duty"]
     allowed_values:
       - value: Cutting
         aliases: ["cut off", "cut-off", "cutoff", "cutting", "cut", "severing"]
@@ -90,6 +95,9 @@ attributes:
       - the last noun of the description is almost always the form
       - '"Wheel" and "Disc" are used interchangeably by suppliers for bonded abrasives'
     spec_labels: ["Form", "Type", "Style", "Format"]
+    # A bonded-abrasive ordering table heads this column "Type" — meaning Type 1 (flat) or Type 27
+    # (depressed centre), which is the form. `abrasive_operation` deliberately does not claim it.
+    table_headers: ["type", "form", "style", "wheel type", "disc type"]
     allowed_values:
       - value: Cut-Off Wheel
         aliases: ["cut off disc", "cut-off disc", "cutoff wheel", "cut off wheel", "cutting disc",
@@ -127,6 +135,7 @@ attributes:
       - a brand name may imply the grain, e.g. Cubitron is 3M's precision-shaped ceramic
       - do not infer the grain from the workpiece the description names
     spec_labels: ["Abrasive", "Grain", "Abrasive Material", "Mineral", "Grain Type"]
+    table_headers: ["grain", "abrasive", "abrasive grain", "mineral", "grain type"]
     allowed_values:
       - value: Aluminum Oxide
         aliases: ["alox", "a/o", "aluminium oxide", "al2o3", "brown aluminum oxide"]
@@ -164,6 +173,7 @@ attributes:
       - 'may be written with a trailing word, e.g. "220 Grit"'
       - do not strip the P prefix, and do not add one
     spec_labels: ["Grit", "Grade", "Grit Size", "Mesh", "Abrasive Grade"]
+    table_headers: ["grit", "grade", "grit size", "mesh"]
     # A coarser or finer grit is a different finishing step rather than a cheaper version of the same
     # one, so a difference is always worth reporting. Functional rather than defining because the
     # products still fit the same machine, and left at the default `equal` substitution because the
@@ -249,6 +259,13 @@ attributes:
       - marked on the wheel face and printed on the datasheet as "Max RPM"
       - never infer it from the diameter
     spec_labels: ["Max RPM", "Maximum Speed", "Max Operating Speed", "RPM", "Speed Rating"]
+    # "Max RPM" is how every bonded-abrasive catalogue heads this column, frequently broken over two
+    # lines as "Max" / "RPM" — which folds to the same string, so both forms are covered. The
+    # attribute's `name` is "Maximum Speed (RPM)" and folds to `maximumspeedrpm`, matching nothing a
+    # real table prints, so without this list the safety-critical speed rating was unreadable from
+    # the one layout that always states it.
+    table_headers: ["max rpm", "maximum rpm", "max speed", "maximum speed", "rpm",
+                    "max operating speed", "speed rating"]
     plausible_range: [500.0, 80000.0]
     # A wheel rated for more speed is always safe on a slower machine; the reverse can burst.
     interchange: functional
@@ -271,6 +288,10 @@ attributes:
     # ON. Holding the label here made the other unreachable on the fastener, saw-blade and driver-bit
     # classes, which bind both.
     spec_labels: ["For Use On", "Application", "Materials", "Suitable For"]
+    # A bare "material" is still withheld, for the reason given above: in a table it is as likely to
+    # head what the product is made OF as what it is used ON. The qualified forms are unambiguous.
+    table_headers: ["application", "applications", "for use on", "use on",
+                    "material application", "suitable for", "materials"]
     allowed_values:
       - value: Metal
         aliases: ["steel", "ferrous", "mild steel", "iron", "metal cutting", "all metal"]

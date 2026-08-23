@@ -45,7 +45,6 @@ from axiom.docintel.models import ParsedDocument, ParsedTable
 from axiom.docintel.sku import find_sku
 from axiom.extract.variants import (
     _SIZE_SCOPED,
-    SKU_COLUMN_HEADERS,
     _fold,
     _looks_like_part_number,
     _note_covers_size,
@@ -617,16 +616,17 @@ def _extract_ordering_row(
     reason the table path runs second.
     """
     folded_sku = _fold(target_sku)
+    read_any = False
     for table in parsed.all_tables():
-        headers = table.header
-        sku_col = _find_sku_column(headers)
-        if sku_col is None:
+        located = _locate_sku_cell(table, folded_sku)
+        if located is None:
             continue
+        header_row, row_index, sku_col = located
+        headers = _header_texts(table, header_row)
 
-        row_index = _find_sku_row(table, sku_col, folded_sku)
-        if row_index is None:
-            continue
-
+        # Recorded even when nothing maps, because "the row was found and no header was recognised"
+        # is the diagnostic that names a missing `table_headers` entry — a one-line schema fix. It
+        # used to be unreachable: the row lookup failed first and the header list was never seen.
         # Gathered before emitting so a contested attribute is resolved by declared priority
         # rather than by whichever column the supplier printed first.
         candidates: dict[str, tuple[int, StructuredMatch]] = {}
@@ -655,7 +655,7 @@ def _extract_ordering_row(
             match = StructuredMatch(
                 attribute_code=code,
                 value_raw=text,
-                quote=_row_quote(table, row_index),
+                quote=_row_quote(table, row_index, header_row=header_row),
                 locator=table.cell_ref(row_index, col),
                 page=table.page,
                 source=ORDERING_TABLE,
@@ -688,71 +688,218 @@ def _extract_ordering_row(
             result.matches.append(match)
             claimed.add(code)
 
+        read_any = True
         result.notes.append(
-            f"read ordering row {row_index} of {table.table_id} for {target_sku!r}"
+            f"read ordering row {row_index} of {table.table_id} for {target_sku!r} "
+            f"(part number in column {sku_col}, headers from row {header_row})"
         )
-        return
+        # No early return. A manufacturer catalogue splits one series across several tables and
+        # pages — dimensions in one, speed ratings and approvals in another — and stopping at the
+        # first hit read one table of a document that stated the rest a page later. `claimed` still
+        # guarantees the first (best) reading of any attribute wins, so continuing cannot overwrite.
 
-    result.notes.append(
-        f"no ordering table contained {target_sku!r}, so no per-variant values were read"
-    )
-
-
-def _find_sku_column(headers: list[str]) -> int | None:
-    wanted = {_fold(h) for h in SKU_COLUMN_HEADERS}
-    for col, header in enumerate(headers):
-        if _fold(header) in wanted:
-            return col
-    return None
+    if not read_any:
+        result.notes.append(
+            f"no ordering table contained {target_sku!r}, so no per-variant values were read"
+        )
 
 
-def _find_sku_row(table: ParsedTable, sku_col: int, folded_sku: str) -> int | None:
-    """Locate the target part number's row.
+def _locate_sku_cell(table: ParsedTable, folded_sku: str) -> tuple[int, int, int] | None:
+    """Find ``(header_row, row, col)`` for the target part number in this table, or None.
 
-    Matched on the folded part number rather than by substring, and only in the identified SKU
-    column. A substring match would find ``77C-105`` inside ``77C-105R`` and read the reduced-port
-    variant's row for the full-port valve — a wrong value with a perfect citation.
+    This replaces a pair of much stricter locators, and the reason is a contract mismatch that made
+    retrieval look like it was failing when it was not. ``docintel.sku.find_sku`` decides whether a
+    document *covers* a part with a substring search over every cell of every table; this function
+    decides whether a value can be *read* for it. When the two disagree, the library reports a
+    manufacturer document covering the SKU in an ordering row and extraction returns nothing from it
+    — which is exactly what the sample catalogue showed, on documents that plainly state the values.
+
+    The old gates, both dropped:
+
+    * the part-number **column** had to carry one of sixteen hardcoded header strings, so
+      ``Cat. No.`` matched and ``Item #``, ``Stock No.``, ``Product No.`` or a merged
+      ``Cat. No. Description`` cell did not;
+    * the part-number **cell** had to equal the SKU exactly and contain no spaces, so an
+      aligned-table column band that swallowed the neighbouring description — ``49-94-0001 Cut-Off
+      Wheel`` — was rejected.
+
+    What is *not* dropped is the guarantee those gates existed for: never read the wrong row. The
+    part number must still appear as a **whole token** of the cell, so ``77C-105`` does not match
+    ``77C-105R`` and read the reduced-port variant's row for the full-port valve. That is the
+    property that matters, and it is enforced directly rather than as a side effect of forbidding
+    spaces.
     """
     grid = table.rows()
-    for index in range(1, len(grid)):
-        cell = table.cell(index, sku_col)
-        text = (cell.text if cell else "").strip()
-        if not _looks_like_part_number(text):
-            continue
-        if _fold(text) == folded_sku:
-            return index
+    if len(grid) < 2:
+        return None
+
+    header_row = _find_header_row(grid)
+    # Any row after the header. Restricting the *column* is what the header whitelist was for, and
+    # scanning every column instead is safe because the match below is anchored on the part number.
+    for row in range(header_row + 1, len(grid)):
+        for col, text in enumerate(grid[row]):
+            if _cell_names_sku(text, folded_sku):
+                return header_row, row, col
     return None
 
 
-def _row_quote(table: ParsedTable, row: int) -> str:
+def _cell_names_sku(text: str, folded_sku: str) -> bool:
+    """Whether this cell identifies the target part, as a whole token rather than a substring.
+
+    The whole-token rule is the anti-wrong-row guarantee. ``_fold`` strips punctuation, so a bare
+    ``in`` test would match ``77C-105`` inside ``77C-105R``; splitting on whitespace first and
+    comparing each token exactly cannot. A cell holding only the part number still matches, which is
+    the common case.
+    """
+    candidate = text.strip()
+    if not candidate or not folded_sku:
+        return False
+    if _fold(candidate) == folded_sku:
+        return True
+    # A merged or badly-segmented cell: the part number plus its description. Accept it only if one
+    # of the words *is* the part number.
+    return any(_fold(token) == folded_sku for token in candidate.split())
+
+
+def _find_header_row(grid: list[list[str]]) -> int:
+    """Which row carries the column labels. Usually 0, and not reliably so.
+
+    A catalogue table routinely opens with a merged title band ("BONDED ABRASIVES — TYPE 1")
+    or a units strip ("in / mm") above the real labels, and ``ParsedTable.header`` hardcodes
+    ``rows()[0]``. Reading a title row as the header maps every column to nothing.
+
+    Chosen by a simple, explainable score rather than a heuristic worth arguing about: the best
+    header row is the one with the most non-empty, non-numeric cells, searching only the first few
+    rows and preferring the earliest on a tie. A data row scores badly because its cells are mostly
+    numbers and part numbers.
+    """
+    best_row, best_score = 0, -1
+    for row in range(min(_HEADER_SEARCH_ROWS, len(grid) - 1)):
+        cells = [text.strip() for text in grid[row]]
+        filled = [text for text in cells if text]
+        if not filled:
+            continue
+        wordy = sum(
+            1
+            for text in filled
+            if not _LEADING_NUMBER.match(text) and not _looks_like_part_number(text)
+        )
+        if wordy > best_score:
+            best_row, best_score = row, wordy
+    return best_row
+
+
+_HEADER_SEARCH_ROWS = 3
+"""How far down to look for the label row. Three covers a title band and a units strip above it;
+searching deeper would start treating a data row as headers on a table whose labels are genuinely
+missing."""
+
+
+def _header_texts(table: ParsedTable, header_row: int) -> list[str]:
+    """The header row's cells, widened by the column above it when a cell is blank.
+
+    A two-line header — ``Max`` over ``RPM``, or a units strip under the label — leaves the chosen
+    row blank in some columns while the text sits one row up or down. Falling back to the
+    neighbouring cell recovers the label instead of dropping the column.
+    """
+    grid = table.rows()
+    if header_row >= len(grid):
+        return []
+    headers = list(grid[header_row])
+    for col, text in enumerate(headers):
+        if text.strip():
+            continue
+        for neighbour in (header_row - 1, header_row + 1):
+            if 0 <= neighbour < len(grid) and col < len(grid[neighbour]):
+                candidate = grid[neighbour][col].strip()
+                # Only a label, never a value: a number here is the first data row bleeding up.
+                if candidate and not _LEADING_NUMBER.match(candidate):
+                    headers[col] = candidate
+                    break
+    return headers
+
+
+def _row_quote(table: ParsedTable, row: int, *, header_row: int = 0) -> str:
     """The whole row, rendered. Wider than the cell on purpose.
 
     A quote of ``12`` proves nothing and verifies against half the document. The row shows the part
     number the value sits beside, which is what makes the citation checkable by eye.
+
+    ``header_row`` is passed rather than assumed to be 0, so the quote names the same labels the
+    values were mapped through. Quoting a title band above the real headers would show a reviewer a
+    row of numbers under a heading that does not describe them.
     """
     grid = table.rows()
-    header = " | ".join(t for t in grid[0] if t.strip()) if grid else ""
-    body = " | ".join(t for t in grid[row] if t.strip()) if row < len(grid) else ""
+    if not grid or row >= len(grid):
+        return ""
+    header = (
+        " | ".join(t for t in grid[header_row] if t.strip()) if header_row < len(grid) else ""
+    )
+    body = " | ".join(t for t in grid[row] if t.strip())
     return f"{header} || {body}" if header else body
 
 
 def _table_covered_lines(parsed: ParsedDocument) -> set[int]:
-    """Line indices that fall inside a detected table's bounds.
+    """Line indices a table already represents, so they are not read twice.
 
     Mirrors ``ParsedPage.to_prompt_text``: a line a table already represents must be read once, by
     the path that can cite a cell.
+
+    Suppression is by **text**, not by bounding box, and that change is what makes the specification
+    path usable on a catalogue page. The aligned-table detector fires on any three consecutive lines
+    with three or more wide column gaps, so on a multi-column page the table's bbox spans almost the
+    whole sheet — and a y-overlap test then suppressed every line in it, including the ``Label:
+    value`` lines printed beside the table that no cell actually holds. The specification path went
+    silent on precisely the documents that carry the most specifications.
+
+    Comparing reconstructed cell text against the line keeps the guarantee that mattered (no double
+    citation of one fact) without the collateral damage: a line whose content really is in the table
+    is skipped, and a line that merely shares its vertical band is read.
     """
     covered: set[int] = set()
     for page in parsed.pages:
+        if not page.tables:
+            continue
+        cell_texts: set[str] = set()
         for table in page.tables:
-            if not table.cells:
+            for cell in table.cells:
+                if folded := _fold(cell.text):
+                    cell_texts.add(folded)
+        if not cell_texts:
+            continue
+        for line in page.lines:
+            folded_line = _fold(line.text)
+            if not folded_line:
                 continue
-            top = min(c.bbox.y0 for c in table.cells)
-            bottom = max(c.bbox.y1 for c in table.cells)
-            for line in page.lines:
-                if line.bbox.y0 >= top - 0.5 and line.bbox.y1 <= bottom + 0.5:
-                    covered.add(line.line_index)
+            # The whole line is one cell, or the line is the concatenation of the row's cells.
+            # Either way the table path can cite it precisely and this path must not restate
+            # it.
+            if folded_line in cell_texts:
+                covered.add(line.line_index)
+                continue
+            if _is_row_of_cells(folded_line, cell_texts):
+                covered.add(line.line_index)
     return covered
+
+
+def _is_row_of_cells(folded_line: str, cell_texts: set[str]) -> bool:
+    """Whether a line is just a table row's cells run together.
+
+    A reconstructed row loses the whitespace between cells once folded, so a genuine table row reads
+    as the concatenation of two or more cell texts. Requiring at least two keeps a one-word line
+    that happens to equal a cell from suppressing an unrelated specification line elsewhere on the
+    page — that case is already handled by the exact test above.
+    """
+    remaining = folded_line
+    consumed = 0
+    # Longest first, so a cell whose text is a prefix of another does not strand the rest.
+    for text in sorted(cell_texts, key=len, reverse=True):
+        if text and remaining.startswith(text):
+            remaining = remaining[len(text) :]
+            consumed += 1
+            if not remaining:
+                return consumed >= 2
+    return False
 
 
 def _attribute_or_none(registry: SchemaRegistry, code: str) -> AttributeDefinition | None:
@@ -792,18 +939,61 @@ def _implausible(attribute: AttributeDefinition, value: str) -> str | None:
 
 _LEADING_NUMBER = re.compile(r"^\s*(-?\d+(?:\.\d+)?)(?:\s*-\s*(\d+)/(\d+))?")
 
+_THOUSANDS = re.compile(r"(?<=\d),(?=\d{3}(?!\d))")
+"""A comma between a digit and exactly three more digits: a thousands separator.
+
+Narrow on purpose. A bare ``,`` strip would turn the decimal comma of ``0,45`` into 45, and the
+lookahead's ``(?!\\d)`` stops ``1,2345`` — which is not a grouped number — from being joined.
+"""
+
+
+_BARE_FRACTION = re.compile(r"^\s*(\d+)\s*/\s*(\d+)")
+_LEADING_DECIMAL = re.compile(r"^\s*(-?\.\d+)")
+
 
 def _leading_magnitude(value: str) -> float | None:
-    """The number a value starts with, if any. Handles ``50-1/4`` as 50.25."""
-    match = _LEADING_NUMBER.match(value)
+    """The number a value starts with, if any.
+
+    Handles the four shapes a manufacturer's dimension column actually prints, three of which used
+    to be misread:
+
+    * ``50-1/4`` → 50.25. Whole plus fraction, already handled.
+    * ``15,300`` → 15300. Grouped thousands. Every bonded-abrasive catalogue prints the maximum safe
+      speed this way, and stopping at the comma read **15**, which then failed the attribute's
+      plausible range of [500, 80000]. The one figure deciding whether a wheel may be fitted to a
+      given tool was discarded as implausible on every document that stated it.
+    * ``1/8`` → 0.125. A **bare fraction**, and the worst of the three because it produced confident
+      wrong refusals rather than none: the old pattern read the numerator as a whole number, so
+      ``1/8"`` became 1 inch, converted to 25.4 mm, and was refused against thickness's [0.5, 15] mm
+      as out of range. A correct value, correctly located and cited, thrown away — and the refusal
+      quoted ``'1/8"'``, which reads like a range error rather than a parse error. It accounted for
+      every thickness refusal on the sample's abrasive rows.
+    * ``.045`` → 0.045. A leading decimal point with no integer part, which matched nothing at all.
+      That returned None, so the plausibility check silently *skipped* rather than misfiring — safe,
+      but it meant the check was not running on the commonest way a wheel thickness is written.
+
+    Order matters: the bare fraction must be tried before the whole-number pattern, or ``1/8`` is
+    claimed by the latter as ``1``.
+    """
+    text = _THOUSANDS.sub("", value)
+
+    if (fraction := _BARE_FRACTION.match(text)) is not None:
+        denominator = float(fraction.group(2))
+        if denominator:
+            return float(fraction.group(1)) / denominator
+
+    if (decimal := _LEADING_DECIMAL.match(text)) is not None:
+        return float(decimal.group(1))
+
+    match = _LEADING_NUMBER.match(text)
     if match is None:
         return None
     whole = float(match.group(1))
     if match.group(2) and match.group(3):
         denominator = float(match.group(3))
         if denominator:
-            fraction = float(match.group(2)) / denominator
-            whole = whole - fraction if whole < 0 else whole + fraction
+            fraction_part = float(match.group(2)) / denominator
+            whole = whole - fraction_part if whole < 0 else whole + fraction_part
     return whole
 
 

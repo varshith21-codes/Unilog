@@ -19,8 +19,8 @@
       "source_document_ids": [
         "Unihack__Sample_Dataset_-_Input#M200G-21XL"
       ],
-      "created_at": "2026-08-22T19:16:17.369500+00:00",
-      "updated_at": "2026-08-22T19:16:17.369544+00:00"
+      "created_at": "2026-08-23T11:45:33.012845+00:00",
+      "updated_at": "2026-08-23T11:45:33.012995+00:00"
     },
     "classifications": [
       {
@@ -70,7 +70,7 @@
         "value_raw": "M12",
         "value_canonical": "M12",
         "value_display": "M12",
-        "method": "supplier_feed",
+        "method": "item_master_parse",
         "confidence": 0.82,
         "status": "queued_for_review",
         "evidence": [
@@ -107,7 +107,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-22T19:16:17.369348Z",
+        "created_at": "2026-08-23T11:45:33.012560Z",
         "score": 0.6,
         "decision": {
           "attribute_code": "battery_platform",
@@ -134,6 +134,8 @@
         },
         "is_publishable": false,
         "has_verified_evidence": true,
+        "is_self_declared": true,
+        "is_independent": false,
         "citation_summary": [
           "Unihack__Sample_Dataset_-_Input#M200G-21XL"
         ]
@@ -143,7 +145,7 @@
         "value_raw": "XL",
         "value_canonical": "XL",
         "value_display": "XL",
-        "method": "supplier_feed",
+        "method": "item_master_parse",
         "confidence": 0.82,
         "status": "auto_accepted",
         "evidence": [
@@ -169,7 +171,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-22T19:16:17.369382Z",
+        "created_at": "2026-08-23T11:45:33.012627Z",
         "score": 0.8,
         "decision": {
           "attribute_code": "garment_size",
@@ -194,8 +196,10 @@
           "source_prior": 0.5,
           "tier_cost": 0.5
         },
-        "is_publishable": true,
+        "is_publishable": false,
         "has_verified_evidence": true,
+        "is_self_declared": true,
+        "is_independent": false,
         "citation_summary": [
           "Unihack__Sample_Dataset_-_Input#M200G-21XL"
         ]
@@ -205,7 +209,7 @@
         "value_raw": "Heated",
         "value_canonical": "true",
         "value_display": "true",
-        "method": "supplier_feed",
+        "method": "item_master_parse",
         "confidence": 0.82,
         "status": "queued_for_review",
         "evidence": [
@@ -242,7 +246,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-22T19:16:17.369361Z",
+        "created_at": "2026-08-23T11:45:33.012583Z",
         "score": 0.6,
         "decision": {
           "attribute_code": "heated_garment",
@@ -269,6 +273,8 @@
         },
         "is_publishable": false,
         "has_verified_evidence": true,
+        "is_self_declared": true,
+        "is_independent": false,
         "citation_summary": [
           "Unihack__Sample_Dataset_-_Input#M200G-21XL"
         ]
@@ -278,7 +284,7 @@
         "value_raw": "Hoodie",
         "value_canonical": "Hoodie",
         "value_display": "Hoodie",
-        "method": "supplier_feed",
+        "method": "item_master_parse",
         "confidence": 0.82,
         "status": "auto_accepted",
         "evidence": [
@@ -304,7 +310,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-22T19:16:17.369368Z",
+        "created_at": "2026-08-23T11:45:33.012597Z",
         "score": 0.8,
         "decision": {
           "attribute_code": "ppe_form",
@@ -329,8 +335,10 @@
           "source_prior": 0.5,
           "tier_cost": 0.5
         },
-        "is_publishable": true,
+        "is_publishable": false,
         "has_verified_evidence": true,
+        "is_self_declared": true,
+        "is_independent": false,
         "citation_summary": [
           "Unihack__Sample_Dataset_-_Input#M200G-21XL"
         ]
@@ -340,7 +348,7 @@
         "value_raw": "Kit",
         "value_canonical": "Kit",
         "value_display": "Kit",
-        "method": "supplier_feed",
+        "method": "item_master_parse",
         "confidence": 0.82,
         "status": "auto_accepted",
         "evidence": [
@@ -366,7 +374,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-22T19:16:17.369375Z",
+        "created_at": "2026-08-23T11:45:33.012613Z",
         "score": 0.8,
         "decision": {
           "attribute_code": "tool_configuration",
@@ -391,14 +399,52 @@
           "source_prior": 0.5,
           "tier_cost": 0.5
         },
-        "is_publishable": true,
+        "is_publishable": false,
         "has_verified_evidence": true,
+        "is_self_declared": true,
+        "is_independent": false,
         "citation_summary": [
           "Unihack__Sample_Dataset_-_Input#M200G-21XL"
         ]
       }
     ],
     "gaps": [
+      {
+        "attribute_code": "garment_size",
+        "reason": "self_declared_only",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#M200G-21XL"
+        ],
+        "detail": "the customer's own description implies 'XL' (from 'XL'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-23T11:45:33.012948Z"
+      },
+      {
+        "attribute_code": "ppe_form",
+        "reason": "self_declared_only",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#M200G-21XL"
+        ],
+        "detail": "the customer's own description implies 'Hoodie' (from 'Hoodie'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-23T11:45:33.012958Z"
+      },
+      {
+        "attribute_code": "heated_garment",
+        "reason": "self_declared_only",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#M200G-21XL"
+        ],
+        "detail": "the customer's own description implies 'true' (from 'Heated'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-23T11:45:33.012965Z"
+      },
       {
         "attribute_code": "finish_color",
         "reason": "no_source_available",
@@ -409,7 +455,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:17.369536Z"
+        "detected_at": "2026-08-23T11:45:33.012972Z"
       },
       {
         "attribute_code": "approvals",
@@ -421,13 +467,13 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:17.369540Z"
+        "detected_at": "2026-08-23T11:45:33.012977Z"
       }
     ],
     "extraction": {
       "requested": 17,
       "values": 5,
-      "gaps": 2,
+      "gaps": 5,
       "rejected_unverifiable": 0,
       "corrected_to_match_evidence": 0,
       "citation_coverage": 1.0,
@@ -516,10 +562,10 @@
       }
     },
     "certificate": {
-      "certificate_id": "ec_eca0c4183de1",
+      "certificate_id": "ec_282a73db1d98",
       "sku": "M200G-21XL",
       "tenant_id": "unilog",
-      "generated_at": "2026-08-22T19:16:17.369933Z",
+      "generated_at": "2026-08-23T11:45:33.013771Z",
       "schema_version": "SAF.APP.GEN@v1",
       "pipeline_version": "axiom-0.1.0",
       "classifications": [
@@ -537,72 +583,38 @@
           "alternatives": []
         }
       ],
-      "attributes": [
-        {
-          "code": "ppe_form",
-          "value_canonical": "Hoodie",
-          "value_display": "Hoodie",
-          "value_raw": "Hoodie",
-          "confidence": 0.82,
-          "method": "supplier_feed",
-          "model_tier": null,
-          "status": "auto_accepted",
-          "evidence": [
-            {
-              "document": "Unihack__Sample_Dataset_-_Input#M200G-21XL",
-              "sha256": "49efd0b2\u2026",
-              "page": null,
-              "bbox": null,
-              "quote": "Hoodie",
-              "verified": true
-            }
-          ],
-          "validations": []
-        },
-        {
-          "code": "tool_configuration",
-          "value_canonical": "Kit",
-          "value_display": "Kit",
-          "value_raw": "Kit",
-          "confidence": 0.82,
-          "method": "supplier_feed",
-          "model_tier": null,
-          "status": "auto_accepted",
-          "evidence": [
-            {
-              "document": "Unihack__Sample_Dataset_-_Input#M200G-21XL",
-              "sha256": "49efd0b2\u2026",
-              "page": null,
-              "bbox": null,
-              "quote": "Kit",
-              "verified": true
-            }
-          ],
-          "validations": []
-        },
+      "attributes": [],
+      "gaps": [
         {
           "code": "garment_size",
-          "value_canonical": "XL",
-          "value_display": "XL",
-          "value_raw": "XL",
-          "confidence": 0.82,
-          "method": "supplier_feed",
-          "model_tier": null,
-          "status": "auto_accepted",
-          "evidence": [
-            {
-              "document": "Unihack__Sample_Dataset_-_Input#M200G-21XL",
-              "sha256": "49efd0b2\u2026",
-              "page": null,
-              "bbox": null,
-              "quote": "XL",
-              "verified": true
-            }
+          "reason": "self_declared_only",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#M200G-21XL"
           ],
-          "validations": []
-        }
-      ],
-      "gaps": [
+          "required": true,
+          "detail": "the customer's own description implies 'XL' (from 'XL'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+          "recommended_action": "retry_with_better_source"
+        },
+        {
+          "code": "ppe_form",
+          "reason": "self_declared_only",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#M200G-21XL"
+          ],
+          "required": true,
+          "detail": "the customer's own description implies 'Hoodie' (from 'Hoodie'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+          "recommended_action": "retry_with_better_source"
+        },
+        {
+          "code": "heated_garment",
+          "reason": "self_declared_only",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#M200G-21XL"
+          ],
+          "required": true,
+          "detail": "the customer's own description implies 'true' (from 'Heated'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+          "recommended_action": "retry_with_better_source"
+        },
         {
           "code": "finish_color",
           "reason": "no_source_available",
@@ -626,18 +638,20 @@
       ],
       "summary": {
         "attributes_required": 5,
-        "attributes_populated": 3,
-        "attributes_with_evidence": 3,
+        "attributes_populated": 0,
+        "attributes_with_evidence": 0,
         "attributes_inferred": 0,
         "auto_accepted": 3,
         "queued_for_review": 2,
-        "gaps_total": 2,
-        "gaps_required": 2,
+        "gaps_total": 5,
+        "gaps_required": 5,
         "quality_index": {
-          "completeness": 0.4,
-          "verifiability": 1.0,
+          "completeness": 0.0,
+          "verifiability": 0.0,
           "consistency": 0.6,
           "richness": 0.0,
+          "self_declared": 0.6,
+          "corroborated": 0.0,
           "weights": {
             "completeness": 0.35,
             "verifiability": 0.3,
@@ -650,12 +664,12 @@
             "richness",
             "verifiability"
           ],
-          "composite": 0.59
+          "composite": 0.15
         },
         "cost_usd": null,
         "wall_clock_seconds": 0.0
       },
-      "signature": "sha256:d364b931eae55de5fc50d96e12d38dd34306dcc97a011db2c59704a8f8db81f2",
+      "signature": "sha256:b9a125f088e25bcc9a36ed8bc12a372f8bcb64fc4f33165b728804e67ade9d52",
       "signature_verified": true
     },
     "channels": [
@@ -665,7 +679,10 @@
         "value_count": 0,
         "withheld": [
           "battery_platform",
-          "heated_garment"
+          "garment_size",
+          "heated_garment",
+          "ppe_form",
+          "tool_configuration"
         ],
         "readiness": {
           "channel": "cx1_pim",
@@ -684,7 +701,10 @@
         "value_count": 0,
         "withheld": [
           "battery_platform",
-          "heated_garment"
+          "garment_size",
+          "heated_garment",
+          "ppe_form",
+          "tool_configuration"
         ],
         "readiness": {
           "channel": "schema_org",
@@ -699,15 +719,32 @@
       }
     ],
     "metrics": {
-      "fill_rate": 0.4,
-      "verifiability": 1.0,
+      "fill_rate": 0.0,
+      "verifiability": 0.0,
+      "self_declared_rate": 0.6,
+      "corroborated_rate": 0.0,
       "values_total": 5,
-      "values_publishable": 3,
+      "values_publishable": 0,
+      "values_self_declared": 5,
       "values_needing_review": 2,
-      "gaps_total": 2,
-      "gaps_required": 2,
+      "gaps_total": 5,
+      "gaps_required": 5,
       "conflicts": []
     },
+    "sources": [
+      {
+        "document_id": "Unihack__Sample_Dataset_-_Input#M200G-21XL",
+        "url": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
+        "host": "",
+        "tier": "item_master",
+        "doc_type": "supplier_feed",
+        "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+        "covers_this_sku": "row",
+        "citable_as_manufacturer": false,
+        "license_note": null,
+        "revision_label": null
+      }
+    ],
     "cost": null,
     "copy": null
   },
@@ -716,7 +753,7 @@
     "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
     "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
     "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-22T19:16:11.275717Z",
+    "fetched_at": "2026-08-23T11:45:10.364455Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": "unilog",

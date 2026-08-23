@@ -467,14 +467,63 @@ def _display_for(
     return parsed.display
 
 
-def to_imperial_fraction(millimetres: float, *, denominator: int = IMPERIAL_DENOMINATOR) -> str:
-    """Render millimetres as an imperial fraction, e.g. 19.05 -> ``3/4"``.
+IMPERIAL_SNAP_TOLERANCE = 0.02
+"""How far a value may sit from the nearest sixteenth and still be rendered as that fraction.
 
-    Snapped to sixteenths, which covers every nominal size a distributor sells. Finer
-    denominators produce noise like ``47/64"`` that no catalogue would ever print.
+2% of the value itself, so the allowance scales with the dimension. Nominal sizes are exact
+conversions and clear this trivially; a figure that genuinely falls between sixteenths does not, and
+gets a decimal inch instead of a rounded lie.
+"""
+
+
+IMPERIAL_DENOMINATORS = (16, 32, 64)
+"""Denominators tried in turn, coarsest first.
+
+Sixteenths cover every nominal pipe and fitting size. Thirty-seconds and sixty-fourths are needed
+because abrasive wheel thicknesses are genuinely printed as ``3/32"`` and ``7/64"`` — they are
+catalogue values, not spurious precision. Trying coarsest first is what keeps ``3/4"`` from being
+rendered as ``48/64"``.
+"""
+
+
+def to_imperial_fraction(
+    millimetres: float,
+    *,
+    denominators: tuple[int, ...] = IMPERIAL_DENOMINATORS,
+    tolerance: float = IMPERIAL_SNAP_TOLERANCE,
+) -> str:
+    """Render millimetres the way a buyer expects to read them, in inches.
+
+    A fraction when the value really is one — 19.05 -> ``3/4"``, 2.778 -> ``7/64"`` — taking the
+    coarsest denominator that represents it, so a nominal size never appears as ``48/64"``.
+
+    **A decimal inch when no fraction represents it.** That case is neither hypothetical nor rare:
+    an
+    abrasive cut-off wheel is 0.045 inches thick, and it used to render as ``1/16"`` — 39% thicker,
+    and a different product. Thin-wheel thicknesses are *sold* by that decimal figure, which is why
+    ``schema/attributes/abrasive.yaml`` lists both ``.045"`` and ``1/16"`` as distinct example
+    values
+    for the same attribute.
+
+    So a fraction has to earn its place. Rendering one regardless made the display disagree with the
+    canonical magnitude it came from, which is the one thing a display value must never do — the
+    number in front of the buyer would not be the number in the record. The tolerance is also what
+    keeps the finer denominators safe: a figure that is not a clean sixty-fourth is not shown as
+    one.
     """
     inches = millimetres / 25.4
-    snapped = Fraction(round(inches * denominator), denominator)
+
+    for denominator in denominators:
+        snapped = Fraction(round(inches * denominator), denominator)
+        # Relative to the value, so one rule serves a 1/4-inch fitting and a 14-inch wheel.
+        if inches and abs(float(snapped) - inches) > abs(inches) * tolerance:
+            continue
+        return _render_fraction(snapped, denominator)
+
+    return f'{_trim(inches)}"'
+
+
+def _render_fraction(snapped: Fraction, denominator: int) -> str:
     whole, remainder = divmod(snapped, 1)
     whole = int(whole)
 
@@ -484,3 +533,13 @@ def to_imperial_fraction(millimetres: float, *, denominator: int = IMPERIAL_DENO
     if whole == 0:
         return f'{fraction.numerator}/{fraction.denominator}"'
     return f'{whole}-{fraction.numerator}/{fraction.denominator}"'
+
+
+def _trim(inches: float) -> str:
+    """A decimal inch with no trailing zeros: 0.045, 0.5, 12.25.
+
+    Three decimal places, because that is the precision imperial industrial dimensions are quoted to
+    — ``.045``, ``.0625``, ``7/64`` -> ``0.109``. More would imply a tolerance the source never
+    gave.
+    """
+    return f"{inches:.3f}".rstrip("0").rstrip(".")

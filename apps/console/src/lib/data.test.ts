@@ -1,8 +1,20 @@
 import { describe, expect, it } from "vitest";
 
-import { reviewOrder, unresolvedConflicts, variantGroupFor, variantGroups } from "@/lib/data";
-import { composite } from "@/lib/types";
-import { qualityIndex, triageBundle, variantBundle, variantValue } from "@/test/factories";
+import {
+  classificationAbstention,
+  reviewOrder,
+  unresolvedConflicts,
+  variantGroupFor,
+  variantGroups,
+} from "@/lib/data";
+import { composite, type SkuBundle } from "@/lib/types";
+import {
+  qualityIndex,
+  stageBundle,
+  triageBundle,
+  variantBundle,
+  variantValue,
+} from "@/test/factories";
 
 /**
  * Triage order decides what a reviewer sees first, and getting it wrong is expensive in a way that
@@ -234,5 +246,69 @@ describe("variantGroupFor", () => {
 
   it("returns null for a standalone product rather than a series of one", () => {
     expect(variantGroupFor(catalogue[2]!, catalogue)).toBeNull();
+  });
+});
+
+/**
+ * A SKU can end up with no class for two reasons that need opposite work, and the console showed one
+ * message for both.
+ *
+ * The message said retrieval matched no class in the schema and the remedy is to add a class
+ * definition under `schema/classes/`. For a heater kit or an insulated water bottle that is exactly
+ * right. For a "Satco Tape Light", a "Voltage Detector w/ LED" or a "Coil Roofing - Nailer Kit" it
+ * was wrong twice: retrieval DID match classes — two of them, named and scored, already carried in
+ * the bundle — and a thirty-third class definition would not resolve a tie between two that exist.
+ *
+ * These tests exist because the failure is invisible. Nothing errors; a reviewer is simply sent to
+ * write a schema file when what was needed was ten seconds of judgement.
+ */
+describe("classificationAbstention", () => {
+  const unclassified = (
+    method: string,
+    candidates: { code: string; score: number; path_text: string }[],
+  ) =>
+    ({
+      sku: "SKU",
+      class_code: null,
+      classification_summary: { method, abstained: true },
+      classification_candidates: candidates,
+    }) as unknown as SkuBundle;
+
+  it("returns null for a SKU that has a class", () => {
+    expect(classificationAbstention(stageBundle())).toBeNull();
+  });
+
+  it("reports a genuine coverage gap as no-candidate", () => {
+    const result = classificationAbstention(unclassified("no_viable_candidate", []));
+    expect(result?.kind).toBe("no-candidate");
+    expect(result?.candidates).toEqual([]);
+  });
+
+  it("reports a near-tie as ambiguous, carrying what was in contention", () => {
+    const result = classificationAbstention(
+      unclassified("ambiguous_no_model", [
+        { code: "LGT.LMP.GEN", score: 0.2158, path_text: "Electrical > Lighting > Lamps" },
+        { code: "BLD.TAPE.GEN", score: 0.1751, path_text: "Building Materials > Tapes" },
+      ]),
+    );
+
+    expect(result?.kind).toBe("ambiguous");
+    // The leader first, because it is the reviewer's answer in the great majority of these.
+    expect(result?.candidates.map((candidate) => candidate.code)).toEqual([
+      "LGT.LMP.GEN",
+      "BLD.TAPE.GEN",
+    ]);
+  });
+
+  it("reads more than one contender as ambiguous even without the method string", () => {
+    // Keyed on the candidates as well as the method so a bundle written by an older pipeline
+    // version still renders the more useful of the two messages rather than the misleading one.
+    const result = classificationAbstention(
+      unclassified("something_else", [
+        { code: "A", score: 0.2, path_text: "A" },
+        { code: "B", score: 0.19, path_text: "B" },
+      ]),
+    );
+    expect(result?.kind).toBe("ambiguous");
   });
 });

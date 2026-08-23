@@ -18,12 +18,15 @@ from __future__ import annotations
 
 import json
 import re
+import sys
+import threading
 import urllib.parse
 from pathlib import Path
 from typing import Annotated, Literal
 
 from axiom.confidence import Priors, select_threshold
 from axiom.console import (
+    backfill_provenance,
     build_dataset,
     dataset_stats,
     normalise_quality_index,
@@ -48,7 +51,26 @@ from axiom.delivery.batch import (
     validate_input_columns,
 )
 from axiom.delivery.source import INPUT_COLUMNS
-from axiom.ingest import IngestError, profile_rows, read_flat_file, sha256_bytes
+from axiom.extract import BedrockModelClient, ModelCascade
+from axiom.extract.client import ModelError
+from axiom.ingest import (
+    IngestError,
+    LocalArtifactStore,
+    UrlFetchError,
+    check_url,
+    profile_rows,
+    read_flat_file,
+    sha256_bytes,
+)
+from axiom.pipeline import (
+    EnrichmentRequest,
+    InsufficientInputError,
+    build_delivery,
+    enrich_one,
+    persist_run,
+)
+from axiom.pipeline.persist import bundle_payload
+from axiom.pipeline.source import SUBMISSION_MAX_BYTES
 from axiom.review import ACCEPT, CORRECT, REJECT, ReviewSession, queue_summary, record_decision
 from axiom.schema import load_default as load_schema
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
@@ -62,9 +84,61 @@ CALIBRATION_DIR = REPO_ROOT / "data" / "calibration"
 CROSS_SOURCE_DIR = REPO_ROOT / "data" / "cross-source"
 EQUIVALENCE_DIR = REPO_ROOT / "data" / "equivalence"
 ARTIFACT_DIR = REPO_ROOT / "data" / "cache" / "artifacts"
+ENRICH_DIR = REPO_ROOT / "data" / "enrich"
+LIBRARY_INDEX = REPO_ROOT / "data" / "library" / "index.json"
+"""The document library retrieval reads and writes.
+
+Shared with ``scripts/retrieve_sources.py`` deliberately: a document fetched by a batch run is one
+the form never has to fetch again, and vice versa. That reuse is the whole economic argument for the
+library — retrieval is a one-time cost per document, not per part."""
 COHORT_PATH = REPO_ROOT / "evals" / "cohort.json"
 
 _SHA256 = re.compile(r"[0-9a-f]{64}")
+
+# Botocore's own failure family, which `ModelError` does **not** cover.
+#
+# `BedrockModelClient.converse` wraps `ClientError` — a call that reached AWS and was
+# refused. It does not wrap `BotoCoreError`, which is the family a call that never got
+# that far raises: `NoCredentialsError`, `ProfileNotFound`, `EndpointConnectionError`.
+# Those are exactly the errors an operator hits on first run, and unwrapped they reach a
+# browser as a 500 traceback, which reads as a bug in the console rather than a missing
+# `AWS_PROFILE`.
+#
+# An empty tuple when botocore is absent, because `except ()` never matches — which is the correct
+# behaviour for an installation that cannot make the call at all.
+try:  # pragma: no cover - exercised by whether the extra is installed, not by a test
+    from botocore.exceptions import BotoCoreError as _BotoCoreError
+
+    _CREDENTIAL_ERRORS: tuple[type[BaseException], ...] = (_BotoCoreError,)
+except ImportError:  # pragma: no cover
+    _CREDENTIAL_ERRORS = ()
+
+# ---------------------------------------------------------------------- enrichment limits
+#
+# The upload endpoint below is bounded because it spends CPU on caller-supplied bytes. This one is
+# bounded for a harder reason: **it spends money.** Every submission is two Bedrock calls,
+# three with copy generation, on an endpoint with no authentication. The caps do not close
+# that gap — nothing short of auth does — they bound what one caller can spend before
+# somebody notices.
+MAX_DESCRIPTION_CHARS = 4_000
+"""Long enough for a real ERP description several times over. The client's own sample descriptions
+run to about 40 characters, and the description is sent to the model verbatim, so this is the field
+that decides the input token bill."""
+
+MAX_URL_CHARS = 2_048
+"""The ceiling browsers and proxies agree on. A longer URL is a mistake, not a datasheet."""
+
+ENRICH_TIMEOUT = 20.0
+ENRICH_MAX_BYTES = SUBMISSION_MAX_BYTES
+"""Re-exported from the pipeline so ``/api/enrich/limits`` reports the number actually enforced
+rather than a copy of it that can drift."""
+
+# One run in flight per process.
+#
+# Not a queue and not a rate limit — a mutex. Concurrent runs would multiply the spend by however
+# many requests arrive, and the second caller's honest answer is "wait" rather than a slower run and
+# a doubled bill. A real deployment needs a work queue and auth; this is what bounds a laptop.
+_ENRICH_LOCK = threading.Lock()
 
 # ---------------------------------------------------------------------- upload limits
 #
@@ -137,6 +211,64 @@ class DecisionRequest(BaseModel):
     action: Literal["accept", "reject", "correct"]
     reviewer: str = Field(default="reviewer@local")
     corrected_value: str | None = None
+
+
+class EnrichRequest(BaseModel):
+    """One product to enrich, as somebody would type it.
+
+    Two required fields and two optional ones, and the interesting rule is not expressible as
+    "required": **at least one of ``description`` and ``source_url`` must be present.** A part
+    number identifies a product but does not describe one, so with neither field the run would
+    classify nothing, extract nothing, and return an identity-only row after paying for two
+    model calls. That
+    is checked in :class:`~axiom.pipeline.EnrichmentRequest` rather than here, so the CLI and the
+    endpoint refuse the same submissions for the same stated reason.
+
+    Lengths are capped because the description is sent to a model verbatim and this endpoint has no
+    authentication in front of it. See the note on the endpoint.
+    """
+
+    mpn: str = Field(min_length=1, max_length=128, description="manufacturer part number")
+    manufacturer: str = Field(min_length=1, max_length=256)
+    description: str | None = Field(default=None, max_length=MAX_DESCRIPTION_CHARS)
+    source_url: str | None = Field(default=None, max_length=MAX_URL_CHARS)
+    retrieve: bool = Field(
+        default=True,
+        description=(
+            "look for the manufacturer's own document when no URL is supplied: the document "
+            "library first, then the manufacturer's site read through its own search form. No "
+            "model call. Off makes the run fully offline and then requires a description or a URL."
+        ),
+    )
+    brand: str | None = Field(default=None, max_length=256)
+    class_code: str | None = Field(
+        default=None,
+        description="force this class instead of classifying, and the fallback when it abstains",
+    )
+    include_optional: bool = Field(
+        default=False, description="also request the class's optional attributes"
+    )
+    generate_copy: bool = Field(
+        default=False,
+        description=(
+            "also generate marketing copy and claim-check it. One extra model call; copy that "
+            "fails the check is reported, not published."
+        ),
+    )
+    risk_budget: float = Field(
+        default=0.05,
+        gt=0.0,
+        lt=1.0,
+        description="max acceptable error rate on auto-published values. Tighter publishes less.",
+    )
+    replace: bool = Field(
+        default=False,
+        description=(
+            "overwrite an existing run for this part number. Without it an existing SKU is a 409, "
+            "because a re-run replaces the session a reviewer may have already worked."
+        ),
+    )
+    supplier_id: str | None = Field(default=None, max_length=128)
 
 
 def _session_path(sku: str) -> Path:
@@ -300,6 +432,11 @@ def console_dataset() -> dict:
         # composite. Reinterpreted on read so the console renders one shape; the signed bytes on
         # disk are left alone, because the signature is the point of having them.
         bundle = normalise_quality_index(bundle)
+        # Likewise for the provenance split and the source list. A bundle written before the item
+        # master stopped counting as evidence has no self-declared values by construction, so the
+        # backfill is a derivation rather than a default. Without it the console reads `undefined`
+        # for a required metric and renders NaN.
+        bundle = backfill_provenance(bundle)
 
         # A bundle records what the pipeline produced; the session records what a reviewer
         # decided since. Joining them here means a decision shows up on the dashboards without
@@ -944,6 +1081,599 @@ async def delivery_export(
         media_type=WORKBOOK_MEDIA_TYPE,
         summary=_headers_for(workbook.export, fmt),
     )
+
+
+# ------------------------------------------------------------------ single-SKU enrichment
+
+
+def credential_profiles() -> dict[str, bool]:
+    """Every named AWS profile, and whether it actually resolves credentials.
+
+    Reported in the 503 detail, so a credentials failure diagnoses itself instead of sending
+    somebody back to the documentation. The distinction it exposes is the one that caused real
+    confusion here: a profile can be present in ``~/.aws/config`` — giving it a region, and making
+    it look configured — while having no entry in ``~/.aws/credentials`` at all.
+    """
+    import boto3
+
+    found: dict[str, bool] = {}
+    for name in boto3.Session().available_profiles:
+        try:
+            found[name] = boto3.Session(profile_name=name).get_credentials() is not None
+        except Exception:  # noqa: BLE001 - a malformed profile is "unusable", not fatal
+            found[name] = False
+    return found
+
+
+def resolve_profile() -> str | None:
+    """Which AWS profile to run as, without depending on the shell that launched the server.
+
+    This exists because the obvious design — pass ``None`` and let boto3's default chain decide —
+    fails in a way that is genuinely hard to read. With no ``AWS_PROFILE`` set, boto3 selects the
+    profile named ``default``; if that profile exists in ``~/.aws/config`` but has no entry in
+    ``~/.aws/credentials``, the result is ``NoCredentialsError`` on a machine where working
+    credentials are sitting right there under another name. The error says "Unable to locate
+    credentials", which reads as *none are configured* rather than *the wrong one was selected*.
+
+    So the order is:
+
+    1.  ``AXIOM_AWS_PROFILE``, then ``AWS_PROFILE``. An explicit instruction always wins, including
+        when it is wrong — surfacing a bad profile name beats silently substituting a good one.
+    2.  The ambient chain, if it resolves. This is the path that must keep working on EC2, ECS and
+        Lambda, where there is no profile at all and credentials come from an instance role.
+    3.  Failing both, the single named profile that *does* resolve credentials. Chosen only when
+        there is exactly one candidate, because picking between two would be guessing at which
+        account to bill.
+
+    Step 3 is the one worth defending. It is not "try things until something works": it fires only
+    when the ambient chain has already failed, so the alternative is not a different credential — it
+    is a 503. And it is announced on stderr rather than applied quietly, because which account is
+    being billed is not something to infer from a working screen.
+    """
+    import os
+
+    explicit = os.environ.get("AXIOM_AWS_PROFILE") or os.environ.get("AWS_PROFILE")
+    if explicit:
+        return explicit
+
+    import boto3
+
+    try:
+        if boto3.Session().get_credentials() is not None:
+            return None
+    except Exception:  # noqa: BLE001 - fall through to the named-profile search
+        pass
+
+    usable = [name for name, ok in credential_profiles().items() if ok]
+    if len(usable) == 1:
+        print(
+            f"[axiom] no ambient AWS credentials; using the only profile that resolves any: "
+            f"{usable[0]!r}. Set AXIOM_AWS_PROFILE to choose explicitly.",
+            file=sys.stderr,
+        )
+        return usable[0]
+    return None
+
+
+def model_client(profile: str | None = None):
+    """The Bedrock client an enrichment run will use.
+
+    A module-level function rather than an inline constructor so a test can replace it with
+    :class:`~axiom.extract.StubModelClient`. That is the same reason
+    :func:`~axiom.pipeline.enrich_one` takes its client as an argument: the alternative is an
+    endpoint whose only test needs credentials, which is an endpoint with no tests.
+    """
+    return BedrockModelClient(
+        region=ModelCascade.load().region,
+        profile=profile if profile is not None else resolve_profile(),
+    )
+
+
+def retrieval_fetcher():
+    """The fetcher retrieval uses, or None for the real one.
+
+    A seam, for the same reason :func:`model_client` is one — but with a sharper edge. Retrieval
+    makes outbound HTTP requests to third-party websites, so a test that reached the default would
+    not merely be slow and flaky: it would send traffic to a manufacturer that did not ask for it,
+    from whatever machine ran the suite. Every test therefore replaces this, and the replacement is
+    what keeps the retrieval path exercised offline instead of skipped.
+
+    None rather than :func:`axiom.ingest.web.fetch_url` so the ingest layer keeps choosing its own
+    default, including the resolver guard.
+    """
+    return None
+
+
+def search_provider():
+    """The open-web search arm. **On by default.**
+
+    This used to return None on the grounds that search is an external service with a key and a
+    bill, so defaulting it on would make the endpoint's reach depend on ambient credentials. That
+    reasoning was right about a keyed provider and wrong about the outcome: it left the arm that
+    reaches an *undeclared* manufacturer switched off, which is the arm that matters most — a
+    manufacturer with a declared domain is already served by site discovery.
+
+    :class:`~axiom.retrieve.DuckDuckGoSearch` needs no key, no account and no bill, so there is no
+    ambient credential to depend on and nothing to leave unconfigured. Measured on this repository's
+    own item master it returns the manufacturer's own product page as the first result for long-tail
+    industrial part numbers.
+
+    Set ``AXIOM_SEARCH=off`` to disable it — worth doing for a run that must make no third-party
+    request at all. ``AXIOM_SEARCH=bedrock`` selects the Bedrock Web Search arm instead, which keeps
+    the query inside the AWS boundary but needs OpenAI GPT model access on the account.
+    """
+    import os
+
+    choice = (os.environ.get("AXIOM_SEARCH") or "duckduckgo").strip().lower()
+    if choice in {"off", "none", "0", "false"}:
+        return None
+    if choice == "bedrock":
+        from axiom.retrieve.search_bedrock import BedrockWebSearch, BedrockWebSearchError
+
+        try:
+            return BedrockWebSearch.from_env()
+        except BedrockWebSearchError as exc:
+            # Degraded rather than fatal: the run still has the library and site discovery, and a
+            # missing search key should not take the endpoint down.
+            print(
+                f"[axiom] AXIOM_SEARCH=bedrock but that provider is unavailable: {exc}",
+                file=sys.stderr,
+            )
+            return None
+
+    from axiom.retrieve import DuckDuckGoSearch
+
+    return DuckDuckGoSearch()
+
+
+def _enrich_delivery_path(slug: str, output: str) -> Path:
+    suffix = {"csv": ".delivery.csv", "xlsx": ".delivery.xlsx", "provenance": ".provenance.json"}
+    return ENRICH_DIR / f"{slug}{suffix[output]}"
+
+
+@app.get("/api/enrich/limits")
+def enrich_limits() -> dict:
+    """What a submission may contain, so the form can describe the real caps.
+
+    Served rather than hard-coded in the console for the same reason ``/api/delivery/format`` is: a
+    UI that advertised a limit this API does not enforce would be describing a different service.
+    """
+    return {
+        "required": ["mpn", "manufacturer"],
+        "optional": ["description", "source_url", "brand", "class_code"],
+        "one_of": ["description", "source_url"],
+        "max_description_chars": MAX_DESCRIPTION_CHARS,
+        "max_url_chars": MAX_URL_CHARS,
+        "max_document_bytes": ENRICH_MAX_BYTES,
+        "fetch_timeout_seconds": ENRICH_TIMEOUT,
+        "url_schemes": ["https"],
+        "concurrent_runs": 1,
+        "outputs": ["csv", "xlsx"],
+        "model_calls_per_run": {"without_copy": 2, "with_copy": 3},
+        "notes": [
+            "Runs the online pipeline: classification and extraction are real Bedrock calls, so "
+            "this endpoint needs credentials and costs money per submission.",
+            "A description or a manufacturer URL is required. A part number identifies a product "
+            "but does not describe one, so with neither field there is nothing to classify and "
+            "nothing to extract from.",
+            "With no URL the submission itself becomes the source document, hashed and citable. "
+            "That is a real provenance claim and a weaker one than a datasheet.",
+        ],
+    }
+
+
+@app.post("/api/enrich")
+def enrich(request: EnrichRequest) -> JSONResponse:
+    """Enrich one product from a typed part number. **Makes real model calls.**
+
+    The same ten stages ``scripts/run_pipeline.py`` runs, through the same
+    :func:`axiom.pipeline.run_stages`, so a submission here and a CLI run over the same document
+    produce the same record. That shared path is the point: a second implementation would be one CI
+    does not gate, and it would drift.
+
+    What arrives is a part number, a manufacturer, and at least one of a description or an
+    ``https://`` URL. With a URL the fetched document is the source and the description is *also*
+    read, deterministically, with the document's values superseding it — a datasheet states a fact
+    where a description only implies it. With no URL the submission itself is hashed and stored
+    as the source, and every citation resolves to a field somebody typed. Both are provenance;
+    they are not equal, and the response labels which one it was.
+
+    The run is persisted, so the SKU joins the corpus: it appears in the Resolve queue, the Audit
+    list and the dashboards, and its delivery file is written now rather than on download.
+
+    **Security posture, stated rather than assumed.** Two things are materially worse here than on
+    the read-only routes, and neither is closed by anything in this function:
+
+    *   **No authentication**, like every endpoint in this API, on a route that *spends money*. The
+        length caps and the single-run mutex bound the damage; they do not prevent it. Anything
+        beyond an operator's laptop needs auth in front of this before anything else.
+    *   **Server-side request forgery.** This fetches a caller-supplied URL from inside your
+        network. The ingest layer refuses non-https schemes, loopback and private literals,
+        resolves the hostname and re-checks every answer, and re-checks again at each
+        redirect hop — but DNS is
+        re-resolved when the socket is opened, so a short-TTL record can still win that race. This
+        needs an egress policy, not just a library check. See
+        :func:`axiom.ingest.web._check_resolved`.
+    """
+    # 429 rather than queueing. Two concurrent runs cost twice as much and the honest answer to the
+    # second caller is "one at a time", not a slower run and a doubled bill.
+    if not _ENRICH_LOCK.acquire(blocking=False):
+        raise HTTPException(
+            status_code=429,
+            detail=(
+                "an enrichment run is already in flight. This endpoint runs one at a time because "
+                "each run costs real model calls; retry when it finishes."
+            ),
+        )
+    try:
+        return _run_enrichment(request)
+    finally:
+        _ENRICH_LOCK.release()
+
+
+def _run_enrichment(request: EnrichRequest) -> JSONResponse:
+    registry = load_schema()
+
+    if request.class_code and request.class_code not in registry.class_codes:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"unknown class {request.class_code!r}; known: {', '.join(registry.class_codes)}"
+            ),
+        )
+
+    url = (request.source_url or "").strip()
+    if url and not url.lower().startswith("https://"):
+        # Refused here as well as in the ingest layer, so the message names the field rather than
+        # explaining a trade-off the form never offered. Plain http would hash bytes that arrived
+        # with no integrity guarantee and call the result provenance.
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "error": "insecure_url",
+                "message": (
+                    "the manufacturer URL must start with https://. Bytes fetched over plain http "
+                    "carry no integrity guarantee, and hashing them as provenance would defeat the "
+                    "point of the citation."
+                ),
+                "field": "source_url",
+            },
+        )
+
+    if url:
+        # The literal address guard, hoisted to run **before** the already-enriched check below.
+        #
+        # The ingest layer performs this too, and more thoroughly — it also resolves the
+        # hostname. But that happens inside the run, which is after the conflict check, so a
+        # caller pointing an already-enriched part number at `169.254.169.254` was told about
+        # the conflict and never about the address. A security refusal must not be masked by a
+        # bookkeeping one, so the free half of the check runs first.
+        #
+        # Only the literal half. Resolving here would put a DNS lookup in front of every submission
+        # and would report an unresolvable host as a validation error, when the honest answer for
+        # that is the 502 fetch path further down.
+        try:
+            check_url(url, allow_insecure_http=False)
+        except UrlFetchError as exc:
+            raise HTTPException(
+                status_code=422,
+                detail={
+                    "error": "invalid_url",
+                    "message": str(exc),
+                    "field": "source_url",
+                },
+            ) from exc
+
+    try:
+        enrichment_request = EnrichmentRequest(
+            mpn=request.mpn,
+            manufacturer=request.manufacturer,
+            description=request.description,
+            source_url=url or None,
+            brand=request.brand,
+            class_code=request.class_code,
+            supplier_id=request.supplier_id,
+            include_optional=request.include_optional,
+            generate_copy=request.generate_copy,
+            risk_budget=request.risk_budget,
+            retrieve=request.retrieve,
+        )
+    except InsufficientInputError as exc:
+        # 422 rather than 400: the request was well-formed, it just cannot produce anything worth
+        # paying for. The missing fields travel structured so a form can highlight them instead of
+        # asking somebody to read a paragraph.
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "error": "insufficient_input",
+                "message": str(exc),
+                "missing": list(exc.missing),
+            },
+        ) from exc
+
+    slug = sku_slug(enrichment_request.clean_mpn)
+    existing = SESSION_DIR / f"{slug}.json"
+    if existing.is_file() and not request.replace:
+        # A re-run replaces the session a reviewer may already have worked, and the decisions on it.
+        # `run_pipeline` refuses a combination that would blank a saved session for the same reason:
+        # by the time a warning is read the data is already gone.
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "error": "already_enriched",
+                "message": (
+                    f"{enrichment_request.clean_mpn} has already been enriched. Re-running "
+                    f"replaces the saved session and any review decisions recorded against "
+                    f"it. Send "
+                    f"replace=true to do that deliberately."
+                ),
+                "sku": enrichment_request.clean_mpn,
+                "slug": slug,
+                "enriched_at": _session_timestamp(existing),
+            },
+        )
+
+    try:
+        client = model_client()
+    except Exception as exc:  # noqa: BLE001 - botocore raises several unrelated types here
+        raise HTTPException(status_code=503, detail=_credentials_detail(exc)) from exc
+
+    try:
+        result = enrich_one(
+            enrichment_request,
+            registry=registry,
+            client=client,
+            store=LocalArtifactStore(ARTIFACT_DIR),
+            calibration_dir=CALIBRATION_DIR,
+            # Retrieval on, which is what makes a part number plus a manufacturer name sufficient.
+            # It makes HTTP requests to the manufacturer's own site, policy-gated and robots-aware,
+            # and no model call. `search` is left None: the open-web arm needs a key and a bill, so
+            # it is opt-in rather than ambient.
+            library_path=LIBRARY_INDEX,
+            fetcher=retrieval_fetcher(),
+            search=search_provider(),
+        )
+    except (UrlFetchError, IngestError) as exc:
+        # 502 rather than 400. The request was fine; the *upstream* document could not be retrieved,
+        # and a caller staring at a link that works in their browser needs the fetch error verbatim.
+        raise HTTPException(
+            status_code=502,
+            detail={
+                "error": "source_unreachable",
+                "message": str(exc),
+                "field": "source_url",
+                "url": url,
+            },
+        ) from exc
+    except (ModelError, *_CREDENTIAL_ERRORS) as exc:
+        # Both families, because they fail at different depths and a caller cannot tell them
+        # apart. `ModelError` is a call AWS refused — throttling, or a model not enabled in
+        # the region. `BotoCoreError` is a call that never left the process, which on a first
+        # run is almost always a missing `AWS_PROFILE`. Unwrapped, either one reaches a
+        # browser as a traceback and reads as a bug in the console rather than a
+        # configuration problem.
+        raise HTTPException(status_code=503, detail=_credentials_detail(exc)) from exc
+
+    paths = persist_run(
+        result.run,
+        parsed=result.source.parsed,
+        artifact=result.source.artifact,
+        registry=registry,
+        sessions_dir=SESSION_DIR,
+        console_dir=CONSOLE_DIR,
+    )
+
+    delivery = build_delivery(
+        result.record,
+        registry=registry,
+        fmt=load_delivery_format(),
+        out_dir=ENRICH_DIR,
+        mpn=enrichment_request.clean_mpn,
+        manufacturer=request.manufacturer,
+        description=request.description,
+        brand=request.brand,
+        source_url=url or None,
+    )
+
+    # The bundle the console already knows how to render. `pages` is deliberately dropped: the
+    # stage cards read the document summary, and a multi-page datasheet's line geometry would
+    # be most of the response for something nothing on this screen draws. The evidence viewer
+    # reads it from /api/session/{slug}, which is now on disk.
+    payload = bundle_payload(
+        result.run,
+        parsed=result.source.parsed,
+        artifact=result.source.artifact,
+        registry=registry,
+    )
+
+    return JSONResponse(
+        {
+            "sku": result.sku,
+            "slug": paths.slug,
+            "replaced": existing.is_file() and request.replace,
+            "summary": result.summary(),
+            "queue": result.queue(registry),
+            "bundle": backfill_provenance(normalise_quality_index(payload["bundle"])),
+            "document": payload["document"],
+            "policy": payload["policy"],
+            "calibrator": payload["calibrator"],
+            "delivery": delivery.summary(),
+            "persisted": {
+                **paths.relative_to(REPO_ROOT),
+                "delivery_csv": _display_path(delivery.csv_path),
+                "delivery_xlsx": _display_path(delivery.xlsx_path),
+                "provenance": _display_path(delivery.provenance_path),
+            },
+            "links": {
+                "review": f"/api/session/{paths.slug}",
+                "delivery_csv": f"/api/enrich/{paths.slug}/delivery?output=csv",
+                "delivery_xlsx": f"/api/enrich/{paths.slug}/delivery?output=xlsx",
+                "source_artifact": f"/api/artifact/{result.source.artifact.sha256}",
+            },
+        }
+    )
+
+
+def _display_path(path: Path) -> str:
+    """A path relative to the repository, or absolute when it is not under it.
+
+    The fallback is not defensive padding: the directory constants are module-level and a
+    test points them at a temporary directory, so ``relative_to`` genuinely raises. Reporting
+    the absolute path is more useful there than a 500 anyway.
+    """
+    try:
+        return str(path.relative_to(REPO_ROOT))
+    except ValueError:
+        return str(path)
+
+
+def _session_timestamp(path: Path) -> str | None:
+    """When the existing run happened, read from the session rather than the filesystem.
+
+    A file's mtime says when the bytes were last written, which is not the same claim — a decision
+    recorded against the session rewrites it without a new run having happened.
+    """
+    try:
+        return json.loads(path.read_text(encoding="utf-8")).get("created_at")
+    except (OSError, ValueError, AttributeError):
+        return None
+
+
+def _credentials_detail(exc: Exception) -> dict:
+    """A model failure, explained as the thing it almost always is.
+
+    ``ModelError`` reaching a browser as a traceback reads as a bug in the console. It is usually
+    absent or expired credentials, or a model that is not enabled in the region, and both are fixed
+    by the operator rather than by retrying.
+
+    The profile inventory is included because the failure that actually happened here was not
+    "no credentials configured" but "the wrong profile was selected" — ``default`` present in
+    ``~/.aws/config`` with no entry in ``~/.aws/credentials``, while a working ``axiom`` profile sat
+    beside it. A message that only said "Unable to locate credentials" sent somebody looking for a
+    missing key that was never missing. Naming every profile and whether it resolves makes the next
+    occurrence self-diagnosing.
+    """
+    try:
+        profiles = credential_profiles()
+        selected = resolve_profile()
+    except Exception:  # noqa: BLE001 - never let diagnostics replace the original failure
+        profiles, selected = {}, None
+
+    usable = sorted(name for name, ok in profiles.items() if ok)
+    unusable = sorted(name for name, ok in profiles.items() if not ok)
+
+    hint = (
+        "Set AXIOM_AWS_PROFILE to one of the profiles that resolve credentials, in the shell that "
+        "starts the API — boto3 reads it when the session is built, so exporting it afterwards in "
+        "another terminal has no effect."
+    )
+    if not usable and profiles:
+        hint = (
+            f"None of the configured profiles ({', '.join(unusable)}) resolve credentials. A "
+            f"profile can appear in ~/.aws/config — which gives it a region and makes it look "
+            f"configured — while having no entry in ~/.aws/credentials."
+        )
+    elif not profiles:
+        hint = "No AWS profiles are configured. Run 'aws configure --profile axiom'."
+
+    return {
+        "error": "model_unavailable",
+        "message": (
+            "the model call could not be made. This endpoint runs the online pipeline, so it needs "
+            "AWS credentials with Bedrock access and the cascade's models enabled in the "
+            f"configured region. {hint} For a run that needs no credentials, use the Publish page, "
+            "which is entirely deterministic."
+        ),
+        "detail": str(exc),
+        "region": ModelCascade.load().region,
+        "profile_used": selected,
+        "profiles_with_credentials": usable,
+        "profiles_without_credentials": unusable,
+    }
+
+
+@app.get("/api/enrich/{sku}/delivery")
+def enrich_delivery(sku: str, output: str = "csv") -> Response:
+    """Serve the delivery file a run already wrote.
+
+    Reads bytes off disk. It does **not** re-run anything, which is the whole reason the files are
+    written at run time: a download that re-ran the pipeline would spend two more model calls to
+    produce a file we already had, and could hand back something different from what the screen
+    reported.
+
+    The path segment is a SKU **slug**, validated against the same whitelist ``/api/session/{sku}``
+    uses. That is not decoration: the value arrives from a URL and is used to build a filesystem
+    path, which is exactly the shape of a traversal bug.
+    """
+    if output not in {"csv", "xlsx"}:
+        raise HTTPException(
+            status_code=400, detail=f"output must be csv or xlsx; got {output!r}"
+        )
+    if not is_sku_slug(sku):
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"invalid sku '{sku}': expected a SKU slug, i.e. letters, digits, '-', '_', '.' "
+                f"and '~' escapes. A part number containing a separator is addressed by its slug, "
+                f"e.g. '52C3-5/8-UPC' as '52C3-5~2F8-UPC'."
+            ),
+        )
+
+    target = _enrich_delivery_path(sku, output)
+    if not target.is_file():
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                f"no enrichment delivery file for '{sku}'. Files are written when a submission is "
+                f"enriched through POST /api/enrich; a SKU produced by the CLI or the Publish "
+                f"upload has its output elsewhere."
+            ),
+        )
+
+    body = target.read_bytes()
+    media_type = (
+        WORKBOOK_MEDIA_TYPE if output == "xlsx" else "text/csv; charset=utf-8"
+    )
+    return _file_response(
+        body,
+        filename=target.name,
+        media_type=media_type,
+        # Read off the sidecar and the file itself, so these agree with the bytes being served
+        # rather than with a second count of their own.
+        summary=_enrich_headers(sku),
+    )
+
+
+def _enrich_headers(slug: str) -> dict[str, str]:
+    """The run summary for a persisted delivery file, from its provenance sidecar.
+
+    Digits and hex only, like every other header here: header values must be latin-1 encodable and
+    nothing should be able to carry supplier text into one.
+
+    The content hash is computed from the CSV on disk rather than read from the sidecar, and that is
+    the stronger claim: it describes the bytes actually being served, not what a run recorded about
+    bytes it wrote earlier. It matches ``DeliveryExport.content_hash`` by construction, because that
+    is the SHA-256 of the same UTF-8 text.
+    """
+    counts: dict[str, str] = {}
+
+    sidecar = _enrich_delivery_path(slug, "provenance")
+    if sidecar.is_file():
+        try:
+            record = json.loads(sidecar.read_text(encoding="utf-8"))["records"][0]
+            counts = {
+                "X-Axiom-Rows": "1",
+                "X-Axiom-Columns-Populated": str(record.get("populated", 0)),
+                "X-Axiom-Columns-Total": str(record.get("of_columns", 0)),
+                "X-Axiom-Withheld": str(len(record.get("withheld", []))),
+            }
+        except (OSError, ValueError, KeyError, IndexError, TypeError):
+            counts = {}
+
+    csv_path = _enrich_delivery_path(slug, "csv")
+    if csv_path.is_file():
+        counts["X-Axiom-Content-Hash"] = sha256_bytes(csv_path.read_bytes())
+    return counts
 
 
 @app.get("/")

@@ -19,8 +19,8 @@
       "source_document_ids": [
         "Unihack__Sample_Dataset_-_Input#48-41-0740"
       ],
-      "created_at": "2026-08-22T19:16:18.514775+00:00",
-      "updated_at": "2026-08-22T19:16:18.514854+00:00"
+      "created_at": "2026-08-23T11:45:34.377935+00:00",
+      "updated_at": "2026-08-23T11:45:34.378000+00:00"
     },
     "classifications": [
       {
@@ -76,7 +76,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:18.514805Z"
+        "detected_at": "2026-08-23T11:45:34.377963Z"
       },
       {
         "attribute_code": "tooth_count",
@@ -88,7 +88,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:18.514812Z"
+        "detected_at": "2026-08-23T11:45:34.377968Z"
       },
       {
         "attribute_code": "blade_material",
@@ -100,7 +100,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:18.514818Z"
+        "detected_at": "2026-08-23T11:45:34.377972Z"
       },
       {
         "attribute_code": "arbor_size",
@@ -112,7 +112,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:18.514823Z"
+        "detected_at": "2026-08-23T11:45:34.377975Z"
       },
       {
         "attribute_code": "workpiece_material",
@@ -124,7 +124,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:18.514827Z"
+        "detected_at": "2026-08-23T11:45:34.377979Z"
       }
     ],
     "extraction": {
@@ -173,10 +173,10 @@
       "per_attribute": {}
     },
     "certificate": {
-      "certificate_id": "ec_80ddc13f4091",
+      "certificate_id": "ec_b0c9063df337",
       "sku": "48-41-0740",
       "tenant_id": "unilog",
-      "generated_at": "2026-08-22T19:16:18.515108Z",
+      "generated_at": "2026-08-23T11:45:34.378114Z",
       "schema_version": "TOL.ACC.SAWBLADE@v1",
       "pipeline_version": "axiom-0.1.0",
       "classifications": [
@@ -261,6 +261,8 @@
           "verifiability": 0.0,
           "consistency": 1.0,
           "richness": 0.0,
+          "self_declared": 0.0,
+          "corroborated": 0.0,
           "weights": {
             "completeness": 0.35,
             "verifiability": 0.3,
@@ -278,7 +280,7 @@
         "cost_usd": null,
         "wall_clock_seconds": 0.0
       },
-      "signature": "sha256:065d44f08a649a4d38c8671372859b0a046d900d76d778939899927e591d0200",
+      "signature": "sha256:aa0c5ad8d488ee00cf82916cc56f9592d723673d2f64b8343953b8801abea78a",
       "signature_verified": true
     },
     "channels": [
@@ -318,13 +320,30 @@
     "metrics": {
       "fill_rate": 0.0,
       "verifiability": 0.0,
+      "self_declared_rate": 0.0,
+      "corroborated_rate": 0.0,
       "values_total": 0,
       "values_publishable": 0,
+      "values_self_declared": 0,
       "values_needing_review": 0,
       "gaps_total": 5,
       "gaps_required": 5,
       "conflicts": []
     },
+    "sources": [
+      {
+        "document_id": "Unihack__Sample_Dataset_-_Input#48-41-0740",
+        "url": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
+        "host": "",
+        "tier": "item_master",
+        "doc_type": "supplier_feed",
+        "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+        "covers_this_sku": "row",
+        "citable_as_manufacturer": false,
+        "license_note": null,
+        "revision_label": null
+      }
+    ],
     "cost": null,
     "copy": null
   },
@@ -333,7 +352,7 @@
     "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
     "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
     "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-22T19:16:11.275717Z",
+    "fetched_at": "2026-08-23T11:45:10.364455Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": "unilog",

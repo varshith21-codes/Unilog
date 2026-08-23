@@ -19,8 +19,8 @@
       "source_document_ids": [
         "Unihack__Sample_Dataset_-_Input#40025"
       ],
-      "created_at": "2026-08-22T19:16:17.072634+00:00",
-      "updated_at": "2026-08-22T19:16:17.073062+00:00"
+      "created_at": "2026-08-23T11:45:32.618236+00:00",
+      "updated_at": "2026-08-23T11:45:32.628500+00:00"
     },
     "classifications": [
       {
@@ -68,27 +68,29 @@
     "gaps": [
       {
         "attribute_code": "measurement_range",
-        "reason": "no_source_available",
+        "reason": "not_present_in_any_source",
         "sources_searched": [
-          "Unihack__Sample_Dataset_-_Input#40025"
+          "Unihack__Sample_Dataset_-_Input#40025",
+          "2026_Bonded-Abrasives_Solutions-Guide@bb06f364"
         ],
-        "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+        "detail": "read the item-master row and 1 retrieved document(s) (2026_Bonded-Abrasives_Solutions-Guide@bb06f364); the part number was located but this attribute is not stated in any of them. A better document will not close this one, so it is a supplier request.",
         "revenue_exposure_usd": null,
-        "recommended_action": "retry_with_better_source",
+        "recommended_action": "request_from_supplier",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:17.072663Z"
+        "detected_at": "2026-08-23T11:45:32.628455Z"
       },
       {
         "attribute_code": "graduation_system",
-        "reason": "no_source_available",
+        "reason": "not_present_in_any_source",
         "sources_searched": [
-          "Unihack__Sample_Dataset_-_Input#40025"
+          "Unihack__Sample_Dataset_-_Input#40025",
+          "2026_Bonded-Abrasives_Solutions-Guide@bb06f364"
         ],
-        "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+        "detail": "read the item-master row and 1 retrieved document(s) (2026_Bonded-Abrasives_Solutions-Guide@bb06f364); the part number was located but this attribute is not stated in any of them. A better document will not close this one, so it is a supplier request.",
         "revenue_exposure_usd": null,
-        "recommended_action": "retry_with_better_source",
+        "recommended_action": "request_from_supplier",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:17.072918Z"
+        "detected_at": "2026-08-23T11:45:32.628475Z"
       }
     ],
     "extraction": {
@@ -127,10 +129,10 @@
       "per_attribute": {}
     },
     "certificate": {
-      "certificate_id": "ec_fb45448fa0d2",
+      "certificate_id": "ec_95dcd015c052",
       "sku": "40025",
       "tenant_id": "unilog",
-      "generated_at": "2026-08-22T19:16:17.073232Z",
+      "generated_at": "2026-08-23T11:45:32.628668Z",
       "schema_version": "TOL.LAY.GEN@v1",
       "pipeline_version": "axiom-0.1.0",
       "classifications": [
@@ -152,23 +154,25 @@
       "gaps": [
         {
           "code": "measurement_range",
-          "reason": "no_source_available",
+          "reason": "not_present_in_any_source",
           "sources_searched": [
-            "Unihack__Sample_Dataset_-_Input#40025"
+            "Unihack__Sample_Dataset_-_Input#40025",
+            "2026_Bonded-Abrasives_Solutions-Guide@bb06f364"
           ],
           "required": true,
-          "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
-          "recommended_action": "retry_with_better_source"
+          "detail": "read the item-master row and 1 retrieved document(s) (2026_Bonded-Abrasives_Solutions-Guide@bb06f364); the part number was located but this attribute is not stated in any of them. A better document will not close this one, so it is a supplier request.",
+          "recommended_action": "request_from_supplier"
         },
         {
           "code": "graduation_system",
-          "reason": "no_source_available",
+          "reason": "not_present_in_any_source",
           "sources_searched": [
-            "Unihack__Sample_Dataset_-_Input#40025"
+            "Unihack__Sample_Dataset_-_Input#40025",
+            "2026_Bonded-Abrasives_Solutions-Guide@bb06f364"
           ],
           "required": true,
-          "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
-          "recommended_action": "retry_with_better_source"
+          "detail": "read the item-master row and 1 retrieved document(s) (2026_Bonded-Abrasives_Solutions-Guide@bb06f364); the part number was located but this attribute is not stated in any of them. A better document will not close this one, so it is a supplier request.",
+          "recommended_action": "request_from_supplier"
         }
       ],
       "summary": {
@@ -185,6 +189,8 @@
           "verifiability": 0.0,
           "consistency": 1.0,
           "richness": 0.0,
+          "self_declared": 0.0,
+          "corroborated": 0.0,
           "weights": {
             "completeness": 0.35,
             "verifiability": 0.3,
@@ -202,7 +208,7 @@
         "cost_usd": null,
         "wall_clock_seconds": 0.0
       },
-      "signature": "sha256:9c6097837795877eaf8de0593a528b41cde5aa74d83cd786ad86f6f7d69daa14",
+      "signature": "sha256:70fb7674bd3e479b9c93b0ae73f76a7a0f26a53793079368e86d0044962ea368",
       "signature_verified": true
     },
     "channels": [
@@ -242,13 +248,42 @@
     "metrics": {
       "fill_rate": 0.0,
       "verifiability": 0.0,
+      "self_declared_rate": 0.0,
+      "corroborated_rate": 0.0,
       "values_total": 0,
       "values_publishable": 0,
+      "values_self_declared": 0,
       "values_needing_review": 0,
       "gaps_total": 2,
       "gaps_required": 2,
       "conflicts": []
     },
+    "sources": [
+      {
+        "document_id": "Unihack__Sample_Dataset_-_Input#40025",
+        "url": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
+        "host": "",
+        "tier": "item_master",
+        "doc_type": "supplier_feed",
+        "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+        "covers_this_sku": "row",
+        "citable_as_manufacturer": false,
+        "license_note": null,
+        "revision_label": null
+      },
+      {
+        "document_id": "2026_Bonded-Abrasives_Solutions-Guide@bb06f364",
+        "url": "https://www.milwaukeetool.com/-/media/PDFs/Objective-Data/2026_Bonded-Abrasives_Solutions-Guide.pdf",
+        "host": "www.milwaukeetool.com",
+        "tier": "manufacturer",
+        "doc_type": "spec_sheet",
+        "sha256": "bb06f364d97f6b89b7bb5dc6ea83e3921e5fcbb575130ca1dd126363197d722c",
+        "covers_this_sku": "text",
+        "citable_as_manufacturer": true,
+        "license_note": "retrieved from www.milwaukeetool.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
+        "revision_label": null
+      }
+    ],
     "cost": null,
     "copy": null
   },
@@ -257,7 +292,7 @@
     "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
     "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
     "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-22T19:16:11.275717Z",
+    "fetched_at": "2026-08-23T11:45:10.364455Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": "unilog",

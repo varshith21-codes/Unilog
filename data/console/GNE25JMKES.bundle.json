@@ -19,8 +19,8 @@
       "source_document_ids": [
         "Unihack__Sample_Dataset_-_Input#GNE25JMKES"
       ],
-      "created_at": "2026-08-22T19:16:16.865597+00:00",
-      "updated_at": "2026-08-22T19:16:16.865641+00:00"
+      "created_at": "2026-08-23T11:45:32.335552+00:00",
+      "updated_at": "2026-08-23T11:45:32.335634+00:00"
     },
     "classifications": [
       {
@@ -76,7 +76,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:16.865614Z"
+        "detected_at": "2026-08-23T11:45:32.335591Z"
       },
       {
         "attribute_code": "door_configuration",
@@ -88,7 +88,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:16.865621Z"
+        "detected_at": "2026-08-23T11:45:32.335599Z"
       },
       {
         "attribute_code": "appliance_width",
@@ -100,7 +100,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:16.865624Z"
+        "detected_at": "2026-08-23T11:45:32.335604Z"
       },
       {
         "attribute_code": "finish_color",
@@ -112,7 +112,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:16.865627Z"
+        "detected_at": "2026-08-23T11:45:32.335609Z"
       }
     ],
     "extraction": {
@@ -161,10 +161,10 @@
       "per_attribute": {}
     },
     "certificate": {
-      "certificate_id": "ec_4c6203f00de1",
+      "certificate_id": "ec_371f982d76f2",
       "sku": "GNE25JMKES",
       "tenant_id": "unilog",
-      "generated_at": "2026-08-22T19:16:16.865712Z",
+      "generated_at": "2026-08-23T11:45:32.335775Z",
       "schema_version": "APP.KIT.REFRIGERATION@v1",
       "pipeline_version": "axiom-0.1.0",
       "classifications": [
@@ -239,6 +239,8 @@
           "verifiability": 0.0,
           "consistency": 1.0,
           "richness": 0.0,
+          "self_declared": 0.0,
+          "corroborated": 0.0,
           "weights": {
             "completeness": 0.35,
             "verifiability": 0.3,
@@ -256,7 +258,7 @@
         "cost_usd": null,
         "wall_clock_seconds": 0.0
       },
-      "signature": "sha256:f57281f765643ea1b2dbf79408908e01502ecb8883081047239f09932dec2644",
+      "signature": "sha256:fb52a762eb38850cccb73d9a7a85a502d8a170fecc7e1c444d228289b15a20b0",
       "signature_verified": true
     },
     "channels": [
@@ -296,13 +298,30 @@
     "metrics": {
       "fill_rate": 0.0,
       "verifiability": 0.0,
+      "self_declared_rate": 0.0,
+      "corroborated_rate": 0.0,
       "values_total": 0,
       "values_publishable": 0,
+      "values_self_declared": 0,
       "values_needing_review": 0,
       "gaps_total": 4,
       "gaps_required": 4,
       "conflicts": []
     },
+    "sources": [
+      {
+        "document_id": "Unihack__Sample_Dataset_-_Input#GNE25JMKES",
+        "url": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
+        "host": "",
+        "tier": "item_master",
+        "doc_type": "supplier_feed",
+        "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+        "covers_this_sku": "row",
+        "citable_as_manufacturer": false,
+        "license_note": null,
+        "revision_label": null
+      }
+    ],
     "cost": null,
     "copy": null
   },
@@ -311,7 +330,7 @@
     "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
     "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
     "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-22T19:16:11.275717Z",
+    "fetched_at": "2026-08-23T11:45:10.364455Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": "unilog",

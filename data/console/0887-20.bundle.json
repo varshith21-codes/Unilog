@@ -19,8 +19,8 @@
       "source_document_ids": [
         "Unihack__Sample_Dataset_-_Input#0887-20"
       ],
-      "created_at": "2026-08-22T19:16:17.690808+00:00",
-      "updated_at": "2026-08-22T19:16:17.690868+00:00"
+      "created_at": "2026-08-23T11:45:33.416106+00:00",
+      "updated_at": "2026-08-23T11:45:33.416192+00:00"
     },
     "classifications": [
       {
@@ -70,7 +70,7 @@
         "value_raw": "M18",
         "value_canonical": "M18",
         "value_display": "M18",
-        "method": "supplier_feed",
+        "method": "item_master_parse",
         "confidence": 0.82,
         "status": "auto_accepted",
         "evidence": [
@@ -96,7 +96,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-22T19:16:17.690733Z",
+        "created_at": "2026-08-23T11:45:33.416034Z",
         "score": 0.8,
         "decision": {
           "attribute_code": "battery_platform",
@@ -121,8 +121,10 @@
           "source_prior": 0.5,
           "tier_cost": 0.5
         },
-        "is_publishable": true,
+        "is_publishable": false,
         "has_verified_evidence": true,
+        "is_self_declared": true,
+        "is_independent": false,
         "citation_summary": [
           "Unihack__Sample_Dataset_-_Input#0887-20"
         ]
@@ -139,7 +141,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:17.690854Z"
+        "detected_at": "2026-08-23T11:45:33.416169Z"
       },
       {
         "attribute_code": "power_source",
@@ -151,7 +153,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:17.690861Z"
+        "detected_at": "2026-08-23T11:45:33.416180Z"
       }
     ],
     "extraction": {
@@ -210,10 +212,10 @@
       "per_attribute": {}
     },
     "certificate": {
-      "certificate_id": "ec_f295a7ad8d35",
+      "certificate_id": "ec_d1d995a96b72",
       "sku": "0887-20",
       "tenant_id": "unilog",
-      "generated_at": "2026-08-22T19:16:17.691224Z",
+      "generated_at": "2026-08-23T11:45:33.416562Z",
       "schema_version": "TOL.PWR.GEN@v1",
       "pipeline_version": "axiom-0.1.0",
       "classifications": [
@@ -231,29 +233,7 @@
           "alternatives": []
         }
       ],
-      "attributes": [
-        {
-          "code": "battery_platform",
-          "value_canonical": "M18",
-          "value_display": "M18",
-          "value_raw": "M18",
-          "confidence": 0.82,
-          "method": "supplier_feed",
-          "model_tier": null,
-          "status": "auto_accepted",
-          "evidence": [
-            {
-              "document": "Unihack__Sample_Dataset_-_Input#0887-20",
-              "sha256": "49efd0b2\u2026",
-              "page": null,
-              "bbox": null,
-              "quote": "M18",
-              "verified": true
-            }
-          ],
-          "validations": []
-        }
-      ],
+      "attributes": [],
       "gaps": [
         {
           "code": "tool_configuration",
@@ -278,8 +258,8 @@
       ],
       "summary": {
         "attributes_required": 2,
-        "attributes_populated": 1,
-        "attributes_with_evidence": 1,
+        "attributes_populated": 0,
+        "attributes_with_evidence": 0,
         "attributes_inferred": 0,
         "auto_accepted": 1,
         "queued_for_review": 0,
@@ -287,9 +267,11 @@
         "gaps_required": 2,
         "quality_index": {
           "completeness": 0.0,
-          "verifiability": 1.0,
+          "verifiability": 0.0,
           "consistency": 1.0,
           "richness": 0.5,
+          "self_declared": 0.0,
+          "corroborated": 0.0,
           "weights": {
             "completeness": 0.35,
             "verifiability": 0.3,
@@ -302,12 +284,12 @@
             "richness",
             "verifiability"
           ],
-          "composite": 0.6
+          "composite": 0.3
         },
         "cost_usd": null,
         "wall_clock_seconds": 0.0
       },
-      "signature": "sha256:e66ff414dbe170f7c238945514c413a10dcde4231125a1c5744297d6578c738c",
+      "signature": "sha256:62150c425567380c498552091fdaba8f4422061731af70293c623f64d14ecb3e",
       "signature_verified": true
     },
     "channels": [
@@ -315,7 +297,9 @@
         "name": "cx1_pim",
         "published": false,
         "value_count": 0,
-        "withheld": [],
+        "withheld": [
+          "battery_platform"
+        ],
         "readiness": {
           "channel": "cx1_pim",
           "ready": false,
@@ -330,8 +314,10 @@
       {
         "name": "schema_org",
         "published": true,
-        "value_count": 1,
-        "withheld": [],
+        "value_count": 0,
+        "withheld": [
+          "battery_platform"
+        ],
         "readiness": {
           "channel": "schema_org",
           "ready": true,
@@ -344,14 +330,31 @@
     ],
     "metrics": {
       "fill_rate": 0.0,
-      "verifiability": 1.0,
+      "verifiability": 0.0,
+      "self_declared_rate": 0.0,
+      "corroborated_rate": 0.0,
       "values_total": 1,
-      "values_publishable": 1,
+      "values_publishable": 0,
+      "values_self_declared": 1,
       "values_needing_review": 0,
       "gaps_total": 2,
       "gaps_required": 2,
       "conflicts": []
     },
+    "sources": [
+      {
+        "document_id": "Unihack__Sample_Dataset_-_Input#0887-20",
+        "url": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
+        "host": "",
+        "tier": "item_master",
+        "doc_type": "supplier_feed",
+        "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+        "covers_this_sku": "row",
+        "citable_as_manufacturer": false,
+        "license_note": null,
+        "revision_label": null
+      }
+    ],
     "cost": null,
     "copy": null
   },
@@ -360,7 +363,7 @@
     "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
     "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
     "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-22T19:16:11.275717Z",
+    "fetched_at": "2026-08-23T11:45:10.364455Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": "unilog",

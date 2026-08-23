@@ -431,7 +431,7 @@ cd apps/console
 npm install
 npm run dev          # http://localhost:3000
 
-npm test             # 143 component tests (Vitest + React Testing Library)
+npm test             # 212 component and library tests (Vitest + React Testing Library)
 npm run typecheck
 npm run check:contrast
 ```
@@ -452,13 +452,15 @@ control arm moved, and whether the cross-reference reads *cannot be determined* 
 than as a rejection. There is deliberately no coverage threshold — a number pushes effort toward the
 easy 80% and away from the handful of branches that matter.
 
-Six screens: a portfolio overview (quality scoreboard, cost meter, interactive risk dial), the
-pipeline replay, the review queue, the per-SKU review workspace with the evidence viewer and the
-cross-reference beneath it, the enrichment certificate, and the Quality Index page carrying the
-before/after cohort. All of it renders **real pipeline output** — the API serves bundles written by
-`run_pipeline.py --save-session` or `export_console_catalogue.py`, and decisions made in the
-workspace post back and persist. Neither writer invents a value; the difference between them is the
-source, and therefore how much there was to read: a datasheet, or one row of an item master.
+Seven screens: a portfolio overview (quality scoreboard, cost meter, interactive risk dial), the
+single-SKU enrichment form, the pipeline replay, the review queue, the per-SKU review workspace with
+the evidence viewer and the cross-reference beneath it, the enrichment certificate, and the Quality
+Index page carrying the before/after cohort. All but one render **real pipeline output** the API
+serves from bundles written by `run_pipeline.py --save-session`, `export_console_catalogue.py` or
+`POST /api/enrich`, and decisions made in the workspace post back and persist. No writer invents a
+value; the difference between them is the source, and therefore how much there was to read: a
+datasheet, one row of an item master, or a typed submission. `/enrich` is the exception in one respect
+only — it *causes* a run rather than reading one.
 
 **`/pipeline` replays a run rather than performing one.** It shows the stages a recorded run went
 through — ingest, parse, classify, extract, normalize, validate, decide, certify, syndicate, plus
@@ -467,6 +469,197 @@ any — each with the numbers that run actually produced, revealed in sequence. 
 and no upload, which is a deliberate reading of the blueprint's own demo hygiene note: cache the
 scripted path, because conference WiFi will fail. A single frontier escalation is thirty seconds of
 dead air in a seven-minute slot.
+
+### `/enrich` — one product, from a part number
+
+Every other entry point needs a file. `POST /api/delivery/export` filters rows already present in an
+uploaded item master; `run_pipeline.py` refuses to start without a source document. Somebody holding
+a part number, a manufacturer name and a link to the datasheet had to build a six-column CSV first.
+
+```powershell
+# This endpoint needs credentials, unlike every other one. No environment variable required: the
+# API resolves the profile itself (see `resolve_profile`), so this works from a plain shell.
+python -m uvicorn apps.api.main:app --port 8000
+
+# Set AXIOM_AWS_PROFILE only to choose between accounts explicitly.
+$env:AXIOM_AWS_PROFILE = "axiom"
+
+# Then open http://localhost:3000/enrich, or — two fields, nothing else:
+curl -X POST http://127.0.0.1:8000/api/enrich -H "Content-Type: application/json" -d '{
+  "mpn": "43911BK",
+  "manufacturer": "Kichler Lighting (KICLI)"
+}'
+```
+
+**On credentials, because this wasted real time.** With no `AWS_PROFILE` set, boto3 selects the
+profile literally named `default`. A `default` profile that exists in `~/.aws/config` — which gives
+it a region, so it looks configured — but has no entry in `~/.aws/credentials` produces
+`NoCredentialsError` on a machine where working credentials sit right beside it under another name.
+The error reads "Unable to locate credentials", which sounds like *none are configured* rather than
+*the wrong one was selected*.
+
+So the API resolves the profile rather than inheriting it: an explicit `AXIOM_AWS_PROFILE` or
+`AWS_PROFILE` always wins; failing that the ambient chain is used when it resolves, which is what
+keeps instance roles working on EC2 and ECS; failing both, the single named profile that *does*
+resolve credentials is used and announced on stderr. Only when there is exactly one candidate —
+choosing between two would be guessing at which account to bill. And the 503 now lists every profile
+and whether it resolves, so the next occurrence diagnoses itself.
+
+**This is the one screen in the console that spends money.** Everything else reads persisted output;
+this runs the online pipeline — two real Bedrock calls per submission, three with copy generation.
+The cost is on the page header, on the submit button, and measured in the result, because a form that
+bills quietly is a form somebody will hold down.
+
+Required: **a part number and a manufacturer, and that is genuinely enough.** Optional: a description
+and an `https://` URL.
+
+Two fields are sufficient because the form is wired to `axiom.retrieve`, so it goes and finds the
+document itself:
+
+1.  **The library first.** A stored document that already covers this part means **no request at
+    all**. `data/library/index.json` currently indexes 79 manufacturer documents covering 121 part
+    numbers, and it also records the 999 parts it has checked and found *absent* — so a negative
+    answer is paid for once instead of re-fetched. Retrieval is a one-time cost per document, not per
+    part, and this is where a catalogue stops being one fetch per row.
+2.  **The manufacturer's own site**, read through the search form the site published — no search API
+    and no key. This works for a manufacturer declared in `schema/sourcing.yaml` (57 of them, with
+    real domains), because that is where the domain comes from.
+3.  **The open web, on by default and needing no key.** `axiom.retrieve.search_duckduckgo` queries
+    DuckDuckGo's lite interface, takes the links and discards every snippet. This is the arm that
+    reaches a manufacturer nobody has declared, which is the case the other two cannot serve at all.
+
+None of that calls a model. It is HTTP and parsing, policy-gated before every request — marketplaces,
+mass retail, distributors and aggregators are refused, `robots.txt` is honoured, requests to one
+origin are spaced. So retrieval spends bandwidth where extraction spends tokens, and it is the
+cheaper half of the run: reading a real datasheet is the difference between thirteen gaps and
+thirteen cited values.
+
+A worked example, part number and manufacturer only, no description and no URL:
+
+```
+mpn='43911BK'  manufacturer='Kichler Lighting (KICLI)'
+
+retrieval    found in the library, 0 requests
+             https://www.kichler.com/products/indoor-lighting/pendants/avery-pendant-43911bk
+classify     LGT.LMP.GEN (retrieval_decisive)
+extract      8 requested, 3 values, 100% citation coverage, $0.000391
+
+  luminaire_form   Pendant          from 'Avery Pendant'
+  product_series   Avery            from 'Avery Collection'
+  wattage          40 W             from 'Wattage: 40 W'
+
+delivery     30/252 columns, 3 cited        certificate ec_1c54759426e2, signature verified
+```
+
+A second worked example, the one the open-web arm exists for. `Frigidaire` is **not** declared in
+`sourcing.yaml`, so steps 1 and 2 have nowhere to look:
+
+```
+mpn='PDSH4816AF'  manufacturer='Frigidaire'   (no description, no URL)
+
+query        "Frigidaire PDSH4816AF specifications datasheet"
+candidates   4 (2 refused by policy: ajmadison, us-appliance)
+fetched      linqcdn.avbportal.com/documents/490513f4-….pdf   3 pages, 2 tables
+classify     APP.KIT.DISHWASHER.BUILTIN
+extract      8 values, 100% citation coverage, $0.000645
+
+  sound_level          47 dBA            from 'Sound Level 47 dBA'
+  voltage_rating       120 V             from 'Voltage Rating 120 V'
+  amperage_rating      15 A              from 'Amps @ 120 Volts 15 Amps'
+  depth_with_door_open 50-1/4"           from 'Depth With Door Open 50 1/4"'
+  wash_cycle_count     8                 from 'Number of Cycles | 8'
+  primary_material     Stainless Steel   from 'Tub Material Stainless Steel'
+  finish_color         Stainless Steel   from 'Available Colors: Stainless Steel'
+  mounting_type        Built-in          from '24" Stainless Steel Tub Built-In Dishwasher'
+```
+
+Eight cited values against **one** from the description-only run on the same part. That difference is
+the argument for retrieval in a single line.
+
+When retrieval finds nothing the run says so and names the remedy ("no manufacturer domain is
+declared for 'X'; add it to `schema/sourcing.yaml`") rather than reporting a dead end, and falls back
+to treating the submission as its own source.
+
+### On the search provider, and its limits
+
+Three things about `search_duckduckgo` that are load-bearing rather than incidental.
+
+**The honest User-Agent is required, not merely preferred.** The intuition is backwards here: a
+spoofed `Mozilla/5.0` gets HTTP 202 and an anti-bot challenge from that endpoint, while the project's
+own `USER_AGENT` — which says what this is and who to contact — gets HTTP 200 and results. So the
+honesty `ingest/web.py` argues for on principle turns out to be the only thing that works. Do not
+"fix" this by adding a browser string; there is a test pinning it.
+
+**It is a public HTML interface, not an API with a usage agreement.** It is used the way a person uses
+it — one query per part number, honestly identified, spaced two seconds apart, link taken and page
+left, no result text stored. That is a defensible reading and it is not a licence. Keep the spacing,
+and treat the provider as replaceable: `SearchProvider` is one method wide precisely so swapping in a
+paid API is a one-line change. `AXIOM_SEARCH=off` disables it; `AXIOM_SEARCH=bedrock` selects the
+Bedrock Web Search arm instead.
+
+**Bedrock Web Search is not usable on every account, which is why it is not the default.** It is a
+server-side tool on the OpenAI Responses API, and that API accepts only the `openai.gpt-5.x` family —
+tested against every model in one real account, where `nvidia.nemotron-*`, `zai.glm-*`, `qwen.*`,
+`deepseek.*`, `minimax.*` and `moonshotai.*` all return *"does not support the `/openai/v1/responses`
+API"* and every `openai.gpt-5.x` returns *"not available for this account"*. A model appearing in the
+Bedrock console catalogue means it is purchasable, not that the account is entitled to it or that it
+supports that API. The extraction cascade is unaffected — it runs on GLM and Qwen through Converse.
+
+`retrieve=false` turns all of it off for a fully offline, deterministic run. *Then* a description or
+a URL is required again, and the refusal is the honest one: with nowhere to look and nothing to read,
+classification abstains, extraction has nothing to cite, and the only output is an identity-only row
+produced after paying for two model calls. The form says which field is missing rather than just
+greying out the button.
+
+One subtlety worth knowing, because it cost a debugging pass. Classification reads the most specific
+statement of what the product *is*: the description when there is one, otherwise the document's title
+block. On a scraped **web page** that title block is navigation chrome — `Menu / Ellipsis / Chevron /
+Grid` — which matches nothing in the schema, so classification abstained and extraction requested
+zero attributes off a perfectly good retrieved page. The whole document is now the fallback, and it
+classified that page decisively. The fallback is free in exactly the case it fires: an abstention on
+vocabulary grounds happens before any model call.
+
+**The two source shapes are not equal, and the UI never flattens them.**
+
+| | Source document | Citation says | Evidential weight |
+|---|---|---|---|
+| **URL supplied** | The fetched datasheet, hashed | page and line | The manufacturer *states* this |
+| **No URL** | The typed fields themselves, hashed, `submission:{mpn}` | the field it was read from | You told us this, at this hash, at this time |
+
+Both are real provenance. A submission is the weaker one, and every screen that shows a value from
+one says so. Supply both and the datasheet is primary: the description still runs through the
+deterministic pass, and the document's values **supersede** it — `ProductRecord.add_value` supersedes
+rather than appends, so the weaker reading stays in the record's history instead of colliding with
+the stronger one. That ordering is the one `axiom/delivery/batch.py` already documents as
+load-bearing, and it is enforced inside `run_stages` rather than left to a caller to remember. A
+description-derived value in a run with a URL cites the *submission*, not the datasheet, because the
+text is not in the datasheet — citing it would be exactly the false citation this system exists to
+prevent.
+
+The result is rendered on screen (stage cards for the run that just executed, the quality index, the
+queue), downloadable as CSV or XLSX with a per-cell provenance sidecar, and **persisted** — the SKU
+joins the corpus, so it appears in Resolve, in Audit, on the dashboards, and is replayable from
+Process. The delivery files are written when the run finishes, not on download: a download that
+re-ran the pipeline would spend two more model calls to produce bytes we already had.
+
+An already-enriched part number is a **409**, not a silent overwrite. Re-running replaces the review
+session and any decisions recorded against it, so it takes a deliberate second press. Same principle
+as `run_pipeline` refusing `--dry-run --save-session`.
+
+**Two things are materially worse on this endpoint than on the read-only routes, and neither is
+closed by anything in the code:**
+
+- **No authentication, on a route that spends money.** A sharper version of the gap already
+  documented on `/api/delivery/export`, which only spends CPU. A 4,000-character description cap, an
+  8 MiB document ceiling and a single-run mutex bound what one caller can spend before somebody
+  notices. They do not prevent it. Auth goes in front of this before anything else.
+- **Server-side request forgery.** This fetches a caller-supplied URL from inside your network.
+  `axiom.ingest.web` refuses non-`https` schemes, loopback and private literals, and now — when
+  `verify_public_address` is set, which this path sets — resolves the hostname and refuses any
+  non-public answer, re-checking at every redirect hop through a custom opener. That closes the
+  hostname-indirection hole the module's own docstring flagged. It does **not** close the race: DNS
+  is re-resolved when the socket is opened, so a short-TTL record can answer publicly to the check
+  and privately to the connection. This needs an egress policy, not just a library check.
 
 The stage list is derived, not fixed, so the count moves with the run. `BA-100-075` as committed
 replays ten stages: it has generated copy but is not part of a series.
@@ -522,6 +715,9 @@ Python installed — no Node, no build step.
 **How the data flows, and one distinction that matters:**
 
 ```
+retrieve_sources.py ───────-> data/library/index.json          which document covers which part
+                        └──-> data/cache/artifacts/            the bytes, addressed by hash
+                                  │
 run_pipeline.py ────────────> data/console/{slug}.bundle.json  what the machine produced
                         └──-> data/sessions/{slug}.json        what humans decided
 export_console_catalogue.py > data/console/{slug}.bundle.json  the same, per item-master row
@@ -538,6 +734,279 @@ escapes anything outside the unreserved set as `~XX`, so `52C3-5/8-UPC` is store
 `52C3-5~2F8-UPC`. A part number needing no escaping is its own slug, so nothing already on disk
 moved. `apps/console/src/lib/sku.ts` mirrors it for URLs, and one table pins both sides
 (`tests/test_sku_naming.py`, `apps/console/src/lib/sku.test.ts`).
+
+### Retrieval: finding the document in the first place
+
+Everything downstream of *here is a document* already worked — hash, parse, extract with verified
+citations, score, certify. Everything upstream worked too. Between them sat a gap no code occupied:
+**nothing chose the document.** So a part whose datasheet is on the manufacturer's website recorded
+`no_source_available`, and the only way to close it was for a person to paste a URL.
+
+`axiom.retrieve` is that step, and it follows three rules.
+
+**1. The manufacturer's own site is the primary source.** Resolution searches the manufacturer's
+domain with a `site:` query before it touches the open web, and only a manufacturer-tier URL may be
+written to the delivery format's `MFR URL` column. The domain map in `schema/sourcing.yaml` is keyed
+three ways, because the item master identifies a manufacturer three ways and none alone is enough:
+Unilog's own vendor code (exact and stable), the `Part_Manuf` name (fold-matched, so the file's own
+misspelling of `Phillips Lighting` still resolves), and the brand column — which is the **only** key
+that works for the 222 distributor rows, where `Part_Manuf` says "Boise Cascade" and only `DIB_Brand`
+says `TREX`.
+
+```powershell
+# how much of the file can even name a manufacturer, ordered by rows each fix unblocks
+python scripts/retrieve_sources.py "Unihack_ Sample Dataset - Input.csv" --report-unresolved
+```
+
+| | rows |
+|---|---|
+| resolve to a declared manufacturer domain | **800** |
+| named party is a declared distributor | 95 |
+| nothing named at all | 37 |
+| vendor known, no domain declared yet | 68 |
+
+The 68 are a work list, not a mystery: one line of YAML each, ordered so the vendor worth the most
+rows is first. The 95 distributor rows are not closable here at all — a distributor has no datasheet,
+and on those rows the brand column is a sentinel. Those need the brand master
+(`UniCat_Manufacturer_and_Brand_List.xlsx`), which is not in this repository.
+
+**2. E-commerce is refused before the request, not filtered after it.** Marketplaces, mass retail,
+industrial distributors, datasheet aggregators, user-generated content and editorial sources are
+declined by policy, so their bytes never enter the artifact store and cannot be cited by accident.
+The reasoning is recorded beside each category in the YAML; the short version is that a retailer's
+spec table is an unsourced transcription by a party with an incentive to look complete, so citing it
+produces an evidence chain that terminates in someone else's guess while looking exactly like one
+that terminates in an engineering drawing. Variant bleed makes it worse: a listing routinely covers a
+family under one URL, so extraction would verify the quote perfectly and attach it to the wrong
+product — the failure `scripts/run_adversarial.py` measures at 39 fabrications, arriving through a
+citation that checks out.
+
+Matching is on the **registrable domain**, never a substring. `amazon.com` matches
+`smile.amazon.com` and `AMAZON.COM.`; it does not match `notamazon.com` or
+`amazon.com.evil.example`, which is exactly what `"amazon.com" in host` does. A third tier,
+`unknown`, is fetchable and cited but never promoted to `MFR URL` — refusing every unrecognised host
+would make the open web unreachable, and promoting one would make the citation a lie.
+
+**3. A document fetched once serves every part it covers.** The artifact store already made
+re-fetching identical bytes free; it could not answer the expensive question — *do we already have
+something covering this part?* `axiom.retrieve.library` indexes that, using `find_sku` rather than
+string matching, so an ordering row is distinguished from a passing mention and a part the document
+*withdraws* is recorded as withdrawn rather than as covered. Part numbers checked and **not** found
+are cached too: a negative result is a result, and re-parsing a 200-page PDF to re-learn it is waste.
+
+```powershell
+# register documents you already have; coverage is then discovered across every row
+python scripts/retrieve_sources.py data/samples/valve-feed.csv `
+  --add data/samples/ba100.txt --add data/samples/gv200.txt --add data/samples/ap77c.pdf
+
+# plan without fetching; --url supplies one directly
+python scripts/retrieve_sources.py "Unihack_ Sample Dataset - Input.csv" --dry-run
+```
+
+Measured on `data/samples/valve-feed.csv`, whose three part numbers are covered by three real
+datasheets in this repository — `--no-library` is the control arm:
+
+| | descriptions only | with the library |
+|---|---|---|
+| values extracted | 7 | **25** |
+| required gaps | 28 | **16** |
+
+Reuse, on the same run: `ba100.txt` was registered for one row and covers **five** BA-100 sizes, each
+in an ordering row. `ap77c.pdf` records `77C-102` as withdrawn, with the quote that retires it, and
+does not offer it as coverage — enriching a discontinued part from its own obituary is worse than
+finding nothing.
+
+The gap *reason* now turns on whether a real source was read. With no covering document it stays
+`no_source_available` / `retry_with_better_source`: go and get it. With one read, it becomes
+`not_present_in_any_source` / `request_from_supplier` — the manufacturer's own document was parsed,
+the part number was located in it, and the attribute is not stated, so a better document will not
+help and a supplier request will.
+
+### Minimal input: a part number and a manufacturer name
+
+That is enough. No description, no URL, no search API key.
+
+```powershell
+# reads the manufacturer's own search form and searches it for the part number
+python scripts/retrieve_sources.py input.csv --discover
+
+# then enrich, which reads the library and extracts from whatever covers each row
+python scripts/export_console_catalogue.py input.csv --risk-budget 0.05
+```
+
+`--discover` (`axiom.retrieve.discover`) has two strategies, and the first one is the one that works.
+
+**1. The site's own sitemap** (`axiom.retrieve.sitemap`). `robots.txt` announces it, it is plain XML,
+and it is the canonical list of the site's pages rather than a ranked guess. Measured live:
+
+| manufacturer | outcome |
+|---|---|
+| `milwaukeetool.com` | 12,523 URLs; **all 108** of the sample's Milwaukee part numbers matched |
+| `kichler.com` | matched, product pages fetched |
+| `diablotools.com` | matched, product page fetched |
+| `satco.com` | no sitemap, no search form, rate-limited — reported, not guessed at |
+
+Product URLs end with the part number
+(`/products/details/5-x-045-x-7-8-metal-cut-off-wheel-type-1/49-94-0013`), so matching is on the last
+path segment first and anywhere in the URL second — those are different claims and both are reported.
+One fetch per manufacturer serves every row of that manufacturer.
+
+**2. The site's own search form**, as a fallback. This was built first, because it is what a person
+does, and on real sites it mostly fails: `milwaukeetool.com` publishes **zero** `<form>` elements, and
+its `/search?q=49-94-0013` page echoes the query into the markup but renders the results with
+JavaScript, so there is not one link to extract. It still works on simpler sites, so it stays.
+
+Sitemaps and search pages are fetched through `RetrievalSession.fetch_transient`, which is
+policy-gated, robots-honoured and rate-limited but **stores nothing**. That separation fixed a real
+bug found on the first live run: navigation pages were being archived, so a results page listing forty
+products was recorded as *covering* all forty, and a citation could have named a search page as the
+source of a specification. Only candidate documents are archived.
+
+Four more decisions worth knowing, because each is the difference between working and looking like it
+works:
+
+- **It reads the site's search form rather than guessing an endpoint.** `/search?q=`, `/?s=`,
+  `/catalogsearch/result/?q=` — a guess works on some sites and 404s on the rest, and the failure
+  looks like a bug. `find_search_form` takes the `action`, the field name and any hidden inputs out
+  of the markup the site published. A POST-only search is reported unusable rather than submitted,
+  because a POST cannot be a citation and submitting an inferred one is acting on the site rather
+  than reading it.
+- **A link qualifies by containing the part number, not by looking like a product page.** Exact and
+  checkable, in the URL or the anchor text, matched across punctuation so `49-94-0013` finds a
+  `49940013` slug. Spec-path hints only break ties among links that already match.
+- **A datasheet linked from a matching product page does *not* need the part number in its own URL.**
+  Manufacturers name literature after a family — requiring it would reject the document being looked
+  for.
+- **Bounded and scoped.** Four pages per part, manufacturer domain only, and every fetch goes through
+  the same session as any other, so robots.txt, per-origin spacing and the policy gate all apply.
+  There is no second fetch path. The homepage is read once per manufacturer, not once per row.
+
+### Source URLs, shown
+
+Every retrieved document is recorded on the record with the URL fetched, the host, and the tier that
+host was judged at, and rendered by `components/sources-panel.tsx` on both the audit artifact and the
+resolve workspace. The tier is as prominent as the link on purpose: a page on the manufacturer's own
+domain and a page on an unrecognised host are both legitimate evidence and are not worth the same,
+and only the first may be published as the manufacturer's own statement.
+
+The client's delivery format has slots for exactly this, and they now fill from real retrieval:
+
+```powershell
+python scripts/export_delivery.py "Unihack_ Sample Dataset - Input.csv" `
+  --library data/library/index.json --out data/delivery
+```
+
+| column | value |
+|---|---|
+| `MFR URL` | `https://www.milwaukeetool.com/products/details/…/49-94-0013` |
+| `Ref URL 1` | `https://www.milwaukeetool.com/-/media/PDFs/…/2026_Bonded-Abrasives_Solutions-Guide.pdf` |
+
+`MFR URL` takes the manufacturer's *page* and the datasheet PDF goes to a `Ref URL`, which is what the
+column means and the more useful pairing besides: the page to see the product, the PDF to check the
+figure. Where no source is on a declared manufacturer domain, `MFR URL` is **left empty** and a note
+says why — filling it with the next best link would publish a claim about who said it.
+
+### Two bugs that live data found
+
+Worth recording, because both were invisible against fixtures and both were caught by the system's own
+checks rather than by inspection.
+
+**A decimal with no leading zero read a thousand times too large.** Abrasive datasheets write
+thicknesses as bare decimal inches — `Thickness: .045 in`, `5"x.045"x7/8"` — and the number pattern in
+`axiom.normalize.parsers` required a digit before the point, so `.045` matched as `045` and became
+**45 inches**. The cross-field rule caught it (a 45-inch-thick 5-inch wheel fails
+`wheel_thickness < wheel_diameter`) and the value never published, but relying on downstream
+validation to catch a parse that wrong is relying on the wrong thing.
+`schema/classes/bonded_abrasive_wheel.yaml` had predicted this exact failure in a comment.
+
+**A fraction that misstated the value it came from.** `to_imperial_fraction` snapped to sixteenths,
+which is right for every nominal pipe size and wrong for a 0.045-inch wheel — it rendered as `1/16"`,
+39% thicker and a different product. It now tries 16ths, 32nds and 64ths in turn and falls back to a
+decimal inch when none represents the figure within 2%, so `3/4"`, `3/32"` and `7/64"` stay fractions
+and `0.045"` stays itself. A display value that disagrees with the canonical magnitude it was derived
+from is the one thing a display value must never be.
+
+A third, smaller one: a rule comparing a quantity to a bare number (`wheel_thickness <= 6.0` — six of
+what?) raised an `AttributeError` that the expression evaluator's `except TypeError` did not catch, so
+one malformed rule in one class aborted a 1,000-row batch. It now reports as a unit mismatch and the
+other rules keep running.
+
+One link had to be added for retrieval to work at all: **a row with no description could not be
+classified**, so no attributes were requested and a perfectly good retrieved datasheet went unread.
+Classification now falls back to the document's **title block** (`axiom.docintel.title_block`). Not
+the full text, and the measurement is why — on `data/samples/ba100.txt` retrieval scores the whole
+document 0.53 ball valve against 0.47 gate valve and correctly abstains, because the body discusses
+bronze, NPT threads and WSP ratings that a gate valve also has. The title block scores 0.76 and
+decides it. `tests/test_minimal_input.py` drives the whole chain and asserts every extracted value
+carries a quote that verifies against the stored bytes.
+
+### The open web
+
+`--discover` only searches the manufacturer's own site. For everything else — a trade association's
+specification, a standards body, a manufacturer whose site search is script-rendered — you need a
+search provider, and there is no default. Search is an external service with a key and a bill, so
+wiring one in silently would make behaviour depend on ambient credentials, and a stubbed fake would
+make an unconfigured install look like a working one.
+
+`axiom.retrieve.search_bedrock` is one, over [Amazon Bedrock's Web Search
+tool](https://docs.aws.amazon.com/bedrock/latest/userguide/web-search.html) — the same stack this
+project already runs on, no second vendor, and with `external_web_access=False` the query stays
+inside the AWS boundary:
+
+```powershell
+$env:AXIOM_BEDROCK_API_KEY = "<bedrock api key>"
+python scripts/retrieve_sources.py input.csv --discover `
+  --search-module axiom.retrieve.search_bedrock:from_env
+```
+
+**It returns URLs and discards every snippet.** Two independent reasons that agree. A snippet is a
+third party's summary, so a value extracted from one would carry a citation whose bytes were never
+held and cannot be hashed — the chain would terminate in someone else's excerpt while looking exactly
+like a citation into a datasheet. And Bedrock's acceptable-use terms forbid using Web Search to
+extract or store search-result content in bulk, or to populate a database, which is precisely what a
+thousand-SKU enrichment run reading snippets would be. So the URL goes back through the policy gate
+and the manufacturer's own bytes get fetched, hashed and cited. There is no code path here that can
+return snippet text.
+
+Two caveats. Web Search is a server-side tool on the **Responses API** at the `bedrock-mantle`
+endpoint, not `bedrock-runtime` where extraction talks — so it needs its own key and a GPT model,
+which is a genuine second dependency. And **this path has not been run against the live service**:
+there are no credentials for it here, so what is tested is the request shape and the parsing of the
+documented `url_citation` contract. Treat it as unverified until someone makes one live call.
+
+Any callable of shape `(query, *, limit) -> URLs` works, so a different provider is a one-line
+change.
+
+### Video, and why it is not built
+
+Product videos do carry specifications, and transcription is straightforward — AWS Transcribe, or a
+model with audio input. The reason it is not in here is the evidence model, not the plumbing.
+
+Every value in this system carries a quote that is mechanically re-checkable against stored bytes;
+that is the single cheapest anti-fabrication mechanism it has, and quote verification is what turns a
+model's claim into a deliverable. A transcript breaks that in a way no other source does. The
+citation would be a timestamp in a **machine-generated** transcript, so it is evidence about the
+audio rather than about the product, and it cannot be re-verified without re-running the
+transcription and hoping it lands the same way. A spoken "rated to about six hundred PSI" is also
+marketing register, not a specification.
+
+If it is wanted, the honest shape is:
+
+1. Manufacturer-owned video only. YouTube is currently in the `social_and_ugc` exclusion, and an
+   official manufacturer channel would need an explicit allowance in `schema/sourcing.yaml` rather
+   than opening the category.
+2. A new `DerivationMethod` — the existing extraction family *requires* a verifiable evidence span,
+   so a transcript value must not borrow one. It needs its own method whose evidence is a
+   `(document, start_ms, end_ms)` triple, and `requiresEvidence` in the console types has to know it
+   is a weaker kind.
+3. **Never auto-published.** These values would enter as candidates below any acceptance threshold,
+   so a human confirms every one. That is not a limitation to work around; it is the correct standing
+   of a machine transcription of speech.
+4. Corroboration only, ideally: use it to agree with a datasheet value, and treat disagreement as an
+   L4 cross-source conflict rather than as a new value.
+
+That is perhaps a day's work on top of what exists, and it is a deliberate decision rather than a
+missing feature. Say the word and I will build it.
 
 ### The whole item master in the console
 
@@ -1504,7 +1973,30 @@ that is internally inconsistent.
 
 ## Pipeline stages
 
-`scripts/run_pipeline.py` is the clearest read of the whole flow. It runs:
+`packages/axiom/pipeline/` holds the flow; `scripts/run_pipeline.py` is still the clearest read of
+it, and is now a thin caller. The split matters because the CLI is no longer the only caller —
+`POST /api/enrich` runs the same stages over a document that arrived from a typed part number — and a
+second implementation would be the worst kind of duplicate: one that scores differently from the one
+CI gates, for reasons nobody would find quickly. The same argument `axiom/delivery/batch.py` makes for
+the deterministic path.
+
+- `pipeline/stages.py` — stages 3 to 10, lifted verbatim. Takes a parsed document, returns
+  everything the run produced. Prints nothing, writes nothing, and takes its model client as an
+  argument, which is what makes the whole path testable with `StubModelClient`
+- `pipeline/source.py` — how a submission becomes a document: a fetched URL, or the typed fields
+  hashed and stored under a `submission:` URI
+- `pipeline/retrieval.py` — the wiring into `axiom.retrieve`, so a part number and a manufacturer
+  name find their own document. Library first, then the manufacturer's own site, then the open web.
+  No model call
+- `pipeline/single.py` — the single-SKU orchestrator, the only thing here that knows a part number
+  can arrive without a file
+- `pipeline/persist.py` — the review session and the console bundle, both under **slugged**
+  filenames. That is a fix, not a preference: the script wrote `{sku}.json` with the raw part number
+  while the API read `{slug}.json`, so the two disagreed for any SKU needing an escape — and
+  `52C3-5/8-UPC` is a fractional size, not an edge case
+- `pipeline/delivery.py` — one enriched record as a 252-column delivery row plus its sidecar
+
+The stages:
 
 1. **ingest** — content-addressed store, SHA-256 keyed, so every citation is anchored to an
    immutable document version. A path, a URL or a supplier flat file all land here identically

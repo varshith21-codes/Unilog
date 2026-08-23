@@ -490,12 +490,15 @@ def to_attribute_values(
     re-derived below rather than trusted from the match, so a bug in span arithmetic surfaces as a
     failure instead of as a false citation.
 
-    ``accept`` controls whether these publish. It defaults to True, which is a real decision worth
-    defending: the evidence is a verified substring of a document the client themselves sent, the
-    derivation is deterministic and declared in version-controlled YAML, and the attribute is
-    class-scoped. That is a stronger provenance chain than an auto-accepted model extraction has.
-    A caller running with a calibrated policy should pass ``accept=False`` and let the policy
-    decide, which is what the full pipeline does.
+    Every value is minted as :attr:`DerivationMethod.ITEM_MASTER_PARSE`, which is what stops this
+    module from answering the question it was asked. The description is the client's own unsourced
+    free text; a specification parsed out of it is a hypothesis to go and confirm, not a fact
+    established. So these values carry a verified span, appear in the console as candidates, and
+    tell retrieval which attribute to look for on the manufacturer's page — but they never publish
+    and never count toward completeness. See the method's own docstring for the full argument.
+
+    ``accept`` therefore no longer controls publication, only whether the value presents as
+    ``AUTO_ACCEPTED`` for the policy's benefit; ``is_publishable`` is False either way.
     """
     values: list[AttributeValue] = []
     for match in extraction.matches:
@@ -525,10 +528,12 @@ def to_attribute_values(
                 value_raw=match.value_raw,
                 value_canonical=match.canonical,
                 value_display=match.display,
-                # SUPPLIER_FEED is in the extraction family, so the type system *requires* the
-                # evidence span above. That is the right family: the value came off a document the
-                # supplier sent, not from inference and not from a nameless legacy row.
-                method=DerivationMethod.SUPPLIER_FEED,
+                # In the extraction family, so the type system *requires* the evidence span above —
+                # this did read a document and must cite it. But ITEM_MASTER_PARSE rather than
+                # SUPPLIER_FEED, because the document is the client's own item master and not
+                # something a manufacturer published. That one word is the difference between
+                # "the description implies 230V" and "230V is this product's rated voltage".
+                method=DerivationMethod.ITEM_MASTER_PARSE,
                 confidence=match.confidence,
                 status=ValueStatus.AUTO_ACCEPTED if accept else ValueStatus.CANDIDATE,
                 evidence=[span],

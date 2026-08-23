@@ -19,8 +19,8 @@
       "source_document_ids": [
         "Unihack__Sample_Dataset_-_Input#XNB07Z"
       ],
-      "created_at": "2026-08-22T19:16:17.876105+00:00",
-      "updated_at": "2026-08-22T19:16:17.876166+00:00"
+      "created_at": "2026-08-23T11:45:33.677037+00:00",
+      "updated_at": "2026-08-23T11:45:33.677127+00:00"
     },
     "classifications": [
       {
@@ -70,7 +70,7 @@
         "value_raw": "LXT",
         "value_canonical": "LXT",
         "value_display": "LXT",
-        "method": "supplier_feed",
+        "method": "item_master_parse",
         "confidence": 0.82,
         "status": "auto_accepted",
         "evidence": [
@@ -96,7 +96,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-22T19:16:17.875913Z",
+        "created_at": "2026-08-23T11:45:33.676843Z",
         "score": 0.8,
         "decision": {
           "attribute_code": "battery_platform",
@@ -121,8 +121,10 @@
           "source_prior": 0.5,
           "tier_cost": 0.5
         },
-        "is_publishable": true,
+        "is_publishable": false,
         "has_verified_evidence": true,
+        "is_self_declared": true,
+        "is_independent": false,
         "citation_summary": [
           "Unihack__Sample_Dataset_-_Input#XNB07Z"
         ]
@@ -135,7 +137,7 @@
           "unit": "V"
         },
         "value_display": "18 V",
-        "method": "supplier_feed",
+        "method": "item_master_parse",
         "confidence": 0.88,
         "status": "auto_accepted",
         "evidence": [
@@ -161,7 +163,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-22T19:16:17.875872Z",
+        "created_at": "2026-08-23T11:45:33.676822Z",
         "score": 0.8,
         "decision": {
           "attribute_code": "battery_voltage",
@@ -186,8 +188,10 @@
           "source_prior": 0.5,
           "tier_cost": 0.5
         },
-        "is_publishable": true,
+        "is_publishable": false,
         "has_verified_evidence": true,
+        "is_self_declared": true,
+        "is_independent": false,
         "citation_summary": [
           "Unihack__Sample_Dataset_-_Input#XNB07Z"
         ]
@@ -197,7 +201,7 @@
         "value_raw": "Bare",
         "value_canonical": "Bare Tool",
         "value_display": "Bare Tool",
-        "method": "supplier_feed",
+        "method": "item_master_parse",
         "confidence": 0.82,
         "status": "auto_accepted",
         "evidence": [
@@ -223,7 +227,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-22T19:16:17.875928Z",
+        "created_at": "2026-08-23T11:45:33.676858Z",
         "score": 0.8,
         "decision": {
           "attribute_code": "tool_configuration",
@@ -248,14 +252,28 @@
           "source_prior": 0.5,
           "tier_cost": 0.5
         },
-        "is_publishable": true,
+        "is_publishable": false,
         "has_verified_evidence": true,
+        "is_self_declared": true,
+        "is_independent": false,
         "citation_summary": [
           "Unihack__Sample_Dataset_-_Input#XNB07Z"
         ]
       }
     ],
     "gaps": [
+      {
+        "attribute_code": "tool_configuration",
+        "reason": "self_declared_only",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#XNB07Z"
+        ],
+        "detail": "the customer's own description implies 'Bare Tool' (from 'Bare'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-23T11:45:33.677110Z"
+      },
       {
         "attribute_code": "power_source",
         "reason": "no_source_available",
@@ -266,13 +284,13 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:17.876162Z"
+        "detected_at": "2026-08-23T11:45:33.677119Z"
       }
     ],
     "extraction": {
       "requested": 24,
       "values": 3,
-      "gaps": 1,
+      "gaps": 2,
       "rejected_unverifiable": 0,
       "corrected_to_match_evidence": 0,
       "citation_coverage": 1.0,
@@ -335,10 +353,10 @@
       "per_attribute": {}
     },
     "certificate": {
-      "certificate_id": "ec_5587c411d5ae",
+      "certificate_id": "ec_4c4e52d0f281",
       "sku": "XNB07Z",
       "tenant_id": "unilog",
-      "generated_at": "2026-08-22T19:16:17.876708Z",
+      "generated_at": "2026-08-23T11:45:33.677556Z",
       "schema_version": "TOL.PWR.GEN@v1",
       "pipeline_version": "axiom-0.1.0",
       "classifications": [
@@ -356,75 +374,18 @@
           "alternatives": []
         }
       ],
-      "attributes": [
-        {
-          "code": "battery_voltage",
-          "value_canonical": {
-            "magnitude": 18.0,
-            "unit": "V"
-          },
-          "value_display": "18 V",
-          "value_raw": "18V",
-          "confidence": 0.88,
-          "method": "supplier_feed",
-          "model_tier": null,
-          "status": "auto_accepted",
-          "evidence": [
-            {
-              "document": "Unihack__Sample_Dataset_-_Input#XNB07Z",
-              "sha256": "49efd0b2\u2026",
-              "page": null,
-              "bbox": null,
-              "quote": "18V",
-              "verified": true
-            }
-          ],
-          "validations": []
-        },
-        {
-          "code": "battery_platform",
-          "value_canonical": "LXT",
-          "value_display": "LXT",
-          "value_raw": "LXT",
-          "confidence": 0.82,
-          "method": "supplier_feed",
-          "model_tier": null,
-          "status": "auto_accepted",
-          "evidence": [
-            {
-              "document": "Unihack__Sample_Dataset_-_Input#XNB07Z",
-              "sha256": "49efd0b2\u2026",
-              "page": null,
-              "bbox": null,
-              "quote": "LXT",
-              "verified": true
-            }
-          ],
-          "validations": []
-        },
+      "attributes": [],
+      "gaps": [
         {
           "code": "tool_configuration",
-          "value_canonical": "Bare Tool",
-          "value_display": "Bare Tool",
-          "value_raw": "Bare",
-          "confidence": 0.82,
-          "method": "supplier_feed",
-          "model_tier": null,
-          "status": "auto_accepted",
-          "evidence": [
-            {
-              "document": "Unihack__Sample_Dataset_-_Input#XNB07Z",
-              "sha256": "49efd0b2\u2026",
-              "page": null,
-              "bbox": null,
-              "quote": "Bare",
-              "verified": true
-            }
+          "reason": "self_declared_only",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#XNB07Z"
           ],
-          "validations": []
-        }
-      ],
-      "gaps": [
+          "required": true,
+          "detail": "the customer's own description implies 'Bare Tool' (from 'Bare'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+          "recommended_action": "retry_with_better_source"
+        },
         {
           "code": "power_source",
           "reason": "no_source_available",
@@ -438,18 +399,20 @@
       ],
       "summary": {
         "attributes_required": 2,
-        "attributes_populated": 3,
-        "attributes_with_evidence": 3,
+        "attributes_populated": 0,
+        "attributes_with_evidence": 0,
         "attributes_inferred": 0,
         "auto_accepted": 3,
         "queued_for_review": 0,
-        "gaps_total": 1,
-        "gaps_required": 1,
+        "gaps_total": 2,
+        "gaps_required": 2,
         "quality_index": {
-          "completeness": 0.5,
-          "verifiability": 1.0,
+          "completeness": 0.0,
+          "verifiability": 0.0,
           "consistency": 1.0,
           "richness": 0.5,
+          "self_declared": 0.5,
+          "corroborated": 0.0,
           "weights": {
             "completeness": 0.35,
             "verifiability": 0.3,
@@ -462,12 +425,12 @@
             "richness",
             "verifiability"
           ],
-          "composite": 0.775
+          "composite": 0.3
         },
         "cost_usd": null,
         "wall_clock_seconds": 0.0
       },
-      "signature": "sha256:700cfad99637fe839d6b7ec05a846e70b79ee5ff1054036e0080a715c206a4ee",
+      "signature": "sha256:1404c98159b24936d40d30f49e560cf319af7c617ab64695984d9cf34578d5a6",
       "signature_verified": true
     },
     "channels": [
@@ -475,7 +438,11 @@
         "name": "cx1_pim",
         "published": false,
         "value_count": 0,
-        "withheld": [],
+        "withheld": [
+          "battery_platform",
+          "battery_voltage",
+          "tool_configuration"
+        ],
         "readiness": {
           "channel": "cx1_pim",
           "ready": false,
@@ -490,8 +457,12 @@
       {
         "name": "schema_org",
         "published": true,
-        "value_count": 3,
-        "withheld": [],
+        "value_count": 0,
+        "withheld": [
+          "battery_platform",
+          "battery_voltage",
+          "tool_configuration"
+        ],
         "readiness": {
           "channel": "schema_org",
           "ready": true,
@@ -503,15 +474,32 @@
       }
     ],
     "metrics": {
-      "fill_rate": 0.5,
-      "verifiability": 1.0,
+      "fill_rate": 0.0,
+      "verifiability": 0.0,
+      "self_declared_rate": 0.5,
+      "corroborated_rate": 0.0,
       "values_total": 3,
-      "values_publishable": 3,
+      "values_publishable": 0,
+      "values_self_declared": 3,
       "values_needing_review": 0,
-      "gaps_total": 1,
-      "gaps_required": 1,
+      "gaps_total": 2,
+      "gaps_required": 2,
       "conflicts": []
     },
+    "sources": [
+      {
+        "document_id": "Unihack__Sample_Dataset_-_Input#XNB07Z",
+        "url": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
+        "host": "",
+        "tier": "item_master",
+        "doc_type": "supplier_feed",
+        "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+        "covers_this_sku": "row",
+        "citable_as_manufacturer": false,
+        "license_note": null,
+        "revision_label": null
+      }
+    ],
     "cost": null,
     "copy": null
   },
@@ -520,7 +508,7 @@
     "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
     "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
     "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-22T19:16:11.275717Z",
+    "fetched_at": "2026-08-23T11:45:10.364455Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": "unilog",

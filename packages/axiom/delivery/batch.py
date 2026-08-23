@@ -28,7 +28,7 @@ The ordering inside :func:`run_batch` is load-bearing and is preserved from the 
 from __future__ import annotations
 
 from collections import Counter
-from collections.abc import Callable, Iterable, Mapping, Sequence
+from collections.abc import Callable, Iterable, Mapping, MutableMapping, Sequence
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 
@@ -245,6 +245,7 @@ def run_batch(
     options: BatchOptions | None = None,
     documents: Sequence[ParsedDocument] = (),
     golden: Mapping[str, Mapping] | None = None,
+    source_urls: Mapping[str, tuple[str | None, list[str]]] | None = None,
     builder: DeliveryRowBuilder | None = None,
     classifier: Classifier | None = None,
     on_row: Callable[[RowOutcome], None] | None = None,
@@ -263,6 +264,9 @@ def run_batch(
     classifier = classifier or Classifier(registry)
     builder = builder or DeliveryRowBuilder(fmt, registry)
     golden = golden or {}
+    # mpn -> (manufacturer-tier URL, other source URLs). Supplied by a caller that has a document
+    # library; empty otherwise, which is why the delivery run has always emitted blank URL columns.
+    source_urls = source_urls or {}
     # Loaded once for the batch, not per row.
     abbreviations = AbbreviationTable.load() if options.read_descriptions else None
 
@@ -340,10 +344,21 @@ def run_batch(
             from_golden = seed_from_golden(record, entry, document_sha256, registry)
             result.seeded_total += from_golden
 
+        # Retrieved URLs, if a document library was supplied. The manufacturer-tier one is handed
+        # over
+        # separately because `MFR URL` is a claim about *who said it*, not merely a link — see
+        # `DeliveryRowBuilder._evidence`.
+        retrieved_mfr, retrieved_refs = source_urls.get(source.mpn or "", (None, []))
+
         row = builder.build(
             record,
             source=source,
-            reference_urls=list(entry.get("reference_urls", [])) if entry else None,
+            mfr_url=retrieved_mfr,
+            reference_urls=(
+                [*retrieved_refs, *entry.get("reference_urls", [])]
+                if entry
+                else (list(retrieved_refs) or None)
+            ),
             # Brand and manufacturer cannot be resolved from a six-column input, so the arm
             # supplies them. Retrieval will supply them the same way.
             brand=entry.get("brand") if entry else None,
@@ -397,12 +412,21 @@ def extract_from_documents(
     registry: SchemaRegistry,
     class_code: str,
     target_sku: str,
+    diagnostics: MutableMapping[str, list[str]] | None = None,
 ) -> tuple[int, int]:
     """Read every attached document deterministically. Returns (values added, values refused).
 
     Values are normalised and then filtered through ``reject_unresolved``, because an enum value
     that normalisation could not snap keeps its accepted status and its verified citation — so it
     would publish as a null with a perfect quote attached.
+
+    ``diagnostics`` collects the reader's own account of what it could not use: table headers and
+    specification labels that matched no bound attribute. These were previously computed and
+    dropped, which made a schema gap indistinguishable from a silent document — the reader would
+    report "0 values" whether the datasheet said nothing or said it under a column name the schema
+    had never heard of. Each unmapped header is usually a one-line ``table_headers`` addition, so
+    surfacing them turns an invisible ceiling into a work list. Optional, because most callers only
+    want the counts.
     """
     added = refused = 0
     for parsed in documents:
@@ -410,6 +434,13 @@ def extract_from_documents(
             parsed, registry, class_code=class_code, target_sku=target_sku or None
         )
         refused += len(result.refused)
+        if diagnostics is not None:
+            for header in result.unmapped_headers:
+                diagnostics.setdefault("unmapped_headers", []).append(header)
+            for label in result.unmapped_labels:
+                diagnostics.setdefault("unmapped_labels", []).append(label)
+            for code, reason in result.refused:
+                diagnostics.setdefault("refused", []).append(f"{code}: {reason}")
         if not result.matches:
             continue
 

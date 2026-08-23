@@ -89,12 +89,12 @@ from axiom.core.naming import sku_slug  # noqa: E402
 from axiom.core.product import ProductRecord  # noqa: E402
 from axiom.delivery.batch import (  # noqa: E402
     InputColumnsError,
-    classify_row,
+    extract_from_documents,
     select_rows,
     validate_input_columns,
 )
 from axiom.delivery.source import INPUT_COLUMNS, SupplierRow  # noqa: E402
-from axiom.docintel import parse_artifact  # noqa: E402
+from axiom.docintel import parse_artifact, title_block  # noqa: E402
 from axiom.extract import ExtractionResult  # noqa: E402
 from axiom.extract.description import (  # noqa: E402
     AbbreviationTable,
@@ -103,6 +103,7 @@ from axiom.extract.description import (  # noqa: E402
 from axiom.extract.description import to_attribute_values as description_values  # noqa: E402
 from axiom.ingest import LocalArtifactStore, ingest_file  # noqa: E402
 from axiom.normalize import BrandMaster, clean_mpn, normalize_all  # noqa: E402
+from axiom.retrieve import DocumentLibrary, SourceTier  # noqa: E402
 from axiom.review import build_session  # noqa: E402
 from axiom.schema import load_default  # noqa: E402
 from axiom.syndicate import export_all  # noqa: E402
@@ -111,6 +112,7 @@ from axiom.validate import Validator  # noqa: E402
 DEFAULT_CONSOLE_DIR = REPO_ROOT / "data" / "console"
 DEFAULT_SESSION_DIR = REPO_ROOT / "data" / "sessions"
 DEFAULT_CALIBRATION_DIR = REPO_ROOT / "data" / "calibration"
+DEFAULT_LIBRARY_INDEX = REPO_ROOT / "data" / "library" / "index.json"
 ARTIFACT_STORE = REPO_ROOT / "data" / "cache" / "artifacts"
 
 TENANT = "unilog"
@@ -169,6 +171,24 @@ def main() -> int:
         action="store_true",
         help="write bundles only. The dashboards render, but the resolve workspace has nothing "
         "to post a decision against",
+    )
+    parser.add_argument(
+        "--library",
+        type=Path,
+        default=DEFAULT_LIBRARY_INDEX,
+        help=(
+            "document library index written by scripts/retrieve_sources.py. Any retrieved document "
+            "that covers a row is extracted from, deterministically and with citations. Absent or "
+            "empty, the run falls back to the description alone."
+        ),
+    )
+    parser.add_argument(
+        "--no-library",
+        action="store_true",
+        help=(
+            "ignore the document library and read descriptions only. The measurement arm: run with "
+            "and without, and the difference is what retrieval contributed."
+        ),
     )
     parser.add_argument(
         "--calibration-dir",
@@ -239,6 +259,13 @@ def main() -> int:
     brands = BrandMaster.load()
     validator = Validator(registry)
 
+    # Loaded once for the whole run, so a document covering two hundred rows is parsed once rather
+    # than two hundred times. That memoisation lives on the library instance, which is why it is
+    # built here and passed down rather than constructed per row.
+    library = None
+    if not args.no_library:
+        library = DocumentLibrary.load(LocalArtifactStore(ARTIFACT_STORE), args.library)
+
     if not args.quiet:
         print(f"read {len(rows)} rows from {args.source.name}; processing {len(selected)}")
         print(f"item master {artifact.document.document_id}  sha256 {artifact.document.sha256}")
@@ -247,8 +274,17 @@ def main() -> int:
         print(
             f"policy      {summary['epsilon']:.0%} error budget, threshold "
             f"{threshold if threshold is None else f'{threshold:.4f}'}, "
-            f"calibrator {'trained' if calibrator.is_trained else 'untrained-heuristic'}\n"
+            f"calibrator {'trained' if calibrator.is_trained else 'untrained-heuristic'}"
         )
+        if library is None:
+            print("library     ignored (--no-library): descriptions only")
+        else:
+            covered = library.stats()["skus_covered"]
+            print(
+                f"library     {len(library)} document(s), covering {covered} part number(s) "
+                f"so far"
+            )
+        print()
 
     args.out.mkdir(parents=True, exist_ok=True)
     if not args.no_sessions:
@@ -264,6 +300,16 @@ def main() -> int:
     values_total = 0
     gaps_total = 0
     accepted_total = 0
+    from_documents_total = 0
+    rows_with_documents = 0
+    # Counted across the run, because frequency is what turns a diagnostic into a decision: a column
+    # header the schema does not know, seen on two hundred rows, is one line of YAML worth more than
+    # the rest of the tail put together.
+    unmapped: dict[str, Counter[str]] = {
+        "unmapped_headers": Counter(),
+        "unmapped_labels": Counter(),
+        "refused": Counter(),
+    }
 
     for index, raw in enumerate(selected, start=1):
         source = SupplierRow.parse(dict(raw))
@@ -273,7 +319,19 @@ def main() -> int:
                 print(f"  {index:>5}  SKIP  (no part number)")
             continue
 
-        class_code, method = classify_row(classifier, source, args.class_code)
+        # Coverage is looked up *before* classification, because it can feed it. A row whose
+        # description is blank is unclassifiable from the row alone — and a retrieved datasheet is a
+        # far better classification input than a forty-character description anyway. Without this
+        # ordering, a SKU with a perfectly good covering document still abstained, and then no
+        # attributes were asked for and the document went unread.
+        coverage = _coverage_for(library, source.mpn or "")
+        class_code, method = _classify(
+            classifier,
+            source,
+            forced=args.class_code,
+            coverage=coverage,
+            library=library,
+        )
         methods[method] += 1
         classes[class_code or "-"] += 1
 
@@ -310,17 +368,28 @@ def main() -> int:
             stem=stem,
             out=args.out,
             session_out=None if args.no_sessions else args.session_out,
+            coverage=coverage,
         )
         written.append(sku)
         values_total += stats["values"]
         gaps_total += stats["gaps"]
         accepted_total += stats["accepted"]
+        from_documents_total += stats["from_documents"]
+        if stats["documents"]:
+            rows_with_documents += 1
+        for kind, entries in stats["diagnostics"].items():
+            unmapped[kind].update(entries)
 
         if not args.quiet:
+            retrieved = (
+                f"  +{stats['from_documents']} from {stats['documents']} doc"
+                if stats["documents"]
+                else ""
+            )
             print(
                 f"  {index:>5}  {sku:24s} {class_code or '-':28s} "
                 f"{stats['values']:2d} values ({stats['accepted']} auto-accepted), "
-                f"{stats['gaps']:2d} gaps  {method}"
+                f"{stats['gaps']:2d} gaps  {method}{retrieved}"
             )
         del bundle_path, session_path
 
@@ -343,6 +412,10 @@ def main() -> int:
         accepted_total=accepted_total,
         pruned=pruned,
         policy=policy,
+        library=library,
+        from_documents_total=from_documents_total,
+        rows_with_documents=rows_with_documents,
+        unmapped=unmapped,
     )
     return 0
 
@@ -363,6 +436,7 @@ def _process_row(
     stem: str,
     out: Path,
     session_out: Path | None,
+    coverage: list = (),
 ) -> tuple[Path, Path | None, dict[str, int]]:
     """Run every offline stage for one row and write its bundle (and session).
 
@@ -376,13 +450,16 @@ def _process_row(
     document_id = row_artifact.document.document_id
 
     # --- classification, captured rather than just its verdict ------------------
-    # `classify_row` returned the code; `build_bundle` wants the candidate ranking behind it, so
-    # the console can show what retrieval considered and how decisively it chose.
-    classification = (
-        classifier.classify(source.description, sku=source.mpn)
-        if source.description
-        else None
-    )
+    # `_classify` returned the code; `build_bundle` wants the candidate ranking behind it, so the
+    # console can show what retrieval considered and how decisively it chose. Re-run against the
+    # same text that decided the class, or the bundle would display candidates for a different
+    # input than the one the verdict came from.
+    classification = None
+    if source.description:
+        classification = classifier.classify(source.description, sku=source.mpn)
+    if (classification is None or not classification.class_code) and coverage:
+        _entry, best = coverage[0]
+        classification = classifier.classify(title_block(best), sku=source.mpn)
 
     # --- extraction: the description, deterministically -------------------------
     extraction = extract_from_description(
@@ -404,6 +481,13 @@ def _process_row(
         accept=False,
     )
     normalized, norm_issues = normalize_all(raw_values, registry, class_code=class_code)
+
+    # --- retrieved documents covering this part ----------------------------------
+    # Resolved by the caller before classification, because a covering document can decide the class
+    # when the row has no description. Written by scripts/retrieve_sources.py; the reuse point is
+    # `DocumentLibrary.coverage_for`, where one accessory catalogue answers for every part listed in
+    # it and a document already checked and found not to mention this part is skipped unparsed.
+    documents = list(coverage) if class_code else []
 
     # --- the record -------------------------------------------------------------
     brand = brands.resolve(source.brand.brand) if source.brand.resolved else None
@@ -435,7 +519,40 @@ def _process_row(
     for value in normalized:
         record.add_value(value)
 
-    gaps = _gaps(record, registry, class_code, document_id=document_id)
+    # --- extraction from the retrieved documents, deterministically --------------
+    # After the description pass and before the gap sweep, which is the same ordering the batch
+    # delivery path uses and for the same reason: both are evidenced, but a datasheet *states* a
+    # fact where a description only implies it, so the document supersedes rather than collides.
+    # Still no model call — `extract_structured` reads specification lines and table cells by
+    # layout and cites the line or cell it read.
+    from_documents = 0
+    document_refused = 0
+    # What the reader saw in the document and could not place. Collected per row and aggregated by
+    # the caller, because an unmapped column that shows up on two hundred rows is one schema line
+    # worth adding and a column that shows up once is noise.
+    diagnostics: dict[str, list[str]] = {}
+    if documents and class_code:
+        parsed_documents = [found for _coverage, found in documents]
+        from_documents, document_refused = extract_from_documents(
+            record,
+            parsed_documents,
+            registry,
+            class_code,
+            source.mpn or "",
+            diagnostics=diagnostics,
+        )
+
+    gaps = _gaps(
+        record,
+        registry,
+        class_code,
+        document_id=document_id,
+        # The gap *reason* turns on this. With a covering document searched, an attribute that is
+        # still missing was genuinely looked for and not stated — `not_present_in_any_source`, which
+        # a supplier request can close. With no document, nothing was read at all, and claiming the
+        # stronger reason would assert a negative result that was never established.
+        documents_searched=[coverage.entry for coverage, _ in documents],
+    )
     for gap in gaps:
         record.add_gap(gap)
 
@@ -483,6 +600,14 @@ def _process_row(
         decisions=decisions,
         certificate=certificate,
         exports=exports,
+        # Where the data came from, on the record, in the form a person can check: the URL, the
+        # host, and what tier that host was judged to be. Only a manufacturer-tier URL is citable as
+        # the manufacturer's own page, so the tier travels with the link rather than being implied
+        # by it — otherwise every source would read as equally authoritative.
+        #
+        # Passed into the projection rather than assigned onto the result afterwards, which is how
+        # every bundle already on disk came to be missing the key.
+        sources=_sources(row_artifact, coverage),
     )
 
     payload = {
@@ -519,8 +644,126 @@ def _process_row(
             "values": len(record.current_values()),
             "gaps": len(record.gaps),
             "accepted": sum(1 for d in decisions if d.accepted),
+            "documents": len(documents),
+            "from_documents": from_documents,
+            "document_refused": document_refused,
+            "diagnostics": diagnostics,
         },
     )
+
+
+def _sources(row_artifact, coverage: list) -> list[dict]:
+    """Every source behind this record, with its URL and the tier it was judged at.
+
+    The item master comes first because it is always there and is the client's own file. Retrieved
+    documents follow, each carrying the URL that was actually fetched — post-redirect, which is the
+    address the bytes came from rather than the one we asked for.
+
+    ``citable_as_manufacturer`` is the field that matters and it is stated rather than inferred. A
+    URL on the manufacturer's own domain may be written into the delivery format's ``MFR URL``
+    column; an unknown-tier source is real evidence and must not be. Leaving a reader to work that
+    out from the host would put the distinction one mistake away.
+    """
+    sources = [
+        {
+            "document_id": row_artifact.document.document_id,
+            "url": row_artifact.document.uri,
+            "host": "",
+            "tier": "item_master",
+            "doc_type": row_artifact.document.doc_type.value,
+            "sha256": row_artifact.document.sha256,
+            "covers_this_sku": "row",
+            "citable_as_manufacturer": False,
+            "license_note": row_artifact.document.license_note,
+            "revision_label": row_artifact.document.revision_label,
+        }
+    ]
+    for entry, _parsed in coverage:
+        document = entry.entry
+        sources.append(
+            {
+                "document_id": document.document_id,
+                "url": document.source_uri,
+                "host": document.host,
+                "tier": document.tier,
+                "doc_type": document.doc_type,
+                "sha256": document.sha256,
+                # `table` means the document lists this part in an ordering row, which is the
+                # strongest claim available: it offers the part rather than mentioning it.
+                "covers_this_sku": entry.how,
+                "citable_as_manufacturer": document.tier == SourceTier.MANUFACTURER.value,
+                "license_note": document.license_note,
+                "revision_label": document.revision_label,
+            }
+        )
+    return sources
+
+
+def _coverage_for(library: DocumentLibrary | None, mpn: str) -> list:
+    """Every retrieved document covering this part, with its parsed form.
+
+    Empty without a library. Resolved once per row and threaded through, because ``coverage_for``
+    may have to parse a document to answer and the result is needed by both classification and
+    extraction.
+    """
+    if library is None or not mpn:
+        return []
+    found = []
+    for entry in library.coverage_for(mpn):
+        if (parsed := library.parsed(entry.entry)) is not None:
+            found.append((entry, parsed))
+    return found
+
+
+def _classify(
+    classifier: Classifier,
+    source: SupplierRow,
+    *,
+    forced: str | None,
+    coverage: list,
+    library: DocumentLibrary | None,
+) -> tuple[str | None, str]:
+    """The class for one row, from the best text available.
+
+    The description first, because it is the client's own words about this specific part number.
+    Then, if that produced nothing, the covering document's full text — which is what
+    ``run_pipeline.py`` has always classified from.
+
+    The fallback is what makes *part number plus manufacturer* a usable input. With no description
+    there is nothing in the row to classify, so the row abstains, so no class is established, so no
+    attributes are requested and the retrieved datasheet is never read. One blank field silently
+    disabled the entire retrieval chain. Reported as ``document`` rather than folded into
+    ``retrieval_only`` so the console can show which text decided the class.
+    """
+    if forced:
+        return forced, "forced"
+
+    if source.description:
+        result = classifier.classify(source.description, sku=source.mpn)
+        if result.class_code:
+            return result.class_code, result.method
+
+    if coverage:
+        # The strongest covering document, which `coverage_for` already sorted to the front.
+        _entry, parsed = coverage[0]
+        # The **title block**, not the full text, and the difference is decisive rather than
+        # cosmetic. Retrieval classification abstains unless one candidate dominates the next, and a
+        # whole datasheet mentions the vocabulary of several neighbouring classes — a bronze ball
+        # valve's spec sheet scores 0.53 for ball valves and 0.47 for gate valves, which is a real
+        # ambiguity and it correctly refuses to guess (`ambiguous_no_model`). The same document's
+        # opening lines score 0.76 and decide it, because a title block names the product and
+        # nothing else. That is also the same *kind* of text the description path classifies from,
+        # so the two arms stay comparable.
+        #
+        # `run_pipeline.py` classifies from the full text instead, and should: it has a model to
+        # resolve the ambiguity this path has to avoid.
+        result = classifier.classify(title_block(parsed), sku=source.mpn)
+        if result.class_code:
+            return result.class_code, f"document:{result.method}"
+        return None, "document_ambiguous"
+
+    del library
+    return None, "no_description" if not source.description else "no_viable_candidate"
 
 
 def _row_document(source: SupplierRow, *, artifact, stem: str):
@@ -542,31 +785,107 @@ def _row_document(source: SupplierRow, *, artifact, stem: str):
     return row_artifact, parse_artifact(f"{text}\n".encode(), document)
 
 
-def _gaps(record: ProductRecord, registry, class_code: str | None, *, document_id: str):
-    """A gap per required attribute the row could not establish.
+def _gaps(
+    record: ProductRecord,
+    registry,
+    class_code: str | None,
+    *,
+    document_id: str,
+    documents_searched: list = (),
+):
+    """A gap per required attribute the row could not establish, with the *reason* it could not.
 
-    ``NO_SOURCE_AVAILABLE`` rather than ``NOT_PRESENT_IN_ANY_SOURCE``, and the distinction is the
-    whole point of having gap reasons: nothing here searched a datasheet and came back empty,
-    because no datasheet was attached. Recording the stronger reason would claim a negative result
-    that was never established, and it would send someone to chase a supplier for a value that is
-    very likely printed on a document nobody has fetched yet.
+    Which reason is the whole point of having several, and it turns on one question: was a real
+    source read?
+
+    **No covering document** gives ``NO_SOURCE_AVAILABLE``. Nothing searched a datasheet and came
+    back empty, because no datasheet was attached — the only source was a forty-character
+    description. Recording the stronger reason here would claim a negative result that was never
+    established, and it would send someone to chase a supplier for a value that is very likely
+    printed on a document nobody has fetched yet. The action is therefore
+    ``RETRY_WITH_BETTER_SOURCE``: go and get it. ``scripts/retrieve_sources.py`` is how.
+
+    **A covering document was read** gives ``NOT_PRESENT_IN_ANY_SOURCE``, and the action becomes
+    ``REQUEST_FROM_SUPPLIER``. This is a genuine negative: the manufacturer's own document was
+    parsed, the part number was located in it, and the attribute is not stated. Nobody should go
+    looking for a better document, because this is the document. Somebody should ask the supplier.
+
+    ``sources_searched`` carries every document actually consulted, which is what makes the
+    negative auditable rather than merely asserted.
     """
     if not class_code:
         return []
 
-    have = {value.attribute_code for value in record.current_values()}
-    return [
-        Gap(
-            attribute_code=code,
-            reason=GapReason.NO_SOURCE_AVAILABLE,
-            sources_searched=[document_id],
-            detail=NO_DOCUMENT_DETAIL,
-            recommended_action=RecommendedAction.RETRY_WITH_BETTER_SOURCE,
-            is_required=True,
+    searched = [document_id, *(entry.document_id for entry in documents_searched)]
+    if documents_searched:
+        reason = GapReason.NOT_PRESENT_IN_ANY_SOURCE
+        action = RecommendedAction.REQUEST_FROM_SUPPLIER
+        names = ", ".join(entry.document_id for entry in documents_searched)
+        detail = (
+            f"read the item-master row and {len(documents_searched)} retrieved document(s) "
+            f"({names}); the part number was located but this attribute is not stated in any of "
+            f"them. A better document will not close this one, so it is a supplier request."
         )
-        for code in registry.required_codes(class_code)
-        if code not in have
-    ]
+    else:
+        reason = GapReason.NO_SOURCE_AVAILABLE
+        action = RecommendedAction.RETRY_WITH_BETTER_SOURCE
+        detail = NO_DOCUMENT_DETAIL
+
+    # **Established**, not merely present. This used to read `record.current_values()`, which
+    # counted a description-derived candidate as satisfying the attribute — so once those values
+    # stopped
+    # publishing, a required attribute the description implied was neither populated nor a gap. It
+    # vanished from both sides of the ledger, and a SKU could report 0 of 3 populated with 0 gaps,
+    # which is not a state that can be acted on.
+    have = {
+        value.attribute_code for value in record.current_values() if value.is_publishable
+    }
+    # What the input proposed but nothing independent confirmed. These become gaps too, with their
+    # own reason: the value is known, it just is not established.
+    suggested = {
+        value.attribute_code: value
+        for value in record.current_values()
+        if not value.method.is_independent and value.attribute_code not in have
+    }
+
+    gaps = []
+    for code in registry.required_codes(class_code):
+        if code in have:
+            continue
+        if (candidate := suggested.get(code)) is not None:
+            shown = candidate.value_display or str(candidate.value_canonical or "")
+            quoted = candidate.evidence[0].quote if candidate.evidence else ""
+            gaps.append(
+                Gap(
+                    attribute_code=code,
+                    reason=GapReason.SELF_DECLARED_ONLY,
+                    sources_searched=searched,
+                    detail=(
+                        f"the customer's own description implies {shown!r} (from {quoted!r}), and "
+                        f"no independent source confirms it. The parse is sound; the item master "
+                        f"is the file being enriched, so this is a lead rather than a fact. "
+                        f"Cheapest gap in the catalogue to close: retrieval has a specific claim "
+                        f"to check."
+                    ),
+                    # Not a supplier request. There is a named value to verify and a manufacturer
+                    # page that would settle it, so sending this to a supplier would ask them to
+                    # confirm what their own site already states.
+                    recommended_action=RecommendedAction.RETRY_WITH_BETTER_SOURCE,
+                    is_required=True,
+                )
+            )
+            continue
+        gaps.append(
+            Gap(
+                attribute_code=code,
+                reason=reason,
+                sources_searched=searched,
+                detail=detail,
+                recommended_action=action,
+                is_required=True,
+            )
+        )
+    return gaps
 
 
 def _extraction_result(extraction, values, gaps, registry, class_code: str | None):
@@ -669,6 +988,42 @@ def _display(path: Path) -> str:
         return str(path)
 
 
+def _report_unmapped(unmapped: dict | None) -> None:
+    """What the document reader saw and could not place, ordered by how often it saw it.
+
+    The highest-value output of a retrieval run after the values themselves, and it used to be
+    computed and discarded. An unmapped column header is the difference between "the datasheet does
+    not state this" and "the datasheet states it under a name the schema has never heard of", and
+    only one of those is closed by fetching more documents. Each line here is usually a one-line
+    ``table_headers`` addition in schema/attributes/.
+    """
+    if not unmapped:
+        return
+    headers = unmapped.get("unmapped_headers") or Counter()
+    labels = unmapped.get("unmapped_labels") or Counter()
+    refused = unmapped.get("refused") or Counter()
+    if not headers and not labels and not refused:
+        return
+
+    print("\nthe reader saw these and could not place them")
+    print("  (each is a candidate one-line addition to schema/attributes/)")
+    for title, counter in (
+        ("table headers", headers),
+        ("spec labels", labels),
+    ):
+        if not counter:
+            continue
+        print(f"  {title}:")
+        for text, count in counter.most_common(8):
+            flat = " ".join(str(text).split())[:58]
+            print(f"    {count:>5}x  {flat}")
+    if refused:
+        print("  refused after mapping (the label matched, the value did not survive):")
+        for text, count in refused.most_common(5):
+            flat = " ".join(str(text).split())[:58]
+            print(f"    {count:>5}x  {flat}")
+
+
 def _report(
     args,
     *,
@@ -683,6 +1038,10 @@ def _report(
     accepted_total: int,
     pruned: list[str],
     policy,
+    library=None,
+    from_documents_total: int = 0,
+    rows_with_documents: int = 0,
+    unmapped: dict | None = None,
 ) -> None:
     print()
     print("=" * 78)
@@ -694,7 +1053,22 @@ def _report(
     print()
 
     print(f"values          {values_total} ({accepted_total} auto-accepted at the threshold)")
+    description_total = values_total - from_documents_total
+    if library is None:
+        print(f"  from descriptions  {description_total}   (library ignored)")
+    else:
+        print(f"  from descriptions  {description_total}")
+        print(
+            f"  from documents     {from_documents_total}   across {rows_with_documents} row(s) "
+            f"a retrieved document covered"
+        )
+        if rows_with_documents == 0 and len(library) == 0:
+            print(
+                "  The library is empty, so every value here came from a forty-character\n"
+                "  description. Populate it: python scripts/retrieve_sources.py <input.csv>"
+            )
     print(f"required gaps   {gaps_total}")
+    _report_unmapped(unmapped)
     print(f"skipped         {skipped_no_mpn} without a part number", end="")
     print(f", {skipped_unclassified} unclassified" if skipped_unclassified else "")
     if duplicates:

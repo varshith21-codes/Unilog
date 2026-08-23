@@ -1,0 +1,699 @@
+# Where product data may be read from, and where it may not.
+#
+# Declarative for the same reason `constants.yaml` is: which sites are marketplaces and which
+# domain belongs to which manufacturer are *domain facts*, and burying them in a Python set puts a
+# domain fact where no domain expert will ever find it. A merchandiser can correct this file; they
+# will not correct a frozenset in a module.
+#
+# Three things live here, matching the three rules retrieval follows:
+#
+#   1. `manufacturers` — the primary and preferred source. The manufacturer's own site is the only
+#      place a specification is authoritative rather than transcribed.
+#   2. `excluded`      — sites that must never be fetched or cited, whatever they contain.
+#   3. `spec_hints`    — path fragments that suggest a page is a specification rather than a
+#      landing page, used to rank candidates.
+#
+# ---------------------------------------------------------------------------------------------
+# WHY EXCLUDE E-COMMERCE, when a marketplace listing often has more specifications on one page
+# than the manufacturer's own site?
+#
+# Because a marketplace listing is a *transcription* by a party with an incentive to make the
+# product look complete, and it is not correctable. Three failure modes, all of which this system
+# is specifically built to avoid:
+#
+#   * **Laundered provenance.** A retailer's spec table is itself unsourced. Citing it produces an
+#     evidence chain that terminates in someone else's guess, while looking exactly like a citation
+#     that terminates in the manufacturer's engineering drawing.
+#   * **Variant bleed.** A listing routinely covers a family under one URL, with the wrong size's
+#     torque figure or the wrong finish beside the part number the buyer typed. Extraction would
+#     verify the quote perfectly and attribute it to the wrong product — the failure mode measured
+#     at 39 fabrications in `scripts/run_adversarial.py`, arriving through a citation that checks
+#     out.
+#   * **Circularity.** Distributors syndicate each other's data. Enriching from a distributor risks
+#     reading back a value this system published, and scoring it as independent corroboration.
+#
+# Distributor sites are excluded on the same reasoning and not because they are competitors. The
+# client's own sourcing rule in the solution guide says the same thing, and the delivery format
+# encodes it: `MFR URL` means the manufacturer's page, so a URL that is not the manufacturer's does
+# not belong in the column.
+#
+# `unknown` is a third state and it is not a synonym for either. An unrecognised host is fetchable
+# but is never promoted to `MFR URL`, and the certificate records the tier it came from. Refusing
+# every host not on a list would make the open web unreachable; promoting one would make the
+# citation a lie.
+
+version: 1
+
+policy:
+  # Tiers, best first. `manufacturer` is authoritative; `unknown` is usable evidence that is
+  # honestly labelled; `excluded` is never fetched.
+  tiers: [manufacturer, unknown, excluded]
+  refuse: [excluded]
+  # Only a manufacturer-tier URL may be written to the delivery format's `MFR URL` column.
+  mfr_url_tiers: [manufacturer]
+  # Politeness, applied per registrable domain by the orchestrator. Not a rate limit imposed on us
+  # by anyone — it is the minimum courtesy owed to a site we are reading without being asked.
+  min_seconds_between_requests: 2.0
+  respect_robots_txt: true
+  max_candidates_per_sku: 4
+
+# -------------------------------------------------------------------------------- excluded hosts
+#
+# Matched on the *registrable domain* and any subdomain of it, never as a substring. `amazon.com`
+# must not match `notamazon.com`, and `www.amazon.com` and `smile.amazon.com` must both match.
+#
+# Not exhaustive, and it cannot be. It exists so the common cases are refused by policy rather than
+# by whoever is reviewing the output that day, and so that adding one is a one-line change a
+# merchandiser can make.
+
+excluded:
+  - category: marketplace
+    reason: >
+      Third-party sellers write their own listings. There is no single party responsible for the
+      specification, so there is nothing to cite and nobody to correct.
+    domains:
+      - amazon.com
+      - amazon.ca
+      - amazon.co.uk
+      - ebay.com
+      - aliexpress.com
+      - alibaba.com
+      - temu.com
+      - wish.com
+      - etsy.com
+      - walmart.com
+      - newegg.com
+      - overstock.com
+      - wayfair.com
+      - houzz.com
+
+  - category: mass_retail
+    reason: >
+      Retail product pages are merchandising copy. They omit the specifications a distributor
+      needs, round the ones they keep, and change without notice or revision marker.
+    domains:
+      - homedepot.com
+      - lowes.com
+      - menards.com
+      - acehardware.com
+      - truevalue.com
+      - doitbest.com
+      - target.com
+      - costco.com
+      - samsclub.com
+      - bestbuy.com
+      - harborfreight.com
+      - northerntool.com
+      - tractorsupply.com
+
+  - category: industrial_distributor
+    reason: >
+      Distributors syndicate each other's product data, so reading one risks reading back a value
+      this system published and scoring it as independent corroboration. This is also the category
+      the client's own sourcing rule names.
+    domains:
+      - grainger.com
+      - mscdirect.com
+      - fastenal.com
+      - zoro.com
+      - mcmaster.com
+      - globalindustrial.com
+      - ferguson.com
+      - supplyhouse.com
+      - pexuniverse.com
+      - wesco.com
+      - graybar.com
+      - platt.com
+      - build.com
+      - acmetools.com
+      - toolnut.com
+      - ohiopowertool.com
+      - cpotools.com
+      - toolbarn.com
+      - 1000bulbs.com
+      - bulbs.com
+      - lightingdirect.com
+      - ajmadison.com
+      - abt.com
+      - appliancesconnection.com
+      - us-appliance.com
+
+  - category: aggregator
+    reason: >
+      Datasheet aggregators host copies whose provenance and revision are unknown, frequently
+      years stale, and often OCR'd. A citation into one cannot be checked against the
+      manufacturer's current document.
+    domains:
+      - octopart.com
+      - findchips.com
+      - alldatasheet.com
+      - datasheets.com
+      - datasheetarchive.com
+      - manualslib.com
+      - manualsonline.com
+      - arrow.com
+      - digikey.com
+      - mouser.com
+      - newark.com
+
+  - category: social_and_ugc
+    reason: >
+      User-generated content is not a specification source under any circumstances, and a quote
+      lifted from one would verify perfectly while being someone's recollection.
+    domains:
+      - reddit.com
+      - facebook.com
+      - instagram.com
+      - pinterest.com
+      - youtube.com
+      - twitter.com
+      - x.com
+      - tiktok.com
+      - quora.com
+      - linkedin.com
+
+  - category: reference
+    reason: >
+      Encyclopaedic and editorial sources are secondary by construction. Useful for orientation,
+      never citable as the manufacturer's stated specification.
+    domains:
+      - wikipedia.org
+      - consumerreports.org
+      - cnet.com
+      - nytimes.com
+
+# --------------------------------------------------------------------------------- spec hints
+#
+# Used only to rank candidates, never to decide whether a page is fetchable. A URL carrying one of
+# these is more likely to be a specification than a category listing, which matters when the
+# per-SKU candidate budget is four.
+
+spec_hints:
+  paths:
+    - /spec
+    - /specification
+    - /datasheet
+    - /data-sheet
+    - /tech
+    - /technical
+    - /literature
+    - /documents
+    - /document
+    - /downloads
+    - /download
+    - /support
+    - /product
+    - /products
+    - /catalog
+    - /manual
+    - /submittal
+    - /pdf
+  suffixes:
+    - .pdf
+  # A path fragment that means "buy" rather than "specify". Deprioritised even on a
+  # manufacturer's own site, because a manufacturer's shop page is retail copy like any other.
+  negative_paths:
+    - /cart
+    - /checkout
+    - /buy
+    - /shop
+    - /store
+    - /where-to-buy
+    - /dealer
+    - /login
+    - /account
+    - /search
+
+# ------------------------------------------------------------------------------- manufacturers
+#
+# Keyed three ways because the item master identifies a manufacturer three different ways and none
+# of them alone is sufficient:
+#
+#   * `vendor_codes` — Unilog's own code from `Part_Manuf`, e.g. `5831`, `KICLI`. The most reliable
+#     key available: exact, stable, and unaffected by how the name is spelled that day.
+#   * `vendors`      — the `Part_Manuf` name, fold-matched. Carries the spelling the file actually
+#     uses, misspellings included: the sample says "Phillips Lighting" for Philips and
+#     "Black & Decker/dewlt" for DEWALT.
+#   * `brands`       — the value from the brand columns, fold-matched. **This is the only key that
+#     works for the distributor rows**, which are 222 of 1,000: when `Part_Manuf` is
+#     "Boise Cascade Building Materials" or "Parksite", the manufacturer is identifiable only from
+#     `DIB_Brand` — TREX, TIMBERTECH. Those two brands alone are 177 rows.
+#
+# Entries are only listed where the official domain is *known*. A guessed domain is worse than an
+# absent one: it would be fetched, would 404 or land on a squatter, and the failure would look like
+# a retrieval bug rather than a missing fact. An unlisted manufacturer resolves to
+# "no manufacturer domain known", which is a reportable, fixable state — see
+# `scripts/retrieve_sources.py --report-unresolved`.
+#
+# `patterns` is the optional fourth key: a URL template taking `{mpn}` (also `{mpn_lower}`,
+# `{mpn_stripped}`, `{mpn_stripped_lower}`) for sites whose product URL shape is known. **No entry
+# below declares one**, deliberately — establishing a site's URL shape means checking it against a
+# real part, and a guessed template produces a confident 404 on every row of that brand. Fill one in
+# once verified and the resolver will use it without a search provider:
+#
+#   - id: example
+#     domains: [example.com]
+#     patterns: ["https://www.example.com/products/{mpn_lower}"]
+
+manufacturers:
+  # ---------------------------------------------------------------- building products / decking
+  - id: trex
+    name: Trex Company
+    domains: [trex.com]
+    brands: [trex]
+    # Reaches the catalogue through three different distributors, which is exactly why the brand
+    # column has to be a key.
+    vendors: []
+
+  - id: timbertech
+    name: TimberTech
+    domains: [timbertech.com]
+    brands: [timbertech, "timbertech azek", azek]
+
+  - id: lp_building_solutions
+    name: LP Building Solutions
+    domains: [lpcorp.com]
+    brands: ["lp smartside", lp, smartside]
+
+  - id: james_hardie
+    name: James Hardie
+    domains: [jameshardie.com]
+    brands: [jameshardie, "james hardie", hardie]
+
+  - id: certainteed
+    name: CertainTeed
+    domains: [certainteed.com]
+    vendor_codes: ["2765"]
+    vendors: ["certainteed gypsum", certainteed]
+    brands: [certainteed]
+
+  - id: huber_engineered_woods
+    name: Huber Engineered Woods
+    domains: [huberwood.com]
+    vendor_codes: ["3158"]
+    vendors: ["huber eng wood llc"]
+    brands: ["zip system", zip]
+
+  - id: velux
+    name: VELUX
+    domains: [velux.com, veluxusa.com]
+    vendor_codes: [VELAM]
+    vendors: ["velux america inc"]
+    brands: [velux]
+
+  - id: provia
+    name: ProVia
+    domains: [provia.com]
+    vendor_codes: [PRODO]
+    vendors: [provia]
+    brands: [provia]
+
+  - id: andersen_windows
+    name: Andersen Windows
+    domains: [andersenwindows.com]
+    brands: [andersen]
+
+  - id: united_window_door
+    name: United Window & Door
+    domains: [unitedwindow.com]
+    vendor_codes: [UNIWI]
+    vendors: ["united window & door manufacturing"]
+    brands: ["united window & door"]
+
+  # ---------------------------------------------------------------------------------- lighting
+  - id: signify_philips
+    name: Signify (Philips lighting)
+    domains: [lighting.philips.com, signify.com]
+    vendor_codes: ["5831"]
+    # The file spells it "Phillips". Recorded as it appears rather than corrected, because the
+    # match has to work against the bytes we were sent.
+    vendors: ["phillips lighting", "philips lighting"]
+    brands: [philips, phillips]
+
+  - id: kichler
+    name: Kichler Lighting
+    domains: [kichler.com]
+    vendor_codes: [KICLI]
+    vendors: ["kichler lighting"]
+    brands: [kichler]
+
+  - id: satco
+    name: Satco Products
+    domains: [satco.com]
+    vendor_codes: ["5573"]
+    vendors: ["satco prod inc"]
+    brands: [satco, "satco nuvo", nuvo]
+    # The first verified pattern in this file, and it is verified rather than inferred: Satco's
+    # product pages are addressed by the bare order code, so `65-1222` resolves to
+    # satco.com/products/65-1222 — confirmed against real part numbers from the item master, not
+    # guessed from the shape of one URL. That matters because site discovery cannot reach this brand
+    # (no usable GET search form on the homepage), so without a pattern all 41 Satco rows resolve to
+    # "manufacturer known, no candidate" and stay description-only.
+    #
+    # Known behaviour, recorded so this entry is not deleted as broken: satco.com answers automated
+    # requests with **HTTP 429 Too Many Requests**, and does so from the first request rather than
+    # after a burst, so it is bot protection rather than our politeness delay being too short. The
+    # retrieval report shows these rows as `failed`, which is the honest outcome and is distinct from
+    # a 404 — the URL is right and the server is declining, so the fix is an agreement with Satco or
+    # their published feed, not a different pattern.
+    patterns: ["https://satco.com/products/{mpn}"]
+
+  - id: feit_electric
+    name: Feit Electric
+    domains: [feit.com]
+    vendor_codes: ["3468"]
+    vendors: ["feit electric"]
+    brands: ["feit electric", feit]
+
+  - id: lithonia
+    name: Lithonia Lighting
+    domains: [lithonia.com, acuitybrands.com]
+    vendor_codes: ["2776"]
+    vendors: ["lithonia lighting"]
+    brands: [lithonia]
+
+  - id: cooper_lighting
+    name: Cooper Lighting Solutions
+    domains: [cooperlighting.com]
+    vendor_codes: ["7638"]
+    vendors: ["cooper lighting"]
+    brands: ["cooper lighting"]
+
+  - id: hunter_fan
+    name: Hunter Fan Company
+    domains: [hunterfan.com]
+    vendor_codes: ["4381"]
+    vendors: ["hunter fan co"]
+    brands: [hunter]
+
+  - id: keystone_technologies
+    name: Keystone Technologies
+    domains: [keystonetech.com]
+    vendor_codes: ["5702"]
+    vendors: [keystone]
+    brands: [keystone]
+
+  # ------------------------------------------------------------------------- power tools / accs
+  - id: milwaukee_tool
+    name: Milwaukee Tool
+    domains: [milwaukeetool.com]
+    vendor_codes: ["4031"]
+    # NOT Milwaukee Valve, which is a different company and is already in `brands.yaml` with
+    # `milwaukee` as an alias. 108 rows here are cut-off wheels and power-tool accessories; a
+    # resolver that matched them to the valve maker would fetch a valve catalogue and extract
+    # pressure ratings for an abrasive disc. Vendor code 4031 is what keeps them apart.
+    vendors: ["milwaukee accessory", "milwaukee tool", "milwaukee electric tool"]
+    brands: [milwaukee]
+
+  - id: dewalt
+    name: DEWALT
+    domains: [dewalt.com]
+    vendor_codes: ["2585"]
+    vendors: ["black & decker/dewlt", "black and decker", dewalt]
+    brands: [dewalt, "black & decker"]
+
+  - id: makita
+    name: Makita
+    domains: [makitatools.com, makita.com]
+    vendor_codes: ["5142"]
+    vendors: ["makita usa inc", makita]
+    brands: [makita]
+
+  - id: bosch_tools
+    name: Bosch Power Tools
+    domains: [boschtools.com]
+    vendor_codes: ["6564"]
+    vendors: ["robt bosch tool corp", "robert bosch tool corporation"]
+    brands: [bosch]
+
+  - id: dremel
+    name: Dremel
+    domains: [dremel.com]
+    brands: [dremel]
+
+  - id: festool
+    name: Festool
+    domains: [festoolusa.com, festool.com]
+    vendor_codes: [FESTO]
+    vendors: ["festool usa", festool]
+    brands: [festool]
+
+  - id: kreg
+    name: Kreg Tool Company
+    domains: [kregtool.com]
+    vendor_codes: [KRETO]
+    vendors: ["kreg tool company", kreg]
+    brands: [kreg]
+
+  - id: sawstop
+    name: SawStop
+    domains: [sawstop.com]
+    vendor_codes: [SAWST]
+    vendors: ["saw stop llc", sawstop]
+    brands: [sawstop]
+
+  - id: jpw_industries
+    name: JPW Industries (JET, Powermatic)
+    domains: [jettools.com, powermatic.com]
+    vendor_codes: [JPWIN]
+    vendors: ["jpw industries"]
+    brands: [jet, powermatic]
+
+  - id: woodstock_international
+    name: Woodstock International
+    domains: [woodstockint.com]
+    vendor_codes: ["3658"]
+    vendors: ["woodstock intl"]
+
+  - id: king_canada
+    name: King Canada
+    domains: [kingcanada.com]
+    vendor_codes: [KINCA]
+    vendors: ["king canada inc"]
+
+  - id: senco
+    name: SENCO
+    domains: [senco.com]
+    vendor_codes: ["4650"]
+    vendors: ["senco products inc", senco]
+    brands: [senco]
+
+  - id: prebena
+    name: PREBENA
+    domains: [prebena.de]
+    vendor_codes: [PREBE]
+    vendors: [prebena]
+
+  - id: irwin
+    name: IRWIN Tools
+    domains: [irwin.com]
+    vendor_codes: ["5863"]
+    vendors: ["irwin industrial tools"]
+    brands: [irwin]
+
+  - id: wera
+    name: Wera Tools
+    domains: [wera.de]
+    vendor_codes: [WERTO]
+    vendors: ["wera tools na inc"]
+    brands: [wera]
+
+  - id: vessel_tools
+    name: Vessel Tools
+    domains: [vesseltools.com]
+    vendor_codes: [VESTO]
+    vendors: ["vessel tools usa inc"]
+
+  - id: streamlight
+    name: Streamlight
+    domains: [streamlight.com]
+    vendor_codes: ["7277"]
+    vendors: [streamlight]
+    brands: [streamlight]
+
+  # ---------------------------------------------------------------------------------- abrasives
+  - id: freud
+    name: Freud / Diablo
+    domains: [freudtools.com, diablotools.com]
+    vendor_codes: ["2435"]
+    vendors: ["freud inc", freud]
+    brands: [diablo, freud]
+
+  - id: mirka
+    name: Mirka
+    domains: [mirka.com]
+    vendor_codes: [MIRUS]
+    vendors: ["mirka abrasives inc", mirka]
+    brands: [mirka]
+
+  - id: three_m
+    name: 3M
+    domains: [3m.com]
+    vendor_codes: ["5293"]
+    vendors: ["3 m co", "3m company", 3m]
+    brands: [3m]
+
+  - id: amana_tool
+    name: Amana Tool
+    domains: [amanatool.com]
+    vendor_codes: [AMATO]
+    vendors: ["amana tool corp"]
+
+  - id: cmt
+    name: CMT Orange Tools
+    domains: [cmtorangetools.com]
+    vendor_codes: [CMTUS]
+    vendors: ["cmt usa inc"]
+
+  - id: whiteside
+    name: Whiteside Machine
+    domains: [whitesiderouterbits.com]
+    vendor_codes: [WHIMA]
+    vendors: ["whiteside machine & repair co"]
+
+  # ------------------------------------------------------------------------ electrical / wiring
+  - id: leviton
+    name: Leviton
+    domains: [leviton.com]
+    vendor_codes: ["4927"]
+    vendors: ["leviton mfg co", leviton]
+    brands: [leviton]
+
+  - id: southwire
+    name: Southwire
+    domains: [southwire.com]
+    vendor_codes: ["6603", "7579"]
+    vendors: ["southwire/g turner", "woods wire southwire", southwire]
+    brands: [southwire, woods]
+
+  - id: schneider_square_d
+    name: Schneider Electric (Square D)
+    domains: [se.com]
+    vendor_codes: ["6825"]
+    vendors: ["square d con prod dv", "square d"]
+    brands: ["square d", schneider]
+
+  # -------------------------------------------------------------------------------- safety / PPE
+  - id: first_alert
+    name: First Alert (BRK Brands)
+    domains: [firstalert.com]
+    vendor_codes: ["2754"]
+    vendors: ["first alert - b r k brands", "brk brands"]
+    brands: ["first alert", brk]
+
+  - id: edge_eyewear
+    name: Edge Eyewear
+    domains: [edgeeyewear.com]
+    vendor_codes: [EDGSA]
+    vendors: ["edge eyewear inc"]
+    brands: [edge]
+
+  - id: radians
+    name: Radians
+    domains: [radians.com]
+    vendor_codes: ["7363"]
+    vendors: [radians]
+    brands: [radians]
+
+  - id: sabre
+    name: SABRE
+    domains: [sabrered.com]
+    vendor_codes: ["9195"]
+    vendors: [sabre]
+
+  # --------------------------------------------------------------------------- misc hand tools
+  - id: marshalltown
+    name: Marshalltown
+    domains: [marshalltown.com]
+    vendor_codes: ["5155"]
+    vendors: ["marshalltown trowel"]
+    brands: [marshalltown]
+
+  - id: malco
+    name: Malco Products
+    domains: [malcotools.com]
+    vendor_codes: ["2370"]
+    vendors: ["malco prod"]
+    brands: [malco]
+
+  - id: woodpeckers
+    name: Woodpeckers
+    domains: [woodpeck.com]
+    vendor_codes: [WOODP]
+    vendors: ["woodpeckers inc"]
+
+  - id: bow_products
+    name: Bow Products
+    domains: [bowproducts.com]
+    vendor_codes: [BOWPR]
+    vendors: ["bow products"]
+
+  - id: national_nail
+    name: National Nail
+    domains: [nationalnail.com]
+    vendor_codes: ["7439"]
+    vendors: ["national nail corp"]
+    brands: [camo]
+
+  - id: hager
+    name: Hager Companies
+    domains: [hagerco.com]
+    vendor_codes: ["4189"]
+    vendors: ["hager hinge co"]
+    brands: [hager]
+
+  - id: schumacher
+    name: Schumacher Electric
+    domains: [schumacherelectric.com]
+    brands: [schumacher]
+
+  - id: maxsa
+    name: MAXSA Innovations
+    domains: [maxsainnovations.com]
+    vendor_codes: [MAXIN]
+    vendors: ["maxsa innovations"]
+
+  - id: stealthmounts
+    name: StealthMounts
+    domains: [stealthmounts.com]
+    brands: [stealthmounts]
+
+# ------------------------------------------------------------------------------ known unresolved
+#
+# Vendors present in the sample whose official domain is deliberately **not** asserted here, either
+# because they are a distributor rather than a manufacturer, or because the correct domain could not
+# be established with confidence. Listed rather than omitted so the gap is visible and closable, and
+# so `--report-unresolved` can distinguish "nobody has looked at this vendor" from "somebody looked
+# and could not establish it".
+#
+# The distributors are permanent entries: no domain will ever be right for them, because the
+# manufacturer has to come from the brand column instead.
+
+unresolved:
+  distributors:
+    - { code: BOICA, name: Boise Cascade Building Materials, rows: 85 }
+    - { code: APPDE, name: Appliance Dealers Cooperative, rows: 84 }
+    - { code: "6151", name: Parksite, rows: 55 }
+    - { code: "3073", name: U S Lumber, rows: 43 }
+    - { code: JAMIN, name: Jam Industrial Supply LLC, rows: 6 }
+    - { code: WESLU, name: Westwood Lumber Sales, rows: 4 }
+    - { code: VVAPP, name: V & V Appliance Parts Inc, rows: 1 }
+  needs_research:
+    - { code: TECGE, name: Tech Gear 5.7 Inc, rows: 11 }
+    - { code: "6694", name: U S Tape Company, rows: 10 }
+    - { code: PALDO, name: Palmer Donavin Mfg Company, rows: 9 }
+    - { code: PREME, name: Premier Metals, rows: 8 }
+    - { code: OLIMA, name: Oliver Machinery Company, rows: 6 }
+    - { code: "3562", name: Prime Wire & Cable, rows: 5 }
+    - { code: REECA, name: Rees Cast Stone Company, rows: 4 }
+    - { code: FENBR, name: Fenton Bros Electric Inc, rows: 3 }
+    - { code: HOLFS, name: Ohio Firewatch Protection Inc, rows: 2 }
+    - { code: "1154", name: ACG Brands, rows: 2 }
+    - { code: EMSJO, name: Emseal Joint Systems Ltd, rows: 1 }
+    - { code: AJMAN, name: A J Manufacturing Inc, rows: 1 }
+    - { code: MILTE, name: MillerTech Energy Solutions, rows: 1 }
+    - { code: METIN, name: Metalmark Industrial Inc, rows: 1 }
+    - { code: "7405", name: Thomas & Betts, rows: 1 }
+    - { code: "3560", name: Cooper Wiring Devices, rows: 1 }
+    - { code: "9470", name: Police Security, rows: 1 }
+    - { code: JGMAC, name: J&G Machinery, rows: 1 }

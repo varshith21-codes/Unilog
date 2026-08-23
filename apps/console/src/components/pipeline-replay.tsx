@@ -3,7 +3,8 @@
 import clsx from "clsx";
 import { useCallback, useEffect, useState } from "react";
 
-import { AlertIcon, CheckIcon, Overline, Panel } from "@/components/primitives";
+import { Overline } from "@/components/primitives";
+import { StageCard } from "@/components/stage-card";
 import type { PipelineStage } from "@/lib/stages";
 import { modelStageShare, stageSeconds } from "@/lib/stages";
 
@@ -186,74 +187,7 @@ export function PipelineReplay({
   );
 }
 
-const TONE_TEXT: Record<PipelineStage["tone"], string> = {
-  pass: "text-[var(--pass)]",
-  warn: "text-[var(--warn)]",
-  fail: "text-[var(--fail)]",
-  quiet: "text-[var(--fg-tertiary)]",
-};
-
-const TONE_EDGE: Record<PipelineStage["tone"], string> = {
-  pass: "border-l-[var(--pass)]",
-  warn: "border-l-[var(--warn)]",
-  fail: "border-l-[var(--fail)]",
-  // A decorative edge, not a control boundary, so the hairline token is the right one — and it is
-  // the only one of the four that is deliberately *not* held to 3:1.
-  quiet: "border-l-[var(--hairline-strong)]",
-};
-
-function StageCard({ stage, index }: { stage: PipelineStage; index: number }) {
-  return (
-    /*
-      `p-5` rather than `p-6`, and tighter separators below. Nine of these stack during the reveal, so
-      every row of padding is multiplied by nine — this is the one lever that reduces how far the
-      sequence pushes the last cards past the fold without touching the timing.
-    */
-    <Panel className={clsx("border-l-2 p-5", TONE_EDGE[stage.tone])}>
-      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2">
-        <span className="mono text-meta text-[var(--fg-quiet)]">
-          {String(index + 1).padStart(2, "0")}
-        </span>
-        <h3 className="text-sm font-medium">{stage.name}</h3>
-
-        {/*
-          Which stages called a model, marked on the stage itself. A reader tracing an unexpected
-          value needs to know whether a model was involved in producing it, and that is not
-          recoverable from the numbers.
-        */}
-        <span className={clsx("pill", stage.model ? "pill-accent" : "pill-quiet")}>
-          {stage.model ? "model" : "deterministic"}
-        </span>
-
-        {stage.latencyMs !== null ? (
-          <span className="text-meta text-[var(--fg-quiet)]">
-            {stageSeconds(stage.latencyMs)} recorded
-          </span>
-        ) : null}
-
-        <span className={clsx("ml-auto", TONE_TEXT[stage.tone])}>
-          {stage.tone === "fail" ? <AlertIcon /> : <CheckIcon />}
-        </span>
-      </div>
-
-      <p className={clsx("mt-2.5 max-w-[80ch] text-body", TONE_TEXT[stage.tone])}>
-        {stage.headline}
-      </p>
-
-      {stage.facts.length > 0 ? (
-        <dl className="mt-3.5 flex flex-wrap gap-x-7 gap-y-2">
-          {stage.facts.map((fact) => (
-            <div key={fact.label}>
-              <dt className="text-meta text-[var(--fg-quiet)]">{fact.label}</dt>
-              <dd className="mono mt-0.5 text-sm text-[var(--fg-secondary)]">{fact.value}</dd>
-            </div>
-          ))}
-        </dl>
-      ) : null}
-
-      <p className="hairline-t mt-4 max-w-[92ch] pt-3.5 text-meta text-[var(--fg-quiet)]">
-        {stage.note}
-      </p>
-    </Panel>
-  );
-}
+// `StageCard`, `TONE_TEXT` and `TONE_EDGE` moved to `components/stage-card.tsx` when `/enrich` needed
+// the same card for a run that had just executed. What stayed here is the framing — the replay label,
+// the recorded timestamp, the "nothing is executing now" — which is the part that must *not* be
+// shared, because it is the claim this screen makes about its own numbers.

@@ -16,6 +16,7 @@ import {
   Section,
   SectionHeading,
 } from "@/components/primitives";
+import { SourcesPanel } from "@/components/sources-panel";
 import { getClassDefinition, getSku } from "@/lib/data";
 import { reviewHref } from "@/lib/sku";
 import {
@@ -217,6 +218,18 @@ export default async function CertificatePage({
           </Panel>
         </div>
       </section>
+
+      {/* ---------------------------------------------------------------- sources */}
+      {/*
+        Placed before classification, because it answers the first question anyone auditing this
+        record asks: where did this come from? Everything below is an interpretation of these
+        documents.
+      */}
+      {bundle.sources && bundle.sources.length > 0 ? (
+        <Section>
+          <SourcesPanel sources={bundle.sources} />
+        </Section>
+      ) : null}
 
       {/* ---------------------------------------------------------------- classification */}
       <Section>

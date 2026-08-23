@@ -203,6 +203,11 @@ def serialise_values(
                 "features": features.get(value.attribute_code, {}),
                 "is_publishable": value.is_publishable,
                 "has_verified_evidence": value.has_verified_evidence,
+                # Rendered as its own badge rather than inferred from the method name. A value can
+                # carry a perfectly verified span and still rest on nothing but the customer's own
+                # description, and that is the one thing a reviewer must not have to deduce.
+                "is_self_declared": value.method.is_self_declared,
+                "is_independent": value.method.is_independent,
                 "citation_summary": value.citation_summary(),
             }
         )
@@ -267,6 +272,7 @@ def build_bundle(
     exports,
     cost: dict[str, Any] | None = None,
     copy: dict[str, Any] | None = None,
+    sources: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Project one SKU's pipeline run.
 
@@ -338,15 +344,68 @@ def build_bundle(
         "metrics": {
             "fill_rate": round(record.fill_rate(required), 4),
             "verifiability": round(record.verifiability(), 4),
+            # The provenance split, reported beside fill_rate and never folded into it. Without
+            # these two a fill_rate of 0.0 is unreadable: it cannot distinguish "the description
+            # said plenty and nothing has confirmed it" from "there was nothing to go on".
+            "self_declared_rate": round(record.self_declared_rate(required), 4),
+            "corroborated_rate": round(record.corroborated_rate(required), 4),
             "values_total": len(record.current_values()),
             "values_publishable": len(record.publishable_values()),
+            "values_self_declared": sum(
+                1 for v in record.current_values() if not v.method.is_independent
+            ),
             "values_needing_review": len(record.values_needing_review()),
             "gaps_total": len(record.gaps),
             "gaps_required": sum(1 for g in record.gaps if g.is_required),
             "conflicts": sorted(record.conflicts().keys()),
         },
+        # Always present, even as an empty list, so the console can distinguish "no external source
+        # was retrieved" from "this bundle predates source tracking". Every bundle written before
+        # this key existed omitted it entirely, and the sources panel could not tell the two apart —
+        # so it rendered nothing at all, and the one honest signal on the page was the one missing.
+        "sources": list(sources or []),
         "cost": cost,
         "copy": copy,
+    }
+
+
+def backfill_provenance(bundle: dict[str, Any]) -> dict[str, Any]:
+    """Add the provenance fields a bundle written before they existed cannot carry, on read.
+
+    Same approach and the same reason as :func:`normalise_quality_index`: the certificate's
+    signature
+    covers its summary, so rewriting stored bytes to add a field would invalidate the attestation
+    that makes the document worth having. The console needs one shape; the disk keeps its own.
+
+    The values here are derived, not invented, and the derivation is only sound because of *when*
+    these bundles were written. Every one predates ``ITEM_MASTER_PARSE``, so none of its values can
+    be self-declared — the method did not exist. Their values came from real documents. So:
+
+    * ``self_declared_rate`` and ``corroborated_rate`` are 0.0 — nothing on the record rests on the
+      item master, which is a fact about these bundles rather than a placeholder.
+    * ``values_self_declared`` is 0 for the same reason.
+    * ``sources`` becomes an empty list, which the sources panel already renders honestly as "no
+      manufacturer document has been retrieved". That is *not* true of these two bundles — they were
+      built from a real datasheet — but the URL and tier were never recorded, and inferring a
+      manufacturer tier from a document we cannot name would be exactly the laundered citation this
+      system exists to prevent. An absent source is the honest rendering of an unrecorded one.
+
+    A bundle already carrying the fields is returned untouched.
+    """
+    metrics = bundle.get("metrics")
+    if not isinstance(metrics, dict) or "self_declared_rate" in metrics:
+        return bundle if "sources" in bundle else {**bundle, "sources": []}
+
+    return {
+        **bundle,
+        "sources": bundle.get("sources") or [],
+        "metrics": {
+            **metrics,
+            "self_declared_rate": 0.0,
+            "corroborated_rate": 0.0,
+            "values_self_declared": 0,
+            "provenance_backfilled": True,
+        },
     }
 
 

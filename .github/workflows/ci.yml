@@ -311,6 +311,129 @@ jobs:
           python scripts/score_delivery.py \
             data/delivery/supplied/Unihack__Sample_Dataset_-_Input.delivery.csv
 
+      - name: The CLI and the API run the same pipeline, not two copies of it
+        # `tests/test_pipeline_stages.py` and `tests/test_enrich.py` already cover this, and they run
+        # in the suite above. This step guards the property those tests cannot: that the *script*
+        # still goes through the shared function rather than having quietly regrown its own copy.
+        #
+        # A dry run makes no model call, so this is free. It asserts the script imports `run_stages`
+        # and that the module it imports from is the one the endpoint uses — which is the whole point
+        # of the extraction, and the thing a well-meaning refactor would undo first.
+        run: |
+          python - <<'PY'
+          import ast
+          import sys
+          from pathlib import Path
+
+          script = Path("scripts/run_pipeline.py")
+          tree = ast.parse(script.read_text(encoding="utf-8"))
+          imported = {
+              f"{node.module}.{alias.name}"
+              for node in ast.walk(tree)
+              if isinstance(node, ast.ImportFrom) and node.module
+              for alias in node.names
+          }
+
+          problems = []
+          if "axiom.pipeline.run_stages" not in imported:
+              problems.append(
+                  "scripts/run_pipeline.py no longer imports axiom.pipeline.run_stages, so the CLI "
+                  "and POST /api/enrich are running different code"
+              )
+          if "axiom.pipeline.persist_run" not in imported:
+              problems.append(
+                  "scripts/run_pipeline.py no longer imports axiom.pipeline.persist_run, so its "
+                  "session filenames can drift from the ones the API reads"
+              )
+
+          # The stages must not have been copied back into the script. `Extractor` and
+          # `build_certificate` living here again would mean the orchestration was reinlined.
+          for name in ("Extractor", "build_certificate", "apply_policy", "export_all"):
+              if any(f".{name}" in entry for entry in imported):
+                  problems.append(
+                      f"scripts/run_pipeline.py imports {name} directly; the stages belong in "
+                      f"axiom.pipeline.stages so the API runs the same ones"
+                  )
+
+          for problem in problems:
+              print(f"FAIL: {problem}", file=sys.stderr)
+          if problems:
+              sys.exit(1)
+          print("pipeline is shared: the CLI calls axiom.pipeline.run_stages")
+          PY
+          python scripts/run_pipeline.py data/samples/ba100.txt --sku BA-100-075 --dry-run > /dev/null
+          echo "CLI dry run still completes through the shared function"
+
+      - name: Enrichment persists under a slug a part number with a separator can use
+        # The bug this guards is not hypothetical: `52C3-5/8-UPC` is a real part number from the
+        # client's item master, and writing `data/sessions/52C3-5/8-UPC.json` either lands in a
+        # directory that does not exist or creates one nobody meant to.
+        #
+        # Free and offline — StubModelClient, so no credentials and no network. The assertion is that
+        # every artifact lands under the slug and that the *contents* still carry the true part
+        # number, since that is what lets the console find the session from the bundle.
+        run: |
+          python - <<'PY'
+          import json
+          import sys
+          import tempfile
+          from pathlib import Path
+
+          from axiom.core.naming import sku_slug
+          from axiom.extract import StubModelClient
+          from axiom.ingest import LocalArtifactStore
+          from axiom.pipeline import EnrichmentRequest, enrich_one, persist_run
+          from axiom.review import ReviewSession
+          from axiom.schema import load_default
+
+          MPN = "52C3-5/8-UPC"
+          tmp = Path(tempfile.mkdtemp())
+          registry = load_default()
+
+          result = enrich_one(
+              EnrichmentRequest(mpn=MPN, manufacturer="Nibco", description="5/8IN COPPER TUBE"),
+              registry=registry,
+              client=StubModelClient([json.dumps([])]),
+              store=LocalArtifactStore(tmp / "artifacts"),
+              calibration_dir=tmp / "calibration",
+          )
+          paths = persist_run(
+              result.run,
+              parsed=result.source.parsed,
+              artifact=result.source.artifact,
+              registry=registry,
+              sessions_dir=tmp / "sessions",
+              console_dir=tmp / "console",
+          )
+
+          problems = []
+          if paths.slug != "52C3-5~2F8-UPC":
+              problems.append(f"slug is {paths.slug!r}")
+          for name, path in (("session", paths.session), ("bundle", paths.bundle)):
+              if not path.is_file():
+                  problems.append(f"{name} was not written to {path}")
+              elif not path.name.startswith(paths.slug):
+                  problems.append(f"{name} filename {path.name!r} is not slugged")
+
+          if paths.session.is_file() and ReviewSession.load(paths.session).sku != MPN:
+              problems.append("the session does not carry the true part number")
+          if paths.bundle.is_file():
+              bundle = json.loads(paths.bundle.read_text(encoding="utf-8"))["bundle"]
+              if bundle["sku"] != MPN:
+                  problems.append("the bundle does not carry the true part number")
+              elif sku_slug(bundle["sku"]) != paths.slug:
+                  problems.append("the console could not derive the session path from the bundle")
+
+          if not result.run.certificate.verify_signature():
+              problems.append("the certificate signature does not verify")
+
+          for problem in problems:
+              print(f"FAIL: {problem}", file=sys.stderr)
+          if problems:
+              sys.exit(1)
+          print(f"enrichment ok: {MPN} -> {paths.slug}, certificate signed")
+          PY
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v7

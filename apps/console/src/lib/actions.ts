@@ -20,6 +20,8 @@
 import { revalidatePath } from "next/cache";
 
 import { API_BASE } from "./data";
+import type { EnrichInput, EnrichResponse, EnrichResult } from "./enrich";
+import { enrichBody, isSubmittable, readEnrichFailure } from "./enrich";
 import { skuSlug } from "./sku";
 import type { DecisionResponse, ReviewAction, RiskPolicyView } from "./types";
 
@@ -126,6 +128,92 @@ export async function submitDecision(input: DecisionInput): Promise<DecisionResu
   revalidatePath("/review");
   revalidatePath(`/review/${skuSlug(sku)}`);
   revalidatePath("/");
+
+  return { ok: true, data };
+}
+
+/**
+ * Long enough for two real model calls, plus a datasheet fetch.
+ *
+ * `TIMEOUT_MS` above is 8 seconds, which is right for the endpoints it guards: they read a file off
+ * disk. This one runs the online pipeline. Classification and extraction are Bedrock calls, an
+ * escalation to a larger model adds tens of seconds, and a fetched datasheet has its own 20-second
+ * budget before parsing starts. Aborting at 8 seconds would report a network error for work that was
+ * going to succeed, and — worse on this endpoint specifically — the run would keep going and keep
+ * spending after the client had given up on it.
+ *
+ * Five minutes rather than "no timeout": a request with no ceiling holds the single-run mutex on the
+ * API side until the process is restarted.
+ */
+const ENRICH_TIMEOUT_MS = 300_000;
+
+/**
+ * Enrich one product from typed fields. **This spends real money.**
+ *
+ * A server action rather than a fetch from the browser, for the reasons at the top of this file, and
+ * one more that matters here: this is the only route in the console that costs money per call, so it
+ * is the one that most needs to sit behind the app's own origin with a single place to add auth.
+ *
+ * Failures come back as values, like every other action here. A refused submission is an ordinary
+ * outcome somebody needs to read and correct, not an exception that should blank the page they were
+ * filling in.
+ */
+export async function runEnrichment(input: EnrichInput): Promise<EnrichResult> {
+  // Checked here as well as on the form and again in Python. Not belt-and-braces: a server action is
+  // a public HTTP endpoint of its own, so "the button was disabled" is not a validation.
+  if (!isSubmittable(input)) {
+    return {
+      ok: false,
+      failure: {
+        kind: "insufficient_input",
+        message:
+          "A part number and a manufacturer are required, along with either a description or a " +
+          "manufacturer URL. A part number identifies a product but does not describe one, so with " +
+          "neither field there is nothing to classify and nothing to extract from.",
+        missing: ["description", "source_url"],
+      },
+    };
+  }
+
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE}/api/enrich`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(enrichBody(input)),
+      cache: "no-store",
+      signal: AbortSignal.timeout(ENRICH_TIMEOUT_MS),
+    });
+  } catch (cause) {
+    const reason = cause instanceof Error ? cause.message : String(cause);
+    return {
+      ok: false,
+      failure: {
+        kind: "unreachable",
+        message:
+          `Could not reach the AXIOM API at ${API_BASE} (${reason}). Start it with ` +
+          `"python -m uvicorn apps.api.main:app --port 8000", with AWS credentials set — this ` +
+          `endpoint makes real model calls.`,
+      },
+    };
+  }
+
+  if (!response.ok) {
+    return { ok: false, failure: await readEnrichFailure(response) };
+  }
+
+  const data = (await response.json()) as EnrichResponse;
+
+  // The SKU joined the corpus, so every screen that lists it is now stale. `/pipeline` is in the list
+  // because its recorded-run picker enumerates bundles, and a run that just happened should be
+  // replayable from it.
+  revalidatePath("/");
+  revalidatePath("/review");
+  revalidatePath(`/review/${data.slug}`);
+  revalidatePath("/certificates");
+  revalidatePath(`/certificates/${data.slug}`);
+  revalidatePath("/pipeline");
+  revalidatePath("/quality");
 
   return { ok: true, data };
 }

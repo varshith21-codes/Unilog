@@ -19,8 +19,8 @@
       "source_document_ids": [
         "Unihack__Sample_Dataset_-_Input#1728ABL"
       ],
-      "created_at": "2026-08-22T19:16:14.528609+00:00",
-      "updated_at": "2026-08-22T19:16:14.528668+00:00"
+      "created_at": "2026-08-23T11:45:27.179874+00:00",
+      "updated_at": "2026-08-23T11:45:27.179918+00:00"
     },
     "classifications": [
       {
@@ -76,7 +76,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:14.528636Z"
+        "detected_at": "2026-08-23T11:45:27.179896Z"
       },
       {
         "attribute_code": "nominal_dimensions",
@@ -88,7 +88,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:14.528644Z"
+        "detected_at": "2026-08-23T11:45:27.179900Z"
       },
       {
         "attribute_code": "material_composition",
@@ -100,7 +100,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:14.528649Z"
+        "detected_at": "2026-08-23T11:45:27.179903Z"
       }
     ],
     "extraction": {
@@ -149,10 +149,10 @@
       "per_attribute": {}
     },
     "certificate": {
-      "certificate_id": "ec_adf0a1d57575",
+      "certificate_id": "ec_a82440d3a0bb",
       "sku": "1728ABL",
       "tenant_id": "unilog",
-      "generated_at": "2026-08-22T19:16:14.528775Z",
+      "generated_at": "2026-08-23T11:45:27.180002Z",
       "schema_version": "BLD.PNL.SHEATHING@v1",
       "pipeline_version": "axiom-0.1.0",
       "classifications": [
@@ -217,6 +217,8 @@
           "verifiability": 0.0,
           "consistency": 1.0,
           "richness": 0.0,
+          "self_declared": 0.0,
+          "corroborated": 0.0,
           "weights": {
             "completeness": 0.35,
             "verifiability": 0.3,
@@ -234,7 +236,7 @@
         "cost_usd": null,
         "wall_clock_seconds": 0.0
       },
-      "signature": "sha256:1e6e798173143e1e003418f4bd26a39bbc889ba2468d2de1555dea2ece487c58",
+      "signature": "sha256:c642ec6af4b0b79f8928b5acc0c3b3e6405563ce39c576689bf05c50e3600666",
       "signature_verified": true
     },
     "channels": [
@@ -274,13 +276,30 @@
     "metrics": {
       "fill_rate": 0.0,
       "verifiability": 0.0,
+      "self_declared_rate": 0.0,
+      "corroborated_rate": 0.0,
       "values_total": 0,
       "values_publishable": 0,
+      "values_self_declared": 0,
       "values_needing_review": 0,
       "gaps_total": 3,
       "gaps_required": 3,
       "conflicts": []
     },
+    "sources": [
+      {
+        "document_id": "Unihack__Sample_Dataset_-_Input#1728ABL",
+        "url": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
+        "host": "",
+        "tier": "item_master",
+        "doc_type": "supplier_feed",
+        "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+        "covers_this_sku": "row",
+        "citable_as_manufacturer": false,
+        "license_note": null,
+        "revision_label": null
+      }
+    ],
     "cost": null,
     "copy": null
   },
@@ -289,7 +308,7 @@
     "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
     "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
     "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-22T19:16:11.275717Z",
+    "fetched_at": "2026-08-23T11:45:10.364455Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": "unilog",

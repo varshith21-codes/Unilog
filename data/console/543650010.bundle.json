@@ -19,8 +19,8 @@
       "source_document_ids": [
         "Unihack__Sample_Dataset_-_Input#543650010"
       ],
-      "created_at": "2026-08-22T19:16:14.450796+00:00",
-      "updated_at": "2026-08-22T19:16:14.450845+00:00"
+      "created_at": "2026-08-23T11:45:27.034067+00:00",
+      "updated_at": "2026-08-23T11:45:27.034127+00:00"
     },
     "classifications": [
       {
@@ -70,7 +70,7 @@
         "value_raw": "Alum",
         "value_canonical": "Aluminum",
         "value_display": "Aluminum",
-        "method": "supplier_feed",
+        "method": "item_master_parse",
         "confidence": 0.82,
         "status": "auto_accepted",
         "evidence": [
@@ -96,7 +96,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-22T19:16:14.450701Z",
+        "created_at": "2026-08-23T11:45:27.033957Z",
         "score": 0.8,
         "decision": {
           "attribute_code": "material_composition",
@@ -121,8 +121,10 @@
           "source_prior": 0.5,
           "tier_cost": 0.5
         },
-        "is_publishable": true,
+        "is_publishable": false,
         "has_verified_evidence": true,
+        "is_self_declared": true,
+        "is_independent": false,
         "citation_summary": [
           "Unihack__Sample_Dataset_-_Input#543650010"
         ]
@@ -139,7 +141,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:14.450824Z"
+        "detected_at": "2026-08-23T11:45:27.034102Z"
       },
       {
         "attribute_code": "nominal_length",
@@ -151,7 +153,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:14.450829Z"
+        "detected_at": "2026-08-23T11:45:27.034106Z"
       },
       {
         "attribute_code": "edge_profile",
@@ -163,7 +165,19 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:14.450832Z"
+        "detected_at": "2026-08-23T11:45:27.034109Z"
+      },
+      {
+        "attribute_code": "material_composition",
+        "reason": "self_declared_only",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#543650010"
+        ],
+        "detail": "the customer's own description implies 'Aluminum' (from 'Alum'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-23T11:45:27.034114Z"
       },
       {
         "attribute_code": "finish_color",
@@ -175,13 +189,13 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:14.450836Z"
+        "detected_at": "2026-08-23T11:45:27.034117Z"
       }
     ],
     "extraction": {
       "requested": 17,
       "values": 1,
-      "gaps": 4,
+      "gaps": 5,
       "rejected_unverifiable": 0,
       "corrected_to_match_evidence": 0,
       "citation_coverage": 1.0,
@@ -224,10 +238,10 @@
       "per_attribute": {}
     },
     "certificate": {
-      "certificate_id": "ec_abbcb5c1d3ce",
+      "certificate_id": "ec_be6540040ce8",
       "sku": "543650010",
       "tenant_id": "unilog",
-      "generated_at": "2026-08-22T19:16:14.451046Z",
+      "generated_at": "2026-08-23T11:45:27.034401Z",
       "schema_version": "BLD.DCK.BOARD@v1",
       "pipeline_version": "axiom-0.1.0",
       "classifications": [
@@ -245,29 +259,7 @@
           "alternatives": []
         }
       ],
-      "attributes": [
-        {
-          "code": "material_composition",
-          "value_canonical": "Aluminum",
-          "value_display": "Aluminum",
-          "value_raw": "Alum",
-          "confidence": 0.82,
-          "method": "supplier_feed",
-          "model_tier": null,
-          "status": "auto_accepted",
-          "evidence": [
-            {
-              "document": "Unihack__Sample_Dataset_-_Input#543650010",
-              "sha256": "49efd0b2\u2026",
-              "page": null,
-              "bbox": null,
-              "quote": "Alum",
-              "verified": true
-            }
-          ],
-          "validations": []
-        }
-      ],
+      "attributes": [],
       "gaps": [
         {
           "code": "nominal_dimensions",
@@ -300,6 +292,16 @@
           "recommended_action": "retry_with_better_source"
         },
         {
+          "code": "material_composition",
+          "reason": "self_declared_only",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#543650010"
+          ],
+          "required": true,
+          "detail": "the customer's own description implies 'Aluminum' (from 'Alum'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+          "recommended_action": "retry_with_better_source"
+        },
+        {
           "code": "finish_color",
           "reason": "no_source_available",
           "sources_searched": [
@@ -312,18 +314,20 @@
       ],
       "summary": {
         "attributes_required": 5,
-        "attributes_populated": 1,
-        "attributes_with_evidence": 1,
+        "attributes_populated": 0,
+        "attributes_with_evidence": 0,
         "attributes_inferred": 0,
         "auto_accepted": 1,
         "queued_for_review": 0,
-        "gaps_total": 4,
-        "gaps_required": 4,
+        "gaps_total": 5,
+        "gaps_required": 5,
         "quality_index": {
-          "completeness": 0.2,
-          "verifiability": 1.0,
+          "completeness": 0.0,
+          "verifiability": 0.0,
           "consistency": 1.0,
           "richness": 0.5,
+          "self_declared": 0.2,
+          "corroborated": 0.0,
           "weights": {
             "completeness": 0.35,
             "verifiability": 0.3,
@@ -336,12 +340,12 @@
             "richness",
             "verifiability"
           ],
-          "composite": 0.67
+          "composite": 0.3
         },
         "cost_usd": null,
         "wall_clock_seconds": 0.0
       },
-      "signature": "sha256:de30299d647fcff3b8dc3f402c643f0b23e415ad789acb6f33561ad47c688c7c",
+      "signature": "sha256:9b2613d2c1ea8fd7f280d54d8cfc361f5bc4152be73fe83448073eb3f465c123",
       "signature_verified": true
     },
     "channels": [
@@ -349,7 +353,9 @@
         "name": "cx1_pim",
         "published": false,
         "value_count": 0,
-        "withheld": [],
+        "withheld": [
+          "material_composition"
+        ],
         "readiness": {
           "channel": "cx1_pim",
           "ready": false,
@@ -364,8 +370,10 @@
       {
         "name": "schema_org",
         "published": true,
-        "value_count": 1,
-        "withheld": [],
+        "value_count": 0,
+        "withheld": [
+          "material_composition"
+        ],
         "readiness": {
           "channel": "schema_org",
           "ready": true,
@@ -377,15 +385,32 @@
       }
     ],
     "metrics": {
-      "fill_rate": 0.2,
-      "verifiability": 1.0,
+      "fill_rate": 0.0,
+      "verifiability": 0.0,
+      "self_declared_rate": 0.2,
+      "corroborated_rate": 0.0,
       "values_total": 1,
-      "values_publishable": 1,
+      "values_publishable": 0,
+      "values_self_declared": 1,
       "values_needing_review": 0,
-      "gaps_total": 4,
-      "gaps_required": 4,
+      "gaps_total": 5,
+      "gaps_required": 5,
       "conflicts": []
     },
+    "sources": [
+      {
+        "document_id": "Unihack__Sample_Dataset_-_Input#543650010",
+        "url": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
+        "host": "",
+        "tier": "item_master",
+        "doc_type": "supplier_feed",
+        "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+        "covers_this_sku": "row",
+        "citable_as_manufacturer": false,
+        "license_note": null,
+        "revision_label": null
+      }
+    ],
     "cost": null,
     "copy": null
   },
@@ -394,7 +419,7 @@
     "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
     "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
     "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-22T19:16:11.275717Z",
+    "fetched_at": "2026-08-23T11:45:10.364455Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": "unilog",

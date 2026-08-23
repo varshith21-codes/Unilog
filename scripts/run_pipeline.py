@@ -24,47 +24,13 @@ import sys
 from dataclasses import replace
 from pathlib import Path
 
-from axiom.classify import Classifier
-from axiom.confidence import (
-    DEFAULT_EPSILON,
-    Calibrator,
-    Priors,
-    apply_policy,
-    extract_features,
-    select_threshold,
-)
-from axiom.console import (
-    build_bundle,
-    jsonable,
-    serialise_class,
-    serialise_copy,
-    serialise_cost,
-    serialise_document,
-    serialise_pages,
-)
-from axiom.core.certificate import build_certificate
-from axiom.core.product import ProductRecord
+from axiom.confidence import DEFAULT_EPSILON
 from axiom.docintel import find_revision, parse_artifact
-from axiom.extract import (
-    BedrockModelClient,
-    Extractor,
-    ModelCascade,
-    PriceTable,
-    StubModelClient,
-    UsageLedger,
-)
-from axiom.generate import ClaimVerdict, CopyGenerator, build_fact_sheet, load_policy
+from axiom.extract import BedrockModelClient, ModelCascade, StubModelClient
+from axiom.generate import ClaimVerdict
 from axiom.ingest import IngestError, LocalArtifactStore, ingest_file, ingest_url, is_url
-from axiom.normalize import BrandMaster, clean_mpn, normalize_all
-from axiom.review import build_session
+from axiom.pipeline import persist_run, run_stages
 from axiom.schema import load_default
-from axiom.syndicate import export_all
-from axiom.validate import (
-    ReasoningChecker,
-    ReasoningConfig,
-    Validator,
-    guardrail_runtime,
-)
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_STORE = REPO_ROOT / "data" / "cache" / "artifacts"
@@ -236,182 +202,84 @@ def main() -> int:
     else:
         client = BedrockModelClient(region=cascade.region, profile=args.profile)
 
-    # --- stage 3: classify -----------------------------------------------------
-    # Runs before extraction because the class decides which attributes to ask for. When
-    # classification abstains, --class-code is the explicit fallback rather than a guess.
-    classifier = Classifier(registry, client=client, cascade=cascade, tier=args.tier)
-    classification = classifier.classify(parsed.full_text, sku=args.sku)
-    class_code = classification.class_code or args.class_code
-
-    # --- stage 4: extract ------------------------------------------------------
-    # Extraction never normalises and never validates. It reports `value_raw` plus a quote,
-    # and nothing else, so a unit bug can never be mistaken for an extraction bug.
-    extractor = Extractor(registry, client, cascade, start_tier=args.tier)
-    result = extractor.extract(
+    # --- stages 3 to 10 -------------------------------------------------------
+    # Classify, extract, normalize, validate, score, decide, generate, certify, syndicate. All of it
+    # lives in `axiom.pipeline.stages` rather than here, because this script is no longer the only
+    # caller: the single-SKU enrichment endpoint runs the same sequence over a document that arrived
+    # from a typed part number. A second copy of it would be the worst kind of duplicate — one that
+    # scores differently from the one CI gates, for reasons nobody would find quickly.
+    #
+    # What stays in this script is what a CLI owns: which client to build, and how to report what
+    # came back.
+    run = run_stages(
         parsed,
-        class_code=class_code,
-        target_sku=args.sku,
-        include_optional=args.include_optional,
-    )
-
-    # --- stage 5: normalize ----------------------------------------------------
-    normalized, norm_issues = normalize_all(result.values, registry)
-
-    # --- stage 6: validate -----------------------------------------------------
-    brands = BrandMaster.load()
-    brand = brands.resolve(args.brand) if args.brand else None
-    record = ProductRecord(
-        tenant_id="demo",
+        artifact,
+        registry=registry,
+        client=client,
+        cascade=cascade,
         sku=args.sku,
-        mpn=args.sku,
-        mpn_normalized=clean_mpn(args.sku, brand=brand.brand if brand else None),
-        brand=brand.brand.name if brand and brand.resolved else args.brand,
-        brand_id=brand.brand.brand_id if brand and brand.resolved else None,
+        brand=args.brand,
         supplier_id=args.supplier,
-        class_code=class_code,
-        schema_version=result.schema_version,
-        source_document_ids=[artifact.document.document_id],
+        class_code_fallback=args.class_code,
+        calibration_dir=args.calibration_dir,
+        risk_budget=args.risk_budget,
+        include_optional=args.include_optional,
+        tier=args.tier,
+        generate_copy=args.generate_copy,
+        verify_claims=args.verify_claims,
+        profile=args.profile,
     )
-    record.classifications.extend(classification.classifications)
-    for value in normalized:
-        record.add_value(value)
-    for gap in result.gaps:
-        record.add_gap(gap)
 
-    report = Validator(registry).validate(record)
+    # Things the run wants surfaced that are not failures — an undeployed L6 policy, most often.
+    # They come back as values because `run_stages` has no idea whether its caller is a terminal.
+    for note in run.notes:
+        print(f"  {note}", file=sys.stderr)
 
-    # --- stage 7: score and decide ---------------------------------------------
-    # Validation results are attached to each value first, so the confidence features can see
-    # them. Scoring before validating would ignore the strongest independent signal available.
-    for value in record.current_values():
-        findings = report.per_attribute.get(value.attribute_code, [])
-        if findings:
-            value.validations = [*value.validations, *findings]
-
-    calibrator, priors, policy = _load_calibration(args.calibration_dir, args.risk_budget)
-    scores: dict[str, float] = {}
-    feature_map = {}
-    for value in record.current_values():
-        features = extract_features(value, priors=priors, supplier_id=args.supplier)
-        feature_map[value.attribute_code] = features
-        scores[value.attribute_code] = calibrator.predict(features)
-
-    decisions = apply_policy(record.current_values(), scores, policy)
-
-    # --- stage 8: certificate and channel exports ------------------------------
-    # Cost covers classification *and* extraction. Classification is a real model call against
-    # a real prompt, and reporting only extraction would understate the true cost per SKU by
-    # whatever the cheapest stage happens to cost — flattering, and wrong.
-    usage = UsageLedger()
-    usage.merge(classification.usage)
-    usage.merge(result.usage)
-
-    prices = PriceTable.load()
-    tier_prices = prices.tier_prices(cascade) if prices else None
-    cost_usd = usage.cost_usd(tier_prices)
-
-    exports = export_all(record, registry)
-
-    # --- stage 9: constrained copy generation ----------------------------------
-    # Runs last, and only from values that already survived every earlier gate. Generating
-    # before the acceptance decision would let a queued value into a product description.
-    generated = None
-    reasoning_config = None
-    if args.generate_copy:
-        sheet = build_fact_sheet(record, registry)
-        generator = CopyGenerator(client, ModelCascade.load(), load_policy(), tier="mid")
-        generated = generator.generate(sheet)
-        usage.merge(generated.usage)
-        cost_usd = usage.cost_usd(tier_prices)
-
-        # --- stage 9b: formal verification of the prose (L6) --------------------
-        # Runs after the claim check rather than instead of it. The claim check proves each
-        # statement came *from* a verified attribute; this proves the statement is not
-        # self-contradictory given everything else the record establishes. Copy assembled
-        # entirely from real attributes can still assert something impossible.
-        #
-        # Deliberately no regeneration on an L6 failure, unlike an unsupported claim. A
-        # contradiction here is almost always a property of the source data — a leaded alloy
-        # carrying a potable-water approval — so asking the model to rewrite would spend another
-        # call to re-derive the same contradiction from the same facts. The finding belongs in
-        # front of a human, not in a retry loop.
-        if args.verify_claims and generated.headline:
-            reasoning_config = ReasoningConfig.load()
-            if reasoning_config is None:
-                print(
-                    "  L6 skipped: no reasoning policy is deployed. Deploy one with "
-                    "scripts/deploy_reasoning_policy.py",
-                    file=sys.stderr,
-                )
-            else:
-                checker = ReasoningChecker(
-                    guardrail_runtime(reasoning_config, profile=args.profile),
-                    reasoning_config,
-                )
-                generated.formal = checker.verify_copy(record, generated.fields())
-
-    # --- stage 10: certificate -------------------------------------------------
-    # Built last, after the exports and the copy exist, because the Quality Index's richness
-    # dimension is observed from them: channel readiness from the pre-flight results, copy depth
-    # from the generated prose. Building the certificate first — as this script used to — left
-    # richness permanently unmeasured, which dragged every composite down by a tenth for a reason
-    # unrelated to the data.
-    serialised_copy = serialise_copy(generated)
-    certificate = build_certificate(
-        record,
-        required_attribute_codes=registry.required_codes(class_code),
-        pipeline_version=f"axiom-{__import__('axiom').__version__}",
-        cost_usd=cost_usd,
-        wall_clock_seconds=round(usage.latency_ms / 1000, 2),
-        exports=exports,
-        copy=serialised_copy,
-    )
+    # Local names, unchanged from when these were this function's own variables, so every
+    # `_report_*` signature below stays exactly as it was.
+    record = run.record
+    classification = run.classification
+    result = run.extraction
+    class_code = run.class_code
+    normalized = run.normalized
+    norm_issues = run.normalization_issues
+    report = run.validation
+    brand = run.brand
+    decisions = run.decisions
+    scores = run.scores
+    feature_map = run.features
+    policy = run.policy
+    calibrator = run.calibrator
+    usage = run.usage
+    prices = run.prices
+    tier_prices = run.tier_prices
+    cost_usd = run.cost_usd
+    generated = run.copy
+    certificate = run.certificate
+    exports = run.exports
 
     session_path = None
     bundle_path = None
     if args.save_session:
-        session = build_session(
-            record,
-            parsed,
-            registry,
-            decisions,
-            scores,
-            policy,
-            quality=certificate.summary.quality_index.to_dict(),
-        )
-        session_path = session.save(
-            REPO_ROOT / "data" / "sessions" / f"{args.sku}.json"
-        )
-
-        # The console bundle is the wider projection: certificate, channel readiness,
-        # classification candidates and the validation report, none of which a review session
-        # carries. Persisting it here rather than recomputing it in the API is what keeps
-        # model calls off the request path — a dashboard that re-ran extraction on every page
-        # load would be both slow and non-deterministic.
-        bundle_path = _save_bundle(
-            registry=registry,
-            record=record,
+        # The review session and the wider console bundle, both written by `axiom.pipeline.persist`
+        # so this script and the enrichment endpoint produce the same artifacts under the same
+        # names.
+        #
+        # The names are **slugged**, which is a fix rather than a preference: this script used to
+        # write `{sku}.json` with the raw part number while the API read `{slug}.json`, so the two
+        # disagreed for any SKU needing an escape — and `52C3-5/8-UPC` is a fractional size, not an
+        # edge case. A part number needing no escaping is its own slug, so `BA-100-075.json` is
+        # unchanged and nothing on disk needs migrating.
+        paths = persist_run(
+            run,
             parsed=parsed,
             artifact=artifact,
-            classification=classification,
-            extraction=result,
-            normalization_issues=norm_issues,
-            validation=report,
-            scores=scores,
-            features={code: f.explain() for code, f in feature_map.items()},
-            decisions=decisions,
-            certificate=certificate,
-            exports=exports,
-            policy=policy,
-            calibrator=calibrator,
-            cost=serialise_cost(
-                usage,
-                cost_usd=cost_usd,
-                cost_by_tier=usage.cost_by_tier(tier_prices),
-                prices=prices,
-            ),
-            copy=serialised_copy,
+            registry=registry,
+            sessions_dir=REPO_ROOT / "data" / "sessions",
+            console_dir=REPO_ROOT / "data" / "console",
         )
+        session_path = paths.session
+        bundle_path = paths.bundle
 
     if args.out:
         args.out.mkdir(parents=True, exist_ok=True)
@@ -585,66 +453,6 @@ def _effective_date(prices) -> str:
     return ", ".join(sorted(d[:10] for d in dates)) if dates else "unknown"
 
 
-def _save_bundle(
-    *,
-    registry,
-    record,
-    parsed,
-    artifact,
-    classification,
-    extraction,
-    normalization_issues,
-    validation,
-    scores,
-    features,
-    decisions,
-    certificate,
-    exports,
-    policy,
-    calibrator,
-    cost=None,
-    copy=None,
-) -> Path:
-    """Write one SKU's console bundle to ``data/console/``.
-
-    The document and class definition travel with the bundle rather than being looked up by
-    the API. A bundle has to stay readable against the schema version it was produced under —
-    if the API resolved the class at read time, editing a YAML file would silently rewrite the
-    history of every run that came before it.
-    """
-    bundle = build_bundle(
-        registry=registry,
-        record=record,
-        artifact=artifact,
-        classification=classification,
-        extraction=extraction,
-        normalization_issues=normalization_issues,
-        validation=validation,
-        cost=cost,
-        copy=copy,
-        scores=scores,
-        features=features,
-        decisions=decisions,
-        certificate=certificate,
-        exports=exports,
-    )
-    payload = {
-        "bundle": bundle,
-        "document": serialise_document(artifact, parsed),
-        "pages": serialise_pages(parsed),
-        "class_definition": (
-            serialise_class(registry, record.class_code) if record.class_code else None
-        ),
-        "policy": jsonable(policy.summary()),
-        "calibrator": "trained" if calibrator.is_trained else "untrained-heuristic",
-    }
-
-    target = REPO_ROOT / "data" / "console" / f"{record.sku}.bundle.json"
-    target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
-    return target
-
-
 def _report_publish(certificate, exports, out_dir) -> None:
     print(f"\n{'=' * 78}\nCERTIFICATE & EXPORTS\n{'=' * 78}")
     summary = certificate.summary
@@ -680,28 +488,6 @@ def _report_publish(certificate, exports, out_dir) -> None:
 
     if out_dir:
         print(f"\n  written to {out_dir}")
-
-
-def _load_calibration(directory: Path, epsilon: float = DEFAULT_EPSILON):
-    """Load a trained calibrator, learned priors and a validated risk policy if they exist.
-
-    All three are optional. With none of them present the system cold-starts: scores come from
-    a capped heuristic and the policy is unachievable, so every value queues for review. That
-    is the correct opening state — automation coverage should be earned from review outcomes,
-    not granted before any exist.
-    """
-    calibrator = Calibrator()
-    priors = Priors()
-    policy = select_threshold([], [], epsilon=epsilon)
-
-    if (path := directory / "calibrator.json").exists():
-        calibrator = Calibrator.load(path)
-    if (path := directory / "priors.json").exists():
-        priors = Priors.load(path)
-    if (path := directory / "calibration_set.json").exists():
-        payload = json.loads(path.read_text(encoding="utf-8"))
-        policy = select_threshold(payload["scores"], payload["labels"], epsilon=epsilon)
-    return calibrator, priors, policy
 
 
 def _report_decide(decisions, scores, feature_map, policy, calibrator) -> None:

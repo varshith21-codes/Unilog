@@ -1,22 +1,18 @@
-import Link from "next/link";
-
+import { ReviewQueue, type ReviewQueueItem } from "@/components/review-queue";
 import {
   AlertIcon,
-  ArrowIcon,
-  CheckIcon,
   EmptyState,
   Overline,
   PageHeader,
-  Pager,
   Panel,
   Section,
   SectionHeading,
   Stat,
   StatBand,
-  StatusPill,
 } from "@/components/primitives";
 import {
   attributeRows,
+  classificationAbstention,
   listSkus,
   loadDataset,
   needsClassification,
@@ -25,7 +21,7 @@ import {
   unresolvedConflicts,
 } from "@/lib/data";
 import { GAP_REASON_LABEL, canonical, count, percent, score } from "@/lib/format";
-import { pageParam, paginate } from "@/lib/paginate";
+import { pageParam } from "@/lib/paginate";
 import { reviewHref } from "@/lib/sku";
 
 export const metadata = { title: "Resolve" };
@@ -33,41 +29,95 @@ export const metadata = { title: "Resolve" };
 export default async function ReviewIndexPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string | string[] }>;
 }) {
   const dataset = await loadDataset();
   const skus = reviewOrder(await listSkus());
+  const params = await searchParams;
 
-  // Each SKU is scored against *its own* class, not one shared definition. A catalog spanning
-  // ball valves and gate valves has different required attributes per class, so joining
-  // against a single class here would invent gaps for attributes the class never declared.
-  const groups = skus.map((bundle) => ({
-    bundle,
-    open: reviewRows(
-      attributeRows(
-        bundle.class_code
-          ? (dataset.class_definitions[bundle.class_code]?.attributes ?? [])
-          : [],
-        bundle.values,
-        bundle.gaps,
-      ),
-    ),
-  }));
+  // Each SKU is scored against its own class. The queue receives only the scalar fields it needs;
+  // evidence spans, documents, schemas, and the complete SkuBundle remain on the server.
+  const groups = skus.map((bundle, publicationRiskRank) => {
+    const classDefinition = bundle.class_code
+      ? dataset.class_definitions[bundle.class_code]
+      : undefined;
+    const open = reviewRows(
+      attributeRows(classDefinition?.attributes ?? [], bundle.values, bundle.gaps),
+    );
+    const valueOpenCount = open.filter((row) => row.value !== null).length;
+    const belowThresholdCount = open.filter(
+      (row) => row.value?.decision?.reason_code === "below_threshold",
+    ).length;
+    const unclassified = needsClassification(bundle);
 
+    const item: ReviewQueueItem = {
+      sku: bundle.sku,
+      href: reviewHref(bundle.sku),
+      brand: bundle.record.brand,
+      mpn: bundle.record.mpn,
+      normalizedMpn: bundle.record.mpn_normalized,
+      gtin: bundle.record.gtin,
+      supplierId: bundle.record.supplier_id,
+      classCode: bundle.class_code,
+      className: classDefinition?.name ?? null,
+      state: unclassified ? "unclassified" : open.length === 0 ? "fully-accepted" : "open",
+      abstention: classificationAbstention(bundle),
+      completeness: unclassified ? null : bundle.metrics.fill_rate,
+      validationFailures: bundle.validation.failures,
+      validationWarnings: bundle.validation.warnings,
+      sourceConflictCount: unresolvedConflicts(bundle),
+      crossSourceApplicable: bundle.cross_source?.applicable ?? false,
+      corroboratedCount: bundle.cross_source?.corroborated ?? 0,
+      openItemCount: open.length,
+      valueOpenCount,
+      belowThresholdCount,
+      requiredGapCount: open.length - valueOpenCount,
+      publicationRiskRank,
+      rows: open.map((row) => {
+        if (row.value) {
+          return {
+            code: row.spec.code,
+            name: row.spec.name,
+            complianceClaim: row.spec.compliance_claim,
+            kind: "value" as const,
+            primary: row.value.value_display ?? canonical(row.value.value_canonical),
+            secondary: `score ${score(row.value.score)}${
+              row.value.decision ? ` · ${row.value.decision.detail}` : ""
+            }`,
+            status: row.value.status,
+          };
+        }
+
+        return {
+          code: row.spec.code,
+          name: row.spec.name,
+          complianceClaim: row.spec.compliance_claim,
+          kind: "gap" as const,
+          primary: row.gap ? GAP_REASON_LABEL[row.gap.reason] : "No candidate produced",
+          secondary: row.gap?.detail ?? null,
+          status: null,
+        };
+      }),
+    };
+
+    return { bundle, open, item };
+  });
+
+  // These metrics deliberately describe the entire catalogue. The client toolbar reports its own
+  // matching count so narrowing the queue never changes the page-level operational denominator.
   const openTotal = groups.reduce((sum, group) => sum + group.open.length, 0);
   const valuesOpen = groups.reduce(
     (sum, group) => sum + group.open.filter((row) => row.value !== null).length,
     0,
   );
   const gapsOpen = openTotal - valuesOpen;
-  // Counted over the whole catalogue rather than the page being rendered. An unclassified SKU
-  // contributes nothing to the three counts above — it has no class, so it has no required
-  // attributes to be missing — which is exactly why it needs a count of its own.
   const unclassified = skus.filter(needsClassification).length;
-
-  // The queue is risk-ordered, so page one is the work that matters. Paged rather than truncated
-  // so a record on page eleven is still reachable. See lib/paginate.ts.
-  const page = paginate(groups, pageParam((await searchParams).page));
+  // Split out because the two need different work and the combined figure hid that: a SKU with no
+  // matching class needs a class definition, a SKU with two matching classes needs a decision.
+  const awaitingAdjudication = skus.filter(
+    (bundle) => classificationAbstention(bundle)?.kind === "ambiguous",
+  ).length;
+  const noClassMatched = unclassified - awaitingAdjudication;
 
   return (
     <div className="mx-auto max-w-[var(--container-shell)] px-[var(--spacing-gutter)] pb-24">
@@ -79,7 +129,7 @@ export default async function ReviewIndexPage({
         detail={
           <>
             Values below the acceptance threshold, plus required attributes no source could
-            establish. Ordered so blocking failures come first.
+            establish. Defaults to publication risk, with blocking failures first.
           </>
         }
         meta={
@@ -105,27 +155,22 @@ export default async function ReviewIndexPage({
         />
         <Stat label="Below threshold" value={count(valuesOpen)} hint="values to confirm" />
         <Stat label="Required gaps" value={count(gapsOpen)} hint="no value could be read" />
-        {/*
-          Unclassified replaces the threshold stat when there is any, and that ordering is
-          deliberate: a threshold is a property of the policy and is repeated on every screen,
-          while "no class could be established" is the largest unstated liability in the catalogue.
-          Nothing else on this page counts these SKUs, because every metric it reads is defined
-          per class and they have none.
-        */}
         {unclassified > 0 ? (
           <Stat
             label="Unclassified"
             value={count(unclassified)}
-            hint="no class matched; nothing evaluated"
+            hint={
+              awaitingAdjudication > 0
+                ? `${count(noClassMatched)} no class matched · ${count(
+                    awaitingAdjudication,
+                  )} awaiting adjudication`
+                : "no class matched; nothing evaluated"
+            }
             tone="warn"
           />
         ) : (
           <Stat
             label="Threshold"
-            /*
-              An unset threshold is an em-dash, not a zero. A `0.000` threshold would mean every
-              value auto-accepts, which is the opposite of what a missing calibration means.
-            */
             value={dataset.policy.threshold === null ? "—" : dataset.policy.threshold.toFixed(3)}
             hint={`${percent(dataset.policy.epsilon)} error budget at ${percent(
               dataset.policy.confidence_level,
@@ -134,165 +179,10 @@ export default async function ReviewIndexPage({
         )}
       </StatBand>
 
-      <div className="mt-[var(--spacing-section)] flex flex-col gap-6">
-        {page.items.map(({ bundle, open }) => (
-          <Panel key={bundle.sku} className="overflow-hidden p-0">
-            <div className="hairline-b flex flex-wrap items-center justify-between gap-4 bg-[var(--surface-sunken)] px-6 py-4">
-              <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-                <h2 className="text-lg font-medium">
-                  <Link
-                    href={reviewHref(bundle.sku)}
-                    className="rounded-xs transition-colors duration-[var(--duration-fast)] hover:text-[var(--accent)]"
-                  >
-                    {bundle.sku}
-                  </Link>
-                </h2>
-                {needsClassification(bundle) ? (
-                  <p className="text-meta text-[var(--fg-tertiary)]">
-                    <span className="text-[var(--warn)]">not classified</span> · no attributes
-                    evaluated
-                  </p>
-                ) : (
-                <p className="text-meta text-[var(--fg-tertiary)]">
-                  {percent(bundle.metrics.fill_rate)} complete ·{" "}
-                  {bundle.validation.failures > 0 ? (
-                    <span className="text-[var(--fail)]">
-                      {bundle.validation.failures} blocking
-                    </span>
-                  ) : bundle.validation.warnings > 0 ? (
-                    <span className="text-[var(--warn)]">
-                      {bundle.validation.warnings} warning
-                      {bundle.validation.warnings === 1 ? "" : "s"}
-                    </span>
-                  ) : (
-                    <span className="text-[var(--pass)]">checks clean</span>
-                  )}
-                </p>
-                )}
-                {/*
-                  L4 gets its own badge rather than folding into the failure count. An unresolved
-                  conflict is not one value the pipeline is unsure about — it is two contradictory
-                  answers it refused to choose between, and it sorts to the top of this queue.
-                */}
-                {unresolvedConflicts(bundle) > 0 ? (
-                  <span className="pill pill-fail">
-                    <AlertIcon />
-                    {unresolvedConflicts(bundle)} source conflict
-                    {unresolvedConflicts(bundle) === 1 ? "" : "s"}
-                  </span>
-                ) : bundle.cross_source?.applicable ? (
-                  <span className="pill pill-pass">
-                    <CheckIcon />
-                    {bundle.cross_source.corroborated} corroborated
-                  </span>
-                ) : null}
-              </div>
-
-              <Link href={reviewHref(bundle.sku)} className="btn btn-quiet h-7">
-                Resolve SKU
-                <ArrowIcon />
-              </Link>
-            </div>
-
-            {needsClassification(bundle) ? (
-              /*
-                `unmeasured`, and the distinction from the branch below is the whole reason this
-                branch exists. An unclassified SKU has no required attributes, so it has no open
-                items — and rendering the "fully accepted" state for it would tell a reviewer that
-                every attribute cleared the threshold when not one was ever asked for.
-              */
-              <EmptyState
-                kind="unmeasured"
-                title="No class could be established"
-                detail="Retrieval found no class in the schema that this description matches, and it abstains rather than guessing. Nothing has been extracted, scored or gapped for this record: the attributes to ask for are defined per class, and there is no class yet. Closing this means adding a class definition under schema/classes/, not loosening the classifier."
-              />
-            ) : open.length === 0 ? (
-              /*
-                `empty`, deliberately. This SKU was measured and came back clean — the reviewer has
-                nothing to do, which is a result rather than an absence of one.
-              */
-              <EmptyState
-                title="Fully accepted"
-                detail="Every attribute this class requires cleared the threshold with verified evidence."
-              />
-            ) : (
-              <ul>
-                {open.map((row) => (
-                  <li
-                    key={row.spec.code}
-                    className="grid-row group hairline-b grid grid-cols-[1fr_auto] items-center gap-x-5 gap-y-1.5 px-6 py-3.5 last:border-b-0 sm:grid-cols-[16rem_1fr_auto]"
-                  >
-                    <div className="flex min-w-0 items-center gap-2">
-                      <Link
-                        href={reviewHref(bundle.sku)}
-                        className="truncate rounded-xs text-sm font-medium transition-colors duration-[var(--duration-fast)] group-hover:text-[var(--accent)] hover:text-[var(--accent)]"
-                      >
-                        {row.spec.name}
-                      </Link>
-                      {row.spec.compliance_claim ? (
-                        <span className="pill pill-accent shrink-0">Claim</span>
-                      ) : null}
-                    </div>
-
-                    <p className="col-span-2 min-w-0 truncate text-meta text-[var(--fg-tertiary)] sm:col-span-1">
-                      {row.value ? (
-                        <>
-                          {row.value.value_display ?? canonical(row.value.value_canonical)}
-                          <span className="text-[var(--fg-quiet)]">
-                            {" "}
-                            · score {score(row.value.score)}
-                            {row.value.decision ? ` · ${row.value.decision.detail}` : ""}
-                          </span>
-                        </>
-                      ) : row.gap ? (
-                        <>
-                          {GAP_REASON_LABEL[row.gap.reason]}
-                          {row.gap.detail ? (
-                            <span className="text-[var(--fg-quiet)]"> · {row.gap.detail}</span>
-                          ) : null}
-                        </>
-                      ) : (
-                        "No candidate produced"
-                      )}
-                    </p>
-
-                    <div className="row-start-1 justify-self-end sm:row-start-auto">
-                      {row.value ? (
-                        <StatusPill status={row.value.status} />
-                      ) : (
-                        <span className="pill pill-warn">
-                          <AlertIcon />
-                          Gap
-                        </span>
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Panel>
-        ))}
-      </div>
-
-      <Pager
-        page={page.page}
-        pageCount={page.pageCount}
-        from={page.from}
-        to={page.to}
-        total={page.total}
-        hasPrevious={page.hasPrevious}
-        hasNext={page.hasNext}
-        href={(next) => (next === 1 ? "/review" : `/review?page=${next}`)}
-        label="Resolve queue pages"
-        unit="SKUs, ordered by publication risk"
-      />
-
-      {groups.length === 0 ? (
+      {groups.length > 0 ? (
+        <ReviewQueue items={groups.map((group) => group.item)} initialPage={pageParam(params.page)} />
+      ) : (
         <Panel className="mt-[var(--spacing-section)]">
-          {/*
-            `unmeasured`: no SKUs loaded means no run has been read, not a catalogue that was
-            examined and found to contain nothing.
-          */}
           <EmptyState
             kind="unmeasured"
             title="No SKUs loaded"
@@ -312,13 +202,8 @@ export default async function ReviewIndexPage({
             }
           />
         </Panel>
-      ) : null}
+      )}
 
-      {/*
-        The legend, at the foot of the page rather than mid-column. It explains the kinds of row
-        above it and is read once; giving it the same weight as the queue itself would put reference
-        material between a reviewer and their work.
-      */}
       <Section rhythm="lg">
         <SectionHeading
           title="Why an attribute lands here"
@@ -329,16 +214,16 @@ export default async function ReviewIndexPage({
             <Overline>Below threshold</Overline>
             <p className="mt-3 max-w-[62ch] text-sm text-[var(--fg-secondary)]">
               A value exists and its quote verified, but the calibrated score sat under the
-              acceptance threshold. The reviewer confirms or corrects it, and that decision is
-              what later trains the calibrator.
+              acceptance threshold. The reviewer confirms or corrects it, and that decision is what
+              later trains the calibrator.
             </p>
           </Panel>
           <Panel className="p-6">
             <Overline>Required gap</Overline>
             <p className="mt-3 max-w-[62ch] text-sm text-[var(--fg-secondary)]">
-              No source stated the value. Nothing to confirm, so the work is to obtain it —
-              usually a supplier request, sometimes a better document. The gap records every
-              source already searched so the negative result stays auditable.
+              No source stated the value. Nothing to confirm, so the work is to obtain it — usually
+              a supplier request, sometimes a better document. The gap records every source already
+              searched so the negative result stays auditable.
             </p>
           </Panel>
           <Panel className="p-6">
@@ -346,8 +231,8 @@ export default async function ReviewIndexPage({
             <p className="mt-3 max-w-[62ch] text-sm text-[var(--fg-secondary)]">
               Neither of the above, because nothing was asked. Retrieval matched no class in the
               schema and abstained instead of guessing, so this record has no required attributes
-              to be missing and no values to score. It is not clean — it is unexamined, and the
-              work is a class definition rather than a reviewer decision.
+              to be missing and no values to score. It is not clean — it is unexamined, and the work
+              is a class definition rather than a reviewer decision.
             </p>
           </Panel>
         </div>

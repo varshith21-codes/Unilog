@@ -14,23 +14,25 @@
   "gaps": [
     {
       "code": "measurement_range",
-      "reason": "no_source_available",
+      "reason": "not_present_in_any_source",
       "sources_searched": [
-        "Unihack__Sample_Dataset_-_Input#40025"
+        "Unihack__Sample_Dataset_-_Input#40025",
+        "2026_Bonded-Abrasives_Solutions-Guide@bb06f364"
       ],
       "required": true,
-      "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
-      "recommended_action": "retry_with_better_source"
+      "detail": "read the item-master row and 1 retrieved document(s) (2026_Bonded-Abrasives_Solutions-Guide@bb06f364); the part number was located but this attribute is not stated in any of them. A better document will not close this one, so it is a supplier request.",
+      "recommended_action": "request_from_supplier"
     },
     {
       "code": "graduation_system",
-      "reason": "no_source_available",
+      "reason": "not_present_in_any_source",
       "sources_searched": [
-        "Unihack__Sample_Dataset_-_Input#40025"
+        "Unihack__Sample_Dataset_-_Input#40025",
+        "2026_Bonded-Abrasives_Solutions-Guide@bb06f364"
       ],
       "required": true,
-      "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
-      "recommended_action": "retry_with_better_source"
+      "detail": "read the item-master row and 1 retrieved document(s) (2026_Bonded-Abrasives_Solutions-Guide@bb06f364); the part number was located but this attribute is not stated in any of them. A better document will not close this one, so it is a supplier request.",
+      "recommended_action": "request_from_supplier"
     }
   ],
   "policy": {
@@ -51,6 +53,8 @@
     "verifiability": 0.0,
     "consistency": 1.0,
     "richness": 0.0,
+    "self_declared": 0.0,
+    "corroborated": 0.0,
     "composite": 0.25,
     "measured_dimensions": [
       "completeness",
@@ -59,7 +63,7 @@
       "verifiability"
     ]
   },
-  "created_at": "2026-08-22T19:16:17.074982+00:00",
+  "created_at": "2026-08-23T11:45:32.631101+00:00",
   "decisions": [],
   "pages": [
     {

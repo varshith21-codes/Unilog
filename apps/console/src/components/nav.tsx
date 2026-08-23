@@ -10,11 +10,21 @@ type NavItem = {
   href: string;
   label: string;
   descriptor: string;
-  glyph: "operations" | "resolve" | "process" | "publish" | "audit" | "intelligence";
+  glyph:
+    | "operations"
+    | "enrich"
+    | "resolve"
+    | "process"
+    | "publish"
+    | "audit"
+    | "intelligence";
 };
 
 const PRIMARY: NavItem[] = [
   { href: "/", label: "Operations", descriptor: "Portfolio command", glyph: "operations" },
+  // First after Operations because it is where a catalogue starts: one product, from a part number.
+  // The descriptor says "live" because this is the only entry here that spends money.
+  { href: "/enrich", label: "Enrich", descriptor: "Live single run", glyph: "enrich" },
   { href: "/review", label: "Resolve", descriptor: "Decision queue", glyph: "resolve" },
   { href: "/pipeline", label: "Process", descriptor: "Recorded runs", glyph: "process" },
   { href: "/delivery", label: "Publish", descriptor: "Delivery studio", glyph: "publish" },
@@ -40,6 +50,9 @@ function activeFor(pathname: string, href: string): boolean {
 function NavGlyph({ name }: { name: NavItem["glyph"] }) {
   const paths = {
     operations: <path d="M2.5 3.5h11v3h-11zm0 6h5v3h-5zm8 0h3v3h-3z" />,
+    // A single item with a spark on it: one product going in, something added. Distinct from
+    // `publish` (a whole file, arrow up) and from `process` (a recorded sequence).
+    enrich: <path d="M4 6.5h5m-5 3h4m-5.5-6.5h8v10h-8zM11 2.5v3m-1.5-1.5h3" />,
     resolve: <path d="M3 3.5h6m-6 4h10m-10 4h7m2.5-9v3m-4 4v3" />,
     process: <path d="M2.5 4h4l1.5 2.5L9.5 4h4M2.5 12h4L8 9.5 9.5 12h4" />,
     publish: <path d="M8 2.5v7m0-7L5.5 5M8 2.5 10.5 5M3 9.5v3h10v-3" />,

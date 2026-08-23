@@ -62,11 +62,24 @@ _QUALIFIER_TOKENS: dict[str, Qualifier] = {
 _DASHES = "-\u2010\u2011\u2012\u2013\u2014\u2015\u2212"
 _RANGE_WORDS = r"(?:to|through|thru|\.\.\.|\.\.)"
 
-_NUMBER = r"[+-]?\d+(?:\.\d+)?"
+# The leading-dot alternative is not a nicety. Abrasive datasheets write thicknesses as bare decimal
+# inches with no whole part — `Thickness: .045 in`, `5"x.045"x7/8"` — and it is the house style
+# across
+# the category, not a typo. Without it the pattern matched `045` and produced **45 inches** for a
+# 0.045-inch wheel: a value a thousand times too large, carrying a perfectly verified quote.
+#
+# Found on a real Milwaukee datasheet. The cross-field rule caught it (a 45-inch-thick 5-inch wheel
+# fails `wheel_thickness < wheel_diameter`) and the plausible-range check warned, so it never
+# published — but relying on downstream validation to catch a parse this wrong is relying on the
+# wrong thing. `schema/classes/bonded_abrasive_wheel.yaml` predicted this exact failure in a
+# comment.
+_NUMBER = r"[+-]?(?:\d+(?:\.\d+)?|\.\d+)"
 _FRACTION = r"\d+\s*/\s*\d+"
 _MIXED = rf"\d+\s*[{_DASHES}\s]\s*{_FRACTION}"
 
-# Order matters: mixed number before bare fraction before plain number.
+# Order matters: mixed number before bare fraction before plain number. The leading-dot form has to
+# sit inside `_NUMBER` rather than as a fourth alternative, so that `1-1/2` still reads as a mixed
+# number instead of matching `1` and leaving `-1/2` behind.
 _MAGNITUDE_RE = re.compile(rf"(?P<mag>{_MIXED}|{_FRACTION}|{_NUMBER})")
 
 

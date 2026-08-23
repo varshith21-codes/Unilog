@@ -37,6 +37,34 @@ class DerivationMethod(str, Enum):
     WEB_EXTRACTION = "web_extraction"
     SUPPLIER_FEED = "supplier_feed"
 
+    # --- self-declared: the client's own input, parsed. Evidence-bearing, never publishable ---
+    ITEM_MASTER_PARSE = "item_master_parse"
+    """A value read out of the client's own item-master row — almost always ``Part_Desc``.
+
+    This is the method that keeps the system honest about its own input, and it exists because
+    ``SUPPLIER_FEED`` was quietly doing two incompatible jobs. A supplier feed proper is a
+    structured file a *manufacturer* published; the item master is the 1,000-row CSV the client
+    asked us to enrich. Filing the second under the first put the question being asked into the
+    answer: parse ``230V`` out of ``MILW 230V ANGLE GRINDER``, cite the row it came from, and the
+    SKU scores as evidenced — on the strength of the string we were handed.
+
+    The span is real and worth keeping. ``description[start:end] == quote`` is a genuine substring
+    check, the derivation is declared in version-controlled YAML, and a reviewer should be able to
+    see what the description implied. So this method **requires** evidence like any extraction.
+
+    What it must not do is publish. ``Part_Desc`` is unsourced free text written to move stock: it
+    abbreviates, it rounds, it inherits a family's figure for a specific variant, and nobody can be
+    asked to correct it. A specification traceable only to it is a **hypothesis about the product,
+    not a fact about it** — the same reasoning ``LEGACY_RECORD`` already applies to an untraceable
+    legacy row, and the same verdict ``evaluation/cohort.py`` already reaches when it scores the
+    client's starting state at zero completeness.
+
+    So it is a candidate, and it is a good one: it tells retrieval which attribute to go and confirm
+    on the manufacturer's page. Once a manufacturer document states the same value, that document
+    supplies its own ``DOCUMENT_EXTRACTION``/``TABLE_EXTRACTION`` value and *that* one publishes.
+    Until then the attribute is a gap, which is the truth.
+    """
+
     # --- derivation family: traceable to another value, evidence optional ---
     UNIT_CONVERSION = "unit_conversion"
     ENUM_RESOLUTION = "enum_resolution"
@@ -89,6 +117,30 @@ class DerivationMethod(str, Enum):
         """Constructible without evidence, but not publishable without it."""
         return self is DerivationMethod.LEGACY_RECORD
 
+    @property
+    def is_self_declared(self) -> bool:
+        """Cited against the client's own item master, so never publishable however well cited.
+
+        Deliberately narrower than :attr:`is_independent`. This one gates *publication*, and it
+        names only ``ITEM_MASTER_PARSE`` so that ``LEGACY_RECORD`` keeps the behaviour it has: a
+        legacy value that someone has since attached real evidence to may publish on the strength of
+        that evidence. The item-master parse cannot, because its evidence is the input itself and no
+        amount of it will ever be independent.
+        """
+        return self is DerivationMethod.ITEM_MASTER_PARSE
+
+    @property
+    def is_independent(self) -> bool:
+        """Whether this method can rest on a source outside the file we were asked to enrich.
+
+        The predicate the quality metrics are computed over, and it is about the *method's*
+        capability, not about a particular value: whether a given value truly stands on an
+        independent source also depends on the spans it carries. Both self-declared methods are
+        excluded here even though only one of them is barred from publishing, because a metric that
+        counted either would be measuring the input.
+        """
+        return self not in _SELF_DECLARED_FAMILY
+
 
 _EXTRACTION_FAMILY = frozenset(
     {
@@ -97,8 +149,27 @@ _EXTRACTION_FAMILY = frozenset(
         DerivationMethod.IMAGE_EXTRACTION,
         DerivationMethod.WEB_EXTRACTION,
         DerivationMethod.SUPPLIER_FEED,
+        # Requires a span for the same reason the others do: it read a document and must cite the
+        # place it read. That the document is the client's own file is a question of *authority*,
+        # settled by `_SELF_DECLARED_FAMILY`, not of whether a citation is owed.
+        DerivationMethod.ITEM_MASTER_PARSE,
     }
 )
+
+_SELF_DECLARED_FAMILY = frozenset(
+    {
+        DerivationMethod.ITEM_MASTER_PARSE,
+        # A legacy row is self-declared too, and more weakly than the item master: at least the
+        # item master names the file it arrived in.
+        DerivationMethod.LEGACY_RECORD,
+    }
+)
+"""Methods whose only possible source is the catalogue we were asked to enrich.
+
+Excluded from completeness and verifiability by construction. Crediting them would let a catalogue
+report itself as enriched by restating its own input, which is the specific failure this system
+exists to make impossible.
+"""
 
 _INFERENCE_FAMILY = frozenset(
     {
@@ -162,6 +233,23 @@ class Quantity(BaseModel):
         return f"{self.magnitude:g} {self.unit}"
 
     def _require_same_unit(self, other: Quantity) -> None:
+        # A bare number is the commoner mistake, and it used to be the worse one. Reaching for
+        # `other.unit` on a float raised `AttributeError`, which is not a `TypeError`, so the
+        # expression evaluator's `except TypeError` did not catch it and a single malformed rule in
+        # one class aborted an entire batch — found exactly that way, on a real 1,000-row run, from
+        # `wheel_thickness <= 6.0`.
+        #
+        # Reported as a unit mismatch because that is what it is: `6.0` is not six millimetres, it
+        # is
+        # six of nothing. Refusing it is the same protection that stops pounds being compared with
+        # kilograms, and `UnitMismatchError` subclasses `TypeError` so the evaluator now degrades to
+        # "this rule is malformed" and the other rules still run.
+        if not isinstance(other, Quantity):
+            raise UnitMismatchError(
+                f"cannot compare {self.unit!r} with a unitless {type(other).__name__}: a rule "
+                f"comparing a quantity to a bare number is ambiguous. Compare against another "
+                f"quantity, or against '.magnitude' if the constant is in canonical units."
+            )
         if self.unit != other.unit:
             raise UnitMismatchError(
                 f"cannot combine {self.unit!r} with {other.unit!r}; convert to a common unit "
@@ -339,6 +427,14 @@ class AttributeValue(BaseModel):
         # can be measured, but it must never publish on that basis. If it cannot be sourced it is
         # a gap, whatever it looks like in the item master.
         if self.method.is_unsourced and not self.has_verified_evidence:
+            return False
+        # Self-declared values never publish, however well cited. The span proves the client's file
+        # says this; it does not make the claim true, and the citation would read to a downstream
+        # consumer exactly like one that terminates in the manufacturer's own drawing. An
+        # independent source has to state it before it can be published — at which point that
+        # source contributes its own value and this one is superseded or stays a corroborating
+        # candidate.
+        if self.method.is_self_declared:
             return False
         return not self.failed_validations()
 

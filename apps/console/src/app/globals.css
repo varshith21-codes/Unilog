@@ -160,6 +160,7 @@
   --sidebar-rail-width: 4.5rem;
   --header-height: 3.75rem;
   --control-height: 2.375rem;
+  --control-height-touch: 2.75rem;
 
   /* Fluid section rhythm, so desktop gets breathing room without cramping mobile. */
   --spacing-section: clamp(2.5rem, 4.5vw, 4.75rem);
@@ -1374,6 +1375,21 @@
   color: var(--fg);
   padding-inline: 0.75rem;
   font-size: var(--text-sm);
+}
+
+.review-queue-control:hover:not(:disabled) {
+  border-color: var(--hairline-accent);
+  background-color: var(--surface-hover);
+}
+
+.review-queue-control:active:not(:disabled) {
+  border-color: var(--accent);
+}
+
+@media (pointer: coarse) {
+  .review-queue-control {
+    min-height: var(--control-height-touch);
+  }
 }
 
 /* Unlayered to follow the shared input rule in the cascade. */

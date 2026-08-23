@@ -207,20 +207,35 @@ def test_spans_point_at_the_right_characters(registry, table):
         assert description[match.start : match.end] == match.value_raw
 
 
-def test_values_use_the_supplier_feed_method(registry, table):
-    """An extraction-family method, so the type system *requires* the evidence span."""
+def test_values_use_the_item_master_parse_method(registry, table):
+    """An extraction-family method, so the type system *requires* the evidence span.
+
+    ``ITEM_MASTER_PARSE`` rather than ``SUPPLIER_FEED``, which is not a rename. A supplier feed is
+    something a manufacturer published; this is the client's own row, and conflating the two let a
+    parse of the input count as evidence about the product.
+    """
     values = to_attribute_values(
         run("Dishwasher SS", registry, table), document_id="d", document_sha256=SHA
     )
-    assert all(v.method is DerivationMethod.SUPPLIER_FEED for v in values)
+    assert all(v.method is DerivationMethod.ITEM_MASTER_PARSE for v in values)
     assert all(v.method.requires_evidence for v in values)
+    assert all(v.method.is_self_declared for v in values)
+    assert not any(v.method.is_independent for v in values)
 
 
-def test_values_are_publishable_by_default(registry, table):
+def test_values_are_never_publishable_however_well_cited(registry, table):
+    """The core rule. The span is verified and the value still must not publish.
+
+    ``description[start:end] == quote`` proves the client's file says "120V". It does not establish
+    that the product is rated for 120V, and a downstream consumer cannot tell the two apart from a
+    citation alone. So the attribute stays a gap until an independent source states it.
+    """
     values = to_attribute_values(
         run("Dishwasher SS 120V", registry, table), document_id="d", document_sha256=SHA
     )
-    assert values and all(v.is_publishable for v in values)
+    assert values
+    assert all(v.has_verified_evidence for v in values)
+    assert not any(v.is_publishable for v in values)
 
 
 def test_accept_false_leaves_them_for_the_policy(registry, table):

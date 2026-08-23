@@ -94,8 +94,14 @@ class:
         positionally with nothing in the string to say so, and this is the transposition the
         individual plausible ranges cannot catch on their own.
 
+    # `.magnitude` rather than a bare comparison, and the unit is millimetres because that is
+    # `wheel_thickness`'s canonical unit. Written as `wheel_thickness <= 6.0` this rule compared a
+    # quantity against a unitless number, which is ambiguous — 6.0 of what? — and the evaluator now
+    # refuses it as a unit mismatch. It used to raise an AttributeError that aborted the whole run,
+    # which is how it was found: on a real Milwaukee datasheet, the first document that ever supplied
+    # a thickness at all.
     - id: R_CUTTING_WHEEL_IS_THIN
-      expr: "abrasive_operation != 'Cutting' or wheel_thickness <= 6.0"
+      expr: "abrasive_operation != 'Cutting' or wheel_thickness.magnitude <= 6.0"
       references: [abrasive_operation, wheel_thickness]
       severity: error
       message: >

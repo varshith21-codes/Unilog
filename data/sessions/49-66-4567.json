@@ -48,10 +48,12 @@
   },
   "quality": {
     "completeness": 0.0,
-    "verifiability": 1.0,
+    "verifiability": 0.0,
     "consistency": 1.0,
     "richness": 0.5,
-    "composite": 0.6,
+    "self_declared": 0.0,
+    "corroborated": 0.0,
+    "composite": 0.3,
     "measured_dimensions": [
       "completeness",
       "consistency",
@@ -59,7 +61,7 @@
       "verifiability"
     ]
   },
-  "created_at": "2026-08-22T19:16:17.906884+00:00",
+  "created_at": "2026-08-23T11:45:33.713375+00:00",
   "decisions": [],
   "pages": [
     {
@@ -90,7 +92,7 @@
       "status": "auto_accepted",
       "reason_code": "auto_accepted",
       "detail": "score 0.800 >= threshold 0.719",
-      "method": "supplier_feed",
+      "method": "item_master_parse",
       "model_tier": null,
       "is_required": false,
       "accepted": true,

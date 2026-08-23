@@ -6,6 +6,7 @@ serve different shapes for the same data.
 
 from axiom.console.projection import (
     PUBLISHABLE_STATUSES,
+    backfill_provenance,
     build_bundle,
     build_dataset,
     dataset_stats,
@@ -26,6 +27,7 @@ __all__ = [
     "PUBLISHABLE_STATUSES",
     "build_bundle",
     "build_dataset",
+    "backfill_provenance",
     "dataset_stats",
     "jsonable",
     "normalise_quality_index",

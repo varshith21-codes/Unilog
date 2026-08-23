@@ -15,6 +15,7 @@ from axiom.docintel.models import (
     ParsedWord,
     TableCell,
 )
+from axiom.docintel.navigation import Link, SearchForm, extract_links, find_search_form
 from axiom.docintel.pdf_parser import PdfParseError, parse_pdf
 from axiom.docintel.revision import RevisionMarker, find_revision
 from axiom.docintel.sku import MIN_SKU_CHARS, SkuPresence, find_sku
@@ -27,6 +28,8 @@ from axiom.docintel.spans import (
     verify_quote,
 )
 from axiom.docintel.text_parser import parse_text
+from axiom.docintel.title import DEFAULT_LINES as TITLE_BLOCK_LINES
+from axiom.docintel.title import title_block
 
 
 def parse_artifact(data: bytes, document, **kwargs) -> ParsedDocument:
@@ -61,6 +64,7 @@ __all__ = [
     "DEFAULT_THRESHOLD",
     "MIN_SKU_CHARS",
     "DocumentType",
+    "Link",
     "ParsedDocument",
     "ParsedLine",
     "ParsedPage",
@@ -69,10 +73,14 @@ __all__ = [
     "PdfParseError",
     "QuoteLocation",
     "RevisionMarker",
+    "SearchForm",
     "SkuPresence",
+    "TITLE_BLOCK_LINES",
     "TableCell",
     "build_evidence_span",
+    "extract_links",
     "find_revision",
+    "find_search_form",
     "find_sku",
     "html_to_text",
     "locate_quote",
@@ -82,5 +90,6 @@ __all__ = [
     "parse_pdf",
     "parse_text",
     "squash",
+    "title_block",
     "verify_quote",
 ]

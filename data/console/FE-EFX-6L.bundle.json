@@ -19,8 +19,8 @@
       "source_document_ids": [
         "Unihack__Sample_Dataset_-_Input#FE-EFX-6L"
       ],
-      "created_at": "2026-08-22T19:16:17.142362+00:00",
-      "updated_at": "2026-08-22T19:16:17.142400+00:00"
+      "created_at": "2026-08-23T11:45:32.759791+00:00",
+      "updated_at": "2026-08-23T11:45:32.759866+00:00"
     },
     "classifications": [
       {
@@ -76,7 +76,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:17.142381Z"
+        "detected_at": "2026-08-23T11:45:32.759832Z"
       },
       {
         "attribute_code": "approvals",
@@ -88,7 +88,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:17.142386Z"
+        "detected_at": "2026-08-23T11:45:32.759843Z"
       }
     ],
     "extraction": {
@@ -137,10 +137,10 @@
       "per_attribute": {}
     },
     "certificate": {
-      "certificate_id": "ec_71f5d0c8d541",
+      "certificate_id": "ec_a399cce4257d",
       "sku": "FE-EFX-6L",
       "tenant_id": "unilog",
-      "generated_at": "2026-08-22T19:16:17.142500Z",
+      "generated_at": "2026-08-23T11:45:32.760065Z",
       "schema_version": "SAF.DET.GEN@v1",
       "pipeline_version": "axiom-0.1.0",
       "classifications": [
@@ -195,6 +195,8 @@
           "verifiability": 0.0,
           "consistency": 1.0,
           "richness": 0.0,
+          "self_declared": 0.0,
+          "corroborated": 0.0,
           "weights": {
             "completeness": 0.35,
             "verifiability": 0.3,
@@ -212,7 +214,7 @@
         "cost_usd": null,
         "wall_clock_seconds": 0.0
       },
-      "signature": "sha256:4375c54a672b6ddc27dd11584a7c39f2fad00a71f1c9a441c253faf3dc4f7894",
+      "signature": "sha256:d895e11ca1747b1568277a9c485db72cb5525b2fda17a5839192552601536b8a",
       "signature_verified": true
     },
     "channels": [
@@ -252,13 +254,30 @@
     "metrics": {
       "fill_rate": 0.0,
       "verifiability": 0.0,
+      "self_declared_rate": 0.0,
+      "corroborated_rate": 0.0,
       "values_total": 0,
       "values_publishable": 0,
+      "values_self_declared": 0,
       "values_needing_review": 0,
       "gaps_total": 2,
       "gaps_required": 2,
       "conflicts": []
     },
+    "sources": [
+      {
+        "document_id": "Unihack__Sample_Dataset_-_Input#FE-EFX-6L",
+        "url": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
+        "host": "",
+        "tier": "item_master",
+        "doc_type": "supplier_feed",
+        "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+        "covers_this_sku": "row",
+        "citable_as_manufacturer": false,
+        "license_note": null,
+        "revision_label": null
+      }
+    ],
     "cost": null,
     "copy": null
   },
@@ -267,7 +286,7 @@
     "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
     "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
     "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-22T19:16:11.275717Z",
+    "fetched_at": "2026-08-23T11:45:10.364455Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": "unilog",

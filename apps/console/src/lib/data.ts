@@ -229,12 +229,49 @@ export function unresolvedConflicts(bundle: SkuBundle): number {
  * and a page that treats "nothing to do" and "nothing was evaluated" as the same state will tell a
  * reviewer their catalogue is finished when most of it has not been looked at.
  *
- * At catalogue scale this is the dominant state, not an edge case: retrieval abstains rather than
- * guessing, and `schema/classes/` covers four classes against an item master spanning abrasives,
- * lumber, power tools, wire and PPE. Closing it means adding class definitions.
+ * This used to be the dominant state and no longer is. `schema/classes/` covered four classes
+ * against an item master spanning decking, abrasives, power tools, appliances, wire and PPE, so 785
+ * of 1,000 SKUs landed here; it now covers thirty-two and 980 of 1,000 SKUs reach a class. What is
+ * left is a tail, and the tail has two kinds in it — see `classificationAbstention`, because they
+ * need different work and telling a reviewer the wrong one wastes their time.
  */
 export function needsClassification(bundle: SkuBundle): boolean {
   return bundle.class_code === null;
+}
+
+/** Why a SKU has no class, and what was in contention when it was decided. */
+export interface ClassificationAbstention {
+  /**
+   * `no-candidate` — nothing in the schema matched. The remedy is a class definition.
+   * `ambiguous` — two classes matched and neither dominated, so retrieval refused to guess. The
+   * remedy is adjudication, and adding a class would not help.
+   */
+  kind: "no-candidate" | "ambiguous";
+  /** What was in contention, best first. Empty for `no-candidate`. */
+  candidates: { code: string; score: number; path_text: string }[];
+}
+
+/**
+ * Distinguish the two ways a SKU can end up with no class.
+ *
+ * Worth separating because the console told every unclassified SKU the same thing — that retrieval
+ * matched no class and the fix is to add a class definition under `schema/classes/`. For a heater
+ * kit or an insulated water bottle that is exactly right. For a "Satco Tape Light", a "Voltage
+ * Detector w/ LED" or a "Coil Roofing - Nailer Kit" it is wrong twice over: retrieval DID match
+ * classes — two of them, named and scored, already in this bundle — and adding a thirty-third class
+ * would not resolve a tie between the two that already exist.
+ *
+ * Reading the reason from the pipeline rather than re-deriving it: `method` is the classifier's own
+ * account of how it decided, and `classification_candidates` is what it was choosing between.
+ */
+export function classificationAbstention(bundle: SkuBundle): ClassificationAbstention | null {
+  if (bundle.class_code !== null) return null;
+  const method = (bundle.classification_summary as { method?: string } | null)?.method;
+  const candidates = bundle.classification_candidates ?? [];
+  // Keyed on the presence of contenders rather than only on the method string, so a bundle written
+  // by an older pipeline version still renders the more useful of the two messages.
+  const ambiguous = method === "ambiguous_no_model" || candidates.length > 1;
+  return { kind: ambiguous ? "ambiguous" : "no-candidate", candidates };
 }
 
 /**

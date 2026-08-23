@@ -280,6 +280,7 @@ def test_measured_score_against_real_ground_truth(fmt, registry):
     table = AbbreviationTable.load()
 
     produced = []
+    built = []
     for mpn in truth:
         assert mpn in inputs, f"{mpn} is in ground truth but not in the input file"
         source = SupplierRow.parse(inputs[mpn])
@@ -297,7 +298,9 @@ def test_measured_score_against_real_ground_truth(fmt, registry):
             extraction, document_id="item-master", document_sha256="e" * 64
         ):
             record.add_value(value)
-        produced.append(builder.build(record, source=source).as_dict())
+        row = builder.build(record, source=source)
+        built.append(row)
+        produced.append(row.as_dict())
 
     report = score_rows(fmt, list(truth.values()), produced)
 
@@ -311,11 +314,21 @@ def test_measured_score_against_real_ground_truth(fmt, registry):
 
     exact, expected = report.exact_of_expected()
     assert expected == 134, "ground truth populates 134 of 504 compared cells"
-    assert exact == 56, f"expected 56 exact matches, measured {exact}"
+    assert exact == 54, f"expected 54 exact matches, measured {exact}"
 
-    # Of those 56, exactly 2 are enrichment — `Material: Stainless Steel` on each row, read from
-    # the "SS" in the description. The other 54 are structure. Split out so the distinction cannot
-    # quietly erode: a rise in the headline number that is all scaffolding is not progress.
+    # All 54 are structure: both hierarchies, the input echo, and every grid label. **None is
+    # enrichment**, and that number is the honest one for a run with no document behind it.
+    #
+    # It used to be 56. The extra two were `Material: Stainless Steel` on each row, read from the
+    # "SS" in the description — and they were the *entire* enrichment contribution of this path.
+    # They agreed with ground truth, which is what made them so easy to keep and so misleading to
+    # count: the description happened to be right about these two cells, and nothing in the pipeline
+    # could tell that from the cells where a description is wrong. Publishing on that basis is the
+    # laundered-provenance failure `schema/sourcing.yaml` refuses marketplaces for, sourced from the
+    # client's own file instead of a retailer's.
+    #
+    # So the gate now withholds them, this row publishes structure only, and the way to move this
+    # number is to retrieve the manufacturer's document — not to squeeze the description harder.
     material = [
         cell
         for row in report.rows
@@ -323,8 +336,23 @@ def test_measured_score_against_real_ground_truth(fmt, registry):
         if cell.column == "ATTRIBUTE_VALUE 13"
     ]
     assert len(material) == 2
-    assert all(c.verdict is Verdict.EXACT for c in material)
-    assert all(c.actual == "Stainless Steel" for c in material)
+    assert all(c.verdict is Verdict.MISSED for c in material), (
+        "Material was read from the description alone, so it must be withheld rather than "
+        f"published: got {[(c.verdict.value, c.actual) for c in material]}"
+    )
+
+    # Withheld, not silently dropped. A merchandiser has to be able to see that the row is thinner
+    # than the record and why, or the gate looks like a bug.
+    withheld = [w for row in built for w in row.withheld]
+    material_withheld = [w for w in withheld if w.attribute_code == "primary_material"]
+    assert len(material_withheld) == 2, (
+        f"expected primary_material withheld on both rows: {withheld}"
+    )
+    # And the reason names the provenance rule, not merely the outcome. "not publishable" sends a
+    # merchandiser looking for a validation failure that does not exist.
+    assert all(
+        "item master" in w.reason for w in material_withheld
+    ), f"the reason should name the item master as the only source: {material_withheld}"
 
     groups = report.by_group()
     # Structure is fully correct: both hierarchies, the input echo, and every grid label.

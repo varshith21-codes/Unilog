@@ -30,6 +30,20 @@ class GapReason(str, Enum):
     EXTRACTED_BUT_UNVERIFIABLE = "extracted_but_unverifiable"
     """A candidate was produced but its quote could not be matched back to the source."""
 
+    SELF_DECLARED_ONLY = "self_declared_only"
+    """The customer's own item master suggests a value; no independent source confirms it.
+
+    The commonest state in a real catalogue, and the one that had no honest name. A description
+    reading "5in x .045in Cut-Off Wheel" implies a diameter and a thickness, the parse is correct,
+    and the quote verifies against the row — but the row is the file being enriched, so nothing has
+    been *established*. Recording this as populated would credit the input as enrichment; recording
+    it as ``NO_SOURCE_AVAILABLE`` would discard a genuine lead and imply nothing was found.
+
+    It is therefore a gap with a candidate attached, and it is the most closable kind: the value to
+    confirm is already known, so retrieval has a specific claim to check on the manufacturer's page
+    rather than an open-ended read.
+    """
+
     FAILED_VALIDATION = "failed_validation"
     """A value was found but rejected by a blocking validation layer."""
 
@@ -47,6 +61,19 @@ class GapReason(str, Enum):
             GapReason.NO_SOURCE_AVAILABLE,
             GapReason.REFERRED_ELSEWHERE,
             GapReason.CONFLICTING_SOURCES,
+        }
+
+    @property
+    def has_candidate(self) -> bool:
+        """Gaps that already hold a proposed value, so closing them is confirmation not discovery.
+
+        Worth separating in a backlog: these are the cheapest gaps in the catalogue to close, and
+        a queue that ranked them alongside "nothing was found" would bury them.
+        """
+        return self in {
+            GapReason.SELF_DECLARED_ONLY,
+            GapReason.AWAITING_REVIEW,
+            GapReason.EXTRACTED_BUT_UNVERIFIABLE,
         }
 
 

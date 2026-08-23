@@ -4,7 +4,9 @@ import { notFound } from "next/navigation";
 import { CrossSourcePanel } from "@/components/cross-source-panel";
 import { EquivalencePanel } from "@/components/equivalence-panel";
 import { ArrowIcon, Meter, Overline, Section } from "@/components/primitives";
+import { ProvenanceNote } from "@/components/provenance-note";
 import { ReviewWorkspace } from "@/components/review-workspace";
+import { SourcesPanel } from "@/components/sources-panel";
 import { VariantSeriesPanel } from "@/components/variant-series-panel";
 import {
   attributeRows,
@@ -180,7 +182,14 @@ export default async function ReviewSkuPage({
             </dd>
             <dd className="mt-2 text-meta text-[var(--fg-quiet)]">
               {bundle.certificate.summary.attributes_populated} of{" "}
-              {bundle.certificate.summary.attributes_required} required
+              {bundle.certificate.summary.attributes_required} required, established by an
+              independent source
+            </dd>
+            {/* The denominator of the denominator: how much of the remainder the customer's own
+                description already proposes. A reviewer seeing 0% needs to know whether that means
+                "no leads" or "leads nobody has checked", because the two imply different work. */}
+            <dd className="mt-2">
+              <ProvenanceNote metrics={bundle.metrics} />
             </dd>
           </div>
 
@@ -238,6 +247,16 @@ export default async function ReviewSkuPage({
         threshold={dataset.policy.threshold}
         live={dataset.meta.live}
       />
+
+      {/*
+        The sources, in front of the reviewer who is about to accept or correct a value. A quote is
+        checkable by the machine; the link is what makes it checkable by them.
+      */}
+      {bundle.sources && bundle.sources.length > 0 ? (
+        <Section rhythm="lg">
+          <SourcesPanel sources={bundle.sources} />
+        </Section>
+      ) : null}
 
       {series ? (
         <Section rhythm="lg">

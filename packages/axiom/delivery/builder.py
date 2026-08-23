@@ -218,6 +218,7 @@ class DeliveryRowBuilder:
         descriptions: Mapping[str, str] | None = None,
         features: list[str] | None = None,
         reference_urls: list[str] | None = None,
+        mfr_url: str | None = None,
         assets: Mapping[str, str] | None = None,
         brand: str | None = None,
         manufacturer: str | None = None,
@@ -272,7 +273,7 @@ class DeliveryRowBuilder:
         self._named_attributes(row, record)
         self._identifiers(row, record)
         self._lifecycle(row, record)
-        self._evidence(row, record, reference_urls)
+        self._evidence(row, record, reference_urls, mfr_url)
 
         # Rendered descriptions come after the grid, because the recipes read the same values the
         # grid published and a renderer running first would compose from nothing.
@@ -562,26 +563,51 @@ class DeliveryRowBuilder:
     # ------------------------------------------------------------------ evidence
 
     def _evidence(
-        self, row: DeliveryRow, record: ProductRecord, reference_urls: list[str] | None
+        self,
+        row: DeliveryRow,
+        record: ProductRecord,
+        reference_urls: list[str] | None,
+        mfr_url: str | None = None,
     ) -> None:
         """The manufacturer URL and supporting references.
 
-        The guide's sourcing rule excludes marketplaces and distributor sites, so the first URL
-        is expected to be the manufacturer's own. That is the caller's responsibility to honour;
-        this only lays them out in the order the format wants.
+        ``MFR URL`` means *the manufacturer's own page*. The guide's sourcing rule excludes
+        marketplaces and distributor sites, so passing ``mfr_url`` explicitly is how a caller states
+        that a URL has been judged to be the manufacturer's — ``axiom.retrieve.policy`` decides
+        that,
+        and only a ``manufacturer``-tier host qualifies.
+
+        Without it, the first reference URL fills the slot. That is the older behaviour and it is
+        kept
+        for the golden arm, where the URLs were transcribed by hand from the client's own answer
+        sheet
+        and the first one is the manufacturer's by construction. It is *not* a safe default for
+        retrieved URLs, which is why retrieval passes the field rather than relying on ordering: an
+        unknown-tier page landing in ``MFR URL`` would publish a claim about who said it.
         """
-        urls = [u for u in (reference_urls or []) if u]
-        if not urls:
+        others = [u for u in (reference_urls or []) if u]
+        primary = mfr_url or (others.pop(0) if mfr_url is None and others else None)
+        if not primary and not others:
             return
-        self._set(row, "MFR URL", urls[0], Provenance.EVIDENCE, source="source document")
 
         overflow = [c for c in self._format.group("reference_urls") if c.name != "MFR URL"]
-        for column, url in zip(overflow, urls[1:], strict=False):
-            self._set(row, column.name, url, Provenance.EVIDENCE, source="source document")
-        if len(urls) - 1 > len(overflow):
+        if primary:
+            self._set(row, "MFR URL", primary, Provenance.EVIDENCE, source="source document")
+        else:
+            # Deliberately left empty rather than filled with the next best thing. An empty
+            # `MFR URL` beside populated `Ref URL` columns says exactly what happened: sources were
+            # found, none of them the manufacturer's.
             row.notes.append(
-                f"{len(urls)} reference URLs supplied but the format has "
-                f"{len(overflow) + 1} slots; {len(urls) - 1 - len(overflow)} not emitted"
+                f"{len(others)} reference URL(s) found but none on a declared manufacturer domain, "
+                f"so MFR URL is left empty"
+            )
+
+        for column, url in zip(overflow, others, strict=False):
+            self._set(row, column.name, url, Provenance.EVIDENCE, source="source document")
+        if len(others) > len(overflow):
+            row.notes.append(
+                f"{len(others) + (1 if primary else 0)} reference URLs supplied but the format has "
+                f"{len(overflow) + 1} slots; {len(others) - len(overflow)} not emitted"
             )
 
     # ------------------------------------------------------------------ generated
@@ -753,6 +779,16 @@ def _withhold_reason(value: AttributeValue) -> str:
         return (
             "legacy item-master value with no verified evidence: present in the catalogue but "
             "not traceable to a source"
+        )
+    # Before the generic evidence check, because this value *has* a verified span and the generic
+    # message would therefore be wrong about it. The span cites the client's own item master, which
+    # establishes what the row says and not what the product is.
+    if value.method.is_self_declared:
+        return (
+            "read from the customer's own item master description, which is the only source for "
+            "it. The quote is verified, but the item master is the file being enriched rather than "
+            "an independent source, so this stays a candidate: retrieve the manufacturer's "
+            "document to publish it"
         )
     if value.method.requires_evidence and not value.has_verified_evidence:
         return "extracted without a verified evidence span"

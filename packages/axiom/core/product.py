@@ -196,22 +196,90 @@ class ProductRecord(BaseModel):
     # ------------------------------------------------------------------ metrics
 
     def fill_rate(self, required_codes: list[str]) -> float:
-        """Share of required attributes with a publishable value."""
+        """Share of required attributes established by an independent source.
+
+        "Publishable" carries the provenance rule rather than restating it here: a value cited only
+        against the client's own item master is not publishable, so it does not count. That is the
+        difference between reporting what a catalogue *contains* and what has been *established*
+        about it, and it is why an un-retrieved SKU reads 0.0 no matter how descriptive its
+        ``Part_Desc`` is. :meth:`self_declared_rate` is where that description's contribution shows
+        up, unmixed with this.
+
+        **An empty requirement set scores 0.0, not 1.0.** Vacuous truth is the wrong reading here.
+        "Every one of no required attributes is populated" is defensible arithmetic and a false
+        statement about the product: the only thing that produces an empty requirement set in this
+        system is a record whose classification abstained, and an unclassified SKU is the least
+        complete thing in the catalogue rather than the most. Returning 1.0 put the sample's twenty
+        unclassified rows — the ones where not even the product type is known — at the top of the
+        dashboard on 100% completeness. A caller that needs "was this measurable at all" should ask
+        the class code or the requirement list, not read it out of the score.
+        """
         if not required_codes:
-            return 1.0
+            return 0.0
         populated = sum(1 for code in required_codes if self._has_publishable(code))
         return populated / len(required_codes)
 
+    def self_declared_rate(self, required_codes: list[str]) -> float:
+        """Share of required attributes for which the client's own input suggests a value.
+
+        Reported *beside* :meth:`fill_rate`, never folded into it. Without this the honest
+        completeness number would make the description parse invisible and the pipeline would look
+        like it had done nothing on a row it had in fact read correctly; with it folded in, the
+        input would masquerade as enrichment. Two numbers, because there are two facts.
+        """
+        if not required_codes:
+            return 0.0
+        return sum(1 for code in required_codes if code in self._self_declared_codes()) / len(
+            required_codes
+        )
+
+    def corroborated_rate(self, required_codes: list[str]) -> float:
+        """Share of required attributes an independent source *confirmed* the input's suggestion on.
+
+        The number that says retrieval is working rather than merely running. A high
+        :meth:`self_declared_rate` with a low value here means documents are being fetched that do
+        not speak to what the descriptions claim, which is a retrieval-targeting problem and looks
+        nothing like a coverage problem in the other two metrics.
+        """
+        if not required_codes:
+            return 0.0
+        suggested = self._self_declared_codes()
+        confirmed = sum(
+            1 for code in required_codes if code in suggested and self._has_publishable(code)
+        )
+        return confirmed / len(required_codes)
+
+    def _self_declared_codes(self) -> set[str]:
+        """Attribute codes the client's own input suggested, whether or not it was later confirmed.
+
+        Scans every version rather than :meth:`current_values`, and that is load-bearing. A document
+        that confirms a description-derived value supersedes it, so by the time these metrics run
+        the input's suggestion is no longer *current* — reading only current values would report
+        zero self-declared and zero corroborated on precisely the SKUs where retrieval did its job.
+        """
+        return {
+            v.attribute_code for v in self.attribute_values if not v.method.is_independent
+        }
+
     def verifiability(self) -> float:
-        """Share of publishable values backed by verified evidence.
+        """Share of publishable values backed by verified, independent evidence.
 
         This is the dimension nobody else reports and the one that matters most.
         Derivation- and human-family values count as verified: a unit conversion inherits
         the provenance of the value it was computed from, and a human entry is itself
         an accountable source.
+
+        Self-declared values are excluded twice over — they are not publishable, so they never
+        reach the denominator, and :attr:`DerivationMethod.is_independent` would bar them if they
+        did. Both guards are deliberate. This metric read 1.0 across nearly the whole sample
+        catalogue when a verified substring of the input CSV satisfied it, which is the most
+        flattering possible reading of having retrieved nothing.
         """
-        values = self.publishable_values()
+        values = [v for v in self.publishable_values() if v.method.is_independent]
         if not values:
+            # No independent value, so nothing has been verified. Zero is the measurement, not a
+            # missing one: the SKU may well be full of description-derived candidates, and none of
+            # them has been confirmed by anybody.
             return 0.0
         verified = sum(
             1
@@ -223,8 +291,19 @@ class ProductRecord(BaseModel):
         return verified / len(values)
 
     def _has_publishable(self, attribute_code: str) -> bool:
-        v = self.get(attribute_code)
-        return v is not None and v.is_publishable
+        """Whether *any* current candidate for this attribute is publishable.
+
+        Any, not the highest-version one. Cross-source candidates accumulate through
+        :meth:`add_candidate` without superseding each other, so an attribute can hold a
+        description-derived candidate and a datasheet-derived one at the same version. Asking
+        :meth:`get` would pick between them by list order and could answer "not established" about
+        an attribute a manufacturer document states outright.
+        """
+        return any(
+            v.is_publishable
+            for v in self.current_values()
+            if v.attribute_code == attribute_code
+        )
 
 
 _EVIDENCE_EXPECTED = frozenset(

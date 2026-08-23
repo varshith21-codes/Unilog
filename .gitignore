@@ -59,6 +59,12 @@ data/ingest/*.rows.json
 # against ground truth (pinned in tests/test_delivery_scoring.py).
 data/delivery/
 
+# Per-submission output from POST /api/enrich, on the same principle as data/delivery/ above: one
+# 252-column row plus its provenance sidecar and a workbook, written per run. Unlike data/console/
+# and data/sessions/ — which are the demo corpus and ARE committed — these are download artifacts
+# with no reviewable content, and every one of them cost a real model call to produce.
+data/enrich/
+
 # --- os / editor ---
 Thumbs.db
 Desktop.ini

@@ -19,8 +19,8 @@
       "source_document_ids": [
         "Unihack__Sample_Dataset_-_Input#WC1V12W-SG-UPC"
       ],
-      "created_at": "2026-08-22T19:16:16.610735+00:00",
-      "updated_at": "2026-08-22T19:16:16.610785+00:00"
+      "created_at": "2026-08-23T11:45:31.995797+00:00",
+      "updated_at": "2026-08-23T11:45:31.995888+00:00"
     },
     "classifications": [
       {
@@ -70,7 +70,7 @@
         "value_raw": "Wh",
         "value_canonical": "Wh",
         "value_display": "Wh",
-        "method": "supplier_feed",
+        "method": "item_master_parse",
         "confidence": 0.82,
         "status": "auto_accepted",
         "evidence": [
@@ -96,7 +96,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-22T19:16:16.610686Z",
+        "created_at": "2026-08-23T11:45:31.995725Z",
         "score": 0.8,
         "decision": {
           "attribute_code": "finish_color",
@@ -121,8 +121,10 @@
           "source_prior": 0.5,
           "tier_cost": 0.5
         },
-        "is_publishable": true,
+        "is_publishable": false,
         "has_verified_evidence": true,
+        "is_self_declared": true,
+        "is_independent": false,
         "citation_summary": [
           "Unihack__Sample_Dataset_-_Input#WC1V12W-SG-UPC"
         ]
@@ -139,7 +141,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:16.610763Z"
+        "detected_at": "2026-08-23T11:45:31.995849Z"
       },
       {
         "attribute_code": "overall_size",
@@ -151,7 +153,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:16.610767Z"
+        "detected_at": "2026-08-23T11:45:31.995857Z"
       },
       {
         "attribute_code": "gang_count",
@@ -163,7 +165,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:16.610770Z"
+        "detected_at": "2026-08-23T11:45:31.995863Z"
       },
       {
         "attribute_code": "primary_material",
@@ -175,7 +177,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:16.610772Z"
+        "detected_at": "2026-08-23T11:45:31.995867Z"
       },
       {
         "attribute_code": "approvals",
@@ -187,7 +189,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:16.610776Z"
+        "detected_at": "2026-08-23T11:45:31.995872Z"
       }
     ],
     "extraction": {
@@ -236,10 +238,10 @@
       "per_attribute": {}
     },
     "certificate": {
-      "certificate_id": "ec_b3077f845027",
+      "certificate_id": "ec_3eec98b9b6ad",
       "sku": "WC1V12W-SG-UPC",
       "tenant_id": "unilog",
-      "generated_at": "2026-08-22T19:16:16.610920Z",
+      "generated_at": "2026-08-23T11:45:31.996087Z",
       "schema_version": "ELC.BOX.GEN@v1",
       "pipeline_version": "axiom-0.1.0",
       "classifications": [
@@ -257,29 +259,7 @@
           "alternatives": []
         }
       ],
-      "attributes": [
-        {
-          "code": "finish_color",
-          "value_canonical": "Wh",
-          "value_display": "Wh",
-          "value_raw": "Wh",
-          "confidence": 0.82,
-          "method": "supplier_feed",
-          "model_tier": null,
-          "status": "auto_accepted",
-          "evidence": [
-            {
-              "document": "Unihack__Sample_Dataset_-_Input#WC1V12W-SG-UPC",
-              "sha256": "49efd0b2\u2026",
-              "page": null,
-              "bbox": null,
-              "quote": "Wh",
-              "verified": true
-            }
-          ],
-          "validations": []
-        }
-      ],
+      "attributes": [],
       "gaps": [
         {
           "code": "enclosure_form",
@@ -334,8 +314,8 @@
       ],
       "summary": {
         "attributes_required": 5,
-        "attributes_populated": 1,
-        "attributes_with_evidence": 1,
+        "attributes_populated": 0,
+        "attributes_with_evidence": 0,
         "attributes_inferred": 0,
         "auto_accepted": 1,
         "queued_for_review": 0,
@@ -343,9 +323,11 @@
         "gaps_required": 5,
         "quality_index": {
           "completeness": 0.0,
-          "verifiability": 1.0,
+          "verifiability": 0.0,
           "consistency": 1.0,
           "richness": 0.0,
+          "self_declared": 0.0,
+          "corroborated": 0.0,
           "weights": {
             "completeness": 0.35,
             "verifiability": 0.3,
@@ -358,12 +340,12 @@
             "richness",
             "verifiability"
           ],
-          "composite": 0.55
+          "composite": 0.25
         },
         "cost_usd": null,
         "wall_clock_seconds": 0.0
       },
-      "signature": "sha256:0790300b9deca95bf5559d33ded9dbd13d20369658b75a2d8f6119e98e559d77",
+      "signature": "sha256:fac1ac04c9fff44fb09446e733f5137648327eb330a386442dad4b4bc2d63b57",
       "signature_verified": true
     },
     "channels": [
@@ -371,7 +353,9 @@
         "name": "cx1_pim",
         "published": false,
         "value_count": 0,
-        "withheld": [],
+        "withheld": [
+          "finish_color"
+        ],
         "readiness": {
           "channel": "cx1_pim",
           "ready": false,
@@ -387,7 +371,9 @@
         "name": "schema_org",
         "published": false,
         "value_count": 0,
-        "withheld": [],
+        "withheld": [
+          "finish_color"
+        ],
         "readiness": {
           "channel": "schema_org",
           "ready": false,
@@ -402,14 +388,31 @@
     ],
     "metrics": {
       "fill_rate": 0.0,
-      "verifiability": 1.0,
+      "verifiability": 0.0,
+      "self_declared_rate": 0.0,
+      "corroborated_rate": 0.0,
       "values_total": 1,
-      "values_publishable": 1,
+      "values_publishable": 0,
+      "values_self_declared": 1,
       "values_needing_review": 0,
       "gaps_total": 5,
       "gaps_required": 5,
       "conflicts": []
     },
+    "sources": [
+      {
+        "document_id": "Unihack__Sample_Dataset_-_Input#WC1V12W-SG-UPC",
+        "url": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
+        "host": "",
+        "tier": "item_master",
+        "doc_type": "supplier_feed",
+        "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+        "covers_this_sku": "row",
+        "citable_as_manufacturer": false,
+        "license_note": null,
+        "revision_label": null
+      }
+    ],
     "cost": null,
     "copy": null
   },
@@ -418,7 +421,7 @@
     "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
     "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
     "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-22T19:16:11.275717Z",
+    "fetched_at": "2026-08-23T11:45:10.364455Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": "unilog",

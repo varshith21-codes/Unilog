@@ -19,8 +19,8 @@
       "source_document_ids": [
         "Unihack__Sample_Dataset_-_Input#M701B-21M"
       ],
-      "created_at": "2026-08-22T19:16:17.187647+00:00",
-      "updated_at": "2026-08-22T19:16:17.187685+00:00"
+      "created_at": "2026-08-23T11:45:32.797462+00:00",
+      "updated_at": "2026-08-23T11:45:32.797580+00:00"
     },
     "classifications": [
       {
@@ -70,7 +70,7 @@
         "value_raw": "M",
         "value_canonical": "M",
         "value_display": "M",
-        "method": "supplier_feed",
+        "method": "item_master_parse",
         "confidence": 0.82,
         "status": "auto_accepted",
         "evidence": [
@@ -96,7 +96,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-22T19:16:17.187533Z",
+        "created_at": "2026-08-23T11:45:32.797257Z",
         "score": 0.8,
         "decision": {
           "attribute_code": "garment_size",
@@ -121,8 +121,10 @@
           "source_prior": 0.5,
           "tier_cost": 0.5
         },
-        "is_publishable": true,
+        "is_publishable": false,
         "has_verified_evidence": true,
+        "is_self_declared": true,
+        "is_independent": false,
         "citation_summary": [
           "Unihack__Sample_Dataset_-_Input#M701B-21M"
         ]
@@ -132,7 +134,7 @@
         "value_raw": "Heated",
         "value_canonical": "true",
         "value_display": "true",
-        "method": "supplier_feed",
+        "method": "item_master_parse",
         "confidence": 0.82,
         "status": "auto_accepted",
         "evidence": [
@@ -158,7 +160,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-22T19:16:17.187547Z",
+        "created_at": "2026-08-23T11:45:32.797283Z",
         "score": 0.8,
         "decision": {
           "attribute_code": "heated_garment",
@@ -183,8 +185,10 @@
           "source_prior": 0.5,
           "tier_cost": 0.5
         },
-        "is_publishable": true,
+        "is_publishable": false,
         "has_verified_evidence": true,
+        "is_self_declared": true,
+        "is_independent": false,
         "citation_summary": [
           "Unihack__Sample_Dataset_-_Input#M701B-21M"
         ]
@@ -194,7 +198,7 @@
         "value_raw": "Glove Liners",
         "value_canonical": "Glove Liner",
         "value_display": "Glove Liner",
-        "method": "supplier_feed",
+        "method": "item_master_parse",
         "confidence": 0.82,
         "status": "auto_accepted",
         "evidence": [
@@ -220,7 +224,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-22T19:16:17.187555Z",
+        "created_at": "2026-08-23T11:45:32.797299Z",
         "score": 0.8,
         "decision": {
           "attribute_code": "ppe_form",
@@ -245,14 +249,52 @@
           "source_prior": 0.5,
           "tier_cost": 0.5
         },
-        "is_publishable": true,
+        "is_publishable": false,
         "has_verified_evidence": true,
+        "is_self_declared": true,
+        "is_independent": false,
         "citation_summary": [
           "Unihack__Sample_Dataset_-_Input#M701B-21M"
         ]
       }
     ],
     "gaps": [
+      {
+        "attribute_code": "garment_size",
+        "reason": "self_declared_only",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#M701B-21M"
+        ],
+        "detail": "the customer's own description implies 'M' (from 'M'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-23T11:45:32.797530Z"
+      },
+      {
+        "attribute_code": "ppe_form",
+        "reason": "self_declared_only",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#M701B-21M"
+        ],
+        "detail": "the customer's own description implies 'Glove Liner' (from 'Glove Liners'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-23T11:45:32.797540Z"
+      },
+      {
+        "attribute_code": "heated_garment",
+        "reason": "self_declared_only",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#M701B-21M"
+        ],
+        "detail": "the customer's own description implies 'true' (from 'Heated'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-23T11:45:32.797547Z"
+      },
       {
         "attribute_code": "finish_color",
         "reason": "no_source_available",
@@ -263,7 +305,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:17.187677Z"
+        "detected_at": "2026-08-23T11:45:32.797553Z"
       },
       {
         "attribute_code": "approvals",
@@ -275,13 +317,13 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:17.187681Z"
+        "detected_at": "2026-08-23T11:45:32.797560Z"
       }
     ],
     "extraction": {
       "requested": 17,
       "values": 3,
-      "gaps": 2,
+      "gaps": 5,
       "rejected_unverifiable": 0,
       "corrected_to_match_evidence": 0,
       "citation_coverage": 1.0,
@@ -345,10 +387,10 @@
       "per_attribute": {}
     },
     "certificate": {
-      "certificate_id": "ec_20bbbab04f3b",
+      "certificate_id": "ec_b9e615a86df5",
       "sku": "M701B-21M",
       "tenant_id": "unilog",
-      "generated_at": "2026-08-22T19:16:17.187941Z",
+      "generated_at": "2026-08-23T11:45:32.798105Z",
       "schema_version": "SAF.APP.GEN@v1",
       "pipeline_version": "axiom-0.1.0",
       "classifications": [
@@ -366,72 +408,38 @@
           "alternatives": []
         }
       ],
-      "attributes": [
+      "attributes": [],
+      "gaps": [
         {
           "code": "garment_size",
-          "value_canonical": "M",
-          "value_display": "M",
-          "value_raw": "M",
-          "confidence": 0.82,
-          "method": "supplier_feed",
-          "model_tier": null,
-          "status": "auto_accepted",
-          "evidence": [
-            {
-              "document": "Unihack__Sample_Dataset_-_Input#M701B-21M",
-              "sha256": "49efd0b2\u2026",
-              "page": null,
-              "bbox": null,
-              "quote": "M",
-              "verified": true
-            }
+          "reason": "self_declared_only",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#M701B-21M"
           ],
-          "validations": []
-        },
-        {
-          "code": "heated_garment",
-          "value_canonical": "true",
-          "value_display": "true",
-          "value_raw": "Heated",
-          "confidence": 0.82,
-          "method": "supplier_feed",
-          "model_tier": null,
-          "status": "auto_accepted",
-          "evidence": [
-            {
-              "document": "Unihack__Sample_Dataset_-_Input#M701B-21M",
-              "sha256": "49efd0b2\u2026",
-              "page": null,
-              "bbox": null,
-              "quote": "Heated",
-              "verified": true
-            }
-          ],
-          "validations": []
+          "required": true,
+          "detail": "the customer's own description implies 'M' (from 'M'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+          "recommended_action": "retry_with_better_source"
         },
         {
           "code": "ppe_form",
-          "value_canonical": "Glove Liner",
-          "value_display": "Glove Liner",
-          "value_raw": "Glove Liners",
-          "confidence": 0.82,
-          "method": "supplier_feed",
-          "model_tier": null,
-          "status": "auto_accepted",
-          "evidence": [
-            {
-              "document": "Unihack__Sample_Dataset_-_Input#M701B-21M",
-              "sha256": "49efd0b2\u2026",
-              "page": null,
-              "bbox": null,
-              "quote": "Glove Liners",
-              "verified": true
-            }
+          "reason": "self_declared_only",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#M701B-21M"
           ],
-          "validations": []
-        }
-      ],
-      "gaps": [
+          "required": true,
+          "detail": "the customer's own description implies 'Glove Liner' (from 'Glove Liners'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+          "recommended_action": "retry_with_better_source"
+        },
+        {
+          "code": "heated_garment",
+          "reason": "self_declared_only",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#M701B-21M"
+          ],
+          "required": true,
+          "detail": "the customer's own description implies 'true' (from 'Heated'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+          "recommended_action": "retry_with_better_source"
+        },
         {
           "code": "finish_color",
           "reason": "no_source_available",
@@ -455,18 +463,20 @@
       ],
       "summary": {
         "attributes_required": 5,
-        "attributes_populated": 3,
-        "attributes_with_evidence": 3,
+        "attributes_populated": 0,
+        "attributes_with_evidence": 0,
         "attributes_inferred": 0,
         "auto_accepted": 3,
         "queued_for_review": 0,
-        "gaps_total": 2,
-        "gaps_required": 2,
+        "gaps_total": 5,
+        "gaps_required": 5,
         "quality_index": {
-          "completeness": 0.6,
-          "verifiability": 1.0,
+          "completeness": 0.0,
+          "verifiability": 0.0,
           "consistency": 1.0,
           "richness": 0.0,
+          "self_declared": 0.6,
+          "corroborated": 0.0,
           "weights": {
             "completeness": 0.35,
             "verifiability": 0.3,
@@ -479,12 +489,12 @@
             "richness",
             "verifiability"
           ],
-          "composite": 0.76
+          "composite": 0.25
         },
         "cost_usd": null,
         "wall_clock_seconds": 0.0
       },
-      "signature": "sha256:b1db7344a2ebcc64c73ece8dacdeb28a6a7d3de740f0e19cea3b689f77cad188",
+      "signature": "sha256:2e6e8d5d01a18bf4b81a3a0f9174365416af2e257dc4872bf402f56c53a9ec67",
       "signature_verified": true
     },
     "channels": [
@@ -492,7 +502,11 @@
         "name": "cx1_pim",
         "published": false,
         "value_count": 0,
-        "withheld": [],
+        "withheld": [
+          "garment_size",
+          "heated_garment",
+          "ppe_form"
+        ],
         "readiness": {
           "channel": "cx1_pim",
           "ready": false,
@@ -508,7 +522,11 @@
         "name": "schema_org",
         "published": false,
         "value_count": 0,
-        "withheld": [],
+        "withheld": [
+          "garment_size",
+          "heated_garment",
+          "ppe_form"
+        ],
         "readiness": {
           "channel": "schema_org",
           "ready": false,
@@ -522,15 +540,32 @@
       }
     ],
     "metrics": {
-      "fill_rate": 0.6,
-      "verifiability": 1.0,
+      "fill_rate": 0.0,
+      "verifiability": 0.0,
+      "self_declared_rate": 0.6,
+      "corroborated_rate": 0.0,
       "values_total": 3,
-      "values_publishable": 3,
+      "values_publishable": 0,
+      "values_self_declared": 3,
       "values_needing_review": 0,
-      "gaps_total": 2,
-      "gaps_required": 2,
+      "gaps_total": 5,
+      "gaps_required": 5,
       "conflicts": []
     },
+    "sources": [
+      {
+        "document_id": "Unihack__Sample_Dataset_-_Input#M701B-21M",
+        "url": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
+        "host": "",
+        "tier": "item_master",
+        "doc_type": "supplier_feed",
+        "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+        "covers_this_sku": "row",
+        "citable_as_manufacturer": false,
+        "license_note": null,
+        "revision_label": null
+      }
+    ],
     "cost": null,
     "copy": null
   },
@@ -539,7 +574,7 @@
     "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
     "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
     "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-22T19:16:11.275717Z",
+    "fetched_at": "2026-08-23T11:45:10.364455Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": "unilog",

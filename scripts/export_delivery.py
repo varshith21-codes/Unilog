@@ -112,6 +112,16 @@ def main() -> int:
         "rendered onto its own sheets. What to hand a human: Excel reinterprets a CSV on import, "
         "turning 50-1/4 into a date and 0123 into 123.",
     )
+    parser.add_argument(
+        "--library",
+        type=Path,
+        default=None,
+        help=(
+            "document library index written by scripts/retrieve_sources.py. Fills the format's "
+            "MFR URL and Ref URL columns from documents actually retrieved for each row, and only "
+            "puts a manufacturer-tier URL in MFR URL."
+        ),
+    )
     parser.add_argument("--quiet", action="store_true", help="suppress the per-row log")
     args = parser.parse_args()
 
@@ -180,12 +190,15 @@ def main() -> int:
             f"     extraction — the values come from the client's own answer sheet.\n"
         )
 
+    source_urls = _source_urls(args.library, selected, quiet=args.quiet)
+
     result = run_batch(
         selected,
         fmt=fmt,
         registry=registry,
         document_id=document_id,
         document_sha256=document_sha256,
+        source_urls=source_urls,
         options=BatchOptions(
             class_code=args.class_code,
             classified_only=args.classified_only,
@@ -286,6 +299,68 @@ def _load_documents(paths: list[Path]) -> list[ParsedDocument]:
             )
         )
     return parse_documents(sources)
+
+
+def _source_urls(
+    index: Path | None, rows: list[dict[str, str]], *, quiet: bool
+) -> dict[str, tuple[str | None, list[str]]]:
+    """mpn -> (manufacturer URL, other source URLs), read from the document library.
+
+    The manufacturer-tier URL is separated out because ``MFR URL`` is a claim about who stated the
+    specification, not merely a link. A URL from an unrecognised host is real evidence and belongs
+    in
+    a ``Ref URL`` column; putting it in ``MFR URL`` would attribute someone else's page to the
+    manufacturer.
+    """
+    if index is None:
+        return {}
+
+    from axiom.ingest import LocalArtifactStore
+    from axiom.retrieve import DocumentLibrary, SourceTier
+
+    library = DocumentLibrary.load(
+        LocalArtifactStore(REPO_ROOT / "data" / "cache" / "artifacts"), index
+    )
+    if not len(library):
+        if not quiet:
+            print(f"library {_display(index)} is empty; URL columns will stay blank\n")
+        return {}
+
+    out: dict[str, tuple[str | None, list[str]]] = {}
+    for raw in rows:
+        mpn = (raw.get("Mfg_Part_Num") or "").strip()
+        if not mpn:
+            continue
+        web: list[str] = []
+        docs: list[str] = []
+        others: list[str] = []
+        for coverage in library.coverage_for(mpn):
+            entry = coverage.entry
+            if not entry.source_uri.startswith(("http://", "https://")):
+                continue
+            if entry.tier != SourceTier.MANUFACTURER.value:
+                others.append(entry.source_uri)
+            elif entry.doc_type == "web_page":
+                web.append(entry.source_uri)
+            else:
+                docs.append(entry.source_uri)
+
+        # The column says "MFR URL", and the client's guide means the manufacturer's *page*. A
+        # datasheet PDF is a document, so where both exist the page takes the slot and the PDF goes
+        # to a Ref URL — which is also the more useful pairing for whoever opens them: the page to
+        # see the product, the PDF to check the figure.
+        mfr = web[0] if web else (docs[0] if docs else None)
+        refs = [url for url in [*web[1:], *docs, *others] if url != mfr]
+        if mfr or refs:
+            out[mpn] = (mfr, refs)
+
+    if not quiet:
+        with_mfr = sum(1 for mfr, _ in out.values() if mfr)
+        print(
+            f"library {_display(index)}: {len(library)} document(s); "
+            f"{len(out)} row(s) have a source URL, {with_mfr} on a manufacturer domain\n"
+        )
+    return out
 
 
 def _load_golden(path: Path) -> dict[str, dict]:

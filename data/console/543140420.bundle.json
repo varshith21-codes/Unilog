@@ -19,8 +19,8 @@
       "source_document_ids": [
         "Unihack__Sample_Dataset_-_Input#543140420"
       ],
-      "created_at": "2026-08-22T19:16:12.657000+00:00",
-      "updated_at": "2026-08-22T19:16:12.657134+00:00"
+      "created_at": "2026-08-23T11:45:21.650967+00:00",
+      "updated_at": "2026-08-23T11:45:21.651052+00:00"
     },
     "classifications": [
       {
@@ -70,7 +70,7 @@
         "value_raw": "Grooved",
         "value_canonical": "Grooved",
         "value_display": "Grooved",
-        "method": "supplier_feed",
+        "method": "item_master_parse",
         "confidence": 0.82,
         "status": "auto_accepted",
         "evidence": [
@@ -96,7 +96,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-22T19:16:12.656792Z",
+        "created_at": "2026-08-23T11:45:21.650837Z",
         "score": 0.8,
         "decision": {
           "attribute_code": "edge_profile",
@@ -121,8 +121,10 @@
           "source_prior": 0.5,
           "tier_cost": 0.5
         },
-        "is_publishable": true,
+        "is_publishable": false,
         "has_verified_evidence": true,
+        "is_self_declared": true,
+        "is_independent": false,
         "citation_summary": [
           "Unihack__Sample_Dataset_-_Input#543140420"
         ]
@@ -135,7 +137,7 @@
           "unit": "mm"
         },
         "value_display": "240\"",
-        "method": "supplier_feed",
+        "method": "item_master_parse",
         "confidence": 0.88,
         "status": "auto_accepted",
         "evidence": [
@@ -161,7 +163,7 @@
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-22T19:16:12.656769Z",
+        "created_at": "2026-08-23T11:45:21.650820Z",
         "score": 0.8,
         "decision": {
           "attribute_code": "nominal_length",
@@ -186,8 +188,10 @@
           "source_prior": 0.5,
           "tier_cost": 0.5
         },
-        "is_publishable": true,
+        "is_publishable": false,
         "has_verified_evidence": true,
+        "is_self_declared": true,
+        "is_independent": false,
         "citation_summary": [
           "Unihack__Sample_Dataset_-_Input#543140420"
         ]
@@ -204,7 +208,31 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:12.657111Z"
+        "detected_at": "2026-08-23T11:45:21.651022Z"
+      },
+      {
+        "attribute_code": "nominal_length",
+        "reason": "self_declared_only",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#543140420"
+        ],
+        "detail": "the customer's own description implies '240\"' (from \"20'\"), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-23T11:45:21.651031Z"
+      },
+      {
+        "attribute_code": "edge_profile",
+        "reason": "self_declared_only",
+        "sources_searched": [
+          "Unihack__Sample_Dataset_-_Input#543140420"
+        ],
+        "detail": "the customer's own description implies 'Grooved' (from 'Grooved'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "retry_with_better_source",
+        "is_required": true,
+        "detected_at": "2026-08-23T11:45:21.651035Z"
       },
       {
         "attribute_code": "material_composition",
@@ -216,7 +244,7 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:12.657120Z"
+        "detected_at": "2026-08-23T11:45:21.651038Z"
       },
       {
         "attribute_code": "finish_color",
@@ -228,13 +256,13 @@
         "revenue_exposure_usd": null,
         "recommended_action": "retry_with_better_source",
         "is_required": true,
-        "detected_at": "2026-08-22T19:16:12.657125Z"
+        "detected_at": "2026-08-23T11:45:21.651041Z"
       }
     ],
     "extraction": {
       "requested": 17,
       "values": 2,
-      "gaps": 3,
+      "gaps": 5,
       "rejected_unverifiable": 0,
       "corrected_to_match_evidence": 0,
       "citation_coverage": 1.0,
@@ -287,10 +315,10 @@
       "per_attribute": {}
     },
     "certificate": {
-      "certificate_id": "ec_82b3872e81f8",
+      "certificate_id": "ec_9711188c9c9c",
       "sku": "543140420",
       "tenant_id": "unilog",
-      "generated_at": "2026-08-22T19:16:12.657548Z",
+      "generated_at": "2026-08-23T11:45:21.651526Z",
       "schema_version": "BLD.DCK.BOARD@v1",
       "pipeline_version": "axiom-0.1.0",
       "classifications": [
@@ -308,53 +336,7 @@
           "alternatives": []
         }
       ],
-      "attributes": [
-        {
-          "code": "nominal_length",
-          "value_canonical": {
-            "magnitude": 6096.0,
-            "unit": "mm"
-          },
-          "value_display": "240\"",
-          "value_raw": "20'",
-          "confidence": 0.88,
-          "method": "supplier_feed",
-          "model_tier": null,
-          "status": "auto_accepted",
-          "evidence": [
-            {
-              "document": "Unihack__Sample_Dataset_-_Input#543140420",
-              "sha256": "49efd0b2\u2026",
-              "page": null,
-              "bbox": null,
-              "quote": "20'",
-              "verified": true
-            }
-          ],
-          "validations": []
-        },
-        {
-          "code": "edge_profile",
-          "value_canonical": "Grooved",
-          "value_display": "Grooved",
-          "value_raw": "Grooved",
-          "confidence": 0.82,
-          "method": "supplier_feed",
-          "model_tier": null,
-          "status": "auto_accepted",
-          "evidence": [
-            {
-              "document": "Unihack__Sample_Dataset_-_Input#543140420",
-              "sha256": "49efd0b2\u2026",
-              "page": null,
-              "bbox": null,
-              "quote": "Grooved",
-              "verified": true
-            }
-          ],
-          "validations": []
-        }
-      ],
+      "attributes": [],
       "gaps": [
         {
           "code": "nominal_dimensions",
@@ -364,6 +346,26 @@
           ],
           "required": true,
           "detail": "the only source for this SKU is its item-master row: a part number and a short description. No manufacturer document was attached, so this attribute was never stated. Attach a datasheet and run scripts/run_pipeline.py to close it.",
+          "recommended_action": "retry_with_better_source"
+        },
+        {
+          "code": "nominal_length",
+          "reason": "self_declared_only",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#543140420"
+          ],
+          "required": true,
+          "detail": "the customer's own description implies '240\"' (from \"20'\"), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+          "recommended_action": "retry_with_better_source"
+        },
+        {
+          "code": "edge_profile",
+          "reason": "self_declared_only",
+          "sources_searched": [
+            "Unihack__Sample_Dataset_-_Input#543140420"
+          ],
+          "required": true,
+          "detail": "the customer's own description implies 'Grooved' (from 'Grooved'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
           "recommended_action": "retry_with_better_source"
         },
         {
@@ -389,18 +391,20 @@
       ],
       "summary": {
         "attributes_required": 5,
-        "attributes_populated": 2,
-        "attributes_with_evidence": 2,
+        "attributes_populated": 0,
+        "attributes_with_evidence": 0,
         "attributes_inferred": 0,
         "auto_accepted": 2,
         "queued_for_review": 0,
-        "gaps_total": 3,
-        "gaps_required": 3,
+        "gaps_total": 5,
+        "gaps_required": 5,
         "quality_index": {
-          "completeness": 0.4,
-          "verifiability": 1.0,
+          "completeness": 0.0,
+          "verifiability": 0.0,
           "consistency": 1.0,
           "richness": 0.5,
+          "self_declared": 0.4,
+          "corroborated": 0.0,
           "weights": {
             "completeness": 0.35,
             "verifiability": 0.3,
@@ -413,12 +417,12 @@
             "richness",
             "verifiability"
           ],
-          "composite": 0.74
+          "composite": 0.3
         },
         "cost_usd": null,
         "wall_clock_seconds": 0.0
       },
-      "signature": "sha256:bd294c09effc87f2cdba57bd82df0215776e295aeba248612b22c64482802630",
+      "signature": "sha256:1208db4e7d3ed7702783c00cd4d3cb483cbddc80d260410957346321d047d1be",
       "signature_verified": true
     },
     "channels": [
@@ -426,7 +430,10 @@
         "name": "cx1_pim",
         "published": false,
         "value_count": 0,
-        "withheld": [],
+        "withheld": [
+          "edge_profile",
+          "nominal_length"
+        ],
         "readiness": {
           "channel": "cx1_pim",
           "ready": false,
@@ -441,8 +448,11 @@
       {
         "name": "schema_org",
         "published": true,
-        "value_count": 2,
-        "withheld": [],
+        "value_count": 0,
+        "withheld": [
+          "edge_profile",
+          "nominal_length"
+        ],
         "readiness": {
           "channel": "schema_org",
           "ready": true,
@@ -454,15 +464,32 @@
       }
     ],
     "metrics": {
-      "fill_rate": 0.4,
-      "verifiability": 1.0,
+      "fill_rate": 0.0,
+      "verifiability": 0.0,
+      "self_declared_rate": 0.4,
+      "corroborated_rate": 0.0,
       "values_total": 2,
-      "values_publishable": 2,
+      "values_publishable": 0,
+      "values_self_declared": 2,
       "values_needing_review": 0,
-      "gaps_total": 3,
-      "gaps_required": 3,
+      "gaps_total": 5,
+      "gaps_required": 5,
       "conflicts": []
     },
+    "sources": [
+      {
+        "document_id": "Unihack__Sample_Dataset_-_Input#543140420",
+        "url": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
+        "host": "",
+        "tier": "item_master",
+        "doc_type": "supplier_feed",
+        "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
+        "covers_this_sku": "row",
+        "citable_as_manufacturer": false,
+        "license_note": null,
+        "revision_label": null
+      }
+    ],
     "cost": null,
     "copy": null
   },
@@ -471,7 +498,7 @@
     "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
     "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
     "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-22T19:16:11.275717Z",
+    "fetched_at": "2026-08-23T11:45:10.364455Z",
     "page_count": 1,
     "revision_label": null,
     "supplier_id": "unilog",

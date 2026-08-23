@@ -13,6 +13,16 @@
   "document_sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
   "gaps": [
     {
+      "code": "lamp_technology",
+      "reason": "self_declared_only",
+      "sources_searched": [
+        "Unihack__Sample_Dataset_-_Input#576363"
+      ],
+      "required": true,
+      "detail": "the customer's own description implies 'LED' (from 'Led'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+      "recommended_action": "retry_with_better_source"
+    },
+    {
       "code": "wattage",
       "reason": "no_source_available",
       "sources_searched": [
@@ -37,11 +47,13 @@
     "reason": "at threshold 0.719, 75.9% of values are publishable with an error rate of at most 1.6% at 95% confidence"
   },
   "quality": {
-    "completeness": 0.5,
-    "verifiability": 1.0,
+    "completeness": 0.0,
+    "verifiability": 0.0,
     "consistency": 1.0,
-    "richness": 1.0,
-    "composite": 0.825,
+    "richness": 0.5,
+    "self_declared": 0.5,
+    "corroborated": 0.0,
+    "composite": 0.3,
     "measured_dimensions": [
       "completeness",
       "consistency",
@@ -49,7 +61,7 @@
       "verifiability"
     ]
   },
-  "created_at": "2026-08-22T19:16:15.367750+00:00",
+  "created_at": "2026-08-23T11:45:30.447436+00:00",
   "decisions": [],
   "pages": [
     {
@@ -77,7 +89,7 @@
       "status": "auto_accepted",
       "reason_code": "auto_accepted",
       "detail": "score 0.800 >= threshold 0.719",
-      "method": "supplier_feed",
+      "method": "item_master_parse",
       "model_tier": null,
       "is_required": true,
       "accepted": true,
@@ -118,7 +130,7 @@
       "status": "auto_accepted",
       "reason_code": "auto_accepted",
       "detail": "score 0.800 >= threshold 0.719",
-      "method": "supplier_feed",
+      "method": "item_master_parse",
       "model_tier": null,
       "is_required": false,
       "accepted": true,
