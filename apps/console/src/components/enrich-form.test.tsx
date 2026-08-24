@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { EnrichForm } from "@/components/enrich-form";
 import type { EnrichResult } from "@/lib/enrich";
+import type { ManufacturerSpecification } from "@/lib/types";
 import { enrichLimits, enrichResponse, enrichSummary } from "@/test/factories";
 
 /**
@@ -26,6 +27,34 @@ beforeEach(() => {
 afterEach(cleanup);
 
 const LIMITS = enrichLimits();
+const SOURCE_SPECIFICATION = {
+  specification_id: "ms_817d7072ea816506",
+  label_raw: "Ball / Stem",
+  value_raw: "Chrome-plated brass / Brass",
+  confidence: 0.94,
+  method: "document_extraction",
+  mapped_attribute_code: null,
+  citable_as_manufacturer: true,
+  model_id: "test-model",
+  model_tier: "volume",
+  prompt_version: "extract.v3",
+  schema_version: "PLB.VLV.BALL.2PC@v1",
+  has_verified_evidence: true,
+  citation_summary: ["ba100@9f2c0000 p.1"],
+  evidence: [
+    {
+      span_id: "sp-ball-stem",
+      document_id: "ba100@9f2c0000",
+      document_sha256: "9f2c" + "0".repeat(60),
+      quote: "Ball / Stem .................... Chrome-plated brass / Brass",
+      page: 1,
+      bbox: null,
+      table_ref: null,
+      quote_verified: true,
+      match_score: 1,
+    },
+  ],
+} satisfies ManufacturerSpecification;
 
 // `fireEvent` rather than `user-event`, matching the rest of this suite. These are controlled inputs,
 // so one change event per field is exactly what a keystroke sequence would end at.
@@ -223,7 +252,7 @@ describe("how the document was found", () => {
     await submitWith({ ok: true, data: enrichResponse({ summary }) });
     await resultRendered();
 
-    expect(screen.getByText(/Already in the document library/i)).toBeTruthy();
+    expect(screen.getByText(/Reused a stored manufacturer document/i)).toBeTruthy();
     expect(screen.getByText(/0 requests · no model call/i)).toBeTruthy();
     expect(
       screen.getByText(/kichler\.com\/products\/indoor-lighting\/pendants/i),
@@ -549,6 +578,56 @@ describe("the result", () => {
 
     expect(screen.getByText(/2 of 2 values need a decision/)).toBeTruthy();
     expect(screen.getByText(/correct opening state/i)).toBeTruthy();
+  });
+
+  it("derives specification counts from legacy responses without a summary", async () => {
+    const data = enrichResponse();
+    delete data.summary.manufacturer_specifications;
+    data.bundle.manufacturer_specifications = [{ ...SOURCE_SPECIFICATION }];
+    delete data.bundle.manufacturer_specifications[0]!.mapped_attribute_code;
+
+    await succeed(data);
+
+    expect(screen.getByText("Ball / Stem")).toBeTruthy();
+    expect(screen.getByText("Chrome-plated brass / Brass")).toBeTruthy();
+    expect(screen.getByText("Source-only")).toBeTruthy();
+    expect(screen.getByText("0 mapped, 1 source-only")).toBeTruthy();
+    expect(screen.getByText("1 captured · 0 mapped · 1 source-only")).toBeTruthy();
+    expect(screen.getByText("Manufacturer source")).toBeTruthy();
+    expect(screen.getByText("Quote verified")).toBeTruthy();
+    expect(screen.queryByText(/^Verified$/)).toBeNull();
+    expect(
+      screen.getByText("Ball / Stem .................... Chrome-plated brass / Brass"),
+    ).toBeTruthy();
+  });
+
+  it("derives bundle counts instead of trusting a stale API summary", async () => {
+    const data = enrichResponse();
+    data.bundle.manufacturer_specifications = [
+      {
+        ...SOURCE_SPECIFICATION,
+        mapped_attribute_code: "   ",
+        citable_as_manufacturer: false,
+      },
+    ];
+
+    await succeed(data);
+
+    expect(screen.getByText("Publisher unverified")).toBeTruthy();
+    expect(screen.getByText("Quote verified")).toBeTruthy();
+    expect(screen.queryByText("Manufacturer source")).toBeNull();
+    expect(screen.getByText("0 mapped, 1 source-only")).toBeTruthy();
+    expect(screen.getByText("1 captured · 0 mapped · 1 source-only")).toBeTruthy();
+  });
+
+  it("renders zero source specifications when both legacy fields are absent", async () => {
+    const data = enrichResponse();
+    delete data.summary.manufacturer_specifications;
+    delete data.bundle.manufacturer_specifications;
+
+    await succeed(data);
+
+    expect(screen.getByText("0 mapped, 0 source-only")).toBeTruthy();
   });
 
   it("offers a clean slate rather than leaving the last run on screen", async () => {

@@ -168,6 +168,7 @@ def run_stages(
     brands: BrandMaster | None = None,
     seed_values: Callable[[ProductRecord], Sequence[AttributeValue]] | None = None,
     classify_text: str | None = None,
+    manufacturer_source_verified: bool = False,
 ) -> PipelineRun:
     """Run the pipeline over one parsed document.
 
@@ -226,23 +227,15 @@ def run_stages(
     class_code = classification.class_code or class_code_fallback
 
     # --- stage 4: extract ------------------------------------------------------
-    # Extraction never normalises and never validates. It reports `value_raw` plus a quote, and
-    # nothing else, so a unit bug can never be mistaken for an extraction bug.
-    if class_code is None:
-        # Classification abstained and no fallback was supplied, so there is no attribute list to
-        # ask for. Extraction is skipped rather than attempted: the class *is* the schema, and
-        # `build_extraction_prompt` cannot build a prompt without one. Asking a model to read a
-        # document with nothing declared in front of it is exactly the guessing this system exists
-        # to prevent, and the answer would arrive with no attribute code to bind to.
-        #
-        # The CLI never reaches this branch — `--class-code` carries a default — but a typed
-        # submission whose description matches no class does, and an identity-only record with an
-        # explanation is the honest output. Not spending the extraction call is a side benefit.
+    # Typed extraction remains class-bound. When classification abstains, the independent
+    # source-native channel still has a useful answer: exact manufacturer label/value pairs. An
+    # untrusted web source cannot produce those claims, so that narrow case still skips the call.
+    if class_code is None and manufacturer_source_verified is False:
         result = ExtractionResult()
         notes.append(
-            "classification abstained and no fallback class was given, so extraction was skipped: "
-            "without a class there is no attribute list to request and nothing a returned value "
-            "could bind to. The record carries its identity and no specifications."
+            "classification abstained and the source was not verified as manufacturer-owned, so "
+            "there was neither a typed attribute list nor an authorized manufacturer "
+            "specification pass to run"
         )
     else:
         extractor = Extractor(registry, client, cascade, start_tier=tier)
@@ -251,7 +244,13 @@ def run_stages(
             class_code=class_code,
             target_sku=sku,
             include_optional=include_optional,
+            manufacturer_source_verified=manufacturer_source_verified,
         )
+        if class_code is None:
+            notes.append(
+                "classification abstained, so no typed attributes were requested; verified "
+                "source-native manufacturer specifications were retained instead"
+            )
 
     # --- stage 5: normalize ----------------------------------------------------
     normalized, norm_issues = normalize_all(result.values, registry)
@@ -285,6 +284,8 @@ def run_stages(
 
     for value in normalized:
         record.add_value(value)
+    for specification in result.manufacturer_specifications:
+        record.add_manufacturer_specification(specification)
     for gap in result.gaps:
         record.add_gap(gap)
 

@@ -170,6 +170,9 @@ def test_prompt_is_generated_from_the_schema(registry: SchemaRegistry):
     # the negative demonstration is what suppresses fabrication
     assert "absence is a correct answer" in prefix
     assert "consult factory" in prefix.lower()
+    # open-ended source data is a separate channel, not an invented schema attribute
+    assert "manufacturer_specifications" in prompt.system
+    assert "EVERY explicit product label/value pair" in prompt.system
 
 
 def test_prompt_prefix_is_stable_across_skus_so_it_can_be_cached(registry: SchemaRegistry):
@@ -318,10 +321,19 @@ def test_empty_attribute_selection_is_an_error(registry: SchemaRegistry):
 def test_output_schema_constrains_attribute_codes(registry: SchemaRegistry):
     attrs = registry.attributes_for(BALL_VALVE, Requirement.REQUIRED)
     schema = build_output_schema(attrs)
-    props = schema["items"]["properties"]
+    attribute_items = schema["properties"]["attributes"]["items"]
+    props = attribute_items["properties"]
     assert set(props["attribute_code"]["enum"]) == {a.code for a in attrs}
-    assert schema["items"]["additionalProperties"] is False
+    assert attribute_items["additionalProperties"] is False
     assert props["found"]["type"] == "boolean"
+
+    specifications = schema["properties"]["manufacturer_specifications"]
+    assert specifications["items"]["required"] == [
+        "label_raw",
+        "value_raw",
+        "evidence_quote",
+    ]
+    assert schema["additionalProperties"] is False
 
 
 # --------------------------------------------------------------- integrity checking

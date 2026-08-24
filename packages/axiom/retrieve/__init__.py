@@ -69,8 +69,8 @@ from axiom.retrieve.resolver import (
     Resolver,
     SearchProvider,
 )
-from axiom.retrieve.search_brave import BraveSearch, BraveSearchError
 from axiom.retrieve.search_duckduckgo import DuckDuckGoSearch
+from axiom.retrieve.search_serper import SerperSearch, SerperSearchError
 from axiom.retrieve.session import (
     FetchOutcome,
     FetchStatus,
@@ -79,8 +79,6 @@ from axiom.retrieve.session import (
 )
 
 __all__ = [
-    "BraveSearch",
-    "BraveSearchError",
     "BrowserFetchError",
     "Candidate",
     "Coverage",
@@ -101,6 +99,8 @@ __all__ = [
     "RetrievalSession",
     "RobotsCache",
     "SearchProvider",
+    "SerperSearch",
+    "SerperSearchError",
     "SiteDiscovery",
     "SourcePolicy",
     "SourceTier",

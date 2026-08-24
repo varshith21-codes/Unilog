@@ -552,6 +552,52 @@ def test_save_and_load_round_trips_the_whole_session(session, tmp_path):
     assert restored.pages[0].lines == session.pages[0].lines
 
 
+def test_round_trip_preserves_unknown_manufacturer_specifications(
+    registry, parsed_datasheet, tmp_path
+):
+    from axiom.core.specifications import ManufacturerSpecification, specification_id
+
+    label = "Ball / Stem"
+    displayed = "Chrome-plated brass / Brass"
+    quote = "Ball / Stem .................... Chrome-plated brass / Brass"
+    product = record()
+    product.add_manufacturer_specification(
+        ManufacturerSpecification(
+            specification_id=specification_id(SHA, label, displayed),
+            label_raw=label,
+            value_raw=displayed,
+            evidence=[span(quote)],
+            confidence=0.94,
+            method=DerivationMethod.DOCUMENT_EXTRACTION,
+            mapped_attribute_code=None,
+            citable_as_manufacturer=True,
+            model_id="test-model",
+            prompt_version="extract.v3",
+            schema_version=product.schema_version,
+        )
+    )
+    built = build_session(
+        product,
+        parsed_datasheet,
+        registry,
+        decisions_for(product, {}),
+        {},
+        permissive_policy(),
+    )
+
+    restored = ReviewSession.load(built.save(tmp_path / "with-specification.json"))
+    assert len(restored.manufacturer_specifications) == 1
+    specification = restored.manufacturer_specifications[0]
+    assert specification.specification_id == specification_id(SHA, label, displayed)
+    assert specification.label_raw == label
+    assert specification.value_raw == displayed
+    assert specification.mapped_attribute_code is None
+    assert specification.citable_as_manufacturer is True
+    assert specification.evidence[0].quote == quote
+    assert specification.evidence[0].verified is True
+    assert specification.evidence[0].line_index is not None
+
+
 def test_round_trip_preserves_evidence_positions(session, tmp_path):
     restored = ReviewSession.load(session.save(tmp_path / "s.json"))
     original = session.item("handle_type").evidence[0]

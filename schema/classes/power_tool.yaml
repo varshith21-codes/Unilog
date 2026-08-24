@@ -51,10 +51,15 @@ class:
   # collapsed the dominance band to 0.0013 wide by pulling four M12 impact wrenches level with the
   # easiest genuinely ambiguous case in the taxonomy. The impact wrenches are still won here, on
   # `impact`, which is the token that actually says the tool is powered.
+  # `oscillatingedge` is the supplier's concatenated spelling in "OscillatingEdge - Belt and
+  # Spindle Sander". Without the compound token, `belt` admits the coated-abrasive class strongly
+  # enough to turn an explicit powered sander into an ambiguity. Keep this local rather than
+  # splitting compounds globally; that measured worse across the catalogue.
   identity_terms:
     [saw, sawzall, drill, drilling, driver, impact, impact/drill, grinder, sander, trimmer,
      blower, vacuum, extractor, dust, ratchet, rachet, nailer, stapler, router, planer, planing,
-     shaper, lathe, bandsaw, jigsaw, jointer, polisher, gun, tool, rotary, speaker, feeder, surge]
+     shaper, lathe, bandsaw, jigsaw, jointer, polisher, gun, tool, rotary, speaker, feeder, surge,
+     oscillatingedge]
 
   browse_path:
     - Tools & Consumables

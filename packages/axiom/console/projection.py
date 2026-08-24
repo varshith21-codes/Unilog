@@ -214,6 +214,18 @@ def serialise_values(
     return out
 
 
+def serialise_manufacturer_specifications(record) -> list[dict[str, Any]]:
+    """Source-native facts, kept separate from normalized and publishable attributes."""
+    return [
+        {
+            **jsonable(specification),
+            "has_verified_evidence": specification.has_verified_evidence,
+            "citation_summary": specification.citation_summary(),
+        }
+        for specification in record.manufacturer_specifications
+    ]
+
+
 def serialise_copy(generated) -> dict[str, Any] | None:
     """Generated marketing copy together with the claim check that gated it.
 
@@ -318,6 +330,7 @@ def build_bundle(
         "values": serialise_values(
             record, scores=scores, features=features, decisions=decisions
         ),
+        "manufacturer_specifications": serialise_manufacturer_specifications(record),
         "gaps": jsonable(record.gaps),
         "extraction": jsonable(extraction.summary()),
         "normalization_issues": jsonable(normalization_issues),
@@ -355,6 +368,12 @@ def build_bundle(
                 1 for v in record.current_values() if not v.method.is_independent
             ),
             "values_needing_review": len(record.values_needing_review()),
+            "manufacturer_specifications": len(record.manufacturer_specifications),
+            "manufacturer_specifications_unmapped": sum(
+                1
+                for specification in record.manufacturer_specifications
+                if specification.mapped_attribute_code is None
+            ),
             "gaps_total": len(record.gaps),
             "gaps_required": sum(1 for g in record.gaps if g.is_required),
             "conflicts": sorted(record.conflicts().keys()),

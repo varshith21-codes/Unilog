@@ -82,6 +82,14 @@ A large sitemap must never consume the whole submission budget before open searc
 MAX_DISCOVERY_FETCHES = 8
 """Maximum sitemap and manufacturer-site requests before candidate resolution takes over."""
 
+MAX_REFRESH_PRIMARY_PAGES = 25
+"""Largest document treated as a focused live source during an explicit richness refresh.
+
+The refresh control exists to escape broad catalogue coverage. A replacement catalogue may be
+newer and still no richer for one SKU, so it remains a candidate while focused product pages and
+technical data sheets are preferred. The normal non-refresh path retains its existing ranking.
+"""
+
 
 @dataclass(frozen=True)
 class RetrievalAttempt:
@@ -100,6 +108,8 @@ class RetrievalAttempt:
     manufacturer: Manufacturer | None = None
     from_library: bool = False
     """True when a stored document already covered this part, so no request was made at all."""
+    refresh_requested: bool = False
+    """True when stored coverage was deliberately bypassed to look for a richer live source."""
 
     discovery: Discovery | None = None
     resolution: Resolution | None = None
@@ -123,6 +133,7 @@ class RetrievalAttempt:
             "attempted": True,
             "found": self.found,
             "from_library": self.from_library,
+            "refresh_requested": self.refresh_requested,
             "manufacturer": (
                 {
                     "id": self.manufacturer.id,
@@ -171,6 +182,7 @@ def retrieve_documents(
     max_fetches: int = MAX_FETCHES,
     max_browser_pages: int = 2,
     discover: bool = True,
+    refresh_sources: bool = False,
     library: DocumentLibrary | None = None,
 ) -> RetrievalAttempt:
     """Find documents covering ``mpn``. Makes HTTP requests; makes **no** model call.
@@ -198,10 +210,15 @@ def retrieve_documents(
     # checked-and-absent record, so a part a stored catalogue was already searched for is not
     # re-searched.
     coverage = library.coverage_for(mpn)
+    stored_documents: tuple[ParsedDocument, ...] = ()
+    stored_entries: tuple[DocumentEntry, ...] = ()
+    baseline_hashes: set[str] = set()
     if coverage:
         parsed = [library.parsed(c.entry) for c in coverage]
-        documents = tuple(p for p in parsed if p is not None)
-        if documents:
+        stored_documents = tuple(p for p in parsed if p is not None)
+        stored_entries = tuple(c.entry for c in coverage)
+        baseline_hashes = {entry.sha256 for entry in stored_entries}
+        if stored_documents and not refresh_sources:
             how = "an ordering row" if coverage[0].is_ordering_row else "the document body"
             notes.append(
                 f"a stored document already covers {mpn} in {how}, so no request was made. "
@@ -209,17 +226,23 @@ def retrieve_documents(
             )
             return RetrievalAttempt(
                 mpn=mpn,
-                documents=documents,
-                entries=tuple(c.entry for c in coverage),
+                documents=stored_documents,
+                entries=stored_entries,
                 manufacturer=maker,
                 from_library=True,
                 notes=tuple(notes),
             )
-        # Indexed but the bytes are gone: the store is gitignored, so a fresh clone hits this.
-        notes.append(
-            "the library indexes a document covering this part but its bytes are not in the "
-            "store, which is gitignored — re-fetching."
-        )
+        if stored_documents:
+            notes.append(
+                f"stored coverage for {mpn} was retained as a fallback while refresh searched "
+                "for a richer live manufacturer source."
+            )
+        else:
+            # Indexed but the bytes are gone: the store is gitignored, so a fresh clone hits this.
+            notes.append(
+                "the library indexes a document covering this part but its bytes are not in the "
+                "store, which is gitignored — re-fetching."
+            )
 
     if maker is None:
         if policy.is_known_distributor(vendor_code=vendor_code, vendor_name=manufacturer):
@@ -251,10 +274,42 @@ def retrieve_documents(
     resolution: Resolution | None = None
     outcomes: list[FetchOutcome] = []
 
+    def _is_refresh_upgrade(document: ParsedDocument) -> bool:
+        """Whether a fresh source is focused enough to replace broad cached coverage."""
+        return (
+            not stored_documents
+            or document.page_count <= MAX_REFRESH_PRIMARY_PAGES
+        )
+
     def _harvest() -> tuple[ParsedDocument, ...]:
         found = library.coverage_for(mpn)
-        parsed = [library.parsed(c.entry) for c in found]
-        return tuple(p for p in parsed if p is not None)
+        if not refresh_sources:
+            parsed = [library.parsed(c.entry) for c in found]
+            return tuple(p for p in parsed if p is not None)
+
+        fresh_coverage = [c for c in found if c.entry.sha256 not in baseline_hashes]
+        fresh_documents = tuple(
+            parsed
+            for coverage in fresh_coverage
+            if (parsed := library.parsed(coverage.entry)) is not None
+        )
+        upgrades = tuple(
+            document for document in fresh_documents if _is_refresh_upgrade(document)
+        )
+        if not upgrades:
+            return ()
+
+        def priority(document: ParsedDocument) -> tuple[int, int, int, str]:
+            doc_type = document.document.doc_type.value
+            return (
+                0 if _is_refresh_upgrade(document) else 1,
+                0 if doc_type == "spec_sheet" else 1,
+                document.page_count,
+                document.document.sha256,
+            )
+
+        all_documents = [*fresh_documents, *stored_documents]
+        return tuple(sorted(all_documents, key=priority))
 
     # --- step 2: the manufacturer's own site, via its own search form ---------------
     #
@@ -277,6 +332,7 @@ def retrieve_documents(
                     documents=documents,
                     entries=discovery.documents,
                     manufacturer=maker,
+                    refresh_requested=refresh_sources,
                     discovery=discovery,
                     requests_made=discovery_session.requests_made,
                     bytes_fetched=discovery_session.bytes_fetched,
@@ -317,6 +373,7 @@ def retrieve_documents(
                 documents=documents,
                 entries=tuple(o.entry for o in outcomes if o.entry is not None),
                 manufacturer=maker,
+                refresh_requested=refresh_sources,
                 discovery=discovery,
                 resolution=resolution,
                 outcomes=tuple(outcomes),
@@ -325,6 +382,38 @@ def retrieve_documents(
                 bytes_fetched=discovery_session.bytes_fetched + session.bytes_fetched,
                 notes=tuple(notes),
             )
+
+        def _fetch_linked_pdfs(
+            entry: DocumentEntry | None,
+            parent: Candidate,
+            *,
+            origin: str,
+        ) -> None:
+            """Fetch up to two PDFs linked by a product page before accepting the thinner HTML."""
+            if entry is None or session.exhausted:
+                return
+            markup = library.text(entry)
+            if not markup:
+                return
+            links = [
+                link
+                for link in extract_links(markup, entry.source_uri)
+                if link.is_pdf and policy.allows(link.url)
+            ]
+            links.sort(key=lambda link: -policy.spec_score(link.url))
+            for link in links[:2]:
+                if session.exhausted:
+                    break
+                verdict = policy.classify(link.url)
+                pdf_candidate = Candidate(
+                    url=link.url,
+                    verdict=verdict,
+                    origin=origin,
+                    rank=parent.rank + policy.spec_score(link.url),
+                    query=parent.query,
+                    manufacturer_id=verdict.manufacturer_id,
+                )
+                outcomes.append(session.fetch(pdf_candidate))
 
         for candidate in resolution.candidates:
             if session.exhausted:
@@ -340,6 +429,10 @@ def retrieve_documents(
             # behind a citation.
             if not outcome.usable:
                 continue
+            # A product page can already cover the SKU while linking to a much richer technical
+            # data sheet. Fetch those bounded, policy-checked PDFs before accepting the thinner
+            # HTML; otherwise exact coverage becomes an accidental early-exit from enrichment.
+            _fetch_linked_pdfs(outcome.entry, candidate, origin="product_page_link")
             if completed := _completed_attempt():
                 return completed
 
@@ -354,34 +447,13 @@ def retrieve_documents(
             # Fetch it through RetrievalSession rather than browser APIs so redirects, robots, byte
             # limits and final-URL policy remain exactly the static path's rules.
             for rendered_outcome in rendered_outcomes:
-                entry = rendered_outcome.entry
-                if entry is None or session.exhausted:
-                    continue
-                markup = library.text(entry)
-                if not markup:
-                    continue
-                links = [
-                    link
-                    for link in extract_links(markup, entry.source_uri)
-                    if link.is_pdf and policy.allows(link.url)
-                ]
-                links.sort(key=lambda link: -policy.spec_score(link.url))
-                for link in links[:2]:
-                    if session.exhausted:
-                        break
-                    verdict = policy.classify(link.url)
-                    pdf_candidate = Candidate(
-                        url=link.url,
-                        verdict=verdict,
-                        origin="browser_link",
-                        rank=candidate.rank + policy.spec_score(link.url),
-                        query=candidate.query,
-                        manufacturer_id=verdict.manufacturer_id,
-                    )
-                    pdf_outcome = session.fetch(pdf_candidate)
-                    outcomes.append(pdf_outcome)
-                    if pdf_outcome.usable and (completed := _completed_attempt()):
-                        return completed
+                _fetch_linked_pdfs(
+                    rendered_outcome.entry,
+                    candidate,
+                    origin="browser_link",
+                )
+                if completed := _completed_attempt():
+                    return completed
             if completed := _completed_attempt():
                 return completed
 
@@ -390,9 +462,30 @@ def retrieve_documents(
     if total_requests:
         library.save()
 
+    if refresh_sources and stored_documents:
+        notes.append(
+            "refresh found no richer exact-SKU source, so the previously stored document remains "
+            "the extraction source."
+        )
+        return RetrievalAttempt(
+            mpn=mpn,
+            documents=stored_documents,
+            entries=stored_entries,
+            manufacturer=maker,
+            refresh_requested=True,
+            discovery=discovery,
+            resolution=resolution,
+            outcomes=tuple(outcomes),
+            requests_made=total_requests,
+            browser_requests_made=session.browser_requests_made,
+            bytes_fetched=total_bytes,
+            notes=tuple(notes),
+        )
+
     return RetrievalAttempt(
         mpn=mpn,
         manufacturer=maker,
+        refresh_requested=refresh_sources,
         discovery=discovery,
         resolution=resolution,
         outcomes=tuple(outcomes),

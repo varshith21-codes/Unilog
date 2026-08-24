@@ -69,6 +69,8 @@ export interface EnrichSourceSummary {
   parser: string;
   was_already_stored: boolean;
   warnings: string[];
+  source_tier?: string;
+  citable_as_manufacturer?: boolean;
   /** Stated in prose because the distinction is the point, not a badge. */
   evidential_weight: string;
 }
@@ -79,6 +81,8 @@ export interface EnrichRetrievalSummary {
   found: boolean;
   /** True when a stored document already covered the part, so no request was made at all. */
   from_library?: boolean;
+  /** True when this run bypassed cached SKU coverage to look for richer live sources. */
+  refresh_requested?: boolean;
   manufacturer?: { id: string; name: string; domain: string } | null;
   documents?: {
     document_id: string;
@@ -111,6 +115,8 @@ export interface EnrichSummary {
   };
   from_description: { extracted: number; refused: number };
   values: { total: number; publishable: number; needing_review: number };
+  /** Absent from API responses produced before source specification summaries existed. */
+  manufacturer_specifications?: { total: number; mapped: number; unmapped: number };
   gaps: { total: number; required: number };
   validation: { checks: number; failures: number; warnings: number; [key: string]: unknown };
   certificate: {

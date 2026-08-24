@@ -574,6 +574,7 @@ export function enrichSummary(overrides: Partial<EnrichSummary> = {}): EnrichSum
     from_description: { extracted: 2, refused: 0 },
     // A cold start: no calibration data, so nothing clears a validated threshold.
     values: { total: 2, publishable: 0, needing_review: 2 },
+    manufacturer_specifications: { total: 0, mapped: 0, unmapped: 0 },
     gaps: { total: 20, required: 8 },
     validation: { checks: 2, failures: 0, warnings: 0, skipped_rules: 6, consistency: 1 },
     certificate: {

@@ -1,13 +1,12 @@
-"""Parsing the evidence contract.
+"""Parsing the model's evidence contract.
 
-The contract is the JSON array the model must return: one element per requested attribute,
-each either a value with a verbatim quote or an explicit abstention with a reason.
+The live contract has two independent channels in one response: schema-bound ``attributes`` and
+source-native ``manufacturer_specifications``. The first may become normalized catalogue values;
+the second preserves every explicit manufacturer label/value pair without inventing schema codes.
+Both require verbatim evidence.
 
-Parsing is **liberal about formatting and strict about substance**. A model that wraps valid
-JSON in a markdown fence is a formatting nuisance and the pipeline should absorb it; a model
-that returns a value with no quote is a correctness problem and must not be absorbed. Those
-are different failures and conflating them either breaks working extractions or lets
-unsourced values through.
+Parsing is liberal about formatting and strict about substance. Legacy bare attribute arrays remain
+accepted so saved fixtures and older model responses can still be replayed.
 """
 
 from __future__ import annotations
@@ -29,18 +28,13 @@ class Certainty(str, Enum):
 
     @property
     def provisional_confidence(self) -> float:
-        """A placeholder score, not a calibrated one.
-
-        Self-reported certainty is weakly correlated with correctness at best. These values
-        exist so the pipeline has something to sort by before the calibrated estimator is
-        trained on real reviewer outcomes; that estimator replaces them entirely.
-        """
+        """A placeholder score, not a calibrated one."""
         return {Certainty.HIGH: 0.90, Certainty.MEDIUM: 0.70, Certainty.LOW: 0.50}[self]
 
 
 @dataclass(frozen=True)
 class ContractItem:
-    """One element of the evidence contract."""
+    """One schema-bound attribute element of the evidence contract."""
 
     attribute_code: str
     found: bool
@@ -52,7 +46,6 @@ class ContractItem:
 
     @property
     def is_well_formed(self) -> bool:
-        """A found value must carry both a value and a quote. No quote, no value."""
         if not self.found:
             return True
         return bool(self.value_raw and self.value_raw.strip()) and bool(
@@ -60,20 +53,39 @@ class ContractItem:
         )
 
 
-# Phrases indicating the source deferred the value rather than omitting it. Worth
-# distinguishing: "consult factory" means the value exists and we must ask, whereas silence
-# means nobody has it. Those drive different follow-up actions.
+@dataclass(frozen=True)
+class ManufacturerSpecificationContractItem:
+    """One arbitrary source-stated label/value pair before evidence verification."""
+
+    label_raw: str | None
+    value_raw: str | None
+    evidence_quote: str | None
+    evidence_page: int | None = None
+    certainty: Certainty = Certainty.MEDIUM
+
+    @property
+    def is_well_formed(self) -> bool:
+        return all(
+            value is not None and bool(value.strip())
+            for value in (self.label_raw, self.value_raw, self.evidence_quote)
+        )
+
+
+@dataclass(frozen=True)
+class ExtractionContract:
+    """The two channels returned by one extraction call."""
+
+    attributes: tuple[ContractItem, ...] = ()
+    manufacturer_specifications: tuple[ManufacturerSpecificationContractItem, ...] = ()
+
+
 _DEFERRAL = re.compile(
     r"consult"
     r"|contact\s+(?:the\s+)?(?:factory|manufacturer|supplier)"
-    # allow qualifiers between the verb and the noun: "see derating chart", "see table 3"
     r"|see\s+(?:\w+\s+){0,2}(?:chart|table|page|drawing|catalog|catalogue|appendix|figure)"
     r"|available\s+on\s+request|upon\s+request|refer\s+to",
     re.IGNORECASE,
 )
-
-# Phrases indicating the value was present but scoped to a different variant. This is the
-# applicability case; the value is real and belongs to another SKU.
 _APPLICABILITY = re.compile(
     r"different\s+(?:size|variant|model)|only\s+for|applies\s+to|not\s+for\s+this"
     r"|other\s+size|1/2\"|mismatch|does\s+not\s+match",
@@ -82,7 +94,7 @@ _APPLICABILITY = re.compile(
 
 
 def classify_abstention(reason: str | None) -> str:
-    """Bucket an abstention reason: 'deferred', 'applicability' or 'absent'."""
+    """Bucket an abstention reason: ``deferred``, ``applicability`` or ``absent``."""
     if not reason:
         return "absent"
     if _DEFERRAL.search(reason):
@@ -92,45 +104,90 @@ def classify_abstention(reason: str | None) -> str:
     return "absent"
 
 
-def parse_contract(
+def parse_extraction_contract(
     text: str, *, expected_codes: tuple[str, ...] | None = None
-) -> list[ContractItem]:
-    """Parse a model response into contract items.
+) -> ExtractionContract:
+    """Parse the complete two-channel extraction response.
 
-    Raises :class:`ContractError` when the response is unusable, which the cascade treats as
-    grounds to escalate to a stronger tier.
+    A bare array is treated as a legacy attribute-only response. When typed codes are expected, at
+    least one usable typed item is required so a specification-only answer cannot suppress cascade
+    escalation. An explicitly empty ``expected_codes`` tuple denotes a specification-only pass,
+    where even an empty two-channel object is a valid answer.
     """
     payload = _extract_json(text)
 
-    if isinstance(payload, dict):
-        # Some models wrap the array in an object despite instructions.
-        for key in ("attributes", "results", "data", "items", "extractions"):
-            if isinstance(payload.get(key), list):
-                payload = payload[key]
-                break
-        else:
-            raise ContractError("response was a JSON object with no recognisable array field")
+    if isinstance(payload, list):
+        attributes_raw, specifications_raw = payload, []
+    elif isinstance(payload, dict):
+        attributes_raw = payload.get("attributes")
+        specifications_raw = (
+            payload.get("manufacturer_specifications")
+            or payload.get("source_specifications")
+            or payload.get("specifications")
+            or []
+        )
+        if not isinstance(attributes_raw, list):
+            for key in ("results", "data", "items", "extractions"):
+                if isinstance(payload.get(key), list):
+                    attributes_raw = payload[key]
+                    break
+        if attributes_raw is None:
+            attributes_raw = []
+        if not isinstance(attributes_raw, list) or not isinstance(specifications_raw, list):
+            raise ContractError("response arrays have an invalid shape")
+    else:
+        raise ContractError(f"expected a JSON object or array, got {type(payload).__name__}")
 
-    if not isinstance(payload, list):
-        raise ContractError(f"expected a JSON array, got {type(payload).__name__}")
+    attributes = _parse_attributes(attributes_raw, expected_codes=expected_codes)
+    specifications = _parse_specifications(specifications_raw)
+    if expected_codes and not any(item.is_well_formed for item in attributes):
+        raise ContractError("response contained no usable typed attribute items")
+    if expected_codes == () and specifications_raw and not specifications:
+        raise ContractError(
+            "specification-only response contained no usable specification items"
+        )
+    if expected_codes == () and attributes_raw and not specifications:
+        raise ContractError(
+            "specification-only response contained typed attributes but no specifications"
+        )
+    if expected_codes != () and not attributes and not specifications:
+        raise ContractError("response contained no usable contract items")
+    return ExtractionContract(tuple(attributes), tuple(specifications))
 
-    allowed = set(expected_codes) if expected_codes else None
+
+def parse_contract(
+    text: str, *, expected_codes: tuple[str, ...] | None = None
+) -> list[ContractItem]:
+    """Backward-compatible attribute-only parser.
+
+    New extraction code should call :func:`parse_extraction_contract`; cascade and contract tests
+    still use this function to exercise the original single-array boundary.
+    """
+    parsed = parse_extraction_contract(text, expected_codes=expected_codes)
+    if not parsed.attributes:
+        raise ContractError("response contained no usable contract items")
+    return list(parsed.attributes)
+
+
+def _parse_attributes(
+    payload: list, *, expected_codes: tuple[str, ...] | None
+) -> list[ContractItem]:
+    allowed = set(expected_codes) if expected_codes is not None else None
     items: list[ContractItem] = []
     seen: set[str] = set()
 
-    for index, raw in enumerate(payload):
+    for raw in payload:
         if not isinstance(raw, dict):
-            continue  # a stray non-object element is noise, not a fatal error
+            continue
         code = raw.get("attribute_code") or raw.get("code")
         if not isinstance(code, str) or not code.strip():
             continue
         code = code.strip()
         if allowed is not None and code not in allowed:
-            continue  # hallucinated attribute codes are dropped silently
+            continue
         if code in seen:
-            continue  # first response for an attribute wins
+            continue
         seen.add(code)
-
         items.append(
             ContractItem(
                 attribute_code=code,
@@ -142,10 +199,31 @@ def parse_contract(
                 reason=_coerce_text(raw.get("reason")),
             )
         )
-        del index
+    return items
 
-    if not items:
-        raise ContractError("response contained no usable contract items")
+
+def _parse_specifications(payload: list) -> list[ManufacturerSpecificationContractItem]:
+    """Keep every candidate until source verification can choose supported evidence.
+
+    Label/value deduplication belongs after quote location. Dropping duplicates here would let an
+    invalid first citation suppress a later candidate whose quote actually supports the statement.
+    """
+    items: list[ManufacturerSpecificationContractItem] = []
+    for raw in payload:
+        if not isinstance(raw, dict):
+            continue
+        label = _coerce_text(raw.get("label_raw") or raw.get("label") or raw.get("attribute"))
+        value = _coerce_text(raw.get("value_raw") or raw.get("value"))
+        quote = _coerce_text(raw.get("evidence_quote") or raw.get("quote"))
+        item = ManufacturerSpecificationContractItem(
+            label_raw=label,
+            value_raw=value,
+            evidence_quote=quote,
+            evidence_page=_coerce_page(raw.get("evidence_page") or raw.get("page")),
+            certainty=_coerce_certainty(raw.get("certainty")),
+        )
+        if item.is_well_formed:
+            items.append(item)
     return items
 
 
@@ -163,12 +241,14 @@ def _extract_json(text: str):
     except json.JSONDecodeError:
         pass
 
-    # Fall back to the outermost bracketed region, which handles a model that prefixed
-    # commentary despite being told not to.
+    candidates = []
     for opener, closer in (("[", "]"), ("{", "}")):
         start = cleaned.find(opener)
+        if start >= 0:
+            candidates.append((start, opener, closer))
+    for start, _opener, closer in sorted(candidates):
         end = cleaned.rfind(closer)
-        if start >= 0 and end > start:
+        if end > start:
             try:
                 return json.loads(cleaned[start : end + 1])
             except json.JSONDecodeError:
@@ -191,7 +271,6 @@ def _coerce_text(value) -> str | None:
         stripped = value.strip()
         return stripped or None
     if isinstance(value, list):
-        # multi_enum attributes legitimately come back as a list
         joined = ", ".join(str(v).strip() for v in value if str(v).strip())
         return joined or None
     if isinstance(value, bool):

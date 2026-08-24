@@ -199,24 +199,35 @@ def test_every_value_queues_when_no_policy_is_validated(
     assert all(not decision.accepted for decision in run.decisions)
 
 
-def test_unclassified_run_skips_extraction_rather_than_guessing(
-    parsed_datasheet, registry, cascade, calibration, tmp_path
+def test_unclassified_trusted_run_extracts_source_native_specifications(
+    registry, cascade, calibration, tmp_path
 ):
-    """No class means no attribute list, so no extraction call is made at all.
-
-    The CLI never reaches this branch because ``--class-code`` carries a default. A typed submission
-    that matches no class does, and the honest answer is an identity-only record with an explanation
-    rather than a model asked to read a document with nothing declared in front of it.
-    """
+    """Open-ended source rows do not depend on a class schema."""
+    from axiom.docintel import parse_text
     from axiom.ingest import ingest_bytes
 
     store = LocalArtifactStore(tmp_path / "artifacts")
-    artifact = ingest_bytes(b"nothing recognisable here", store, filename="x.txt")
-    from axiom.docintel import parse_text
+    artifact = ingest_bytes(b"unknown product", store, filename="unknown.txt")
+    parsed = parse_text(
+        "UNKNOWN-1\nFinish ................ Matte Black\n", artifact.document
+    )
+    client = stub(
+        json.dumps(
+            {
+                "attributes": [],
+                "manufacturer_specifications": [
+                    {
+                        "label_raw": "Finish",
+                        "value_raw": "Matte Black",
+                        "evidence_quote": "Finish ................ Matte Black",
+                        "evidence_page": 1,
+                        "certainty": "high",
+                    }
+                ],
+            }
+        )
+    )
 
-    parsed = parse_text("qqqq zzzz wwww", artifact.document)
-
-    client = stub()  # Exhausted on the first call, so any model call would raise.
     run = run_stages(
         parsed,
         artifact,
@@ -226,14 +237,49 @@ def test_unclassified_run_skips_extraction_rather_than_guessing(
         sku="UNKNOWN-1",
         class_code_fallback=None,
         calibration_dir=calibration,
+        manufacturer_source_verified=True,
     )
 
     assert run.class_code is None
+    assert run.extraction.requested_codes == ()
     assert run.extraction.values == []
-    assert client.calls == []
-    assert any("extraction was skipped" in note for note in run.notes)
-    # Still a real certificate over a real (identity-only) record.
+    assert len(run.record.manufacturer_specifications) == 1
+    assert run.record.manufacturer_specifications[0].mapped_attribute_code is None
+    assert run.record.manufacturer_specifications[0].citable_as_manufacturer is True
+    assert len(client.calls) == 1
+    assert any("source-native manufacturer specifications" in note for note in run.notes)
     assert run.certificate.verify_signature() is True
+
+
+def test_unclassified_untrusted_run_skips_the_unauthorized_specification_pass(
+    registry, cascade, calibration, tmp_path
+):
+    from axiom.docintel import parse_text
+    from axiom.ingest import ingest_bytes
+
+    store = LocalArtifactStore(tmp_path / "artifacts")
+    artifact = ingest_bytes(b"unknown product", store, filename="unknown.txt")
+    parsed = parse_text(
+        "UNKNOWN-1\nFinish ................ Matte Black\n", artifact.document
+    )
+    client = stub()
+
+    run = run_stages(
+        parsed,
+        artifact,
+        registry=registry,
+        client=client,
+        cascade=cascade,
+        sku="UNKNOWN-1",
+        class_code_fallback=None,
+        calibration_dir=calibration,
+        manufacturer_source_verified=False,
+    )
+
+    assert run.class_code is None
+    assert run.record.manufacturer_specifications == []
+    assert client.calls == []
+    assert any("not verified as manufacturer-owned" in note for note in run.notes)
 
 
 # ===================================================================== source resolution
@@ -621,6 +667,8 @@ manufacturers:
     policy_path = tmp_path / "sourcing.yaml"
     policy_path.write_text(policy_yaml, encoding="utf-8")
 
+    source_policy = SourcePolicy.load(policy_path)
+
     # The whole input: a part number and a vendor code. No description, no URL.
     result = enrich_one(
         EnrichmentRequest(mpn=SKU, manufacturer="Milwaukee Valve (MILVA)"),
@@ -628,17 +676,32 @@ manufacturers:
         client=stub(
             json.dumps({"code": VALVE_CLASS, "confidence": 0.92}),
             json.dumps(
-                [
-                    contract_item(
-                        "body_material", value_raw="Bronze C84400", evidence_quote="Bronze C84400"
-                    )
-                ]
+                {
+                    "attributes": [
+                        contract_item(
+                            "body_material",
+                            value_raw="Bronze C84400",
+                            evidence_quote="Bronze C84400",
+                        )
+                    ],
+                    "manufacturer_specifications": [
+                        {
+                            "label_raw": "Body Material",
+                            "value_raw": "Bronze C84400",
+                            "evidence_quote": (
+                                "Body Material .................. Bronze C84400"
+                            ),
+                            "evidence_page": 1,
+                            "certainty": "high",
+                        }
+                    ],
+                }
             ),
         ),
         store=store,
         calibration_dir=calibration,
         library_path=tmp_path / "index.json",
-        source_policy=SourcePolicy.load(policy_path),
+        source_policy=source_policy,
         fetcher=fetch,
     )
 
@@ -663,6 +726,54 @@ manufacturers:
     body = next(v for v in values if v.attribute_code == "body_material")
     assert "Bronze" in body.evidence[0].quote
     assert body.evidence[0].quote_verified
+    assert result.source.source_tier == "manufacturer"
+    assert result.source.citable_as_manufacturer is True
+    assert len(result.record.manufacturer_specifications) == 1
+    assert result.record.manufacturer_specifications[0].citable_as_manufacturer is True
+
+    from dataclasses import replace
+
+    from axiom.pipeline.persist import source_summaries
+    from axiom.pipeline.single import _source_authority
+
+    projected = source_summaries(result.source, retrieval, mpn=SKU)
+    assert projected[0]["tier"] == result.source.source_tier
+    assert projected[0]["citable_as_manufacturer"] is True
+
+    matching_entry = next(
+        entry
+        for entry in retrieval.entries
+        if entry.sha256 == result.source.artifact.document.sha256
+    )
+    entry_without_identity = replace(matching_entry, manufacturer_id=None)
+    retrieval_without_identity = replace(
+        retrieval,
+        entries=tuple(
+            entry_without_identity if entry.sha256 == matching_entry.sha256 else entry
+            for entry in retrieval.entries
+        ),
+    )
+    _, citable_without_identity = _source_authority(
+        result.source,
+        retrieval_without_identity,
+        source_policy,
+        result.manufacturer,
+        None,
+    )
+    assert citable_without_identity is False
+
+    secondary_without_identity = replace(
+        retrieval.entries[0],
+        sha256="f" * 64,
+        document_id="secondary-without-manufacturer-id",
+        manufacturer_id=None,
+    )
+    projected_with_secondary = source_summaries(
+        result.source,
+        replace(retrieval, entries=(*retrieval.entries, secondary_without_identity)),
+        mpn=SKU,
+    )
+    assert projected_with_secondary[-1]["citable_as_manufacturer"] is False
 
 
 def test_the_library_answers_without_a_request(registry, store, calibration, tmp_path):
@@ -750,9 +861,31 @@ def test_retrieval_is_skipped_when_a_url_was_supplied(
             mpn=SKU,
             manufacturer="Milwaukee Valve (MILVA)",
             source_url="https://example.com/ba100.txt",
+            class_code=VALVE_CLASS,
         ),
         registry=registry,
-        client=stub(json.dumps({"code": VALVE_CLASS, "confidence": 0.9}), json.dumps([])),
+        client=stub(
+            json.dumps(
+                {
+                    "attributes": [
+                        contract_item(
+                            "body_material",
+                            value_raw="Bronze C84400",
+                            evidence_quote="Body Material ... Bronze C84400",
+                        )
+                    ],
+                    "manufacturer_specifications": [
+                        {
+                            "label_raw": "Body Material",
+                            "value_raw": "Bronze C84400",
+                            "evidence_quote": "Body Material ... Bronze C84400",
+                            "evidence_page": 1,
+                            "certainty": "high",
+                        }
+                    ],
+                }
+            ),
+        ),
         store=store,
         calibration_dir=calibration,
         library_path=tmp_path / "index.json",
@@ -761,6 +894,31 @@ def test_retrieval_is_skipped_when_a_url_was_supplied(
 
     assert result.retrieval is None
     assert result.source.artifact.document.uri == "https://example.com/ba100.txt"
+    assert result.source.citable_as_manufacturer is False
+    assert any(
+        value.attribute_code == "body_material" for value in result.record.current_values()
+    )
+    assert len(result.record.manufacturer_specifications) == 1
+    specification = result.record.manufacturer_specifications[0]
+    assert specification.citable_as_manufacturer is False
+    assert result.run.extraction.suppressed_specifications == [specification]
+
+    from dataclasses import replace
+
+    from axiom.pipeline.persist import source_summaries
+
+    projected = source_summaries(result.source, None, mpn=SKU)
+    assert projected[0]["tier"] == result.source.source_tier
+    assert projected[0]["citable_as_manufacturer"] is False
+
+    policy_verified_source = replace(
+        result.source,
+        source_tier="manufacturer",
+        citable_as_manufacturer=True,
+    )
+    verified_projection = source_summaries(policy_verified_source, None, mpn=SKU)
+    assert verified_projection[0]["tier"] == "manufacturer"
+    assert verified_projection[0]["citable_as_manufacturer"] is True
 
 
 def test_retrieval_off_makes_the_run_offline(registry, store, calibration, tmp_path):

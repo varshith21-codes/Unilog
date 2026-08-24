@@ -11,6 +11,7 @@ import json
 
 import pytest
 from axiom.core.gaps import GapReason, RecommendedAction
+from axiom.core.specifications import quote_supports_specification
 from axiom.core.values import DerivationMethod, ValueStatus
 from axiom.extract import (
     Certainty,
@@ -23,6 +24,7 @@ from axiom.extract import (
     classify_abstention,
     invoke_with_cascade,
     parse_contract,
+    parse_extraction_contract,
 )
 from axiom.schema import load_default
 
@@ -84,6 +86,88 @@ def test_leading_prose_is_tolerated():
 def test_object_wrapper_is_unwrapped():
     inner = {"attributes": [item("port_type", value_raw="Full Port", evidence_quote="Full Port")]}
     assert len(parse_contract(json.dumps(inner))) == 1
+
+
+def test_two_channel_contract_retains_arbitrary_manufacturer_fields():
+    payload = {
+        "attributes": [
+            item("pressure_rating_wog", value_raw="600 PSI WOG", evidence_quote="600 PSI WOG")
+        ],
+        "manufacturer_specifications": [
+            {
+                "label_raw": "Ball / Stem",
+                "value_raw": "Chrome-plated brass / Brass",
+                "evidence_quote": "Ball / Stem .................... Chrome-plated brass / Brass",
+                "evidence_page": 1,
+                "certainty": "high",
+            }
+        ],
+    }
+
+    parsed = parse_extraction_contract(
+        json.dumps(payload), expected_codes=("pressure_rating_wog",)
+    )
+
+    assert [attribute.attribute_code for attribute in parsed.attributes] == [
+        "pressure_rating_wog"
+    ]
+    assert parsed.manufacturer_specifications[0].label_raw == "Ball / Stem"
+    assert parsed.manufacturer_specifications[0].value_raw == "Chrome-plated brass / Brass"
+
+
+def test_specification_only_contract_accepts_rows_and_an_explicit_empty_object():
+    specification = {
+        "label_raw": "Ball / Stem",
+        "value_raw": "Chrome-plated brass / Brass",
+        "evidence_quote": "Ball / Stem ... Chrome-plated brass / Brass",
+    }
+
+    parsed = parse_extraction_contract(
+        json.dumps({"manufacturer_specifications": [specification]}), expected_codes=()
+    )
+    empty = parse_extraction_contract(
+        json.dumps({"attributes": [], "manufacturer_specifications": []}),
+        expected_codes=(),
+    )
+
+    assert parsed.attributes == ()
+    assert parsed.manufacturer_specifications[0].label_raw == "Ball / Stem"
+    assert empty.attributes == ()
+    assert empty.manufacturer_specifications == ()
+
+
+def test_typed_only_output_cannot_satisfy_a_specification_only_pass():
+    payload = {"attributes": [item("body_material", found=False, reason="not stated")]}
+
+    with pytest.raises(ContractError, match="typed attributes but no specifications"):
+        parse_extraction_contract(json.dumps(payload), expected_codes=())
+
+
+def test_specification_pair_must_be_label_first_on_one_source_line():
+    assert quote_supports_specification(
+        "Ball / Stem",
+        "Chrome-plated brass / Brass",
+        "BALL / STEM .... Chrome-plated   brass / Brass",
+    )
+    assert not quote_supports_specification(
+        "Ball / Stem",
+        "Chrome-plated brass / Brass",
+        "Ball / Stem\nChrome-plated brass / Brass",
+    )
+    assert not quote_supports_specification(
+        "Ball / Stem",
+        "Chrome-plated brass / Brass",
+        "Chrome-plated brass / Brass .... Ball / Stem",
+    )
+    assert not quote_supports_specification(
+        "Material", "Bronze C84400", "Body Material .... Bronze C84400"
+    )
+    assert not quote_supports_specification(
+        "Body Material", "Bronze", "Body Material .... Bronze C84400"
+    )
+    assert quote_supports_specification(
+        "Body Material", "Bronze C84400", "| Body Material | Bronze C84400 |"
+    )
 
 
 def test_invalid_json_raises_so_the_cascade_escalates():
@@ -232,6 +316,69 @@ def test_unusable_output_escalates(cascade: ModelCascade):
     assert ledger.escalations == 1
 
 
+def test_specification_only_typed_response_escalates(cascade: ModelCascade):
+    first = json.dumps(
+        {
+            "manufacturer_specifications": [
+                {
+                    "label_raw": "Ball / Stem",
+                    "value_raw": "Chrome-plated brass / Brass",
+                    "evidence_quote": "Ball / Stem ... Chrome-plated brass / Brass",
+                }
+            ]
+        }
+    )
+    second = json.dumps(
+        {"attributes": [item("body_material", found=False, reason="not stated")]}
+    )
+    client = StubModelClient([first, second])
+    ledger = UsageLedger()
+
+    response, contract = invoke_with_cascade(
+        client,
+        cascade,
+        system="s",
+        user="u",
+        validate=lambda text: parse_extraction_contract(
+            text, expected_codes=("body_material",)
+        ),
+        ledger=ledger,
+    )
+
+    assert response.tier == "mid"
+    assert contract.attributes[0].attribute_code == "body_material"
+    assert ledger.calls == 2
+    assert ledger.escalations == 1
+
+
+def test_malformed_typed_item_does_not_prevent_escalation(cascade: ModelCascade):
+    malformed = json.dumps(
+        {
+            "attributes": [
+                item("body_material", value_raw="Bronze", evidence_quote=None)
+            ],
+            "manufacturer_specifications": [],
+        }
+    )
+    valid = json.dumps(
+        {"attributes": [item("body_material", found=False, reason="not stated")]}
+    )
+    client = StubModelClient([malformed, valid])
+
+    response, _ = invoke_with_cascade(
+        client,
+        cascade,
+        system="s",
+        user="u",
+        validate=lambda text: parse_extraction_contract(
+            text, expected_codes=("body_material",)
+        ),
+    )
+
+    assert response.tier == "mid"
+    assert len(client.calls) == 2
+
+
 def test_model_error_on_one_tier_moves_to_the_next(cascade: ModelCascade):
     client = StubModelClient(
         [ModelError("throttled"), '[{"attribute_code":"a","found":false}]']
@@ -291,6 +438,51 @@ def _extractor(registry, cascade, responses):
     return Extractor(registry, StubModelClient(responses), cascade, start_tier="volume")
 
 
+def test_unclassified_specification_pass_escalates_malformed_rows(
+    registry, cascade, parsed_datasheet
+):
+    malformed = json.dumps(
+        {
+            "attributes": [],
+            "manufacturer_specifications": [
+                {
+                    "label_raw": "Ball / Stem",
+                    "value_raw": None,
+                    "evidence_quote": "Ball / Stem",
+                }
+            ],
+        }
+    )
+    valid = json.dumps(
+        {
+            "attributes": [],
+            "manufacturer_specifications": [
+                {
+                    "label_raw": "Ball / Stem",
+                    "value_raw": "Chrome-plated brass / Brass",
+                    "evidence_quote": (
+                        "Ball / Stem .................... Chrome-plated brass / Brass"
+                    ),
+                    "evidence_page": 1,
+                    "certainty": "high",
+                }
+            ],
+        }
+    )
+
+    result = _extractor(registry, cascade, [malformed, valid]).extract(
+        parsed_datasheet,
+        class_code=None,
+        target_sku="BA-100-075",
+        manufacturer_source_verified=True,
+    )
+
+    assert result.response is not None
+    assert result.response.tier == "mid"
+    assert result.usage.escalations == 1
+    assert len(result.manufacturer_specifications) == 1
+
+
 def test_verified_value_becomes_an_attribute_value(registry, cascade, parsed_datasheet):
     payload = json.dumps(
         [
@@ -317,6 +509,199 @@ def test_verified_value_becomes_an_attribute_value(registry, cascade, parsed_dat
     assert value.evidence[0].match_score == 1.0
     assert value.prompt_version and value.schema_version
     assert result.citation_coverage == 1.0
+
+
+def test_open_ended_manufacturer_specifications_survive_with_verified_evidence(
+    registry, cascade, parsed_datasheet
+):
+    payload = json.dumps(
+        {
+            "attributes": [
+                item(
+                    "pressure_rating_wog",
+                    value_raw="600 PSI WOG",
+                    evidence_quote="Pressure Rating ................ 600 PSI WOG @ 73 degF",
+                    evidence_page=1,
+                )
+            ],
+            "manufacturer_specifications": [
+                {
+                    "label_raw": "Pressure Rating",
+                    "value_raw": "600 PSI WOG @ 73 degF",
+                    "evidence_quote": "Pressure Rating ................ 600 PSI WOG @ 73 degF",
+                    "evidence_page": 1,
+                    "certainty": "high",
+                },
+                {
+                    "label_raw": "Ball / Stem",
+                    "value_raw": "Chrome-plated brass / Brass",
+                    "evidence_quote": (
+                        "Ball / Stem .................... Chrome-plated brass / Brass"
+                    ),
+                    "evidence_page": 1,
+                    "certainty": "high",
+                },
+            ],
+        }
+    )
+
+    result = _extractor(registry, cascade, [payload]).extract(
+        parsed_datasheet,
+        class_code=CLASS_CODE,
+        target_sku="BA-100-075",
+        only_codes=("pressure_rating_wog",),
+    )
+
+    assert len(result.manufacturer_specifications) == 2
+    by_label = {
+        specification.label_raw: specification
+        for specification in result.manufacturer_specifications
+    }
+    assert by_label["Pressure Rating"].mapped_attribute_code == "pressure_rating_wog"
+    assert by_label["Ball / Stem"].mapped_attribute_code is None
+    assert all(
+        specification.has_verified_evidence
+        for specification in result.manufacturer_specifications
+    )
+    assert all(
+        specification.citable_as_manufacturer is False
+        for specification in result.manufacturer_specifications
+    )
+    assert result.suppressed_specifications == result.manufacturer_specifications
+
+
+def test_open_ended_specification_rejects_a_label_not_present_in_its_quote(
+    registry, cascade, parsed_datasheet
+):
+    payload = json.dumps(
+        {
+            "attributes": [item("pressure_rating_wog", found=False, reason="not requested")],
+            "manufacturer_specifications": [
+                {
+                    "label_raw": "Burst Pressure",
+                    "value_raw": "600 PSI WOG @ 73 degF",
+                    "evidence_quote": "Pressure Rating ................ 600 PSI WOG @ 73 degF",
+                    "evidence_page": 1,
+                    "certainty": "high",
+                }
+            ],
+        }
+    )
+
+    result = _extractor(registry, cascade, [payload]).extract(
+        parsed_datasheet,
+        class_code=CLASS_CODE,
+        target_sku="BA-100-075",
+        only_codes=("pressure_rating_wog",),
+    )
+
+    assert result.manufacturer_specifications == []
+    assert len(result.rejected_specifications) == 1
+
+
+def test_partial_specification_cells_are_rejected_before_materialization(
+    registry, cascade, parsed_datasheet
+):
+    payload = json.dumps(
+        {
+            "attributes": [item("body_material", found=False, reason="not stated")],
+            "manufacturer_specifications": [
+                {
+                    "label_raw": "Material",
+                    "value_raw": "Bronze",
+                    "evidence_quote": (
+                        "Body Material .................. Bronze C84400"
+                    ),
+                    "evidence_page": 1,
+                    "certainty": "high",
+                }
+            ],
+        }
+    )
+
+    result = _extractor(registry, cascade, [payload]).extract(
+        parsed_datasheet,
+        class_code=CLASS_CODE,
+        target_sku="BA-100-075",
+        only_codes=("body_material",),
+        manufacturer_source_verified=True,
+    )
+
+    assert result.manufacturer_specifications == []
+    assert len(result.rejected_specifications) == 1
+
+
+def test_invalid_first_duplicate_citation_does_not_hide_a_later_valid_one(
+    registry, cascade, parsed_datasheet
+):
+    label = "Ball / Stem"
+    value = "Chrome-plated brass / Brass"
+    payload = json.dumps(
+        {
+            "attributes": [item("pressure_rating_wog", found=False, reason="not stated")],
+            "manufacturer_specifications": [
+                {
+                    "label_raw": label,
+                    "value_raw": value,
+                    "evidence_quote": value,
+                    "evidence_page": 1,
+                    "certainty": "high",
+                },
+                {
+                    "label_raw": label,
+                    "value_raw": value,
+                    "evidence_quote": f"{label} .................... {value}",
+                    "evidence_page": 1,
+                    "certainty": "high",
+                },
+            ],
+        }
+    )
+
+    result = _extractor(registry, cascade, [payload]).extract(
+        parsed_datasheet,
+        class_code=CLASS_CODE,
+        target_sku="BA-100-075",
+        only_codes=("pressure_rating_wog",),
+    )
+
+    assert len(result.rejected_specifications) == 1
+    assert len(result.manufacturer_specifications) == 1
+    assert result.manufacturer_specifications[0].evidence[0].quote == (
+        "Ball / Stem .................... Chrome-plated brass / Brass"
+    )
+
+
+def test_open_ended_specification_rejects_cross_line_pairing(
+    registry, cascade, parsed_datasheet
+):
+    payload = json.dumps(
+        {
+            "attributes": [item("pressure_rating_wog", found=False, reason="not stated")],
+            "manufacturer_specifications": [
+                {
+                    "label_raw": "Pressure Rating",
+                    "value_raw": "Chrome-plated brass / Brass",
+                    "evidence_quote": (
+                        "Pressure Rating ................ 600 PSI WOG @ 73 degF\n"
+                        "Ball / Stem .................... Chrome-plated brass / Brass"
+                    ),
+                    "evidence_page": 1,
+                    "certainty": "high",
+                }
+            ],
+        }
+    )
+
+    result = _extractor(registry, cascade, [payload]).extract(
+        parsed_datasheet,
+        class_code=CLASS_CODE,
+        target_sku="BA-100-075",
+        only_codes=("pressure_rating_wog",),
+    )
+
+    assert result.manufacturer_specifications == []
+    assert len(result.rejected_specifications) == 1
 
 
 def test_value_from_a_table_is_marked_as_table_extraction(registry, cascade, parsed_datasheet):
@@ -362,8 +747,12 @@ def test_unlocatable_quote_is_discarded_and_becomes_a_gap(registry, cascade, par
     assert "18.5" in gap.detail, "the rejected claim must remain visible to a reviewer"
 
 
-def test_value_claimed_without_a_quote_is_discarded(registry, cascade, parsed_datasheet):
-    payload = json.dumps([item("body_material", value_raw="Bronze C84400", evidence_quote=None)])
+def test_value_claimed_without_a_quote_escalates_as_an_unusable_contract(
+    registry, cascade, parsed_datasheet
+):
+    payload = json.dumps(
+        [item("body_material", value_raw="Bronze C84400", evidence_quote=None)]
+    )
     result = _extractor(registry, cascade, [payload]).extract(
         parsed_datasheet,
         class_code=CLASS_CODE,
@@ -371,8 +760,8 @@ def test_value_claimed_without_a_quote_is_discarded(registry, cascade, parsed_da
         only_codes=("body_material",),
     )
     assert result.values == []
-    assert result.gaps[0].reason is GapReason.EXTRACTED_BUT_UNVERIFIABLE
-    assert "no supporting quote" in result.gaps[0].detail
+    assert result.gaps[0].reason is GapReason.NO_SOURCE_AVAILABLE
+    assert "no usable typed attribute items" in result.gaps[0].detail
 
 
 def test_deferred_value_becomes_a_supplier_request(registry, cascade, parsed_datasheet):

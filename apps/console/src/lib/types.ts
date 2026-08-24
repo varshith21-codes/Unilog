@@ -66,6 +66,25 @@ export interface EvidenceSpan {
   match_score: number | null;
 }
 
+/** A source-native label/value pair retained even when no schema attribute represents it. */
+export interface ManufacturerSpecification {
+  specification_id: string;
+  label_raw: string;
+  value_raw: string;
+  evidence: EvidenceSpan[];
+  confidence: number;
+  method: DerivationMethod;
+  mapped_attribute_code?: string | null;
+  /** Absent on legacy bundles; true only when source policy verified manufacturer ownership. */
+  citable_as_manufacturer?: boolean;
+  model_id: string | null;
+  model_tier: string | null;
+  prompt_version: string | null;
+  schema_version: string | null;
+  has_verified_evidence: boolean;
+  citation_summary: string[];
+}
+
 // ---------------------------------------------------------------- validation
 // axiom.core.validation
 
@@ -1117,6 +1136,9 @@ export interface SkuMetrics {
   /** Values resting only on the customer's own input. Cited, but not evidence about the product. */
   values_self_declared: number;
   values_needing_review: number;
+  /** Source-native pairs are measured separately from normalized catalogue attributes. */
+  manufacturer_specifications?: number;
+  manufacturer_specifications_unmapped?: number;
   gaps_total: number;
   gaps_required: number;
   conflicts: string[];
@@ -1135,6 +1157,8 @@ export interface SkuBundle {
   classification_summary: Record<string, unknown>;
   classification_candidates: { code: string; score: number; path_text: string }[];
   values: AttributeValue[];
+  /** Optional for bundles written before open-ended source specification capture existed. */
+  manufacturer_specifications?: ManufacturerSpecification[];
   gaps: Gap[];
   /**
    * Where the data came from, with the URL fetched and the tier that host was judged at.

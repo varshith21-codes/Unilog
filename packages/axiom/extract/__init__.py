@@ -15,8 +15,11 @@ from axiom.extract.contract import (
     Certainty,
     ContractError,
     ContractItem,
+    ExtractionContract,
+    ManufacturerSpecificationContractItem,
     classify_abstention,
     parse_contract,
+    parse_extraction_contract,
 )
 
 # Two model-free paths and the model path all mint AttributeValues, so each has its own
@@ -118,6 +121,7 @@ __all__ = [
     "ContractItem",
     "DescriptionExtraction",
     "DescriptionMatch",
+    "ExtractionContract",
     "ExtractionResult",
     "Extractor",
     "GrammarReading",
@@ -127,6 +131,7 @@ __all__ = [
     "ModelError",
     "ModelPrice",
     "ModelResponse",
+    "ManufacturerSpecificationContractItem",
     "Observation",
     "PartNumberGrammar",
     "Prediction",
@@ -158,6 +163,7 @@ __all__ = [
     "label_lookup",
     "load_prices",
     "parse_contract",
+    "parse_extraction_contract",
     "reject_unresolved",
     "segment",
     "shape",

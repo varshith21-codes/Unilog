@@ -58,6 +58,20 @@ class EvidenceView:
 
 
 @dataclass
+class ManufacturerSpecificationView:
+    """A source-native fact shown beside, but not mixed into, the typed review queue."""
+
+    specification_id: str
+    label_raw: str
+    value_raw: str
+    confidence: float
+    method: str
+    mapped_attribute_code: str | None = None
+    citable_as_manufacturer: bool = False
+    evidence: list[EvidenceView] = field(default_factory=list)
+
+
+@dataclass
 class ValidationView:
     layer: str
     rule_id: str
@@ -121,6 +135,7 @@ class ReviewSession:
     quality: dict
     created_at: str
     decisions: list[dict] = field(default_factory=list)
+    manufacturer_specifications: list[ManufacturerSpecificationView] = field(default_factory=list)
 
     @property
     def queue(self) -> list[ReviewItem]:
@@ -171,7 +186,18 @@ class ReviewSession:
             evidence = [EvidenceView(**e) for e in raw.pop("evidence", [])]
             validations = [ValidationView(**v) for v in raw.pop("validations", [])]
             items.append(ReviewItem(**raw, evidence=evidence, validations=validations))
-        return cls(**payload, pages=pages, items=items)
+        manufacturer_specifications = []
+        for raw in payload.pop("manufacturer_specifications", []):
+            evidence = [EvidenceView(**e) for e in raw.pop("evidence", [])]
+            manufacturer_specifications.append(
+                ManufacturerSpecificationView(**raw, evidence=evidence)
+            )
+        return cls(
+            **payload,
+            pages=pages,
+            items=items,
+            manufacturer_specifications=manufacturer_specifications,
+        )
 
 
 def build_session(
@@ -237,6 +263,19 @@ def build_session(
         policy=policy.summary(),
         quality=quality or {},
         created_at=datetime.now(UTC).isoformat(),
+        manufacturer_specifications=[
+            ManufacturerSpecificationView(
+                specification_id=specification.specification_id,
+                label_raw=specification.label_raw,
+                value_raw=specification.value_raw,
+                confidence=specification.confidence,
+                method=specification.method.value,
+                mapped_attribute_code=specification.mapped_attribute_code,
+                citable_as_manufacturer=specification.citable_as_manufacturer,
+                evidence=[_evidence_view(span, parsed) for span in specification.evidence],
+            )
+            for specification in record.manufacturer_specifications
+        ],
     )
 
 

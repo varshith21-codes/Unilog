@@ -15,6 +15,7 @@ from axiom.core.certificate import (
 from axiom.core.evidence import EvidenceSpan, SourceDocument
 from axiom.core.gaps import Gap, GapReason
 from axiom.core.product import Classification, ProductRecord
+from axiom.core.specifications import ManufacturerSpecification, specification_id
 from axiom.core.validation import ValidationLayer, ValidationResult, Verdict
 from axiom.core.values import (
     AttributeValue,
@@ -33,11 +34,13 @@ __all__ = [
     "EvidenceSpan",
     "Gap",
     "GapReason",
+    "ManufacturerSpecification",
     "ProductRecord",
     "Quantity",
     "QualityIndex",
     "quality_index_for",
     "SourceDocument",
+    "specification_id",
     "ValidationLayer",
     "ValidationResult",
     "ValueRange",

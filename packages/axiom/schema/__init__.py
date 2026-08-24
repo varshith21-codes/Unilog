@@ -21,6 +21,7 @@ from axiom.schema.prompts import (
     ExtractionPrompt,
     build_extraction_prompt,
     build_output_schema,
+    build_specification_extraction_prompt,
 )
 from axiom.schema.registry import (
     SchemaIntegrityError,
@@ -46,6 +47,7 @@ __all__ = [
     "Severity",
     "build_extraction_prompt",
     "build_output_schema",
+    "build_specification_extraction_prompt",
     "default_schema_root",
     "load_default",
 ]

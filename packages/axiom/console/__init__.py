@@ -19,6 +19,7 @@ from axiom.console.projection import (
     serialise_copy,
     serialise_cost,
     serialise_document,
+    serialise_manufacturer_specifications,
     serialise_pages,
     serialise_values,
 )
@@ -38,6 +39,7 @@ __all__ = [
     "serialise_copy",
     "serialise_cost",
     "serialise_document",
+    "serialise_manufacturer_specifications",
     "serialise_pages",
     "serialise_values",
 ]

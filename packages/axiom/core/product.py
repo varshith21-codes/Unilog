@@ -22,6 +22,7 @@ from enum import Enum
 from pydantic import BaseModel, ConfigDict, Field
 
 from axiom.core.gaps import Gap
+from axiom.core.specifications import ManufacturerSpecification
 from axiom.core.values import AttributeValue, DerivationMethod, ValueStatus
 
 
@@ -113,6 +114,7 @@ class ProductRecord(BaseModel):
 
     classifications: list[Classification] = Field(default_factory=list)
     attribute_values: list[AttributeValue] = Field(default_factory=list)
+    manufacturer_specifications: list[ManufacturerSpecification] = Field(default_factory=list)
     gaps: list[Gap] = Field(default_factory=list)
     source_document_ids: list[str] = Field(default_factory=list)
 
@@ -188,6 +190,20 @@ class ProductRecord(BaseModel):
         """
         self.attribute_values.append(value)
         self.updated_at = datetime.now(UTC)
+
+    def add_manufacturer_specification(self, specification: ManufacturerSpecification) -> bool:
+        """Retain a source-native label/value once, without promoting it to a typed attribute.
+
+        Returns whether the record changed. Repeated specification blocks are common on product
+        pages and PDFs; exact label/value repetitions from the same document are one observation,
+        while the same label with a different value is preserved as a visible conflict.
+        """
+        key = specification.deduplication_key
+        if any(existing.deduplication_key == key for existing in self.manufacturer_specifications):
+            return False
+        self.manufacturer_specifications.append(specification)
+        self.updated_at = datetime.now(UTC)
+        return True
 
     def add_gap(self, gap: Gap) -> None:
         self.gaps.append(gap)

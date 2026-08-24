@@ -54,9 +54,11 @@ class ResolvedSource:
     parsed: ParsedDocument
 
     from_url: bool
-    """True when the bytes came off the internet. The single most important thing to render next to
-    a value from this run, because it is the difference between "the manufacturer's datasheet says
-    this" and "the person who submitted this said it"."""
+    """True when the bytes came off the internet, rather than from the submitted fields."""
+
+    source_tier: str = "submission"
+    citable_as_manufacturer: bool = False
+    """Set only after source policy establishes that the final publisher is the manufacturer."""
 
     @property
     def kind(self) -> str:
@@ -76,11 +78,18 @@ class ResolvedSource:
             "parser": self.parsed.parser,
             "was_already_stored": self.artifact.was_already_stored,
             "warnings": list(self.parsed.warnings),
+            "source_tier": self.source_tier,
+            "citable_as_manufacturer": self.citable_as_manufacturer,
             "evidential_weight": (
-                "A manufacturer document. Values cite the page and line they were read from."
-                if self.from_url
-                else "The submission itself. Values cite the field they were read from, which "
-                "records what was supplied rather than what a manufacturer published."
+                "A manufacturer-owned document. Values cite the page and line they were read from."
+                if self.citable_as_manufacturer
+                else (
+                    "A fetched document whose publisher was not verified as the manufacturer. "
+                    "Typed values remain cited; source-native manufacturer claims are withheld."
+                    if self.from_url
+                    else "The submission itself. Values cite the field they were read from, which "
+                    "records what was supplied rather than what a manufacturer published."
+                )
             ),
         }
 

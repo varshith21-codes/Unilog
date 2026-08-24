@@ -35,7 +35,7 @@ it is the reason the caller above this one needs caps.
 from __future__ import annotations
 
 from collections.abc import Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 
 from axiom.confidence import DEFAULT_EPSILON
@@ -51,6 +51,8 @@ from axiom.ingest.store import ArtifactStore
 from axiom.pipeline.retrieval import RetrievalAttempt, retrieve_documents
 from axiom.pipeline.source import ResolvedSource, ingest_submission, resolve_source
 from axiom.pipeline.stages import PipelineRun, run_stages
+from axiom.retrieve.policy import SourcePolicy, SourceTier
+from axiom.retrieve.policy import load_default as load_source_policy
 from axiom.review import queue_summary
 from axiom.schema import SchemaRegistry
 
@@ -77,6 +79,52 @@ def _artifact_for(parsed, retrieval: RetrievalAttempt) -> IngestedArtifact:
         original_filename=entry.filename if entry else None,
         was_already_stored=True,
     )
+
+
+def _source_authority(
+    source: ResolvedSource,
+    retrieval: RetrievalAttempt | None,
+    policy: SourcePolicy | None,
+    manufacturer: ManufacturerResolution,
+    brand: str | None,
+) -> tuple[str, bool]:
+    """Return the persisted source tier and whether it may support manufacturer-named claims."""
+    if not source.from_url:
+        return "submission", False
+
+    effective = policy or load_source_policy()
+    entry = None
+    if retrieval is not None:
+        entry = next(
+            (
+                candidate
+                for candidate in retrieval.entries
+                if candidate.sha256 == source.artifact.document.sha256
+            ),
+            None,
+        )
+    if entry is not None:
+        expected_id = retrieval.manufacturer.id if retrieval and retrieval.manufacturer else None
+        citable = (
+            entry.tier == SourceTier.MANUFACTURER.value
+            and entry.manufacturer_id is not None
+            and expected_id is not None
+            and entry.manufacturer_id == expected_id
+        )
+        return entry.tier, citable
+
+    verdict = effective.classify(source.artifact.document.uri)
+    expected = effective.manufacturer_for(
+        vendor_code=manufacturer.supplier_code,
+        vendor_name=manufacturer.name,
+        brand=brand,
+    )
+    citable = (
+        verdict.citable_as_manufacturer
+        and expected is not None
+        and verdict.manufacturer_id == expected.id
+    )
+    return verdict.tier.value, citable
 
 
 class InsufficientInputError(ValueError):
@@ -118,6 +166,8 @@ class EnrichmentRequest:
     It makes no model call either way. It makes HTTP requests to the manufacturer's site, gated by
     :mod:`axiom.retrieve.policy` and ``robots.txt``.
     """
+    refresh_sources: bool = False
+    """Bypass stored SKU coverage once to look for a richer live product source and datasheet."""
 
     class_code: str | None = None
     """Forced class, bypassing classification. The fallback when classification abstains, too — the
@@ -169,6 +219,7 @@ class EnrichmentRequest:
             "brand": self.brand,
             "class_code": self.class_code,
             "include_optional": self.include_optional,
+            "refresh_sources": self.refresh_sources,
             "risk_budget": self.risk_budget,
             "generate_copy": self.generate_copy,
         }
@@ -217,6 +268,19 @@ class EnrichmentResult:
                 "total": len(run.record.current_values()),
                 "publishable": len(run.record.publishable_values()),
                 "needing_review": len(run.record.values_needing_review()),
+            },
+            "manufacturer_specifications": {
+                "total": len(run.record.manufacturer_specifications),
+                "mapped": sum(
+                    1
+                    for specification in run.record.manufacturer_specifications
+                    if specification.mapped_attribute_code is not None
+                ),
+                "unmapped": sum(
+                    1
+                    for specification in run.record.manufacturer_specifications
+                    if specification.mapped_attribute_code is None
+                ),
             },
             "gaps": {
                 "total": len(run.record.gaps),
@@ -334,6 +398,7 @@ def enrich_one(
             search=search,
             renderer=renderer,
             fetcher=fetcher,
+            refresh_sources=request.refresh_sources,
             library=library,
         )
         if retrieval.primary is not None:
@@ -355,6 +420,15 @@ def enrich_one(
             supplier_id=request.supplier_id,
             fetcher=fetcher,
         )
+
+    source_tier, citable_as_manufacturer = _source_authority(
+        source, retrieval, source_policy, manufacturer, request.brand
+    )
+    source = replace(
+        source,
+        source_tier=source_tier,
+        citable_as_manufacturer=citable_as_manufacturer,
+    )
 
     # When a datasheet is the primary source, the typed fields are stored as a second document so a
     # description-derived value cites text that actually contains it. Free: the bytes are hashed and
@@ -431,6 +505,7 @@ def enrich_one(
         classify_text=description or (
             title_block(source.parsed) if source.from_url else None
         ),
+        manufacturer_source_verified=source.citable_as_manufacturer,
     )
 
     if manufacturer.looks_like_a_distributor:
@@ -446,6 +521,11 @@ def enrich_one(
         )
     if retrieval is not None:
         run.notes.extend(retrieval.notes)
+    if source.from_url and not source.citable_as_manufacturer:
+        run.notes.append(
+            "the fetched source was not verified as manufacturer-owned. Typed values remain "
+            "cited, but source-native manufacturer specifications were withheld"
+        )
     if not source.from_url:
         run.notes.append(
             "no manufacturer document was found, so the submission itself is the source. Every "

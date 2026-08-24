@@ -68,7 +68,9 @@ _ENUM_DATATYPES = frozenset({Datatype.ENUM, Datatype.MULTI_ENUM})
 # Matches a table cell reference's row index, as minted by ``ParsedTable.cell_ref``.
 _ROW_REF = re.compile(r":r(\d+):")
 
-_NUMBER = re.compile(r"\d+(?:\.\d+)?")
+# Grouped integers such as ``12 500`` are one printed magnitude, not ``12`` and ``500``.
+# Commas are deliberately excluded: they are decimal separators in source text such as ``22,23``.
+_NUMBER = re.compile(r"\d+(?:[ \u00a0]\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?")
 
 # Splits a multi-enum value_raw into its listed members. Newlines appear when a model echoes a
 # bulleted list; slashes do not, because "NSF/ANSI 61" contains one.
@@ -294,14 +296,18 @@ def _check_numeric(value_raw: str, quote: str) -> Entailment:
 
 
 def _magnitude_present(literal: str, quote_literals: list[str]) -> bool:
-    """Compare numerically so 15 matches 15.0 and 400 matches 400.00."""
+    """Compare numerically so 15 matches 15.0 and 12 500 matches 12500."""
+
+    def magnitude(value: str) -> float:
+        return float(value.replace(" ", "").replace("\u00a0", ""))
+
     try:
-        target = float(literal)
+        target = magnitude(literal)
     except ValueError:
         return False
     for candidate in quote_literals:
         try:
-            if float(candidate) == target:
+            if magnitude(candidate) == target:
                 return True
         except ValueError:
             continue

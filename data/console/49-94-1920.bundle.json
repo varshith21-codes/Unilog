@@ -1,27 +1,27 @@
 {
   "bundle": {
     "sku": "49-94-1920",
-    "document_id": "Unihack__Sample_Dataset_-_Input#49-94-1920",
+    "document_id": "49-94-1920@6160f24b",
     "class_code": "ABR.WHL.BONDED",
     "record": {
-      "tenant_id": "unilog",
+      "tenant_id": "demo",
       "sku": "49-94-1920",
       "mpn": "49-94-1920",
       "mpn_normalized": "49-94-1920",
       "gtin": null,
       "brand": null,
       "brand_id": null,
-      "supplier_id": "4031",
+      "supplier_id": null,
       "parent_sku": null,
       "lifecycle_status": "active",
       "class_code": "ABR.WHL.BONDED",
       "schema_version": "ABR.WHL.BONDED@v1",
       "source_document_ids": [
-        "Unihack__Sample_Dataset_-_Input#49-94-1920",
-        "2026_Bonded-Abrasives_Solutions-Guide@bb06f364"
+        "49-94-1920@6160f24b",
+        "49-94-1920.submission@7d31d0d1"
       ],
-      "created_at": "2026-08-23T11:45:16.868973+00:00",
-      "updated_at": "2026-08-23T11:45:16.903604+00:00"
+      "created_at": "2026-08-24T11:20:04.088731+00:00",
+      "updated_at": "2026-08-24T11:20:04.133936+00:00"
     },
     "classifications": [
       {
@@ -61,58 +61,63 @@
     "classification_candidates": [
       {
         "code": "ABR.WHL.BONDED",
-        "score": 0.3112,
+        "score": 0.3077,
         "path_text": "Tools & Consumables > Abrasives > Bonded Abrasive Wheels"
       }
     ],
     "values": [
       {
-        "attribute_code": "abrasive_operation",
-        "value_raw": "Cut Off",
-        "value_canonical": "Cutting",
-        "value_display": "Cutting",
-        "method": "item_master_parse",
-        "confidence": 0.82,
+        "attribute_code": "abrasive_grain",
+        "value_raw": "Silicon Carbide",
+        "value_canonical": "Silicon Carbide",
+        "value_display": "Silicon Carbide",
+        "method": "document_extraction",
+        "confidence": 0.9,
         "status": "auto_accepted",
         "evidence": [
           {
-            "span_id": "desc-abrasive_operation-41",
-            "document_id": "Unihack__Sample_Dataset_-_Input#49-94-1920",
-            "document_sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
-            "quote": "Cut Off",
-            "page": null,
-            "bbox": null,
+            "span_id": "sp_6160f24b_6",
+            "document_id": "49-94-1920@6160f24b",
+            "document_sha256": "6160f24b864b8cb8158186d87d69e9cbcfda70c0ab6f303a4e8c2c2a0ad5cdd9",
+            "quote": "Silicon Carbide Grain Provides Durable Performance",
+            "page": 9,
+            "bbox": {
+              "x0": 54.0,
+              "y0": 174.0,
+              "x1": 354.0,
+              "y1": 186.0
+            },
             "table_ref": null,
             "quote_verified": true,
             "match_score": 1.0
           }
         ],
         "validations": [],
-        "model_id": null,
-        "model_tier": null,
-        "prompt_version": "description@v1",
+        "model_id": "zai.glm-4.7-flash",
+        "model_tier": "volume",
+        "prompt_version": "extract.v2",
         "schema_version": "ABR.WHL.BONDED@v1",
         "version": 1,
         "superseded_by": null,
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-23T11:45:16.868832Z",
-        "score": 0.8,
+        "created_at": "2026-08-24T11:20:04.035140Z",
+        "score": 0.73,
         "decision": {
-          "attribute_code": "abrasive_operation",
-          "score": 0.8,
+          "attribute_code": "abrasive_grain",
+          "score": 0.73,
           "accepted": true,
           "status": "auto_accepted",
           "reason_code": "auto_accepted",
-          "detail": "score 0.800 >= threshold 0.719"
+          "detail": "score 0.730 >= threshold 0.685"
         },
         "features": {
           "evidence_match_score": 1.0,
           "evidence_verified": 1.0,
           "citation_precision": 0.4,
-          "quote_specificity": 1.0,
-          "self_reported_certainty": 0.82,
+          "quote_specificity": 0.3,
+          "self_reported_certainty": 0.9,
           "validation_pass_rate": 0.5,
           "validation_clean": 1.0,
           "is_extraction": 1.0,
@@ -120,68 +125,68 @@
           "normalized": 1.0,
           "attribute_prior": 0.5,
           "source_prior": 0.5,
-          "tier_cost": 0.5
+          "tier_cost": 0.25
         },
-        "is_publishable": false,
+        "is_publishable": true,
         "has_verified_evidence": true,
-        "is_self_declared": true,
-        "is_independent": false,
+        "is_self_declared": false,
+        "is_independent": true,
         "citation_summary": [
-          "Unihack__Sample_Dataset_-_Input#49-94-1920"
+          "49-94-1920@6160f24b p.9"
         ]
       },
       {
-        "attribute_code": "arbor_size",
-        "value_raw": "5/8\" DKO",
-        "value_canonical": "5/8\" DKO",
-        "value_display": "5/8\" DKO",
-        "method": "table_extraction",
-        "confidence": 0.94,
+        "attribute_code": "abrasive_operation",
+        "value_raw": "Cutting",
+        "value_canonical": "Cutting",
+        "value_display": "Cutting",
+        "method": "document_extraction",
+        "confidence": 0.9,
         "status": "auto_accepted",
         "evidence": [
           {
-            "span_id": "struct-arbor_size-t15:r9:c2",
-            "document_id": "2026_Bonded-Abrasives_Solutions-Guide@bb06f364",
-            "document_sha256": "bb06f364d97f6b89b7bb5dc6ea83e3921e5fcbb575130ca1dd126363197d722c",
-            "quote": "Diameter | Thickness | Arbor | Max\nRPM | Type | Tool\nCompatibility | LONG LIFE.\nFAST CUTS. || 7\" | 1/8\" | 5/8\" DKO | 8,500 | 1 | 49-94-1920 (10pk Bulk)",
-            "page": 6,
+            "span_id": "sp_6160f24b_0",
+            "document_id": "49-94-1920@6160f24b",
+            "document_sha256": "6160f24b864b8cb8158186d87d69e9cbcfda70c0ab6f303a4e8c2c2a0ad5cdd9",
+            "quote": "Cut Off Wheels",
+            "page": 8,
             "bbox": {
-              "x0": 144.20925454545454,
-              "y0": 260.18859999999995,
-              "x1": 198.20517999999998,
-              "y1": 278.18864999999994
+              "x0": 54.0,
+              "y0": 606.0,
+              "x1": 138.0,
+              "y1": 618.0
             },
-            "table_ref": "t15:r9:c2",
+            "table_ref": null,
             "quote_verified": true,
             "match_score": 1.0
           }
         ],
         "validations": [],
-        "model_id": null,
-        "model_tier": null,
-        "prompt_version": "structured@v1",
+        "model_id": "zai.glm-4.7-flash",
+        "model_tier": "volume",
+        "prompt_version": "extract.v2",
         "schema_version": "ABR.WHL.BONDED@v1",
-        "version": 1,
+        "version": 2,
         "superseded_by": null,
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-23T11:45:16.901304Z",
-        "score": 0.8553,
+        "created_at": "2026-08-24T11:20:04.032979Z",
+        "score": 0.75,
         "decision": {
-          "attribute_code": "arbor_size",
-          "score": 0.8553,
+          "attribute_code": "abrasive_operation",
+          "score": 0.75,
           "accepted": true,
           "status": "auto_accepted",
           "reason_code": "auto_accepted",
-          "detail": "score 0.855 >= threshold 0.719"
+          "detail": "score 0.750 >= threshold 0.685"
         },
         "features": {
           "evidence_match_score": 1.0,
           "evidence_verified": 1.0,
-          "citation_precision": 1.0,
-          "quote_specificity": 0.053,
-          "self_reported_certainty": 0.94,
+          "citation_precision": 0.4,
+          "quote_specificity": 0.5,
+          "self_reported_certainty": 0.9,
           "validation_pass_rate": 0.5,
           "validation_clean": 1.0,
           "is_extraction": 1.0,
@@ -189,94 +194,221 @@
           "normalized": 1.0,
           "attribute_prior": 0.5,
           "source_prior": 0.5,
-          "tier_cost": 0.5
+          "tier_cost": 0.25
         },
         "is_publishable": true,
         "has_verified_evidence": true,
         "is_self_declared": false,
         "is_independent": true,
         "citation_summary": [
-          "2026_Bonded-Abrasives_Solutions-Guide@bb06f364 p.6 t15:r9:c2"
+          "49-94-1920@6160f24b p.8"
         ]
       },
       {
-        "attribute_code": "max_operating_speed",
-        "value_raw": "8,500",
-        "value_canonical": 8,
-        "value_display": "8",
-        "method": "table_extraction",
-        "confidence": 0.94,
+        "attribute_code": "arbor_size",
+        "value_raw": "5/8 in",
+        "value_canonical": "5/8 in",
+        "value_display": "5/8 in",
+        "method": "document_extraction",
+        "confidence": 0.9,
         "status": "auto_accepted",
         "evidence": [
           {
-            "span_id": "struct-max_operating_speed-t15:r9:c3",
-            "document_id": "2026_Bonded-Abrasives_Solutions-Guide@bb06f364",
-            "document_sha256": "bb06f364d97f6b89b7bb5dc6ea83e3921e5fcbb575130ca1dd126363197d722c",
-            "quote": "Diameter | Thickness | Arbor | Max\nRPM | Type | Tool\nCompatibility | LONG LIFE.\nFAST CUTS. || 7\" | 1/8\" | 5/8\" DKO | 8,500 | 1 | 49-94-1920 (10pk Bulk)",
-            "page": 6,
+            "span_id": "sp_6160f24b_4",
+            "document_id": "49-94-1920@6160f24b",
+            "document_sha256": "6160f24b864b8cb8158186d87d69e9cbcfda70c0ab6f303a4e8c2c2a0ad5cdd9",
+            "quote": "Arbor Size: DM, 5/8 in",
+            "page": 8,
             "bbox": {
-              "x0": 198.20517999999998,
-              "y0": 260.18859999999995,
-              "x1": 253.3185542857143,
-              "y1": 278.18864999999994
+              "x0": 54.0,
+              "y0": 690.0,
+              "x1": 186.0,
+              "y1": 702.0
             },
-            "table_ref": "t15:r9:c3",
+            "table_ref": null,
             "quote_verified": true,
             "match_score": 1.0
           }
         ],
-        "validations": [
-          {
-            "layer": "L3",
-            "rule_id": "plausible_range",
-            "verdict": "warn",
-            "severity": "warning",
-            "reason": "attribute 'max_operating_speed' value 8  is outside the expected range [500, 80000] for this attribute",
-            "counterexample": null,
-            "suggested_fix": null,
-            "detail": "raw source text: '8,500'"
-          }
-        ],
-        "model_id": null,
-        "model_tier": null,
-        "prompt_version": "structured@v1",
+        "validations": [],
+        "model_id": "zai.glm-4.7-flash",
+        "model_tier": "volume",
+        "prompt_version": "extract.v2",
         "schema_version": "ABR.WHL.BONDED@v1",
         "version": 1,
         "superseded_by": null,
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-23T11:45:16.901316Z",
-        "score": 0.8033,
+        "created_at": "2026-08-24T11:20:04.033884Z",
+        "score": 0.7273,
         "decision": {
-          "attribute_code": "max_operating_speed",
-          "score": 0.8033,
+          "attribute_code": "arbor_size",
+          "score": 0.7273,
           "accepted": true,
           "status": "auto_accepted",
           "reason_code": "auto_accepted",
-          "detail": "score 0.803 >= threshold 0.719"
+          "detail": "score 0.727 >= threshold 0.685"
         },
         "features": {
           "evidence_match_score": 1.0,
           "evidence_verified": 1.0,
-          "citation_precision": 1.0,
-          "quote_specificity": 0.0331,
-          "self_reported_certainty": 0.94,
-          "validation_pass_rate": 0.0,
+          "citation_precision": 0.4,
+          "quote_specificity": 0.2727,
+          "self_reported_certainty": 0.9,
+          "validation_pass_rate": 0.5,
           "validation_clean": 1.0,
           "is_extraction": 1.0,
           "is_inference": 0.0,
           "normalized": 1.0,
           "attribute_prior": 0.5,
           "source_prior": 0.5,
-          "tier_cost": 0.5
+          "tier_cost": 0.25
         },
         "is_publishable": true,
         "has_verified_evidence": true,
         "is_self_declared": false,
         "is_independent": true,
         "citation_summary": [
-          "2026_Bonded-Abrasives_Solutions-Guide@bb06f364 p.6 t15:r9:c3"
+          "49-94-1920@6160f24b p.8"
+        ]
+      },
+      {
+        "attribute_code": "attachment_type",
+        "value_raw": "Arbor Hole",
+        "value_canonical": "Arbor Hole",
+        "value_display": "Arbor Hole",
+        "method": "document_extraction",
+        "confidence": 0.9,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "sp_6160f24b_8",
+            "document_id": "49-94-1920@6160f24b",
+            "document_sha256": "6160f24b864b8cb8158186d87d69e9cbcfda70c0ab6f303a4e8c2c2a0ad5cdd9",
+            "quote": "5/8\" DKO Arbor",
+            "page": 9,
+            "bbox": {
+              "x0": 54.0,
+              "y0": 222.0,
+              "x1": 138.0,
+              "y1": 234.0
+            },
+            "table_ref": null,
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [],
+        "model_id": "zai.glm-4.7-flash",
+        "model_tier": "volume",
+        "prompt_version": "extract.v2",
+        "schema_version": "ABR.WHL.BONDED@v1",
+        "version": 1,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-24T11:20:04.035355Z",
+        "score": 0.7714,
+        "decision": {
+          "attribute_code": "attachment_type",
+          "score": 0.7714,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.771 >= threshold 0.685"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 0.4,
+          "quote_specificity": 0.7143,
+          "self_reported_certainty": 0.9,
+          "validation_pass_rate": 0.5,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.5,
+          "source_prior": 0.5,
+          "tier_cost": 0.25
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "is_self_declared": false,
+        "is_independent": true,
+        "citation_summary": [
+          "49-94-1920@6160f24b p.9"
+        ]
+      },
+      {
+        "attribute_code": "product_series",
+        "value_raw": "DKO",
+        "value_canonical": "DKO",
+        "value_display": "DKO",
+        "method": "document_extraction",
+        "confidence": 0.9,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "sp_6160f24b_9",
+            "document_id": "49-94-1920@6160f24b",
+            "document_sha256": "6160f24b864b8cb8158186d87d69e9cbcfda70c0ab6f303a4e8c2c2a0ad5cdd9",
+            "quote": "5/8\" DKO Arbor",
+            "page": 9,
+            "bbox": {
+              "x0": 54.0,
+              "y0": 222.0,
+              "x1": 138.0,
+              "y1": 234.0
+            },
+            "table_ref": null,
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [],
+        "model_id": "zai.glm-4.7-flash",
+        "model_tier": "volume",
+        "prompt_version": "extract.v2",
+        "schema_version": "ABR.WHL.BONDED@v1",
+        "version": 1,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-24T11:20:04.035454Z",
+        "score": 0.7214,
+        "decision": {
+          "attribute_code": "product_series",
+          "score": 0.7214,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.721 >= threshold 0.685"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 0.4,
+          "quote_specificity": 0.2143,
+          "self_reported_certainty": 0.9,
+          "validation_pass_rate": 0.5,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.875,
+          "source_prior": 0.5,
+          "tier_cost": 0.25
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "is_self_declared": false,
+        "is_independent": true,
+        "citation_summary": [
+          "49-94-1920@6160f24b p.9"
         ]
       },
       {
@@ -287,191 +419,53 @@
           "unit": "mm"
         },
         "value_display": "7\"",
-        "method": "table_extraction",
-        "confidence": 0.94,
+        "method": "document_extraction",
+        "confidence": 0.9,
         "status": "auto_accepted",
         "evidence": [
           {
-            "span_id": "struct-wheel_diameter-t15:r9:c0",
-            "document_id": "2026_Bonded-Abrasives_Solutions-Guide@bb06f364",
-            "document_sha256": "bb06f364d97f6b89b7bb5dc6ea83e3921e5fcbb575130ca1dd126363197d722c",
-            "quote": "Diameter | Thickness | Arbor | Max\nRPM | Type | Tool\nCompatibility | LONG LIFE.\nFAST CUTS. || 7\" | 1/8\" | 5/8\" DKO | 8,500 | 1 | 49-94-1920 (10pk Bulk)",
-            "page": 6,
+            "span_id": "sp_6160f24b_2",
+            "document_id": "49-94-1920@6160f24b",
+            "document_sha256": "6160f24b864b8cb8158186d87d69e9cbcfda70c0ab6f303a4e8c2c2a0ad5cdd9",
+            "quote": "Diameter: 7\"",
+            "page": 8,
             "bbox": {
-              "x0": 36.20615652173913,
-              "y0": 260.18859999999995,
-              "x1": 90.20925454545454,
-              "y1": 278.18864999999994
+              "x0": 54.0,
+              "y0": 666.0,
+              "x1": 126.0,
+              "y1": 678.0
             },
-            "table_ref": "t15:r9:c0",
-            "quote_verified": true,
-            "match_score": 1.0
-          }
-        ],
-        "validations": [],
-        "model_id": null,
-        "model_tier": null,
-        "prompt_version": "structured@v1",
-        "schema_version": "ABR.WHL.BONDED@v1",
-        "version": 2,
-        "superseded_by": null,
-        "derived_from": null,
-        "reviewed_by": null,
-        "reviewed_at": null,
-        "created_at": "2026-08-23T11:45:16.901233Z",
-        "score": 0.8513,
-        "decision": {
-          "attribute_code": "wheel_diameter",
-          "score": 0.8513,
-          "accepted": true,
-          "status": "auto_accepted",
-          "reason_code": "auto_accepted",
-          "detail": "score 0.851 >= threshold 0.719"
-        },
-        "features": {
-          "evidence_match_score": 1.0,
-          "evidence_verified": 1.0,
-          "citation_precision": 1.0,
-          "quote_specificity": 0.0132,
-          "self_reported_certainty": 0.94,
-          "validation_pass_rate": 0.5,
-          "validation_clean": 1.0,
-          "is_extraction": 1.0,
-          "is_inference": 0.0,
-          "normalized": 1.0,
-          "attribute_prior": 0.5,
-          "source_prior": 0.5,
-          "tier_cost": 0.5
-        },
-        "is_publishable": true,
-        "has_verified_evidence": true,
-        "is_self_declared": false,
-        "is_independent": true,
-        "citation_summary": [
-          "2026_Bonded-Abrasives_Solutions-Guide@bb06f364 p.6 t15:r9:c0"
-        ]
-      },
-      {
-        "attribute_code": "wheel_thickness",
-        "value_raw": "1/8\"",
-        "value_canonical": {
-          "magnitude": 3.175,
-          "unit": "mm"
-        },
-        "value_display": "1/8\"",
-        "method": "table_extraction",
-        "confidence": 0.94,
-        "status": "auto_accepted",
-        "evidence": [
-          {
-            "span_id": "struct-wheel_thickness-t15:r9:c1",
-            "document_id": "2026_Bonded-Abrasives_Solutions-Guide@bb06f364",
-            "document_sha256": "bb06f364d97f6b89b7bb5dc6ea83e3921e5fcbb575130ca1dd126363197d722c",
-            "quote": "Diameter | Thickness | Arbor | Max\nRPM | Type | Tool\nCompatibility | LONG LIFE.\nFAST CUTS. || 7\" | 1/8\" | 5/8\" DKO | 8,500 | 1 | 49-94-1920 (10pk Bulk)",
-            "page": 6,
-            "bbox": {
-              "x0": 90.20925454545454,
-              "y0": 260.18859999999995,
-              "x1": 144.20925454545454,
-              "y1": 278.18864999999994
-            },
-            "table_ref": "t15:r9:c1",
-            "quote_verified": true,
-            "match_score": 1.0
-          }
-        ],
-        "validations": [],
-        "model_id": null,
-        "model_tier": null,
-        "prompt_version": "structured@v1",
-        "schema_version": "ABR.WHL.BONDED@v1",
-        "version": 1,
-        "superseded_by": null,
-        "derived_from": null,
-        "reviewed_by": null,
-        "reviewed_at": null,
-        "created_at": "2026-08-23T11:45:16.901290Z",
-        "score": 0.8526,
-        "decision": {
-          "attribute_code": "wheel_thickness",
-          "score": 0.8526,
-          "accepted": true,
-          "status": "auto_accepted",
-          "reason_code": "auto_accepted",
-          "detail": "score 0.853 >= threshold 0.719"
-        },
-        "features": {
-          "evidence_match_score": 1.0,
-          "evidence_verified": 1.0,
-          "citation_precision": 1.0,
-          "quote_specificity": 0.0265,
-          "self_reported_certainty": 0.94,
-          "validation_pass_rate": 0.5,
-          "validation_clean": 1.0,
-          "is_extraction": 1.0,
-          "is_inference": 0.0,
-          "normalized": 1.0,
-          "attribute_prior": 0.5,
-          "source_prior": 0.5,
-          "tier_cost": 0.5
-        },
-        "is_publishable": true,
-        "has_verified_evidence": true,
-        "is_self_declared": false,
-        "is_independent": true,
-        "citation_summary": [
-          "2026_Bonded-Abrasives_Solutions-Guide@bb06f364 p.6 t15:r9:c1"
-        ]
-      },
-      {
-        "attribute_code": "workpiece_material",
-        "value_raw": "Masonry",
-        "value_canonical": [
-          "Concrete / Masonry"
-        ],
-        "value_display": "Concrete / Masonry",
-        "method": "item_master_parse",
-        "confidence": 0.82,
-        "status": "auto_accepted",
-        "evidence": [
-          {
-            "span_id": "desc-workpiece_material-33",
-            "document_id": "Unihack__Sample_Dataset_-_Input#49-94-1920",
-            "document_sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
-            "quote": "Masonry",
-            "page": null,
-            "bbox": null,
             "table_ref": null,
             "quote_verified": true,
             "match_score": 1.0
           }
         ],
         "validations": [],
-        "model_id": null,
-        "model_tier": null,
-        "prompt_version": "description@v1",
+        "model_id": "zai.glm-4.7-flash",
+        "model_tier": "volume",
+        "prompt_version": "extract.v2",
         "schema_version": "ABR.WHL.BONDED@v1",
-        "version": 1,
+        "version": 2,
         "superseded_by": null,
         "derived_from": null,
         "reviewed_by": null,
         "reviewed_at": null,
-        "created_at": "2026-08-23T11:45:16.868823Z",
-        "score": 0.8,
+        "created_at": "2026-08-24T11:20:04.033573Z",
+        "score": 0.7167,
         "decision": {
-          "attribute_code": "workpiece_material",
-          "score": 0.8,
+          "attribute_code": "wheel_diameter",
+          "score": 0.7167,
           "accepted": true,
           "status": "auto_accepted",
           "reason_code": "auto_accepted",
-          "detail": "score 0.800 >= threshold 0.719"
+          "detail": "score 0.717 >= threshold 0.685"
         },
         "features": {
           "evidence_match_score": 1.0,
           "evidence_verified": 1.0,
           "citation_precision": 0.4,
-          "quote_specificity": 1.0,
-          "self_reported_certainty": 0.82,
+          "quote_specificity": 0.1667,
+          "self_reported_certainty": 0.9,
           "validation_pass_rate": 0.5,
           "validation_clean": 1.0,
           "is_extraction": 1.0,
@@ -479,66 +473,315 @@
           "normalized": 1.0,
           "attribute_prior": 0.5,
           "source_prior": 0.5,
-          "tier_cost": 0.5
+          "tier_cost": 0.25
         },
-        "is_publishable": false,
+        "is_publishable": true,
         "has_verified_evidence": true,
-        "is_self_declared": true,
-        "is_independent": false,
+        "is_self_declared": false,
+        "is_independent": true,
         "citation_summary": [
-          "Unihack__Sample_Dataset_-_Input#49-94-1920"
+          "49-94-1920@6160f24b p.8"
+        ]
+      },
+      {
+        "attribute_code": "wheel_thickness",
+        "value_raw": "1/8 in",
+        "value_canonical": {
+          "magnitude": 3.175,
+          "unit": "mm"
+        },
+        "value_display": "1/8\"",
+        "method": "document_extraction",
+        "confidence": 0.9,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "sp_6160f24b_3",
+            "document_id": "49-94-1920@6160f24b",
+            "document_sha256": "6160f24b864b8cb8158186d87d69e9cbcfda70c0ab6f303a4e8c2c2a0ad5cdd9",
+            "quote": "Thickness: 1/8 in",
+            "page": 8,
+            "bbox": {
+              "x0": 54.0,
+              "y0": 702.0,
+              "x1": 156.0,
+              "y1": 714.0
+            },
+            "table_ref": null,
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [],
+        "model_id": "zai.glm-4.7-flash",
+        "model_tier": "volume",
+        "prompt_version": "extract.v2",
+        "schema_version": "ABR.WHL.BONDED@v1",
+        "version": 1,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-24T11:20:04.033724Z",
+        "score": 0.7353,
+        "decision": {
+          "attribute_code": "wheel_thickness",
+          "score": 0.7353,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.735 >= threshold 0.685"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 0.4,
+          "quote_specificity": 0.3529,
+          "self_reported_certainty": 0.9,
+          "validation_pass_rate": 0.5,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.5,
+          "source_prior": 0.5,
+          "tier_cost": 0.25
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "is_self_declared": false,
+        "is_independent": true,
+        "citation_summary": [
+          "49-94-1920@6160f24b p.8"
+        ]
+      },
+      {
+        "attribute_code": "workpiece_material",
+        "value_raw": "Concrete, Masonry",
+        "value_canonical": [
+          "Concrete / Masonry"
+        ],
+        "value_display": "Concrete / Masonry",
+        "method": "document_extraction",
+        "confidence": 0.9,
+        "status": "auto_accepted",
+        "evidence": [
+          {
+            "span_id": "sp_6160f24b_5",
+            "document_id": "49-94-1920@6160f24b",
+            "document_sha256": "6160f24b864b8cb8158186d87d69e9cbcfda70c0ab6f303a4e8c2c2a0ad5cdd9",
+            "quote": "concrete and masonry",
+            "page": 9,
+            "bbox": {
+              "x0": 480.0,
+              "y0": 102.0,
+              "x1": 600.0,
+              "y1": 114.0
+            },
+            "table_ref": null,
+            "quote_verified": true,
+            "match_score": 1.0
+          }
+        ],
+        "validations": [],
+        "model_id": "zai.glm-4.7-flash",
+        "model_tier": "volume",
+        "prompt_version": "extract.v2",
+        "schema_version": "ABR.WHL.BONDED@v1",
+        "version": 2,
+        "superseded_by": null,
+        "derived_from": null,
+        "reviewed_by": null,
+        "reviewed_at": null,
+        "created_at": "2026-08-24T11:20:04.034896Z",
+        "score": 0.785,
+        "decision": {
+          "attribute_code": "workpiece_material",
+          "score": 0.785,
+          "accepted": true,
+          "status": "auto_accepted",
+          "reason_code": "auto_accepted",
+          "detail": "score 0.785 >= threshold 0.685"
+        },
+        "features": {
+          "evidence_match_score": 1.0,
+          "evidence_verified": 1.0,
+          "citation_precision": 0.4,
+          "quote_specificity": 0.85,
+          "self_reported_certainty": 0.9,
+          "validation_pass_rate": 0.5,
+          "validation_clean": 1.0,
+          "is_extraction": 1.0,
+          "is_inference": 0.0,
+          "normalized": 1.0,
+          "attribute_prior": 0.5,
+          "source_prior": 0.5,
+          "tier_cost": 0.25
+        },
+        "is_publishable": true,
+        "has_verified_evidence": true,
+        "is_self_declared": false,
+        "is_independent": true,
+        "citation_summary": [
+          "49-94-1920@6160f24b p.9"
         ]
       }
     ],
     "gaps": [
       {
-        "attribute_code": "abrasive_operation",
-        "reason": "self_declared_only",
+        "attribute_code": "abrasive_form",
+        "reason": "extracted_but_unverifiable",
         "sources_searched": [
-          "Unihack__Sample_Dataset_-_Input#49-94-1920",
-          "2026_Bonded-Abrasives_Solutions-Guide@bb06f364"
+          "49-94-1920@6160f24b"
         ],
-        "detail": "the customer's own description implies 'Cutting' (from 'Cut Off'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+        "detail": "citation does not support the value: quote 'Cut Off Wheels' does not state 'Cut-Off Wheel' and names none of this attribute's allowed values",
         "revenue_exposure_usd": null,
-        "recommended_action": "retry_with_better_source",
-        "is_required": true,
-        "detected_at": "2026-08-23T11:45:16.903556Z"
+        "recommended_action": "human_research",
+        "is_required": false,
+        "detected_at": "2026-08-24T11:20:04.033385Z"
       },
       {
-        "attribute_code": "workpiece_material",
-        "reason": "self_declared_only",
+        "attribute_code": "max_operating_speed",
+        "reason": "not_present_in_any_source",
         "sources_searched": [
-          "Unihack__Sample_Dataset_-_Input#49-94-1920",
-          "2026_Bonded-Abrasives_Solutions-Guide@bb06f364"
+          "49-94-1920@6160f24b"
         ],
-        "detail": "the customer's own description implies 'Concrete / Masonry' (from 'Masonry'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
+        "detail": "attribute was requested but absent from the model response",
         "revenue_exposure_usd": null,
-        "recommended_action": "retry_with_better_source",
-        "is_required": true,
-        "detected_at": "2026-08-23T11:45:16.903567Z"
+        "recommended_action": "human_review",
+        "is_required": false,
+        "detected_at": "2026-08-24T11:20:04.035150Z"
+      },
+      {
+        "attribute_code": "pack_quantity",
+        "reason": "not_present_in_any_source",
+        "sources_searched": [
+          "49-94-1920@6160f24b"
+        ],
+        "detail": "Pack quantity not specified in source",
+        "revenue_exposure_usd": null,
+        "recommended_action": "request_from_supplier",
+        "is_required": false,
+        "detected_at": "2026-08-24T11:20:04.035470Z"
+      },
+      {
+        "attribute_code": "selling_uom",
+        "reason": "not_present_in_any_source",
+        "sources_searched": [
+          "49-94-1920@6160f24b"
+        ],
+        "detail": "Selling unit of measure not specified in source",
+        "revenue_exposure_usd": null,
+        "recommended_action": "request_from_supplier",
+        "is_required": false,
+        "detected_at": "2026-08-24T11:20:04.035481Z"
+      },
+      {
+        "attribute_code": "case_quantity",
+        "reason": "not_present_in_any_source",
+        "sources_searched": [
+          "49-94-1920@6160f24b"
+        ],
+        "detail": "Carton quantity not specified in source",
+        "revenue_exposure_usd": null,
+        "recommended_action": "request_from_supplier",
+        "is_required": false,
+        "detected_at": "2026-08-24T11:20:04.035490Z"
+      },
+      {
+        "attribute_code": "each_weight",
+        "reason": "not_present_in_any_source",
+        "sources_searched": [
+          "49-94-1920@6160f24b"
+        ],
+        "detail": "Weight not specified in source",
+        "revenue_exposure_usd": null,
+        "recommended_action": "request_from_supplier",
+        "is_required": false,
+        "detected_at": "2026-08-24T11:20:04.035498Z"
+      },
+      {
+        "attribute_code": "additional_information",
+        "reason": "extracted_but_unverifiable",
+        "sources_searched": [
+          "49-94-1920@6160f24b"
+        ],
+        "detail": "quote 'Type 1\\n2 Sheets of Fiber Glass Reinforcement\\nFor Use With Angle Grinder' could not be located in the source; value 'Type 1, 2 Sheets of Fiber Glass Reinforcement, For Use With Angle Grinder' discarded",
+        "revenue_exposure_usd": null,
+        "recommended_action": "human_research",
+        "is_required": false,
+        "detected_at": "2026-08-24T11:20:04.080255Z"
+      },
+      {
+        "attribute_code": "approvals",
+        "reason": "not_present_in_any_source",
+        "sources_searched": [
+          "49-94-1920@6160f24b"
+        ],
+        "detail": "No certifications or listings explicitly stated in source",
+        "revenue_exposure_usd": null,
+        "recommended_action": "request_from_supplier",
+        "is_required": false,
+        "detected_at": "2026-08-24T11:20:04.080282Z"
+      },
+      {
+        "attribute_code": "country_of_origin",
+        "reason": "not_present_in_any_source",
+        "sources_searched": [
+          "49-94-1920@6160f24b"
+        ],
+        "detail": "Country of origin not specified in source",
+        "revenue_exposure_usd": null,
+        "recommended_action": "request_from_supplier",
+        "is_required": false,
+        "detected_at": "2026-08-24T11:20:04.080292Z"
+      },
+      {
+        "attribute_code": "prop65_warning_required",
+        "reason": "not_present_in_any_source",
+        "sources_searched": [
+          "49-94-1920@6160f24b"
+        ],
+        "detail": "Prop 65 warning not mentioned in source",
+        "revenue_exposure_usd": null,
+        "recommended_action": "request_from_supplier",
+        "is_required": false,
+        "detected_at": "2026-08-24T11:20:04.080301Z"
+      },
+      {
+        "attribute_code": "gtin",
+        "reason": "not_present_in_any_source",
+        "sources_searched": [
+          "49-94-1920@6160f24b"
+        ],
+        "detail": "GTIN/UPC not specified in source",
+        "revenue_exposure_usd": null,
+        "recommended_action": "request_from_supplier",
+        "is_required": false,
+        "detected_at": "2026-08-24T11:20:04.080309Z"
       }
     ],
     "extraction": {
       "requested": 19,
-      "values": 3,
-      "gaps": 2,
-      "rejected_unverifiable": 0,
-      "corrected_to_match_evidence": 2,
+      "values": 8,
+      "gaps": 11,
+      "rejected_unverifiable": 2,
+      "corrected_to_match_evidence": 0,
       "citation_coverage": 1.0,
-      "input_tokens": 0,
-      "output_tokens": 0,
+      "input_tokens": 5878,
+      "output_tokens": 1211,
       "escalations": 0,
-      "latency_ms": 0,
-      "sku_found_in_document": null,
+      "latency_ms": 5728,
+      "sku_found_in_document": true,
       "targeting_failed": false
     },
     "normalization_issues": [],
     "validation": {
-      "checks": 6,
+      "checks": 5,
       "failures": 0,
-      "warnings": 1,
-      "skipped_rules": 0,
-      "consistency": 0.8333,
+      "warnings": 0,
+      "skipped_rules": 1,
+      "consistency": 1.0,
       "results": [
         {
           "layer": "L3",
@@ -559,16 +802,6 @@
           "counterexample": null,
           "suggested_fix": null,
           "detail": null
-        },
-        {
-          "layer": "L3",
-          "rule_id": "plausible_range",
-          "verdict": "warn",
-          "severity": "warning",
-          "reason": "attribute 'max_operating_speed' value 8  is outside the expected range [500, 80000] for this attribute",
-          "counterexample": null,
-          "suggested_fix": null,
-          "detail": "raw source text: '8,500'"
         },
         {
           "layer": "L2",
@@ -593,34 +826,21 @@
         {
           "layer": "L2",
           "rule_id": "R_SPEED_RATING_PRESENT",
-          "verdict": "pass",
-          "severity": "error",
-          "reason": "No maximum safe speed was captured for a wheel of known diameter. The rating is marked on every wheel sold and is the figure that decides whether it may be fitted to a given tool, so its absence is a gap worth showing rather than an acceptable blank. It is deliberately NOT derived from the diameter, which would be a calculation presented as a reading.",
+          "verdict": "skipped",
+          "severity": "info",
+          "reason": "not evaluated: missing max_operating_speed",
           "counterexample": null,
           "suggested_fix": null,
           "detail": null
         }
       ],
-      "per_attribute": {
-        "max_operating_speed": [
-          {
-            "layer": "L3",
-            "rule_id": "plausible_range",
-            "verdict": "warn",
-            "severity": "warning",
-            "reason": "attribute 'max_operating_speed' value 8  is outside the expected range [500, 80000] for this attribute",
-            "counterexample": null,
-            "suggested_fix": null,
-            "detail": "raw source text: '8,500'"
-          }
-        ]
-      }
+      "per_attribute": {}
     },
     "certificate": {
-      "certificate_id": "ec_f1942c381d60",
+      "certificate_id": "ec_7b55553da29b",
       "sku": "49-94-1920",
-      "tenant_id": "unilog",
-      "generated_at": "2026-08-23T11:45:16.904712Z",
+      "tenant_id": "demo",
+      "generated_at": "2026-08-24T11:20:04.149683Z",
       "schema_version": "ABR.WHL.BONDED@v1",
       "pipeline_version": "axiom-0.1.0",
       "classifications": [
@@ -640,6 +860,32 @@
       ],
       "attributes": [
         {
+          "code": "abrasive_operation",
+          "value_canonical": "Cutting",
+          "value_display": "Cutting",
+          "value_raw": "Cutting",
+          "confidence": 0.9,
+          "method": "document_extraction",
+          "model_tier": "volume",
+          "status": "auto_accepted",
+          "evidence": [
+            {
+              "document": "49-94-1920@6160f24b",
+              "sha256": "6160f24b\u2026",
+              "page": 8,
+              "bbox": [
+                54.0,
+                606.0,
+                138.0,
+                618.0
+              ],
+              "quote": "Cut Off Wheels",
+              "verified": true
+            }
+          ],
+          "validations": []
+        },
+        {
           "code": "wheel_diameter",
           "value_canonical": {
             "magnitude": 177.8,
@@ -647,22 +893,22 @@
           },
           "value_display": "7\"",
           "value_raw": "7\"",
-          "confidence": 0.94,
-          "method": "table_extraction",
-          "model_tier": null,
+          "confidence": 0.9,
+          "method": "document_extraction",
+          "model_tier": "volume",
           "status": "auto_accepted",
           "evidence": [
             {
-              "document": "2026_Bonded-Abrasives_Solutions-Guide@bb06f364",
-              "sha256": "bb06f364\u2026",
-              "page": 6,
+              "document": "49-94-1920@6160f24b",
+              "sha256": "6160f24b\u2026",
+              "page": 8,
               "bbox": [
-                36.20615652173913,
-                260.18859999999995,
-                90.20925454545454,
-                278.18864999999994
+                54.0,
+                666.0,
+                126.0,
+                678.0
               ],
-              "quote": "Diameter | Thickness | Arbor | Max\nRPM | Type | Tool\nCompatibility | LONG LIFE.\nFAST CUTS. || 7\" | 1/8\" | 5/8\" DKO | 8,500 | 1 | 49-94-1920 (10pk Bulk)",
+              "quote": "Diameter: 7\"",
               "verified": true
             }
           ],
@@ -675,23 +921,23 @@
             "unit": "mm"
           },
           "value_display": "1/8\"",
-          "value_raw": "1/8\"",
-          "confidence": 0.94,
-          "method": "table_extraction",
-          "model_tier": null,
+          "value_raw": "1/8 in",
+          "confidence": 0.9,
+          "method": "document_extraction",
+          "model_tier": "volume",
           "status": "auto_accepted",
           "evidence": [
             {
-              "document": "2026_Bonded-Abrasives_Solutions-Guide@bb06f364",
-              "sha256": "bb06f364\u2026",
-              "page": 6,
+              "document": "49-94-1920@6160f24b",
+              "sha256": "6160f24b\u2026",
+              "page": 8,
               "bbox": [
-                90.20925454545454,
-                260.18859999999995,
-                144.20925454545454,
-                278.18864999999994
+                54.0,
+                702.0,
+                156.0,
+                714.0
               ],
-              "quote": "Diameter | Thickness | Arbor | Max\nRPM | Type | Tool\nCompatibility | LONG LIFE.\nFAST CUTS. || 7\" | 1/8\" | 5/8\" DKO | 8,500 | 1 | 49-94-1920 (10pk Bulk)",
+              "quote": "Thickness: 1/8 in",
               "verified": true
             }
           ],
@@ -699,104 +945,265 @@
         },
         {
           "code": "arbor_size",
-          "value_canonical": "5/8\" DKO",
-          "value_display": "5/8\" DKO",
-          "value_raw": "5/8\" DKO",
-          "confidence": 0.94,
-          "method": "table_extraction",
-          "model_tier": null,
+          "value_canonical": "5/8 in",
+          "value_display": "5/8 in",
+          "value_raw": "5/8 in",
+          "confidence": 0.9,
+          "method": "document_extraction",
+          "model_tier": "volume",
           "status": "auto_accepted",
           "evidence": [
             {
-              "document": "2026_Bonded-Abrasives_Solutions-Guide@bb06f364",
-              "sha256": "bb06f364\u2026",
-              "page": 6,
+              "document": "49-94-1920@6160f24b",
+              "sha256": "6160f24b\u2026",
+              "page": 8,
               "bbox": [
-                144.20925454545454,
-                260.18859999999995,
-                198.20517999999998,
-                278.18864999999994
+                54.0,
+                690.0,
+                186.0,
+                702.0
               ],
-              "quote": "Diameter | Thickness | Arbor | Max\nRPM | Type | Tool\nCompatibility | LONG LIFE.\nFAST CUTS. || 7\" | 1/8\" | 5/8\" DKO | 8,500 | 1 | 49-94-1920 (10pk Bulk)",
+              "quote": "Arbor Size: DM, 5/8 in",
               "verified": true
             }
           ],
           "validations": []
         },
         {
-          "code": "max_operating_speed",
-          "value_canonical": 8,
-          "value_display": "8",
-          "value_raw": "8,500",
-          "confidence": 0.94,
-          "method": "table_extraction",
-          "model_tier": null,
+          "code": "workpiece_material",
+          "value_canonical": [
+            "Concrete / Masonry"
+          ],
+          "value_display": "Concrete / Masonry",
+          "value_raw": "Concrete, Masonry",
+          "confidence": 0.9,
+          "method": "document_extraction",
+          "model_tier": "volume",
           "status": "auto_accepted",
           "evidence": [
             {
-              "document": "2026_Bonded-Abrasives_Solutions-Guide@bb06f364",
-              "sha256": "bb06f364\u2026",
-              "page": 6,
+              "document": "49-94-1920@6160f24b",
+              "sha256": "6160f24b\u2026",
+              "page": 9,
               "bbox": [
-                198.20517999999998,
-                260.18859999999995,
-                253.3185542857143,
-                278.18864999999994
+                480.0,
+                102.0,
+                600.0,
+                114.0
               ],
-              "quote": "Diameter | Thickness | Arbor | Max\nRPM | Type | Tool\nCompatibility | LONG LIFE.\nFAST CUTS. || 7\" | 1/8\" | 5/8\" DKO | 8,500 | 1 | 49-94-1920 (10pk Bulk)",
+              "quote": "concrete and masonry",
               "verified": true
             }
           ],
-          "validations": [
+          "validations": []
+        },
+        {
+          "code": "abrasive_grain",
+          "value_canonical": "Silicon Carbide",
+          "value_display": "Silicon Carbide",
+          "value_raw": "Silicon Carbide",
+          "confidence": 0.9,
+          "method": "document_extraction",
+          "model_tier": "volume",
+          "status": "auto_accepted",
+          "evidence": [
             {
-              "layer": "L3",
-              "rule": "plausible_range",
-              "verdict": "warn",
-              "detail": "raw source text: '8,500'"
+              "document": "49-94-1920@6160f24b",
+              "sha256": "6160f24b\u2026",
+              "page": 9,
+              "bbox": [
+                54.0,
+                174.0,
+                354.0,
+                186.0
+              ],
+              "quote": "Silicon Carbide Grain Provides Durable Performance",
+              "verified": true
             }
-          ]
+          ],
+          "validations": []
+        },
+        {
+          "code": "attachment_type",
+          "value_canonical": "Arbor Hole",
+          "value_display": "Arbor Hole",
+          "value_raw": "Arbor Hole",
+          "confidence": 0.9,
+          "method": "document_extraction",
+          "model_tier": "volume",
+          "status": "auto_accepted",
+          "evidence": [
+            {
+              "document": "49-94-1920@6160f24b",
+              "sha256": "6160f24b\u2026",
+              "page": 9,
+              "bbox": [
+                54.0,
+                222.0,
+                138.0,
+                234.0
+              ],
+              "quote": "5/8\" DKO Arbor",
+              "verified": true
+            }
+          ],
+          "validations": []
+        },
+        {
+          "code": "product_series",
+          "value_canonical": "DKO",
+          "value_display": "DKO",
+          "value_raw": "DKO",
+          "confidence": 0.9,
+          "method": "document_extraction",
+          "model_tier": "volume",
+          "status": "auto_accepted",
+          "evidence": [
+            {
+              "document": "49-94-1920@6160f24b",
+              "sha256": "6160f24b\u2026",
+              "page": 9,
+              "bbox": [
+                54.0,
+                222.0,
+                138.0,
+                234.0
+              ],
+              "quote": "5/8\" DKO Arbor",
+              "verified": true
+            }
+          ],
+          "validations": []
         }
       ],
       "gaps": [
         {
-          "code": "abrasive_operation",
-          "reason": "self_declared_only",
+          "code": "abrasive_form",
+          "reason": "extracted_but_unverifiable",
           "sources_searched": [
-            "Unihack__Sample_Dataset_-_Input#49-94-1920",
-            "2026_Bonded-Abrasives_Solutions-Guide@bb06f364"
+            "49-94-1920@6160f24b"
           ],
-          "required": true,
-          "detail": "the customer's own description implies 'Cutting' (from 'Cut Off'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
-          "recommended_action": "retry_with_better_source"
+          "required": false,
+          "detail": "citation does not support the value: quote 'Cut Off Wheels' does not state 'Cut-Off Wheel' and names none of this attribute's allowed values",
+          "recommended_action": "human_research"
         },
         {
-          "code": "workpiece_material",
-          "reason": "self_declared_only",
+          "code": "max_operating_speed",
+          "reason": "not_present_in_any_source",
           "sources_searched": [
-            "Unihack__Sample_Dataset_-_Input#49-94-1920",
-            "2026_Bonded-Abrasives_Solutions-Guide@bb06f364"
+            "49-94-1920@6160f24b"
           ],
-          "required": true,
-          "detail": "the customer's own description implies 'Concrete / Masonry' (from 'Masonry'), and no independent source confirms it. The parse is sound; the item master is the file being enriched, so this is a lead rather than a fact. Cheapest gap in the catalogue to close: retrieval has a specific claim to check.",
-          "recommended_action": "retry_with_better_source"
+          "required": false,
+          "detail": "attribute was requested but absent from the model response",
+          "recommended_action": "human_review"
+        },
+        {
+          "code": "pack_quantity",
+          "reason": "not_present_in_any_source",
+          "sources_searched": [
+            "49-94-1920@6160f24b"
+          ],
+          "required": false,
+          "detail": "Pack quantity not specified in source",
+          "recommended_action": "request_from_supplier"
+        },
+        {
+          "code": "selling_uom",
+          "reason": "not_present_in_any_source",
+          "sources_searched": [
+            "49-94-1920@6160f24b"
+          ],
+          "required": false,
+          "detail": "Selling unit of measure not specified in source",
+          "recommended_action": "request_from_supplier"
+        },
+        {
+          "code": "case_quantity",
+          "reason": "not_present_in_any_source",
+          "sources_searched": [
+            "49-94-1920@6160f24b"
+          ],
+          "required": false,
+          "detail": "Carton quantity not specified in source",
+          "recommended_action": "request_from_supplier"
+        },
+        {
+          "code": "each_weight",
+          "reason": "not_present_in_any_source",
+          "sources_searched": [
+            "49-94-1920@6160f24b"
+          ],
+          "required": false,
+          "detail": "Weight not specified in source",
+          "recommended_action": "request_from_supplier"
+        },
+        {
+          "code": "additional_information",
+          "reason": "extracted_but_unverifiable",
+          "sources_searched": [
+            "49-94-1920@6160f24b"
+          ],
+          "required": false,
+          "detail": "quote 'Type 1\\n2 Sheets of Fiber Glass Reinforcement\\nFor Use With Angle Grinder' could not be located in the source; value 'Type 1, 2 Sheets of Fiber Glass Reinforcement, For Use With Angle Grinder' discarded",
+          "recommended_action": "human_research"
+        },
+        {
+          "code": "approvals",
+          "reason": "not_present_in_any_source",
+          "sources_searched": [
+            "49-94-1920@6160f24b"
+          ],
+          "required": false,
+          "detail": "No certifications or listings explicitly stated in source",
+          "recommended_action": "request_from_supplier"
+        },
+        {
+          "code": "country_of_origin",
+          "reason": "not_present_in_any_source",
+          "sources_searched": [
+            "49-94-1920@6160f24b"
+          ],
+          "required": false,
+          "detail": "Country of origin not specified in source",
+          "recommended_action": "request_from_supplier"
+        },
+        {
+          "code": "prop65_warning_required",
+          "reason": "not_present_in_any_source",
+          "sources_searched": [
+            "49-94-1920@6160f24b"
+          ],
+          "required": false,
+          "detail": "Prop 65 warning not mentioned in source",
+          "recommended_action": "request_from_supplier"
+        },
+        {
+          "code": "gtin",
+          "reason": "not_present_in_any_source",
+          "sources_searched": [
+            "49-94-1920@6160f24b"
+          ],
+          "required": false,
+          "detail": "GTIN/UPC not specified in source",
+          "recommended_action": "request_from_supplier"
         }
       ],
       "summary": {
         "attributes_required": 3,
-        "attributes_populated": 4,
-        "attributes_with_evidence": 4,
+        "attributes_populated": 8,
+        "attributes_with_evidence": 8,
         "attributes_inferred": 0,
-        "auto_accepted": 6,
+        "auto_accepted": 8,
         "queued_for_review": 0,
-        "gaps_total": 2,
-        "gaps_required": 2,
+        "gaps_total": 11,
+        "gaps_required": 0,
         "quality_index": {
-          "completeness": 0.3333333333333333,
+          "completeness": 1.0,
           "verifiability": 1.0,
           "consistency": 1.0,
           "richness": 0.5,
           "self_declared": 1.0,
-          "corroborated": 0.3333333333333333,
+          "corroborated": 1.0,
           "weights": {
             "completeness": 0.35,
             "verifiability": 0.3,
@@ -809,12 +1216,12 @@
             "richness",
             "verifiability"
           ],
-          "composite": 0.7167
+          "composite": 0.95
         },
-        "cost_usd": null,
-        "wall_clock_seconds": 0.0
+        "cost_usd": 0.000896,
+        "wall_clock_seconds": 5.73
       },
-      "signature": "sha256:9ded2788536180d281e084cdb6e2c27ee06be796c29639508669780765cf0ace",
+      "signature": "sha256:f19718c56ba874f2ac3db06221b3e4e2a61b0063af46855dd976cc98375e6bdc",
       "signature_verified": true
     },
     "channels": [
@@ -822,10 +1229,7 @@
         "name": "cx1_pim",
         "published": false,
         "value_count": 0,
-        "withheld": [
-          "abrasive_operation",
-          "workpiece_material"
-        ],
+        "withheld": [],
         "readiness": {
           "channel": "cx1_pim",
           "ready": false,
@@ -840,11 +1244,8 @@
       {
         "name": "schema_org",
         "published": true,
-        "value_count": 4,
-        "withheld": [
-          "abrasive_operation",
-          "workpiece_material"
-        ],
+        "value_count": 8,
+        "withheld": [],
         "readiness": {
           "channel": "schema_org",
           "ready": true,
@@ -856,63 +1257,67 @@
       }
     ],
     "metrics": {
-      "fill_rate": 0.3333,
+      "fill_rate": 1.0,
       "verifiability": 1.0,
       "self_declared_rate": 1.0,
-      "corroborated_rate": 0.3333,
-      "values_total": 6,
-      "values_publishable": 4,
-      "values_self_declared": 2,
+      "corroborated_rate": 1.0,
+      "values_total": 8,
+      "values_publishable": 8,
+      "values_self_declared": 0,
       "values_needing_review": 0,
-      "gaps_total": 2,
-      "gaps_required": 2,
+      "gaps_total": 11,
+      "gaps_required": 0,
       "conflicts": []
     },
-    "sources": [
-      {
-        "document_id": "Unihack__Sample_Dataset_-_Input#49-94-1920",
-        "url": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
-        "host": "",
-        "tier": "item_master",
-        "doc_type": "supplier_feed",
-        "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
-        "covers_this_sku": "row",
-        "citable_as_manufacturer": false,
-        "license_note": null,
-        "revision_label": null
+    "sources": [],
+    "cost": {
+      "calls": 1,
+      "escalations": 0,
+      "input_tokens": 5878,
+      "output_tokens": 1211,
+      "latency_ms": 5728,
+      "calls_by_tier": {
+        "volume": 1
       },
-      {
-        "document_id": "2026_Bonded-Abrasives_Solutions-Guide@bb06f364",
-        "url": "https://www.milwaukeetool.com/-/media/PDFs/Objective-Data/2026_Bonded-Abrasives_Solutions-Guide.pdf",
-        "host": "www.milwaukeetool.com",
-        "tier": "manufacturer",
-        "doc_type": "spec_sheet",
-        "sha256": "bb06f364d97f6b89b7bb5dc6ea83e3921e5fcbb575130ca1dd126363197d722c",
-        "covers_this_sku": "table",
-        "citable_as_manufacturer": true,
-        "license_note": "retrieved from www.milwaukeetool.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
-        "revision_label": null
+      "input_by_tier": {
+        "volume": 5878
+      },
+      "output_by_tier": {
+        "volume": 1211
+      },
+      "cost_usd": 0.000896,
+      "cost_by_tier": {
+        "volume": 0.000896
+      },
+      "priced": true,
+      "price_source": {
+        "region": "us-east-2",
+        "fetched_at": "2026-08-03T05:28:42.224923+00:00",
+        "source": "AWS Price List Query API (AmazonBedrock)",
+        "priced_models": 5,
+        "unpriced_models": [],
+        "age_days": 21.2,
+        "stale": false
       }
-    ],
-    "cost": null,
+    },
     "copy": null
   },
   "document": {
-    "document_id": "Unihack__Sample_Dataset_-_Input#49-94-1920",
-    "uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv",
-    "sha256": "49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa",
-    "doc_type": "supplier_feed",
-    "fetched_at": "2026-08-23T11:45:10.364455Z",
-    "page_count": 1,
+    "document_id": "49-94-1920@6160f24b",
+    "uri": "https://www.milwaukeetool.com/products/details/7-x-1-8-x-5-8-dko-masonry-cut-off-wheel-type-1/49-94-1920",
+    "sha256": "6160f24b864b8cb8158186d87d69e9cbcfda70c0ab6f303a4e8c2c2a0ad5cdd9",
+    "doc_type": "web_page",
+    "fetched_at": "2026-08-24T11:19:57.133500Z",
+    "page_count": 9,
     "revision_label": null,
-    "supplier_id": "unilog",
-    "license_note": null,
-    "parser": "text",
-    "line_count": 7,
+    "supplier_id": null,
+    "license_note": "retrieved from www.milwaukeetool.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
+    "parser": "html",
+    "line_count": 502,
     "table_count": 0,
     "warnings": [],
-    "size_bytes": 127673,
-    "storage_uri": "local://49/ef/49efd0b24b6600b504068168eb1ecc4f08be44349240f7edbac61b7f4f62a9aa.csv"
+    "size_bytes": 666761,
+    "storage_uri": "local://61/60/6160f24b864b8cb8158186d87d69e9cbcfda70c0ab6f303a4e8c2c2a0ad5cdd9.html"
   },
   "pages": [
     {
@@ -922,72 +1327,5086 @@
       "lines": [
         {
           "line_index": 0,
-          "text": "Mfg_Part_Num: 49-94-1920",
+          "text": "7\" x 1/8\" x 5/8\" DKO Masonry Cut Off Wheel -Type 1 | Milwaukee Tool",
           "bbox": [
             54.0,
             54.0,
-            198.0,
+            456.0,
             66.0
           ]
         },
         {
           "line_index": 1,
-          "text": "Part_Desc: 49-94-1920 Milw 7\"x1/8\"x5/8\" DKO Masonry Cut Off Disc",
+          "text": "Products",
           "bbox": [
             54.0,
             66.0,
-            438.0,
+            102.0,
             78.0
           ]
         },
         {
           "line_index": 2,
-          "text": "E1_Brand: -- Unbranded --",
+          "text": "Support",
           "bbox": [
             54.0,
             78.0,
-            204.0,
+            96.0,
             90.0
           ]
         },
         {
           "line_index": 3,
-          "text": "Unilog_Brand: -- No Unilog Brand --",
+          "text": "New Pipeline",
           "bbox": [
             54.0,
             90.0,
-            264.0,
+            126.0,
             102.0
           ]
         },
         {
           "line_index": 4,
-          "text": "DIB_Brand: -- No DIB Brand --",
+          "text": "Cordless Tool System",
           "bbox": [
             54.0,
             102.0,
-            228.0,
+            174.0,
             114.0
           ]
         },
         {
           "line_index": 5,
-          "text": "Part_Manuf: Milwaukee Accessory (4031)",
+          "text": "Cordless Tool System",
           "bbox": [
             54.0,
             114.0,
-            282.0,
+            174.0,
             126.0
           ]
         },
         {
           "line_index": 6,
-          "text": "",
+          "text": "Cordless Equipment System",
           "bbox": [
             54.0,
             126.0,
-            60.0,
+            204.0,
             138.0
+          ]
+        },
+        {
+          "line_index": 7,
+          "text": "MODULAR STORAGE SYSTEM",
+          "bbox": [
+            54.0,
+            138.0,
+            186.0,
+            150.0
+          ]
+        },
+        {
+          "line_index": 8,
+          "text": "Sign Up / Log In",
+          "bbox": [
+            54.0,
+            150.0,
+            150.0,
+            162.0
+          ]
+        },
+        {
+          "line_index": 9,
+          "text": "Your Account",
+          "bbox": [
+            54.0,
+            162.0,
+            126.0,
+            174.0
+          ]
+        },
+        {
+          "line_index": 10,
+          "text": "Connect",
+          "bbox": [
+            54.0,
+            174.0,
+            96.0,
+            186.0
+          ]
+        },
+        {
+          "line_index": 11,
+          "text": "Log Out",
+          "bbox": [
+            54.0,
+            186.0,
+            96.0,
+            198.0
+          ]
+        },
+        {
+          "line_index": 12,
+          "text": "Power Tools",
+          "bbox": [
+            54.0,
+            198.0,
+            120.0,
+            210.0
+          ]
+        },
+        {
+          "line_index": 13,
+          "text": "View All \u2014 Power Tools",
+          "bbox": [
+            54.0,
+            210.0,
+            186.0,
+            222.0
+          ]
+        },
+        {
+          "line_index": 14,
+          "text": "Drilling",
+          "bbox": [
+            54.0,
+            222.0,
+            102.0,
+            234.0
+          ]
+        },
+        {
+          "line_index": 15,
+          "text": "View All \u2014 Drilling",
+          "bbox": [
+            54.0,
+            234.0,
+            168.0,
+            246.0
+          ]
+        },
+        {
+          "line_index": 16,
+          "text": "Drill Drivers",
+          "bbox": [
+            54.0,
+            246.0,
+            132.0,
+            258.0
+          ]
+        },
+        {
+          "line_index": 17,
+          "text": "Hammer Drills",
+          "bbox": [
+            54.0,
+            258.0,
+            132.0,
+            270.0
+          ]
+        },
+        {
+          "line_index": 18,
+          "text": "Right-Angle Drills",
+          "bbox": [
+            54.0,
+            270.0,
+            162.0,
+            282.0
+          ]
+        },
+        {
+          "line_index": 19,
+          "text": "Magnetic Drills",
+          "bbox": [
+            54.0,
+            282.0,
+            144.0,
+            294.0
+          ]
+        },
+        {
+          "line_index": 20,
+          "text": "Fastening",
+          "bbox": [
+            54.0,
+            294.0,
+            108.0,
+            306.0
+          ]
+        },
+        {
+          "line_index": 21,
+          "text": "View All \u2014 Fastening",
+          "bbox": [
+            54.0,
+            306.0,
+            174.0,
+            318.0
+          ]
+        },
+        {
+          "line_index": 22,
+          "text": "Impact Drivers",
+          "bbox": [
+            54.0,
+            318.0,
+            138.0,
+            330.0
+          ]
+        },
+        {
+          "line_index": 23,
+          "text": "Impact Wrenches",
+          "bbox": [
+            54.0,
+            330.0,
+            144.0,
+            342.0
+          ]
+        },
+        {
+          "line_index": 24,
+          "text": "Ratchets",
+          "bbox": [
+            54.0,
+            342.0,
+            102.0,
+            354.0
+          ]
+        },
+        {
+          "line_index": 25,
+          "text": "Screwdrivers & Screwguns",
+          "bbox": [
+            54.0,
+            354.0,
+            198.0,
+            366.0
+          ]
+        },
+        {
+          "line_index": 26,
+          "text": "Combo Kits",
+          "bbox": [
+            54.0,
+            366.0,
+            114.0,
+            378.0
+          ]
+        },
+        {
+          "line_index": 27,
+          "text": "View All \u2014 Combo Kits",
+          "bbox": [
+            54.0,
+            378.0,
+            180.0,
+            390.0
+          ]
+        },
+        {
+          "line_index": 28,
+          "text": "2 Piece Kits",
+          "bbox": [
+            54.0,
+            390.0,
+            126.0,
+            402.0
+          ]
+        },
+        {
+          "line_index": 29,
+          "text": "3 Piece Kits",
+          "bbox": [
+            54.0,
+            402.0,
+            126.0,
+            414.0
+          ]
+        },
+        {
+          "line_index": 30,
+          "text": "4 Piece Kits",
+          "bbox": [
+            54.0,
+            414.0,
+            126.0,
+            426.0
+          ]
+        },
+        {
+          "line_index": 31,
+          "text": "5 or More Piece Kits",
+          "bbox": [
+            54.0,
+            426.0,
+            174.0,
+            438.0
+          ]
+        },
+        {
+          "line_index": 32,
+          "text": "Concrete",
+          "bbox": [
+            54.0,
+            438.0,
+            102.0,
+            450.0
+          ]
+        },
+        {
+          "line_index": 33,
+          "text": "View All \u2014 Concrete",
+          "bbox": [
+            54.0,
+            450.0,
+            168.0,
+            462.0
+          ]
+        },
+        {
+          "line_index": 34,
+          "text": "Concrete Vibrators",
+          "bbox": [
+            54.0,
+            462.0,
+            162.0,
+            474.0
+          ]
+        },
+        {
+          "line_index": 35,
+          "text": "Rotary & Demolition Hammers",
+          "bbox": [
+            54.0,
+            474.0,
+            216.0,
+            486.0
+          ]
+        },
+        {
+          "line_index": 36,
+          "text": "Cut-Off Saws",
+          "bbox": [
+            54.0,
+            486.0,
+            126.0,
+            498.0
+          ]
+        },
+        {
+          "line_index": 37,
+          "text": "Sprayers",
+          "bbox": [
+            54.0,
+            498.0,
+            102.0,
+            510.0
+          ]
+        },
+        {
+          "line_index": 38,
+          "text": "Core Drills",
+          "bbox": [
+            54.0,
+            510.0,
+            120.0,
+            522.0
+          ]
+        },
+        {
+          "line_index": 39,
+          "text": "Dust Management",
+          "bbox": [
+            54.0,
+            522.0,
+            144.0,
+            534.0
+          ]
+        },
+        {
+          "line_index": 40,
+          "text": "Drain Cleaning",
+          "bbox": [
+            54.0,
+            534.0,
+            138.0,
+            546.0
+          ]
+        },
+        {
+          "line_index": 41,
+          "text": "View All \u2014 Drain Cleaning",
+          "bbox": [
+            54.0,
+            546.0,
+            204.0,
+            558.0
+          ]
+        },
+        {
+          "line_index": 42,
+          "text": "Toilet, Urinal & Sink Augers",
+          "bbox": [
+            54.0,
+            558.0,
+            222.0,
+            570.0
+          ]
+        },
+        {
+          "line_index": 43,
+          "text": "Sink Machines",
+          "bbox": [
+            54.0,
+            570.0,
+            132.0,
+            582.0
+          ]
+        },
+        {
+          "line_index": 44,
+          "text": "Drum Machines",
+          "bbox": [
+            54.0,
+            582.0,
+            132.0,
+            594.0
+          ]
+        },
+        {
+          "line_index": 45,
+          "text": "Drain Cleaning Cables",
+          "bbox": [
+            54.0,
+            594.0,
+            180.0,
+            606.0
+          ]
+        },
+        {
+          "line_index": 46,
+          "text": "Sectional Machines",
+          "bbox": [
+            54.0,
+            606.0,
+            162.0,
+            618.0
+          ]
+        },
+        {
+          "line_index": 47,
+          "text": "Cutters & Accessories",
+          "bbox": [
+            54.0,
+            618.0,
+            180.0,
+            630.0
+          ]
+        },
+        {
+          "line_index": 48,
+          "text": "Flexible Shaft Machines",
+          "bbox": [
+            54.0,
+            630.0,
+            192.0,
+            642.0
+          ]
+        },
+        {
+          "line_index": 49,
+          "text": "Electrical Installation",
+          "bbox": [
+            54.0,
+            642.0,
+            192.0,
+            654.0
+          ]
+        },
+        {
+          "line_index": 50,
+          "text": "View All \u2014 Electrical Installation",
+          "bbox": [
+            54.0,
+            654.0,
+            258.0,
+            666.0
+          ]
+        },
+        {
+          "line_index": 51,
+          "text": "Crimpers",
+          "bbox": [
+            54.0,
+            666.0,
+            102.0,
+            678.0
+          ]
+        },
+        {
+          "line_index": 52,
+          "text": "Cable Strippers",
+          "bbox": [
+            54.0,
+            678.0,
+            144.0,
+            690.0
+          ]
+        },
+        {
+          "line_index": 53,
+          "text": "Cutters",
+          "bbox": [
+            54.0,
+            690.0,
+            96.0,
+            702.0
+          ]
+        },
+        {
+          "line_index": 54,
+          "text": "Fish Tapes",
+          "bbox": [
+            54.0,
+            702.0,
+            114.0,
+            714.0
+          ]
+        },
+        {
+          "line_index": 55,
+          "text": "Knockout Tools",
+          "bbox": [
+            54.0,
+            714.0,
+            138.0,
+            726.0
+          ]
+        },
+        {
+          "line_index": 56,
+          "text": "Hydraulic Pumps",
+          "bbox": [
+            54.0,
+            726.0,
+            144.0,
+            738.0
+          ]
+        },
+        {
+          "line_index": 57,
+          "text": "Threading",
+          "bbox": [
+            54.0,
+            738.0,
+            108.0,
+            750.0
+          ]
+        }
+      ],
+      "tables": []
+    },
+    {
+      "number": 2,
+      "width": 612.0,
+      "height": 792.0,
+      "lines": [
+        {
+          "line_index": 0,
+          "text": "Threaded Rod Cutters",
+          "bbox": [
+            54.0,
+            54.0,
+            174.0,
+            66.0
+          ]
+        },
+        {
+          "line_index": 1,
+          "text": "Plumbing Installation",
+          "bbox": [
+            54.0,
+            66.0,
+            180.0,
+            78.0
+          ]
+        },
+        {
+          "line_index": 2,
+          "text": "View All \u2014 Plumbing Installation",
+          "bbox": [
+            54.0,
+            78.0,
+            246.0,
+            90.0
+          ]
+        },
+        {
+          "line_index": 3,
+          "text": "Press Tools",
+          "bbox": [
+            54.0,
+            90.0,
+            120.0,
+            102.0
+          ]
+        },
+        {
+          "line_index": 4,
+          "text": "Threading",
+          "bbox": [
+            54.0,
+            102.0,
+            108.0,
+            114.0
+          ]
+        },
+        {
+          "line_index": 5,
+          "text": "Grooving",
+          "bbox": [
+            54.0,
+            114.0,
+            102.0,
+            126.0
+          ]
+        },
+        {
+          "line_index": 6,
+          "text": "Expansion Tools",
+          "bbox": [
+            54.0,
+            126.0,
+            144.0,
+            138.0
+          ]
+        },
+        {
+          "line_index": 7,
+          "text": "Copper & PVC Cutters",
+          "bbox": [
+            54.0,
+            138.0,
+            174.0,
+            150.0
+          ]
+        },
+        {
+          "line_index": 8,
+          "text": "Transfer Pumps",
+          "bbox": [
+            54.0,
+            150.0,
+            138.0,
+            162.0
+          ]
+        },
+        {
+          "line_index": 9,
+          "text": "Lasers",
+          "bbox": [
+            54.0,
+            162.0,
+            90.0,
+            174.0
+          ]
+        },
+        {
+          "line_index": 10,
+          "text": "Metalworking",
+          "bbox": [
+            54.0,
+            174.0,
+            126.0,
+            186.0
+          ]
+        },
+        {
+          "line_index": 11,
+          "text": "View All \u2014 Metalworking",
+          "bbox": [
+            54.0,
+            186.0,
+            192.0,
+            198.0
+          ]
+        },
+        {
+          "line_index": 12,
+          "text": "Grinders",
+          "bbox": [
+            54.0,
+            198.0,
+            102.0,
+            210.0
+          ]
+        },
+        {
+          "line_index": 13,
+          "text": "Cutting",
+          "bbox": [
+            54.0,
+            210.0,
+            96.0,
+            222.0
+          ]
+        },
+        {
+          "line_index": 14,
+          "text": "Band Saws",
+          "bbox": [
+            54.0,
+            222.0,
+            108.0,
+            234.0
+          ]
+        },
+        {
+          "line_index": 15,
+          "text": "Sanders & Polishers",
+          "bbox": [
+            54.0,
+            234.0,
+            168.0,
+            246.0
+          ]
+        },
+        {
+          "line_index": 16,
+          "text": "Nibblers & Shears",
+          "bbox": [
+            54.0,
+            246.0,
+            156.0,
+            258.0
+          ]
+        },
+        {
+          "line_index": 17,
+          "text": "Magnetic Drills",
+          "bbox": [
+            54.0,
+            258.0,
+            144.0,
+            270.0
+          ]
+        },
+        {
+          "line_index": 18,
+          "text": "SAWZALL\u00ae Reciprocating Saws",
+          "bbox": [
+            54.0,
+            270.0,
+            216.0,
+            282.0
+          ]
+        },
+        {
+          "line_index": 19,
+          "text": "View All \u2014 SAWZALL\u00ae Reciprocating Saws",
+          "bbox": [
+            54.0,
+            282.0,
+            282.0,
+            294.0
+          ]
+        },
+        {
+          "line_index": 20,
+          "text": "SAWZALLS\u00ae",
+          "bbox": [
+            54.0,
+            294.0,
+            108.0,
+            306.0
+          ]
+        },
+        {
+          "line_index": 21,
+          "text": "HACKZALLS\u00ae",
+          "bbox": [
+            54.0,
+            306.0,
+            114.0,
+            318.0
+          ]
+        },
+        {
+          "line_index": 22,
+          "text": "Specialty Tools",
+          "bbox": [
+            54.0,
+            318.0,
+            144.0,
+            330.0
+          ]
+        },
+        {
+          "line_index": 23,
+          "text": "View All \u2014 Specialty Tools",
+          "bbox": [
+            54.0,
+            330.0,
+            210.0,
+            342.0
+          ]
+        },
+        {
+          "line_index": 24,
+          "text": "Applicators",
+          "bbox": [
+            54.0,
+            342.0,
+            120.0,
+            354.0
+          ]
+        },
+        {
+          "line_index": 25,
+          "text": "Cut Off Tools",
+          "bbox": [
+            54.0,
+            354.0,
+            132.0,
+            366.0
+          ]
+        },
+        {
+          "line_index": 26,
+          "text": "Heating Tools",
+          "bbox": [
+            54.0,
+            366.0,
+            132.0,
+            378.0
+          ]
+        },
+        {
+          "line_index": 27,
+          "text": "Specialty Pumps",
+          "bbox": [
+            54.0,
+            378.0,
+            144.0,
+            390.0
+          ]
+        },
+        {
+          "line_index": 28,
+          "text": "Hoists",
+          "bbox": [
+            54.0,
+            390.0,
+            90.0,
+            402.0
+          ]
+        },
+        {
+          "line_index": 29,
+          "text": "Compact Blowers",
+          "bbox": [
+            54.0,
+            402.0,
+            144.0,
+            414.0
+          ]
+        },
+        {
+          "line_index": 30,
+          "text": "Radios & Speakers",
+          "bbox": [
+            54.0,
+            414.0,
+            156.0,
+            426.0
+          ]
+        },
+        {
+          "line_index": 31,
+          "text": "View All \u2014 Radios & Speakers",
+          "bbox": [
+            54.0,
+            426.0,
+            222.0,
+            438.0
+          ]
+        },
+        {
+          "line_index": 32,
+          "text": "Radios",
+          "bbox": [
+            54.0,
+            438.0,
+            90.0,
+            450.0
+          ]
+        },
+        {
+          "line_index": 33,
+          "text": "Speakers",
+          "bbox": [
+            54.0,
+            450.0,
+            102.0,
+            462.0
+          ]
+        },
+        {
+          "line_index": 34,
+          "text": "Mixer",
+          "bbox": [
+            54.0,
+            462.0,
+            84.0,
+            474.0
+          ]
+        },
+        {
+          "line_index": 35,
+          "text": "Rivet Tools",
+          "bbox": [
+            54.0,
+            474.0,
+            120.0,
+            486.0
+          ]
+        },
+        {
+          "line_index": 36,
+          "text": "Rotary Tools",
+          "bbox": [
+            54.0,
+            486.0,
+            126.0,
+            498.0
+          ]
+        },
+        {
+          "line_index": 37,
+          "text": "Jobsite Fans",
+          "bbox": [
+            54.0,
+            498.0,
+            126.0,
+            510.0
+          ]
+        },
+        {
+          "line_index": 38,
+          "text": "Nailers and Staplers",
+          "bbox": [
+            54.0,
+            510.0,
+            174.0,
+            522.0
+          ]
+        },
+        {
+          "line_index": 39,
+          "text": "Woodworking",
+          "bbox": [
+            54.0,
+            522.0,
+            120.0,
+            534.0
+          ]
+        },
+        {
+          "line_index": 40,
+          "text": "View All \u2014 Woodworking",
+          "bbox": [
+            54.0,
+            534.0,
+            186.0,
+            546.0
+          ]
+        },
+        {
+          "line_index": 41,
+          "text": "Circular Saws",
+          "bbox": [
+            54.0,
+            546.0,
+            132.0,
+            558.0
+          ]
+        },
+        {
+          "line_index": 42,
+          "text": "Jig Saws",
+          "bbox": [
+            54.0,
+            558.0,
+            102.0,
+            570.0
+          ]
+        },
+        {
+          "line_index": 43,
+          "text": "Table Saws",
+          "bbox": [
+            54.0,
+            570.0,
+            114.0,
+            582.0
+          ]
+        },
+        {
+          "line_index": 44,
+          "text": "Miter Saws",
+          "bbox": [
+            54.0,
+            582.0,
+            114.0,
+            594.0
+          ]
+        },
+        {
+          "line_index": 45,
+          "text": "Oscillating Multi-Tool",
+          "bbox": [
+            54.0,
+            594.0,
+            186.0,
+            606.0
+          ]
+        },
+        {
+          "line_index": 46,
+          "text": "Nailers and Staplers",
+          "bbox": [
+            54.0,
+            606.0,
+            174.0,
+            618.0
+          ]
+        },
+        {
+          "line_index": 47,
+          "text": "View All \u2014 Nailers and Staplers",
+          "bbox": [
+            54.0,
+            618.0,
+            240.0,
+            630.0
+          ]
+        },
+        {
+          "line_index": 48,
+          "text": "Finish Nailers",
+          "bbox": [
+            54.0,
+            630.0,
+            138.0,
+            642.0
+          ]
+        },
+        {
+          "line_index": 49,
+          "text": "Brad Nailers",
+          "bbox": [
+            54.0,
+            642.0,
+            126.0,
+            654.0
+          ]
+        },
+        {
+          "line_index": 50,
+          "text": "Framing Nailers",
+          "bbox": [
+            54.0,
+            654.0,
+            144.0,
+            666.0
+          ]
+        },
+        {
+          "line_index": 51,
+          "text": "Duplex Nailers",
+          "bbox": [
+            54.0,
+            666.0,
+            138.0,
+            678.0
+          ]
+        },
+        {
+          "line_index": 52,
+          "text": "Roofing Nailers",
+          "bbox": [
+            54.0,
+            678.0,
+            144.0,
+            690.0
+          ]
+        },
+        {
+          "line_index": 53,
+          "text": "Palm Nailers",
+          "bbox": [
+            54.0,
+            690.0,
+            126.0,
+            702.0
+          ]
+        },
+        {
+          "line_index": 54,
+          "text": "Staplers",
+          "bbox": [
+            54.0,
+            702.0,
+            102.0,
+            714.0
+          ]
+        },
+        {
+          "line_index": 55,
+          "text": "Panel Saws",
+          "bbox": [
+            54.0,
+            714.0,
+            114.0,
+            726.0
+          ]
+        },
+        {
+          "line_index": 56,
+          "text": "Planers",
+          "bbox": [
+            54.0,
+            726.0,
+            96.0,
+            738.0
+          ]
+        },
+        {
+          "line_index": 57,
+          "text": "Routers",
+          "bbox": [
+            54.0,
+            738.0,
+            96.0,
+            750.0
+          ]
+        }
+      ],
+      "tables": []
+    },
+    {
+      "number": 3,
+      "width": 612.0,
+      "height": 792.0,
+      "lines": [
+        {
+          "line_index": 0,
+          "text": "Sanders",
+          "bbox": [
+            54.0,
+            54.0,
+            96.0,
+            66.0
+          ]
+        },
+        {
+          "line_index": 1,
+          "text": "Compressor",
+          "bbox": [
+            54.0,
+            66.0,
+            114.0,
+            78.0
+          ]
+        },
+        {
+          "line_index": 2,
+          "text": "Vacuums & Vacuum Accessories",
+          "bbox": [
+            54.0,
+            78.0,
+            222.0,
+            90.0
+          ]
+        },
+        {
+          "line_index": 3,
+          "text": "View All \u2014 Vacuums & Vacuum Accessories",
+          "bbox": [
+            54.0,
+            90.0,
+            288.0,
+            102.0
+          ]
+        },
+        {
+          "line_index": 4,
+          "text": "Wet/Dry Vacuums",
+          "bbox": [
+            54.0,
+            102.0,
+            144.0,
+            114.0
+          ]
+        },
+        {
+          "line_index": 5,
+          "text": "Compact Vacuums",
+          "bbox": [
+            54.0,
+            114.0,
+            144.0,
+            126.0
+          ]
+        },
+        {
+          "line_index": 6,
+          "text": "Vacuum Accessories",
+          "bbox": [
+            54.0,
+            126.0,
+            162.0,
+            138.0
+          ]
+        },
+        {
+          "line_index": 7,
+          "text": "Dust Extractors",
+          "bbox": [
+            54.0,
+            138.0,
+            144.0,
+            150.0
+          ]
+        },
+        {
+          "line_index": 8,
+          "text": "MX FUEL\u2122 Equipment",
+          "bbox": [
+            54.0,
+            150.0,
+            162.0,
+            162.0
+          ]
+        },
+        {
+          "line_index": 9,
+          "text": "View All \u2014 MX FUEL\u2122 Equipment",
+          "bbox": [
+            54.0,
+            162.0,
+            228.0,
+            174.0
+          ]
+        },
+        {
+          "line_index": 10,
+          "text": "Compaction",
+          "bbox": [
+            54.0,
+            174.0,
+            114.0,
+            186.0
+          ]
+        },
+        {
+          "line_index": 11,
+          "text": "Dewatering",
+          "bbox": [
+            54.0,
+            186.0,
+            114.0,
+            198.0
+          ]
+        },
+        {
+          "line_index": 12,
+          "text": "Cutting",
+          "bbox": [
+            54.0,
+            198.0,
+            96.0,
+            210.0
+          ]
+        },
+        {
+          "line_index": 13,
+          "text": "Wet Concrete",
+          "bbox": [
+            54.0,
+            210.0,
+            126.0,
+            222.0
+          ]
+        },
+        {
+          "line_index": 14,
+          "text": "Coring",
+          "bbox": [
+            54.0,
+            222.0,
+            90.0,
+            234.0
+          ]
+        },
+        {
+          "line_index": 15,
+          "text": "Demolition",
+          "bbox": [
+            54.0,
+            234.0,
+            114.0,
+            246.0
+          ]
+        },
+        {
+          "line_index": 16,
+          "text": "Drain Cleaning",
+          "bbox": [
+            54.0,
+            246.0,
+            138.0,
+            258.0
+          ]
+        },
+        {
+          "line_index": 17,
+          "text": "Threading",
+          "bbox": [
+            54.0,
+            258.0,
+            108.0,
+            270.0
+          ]
+        },
+        {
+          "line_index": 18,
+          "text": "Pipe Fusion",
+          "bbox": [
+            54.0,
+            270.0,
+            120.0,
+            282.0
+          ]
+        },
+        {
+          "line_index": 19,
+          "text": "Lighting",
+          "bbox": [
+            54.0,
+            282.0,
+            102.0,
+            294.0
+          ]
+        },
+        {
+          "line_index": 20,
+          "text": "Clean Up",
+          "bbox": [
+            54.0,
+            294.0,
+            102.0,
+            306.0
+          ]
+        },
+        {
+          "line_index": 21,
+          "text": "Accessories",
+          "bbox": [
+            54.0,
+            306.0,
+            120.0,
+            318.0
+          ]
+        },
+        {
+          "line_index": 22,
+          "text": "Batteries, Chargers & Power Supplies",
+          "bbox": [
+            54.0,
+            318.0,
+            270.0,
+            330.0
+          ]
+        },
+        {
+          "line_index": 23,
+          "text": "View All \u2014 Batteries, Chargers & Power Supplies",
+          "bbox": [
+            54.0,
+            330.0,
+            336.0,
+            342.0
+          ]
+        },
+        {
+          "line_index": 24,
+          "text": "M12\u2122 Batteries & Chargers",
+          "bbox": [
+            54.0,
+            342.0,
+            204.0,
+            354.0
+          ]
+        },
+        {
+          "line_index": 25,
+          "text": "View All \u2014 M12\u2122 Batteries & Chargers",
+          "bbox": [
+            54.0,
+            354.0,
+            270.0,
+            366.0
+          ]
+        },
+        {
+          "line_index": 26,
+          "text": "M12\u2122 Batteries",
+          "bbox": [
+            54.0,
+            366.0,
+            138.0,
+            378.0
+          ]
+        },
+        {
+          "line_index": 27,
+          "text": "M12\u2122 Chargers",
+          "bbox": [
+            54.0,
+            378.0,
+            132.0,
+            390.0
+          ]
+        },
+        {
+          "line_index": 28,
+          "text": "M18\u2122 Batteries & Chargers",
+          "bbox": [
+            54.0,
+            390.0,
+            204.0,
+            402.0
+          ]
+        },
+        {
+          "line_index": 29,
+          "text": "View All \u2014 M18\u2122 Batteries & Chargers",
+          "bbox": [
+            54.0,
+            402.0,
+            270.0,
+            414.0
+          ]
+        },
+        {
+          "line_index": 30,
+          "text": "M18\u2122 Batteries",
+          "bbox": [
+            54.0,
+            414.0,
+            138.0,
+            426.0
+          ]
+        },
+        {
+          "line_index": 31,
+          "text": "M18\u2122 Chargers",
+          "bbox": [
+            54.0,
+            426.0,
+            132.0,
+            438.0
+          ]
+        },
+        {
+          "line_index": 32,
+          "text": "MX FUEL\u2122 Batteries & Chargers",
+          "bbox": [
+            54.0,
+            438.0,
+            228.0,
+            450.0
+          ]
+        },
+        {
+          "line_index": 33,
+          "text": "View All \u2014 MX FUEL\u2122 Batteries & Chargers",
+          "bbox": [
+            54.0,
+            450.0,
+            294.0,
+            462.0
+          ]
+        },
+        {
+          "line_index": 34,
+          "text": "MX FUEL\u2122 Batteries",
+          "bbox": [
+            54.0,
+            462.0,
+            162.0,
+            474.0
+          ]
+        },
+        {
+          "line_index": 35,
+          "text": "MX FUEL\u2122 Chargers",
+          "bbox": [
+            54.0,
+            474.0,
+            156.0,
+            486.0
+          ]
+        },
+        {
+          "line_index": 36,
+          "text": "Other Batteries & Chargers",
+          "bbox": [
+            54.0,
+            486.0,
+            210.0,
+            498.0
+          ]
+        },
+        {
+          "line_index": 37,
+          "text": "Power Supplies",
+          "bbox": [
+            54.0,
+            498.0,
+            138.0,
+            510.0
+          ]
+        },
+        {
+          "line_index": 38,
+          "text": "Site Lighting",
+          "bbox": [
+            54.0,
+            510.0,
+            132.0,
+            522.0
+          ]
+        },
+        {
+          "line_index": 39,
+          "text": "View All \u2014 Site Lighting",
+          "bbox": [
+            54.0,
+            522.0,
+            198.0,
+            534.0
+          ]
+        },
+        {
+          "line_index": 40,
+          "text": "Personal Lighting",
+          "bbox": [
+            54.0,
+            534.0,
+            156.0,
+            546.0
+          ]
+        },
+        {
+          "line_index": 41,
+          "text": "Task Lighting",
+          "bbox": [
+            54.0,
+            546.0,
+            132.0,
+            558.0
+          ]
+        },
+        {
+          "line_index": 42,
+          "text": "Temp Lighting",
+          "bbox": [
+            54.0,
+            558.0,
+            132.0,
+            570.0
+          ]
+        },
+        {
+          "line_index": 43,
+          "text": "Sewer & Drain Maintenance",
+          "bbox": [
+            54.0,
+            570.0,
+            204.0,
+            582.0
+          ]
+        },
+        {
+          "line_index": 44,
+          "text": "View All \u2014 Sewer & Drain Maintenance",
+          "bbox": [
+            54.0,
+            582.0,
+            270.0,
+            594.0
+          ]
+        },
+        {
+          "line_index": 45,
+          "text": "Inspection Tools",
+          "bbox": [
+            54.0,
+            594.0,
+            150.0,
+            606.0
+          ]
+        },
+        {
+          "line_index": 46,
+          "text": "View All \u2014 Inspection Tools",
+          "bbox": [
+            54.0,
+            606.0,
+            216.0,
+            618.0
+          ]
+        },
+        {
+          "line_index": 47,
+          "text": "Pipeline Inspection Tools",
+          "bbox": [
+            54.0,
+            618.0,
+            204.0,
+            630.0
+          ]
+        },
+        {
+          "line_index": 48,
+          "text": "Drain Cleaning",
+          "bbox": [
+            54.0,
+            630.0,
+            138.0,
+            642.0
+          ]
+        },
+        {
+          "line_index": 49,
+          "text": "View All \u2014 Drain Cleaning",
+          "bbox": [
+            54.0,
+            642.0,
+            204.0,
+            654.0
+          ]
+        },
+        {
+          "line_index": 50,
+          "text": "Toilet, Urinal & Sink Augers",
+          "bbox": [
+            54.0,
+            654.0,
+            222.0,
+            666.0
+          ]
+        },
+        {
+          "line_index": 51,
+          "text": "Sink Machines",
+          "bbox": [
+            54.0,
+            666.0,
+            132.0,
+            678.0
+          ]
+        },
+        {
+          "line_index": 52,
+          "text": "Drum Machines",
+          "bbox": [
+            54.0,
+            678.0,
+            132.0,
+            690.0
+          ]
+        },
+        {
+          "line_index": 53,
+          "text": "Drain Cleaning Cables",
+          "bbox": [
+            54.0,
+            690.0,
+            180.0,
+            702.0
+          ]
+        },
+        {
+          "line_index": 54,
+          "text": "Sectional Machines",
+          "bbox": [
+            54.0,
+            702.0,
+            162.0,
+            714.0
+          ]
+        },
+        {
+          "line_index": 55,
+          "text": "Cutters & Accessories",
+          "bbox": [
+            54.0,
+            714.0,
+            180.0,
+            726.0
+          ]
+        },
+        {
+          "line_index": 56,
+          "text": "Flexible Shaft Machines",
+          "bbox": [
+            54.0,
+            726.0,
+            192.0,
+            738.0
+          ]
+        },
+        {
+          "line_index": 57,
+          "text": "Outdoor Power Equipment",
+          "bbox": [
+            54.0,
+            738.0,
+            192.0,
+            750.0
+          ]
+        }
+      ],
+      "tables": []
+    },
+    {
+      "number": 4,
+      "width": 612.0,
+      "height": 792.0,
+      "lines": [
+        {
+          "line_index": 0,
+          "text": "View All \u2014 Outdoor Power Equipment",
+          "bbox": [
+            54.0,
+            54.0,
+            258.0,
+            66.0
+          ]
+        },
+        {
+          "line_index": 1,
+          "text": "Attachment System",
+          "bbox": [
+            54.0,
+            66.0,
+            156.0,
+            78.0
+          ]
+        },
+        {
+          "line_index": 2,
+          "text": "Blowers",
+          "bbox": [
+            54.0,
+            78.0,
+            96.0,
+            90.0
+          ]
+        },
+        {
+          "line_index": 3,
+          "text": "Hedge Trimmers",
+          "bbox": [
+            54.0,
+            90.0,
+            138.0,
+            102.0
+          ]
+        },
+        {
+          "line_index": 4,
+          "text": "Pruning Shears",
+          "bbox": [
+            54.0,
+            102.0,
+            138.0,
+            114.0
+          ]
+        },
+        {
+          "line_index": 5,
+          "text": "Mowers",
+          "bbox": [
+            54.0,
+            114.0,
+            90.0,
+            126.0
+          ]
+        },
+        {
+          "line_index": 6,
+          "text": "Saws",
+          "bbox": [
+            54.0,
+            126.0,
+            78.0,
+            138.0
+          ]
+        },
+        {
+          "line_index": 7,
+          "text": "Sprayers",
+          "bbox": [
+            54.0,
+            138.0,
+            102.0,
+            150.0
+          ]
+        },
+        {
+          "line_index": 8,
+          "text": "String Trimmers",
+          "bbox": [
+            54.0,
+            150.0,
+            144.0,
+            162.0
+          ]
+        },
+        {
+          "line_index": 9,
+          "text": "Outdoor Power Accessories",
+          "bbox": [
+            54.0,
+            162.0,
+            204.0,
+            174.0
+          ]
+        },
+        {
+          "line_index": 10,
+          "text": "View All \u2014 Outdoor Power Accessories",
+          "bbox": [
+            54.0,
+            174.0,
+            270.0,
+            186.0
+          ]
+        },
+        {
+          "line_index": 11,
+          "text": "Chainsaw Chains & Bars",
+          "bbox": [
+            54.0,
+            186.0,
+            186.0,
+            198.0
+          ]
+        },
+        {
+          "line_index": 12,
+          "text": "Trimmer Line & Heads",
+          "bbox": [
+            54.0,
+            198.0,
+            174.0,
+            210.0
+          ]
+        },
+        {
+          "line_index": 13,
+          "text": "Blades",
+          "bbox": [
+            54.0,
+            210.0,
+            90.0,
+            222.0
+          ]
+        },
+        {
+          "line_index": 14,
+          "text": "Instruments",
+          "bbox": [
+            54.0,
+            222.0,
+            120.0,
+            234.0
+          ]
+        },
+        {
+          "line_index": 15,
+          "text": "View All \u2014 Instruments",
+          "bbox": [
+            54.0,
+            234.0,
+            186.0,
+            246.0
+          ]
+        },
+        {
+          "line_index": 16,
+          "text": "Clamp Meters",
+          "bbox": [
+            54.0,
+            246.0,
+            126.0,
+            258.0
+          ]
+        },
+        {
+          "line_index": 17,
+          "text": "Digital Multimeters",
+          "bbox": [
+            54.0,
+            258.0,
+            168.0,
+            270.0
+          ]
+        },
+        {
+          "line_index": 18,
+          "text": "Distance",
+          "bbox": [
+            54.0,
+            270.0,
+            102.0,
+            282.0
+          ]
+        },
+        {
+          "line_index": 19,
+          "text": "Fork Meters",
+          "bbox": [
+            54.0,
+            282.0,
+            120.0,
+            294.0
+          ]
+        },
+        {
+          "line_index": 20,
+          "text": "Inspection & Detection Tools",
+          "bbox": [
+            54.0,
+            294.0,
+            222.0,
+            306.0
+          ]
+        },
+        {
+          "line_index": 21,
+          "text": "Lighting Testers",
+          "bbox": [
+            54.0,
+            306.0,
+            150.0,
+            318.0
+          ]
+        },
+        {
+          "line_index": 22,
+          "text": "Temperature Guns",
+          "bbox": [
+            54.0,
+            318.0,
+            150.0,
+            330.0
+          ]
+        },
+        {
+          "line_index": 23,
+          "text": "Thermal Imaging",
+          "bbox": [
+            54.0,
+            330.0,
+            144.0,
+            342.0
+          ]
+        },
+        {
+          "line_index": 24,
+          "text": "Hand Tools",
+          "bbox": [
+            54.0,
+            342.0,
+            114.0,
+            354.0
+          ]
+        },
+        {
+          "line_index": 25,
+          "text": "View All \u2014 Hand Tools",
+          "bbox": [
+            54.0,
+            354.0,
+            180.0,
+            366.0
+          ]
+        },
+        {
+          "line_index": 26,
+          "text": "Hammers",
+          "bbox": [
+            54.0,
+            366.0,
+            96.0,
+            378.0
+          ]
+        },
+        {
+          "line_index": 27,
+          "text": "View All \u2014 Hammers",
+          "bbox": [
+            54.0,
+            378.0,
+            162.0,
+            390.0
+          ]
+        },
+        {
+          "line_index": 28,
+          "text": "Hickory Wood Handle Hammers",
+          "bbox": [
+            54.0,
+            390.0,
+            216.0,
+            402.0
+          ]
+        },
+        {
+          "line_index": 29,
+          "text": "Steel Hammers",
+          "bbox": [
+            54.0,
+            402.0,
+            132.0,
+            414.0
+          ]
+        },
+        {
+          "line_index": 30,
+          "text": "Poly Fiberglass Hammers",
+          "bbox": [
+            54.0,
+            414.0,
+            192.0,
+            426.0
+          ]
+        },
+        {
+          "line_index": 31,
+          "text": "Sledge Hammers",
+          "bbox": [
+            54.0,
+            426.0,
+            138.0,
+            438.0
+          ]
+        },
+        {
+          "line_index": 32,
+          "text": "Specialty Hammers",
+          "bbox": [
+            54.0,
+            438.0,
+            156.0,
+            450.0
+          ]
+        },
+        {
+          "line_index": 33,
+          "text": "Wrecking",
+          "bbox": [
+            54.0,
+            450.0,
+            102.0,
+            462.0
+          ]
+        },
+        {
+          "line_index": 34,
+          "text": "Fastening",
+          "bbox": [
+            54.0,
+            462.0,
+            108.0,
+            474.0
+          ]
+        },
+        {
+          "line_index": 35,
+          "text": "View All \u2014 Fastening",
+          "bbox": [
+            54.0,
+            474.0,
+            174.0,
+            486.0
+          ]
+        },
+        {
+          "line_index": 36,
+          "text": "Clamps",
+          "bbox": [
+            54.0,
+            486.0,
+            90.0,
+            498.0
+          ]
+        },
+        {
+          "line_index": 37,
+          "text": "Wrenches",
+          "bbox": [
+            54.0,
+            498.0,
+            102.0,
+            510.0
+          ]
+        },
+        {
+          "line_index": 38,
+          "text": "Screwdrivers & Nutdrivers",
+          "bbox": [
+            54.0,
+            510.0,
+            204.0,
+            522.0
+          ]
+        },
+        {
+          "line_index": 39,
+          "text": "Data Comm VDV Tools",
+          "bbox": [
+            54.0,
+            522.0,
+            168.0,
+            534.0
+          ]
+        },
+        {
+          "line_index": 40,
+          "text": "Mechanics Tools",
+          "bbox": [
+            54.0,
+            534.0,
+            144.0,
+            546.0
+          ]
+        },
+        {
+          "line_index": 41,
+          "text": "View All \u2014 Mechanics Tools",
+          "bbox": [
+            54.0,
+            546.0,
+            210.0,
+            558.0
+          ]
+        },
+        {
+          "line_index": 42,
+          "text": "Ratchets and Sockets",
+          "bbox": [
+            54.0,
+            558.0,
+            174.0,
+            570.0
+          ]
+        },
+        {
+          "line_index": 43,
+          "text": "Combination Wrenches",
+          "bbox": [
+            54.0,
+            570.0,
+            174.0,
+            582.0
+          ]
+        },
+        {
+          "line_index": 44,
+          "text": "Picks and Pry Bars",
+          "bbox": [
+            54.0,
+            582.0,
+            162.0,
+            594.0
+          ]
+        },
+        {
+          "line_index": 45,
+          "text": "Torque Wrenches",
+          "bbox": [
+            54.0,
+            594.0,
+            144.0,
+            606.0
+          ]
+        },
+        {
+          "line_index": 46,
+          "text": "Bending & Pulling",
+          "bbox": [
+            54.0,
+            606.0,
+            156.0,
+            618.0
+          ]
+        },
+        {
+          "line_index": 47,
+          "text": "Layout",
+          "bbox": [
+            54.0,
+            618.0,
+            90.0,
+            630.0
+          ]
+        },
+        {
+          "line_index": 48,
+          "text": "View All \u2014 Layout",
+          "bbox": [
+            54.0,
+            630.0,
+            156.0,
+            642.0
+          ]
+        },
+        {
+          "line_index": 49,
+          "text": "Lasers",
+          "bbox": [
+            54.0,
+            642.0,
+            90.0,
+            654.0
+          ]
+        },
+        {
+          "line_index": 50,
+          "text": "Levels",
+          "bbox": [
+            54.0,
+            654.0,
+            90.0,
+            666.0
+          ]
+        },
+        {
+          "line_index": 51,
+          "text": "Squares",
+          "bbox": [
+            54.0,
+            666.0,
+            96.0,
+            678.0
+          ]
+        },
+        {
+          "line_index": 52,
+          "text": "Chalk and Reel",
+          "bbox": [
+            54.0,
+            678.0,
+            138.0,
+            690.0
+          ]
+        },
+        {
+          "line_index": 53,
+          "text": "Marking",
+          "bbox": [
+            54.0,
+            690.0,
+            96.0,
+            702.0
+          ]
+        },
+        {
+          "line_index": 54,
+          "text": "View All \u2014 Marking",
+          "bbox": [
+            54.0,
+            702.0,
+            162.0,
+            714.0
+          ]
+        },
+        {
+          "line_index": 55,
+          "text": "Jobsite Markers",
+          "bbox": [
+            54.0,
+            714.0,
+            144.0,
+            726.0
+          ]
+        },
+        {
+          "line_index": 56,
+          "text": "Paint Markers",
+          "bbox": [
+            54.0,
+            726.0,
+            132.0,
+            738.0
+          ]
+        },
+        {
+          "line_index": 57,
+          "text": "Jobsite Highlighters",
+          "bbox": [
+            54.0,
+            738.0,
+            174.0,
+            750.0
+          ]
+        }
+      ],
+      "tables": []
+    },
+    {
+      "number": 5,
+      "width": 612.0,
+      "height": 792.0,
+      "lines": [
+        {
+          "line_index": 0,
+          "text": "Chalk and Reel",
+          "bbox": [
+            54.0,
+            54.0,
+            138.0,
+            66.0
+          ]
+        },
+        {
+          "line_index": 1,
+          "text": "Measuring",
+          "bbox": [
+            54.0,
+            66.0,
+            108.0,
+            78.0
+          ]
+        },
+        {
+          "line_index": 2,
+          "text": "View All \u2014 Measuring",
+          "bbox": [
+            54.0,
+            78.0,
+            174.0,
+            90.0
+          ]
+        },
+        {
+          "line_index": 3,
+          "text": "Short Tape Measures",
+          "bbox": [
+            54.0,
+            90.0,
+            168.0,
+            102.0
+          ]
+        },
+        {
+          "line_index": 4,
+          "text": "Folding Rules",
+          "bbox": [
+            54.0,
+            102.0,
+            132.0,
+            114.0
+          ]
+        },
+        {
+          "line_index": 5,
+          "text": "Long Tape Measures",
+          "bbox": [
+            54.0,
+            114.0,
+            162.0,
+            126.0
+          ]
+        },
+        {
+          "line_index": 6,
+          "text": "Measuring Wheels",
+          "bbox": [
+            54.0,
+            126.0,
+            150.0,
+            138.0
+          ]
+        },
+        {
+          "line_index": 7,
+          "text": "Laser Distance Meters",
+          "bbox": [
+            54.0,
+            138.0,
+            180.0,
+            150.0
+          ]
+        },
+        {
+          "line_index": 8,
+          "text": "Outdoor",
+          "bbox": [
+            54.0,
+            150.0,
+            96.0,
+            162.0
+          ]
+        },
+        {
+          "line_index": 9,
+          "text": "View All \u2014 Outdoor",
+          "bbox": [
+            54.0,
+            162.0,
+            162.0,
+            174.0
+          ]
+        },
+        {
+          "line_index": 10,
+          "text": "Loppers & Shears",
+          "bbox": [
+            54.0,
+            174.0,
+            150.0,
+            186.0
+          ]
+        },
+        {
+          "line_index": 11,
+          "text": "Pruners",
+          "bbox": [
+            54.0,
+            186.0,
+            96.0,
+            198.0
+          ]
+        },
+        {
+          "line_index": 12,
+          "text": "Pruning Saws",
+          "bbox": [
+            54.0,
+            198.0,
+            126.0,
+            210.0
+          ]
+        },
+        {
+          "line_index": 13,
+          "text": "Pole Saws & Pruners",
+          "bbox": [
+            54.0,
+            210.0,
+            168.0,
+            222.0
+          ]
+        },
+        {
+          "line_index": 14,
+          "text": "Axes, Mauls & Picks",
+          "bbox": [
+            54.0,
+            222.0,
+            168.0,
+            234.0
+          ]
+        },
+        {
+          "line_index": 15,
+          "text": "Stands & Vises",
+          "bbox": [
+            54.0,
+            234.0,
+            138.0,
+            246.0
+          ]
+        },
+        {
+          "line_index": 16,
+          "text": "Cutting",
+          "bbox": [
+            54.0,
+            246.0,
+            96.0,
+            258.0
+          ]
+        },
+        {
+          "line_index": 17,
+          "text": "View All \u2014 Cutting",
+          "bbox": [
+            54.0,
+            258.0,
+            162.0,
+            270.0
+          ]
+        },
+        {
+          "line_index": 18,
+          "text": "Saws",
+          "bbox": [
+            54.0,
+            270.0,
+            78.0,
+            282.0
+          ]
+        },
+        {
+          "line_index": 19,
+          "text": "Pipe and Tubing Cutters",
+          "bbox": [
+            54.0,
+            282.0,
+            192.0,
+            294.0
+          ]
+        },
+        {
+          "line_index": 20,
+          "text": "Scissors and Snips",
+          "bbox": [
+            54.0,
+            294.0,
+            162.0,
+            306.0
+          ]
+        },
+        {
+          "line_index": 21,
+          "text": "HVAC Tools",
+          "bbox": [
+            54.0,
+            306.0,
+            114.0,
+            318.0
+          ]
+        },
+        {
+          "line_index": 22,
+          "text": "Knives",
+          "bbox": [
+            54.0,
+            318.0,
+            90.0,
+            330.0
+          ]
+        },
+        {
+          "line_index": 23,
+          "text": "Bolt Cutters",
+          "bbox": [
+            54.0,
+            330.0,
+            126.0,
+            342.0
+          ]
+        },
+        {
+          "line_index": 24,
+          "text": "Pliers",
+          "bbox": [
+            54.0,
+            342.0,
+            90.0,
+            354.0
+          ]
+        },
+        {
+          "line_index": 25,
+          "text": "View All \u2014 Pliers",
+          "bbox": [
+            54.0,
+            354.0,
+            156.0,
+            366.0
+          ]
+        },
+        {
+          "line_index": 26,
+          "text": "Lineman's Pliers",
+          "bbox": [
+            54.0,
+            366.0,
+            150.0,
+            378.0
+          ]
+        },
+        {
+          "line_index": 27,
+          "text": "Diagonal Cutters",
+          "bbox": [
+            54.0,
+            378.0,
+            150.0,
+            390.0
+          ]
+        },
+        {
+          "line_index": 28,
+          "text": "Long Nose Pliers",
+          "bbox": [
+            54.0,
+            390.0,
+            150.0,
+            402.0
+          ]
+        },
+        {
+          "line_index": 29,
+          "text": "Wire Strippers",
+          "bbox": [
+            54.0,
+            402.0,
+            138.0,
+            414.0
+          ]
+        },
+        {
+          "line_index": 30,
+          "text": "Straight Jaw Pliers",
+          "bbox": [
+            54.0,
+            414.0,
+            168.0,
+            426.0
+          ]
+        },
+        {
+          "line_index": 31,
+          "text": "V-Jaw Pliers",
+          "bbox": [
+            54.0,
+            426.0,
+            126.0,
+            438.0
+          ]
+        },
+        {
+          "line_index": 32,
+          "text": "Locking Pliers",
+          "bbox": [
+            54.0,
+            438.0,
+            138.0,
+            450.0
+          ]
+        },
+        {
+          "line_index": 33,
+          "text": "Specialty Pliers",
+          "bbox": [
+            54.0,
+            450.0,
+            150.0,
+            462.0
+          ]
+        },
+        {
+          "line_index": 34,
+          "text": "Storage",
+          "bbox": [
+            54.0,
+            462.0,
+            96.0,
+            474.0
+          ]
+        },
+        {
+          "line_index": 35,
+          "text": "View All \u2014 Storage",
+          "bbox": [
+            54.0,
+            474.0,
+            162.0,
+            486.0
+          ]
+        },
+        {
+          "line_index": 36,
+          "text": "PACKOUT\u2122",
+          "bbox": [
+            54.0,
+            486.0,
+            102.0,
+            498.0
+          ]
+        },
+        {
+          "line_index": 37,
+          "text": "View All \u2014 PACKOUT\u2122",
+          "bbox": [
+            54.0,
+            498.0,
+            168.0,
+            510.0
+          ]
+        },
+        {
+          "line_index": 38,
+          "text": "Racks",
+          "bbox": [
+            54.0,
+            510.0,
+            84.0,
+            522.0
+          ]
+        },
+        {
+          "line_index": 39,
+          "text": "Rolling Storage",
+          "bbox": [
+            54.0,
+            522.0,
+            144.0,
+            534.0
+          ]
+        },
+        {
+          "line_index": 40,
+          "text": "Tool Boxes",
+          "bbox": [
+            54.0,
+            534.0,
+            114.0,
+            546.0
+          ]
+        },
+        {
+          "line_index": 41,
+          "text": "Organizers",
+          "bbox": [
+            54.0,
+            546.0,
+            114.0,
+            558.0
+          ]
+        },
+        {
+          "line_index": 42,
+          "text": "Totes & Bags",
+          "bbox": [
+            54.0,
+            558.0,
+            126.0,
+            570.0
+          ]
+        },
+        {
+          "line_index": 43,
+          "text": "Drinkware & Coolers",
+          "bbox": [
+            54.0,
+            570.0,
+            168.0,
+            582.0
+          ]
+        },
+        {
+          "line_index": 44,
+          "text": "Tool Box Attachments",
+          "bbox": [
+            54.0,
+            582.0,
+            174.0,
+            594.0
+          ]
+        },
+        {
+          "line_index": 45,
+          "text": "Mounting",
+          "bbox": [
+            54.0,
+            594.0,
+            102.0,
+            606.0
+          ]
+        },
+        {
+          "line_index": 46,
+          "text": "Holders & Hooks",
+          "bbox": [
+            54.0,
+            606.0,
+            144.0,
+            618.0
+          ]
+        },
+        {
+          "line_index": 47,
+          "text": "Racks & Holders",
+          "bbox": [
+            54.0,
+            618.0,
+            144.0,
+            630.0
+          ]
+        },
+        {
+          "line_index": 48,
+          "text": "Power Tools",
+          "bbox": [
+            54.0,
+            630.0,
+            120.0,
+            642.0
+          ]
+        },
+        {
+          "line_index": 49,
+          "text": "Kits",
+          "bbox": [
+            54.0,
+            642.0,
+            78.0,
+            654.0
+          ]
+        },
+        {
+          "line_index": 50,
+          "text": "Accessories",
+          "bbox": [
+            54.0,
+            654.0,
+            120.0,
+            666.0
+          ]
+        },
+        {
+          "line_index": 51,
+          "text": "Power Utility Storage",
+          "bbox": [
+            54.0,
+            666.0,
+            180.0,
+            678.0
+          ]
+        },
+        {
+          "line_index": 52,
+          "text": "Soft Storage",
+          "bbox": [
+            54.0,
+            678.0,
+            126.0,
+            690.0
+          ]
+        },
+        {
+          "line_index": 53,
+          "text": "View All \u2014 Soft Storage",
+          "bbox": [
+            54.0,
+            690.0,
+            192.0,
+            702.0
+          ]
+        },
+        {
+          "line_index": 54,
+          "text": "Backpacks",
+          "bbox": [
+            54.0,
+            702.0,
+            108.0,
+            714.0
+          ]
+        },
+        {
+          "line_index": 55,
+          "text": "Tool Bags",
+          "bbox": [
+            54.0,
+            714.0,
+            108.0,
+            726.0
+          ]
+        },
+        {
+          "line_index": 56,
+          "text": "Tool Belts and Pouches",
+          "bbox": [
+            54.0,
+            726.0,
+            186.0,
+            738.0
+          ]
+        },
+        {
+          "line_index": 57,
+          "text": "View All \u2014 Tool Belts and Pouches",
+          "bbox": [
+            54.0,
+            738.0,
+            252.0,
+            750.0
+          ]
+        }
+      ],
+      "tables": []
+    },
+    {
+      "number": 6,
+      "width": 612.0,
+      "height": 792.0,
+      "lines": [
+        {
+          "line_index": 0,
+          "text": "Tool Belts",
+          "bbox": [
+            54.0,
+            54.0,
+            114.0,
+            66.0
+          ]
+        },
+        {
+          "line_index": 1,
+          "text": "Pouches",
+          "bbox": [
+            54.0,
+            66.0,
+            96.0,
+            78.0
+          ]
+        },
+        {
+          "line_index": 2,
+          "text": "Steel Storage",
+          "bbox": [
+            54.0,
+            78.0,
+            132.0,
+            90.0
+          ]
+        },
+        {
+          "line_index": 3,
+          "text": "Jobsite Apparel",
+          "bbox": [
+            54.0,
+            90.0,
+            144.0,
+            102.0
+          ]
+        },
+        {
+          "line_index": 4,
+          "text": "View All \u2014 Jobsite Apparel",
+          "bbox": [
+            54.0,
+            102.0,
+            210.0,
+            114.0
+          ]
+        },
+        {
+          "line_index": 5,
+          "text": "Heated Gear",
+          "bbox": [
+            54.0,
+            114.0,
+            120.0,
+            126.0
+          ]
+        },
+        {
+          "line_index": 6,
+          "text": "Workwear",
+          "bbox": [
+            54.0,
+            126.0,
+            102.0,
+            138.0
+          ]
+        },
+        {
+          "line_index": 7,
+          "text": "Pants",
+          "bbox": [
+            54.0,
+            138.0,
+            84.0,
+            150.0
+          ]
+        },
+        {
+          "line_index": 8,
+          "text": "Knee Pads",
+          "bbox": [
+            54.0,
+            150.0,
+            108.0,
+            162.0
+          ]
+        },
+        {
+          "line_index": 9,
+          "text": "Jackets",
+          "bbox": [
+            54.0,
+            162.0,
+            96.0,
+            174.0
+          ]
+        },
+        {
+          "line_index": 10,
+          "text": "Hoodies",
+          "bbox": [
+            54.0,
+            174.0,
+            96.0,
+            186.0
+          ]
+        },
+        {
+          "line_index": 11,
+          "text": "Vests",
+          "bbox": [
+            54.0,
+            186.0,
+            84.0,
+            198.0
+          ]
+        },
+        {
+          "line_index": 12,
+          "text": "Shirts",
+          "bbox": [
+            54.0,
+            198.0,
+            90.0,
+            210.0
+          ]
+        },
+        {
+          "line_index": 13,
+          "text": "Bib Overalls",
+          "bbox": [
+            54.0,
+            210.0,
+            126.0,
+            222.0
+          ]
+        },
+        {
+          "line_index": 14,
+          "text": "Headwear and Face Masks",
+          "bbox": [
+            54.0,
+            222.0,
+            192.0,
+            234.0
+          ]
+        },
+        {
+          "line_index": 15,
+          "text": "Gloves",
+          "bbox": [
+            54.0,
+            234.0,
+            90.0,
+            246.0
+          ]
+        },
+        {
+          "line_index": 16,
+          "text": "Accessories",
+          "bbox": [
+            54.0,
+            246.0,
+            120.0,
+            258.0
+          ]
+        },
+        {
+          "line_index": 17,
+          "text": "View All \u2014 Accessories",
+          "bbox": [
+            54.0,
+            258.0,
+            186.0,
+            270.0
+          ]
+        },
+        {
+          "line_index": 18,
+          "text": "Accessories Sets",
+          "bbox": [
+            54.0,
+            270.0,
+            150.0,
+            282.0
+          ]
+        },
+        {
+          "line_index": 19,
+          "text": "View All \u2014 Accessories Sets",
+          "bbox": [
+            54.0,
+            282.0,
+            216.0,
+            294.0
+          ]
+        },
+        {
+          "line_index": 20,
+          "text": "Hole Dozer Bi-Metal Sets",
+          "bbox": [
+            54.0,
+            294.0,
+            198.0,
+            306.0
+          ]
+        },
+        {
+          "line_index": 21,
+          "text": "Hole Dozer Carbide Teeth Sets",
+          "bbox": [
+            54.0,
+            306.0,
+            228.0,
+            318.0
+          ]
+        },
+        {
+          "line_index": 22,
+          "text": "Masonry & Concrete Sets",
+          "bbox": [
+            54.0,
+            318.0,
+            192.0,
+            330.0
+          ]
+        },
+        {
+          "line_index": 23,
+          "text": "SAWZALL\u00ae Blade Bi-Metal Sets",
+          "bbox": [
+            54.0,
+            330.0,
+            222.0,
+            342.0
+          ]
+        },
+        {
+          "line_index": 24,
+          "text": "Metal Drilling Sets",
+          "bbox": [
+            54.0,
+            342.0,
+            168.0,
+            354.0
+          ]
+        },
+        {
+          "line_index": 25,
+          "text": "Oscillating Multi-Tool Sets",
+          "bbox": [
+            54.0,
+            354.0,
+            216.0,
+            366.0
+          ]
+        },
+        {
+          "line_index": 26,
+          "text": "Oscillating Multi-Tool Sets",
+          "bbox": [
+            54.0,
+            366.0,
+            216.0,
+            378.0
+          ]
+        },
+        {
+          "line_index": 27,
+          "text": "Wood Drilling Sets",
+          "bbox": [
+            54.0,
+            378.0,
+            162.0,
+            390.0
+          ]
+        },
+        {
+          "line_index": 28,
+          "text": "SHOCKWAVE\u2122 Driving Sets",
+          "bbox": [
+            54.0,
+            390.0,
+            192.0,
+            402.0
+          ]
+        },
+        {
+          "line_index": 29,
+          "text": "Extensions",
+          "bbox": [
+            54.0,
+            402.0,
+            114.0,
+            414.0
+          ]
+        },
+        {
+          "line_index": 30,
+          "text": "Tile Drilling",
+          "bbox": [
+            54.0,
+            414.0,
+            132.0,
+            426.0
+          ]
+        },
+        {
+          "line_index": 31,
+          "text": "Oscillating Multi-Tool Blades",
+          "bbox": [
+            54.0,
+            426.0,
+            228.0,
+            438.0
+          ]
+        },
+        {
+          "line_index": 32,
+          "text": "Cutting",
+          "bbox": [
+            54.0,
+            438.0,
+            96.0,
+            450.0
+          ]
+        },
+        {
+          "line_index": 33,
+          "text": "View All \u2014 Cutting",
+          "bbox": [
+            54.0,
+            450.0,
+            162.0,
+            462.0
+          ]
+        },
+        {
+          "line_index": 34,
+          "text": "SAWZALL Blades",
+          "bbox": [
+            54.0,
+            462.0,
+            138.0,
+            474.0
+          ]
+        },
+        {
+          "line_index": 35,
+          "text": "HACKZALL Blades",
+          "bbox": [
+            54.0,
+            474.0,
+            144.0,
+            486.0
+          ]
+        },
+        {
+          "line_index": 36,
+          "text": "Band Saw Blades",
+          "bbox": [
+            54.0,
+            486.0,
+            144.0,
+            498.0
+          ]
+        },
+        {
+          "line_index": 37,
+          "text": "Circular Saw Blades and Accessories",
+          "bbox": [
+            54.0,
+            498.0,
+            264.0,
+            510.0
+          ]
+        },
+        {
+          "line_index": 38,
+          "text": "Shear and Nibbler Accessories",
+          "bbox": [
+            54.0,
+            510.0,
+            228.0,
+            522.0
+          ]
+        },
+        {
+          "line_index": 39,
+          "text": "Jig Saw Blades",
+          "bbox": [
+            54.0,
+            522.0,
+            138.0,
+            534.0
+          ]
+        },
+        {
+          "line_index": 40,
+          "text": "Hole Saws",
+          "bbox": [
+            54.0,
+            534.0,
+            108.0,
+            546.0
+          ]
+        },
+        {
+          "line_index": 41,
+          "text": "View All \u2014 Hole Saws",
+          "bbox": [
+            54.0,
+            546.0,
+            174.0,
+            558.0
+          ]
+        },
+        {
+          "line_index": 42,
+          "text": "HOLE DOZER\u2122 Bi-Metal",
+          "bbox": [
+            54.0,
+            558.0,
+            174.0,
+            570.0
+          ]
+        },
+        {
+          "line_index": 43,
+          "text": "HOLE DOZER\u2122 Bi-Metal Sets",
+          "bbox": [
+            54.0,
+            570.0,
+            204.0,
+            582.0
+          ]
+        },
+        {
+          "line_index": 44,
+          "text": "HOLE DOZER\u2122 Carbide Teeth Sets",
+          "bbox": [
+            54.0,
+            582.0,
+            234.0,
+            594.0
+          ]
+        },
+        {
+          "line_index": 45,
+          "text": "Hole Saw Accessories",
+          "bbox": [
+            54.0,
+            594.0,
+            174.0,
+            606.0
+          ]
+        },
+        {
+          "line_index": 46,
+          "text": "BIG HAWG\u2122 with Carbide Teeth",
+          "bbox": [
+            54.0,
+            606.0,
+            222.0,
+            618.0
+          ]
+        },
+        {
+          "line_index": 47,
+          "text": "HOLE DOZER\u2122 with Carbide Teeth",
+          "bbox": [
+            54.0,
+            618.0,
+            234.0,
+            630.0
+          ]
+        },
+        {
+          "line_index": 48,
+          "text": "Carbide Grit",
+          "bbox": [
+            54.0,
+            630.0,
+            126.0,
+            642.0
+          ]
+        },
+        {
+          "line_index": 49,
+          "text": "Recessed Light",
+          "bbox": [
+            54.0,
+            642.0,
+            138.0,
+            654.0
+          ]
+        },
+        {
+          "line_index": 50,
+          "text": "SHOCKWAVE\u2122 Impact",
+          "bbox": [
+            54.0,
+            654.0,
+            156.0,
+            666.0
+          ]
+        },
+        {
+          "line_index": 51,
+          "text": "DIAMOND MAX\u2122 Hole Saws",
+          "bbox": [
+            54.0,
+            666.0,
+            186.0,
+            678.0
+          ]
+        },
+        {
+          "line_index": 52,
+          "text": "Concrete Drilling and Chiselling",
+          "bbox": [
+            54.0,
+            678.0,
+            246.0,
+            690.0
+          ]
+        },
+        {
+          "line_index": 53,
+          "text": "View All \u2014 Concrete Drilling and Chiselling",
+          "bbox": [
+            54.0,
+            690.0,
+            312.0,
+            702.0
+          ]
+        },
+        {
+          "line_index": 54,
+          "text": "SDS Plus Drill Bits",
+          "bbox": [
+            54.0,
+            702.0,
+            168.0,
+            714.0
+          ]
+        },
+        {
+          "line_index": 55,
+          "text": "SHOCKWAVE\u2122 Multi-Material Drill Bits",
+          "bbox": [
+            54.0,
+            714.0,
+            270.0,
+            726.0
+          ]
+        },
+        {
+          "line_index": 56,
+          "text": "SDS Max Drill Bits",
+          "bbox": [
+            54.0,
+            726.0,
+            162.0,
+            738.0
+          ]
+        },
+        {
+          "line_index": 57,
+          "text": "Spline Drill Bits",
+          "bbox": [
+            54.0,
+            738.0,
+            156.0,
+            750.0
+          ]
+        }
+      ],
+      "tables": []
+    },
+    {
+      "number": 7,
+      "width": 612.0,
+      "height": 792.0,
+      "lines": [
+        {
+          "line_index": 0,
+          "text": "Hammer Drill Bits",
+          "bbox": [
+            54.0,
+            54.0,
+            156.0,
+            66.0
+          ]
+        },
+        {
+          "line_index": 1,
+          "text": "Rebar Cutters",
+          "bbox": [
+            54.0,
+            66.0,
+            132.0,
+            78.0
+          ]
+        },
+        {
+          "line_index": 2,
+          "text": "Vacuum Drill Bits and Dust Management",
+          "bbox": [
+            54.0,
+            78.0,
+            276.0,
+            90.0
+          ]
+        },
+        {
+          "line_index": 3,
+          "text": "Core Bits",
+          "bbox": [
+            54.0,
+            90.0,
+            108.0,
+            102.0
+          ]
+        },
+        {
+          "line_index": 4,
+          "text": "Chisels",
+          "bbox": [
+            54.0,
+            102.0,
+            96.0,
+            114.0
+          ]
+        },
+        {
+          "line_index": 5,
+          "text": "Adaptors",
+          "bbox": [
+            54.0,
+            114.0,
+            102.0,
+            126.0
+          ]
+        },
+        {
+          "line_index": 6,
+          "text": "Metal Drilling",
+          "bbox": [
+            54.0,
+            126.0,
+            138.0,
+            138.0
+          ]
+        },
+        {
+          "line_index": 7,
+          "text": "View All \u2014 Metal Drilling",
+          "bbox": [
+            54.0,
+            138.0,
+            204.0,
+            150.0
+          ]
+        },
+        {
+          "line_index": 8,
+          "text": "Step Drill Bits",
+          "bbox": [
+            54.0,
+            150.0,
+            144.0,
+            162.0
+          ]
+        },
+        {
+          "line_index": 9,
+          "text": "Twist Drill Bits",
+          "bbox": [
+            54.0,
+            162.0,
+            150.0,
+            174.0
+          ]
+        },
+        {
+          "line_index": 10,
+          "text": "Carbide Cutters",
+          "bbox": [
+            54.0,
+            174.0,
+            144.0,
+            186.0
+          ]
+        },
+        {
+          "line_index": 11,
+          "text": "Annular Cutters",
+          "bbox": [
+            54.0,
+            186.0,
+            144.0,
+            198.0
+          ]
+        },
+        {
+          "line_index": 12,
+          "text": "Adaptors",
+          "bbox": [
+            54.0,
+            198.0,
+            102.0,
+            210.0
+          ]
+        },
+        {
+          "line_index": 13,
+          "text": "Steel Hawg",
+          "bbox": [
+            54.0,
+            210.0,
+            114.0,
+            222.0
+          ]
+        },
+        {
+          "line_index": 14,
+          "text": "Taps & Dies",
+          "bbox": [
+            54.0,
+            222.0,
+            120.0,
+            234.0
+          ]
+        },
+        {
+          "line_index": 15,
+          "text": "Driving and Fastening",
+          "bbox": [
+            54.0,
+            234.0,
+            180.0,
+            246.0
+          ]
+        },
+        {
+          "line_index": 16,
+          "text": "View All \u2014 Driving and Fastening",
+          "bbox": [
+            54.0,
+            246.0,
+            246.0,
+            258.0
+          ]
+        },
+        {
+          "line_index": 17,
+          "text": "Drywall Setters",
+          "bbox": [
+            54.0,
+            258.0,
+            144.0,
+            270.0
+          ]
+        },
+        {
+          "line_index": 18,
+          "text": "SHOCKWAVE\u2122 Impact Duty Driver Bits",
+          "bbox": [
+            54.0,
+            270.0,
+            258.0,
+            282.0
+          ]
+        },
+        {
+          "line_index": 19,
+          "text": "SHOCKWAVE\u2122 Impact Duty Bit Holders/Extensions",
+          "bbox": [
+            54.0,
+            282.0,
+            324.0,
+            294.0
+          ]
+        },
+        {
+          "line_index": 20,
+          "text": "SHOCKWAVE\u2122 Impact Duty Nut Drivers",
+          "bbox": [
+            54.0,
+            294.0,
+            258.0,
+            306.0
+          ]
+        },
+        {
+          "line_index": 21,
+          "text": "SHOCKWAVE\u2122 Impact Duty Lineman's Sockets & Adapters",
+          "bbox": [
+            54.0,
+            306.0,
+            360.0,
+            318.0
+          ]
+        },
+        {
+          "line_index": 22,
+          "text": "SHOCKWAVE\u2122 Impact Duty Sockets & Adapters",
+          "bbox": [
+            54.0,
+            318.0,
+            300.0,
+            330.0
+          ]
+        },
+        {
+          "line_index": 23,
+          "text": "Driver Bits",
+          "bbox": [
+            54.0,
+            330.0,
+            120.0,
+            342.0
+          ]
+        },
+        {
+          "line_index": 24,
+          "text": "SHOCKWAVE\u2122 Impact Duty Driving Sets",
+          "bbox": [
+            54.0,
+            342.0,
+            264.0,
+            354.0
+          ]
+        },
+        {
+          "line_index": 25,
+          "text": "Abrasives",
+          "bbox": [
+            54.0,
+            354.0,
+            108.0,
+            366.0
+          ]
+        },
+        {
+          "line_index": 26,
+          "text": "View All \u2014 Abrasives",
+          "bbox": [
+            54.0,
+            366.0,
+            174.0,
+            378.0
+          ]
+        },
+        {
+          "line_index": 27,
+          "text": "Cut Off Wheels",
+          "bbox": [
+            54.0,
+            378.0,
+            138.0,
+            390.0
+          ]
+        },
+        {
+          "line_index": 28,
+          "text": "Grinding Wheels",
+          "bbox": [
+            54.0,
+            390.0,
+            144.0,
+            402.0
+          ]
+        },
+        {
+          "line_index": 29,
+          "text": "Cut & Grind Wheels",
+          "bbox": [
+            54.0,
+            402.0,
+            162.0,
+            414.0
+          ]
+        },
+        {
+          "line_index": 30,
+          "text": "Wire Wheels and Brushes",
+          "bbox": [
+            54.0,
+            414.0,
+            192.0,
+            426.0
+          ]
+        },
+        {
+          "line_index": 31,
+          "text": "Flap Discs",
+          "bbox": [
+            54.0,
+            426.0,
+            114.0,
+            438.0
+          ]
+        },
+        {
+          "line_index": 32,
+          "text": "Sanding & Polishing",
+          "bbox": [
+            54.0,
+            438.0,
+            168.0,
+            450.0
+          ]
+        },
+        {
+          "line_index": 33,
+          "text": "Wood Drilling",
+          "bbox": [
+            54.0,
+            450.0,
+            132.0,
+            462.0
+          ]
+        },
+        {
+          "line_index": 34,
+          "text": "View All \u2014 Wood Drilling",
+          "bbox": [
+            54.0,
+            462.0,
+            198.0,
+            474.0
+          ]
+        },
+        {
+          "line_index": 35,
+          "text": "Auger Bits",
+          "bbox": [
+            54.0,
+            474.0,
+            114.0,
+            486.0
+          ]
+        },
+        {
+          "line_index": 36,
+          "text": "Countersinks",
+          "bbox": [
+            54.0,
+            486.0,
+            126.0,
+            498.0
+          ]
+        },
+        {
+          "line_index": 37,
+          "text": "Selfeed Bits",
+          "bbox": [
+            54.0,
+            498.0,
+            126.0,
+            510.0
+          ]
+        },
+        {
+          "line_index": 38,
+          "text": "Cable Bits",
+          "bbox": [
+            54.0,
+            510.0,
+            114.0,
+            522.0
+          ]
+        },
+        {
+          "line_index": 39,
+          "text": "Bellhanger Bits",
+          "bbox": [
+            54.0,
+            522.0,
+            144.0,
+            534.0
+          ]
+        },
+        {
+          "line_index": 40,
+          "text": "Forstner Bits",
+          "bbox": [
+            54.0,
+            534.0,
+            132.0,
+            546.0
+          ]
+        },
+        {
+          "line_index": 41,
+          "text": "Flat Boring Bits",
+          "bbox": [
+            54.0,
+            546.0,
+            150.0,
+            558.0
+          ]
+        },
+        {
+          "line_index": 42,
+          "text": "Speedfeed Bits",
+          "bbox": [
+            54.0,
+            558.0,
+            138.0,
+            570.0
+          ]
+        },
+        {
+          "line_index": 43,
+          "text": "Extensions",
+          "bbox": [
+            54.0,
+            570.0,
+            114.0,
+            582.0
+          ]
+        },
+        {
+          "line_index": 44,
+          "text": "Brad Points",
+          "bbox": [
+            54.0,
+            582.0,
+            120.0,
+            594.0
+          ]
+        },
+        {
+          "line_index": 45,
+          "text": "Fasteners",
+          "bbox": [
+            54.0,
+            594.0,
+            108.0,
+            606.0
+          ]
+        },
+        {
+          "line_index": 46,
+          "text": "Outdoor Power Accessories",
+          "bbox": [
+            54.0,
+            606.0,
+            204.0,
+            618.0
+          ]
+        },
+        {
+          "line_index": 47,
+          "text": "View All \u2014 Outdoor Power Accessories",
+          "bbox": [
+            54.0,
+            618.0,
+            270.0,
+            630.0
+          ]
+        },
+        {
+          "line_index": 48,
+          "text": "Chainsaw Accessories",
+          "bbox": [
+            54.0,
+            630.0,
+            174.0,
+            642.0
+          ]
+        },
+        {
+          "line_index": 49,
+          "text": "Trimmer Line & Heads",
+          "bbox": [
+            54.0,
+            642.0,
+            174.0,
+            654.0
+          ]
+        },
+        {
+          "line_index": 50,
+          "text": "Blades",
+          "bbox": [
+            54.0,
+            654.0,
+            90.0,
+            666.0
+          ]
+        },
+        {
+          "line_index": 51,
+          "text": "Diamond Cutting and Coring",
+          "bbox": [
+            54.0,
+            666.0,
+            210.0,
+            678.0
+          ]
+        },
+        {
+          "line_index": 52,
+          "text": "View All \u2014 Diamond Cutting and Coring",
+          "bbox": [
+            54.0,
+            678.0,
+            276.0,
+            690.0
+          ]
+        },
+        {
+          "line_index": 53,
+          "text": "Diamond Blades & Cups",
+          "bbox": [
+            54.0,
+            690.0,
+            180.0,
+            702.0
+          ]
+        },
+        {
+          "line_index": 54,
+          "text": "Safety Solutions",
+          "bbox": [
+            54.0,
+            702.0,
+            150.0,
+            714.0
+          ]
+        },
+        {
+          "line_index": 55,
+          "text": "View All \u2014 Safety Solutions",
+          "bbox": [
+            54.0,
+            714.0,
+            216.0,
+            726.0
+          ]
+        },
+        {
+          "line_index": 56,
+          "text": "Personal Protective Equipment",
+          "bbox": [
+            54.0,
+            726.0,
+            228.0,
+            738.0
+          ]
+        },
+        {
+          "line_index": 57,
+          "text": "View All \u2014 Personal Protective Equipment",
+          "bbox": [
+            54.0,
+            738.0,
+            294.0,
+            750.0
+          ]
+        }
+      ],
+      "tables": []
+    },
+    {
+      "number": 8,
+      "width": 612.0,
+      "height": 792.0,
+      "lines": [
+        {
+          "line_index": 0,
+          "text": "Eye and Face Protection",
+          "bbox": [
+            54.0,
+            54.0,
+            192.0,
+            66.0
+          ]
+        },
+        {
+          "line_index": 1,
+          "text": "Head Protection",
+          "bbox": [
+            54.0,
+            66.0,
+            144.0,
+            78.0
+          ]
+        },
+        {
+          "line_index": 2,
+          "text": "Knee Pads",
+          "bbox": [
+            54.0,
+            78.0,
+            108.0,
+            90.0
+          ]
+        },
+        {
+          "line_index": 3,
+          "text": "High Visibility Safety Vests",
+          "bbox": [
+            54.0,
+            90.0,
+            222.0,
+            102.0
+          ]
+        },
+        {
+          "line_index": 4,
+          "text": "Hearing Protection",
+          "bbox": [
+            54.0,
+            102.0,
+            162.0,
+            114.0
+          ]
+        },
+        {
+          "line_index": 5,
+          "text": "Respirators",
+          "bbox": [
+            54.0,
+            114.0,
+            120.0,
+            126.0
+          ]
+        },
+        {
+          "line_index": 6,
+          "text": "Gloves",
+          "bbox": [
+            54.0,
+            126.0,
+            90.0,
+            138.0
+          ]
+        },
+        {
+          "line_index": 7,
+          "text": "Tool Lanyards",
+          "bbox": [
+            54.0,
+            138.0,
+            132.0,
+            150.0
+          ]
+        },
+        {
+          "line_index": 8,
+          "text": "Site Lighting",
+          "bbox": [
+            54.0,
+            150.0,
+            132.0,
+            162.0
+          ]
+        },
+        {
+          "line_index": 9,
+          "text": "Dust Management",
+          "bbox": [
+            54.0,
+            162.0,
+            144.0,
+            174.0
+          ]
+        },
+        {
+          "line_index": 10,
+          "text": "Cooling",
+          "bbox": [
+            54.0,
+            174.0,
+            96.0,
+            186.0
+          ]
+        },
+        {
+          "line_index": 11,
+          "text": "ONE-KEY",
+          "bbox": [
+            54.0,
+            186.0,
+            96.0,
+            198.0
+          ]
+        },
+        {
+          "line_index": 12,
+          "text": "View All \u2014 ONE-KEY",
+          "bbox": [
+            54.0,
+            198.0,
+            162.0,
+            210.0
+          ]
+        },
+        {
+          "line_index": 13,
+          "text": "ONE-KEY Compatible Tools",
+          "bbox": [
+            54.0,
+            210.0,
+            198.0,
+            222.0
+          ]
+        },
+        {
+          "line_index": 14,
+          "text": "Asset Tags and Tracking Products",
+          "bbox": [
+            54.0,
+            222.0,
+            246.0,
+            234.0
+          ]
+        },
+        {
+          "line_index": 15,
+          "text": "Inventory Management",
+          "bbox": [
+            54.0,
+            234.0,
+            174.0,
+            246.0
+          ]
+        },
+        {
+          "line_index": 16,
+          "text": "Support",
+          "bbox": [
+            54.0,
+            246.0,
+            96.0,
+            258.0
+          ]
+        },
+        {
+          "line_index": 17,
+          "text": "View All \u2014 Support",
+          "bbox": [
+            54.0,
+            258.0,
+            162.0,
+            270.0
+          ]
+        },
+        {
+          "line_index": 18,
+          "text": "Fix My Tool",
+          "bbox": [
+            54.0,
+            270.0,
+            120.0,
+            282.0
+          ]
+        },
+        {
+          "line_index": 19,
+          "text": "View All \u2014 Fix My Tool",
+          "bbox": [
+            54.0,
+            282.0,
+            186.0,
+            294.0
+          ]
+        },
+        {
+          "line_index": 20,
+          "text": "By Mail (eService)",
+          "bbox": [
+            54.0,
+            294.0,
+            162.0,
+            306.0
+          ]
+        },
+        {
+          "line_index": 21,
+          "text": "By Location (Service Center)",
+          "bbox": [
+            54.0,
+            306.0,
+            222.0,
+            318.0
+          ]
+        },
+        {
+          "line_index": 22,
+          "text": "By Myself (Manuals)",
+          "bbox": [
+            54.0,
+            318.0,
+            168.0,
+            330.0
+          ]
+        },
+        {
+          "line_index": 23,
+          "text": "eService Tool Repair",
+          "bbox": [
+            54.0,
+            330.0,
+            174.0,
+            342.0
+          ]
+        },
+        {
+          "line_index": 24,
+          "text": "E-Rebates",
+          "bbox": [
+            54.0,
+            342.0,
+            108.0,
+            354.0
+          ]
+        },
+        {
+          "line_index": 25,
+          "text": "Find a Distributor",
+          "bbox": [
+            54.0,
+            354.0,
+            162.0,
+            366.0
+          ]
+        },
+        {
+          "line_index": 26,
+          "text": "Find A Service Center",
+          "bbox": [
+            54.0,
+            366.0,
+            180.0,
+            378.0
+          ]
+        },
+        {
+          "line_index": 27,
+          "text": "Parts Pricing",
+          "bbox": [
+            54.0,
+            378.0,
+            132.0,
+            390.0
+          ]
+        },
+        {
+          "line_index": 28,
+          "text": "Manuals & Downloads",
+          "bbox": [
+            54.0,
+            390.0,
+            168.0,
+            402.0
+          ]
+        },
+        {
+          "line_index": 29,
+          "text": "Registration & Warranty",
+          "bbox": [
+            54.0,
+            402.0,
+            192.0,
+            414.0
+          ]
+        },
+        {
+          "line_index": 30,
+          "text": "Contact Us",
+          "bbox": [
+            54.0,
+            414.0,
+            114.0,
+            426.0
+          ]
+        },
+        {
+          "line_index": 31,
+          "text": "New Pipeline",
+          "bbox": [
+            54.0,
+            426.0,
+            126.0,
+            438.0
+          ]
+        },
+        {
+          "line_index": 32,
+          "text": "world leader in",
+          "bbox": [
+            54.0,
+            438.0,
+            144.0,
+            450.0
+          ]
+        },
+        {
+          "line_index": 33,
+          "text": "cordless innovation",
+          "bbox": [
+            54.0,
+            450.0,
+            168.0,
+            462.0
+          ]
+        },
+        {
+          "line_index": 34,
+          "text": "most versatile, durable",
+          "bbox": [
+            54.0,
+            462.0,
+            192.0,
+            474.0
+          ]
+        },
+        {
+          "line_index": 35,
+          "text": "modular storage system",
+          "bbox": [
+            54.0,
+            474.0,
+            186.0,
+            486.0
+          ]
+        },
+        {
+          "line_index": 36,
+          "text": "Sign Up / Log In",
+          "bbox": [
+            54.0,
+            486.0,
+            150.0,
+            498.0
+          ]
+        },
+        {
+          "line_index": 37,
+          "text": "Where To Buy",
+          "bbox": [
+            54.0,
+            498.0,
+            126.0,
+            510.0
+          ]
+        },
+        {
+          "line_index": 38,
+          "text": "US : : EN",
+          "bbox": [
+            54.0,
+            510.0,
+            108.0,
+            522.0
+          ]
+        },
+        {
+          "line_index": 39,
+          "text": "Contact",
+          "bbox": [
+            54.0,
+            522.0,
+            96.0,
+            534.0
+          ]
+        },
+        {
+          "line_index": 40,
+          "text": "Get Connected",
+          "bbox": [
+            54.0,
+            534.0,
+            132.0,
+            546.0
+          ]
+        },
+        {
+          "line_index": 41,
+          "text": "Home",
+          "bbox": [
+            54.0,
+            546.0,
+            78.0,
+            558.0
+          ]
+        },
+        {
+          "line_index": 42,
+          "text": "\u2026",
+          "bbox": [
+            54.0,
+            558.0,
+            60.0,
+            570.0
+          ]
+        },
+        {
+          "line_index": 43,
+          "text": "Products",
+          "bbox": [
+            54.0,
+            570.0,
+            102.0,
+            582.0
+          ]
+        },
+        {
+          "line_index": 44,
+          "text": "Accessories",
+          "bbox": [
+            54.0,
+            582.0,
+            120.0,
+            594.0
+          ]
+        },
+        {
+          "line_index": 45,
+          "text": "Abrasives",
+          "bbox": [
+            54.0,
+            594.0,
+            108.0,
+            606.0
+          ]
+        },
+        {
+          "line_index": 46,
+          "text": "Cut Off Wheels",
+          "bbox": [
+            54.0,
+            606.0,
+            138.0,
+            618.0
+          ]
+        },
+        {
+          "line_index": 47,
+          "text": "49-94-1920",
+          "bbox": [
+            54.0,
+            618.0,
+            114.0,
+            630.0
+          ]
+        },
+        {
+          "line_index": 48,
+          "text": "7\" x 1/8\" x 5/8\" DKO Masonry Cut Off Wheel -Type 1",
+          "bbox": [
+            54.0,
+            630.0,
+            354.0,
+            642.0
+          ]
+        },
+        {
+          "line_index": 49,
+          "text": "Share",
+          "bbox": [
+            54.0,
+            642.0,
+            84.0,
+            654.0
+          ]
+        },
+        {
+          "line_index": 50,
+          "text": "Options:",
+          "bbox": [
+            54.0,
+            654.0,
+            102.0,
+            666.0
+          ]
+        },
+        {
+          "line_index": 51,
+          "text": "Diameter: 7\"",
+          "bbox": [
+            54.0,
+            666.0,
+            126.0,
+            678.0
+          ]
+        },
+        {
+          "line_index": 52,
+          "text": "Type: 1",
+          "bbox": [
+            54.0,
+            678.0,
+            96.0,
+            690.0
+          ]
+        },
+        {
+          "line_index": 53,
+          "text": "Arbor Size: DM, 5/8 in",
+          "bbox": [
+            54.0,
+            690.0,
+            186.0,
+            702.0
+          ]
+        },
+        {
+          "line_index": 54,
+          "text": "Thickness: 1/8 in",
+          "bbox": [
+            54.0,
+            702.0,
+            156.0,
+            714.0
+          ]
+        },
+        {
+          "line_index": 55,
+          "text": "Buying through an authorized Milwaukee Tool Partner is important. Learn More",
+          "bbox": [
+            54.0,
+            714.0,
+            510.0,
+            726.0
+          ]
+        },
+        {
+          "line_index": 56,
+          "text": "Where To Buy",
+          "bbox": [
+            54.0,
+            726.0,
+            126.0,
+            738.0
+          ]
+        },
+        {
+          "line_index": 57,
+          "text": "Specs",
+          "bbox": [
+            54.0,
+            738.0,
+            84.0,
+            750.0
+          ]
+        }
+      ],
+      "tables": []
+    },
+    {
+      "number": 9,
+      "width": 612.0,
+      "height": 792.0,
+      "lines": [
+        {
+          "line_index": 0,
+          "text": "Loading",
+          "bbox": [
+            54.0,
+            54.0,
+            96.0,
+            66.0
+          ]
+        },
+        {
+          "line_index": 1,
+          "text": "Manuals",
+          "bbox": [
+            54.0,
+            66.0,
+            96.0,
+            78.0
+          ]
+        },
+        {
+          "line_index": 2,
+          "text": "Parts List",
+          "bbox": [
+            54.0,
+            78.0,
+            114.0,
+            90.0
+          ]
+        },
+        {
+          "line_index": 3,
+          "text": "Product Overview",
+          "bbox": [
+            54.0,
+            90.0,
+            150.0,
+            102.0
+          ]
+        },
+        {
+          "line_index": 4,
+          "text": "Our masonry cut-off wheels are designed for long life and fast cuts in concrete and masonry applications. Engineered with our unique formula of resin bonding agents and premium silicone carbide grain, these wheels offer long-lasting performance \u2013 while maintaining smooth, controlled cuts throughout the job. Manufactured with 2 full sheets of high-strength fiberglass reinforcement, these wheels are engineered for durability. Our cut-off wheels offer exceptional versatility to cut through a variety of concrete and masonry materials.",
+          "bbox": [
+            54.0,
+            102.0,
+            3270.0,
+            114.0
+          ]
+        },
+        {
+          "line_index": 5,
+          "text": "Long Life. Fast Cuts.",
+          "bbox": [
+            54.0,
+            114.0,
+            180.0,
+            126.0
+          ]
+        },
+        {
+          "line_index": 6,
+          "text": "Extended Life in Masonry",
+          "bbox": [
+            54.0,
+            126.0,
+            198.0,
+            138.0
+          ]
+        },
+        {
+          "line_index": 7,
+          "text": "Quick Cutting",
+          "bbox": [
+            54.0,
+            138.0,
+            132.0,
+            150.0
+          ]
+        },
+        {
+          "line_index": 8,
+          "text": "Smooth, Controlled Cutting",
+          "bbox": [
+            54.0,
+            150.0,
+            210.0,
+            162.0
+          ]
+        },
+        {
+          "line_index": 9,
+          "text": "2 Sheets of Fiber Glass Reinforcement",
+          "bbox": [
+            54.0,
+            162.0,
+            276.0,
+            174.0
+          ]
+        },
+        {
+          "line_index": 10,
+          "text": "Silicon Carbide Grain Provides Durable Performance",
+          "bbox": [
+            54.0,
+            174.0,
+            354.0,
+            186.0
+          ]
+        },
+        {
+          "line_index": 11,
+          "text": "For Use in Brick, Block, Stone, Mortar, and Other Masonry Applications",
+          "bbox": [
+            54.0,
+            186.0,
+            474.0,
+            198.0
+          ]
+        },
+        {
+          "line_index": 12,
+          "text": "7\" Wheel Diameter",
+          "bbox": [
+            54.0,
+            198.0,
+            156.0,
+            210.0
+          ]
+        },
+        {
+          "line_index": 13,
+          "text": "Type 1",
+          "bbox": [
+            54.0,
+            210.0,
+            90.0,
+            222.0
+          ]
+        },
+        {
+          "line_index": 14,
+          "text": "5/8\" DKO Arbor",
+          "bbox": [
+            54.0,
+            222.0,
+            138.0,
+            234.0
+          ]
+        },
+        {
+          "line_index": 15,
+          "text": "For Use With Angle Grinder",
+          "bbox": [
+            54.0,
+            234.0,
+            210.0,
+            246.0
+          ]
+        },
+        {
+          "line_index": 16,
+          "text": "Product Documents",
+          "bbox": [
+            54.0,
+            246.0,
+            156.0,
+            258.0
+          ]
+        },
+        {
+          "line_index": 17,
+          "text": "Data Sheets",
+          "bbox": [
+            54.0,
+            258.0,
+            120.0,
+            270.0
+          ]
+        },
+        {
+          "line_index": 18,
+          "text": "2026_Bonded Abrasives_Solutions Guide",
+          "bbox": [
+            54.0,
+            270.0,
+            276.0,
+            282.0
+          ]
+        },
+        {
+          "line_index": 19,
+          "text": "Bonded Abrasive Wheel Safety Guide",
+          "bbox": [
+            54.0,
+            282.0,
+            258.0,
+            294.0
+          ]
+        },
+        {
+          "line_index": 20,
+          "text": "Reviews",
+          "bbox": [
+            54.0,
+            294.0,
+            96.0,
+            306.0
+          ]
+        },
+        {
+          "line_index": 21,
+          "text": "Additional Resources",
+          "bbox": [
+            54.0,
+            306.0,
+            174.0,
+            318.0
+          ]
+        },
+        {
+          "line_index": 22,
+          "text": "Manuals",
+          "bbox": [
+            54.0,
+            318.0,
+            96.0,
+            330.0
+          ]
+        },
+        {
+          "line_index": 23,
+          "text": "Warranty",
+          "bbox": [
+            54.0,
+            330.0,
+            102.0,
+            342.0
+          ]
+        },
+        {
+          "line_index": 24,
+          "text": "Parts List",
+          "bbox": [
+            54.0,
+            342.0,
+            114.0,
+            354.0
+          ]
+        },
+        {
+          "line_index": 25,
+          "text": "Fix My Tool",
+          "bbox": [
+            54.0,
+            354.0,
+            120.0,
+            366.0
+          ]
+        },
+        {
+          "line_index": 26,
+          "text": "49-94-1920",
+          "bbox": [
+            54.0,
+            366.0,
+            114.0,
+            378.0
+          ]
+        },
+        {
+          "line_index": 27,
+          "text": "7\" x 1/8\" x 5/8\" DKO Masonry Cut Off Wheel -Type 1",
+          "bbox": [
+            54.0,
+            378.0,
+            354.0,
+            390.0
+          ]
+        },
+        {
+          "line_index": 28,
+          "text": "Share",
+          "bbox": [
+            54.0,
+            390.0,
+            84.0,
+            402.0
+          ]
+        },
+        {
+          "line_index": 29,
+          "text": "Where To Buy",
+          "bbox": [
+            54.0,
+            402.0,
+            126.0,
+            414.0
+          ]
+        },
+        {
+          "line_index": 30,
+          "text": "\u00a9 2026 by Milwaukee Tool. All rights reserved.",
+          "bbox": [
+            54.0,
+            414.0,
+            330.0,
+            426.0
+          ]
+        },
+        {
+          "line_index": 31,
+          "text": "Legal",
+          "bbox": [
+            54.0,
+            426.0,
+            84.0,
+            438.0
+          ]
+        },
+        {
+          "line_index": 32,
+          "text": "Patent",
+          "bbox": [
+            54.0,
+            438.0,
+            90.0,
+            450.0
+          ]
+        },
+        {
+          "line_index": 33,
+          "text": "Safety Notices",
+          "bbox": [
+            54.0,
+            450.0,
+            138.0,
+            462.0
+          ]
+        },
+        {
+          "line_index": 34,
+          "text": "Your Privacy Choices",
+          "bbox": [
+            54.0,
+            462.0,
+            174.0,
+            474.0
+          ]
+        },
+        {
+          "line_index": 35,
+          "text": "Cookie Preferences",
+          "bbox": [
+            54.0,
+            474.0,
+            162.0,
+            486.0
+          ]
+        },
+        {
+          "line_index": 36,
+          "text": "Privacy Notice",
+          "bbox": [
+            54.0,
+            486.0,
+            138.0,
+            498.0
+          ]
+        },
+        {
+          "line_index": 37,
+          "text": "Contact Us",
+          "bbox": [
+            54.0,
+            498.0,
+            114.0,
+            510.0
           ]
         }
       ],
@@ -1459,7 +6878,9 @@
               "a/o",
               "aluminium oxide",
               "al2o3",
-              "brown aluminum oxide"
+              "brown aluminum oxide",
+              "blue-fired aluminum oxide",
+              "blue-fired aluminium oxide"
             ],
             "note": null
           },
@@ -2247,17 +7668,17 @@
     ]
   },
   "policy": {
-    "epsilon": 0.02,
+    "epsilon": 0.05,
     "confidence_level": 0.95,
-    "threshold": 0.7194,
-    "coverage": 0.7591,
-    "accepted": 167,
-    "accepted_errors": 0,
-    "observed_error_rate": 0.0,
-    "error_upper_bound": 0.0159,
+    "threshold": 0.6853,
+    "coverage": 1.0,
+    "accepted": 220,
+    "accepted_errors": 1,
+    "observed_error_rate": 0.0045,
+    "error_upper_bound": 0.0201,
     "calibration_size": 220,
     "achievable": true,
-    "reason": "at threshold 0.719, 75.9% of values are publishable with an error rate of at most 1.6% at 95% confidence"
+    "reason": "at threshold 0.685, 100.0% of values are publishable with an error rate of at most 2.0% at 95% confidence"
   },
   "calibrator": "untrained-heuristic"
 }

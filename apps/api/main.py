@@ -69,7 +69,7 @@ from axiom.pipeline import (
     enrich_one,
     persist_run,
 )
-from axiom.pipeline.persist import bundle_payload
+from axiom.pipeline.persist import bundle_payload, source_summaries
 from axiom.pipeline.source import SUBMISSION_MAX_BYTES
 from axiom.review import ACCEPT, CORRECT, REJECT, ReviewSession, queue_summary, record_decision
 from axiom.schema import load_default as load_schema
@@ -238,6 +238,13 @@ class EnrichRequest(BaseModel):
             "look for the manufacturer's own document when no URL is supplied: the document "
             "library first, then the manufacturer's site read through its own search form. No "
             "model call. Off makes the run fully offline and then requires a description or a URL."
+        ),
+    )
+    refresh_sources: bool = Field(
+        default=False,
+        description=(
+            "bypass stored SKU coverage once and look for a richer live manufacturer product "
+            "page or linked datasheet; existing coverage remains the fallback"
         ),
     )
     brand: str | None = Field(default=None, max_length=256)
@@ -1213,12 +1220,12 @@ def browser_renderer():
 
 
 def search_provider():
-    """The open-web search arm, preferring Brave when credentials are configured.
+    """The open-web arm, preferring Serper when credentials are configured.
 
-    ``AXIOM_SEARCH=auto`` (the default) selects Brave when ``AXIOM_BRAVE_API_KEY`` or
-    ``BRAVE_SEARCH_API_KEY`` is present and otherwise uses the keyless DuckDuckGo fallback.
-    Explicit ``brave`` configuration degrades to DuckDuckGo when its key is unavailable so one
-    missing secret does not disable product discovery entirely.
+    ``AXIOM_SEARCH=auto`` (the default) selects Serper when ``AXIOM_SERPER_API_KEY`` or
+    ``SERPER_API_KEY`` is present and otherwise uses the keyless DuckDuckGo fallback. Explicit
+    ``serper`` configuration degrades to DuckDuckGo when its key is unavailable so one missing
+    secret does not disable product discovery entirely.
     """
     import os
 
@@ -1226,20 +1233,20 @@ def search_provider():
     if choice in {"off", "none", "0", "false"}:
         return None
 
-    brave_key = os.environ.get("AXIOM_BRAVE_API_KEY") or os.environ.get(
-        "BRAVE_SEARCH_API_KEY"
+    serper_key = os.environ.get("AXIOM_SERPER_API_KEY") or os.environ.get(
+        "SERPER_API_KEY"
     )
     if choice == "auto":
-        choice = "brave" if brave_key else "duckduckgo"
+        choice = "serper" if serper_key else "duckduckgo"
 
-    if choice == "brave":
-        from axiom.retrieve import BraveSearch, BraveSearchError
+    if choice == "serper":
+        from axiom.retrieve import SerperSearch, SerperSearchError
 
         try:
-            return BraveSearch.from_env()
-        except BraveSearchError as exc:
+            return SerperSearch.from_env()
+        except SerperSearchError as exc:
             print(
-                f"[axiom] AXIOM_SEARCH=brave but that provider is unavailable: {exc}; "
+                f"[axiom] AXIOM_SEARCH=serper but that provider is unavailable: {exc}; "
                 "falling back to DuckDuckGo",
                 file=sys.stderr,
             )
@@ -1418,6 +1425,7 @@ def _run_enrichment(request: EnrichRequest) -> JSONResponse:
             class_code=request.class_code,
             supplier_id=request.supplier_id,
             include_optional=request.include_optional,
+            refresh_sources=request.refresh_sources,
             generate_copy=request.generate_copy,
             risk_budget=request.risk_budget,
             retrieve=request.retrieve,
@@ -1470,9 +1478,8 @@ def _run_enrichment(request: EnrichRequest) -> JSONResponse:
             store=LocalArtifactStore(ARTIFACT_DIR),
             calibration_dir=CALIBRATION_DIR,
             # Retrieval on, which is what makes a part number plus a manufacturer name sufficient.
-            # It makes HTTP requests to the manufacturer's own site, policy-gated and robots-aware,
-            # and no model call. `search` is left None: the open-web arm needs a key and a bill, so
-            # it is opt-in rather than ambient.
+            # It makes policy-gated, robots-aware HTTP requests and no model call. The open-web
+            # arm selects Serper when configured and otherwise uses the keyless DuckDuckGo fallback.
             library_path=LIBRARY_INDEX,
             fetcher=retrieval_fetcher(),
             search=search_provider(),
@@ -1499,6 +1506,11 @@ def _run_enrichment(request: EnrichRequest) -> JSONResponse:
         # configuration problem.
         raise HTTPException(status_code=503, detail=_credentials_detail(exc)) from exc
 
+    sources = source_summaries(
+        result.source,
+        result.retrieval,
+        mpn=enrichment_request.clean_mpn,
+    )
     paths = persist_run(
         result.run,
         parsed=result.source.parsed,
@@ -1506,6 +1518,7 @@ def _run_enrichment(request: EnrichRequest) -> JSONResponse:
         registry=registry,
         sessions_dir=SESSION_DIR,
         console_dir=CONSOLE_DIR,
+        sources=sources,
     )
 
     delivery = build_delivery(
@@ -1517,7 +1530,11 @@ def _run_enrichment(request: EnrichRequest) -> JSONResponse:
         manufacturer=request.manufacturer,
         description=request.description,
         brand=request.brand,
-        source_url=url or None,
+        source_url=(
+            result.source.artifact.document.uri
+            if result.source.citable_as_manufacturer
+            else None
+        ),
     )
 
     # The bundle the console already knows how to render. `pages` is deliberately dropped: the
@@ -1529,6 +1546,7 @@ def _run_enrichment(request: EnrichRequest) -> JSONResponse:
         parsed=result.source.parsed,
         artifact=result.source.artifact,
         registry=registry,
+        sources=sources,
     )
 
     return JSONResponse(

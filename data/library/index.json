@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-08-23T15:45:26.373594+00:00",
+  "generated_at": "2026-08-24T11:23:52.343120+00:00",
   "documents": [
     {
       "sha256": "01d4f6dc964504f330917a4a49354ee3b8a762ba3c3263192ad28c0a829ee248",
@@ -20073,6 +20073,48 @@
       "withdrawn": {}
     },
     {
+      "sha256": "6160f24b864b8cb8158186d87d69e9cbcfda70c0ab6f303a4e8c2c2a0ad5cdd9",
+      "storage_uri": "local://61/60/6160f24b864b8cb8158186d87d69e9cbcfda70c0ab6f303a4e8c2c2a0ad5cdd9.html",
+      "document_id": "49-94-1920@6160f24b",
+      "source_uri": "https://www.milwaukeetool.com/products/details/7-x-1-8-x-5-8-dko-masonry-cut-off-wheel-type-1/49-94-1920",
+      "host": "www.milwaukeetool.com",
+      "tier": "manufacturer",
+      "manufacturer_id": "milwaukee_tool",
+      "doc_type": "web_page",
+      "filename": "49-94-1920.html",
+      "size_bytes": 666761,
+      "fetched_at": "2026-08-24T11:19:57.133500+00:00",
+      "revision_label": null,
+      "license_note": "retrieved from www.milwaukeetool.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {
+        "49-94-1920": "text"
+      },
+      "absent": [
+        "48-22-4014"
+      ],
+      "withdrawn": {}
+    },
+    {
+      "sha256": "68e3a60ec85146d69ad9115ae6160d1e7e662dba824e079422d4d6592f8e5e59",
+      "storage_uri": "local://68/e3/68e3a60ec85146d69ad9115ae6160d1e7e662dba824e079422d4d6592f8e5e59.html",
+      "document_id": "48-22-4014@68e3a60e",
+      "source_uri": "https://www.milwaukeetool.com/products/details/14-bolt-cutter/48-22-4014",
+      "host": "www.milwaukeetool.com",
+      "tier": "manufacturer",
+      "manufacturer_id": "milwaukee_tool",
+      "doc_type": "web_page",
+      "filename": "48-22-4014.html",
+      "size_bytes": 565192,
+      "fetched_at": "2026-08-24T11:23:23.707378+00:00",
+      "revision_label": null,
+      "license_note": "retrieved from www.milwaukeetool.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {
+        "48-22-4014": "text"
+      },
+      "absent": [],
+      "withdrawn": {}
+    },
+    {
       "sha256": "6b88f8bbe75209584cb5cefda084571ad5b91b14f157635c3d09b269b89207af",
       "storage_uri": "local://6b/88/6b88f8bbe75209584cb5cefda084571ad5b91b14f157635c3d09b269b89207af.html",
       "document_id": "maritime-chandelier-82399@6b88f8bb",
@@ -23448,6 +23490,26 @@
         "d10cnk",
         "e28cnkha"
       ],
+      "withdrawn": {}
+    },
+    {
+      "sha256": "758ec3a3efe637504a990f94c01a672decf4ecc9e93cdd75a6e1dddca20f63fc",
+      "storage_uri": "local://75/8e/758ec3a3efe637504a990f94c01a672decf4ecc9e93cdd75a6e1dddca20f63fc.pdf",
+      "document_id": "54-49-1605@758ec3a3",
+      "source_uri": "https://documents.milwaukeetool.com/54-49-1605.pdf",
+      "host": "documents.milwaukeetool.com",
+      "tier": "manufacturer",
+      "manufacturer_id": "milwaukee_tool",
+      "doc_type": "spec_sheet",
+      "filename": "54-49-1605.pdf",
+      "size_bytes": 3022377,
+      "fetched_at": "2026-08-24T11:23:27.773552+00:00",
+      "revision_label": "Fri, 20 Feb 2026 15:38:23 GMT",
+      "license_note": "retrieved from documents.milwaukeetool.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {
+        "48-22-4014": "table"
+      },
+      "absent": [],
       "withdrawn": {}
     },
     {
@@ -36609,6 +36671,29 @@
         "XVP01Z",
         "d10cnk",
         "e28cnkha"
+      ],
+      "withdrawn": {}
+    },
+    {
+      "sha256": "b5039ff3df039320af7325bf7737c4e02dd9ba90c9c3dee4f579435f1c5b59dd",
+      "storage_uri": "local://b5/03/b5039ff3df039320af7325bf7737c4e02dd9ba90c9c3dee4f579435f1c5b59dd.pdf",
+      "document_id": "urun-katalou-2026@b5039ff3",
+      "source_uri": "https://cms.mirka.com/globalassets/tr/downloads/urun-katalou-2026.pdf",
+      "host": "cms.mirka.com",
+      "tier": "manufacturer",
+      "manufacturer_id": "mirka",
+      "doc_type": "spec_sheet",
+      "filename": "urun-katalou-2026.pdf",
+      "size_bytes": 31073338,
+      "fetched_at": "2026-08-24T09:54:49.178205+00:00",
+      "revision_label": "Wed, 21 Jan 2026 07:51:34 GMT",
+      "license_note": "retrieved from cms.mirka.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {
+        "8896700140": "table"
+      },
+      "absent": [
+        "48-22-4014",
+        "49-94-1920"
       ],
       "withdrawn": {}
     },

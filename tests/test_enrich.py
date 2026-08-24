@@ -499,6 +499,22 @@ def test_the_response_carries_the_bundle_the_console_already_renders(client):
     assert "pages" not in payload
 
 
+def test_submission_api_keeps_the_new_specification_collections_compatible_and_empty(client):
+    """Customer-entered descriptions must not be relabeled as manufacturer-published facts."""
+    payload = submit(client).json()
+
+    assert payload["summary"]["manufacturer_specifications"] == {
+        "total": 0,
+        "mapped": 0,
+        "unmapped": 0,
+    }
+    assert payload["bundle"]["manufacturer_specifications"] == []
+
+    session = client.get(f"/api/session/{payload['slug']}")
+    assert session.status_code == 200
+    assert session.json()["manufacturer_specifications"] == []
+
+
 def test_a_cold_start_queues_everything_and_says_why(client):
     """No calibration data means no validated threshold, so nothing auto-publishes.
 

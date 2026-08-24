@@ -12,7 +12,7 @@ services:
       AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-us-east-2}
       AWS_REGION: ${AWS_DEFAULT_REGION:-us-east-2}
       AXIOM_SEARCH: ${AXIOM_SEARCH:-auto}
-      AXIOM_BRAVE_API_KEY: ${AXIOM_BRAVE_API_KEY:-}
+      AXIOM_SERPER_API_KEY: ${AXIOM_SERPER_API_KEY:-}
       AXIOM_BROWSER: ${AXIOM_BROWSER:-auto}
     volumes:
       - type: bind

@@ -22,8 +22,10 @@ from dataclasses import dataclass
 from axiom.schema.models import AttributeDefinition, ClassDefinition, Requirement
 from axiom.schema.registry import SchemaRegistry
 
-PROMPT_VERSION = "extract.v2"
-"""Bumped from v1: added the applicability rule (rule 8) and datatype reporting guidance.
+PROMPT_VERSION = "extract.v3"
+"""Bumped from v2: one response now preserves open-ended manufacturer specifications alongside
+schema-bound attributes. The typed channel remains closed; the source-native channel retains every
+explicit label/value pair without inventing attribute codes.
 
 Versioning the prompt is not bureaucracy. Every extracted value records the prompt version
 that produced it, so when accuracy moves you can attribute it to a specific change instead
@@ -54,13 +56,31 @@ condition — for example "(1/2\" size)", "for 3 inch and larger", "cold water o
 it ONLY when that qualifier matches the target SKU. Otherwise set "found": false and state \
 the mismatch in "reason". A value that is present in the document but describes a different \
 variant is NOT a value for this SKU, even though you can quote it.
+9. MANUFACTURER SPECIFICATIONS. Independently of the requested schema attributes, enumerate EVERY \
+explicit product label/value pair that applies to the target SKU. Include identifiers, dimensions, \
+materials, construction, compatibility, operating limits, performance, packaging, approvals and \
+manufacturer-specific fields even when no requested attribute represents them. Copy both \
+label_raw and value_raw from the source; both must appear in evidence_quote. Do not include \
+navigation, contact details, legal boilerplate, or a marketing sentence that states no concrete \
+product value.
 
 OUTPUT
-Return ONLY a JSON array. No markdown fences, no commentary.
-Each element must be exactly:
-  {"attribute_code": str, "found": bool, "value_raw": str|null,
-   "evidence_quote": str|null, "evidence_page": int|null, "certainty": "high"|"medium"|"low",
-   "reason": str|null}
+Return ONLY one JSON object. No markdown fences, no commentary:
+{
+  "attributes": [
+    {"attribute_code": str, "found": bool, "value_raw": str|null,
+     "evidence_quote": str|null, "evidence_page": int|null,
+     "certainty": "high"|"medium"|"low", "reason": str|null}
+  ],
+  "manufacturer_specifications": [
+    {"label_raw": str, "value_raw": str, "evidence_quote": str,
+     "evidence_page": int|null, "certainty": "high"|"medium"|"low"}
+  ]
+}
+Return one attributes element for every requested attribute. Return only specifications that are \
+present; do not create found=false specification rows. A known attribute should ALSO appear in \
+manufacturer_specifications when the source prints it, because that channel is the complete \
+source-native account rather than only an overflow bucket.
 """
 
 NEGATIVE_DEMONSTRATION = """\
@@ -165,6 +185,51 @@ def build_extraction_prompt(
     )
 
 
+def build_specification_extraction_prompt(
+    *,
+    source_content: str,
+    target_sku: str,
+    source_name: str | None = None,
+) -> ExtractionPrompt:
+    """Build a source-native pass for a document whose product class is still unknown.
+
+    No typed value can be created without a class definition. The independent specification
+    channel does not need one, so it remains useful instead of turning classification abstention
+    into an identity-only record.
+    """
+    prefix = "\n".join(
+        [
+            "PRODUCT CLASS: Unclassified (source-native specification pass)",
+            "",
+            "ATTRIBUTES TO EXTRACT:",
+            "None. Return an empty attributes array.",
+            "",
+            "Retain every explicit target-SKU label/value pair in manufacturer_specifications.",
+            "",
+            NEGATIVE_DEMONSTRATION,
+        ]
+    )
+    suffix = "\n".join(
+        [
+            f"TARGET SKU: {target_sku}",
+            f"SOURCE DOCUMENT: {source_name or 'unnamed'}",
+            "",
+            "SOURCE CONTENT:",
+            "<<<",
+            source_content,
+            ">>>",
+        ]
+    )
+    return ExtractionPrompt(
+        system=SYSTEM_INSTRUCTIONS,
+        cacheable_prefix=prefix,
+        volatile_suffix=suffix,
+        prompt_version=PROMPT_VERSION,
+        schema_version="source-native@v1",
+        attribute_codes=(),
+    )
+
+
 def _class_header(definition: ClassDefinition) -> str:
     lines = [f"PRODUCT CLASS: {definition.name} ({definition.code})"]
     if definition.browse_path:
@@ -173,24 +238,45 @@ def _class_header(definition: ClassDefinition) -> str:
 
 
 def build_output_schema(attributes: list[AttributeDefinition]) -> dict:
-    """JSON Schema for the evidence contract, for models supporting structured output."""
-    return {
-        "type": "array",
-        "items": {
-            "type": "object",
-            "required": ["attribute_code", "found"],
-            "properties": {
-                "attribute_code": {
-                    "type": "string",
-                    "enum": [a.code for a in attributes],
-                },
-                "found": {"type": "boolean"},
-                "value_raw": {"type": ["string", "null"]},
-                "evidence_quote": {"type": ["string", "null"]},
-                "evidence_page": {"type": ["integer", "null"]},
-                "certainty": {"type": "string", "enum": ["high", "medium", "low"]},
-                "reason": {"type": ["string", "null"]},
+    """JSON Schema for providers supporting constrained structured output."""
+    attribute_item = {
+        "type": "object",
+        "required": ["attribute_code", "found"],
+        "properties": {
+            "attribute_code": {
+                "type": "string",
+                "enum": [a.code for a in attributes],
             },
-            "additionalProperties": False,
+            "found": {"type": "boolean"},
+            "value_raw": {"type": ["string", "null"]},
+            "evidence_quote": {"type": ["string", "null"]},
+            "evidence_page": {"type": ["integer", "null"]},
+            "certainty": {"type": "string", "enum": ["high", "medium", "low"]},
+            "reason": {"type": ["string", "null"]},
         },
+        "additionalProperties": False,
+    }
+    specification_item = {
+        "type": "object",
+        "required": ["label_raw", "value_raw", "evidence_quote"],
+        "properties": {
+            "label_raw": {"type": "string", "minLength": 1},
+            "value_raw": {"type": "string", "minLength": 1},
+            "evidence_quote": {"type": "string", "minLength": 1},
+            "evidence_page": {"type": ["integer", "null"]},
+            "certainty": {"type": "string", "enum": ["high", "medium", "low"]},
+        },
+        "additionalProperties": False,
+    }
+    return {
+        "type": "object",
+        "required": ["attributes", "manufacturer_specifications"],
+        "properties": {
+            "attributes": {"type": "array", "items": attribute_item},
+            "manufacturer_specifications": {
+                "type": "array",
+                "items": specification_item,
+            },
+        },
+        "additionalProperties": False,
     }

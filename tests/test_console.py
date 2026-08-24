@@ -337,6 +337,7 @@ def test_bundle_carries_everything_a_screen_needs(bundle):
         "record",
         "classifications",
         "values",
+        "manufacturer_specifications",
         "gaps",
         "extraction",
         "validation",
@@ -345,6 +346,72 @@ def test_bundle_carries_everything_a_screen_needs(bundle):
         "metrics",
     ):
         assert key in bundle, f"the console renders {key}"
+
+
+def test_bundle_preserves_an_unknown_manufacturer_label_and_its_evidence(registry):
+    from axiom.core.specifications import ManufacturerSpecification, specification_id
+
+    label = "Ball / Stem"
+    displayed = "Chrome-plated brass / Brass"
+    quote = "Ball / Stem .................... Chrome-plated brass / Brass"
+    record = product()
+    record.add_manufacturer_specification(
+        ManufacturerSpecification(
+            specification_id=specification_id(SHA, label, displayed),
+            label_raw=label,
+            value_raw=displayed,
+            evidence=[span(quote)],
+            confidence=0.94,
+            method=DerivationMethod.DOCUMENT_EXTRACTION,
+            mapped_attribute_code=None,
+            citable_as_manufacturer=True,
+            model_id="test-model",
+            prompt_version="extract.v3",
+            schema_version=record.schema_version,
+        )
+    )
+    made = decisions_for(record)
+    projected = build_bundle(
+        registry=registry,
+        record=record,
+        artifact=StubArtifact(document=source_document()),
+        classification=StubClassification(
+            candidates=[StubCandidate(CLASS_CODE, 0.92, "Plumbing > Valves")]
+        ),
+        extraction=StubExtraction(),
+        normalization_issues=[],
+        validation=Validator(registry).validate(record),
+        scores=SCORES,
+        features=FEATURES,
+        decisions=made,
+        certificate=build_certificate(
+            record,
+            required_attribute_codes=registry.required_codes(CLASS_CODE),
+            pipeline_version="axiom-test",
+        ),
+        exports=export_all(record, registry),
+    )
+
+    assert projected["manufacturer_specifications"] == [
+        {
+            "specification_id": specification_id(SHA, label, displayed),
+            "label_raw": label,
+            "value_raw": displayed,
+            "evidence": [jsonable(span(quote))],
+            "confidence": 0.94,
+            "method": "document_extraction",
+            "mapped_attribute_code": None,
+            "citable_as_manufacturer": True,
+            "model_id": "test-model",
+            "model_tier": None,
+            "prompt_version": "extract.v3",
+            "schema_version": f"{CLASS_CODE}@v1",
+            "has_verified_evidence": True,
+            "citation_summary": ["ba100@9f2c0000 p.1"],
+        }
+    ]
+    assert projected["metrics"]["manufacturer_specifications"] == 1
+    assert projected["metrics"]["manufacturer_specifications_unmapped"] == 1
 
 
 def test_the_record_block_projects_the_variant_parent_pointer(bundle, registry):

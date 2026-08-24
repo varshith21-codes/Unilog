@@ -41,6 +41,8 @@ export interface EnrichInput {
    * mean the same thing here and only an explicit `false` re-imposes the description-or-URL rule.
    */
   retrieve?: boolean;
+  /** Bypass cached SKU coverage once and look for richer live manufacturer sources. */
+  refreshSources?: boolean;
 }
 
 /**
@@ -80,6 +82,8 @@ export function enrichBody(input: EnrichInput): Record<string, unknown> {
   if (input.replace) body.replace = true;
   // Sent only to turn it off, since on is the API's default too.
   if (input.retrieve === false) body.retrieve = false;
+  // Sent only when selected, so cached SKU coverage remains the default retrieval behavior.
+  if (input.refreshSources) body.refresh_sources = true;
   if (typeof input.riskBudget === "number") body.risk_budget = input.riskBudget;
 
   return body;

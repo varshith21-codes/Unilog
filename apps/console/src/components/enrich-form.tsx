@@ -28,6 +28,7 @@ import clsx from "clsx";
 import Link from "next/link";
 import { useId, useState } from "react";
 
+import { ManufacturerSpecifications } from "@/components/manufacturer-specifications";
 import { PipelineLive } from "@/components/pipeline-live";
 import { AlertIcon, KeyValue, Overline, Panel } from "@/components/primitives";
 import { runEnrichment } from "@/lib/actions";
@@ -55,6 +56,7 @@ interface Fields {
   includeOptional: boolean;
   generateCopy: boolean;
   retrieve: boolean;
+  refreshSources: boolean;
 }
 
 const EMPTY: Fields = {
@@ -67,6 +69,7 @@ const EMPTY: Fields = {
   generateCopy: false,
   // On, because it is what makes the two required fields sufficient.
   retrieve: true,
+  refreshSources: false,
 };
 
 export function EnrichForm({ limits }: { limits: EnrichLimits }) {
@@ -94,6 +97,7 @@ export function EnrichForm({ limits }: { limits: EnrichLimits }) {
     includeOptional: fields.includeOptional,
     generateCopy: fields.generateCopy,
     retrieve: fields.retrieve,
+    refreshSources: fields.refreshSources,
   };
   const ready = isSubmittable(input);
   const calls = fields.generateCopy
@@ -111,6 +115,14 @@ export function EnrichForm({ limits }: { limits: EnrichLimits }) {
 
   function set<K extends keyof Fields>(key: K, value: Fields[K]) {
     setFields((current) => ({ ...current, [key]: value }));
+  }
+
+  function setRetrieval(value: boolean) {
+    setFields((current) => ({
+      ...current,
+      retrieve: value,
+      refreshSources: value ? current.refreshSources : false,
+    }));
   }
 
   return (
@@ -277,9 +289,16 @@ export function EnrichForm({ limits }: { limits: EnrichLimits }) {
               />
               <Toggle
                 checked={fields.retrieve}
-                onChange={(value) => set("retrieve", value)}
+                onChange={setRetrieval}
                 label="Find the manufacturer's document"
                 detail="The library first, then the manufacturer's own site. No model call, and it is what makes a part number and a manufacturer enough. Off requires a description or a URL."
+              />
+              <Toggle
+                checked={fields.refreshSources}
+                onChange={(value) => set("refreshSources", value)}
+                disabled={!fields.retrieve}
+                label="Refresh with richer live sources"
+                detail="Bypasses cached SKU coverage once to look for a product page or linked technical datasheet, while retaining the stored document as fallback. No model call, but it may make network requests."
               />
             </div>
           </fieldset>
@@ -483,18 +502,28 @@ function Toggle({
   onChange,
   label,
   detail,
+  disabled = false,
 }: {
   checked: boolean;
   onChange: (value: boolean) => void;
   label: string;
   detail: string;
+  disabled?: boolean;
 }) {
   return (
-    <label className="flex cursor-pointer items-start gap-3 border-b border-[var(--hairline)] py-3 text-sm text-[var(--fg-secondary)] last:border-b-0 hover:text-[var(--fg)] active:opacity-80">
+    <label
+      className={clsx(
+        "flex items-start gap-3 border-b border-[var(--hairline)] py-3 text-sm text-[var(--fg-secondary)] last:border-b-0",
+        disabled
+          ? "cursor-not-allowed opacity-60"
+          : "cursor-pointer hover:text-[var(--fg)] active:opacity-80",
+      )}
+    >
       <input
         type="checkbox"
         checked={checked}
         onChange={(event) => onChange(event.target.checked)}
+        disabled={disabled}
         className="mt-1"
       />
       <span className="min-w-0">
@@ -628,6 +657,22 @@ function Result({ data }: { data: EnrichResponse }) {
   const { summary, delivery, queue } = data;
   const quality = summary.certificate.quality_index;
   const stages = pipelineStages(data.bundle, data.document, data.policy, null);
+  const bundledManufacturerSpecifications = data.bundle.manufacturer_specifications;
+  const manufacturerSpecifications = bundledManufacturerSpecifications ?? [];
+  const mappedManufacturerSpecifications = manufacturerSpecifications.filter(
+    (specification) =>
+      typeof specification.mapped_attribute_code === "string" &&
+      specification.mapped_attribute_code.trim().length > 0,
+  ).length;
+  const derivedManufacturerSpecificationSummary = {
+    total: manufacturerSpecifications.length,
+    mapped: mappedManufacturerSpecifications,
+    unmapped: manufacturerSpecifications.length - mappedManufacturerSpecifications,
+  };
+  const manufacturerSpecificationSummary =
+    bundledManufacturerSpecifications !== undefined
+      ? derivedManufacturerSpecificationSummary
+      : (summary.manufacturer_specifications ?? derivedManufacturerSpecificationSummary);
 
   return (
     <div className="animate-rise mt-10 flex flex-col gap-[var(--spacing-section)]">
@@ -650,11 +695,16 @@ function Result({ data }: { data: EnrichResponse }) {
             : "Classified, extracted, validated, scored and certified. Every figure below was measured by this run."}
         </p>
 
-        <dl className="mt-6 grid grid-cols-2 gap-x-5 gap-y-7 border-y border-[var(--hairline-strong)] py-6 lg:grid-cols-4 lg:gap-x-6">
+        <dl className="mt-6 grid grid-cols-2 gap-x-5 gap-y-7 border-y border-[var(--hairline-strong)] py-6 lg:grid-cols-5 lg:gap-x-6">
           <Metric
-            label="Values"
+            label="Typed values"
             value={count(summary.values.total)}
             hint={`${summary.values.publishable} publishable, ${summary.values.needing_review} queued`}
+          />
+          <Metric
+            label="Source specifications"
+            value={count(manufacturerSpecificationSummary.total)}
+            hint={`${manufacturerSpecificationSummary.mapped} mapped, ${manufacturerSpecificationSummary.unmapped} source-only`}
           />
           {/*
             No quality figure at all for an unclassified run, rather than the one the certificate
@@ -714,7 +764,7 @@ function Result({ data }: { data: EnrichResponse }) {
               <>
                 <p className="mt-2 text-sm text-[var(--fg)]">
                   {summary.retrieval.from_library
-                    ? "Already in the document library, so no request was made."
+                    ? "Reused a stored manufacturer document — no new network request was needed."
                     : `Retrieved from ${summary.retrieval.manufacturer?.domain ?? "the manufacturer"}.`}
                   {typeof summary.retrieval.requests_made === "number" ? (
                     <span className="text-[var(--fg-quiet)]">
@@ -782,6 +832,11 @@ function Result({ data }: { data: EnrichResponse }) {
           </div>
         </div>
       </section>
+
+      <ManufacturerSpecifications
+        specifications={manufacturerSpecifications}
+        headingId="enrich-manufacturer-specifications-heading"
+      />
 
       {summary.notes.length > 0 ? (
         <section aria-labelledby="enrich-notes-heading">

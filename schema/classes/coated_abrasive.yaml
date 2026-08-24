@@ -66,6 +66,13 @@ class:
     - { code: wheel_diameter,        requirement: optional,    weight: 2.0, label: Diameter }
     - { code: abrasive_grain,        requirement: recommended, weight: 2.0, label: Grain }
     - { code: backing_material,      requirement: recommended, weight: 2.0, label: Backing }
+    - { code: abrasive_carrier_type, requirement: recommended, weight: 2.0, label: Carrier }
+    - { code: compatible_tool,       requirement: recommended, weight: 2.0, label: Tool Application }
+    - { code: disc_backing_type,     requirement: recommended, weight: 2.0, label: Disc Backing }
+    - { code: max_operating_speed,   requirement: recommended, weight: 3.0, label: Max RPM }
+    - { code: optimal_operating_speed, requirement: recommended, weight: 2.0, label: Optimal RPM }
+    - { code: abrasive_bond_material, requirement: recommended, weight: 2.0, label: Bond Material }
+    - { code: abrasive_color,        requirement: optional,    weight: 1.0, label: Color }
     - { code: attachment_type,       requirement: required,    weight: 3.0, label: Attachment }
     - { code: abrasive_operation,    requirement: recommended, weight: 2.0, label: Operation }
     - { code: workpiece_material,    requirement: recommended, weight: 2.0, label: For Use On }

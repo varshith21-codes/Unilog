@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { CrossSourcePanel } from "@/components/cross-source-panel";
 import { EquivalencePanel } from "@/components/equivalence-panel";
+import { ManufacturerSpecifications } from "@/components/manufacturer-specifications";
 import { ArrowIcon, Meter, Overline, Section } from "@/components/primitives";
 import { ProvenanceNote } from "@/components/provenance-note";
 import { ReviewWorkspace } from "@/components/review-workspace";
@@ -247,6 +248,15 @@ export default async function ReviewSkuPage({
         threshold={dataset.policy.threshold}
         live={dataset.meta.live}
       />
+
+      {bundle.manufacturer_specifications && bundle.manufacturer_specifications.length > 0 ? (
+        <Section rhythm="lg">
+          <ManufacturerSpecifications
+            specifications={bundle.manufacturer_specifications}
+            headingId="review-manufacturer-specifications-heading"
+          />
+        </Section>
+      ) : null}
 
       {/*
         The sources, in front of the reviewer who is about to accept or correct a value. A quote is

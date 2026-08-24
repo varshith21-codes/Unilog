@@ -116,6 +116,7 @@ class DeliveryRow:
     cells: dict[str, Cell] = field(default_factory=dict)
     withheld: list[WithheldCell] = field(default_factory=list)
     notes: list[str] = field(default_factory=list)
+    manufacturer_specifications: list[dict[str, object]] = field(default_factory=list)
     sku: str | None = None
     mpn: str | None = None
 
@@ -185,6 +186,7 @@ class DeliveryRow:
                 if name in self.cells and self.cells[name].value
             ],
             "withheld": [w.summary() for w in self.withheld],
+            "manufacturer_specifications": list(self.manufacturer_specifications),
             "violations": self.violations(),
             "notes": list(self.notes),
         }
@@ -403,31 +405,31 @@ class DeliveryRowBuilder:
     # ------------------------------------------------------------------ extracted
 
     def _attribute_grid(self, row: DeliveryRow, record: ProductRecord) -> None:
-        """Fill the label/value/UOM triplets from the class's ordered bindings.
+        """Fill typed class bindings, then use remaining slots for source-native specifications.
 
-        The label is written for every bound attribute whether or not a value exists, because
-        that is what the client does: ground truth row 1 carries labels on slots 2, 7 and 14 with
-        no value beside them. The label describes the class; the value describes the part.
+        Schema attributes keep their stable, published slot order. Manufacturer fields unknown
+        to the schema are appended only after that contract, so discovering a new label enriches
+        the row without shifting any established column. Mapped source specifications are
+        omitted here: the typed value owns that slot and must not bypass its validation or
+        publication decision.
         """
-        if record.class_code is None:
-            return
-        try:
-            definition = self._registry.product_class(record.class_code)
-        except KeyError:
-            return
-
         capacity = self._format.slots("attribute_grid", "label")
-        bindings = definition.slot_bindings()
-        if len(bindings) > capacity:
-            row.notes.append(
-                f"class {definition.code} binds {len(bindings)} attributes but the grid has "
-                f"{capacity} slots; the surplus is not emitted"
-            )
+        bindings = []
+        if record.class_code is not None:
+            try:
+                definition = self._registry.product_class(record.class_code)
+                bindings = definition.slot_bindings()
+            except KeyError:
+                definition = None
+            if definition is not None and len(bindings) > capacity:
+                row.notes.append(
+                    f"class {definition.code} binds {len(bindings)} attributes but the grid has "
+                    f"{capacity} slots; the surplus is not emitted"
+                )
 
         slot = 0
         for binding in bindings:
             if binding.code in NAMED_ATTRIBUTE_COLUMNS or binding.code == "gtin":
-                # Fed to its own named column instead of a numbered slot.
                 continue
             slot += 1
             if slot > capacity:
@@ -483,6 +485,114 @@ class DeliveryRowBuilder:
                     unit,
                     Provenance.DERIVED,
                     source=f"{binding.code} unit",
+                )
+
+        statuses: dict[str, str] = {}
+        eligible = []
+        for specification in record.manufacturer_specifications:
+            if not specification.citable_as_manufacturer:
+                statuses[specification.specification_id] = "untrusted_source"
+            elif not specification.has_verified_support:
+                statuses[specification.specification_id] = "unverified_pair"
+            elif specification.mapped_attribute_code is not None:
+                statuses[specification.specification_id] = "typed_mapped"
+            else:
+                eligible.append(specification)
+
+        values_by_label: dict[str, set[str]] = {}
+        for specification in eligible:
+            values_by_label.setdefault(specification.normalized_label, set()).add(
+                specification.normalized_value
+            )
+        conflicting_labels = {
+            label for label, values in values_by_label.items() if len(values) > 1
+        }
+
+        candidates = []
+        seen_statements: set[tuple[str, str]] = set()
+        for specification in sorted(eligible, key=lambda item: item.projection_key):
+            statement = (specification.normalized_label, specification.normalized_value)
+            if specification.normalized_label in conflicting_labels:
+                statuses[specification.specification_id] = "conflict"
+            elif statement in seen_statements:
+                statuses[specification.specification_id] = "duplicate_statement"
+            else:
+                seen_statements.add(statement)
+                candidates.append(specification)
+
+        available = max(0, capacity - slot)
+        emitted = candidates[:available]
+        for specification in emitted:
+            statuses[specification.specification_id] = "emitted"
+        for specification in candidates[available:]:
+            statuses[specification.specification_id] = "capacity_overflow"
+
+        untrusted = sum(1 for status in statuses.values() if status == "untrusted_source")
+        if untrusted:
+            row.notes.append(
+                f"{untrusted} source-native specification(s) remain in provenance but were not "
+                "emitted because the source was not verified as manufacturer-owned"
+            )
+        if conflicting_labels:
+            row.notes.append(
+                f"{len(conflicting_labels)} manufacturer specification label conflict(s) remain "
+                "in provenance and were not emitted"
+            )
+        overflow = max(0, len(candidates) - available)
+        if overflow:
+            row.notes.append(
+                f"the source has {len(candidates)} eligible manufacturer specifications but the "
+                f"attribute grid has {available} remaining slots; {overflow} remain in the bundle "
+                "and provenance record but are not emitted in the CSV grid"
+            )
+
+        row.manufacturer_specifications = [
+            {
+                "specification_id": specification.specification_id,
+                "label": specification.label_raw,
+                "value": specification.value_raw,
+                "mapped_attribute_code": specification.mapped_attribute_code,
+                "citable_as_manufacturer": specification.citable_as_manufacturer,
+                "confidence": round(specification.confidence, 4),
+                "evidence": specification.citation_summary(),
+                "delivery_status": statuses[specification.specification_id],
+            }
+            for specification in sorted(
+                record.manufacturer_specifications, key=lambda item: item.projection_key
+            )
+        ]
+
+        for specification in emitted:
+            slot += 1
+            value_text, unit = split_display_unit(specification.value_raw)
+            rendered = value_text if unit else specification.value_raw
+            source = f"manufacturer specification {specification.specification_id}"
+            citations = tuple(specification.citation_summary())
+            self._set(
+                row,
+                self._format.slot_column("attribute_grid", "label", slot).name,
+                specification.label_raw,
+                Provenance.EXTRACTED,
+                confidence=specification.confidence,
+                source=source,
+                evidence=citations,
+            )
+            self._set(
+                row,
+                self._format.slot_column("attribute_grid", "value", slot).name,
+                rendered,
+                Provenance.EXTRACTED,
+                confidence=specification.confidence,
+                source=source,
+                evidence=citations,
+            )
+            if unit:
+                self._set(
+                    row,
+                    self._format.slot_column("attribute_grid", "uom", slot).name,
+                    unit,
+                    Provenance.DERIVED,
+                    source=f"{source} unit",
                 )
 
     def _named_attributes(self, row: DeliveryRow, record: ProductRecord) -> None:

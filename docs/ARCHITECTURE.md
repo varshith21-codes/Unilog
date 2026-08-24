@@ -47,7 +47,7 @@ flowchart LR
     subgraph external["External runtime dependencies"]
         direction TB
         bedrock["AWS Bedrock Runtime<br/>classification · extraction<br/>optional copy / reasoning"]
-        web["Manufacturer websites<br/>Brave / DuckDuckGo / Bedrock search<br/>optional Playwright rendering"]
+        web["Manufacturer websites<br/>Serper / DuckDuckGo / Bedrock search<br/>optional Playwright rendering"]
     end
 
     stages -->|"model calls"| bedrock

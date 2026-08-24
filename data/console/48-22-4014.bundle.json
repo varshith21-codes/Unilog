@@ -1,0 +1,5366 @@
+{
+  "bundle": {
+    "sku": "48-22-4014",
+    "document_id": "54-49-1605@758ec3a3",
+    "class_code": "FST.GEN",
+    "record": {
+      "tenant_id": "demo",
+      "sku": "48-22-4014",
+      "mpn": "48-22-4014",
+      "mpn_normalized": "48-22-4014",
+      "gtin": null,
+      "brand": null,
+      "brand_id": null,
+      "supplier_id": null,
+      "parent_sku": null,
+      "lifecycle_status": "active",
+      "class_code": "FST.GEN",
+      "schema_version": "FST.GEN@v1",
+      "source_document_ids": [
+        "54-49-1605@758ec3a3",
+        "48-22-4014.submission@ec0f1b89"
+      ],
+      "created_at": "2026-08-24T11:24:00.020037+00:00",
+      "updated_at": "2026-08-24T11:24:00.073066+00:00"
+    },
+    "classifications": [
+      {
+        "scheme": "internal",
+        "code": "FST.GEN",
+        "path": [
+          "Fasteners",
+          "Fasteners",
+          "Nails, Screws & Anchors"
+        ],
+        "confidence": 0.8149,
+        "level_confidences": [
+          1.0,
+          1.0,
+          0.8149
+        ],
+        "rationale": "single viable candidate",
+        "method": "retrieval_only",
+        "alternatives": [],
+        "reviewed_by": null,
+        "reviewed_at": null
+      }
+    ],
+    "classification_summary": {
+      "class_code": "FST.GEN",
+      "confidence": 0.8149,
+      "confident_depth": 3,
+      "schemes": [
+        "internal"
+      ],
+      "candidates_considered": 1,
+      "method": "retrieval_only",
+      "abstained": false,
+      "input_tokens": 0,
+      "output_tokens": 0
+    },
+    "classification_candidates": [
+      {
+        "code": "FST.GEN",
+        "score": 0.215,
+        "path_text": "Fasteners > Fasteners > Nails, Screws & Anchors"
+      }
+    ],
+    "values": [],
+    "gaps": [
+      {
+        "attribute_code": "fastener_type",
+        "reason": "not_present_in_any_source",
+        "sources_searched": [
+          "54-49-1605@758ec3a3"
+        ],
+        "detail": "The source is a service parts list for bolt cutters, not a fastener product. The target SKU 48-22-4014 is a 14\" Standard Bolt Cutter, which is a tool, not a fastener.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "request_from_supplier",
+        "is_required": true,
+        "detected_at": "2026-08-24T11:24:00.012921Z"
+      },
+      {
+        "attribute_code": "fastener_length",
+        "reason": "not_present_in_any_source",
+        "sources_searched": [
+          "54-49-1605@758ec3a3"
+        ],
+        "detail": "The source is a service parts list for bolt cutters, not a fastener product. The target SKU 48-22-4014 is a 14\" Standard Bolt Cutter, which is a tool, not a fastener.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "request_from_supplier",
+        "is_required": true,
+        "detected_at": "2026-08-24T11:24:00.012980Z"
+      },
+      {
+        "attribute_code": "shank_diameter",
+        "reason": "not_present_in_any_source",
+        "sources_searched": [
+          "54-49-1605@758ec3a3"
+        ],
+        "detail": "The source is a service parts list for bolt cutters, not a fastener product. The target SKU 48-22-4014 is a 14\" Standard Bolt Cutter, which is a tool, not a fastener.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "request_from_supplier",
+        "is_required": true,
+        "detected_at": "2026-08-24T11:24:00.013014Z"
+      },
+      {
+        "attribute_code": "fastener_finish",
+        "reason": "not_present_in_any_source",
+        "sources_searched": [
+          "54-49-1605@758ec3a3"
+        ],
+        "detail": "The source is a service parts list for bolt cutters, not a fastener product. The target SKU 48-22-4014 is a 14\" Standard Bolt Cutter, which is a tool, not a fastener.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "request_from_supplier",
+        "is_required": true,
+        "detected_at": "2026-08-24T11:24:00.013046Z"
+      },
+      {
+        "attribute_code": "case_quantity",
+        "reason": "not_present_in_any_source",
+        "sources_searched": [
+          "54-49-1605@758ec3a3"
+        ],
+        "detail": "The source is a service parts list for bolt cutters, not a fastener product. The target SKU 48-22-4014 is a 14\" Standard Bolt Cutter, which is a tool, not a fastener.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "request_from_supplier",
+        "is_required": true,
+        "detected_at": "2026-08-24T11:24:00.013077Z"
+      },
+      {
+        "attribute_code": "bit_tip_type",
+        "reason": "not_present_in_any_source",
+        "sources_searched": [
+          "54-49-1605@758ec3a3"
+        ],
+        "detail": "The source is a service parts list for bolt cutters, not a fastener product. The target SKU 48-22-4014 is a 14\" Standard Bolt Cutter, which is a tool, not a fastener.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "request_from_supplier",
+        "is_required": false,
+        "detected_at": "2026-08-24T11:24:00.013111Z"
+      },
+      {
+        "attribute_code": "workpiece_material",
+        "reason": "not_present_in_any_source",
+        "sources_searched": [
+          "54-49-1605@758ec3a3"
+        ],
+        "detail": "The source is a service parts list for bolt cutters, not a fastener product. The target SKU 48-22-4014 is a 14\" Standard Bolt Cutter, which is a tool, not a fastener.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "request_from_supplier",
+        "is_required": false,
+        "detected_at": "2026-08-24T11:24:00.013145Z"
+      },
+      {
+        "attribute_code": "primary_material",
+        "reason": "not_present_in_any_source",
+        "sources_searched": [
+          "54-49-1605@758ec3a3"
+        ],
+        "detail": "The source is a service parts list for bolt cutters, not a fastener product. The target SKU 48-22-4014 is a 14\" Standard Bolt Cutter, which is a tool, not a fastener.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "request_from_supplier",
+        "is_required": false,
+        "detected_at": "2026-08-24T11:24:00.013177Z"
+      },
+      {
+        "attribute_code": "product_series",
+        "reason": "not_present_in_any_source",
+        "sources_searched": [
+          "54-49-1605@758ec3a3"
+        ],
+        "detail": "The source is a service parts list for bolt cutters, not a fastener product. The target SKU 48-22-4014 is a 14\" Standard Bolt Cutter, which is a tool, not a fastener.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "request_from_supplier",
+        "is_required": false,
+        "detected_at": "2026-08-24T11:24:00.013222Z"
+      },
+      {
+        "attribute_code": "pack_quantity",
+        "reason": "not_present_in_any_source",
+        "sources_searched": [
+          "54-49-1605@758ec3a3"
+        ],
+        "detail": "The source is a service parts list for bolt cutters, not a fastener product. The target SKU 48-22-4014 is a 14\" Standard Bolt Cutter, which is a tool, not a fastener.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "request_from_supplier",
+        "is_required": false,
+        "detected_at": "2026-08-24T11:24:00.013264Z"
+      },
+      {
+        "attribute_code": "selling_uom",
+        "reason": "not_present_in_any_source",
+        "sources_searched": [
+          "54-49-1605@758ec3a3"
+        ],
+        "detail": "The source is a service parts list for bolt cutters, not a fastener product. The target SKU 48-22-4014 is a 14\" Standard Bolt Cutter, which is a tool, not a fastener.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "request_from_supplier",
+        "is_required": true,
+        "detected_at": "2026-08-24T11:24:00.013306Z"
+      },
+      {
+        "attribute_code": "each_weight",
+        "reason": "not_present_in_any_source",
+        "sources_searched": [
+          "54-49-1605@758ec3a3"
+        ],
+        "detail": "The source is a service parts list for bolt cutters, not a fastener product. The target SKU 48-22-4014 is a 14\" Standard Bolt Cutter, which is a tool, not a fastener.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "request_from_supplier",
+        "is_required": false,
+        "detected_at": "2026-08-24T11:24:00.013336Z"
+      },
+      {
+        "attribute_code": "additional_information",
+        "reason": "not_present_in_any_source",
+        "sources_searched": [
+          "54-49-1605@758ec3a3"
+        ],
+        "detail": "The source is a service parts list for bolt cutters, not a fastener product. The target SKU 48-22-4014 is a 14\" Standard Bolt Cutter, which is a tool, not a fastener.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "request_from_supplier",
+        "is_required": false,
+        "detected_at": "2026-08-24T11:24:00.013365Z"
+      },
+      {
+        "attribute_code": "approvals",
+        "reason": "not_present_in_any_source",
+        "sources_searched": [
+          "54-49-1605@758ec3a3"
+        ],
+        "detail": "The source is a service parts list for bolt cutters, not a fastener product. The target SKU 48-22-4014 is a 14\" Standard Bolt Cutter, which is a tool, not a fastener.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "request_from_supplier",
+        "is_required": false,
+        "detected_at": "2026-08-24T11:24:00.013405Z"
+      },
+      {
+        "attribute_code": "country_of_origin",
+        "reason": "not_present_in_any_source",
+        "sources_searched": [
+          "54-49-1605@758ec3a3"
+        ],
+        "detail": "The source is a service parts list for bolt cutters, not a fastener product. The target SKU 48-22-4014 is a 14\" Standard Bolt Cutter, which is a tool, not a fastener.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "request_from_supplier",
+        "is_required": false,
+        "detected_at": "2026-08-24T11:24:00.013448Z"
+      },
+      {
+        "attribute_code": "prop65_warning_required",
+        "reason": "not_present_in_any_source",
+        "sources_searched": [
+          "54-49-1605@758ec3a3"
+        ],
+        "detail": "The source is a service parts list for bolt cutters, not a fastener product. The target SKU 48-22-4014 is a 14\" Standard Bolt Cutter, which is a tool, not a fastener.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "request_from_supplier",
+        "is_required": false,
+        "detected_at": "2026-08-24T11:24:00.013486Z"
+      },
+      {
+        "attribute_code": "gtin",
+        "reason": "not_present_in_any_source",
+        "sources_searched": [
+          "54-49-1605@758ec3a3"
+        ],
+        "detail": "The source is a service parts list for bolt cutters, not a fastener product. The target SKU 48-22-4014 is a 14\" Standard Bolt Cutter, which is a tool, not a fastener.",
+        "revenue_exposure_usd": null,
+        "recommended_action": "request_from_supplier",
+        "is_required": false,
+        "detected_at": "2026-08-24T11:24:00.013525Z"
+      }
+    ],
+    "extraction": {
+      "requested": 17,
+      "values": 0,
+      "gaps": 17,
+      "rejected_unverifiable": 0,
+      "corrected_to_match_evidence": 0,
+      "citation_coverage": 0.0,
+      "input_tokens": 5162,
+      "output_tokens": 1765,
+      "escalations": 0,
+      "latency_ms": 7604,
+      "sku_found_in_document": true,
+      "targeting_failed": false
+    },
+    "normalization_issues": [],
+    "validation": {
+      "checks": 3,
+      "failures": 0,
+      "warnings": 0,
+      "skipped_rules": 3,
+      "consistency": 1.0,
+      "results": [
+        {
+          "layer": "L2",
+          "rule_id": "R_SHANK_BELOW_LENGTH",
+          "verdict": "skipped",
+          "severity": "info",
+          "reason": "not evaluated: missing fastener_length, shank_diameter",
+          "counterexample": null,
+          "suggested_fix": null,
+          "detail": null
+        },
+        {
+          "layer": "L2",
+          "rule_id": "R_COLLATED_NAIL_STATES_A_COUNT",
+          "verdict": "skipped",
+          "severity": "info",
+          "reason": "not evaluated: missing case_quantity, fastener_type",
+          "counterexample": null,
+          "suggested_fix": null,
+          "detail": null
+        },
+        {
+          "layer": "L2",
+          "rule_id": "R_TREATED_LUMBER_NEEDS_A_FINISH",
+          "verdict": "skipped",
+          "severity": "info",
+          "reason": "not evaluated: missing fastener_finish",
+          "counterexample": null,
+          "suggested_fix": null,
+          "detail": null
+        }
+      ],
+      "per_attribute": {}
+    },
+    "certificate": {
+      "certificate_id": "ec_0dc757108ff6",
+      "sku": "48-22-4014",
+      "tenant_id": "demo",
+      "generated_at": "2026-08-24T11:24:00.086477Z",
+      "schema_version": "FST.GEN@v1",
+      "pipeline_version": "axiom-0.1.0",
+      "classifications": [
+        {
+          "scheme": "internal",
+          "code": "FST.GEN",
+          "path": [
+            "Fasteners",
+            "Fasteners",
+            "Nails, Screws & Anchors"
+          ],
+          "confidence": 0.8149,
+          "method": "retrieval_only",
+          "status": "auto",
+          "alternatives": []
+        }
+      ],
+      "attributes": [],
+      "gaps": [
+        {
+          "code": "fastener_type",
+          "reason": "not_present_in_any_source",
+          "sources_searched": [
+            "54-49-1605@758ec3a3"
+          ],
+          "required": true,
+          "detail": "The source is a service parts list for bolt cutters, not a fastener product. The target SKU 48-22-4014 is a 14\" Standard Bolt Cutter, which is a tool, not a fastener.",
+          "recommended_action": "request_from_supplier"
+        },
+        {
+          "code": "fastener_length",
+          "reason": "not_present_in_any_source",
+          "sources_searched": [
+            "54-49-1605@758ec3a3"
+          ],
+          "required": true,
+          "detail": "The source is a service parts list for bolt cutters, not a fastener product. The target SKU 48-22-4014 is a 14\" Standard Bolt Cutter, which is a tool, not a fastener.",
+          "recommended_action": "request_from_supplier"
+        },
+        {
+          "code": "shank_diameter",
+          "reason": "not_present_in_any_source",
+          "sources_searched": [
+            "54-49-1605@758ec3a3"
+          ],
+          "required": true,
+          "detail": "The source is a service parts list for bolt cutters, not a fastener product. The target SKU 48-22-4014 is a 14\" Standard Bolt Cutter, which is a tool, not a fastener.",
+          "recommended_action": "request_from_supplier"
+        },
+        {
+          "code": "fastener_finish",
+          "reason": "not_present_in_any_source",
+          "sources_searched": [
+            "54-49-1605@758ec3a3"
+          ],
+          "required": true,
+          "detail": "The source is a service parts list for bolt cutters, not a fastener product. The target SKU 48-22-4014 is a 14\" Standard Bolt Cutter, which is a tool, not a fastener.",
+          "recommended_action": "request_from_supplier"
+        },
+        {
+          "code": "case_quantity",
+          "reason": "not_present_in_any_source",
+          "sources_searched": [
+            "54-49-1605@758ec3a3"
+          ],
+          "required": true,
+          "detail": "The source is a service parts list for bolt cutters, not a fastener product. The target SKU 48-22-4014 is a 14\" Standard Bolt Cutter, which is a tool, not a fastener.",
+          "recommended_action": "request_from_supplier"
+        },
+        {
+          "code": "bit_tip_type",
+          "reason": "not_present_in_any_source",
+          "sources_searched": [
+            "54-49-1605@758ec3a3"
+          ],
+          "required": false,
+          "detail": "The source is a service parts list for bolt cutters, not a fastener product. The target SKU 48-22-4014 is a 14\" Standard Bolt Cutter, which is a tool, not a fastener.",
+          "recommended_action": "request_from_supplier"
+        },
+        {
+          "code": "workpiece_material",
+          "reason": "not_present_in_any_source",
+          "sources_searched": [
+            "54-49-1605@758ec3a3"
+          ],
+          "required": false,
+          "detail": "The source is a service parts list for bolt cutters, not a fastener product. The target SKU 48-22-4014 is a 14\" Standard Bolt Cutter, which is a tool, not a fastener.",
+          "recommended_action": "request_from_supplier"
+        },
+        {
+          "code": "primary_material",
+          "reason": "not_present_in_any_source",
+          "sources_searched": [
+            "54-49-1605@758ec3a3"
+          ],
+          "required": false,
+          "detail": "The source is a service parts list for bolt cutters, not a fastener product. The target SKU 48-22-4014 is a 14\" Standard Bolt Cutter, which is a tool, not a fastener.",
+          "recommended_action": "request_from_supplier"
+        },
+        {
+          "code": "product_series",
+          "reason": "not_present_in_any_source",
+          "sources_searched": [
+            "54-49-1605@758ec3a3"
+          ],
+          "required": false,
+          "detail": "The source is a service parts list for bolt cutters, not a fastener product. The target SKU 48-22-4014 is a 14\" Standard Bolt Cutter, which is a tool, not a fastener.",
+          "recommended_action": "request_from_supplier"
+        },
+        {
+          "code": "pack_quantity",
+          "reason": "not_present_in_any_source",
+          "sources_searched": [
+            "54-49-1605@758ec3a3"
+          ],
+          "required": false,
+          "detail": "The source is a service parts list for bolt cutters, not a fastener product. The target SKU 48-22-4014 is a 14\" Standard Bolt Cutter, which is a tool, not a fastener.",
+          "recommended_action": "request_from_supplier"
+        },
+        {
+          "code": "selling_uom",
+          "reason": "not_present_in_any_source",
+          "sources_searched": [
+            "54-49-1605@758ec3a3"
+          ],
+          "required": true,
+          "detail": "The source is a service parts list for bolt cutters, not a fastener product. The target SKU 48-22-4014 is a 14\" Standard Bolt Cutter, which is a tool, not a fastener.",
+          "recommended_action": "request_from_supplier"
+        },
+        {
+          "code": "each_weight",
+          "reason": "not_present_in_any_source",
+          "sources_searched": [
+            "54-49-1605@758ec3a3"
+          ],
+          "required": false,
+          "detail": "The source is a service parts list for bolt cutters, not a fastener product. The target SKU 48-22-4014 is a 14\" Standard Bolt Cutter, which is a tool, not a fastener.",
+          "recommended_action": "request_from_supplier"
+        },
+        {
+          "code": "additional_information",
+          "reason": "not_present_in_any_source",
+          "sources_searched": [
+            "54-49-1605@758ec3a3"
+          ],
+          "required": false,
+          "detail": "The source is a service parts list for bolt cutters, not a fastener product. The target SKU 48-22-4014 is a 14\" Standard Bolt Cutter, which is a tool, not a fastener.",
+          "recommended_action": "request_from_supplier"
+        },
+        {
+          "code": "approvals",
+          "reason": "not_present_in_any_source",
+          "sources_searched": [
+            "54-49-1605@758ec3a3"
+          ],
+          "required": false,
+          "detail": "The source is a service parts list for bolt cutters, not a fastener product. The target SKU 48-22-4014 is a 14\" Standard Bolt Cutter, which is a tool, not a fastener.",
+          "recommended_action": "request_from_supplier"
+        },
+        {
+          "code": "country_of_origin",
+          "reason": "not_present_in_any_source",
+          "sources_searched": [
+            "54-49-1605@758ec3a3"
+          ],
+          "required": false,
+          "detail": "The source is a service parts list for bolt cutters, not a fastener product. The target SKU 48-22-4014 is a 14\" Standard Bolt Cutter, which is a tool, not a fastener.",
+          "recommended_action": "request_from_supplier"
+        },
+        {
+          "code": "prop65_warning_required",
+          "reason": "not_present_in_any_source",
+          "sources_searched": [
+            "54-49-1605@758ec3a3"
+          ],
+          "required": false,
+          "detail": "The source is a service parts list for bolt cutters, not a fastener product. The target SKU 48-22-4014 is a 14\" Standard Bolt Cutter, which is a tool, not a fastener.",
+          "recommended_action": "request_from_supplier"
+        },
+        {
+          "code": "gtin",
+          "reason": "not_present_in_any_source",
+          "sources_searched": [
+            "54-49-1605@758ec3a3"
+          ],
+          "required": false,
+          "detail": "The source is a service parts list for bolt cutters, not a fastener product. The target SKU 48-22-4014 is a 14\" Standard Bolt Cutter, which is a tool, not a fastener.",
+          "recommended_action": "request_from_supplier"
+        }
+      ],
+      "summary": {
+        "attributes_required": 6,
+        "attributes_populated": 0,
+        "attributes_with_evidence": 0,
+        "attributes_inferred": 0,
+        "auto_accepted": 0,
+        "queued_for_review": 0,
+        "gaps_total": 17,
+        "gaps_required": 6,
+        "quality_index": {
+          "completeness": 0.0,
+          "verifiability": 0.0,
+          "consistency": 1.0,
+          "richness": 0.0,
+          "self_declared": 0.0,
+          "corroborated": 0.0,
+          "weights": {
+            "completeness": 0.35,
+            "verifiability": 0.3,
+            "consistency": 0.25,
+            "richness": 0.1
+          },
+          "measured_dimensions": [
+            "completeness",
+            "consistency",
+            "richness",
+            "verifiability"
+          ],
+          "composite": 0.25
+        },
+        "cost_usd": 0.001067,
+        "wall_clock_seconds": 7.6
+      },
+      "signature": "sha256:4bdbf03e586a1d1e15cee7067179c31534974c8741b1dda7e3e86039939db9d6",
+      "signature_verified": true
+    },
+    "channels": [
+      {
+        "name": "cx1_pim",
+        "published": false,
+        "value_count": 0,
+        "withheld": [],
+        "readiness": {
+          "channel": "cx1_pim",
+          "ready": false,
+          "missing": [],
+          "not_publishable": [],
+          "warnings": [
+            "class FST.GEN declares no 'cx1_pim' channel profile"
+          ]
+        },
+        "title": null
+      },
+      {
+        "name": "schema_org",
+        "published": false,
+        "value_count": 0,
+        "withheld": [],
+        "readiness": {
+          "channel": "schema_org",
+          "ready": false,
+          "missing": [],
+          "not_publishable": [],
+          "warnings": [
+            "class FST.GEN declares no 'schema_org' channel profile"
+          ]
+        },
+        "title": null
+      }
+    ],
+    "metrics": {
+      "fill_rate": 0.0,
+      "verifiability": 0.0,
+      "self_declared_rate": 0.0,
+      "corroborated_rate": 0.0,
+      "values_total": 0,
+      "values_publishable": 0,
+      "values_self_declared": 0,
+      "values_needing_review": 0,
+      "gaps_total": 17,
+      "gaps_required": 6,
+      "conflicts": []
+    },
+    "sources": [],
+    "cost": {
+      "calls": 1,
+      "escalations": 0,
+      "input_tokens": 5162,
+      "output_tokens": 1765,
+      "latency_ms": 7604,
+      "calls_by_tier": {
+        "volume": 1
+      },
+      "input_by_tier": {
+        "volume": 5162
+      },
+      "output_by_tier": {
+        "volume": 1765
+      },
+      "cost_usd": 0.001067,
+      "cost_by_tier": {
+        "volume": 0.001067
+      },
+      "priced": true,
+      "price_source": {
+        "region": "us-east-2",
+        "fetched_at": "2026-08-03T05:28:42.224923+00:00",
+        "source": "AWS Price List Query API (AmazonBedrock)",
+        "priced_models": 5,
+        "unpriced_models": [],
+        "age_days": 21.2,
+        "stale": false
+      }
+    },
+    "copy": null
+  },
+  "document": {
+    "document_id": "54-49-1605@758ec3a3",
+    "uri": "https://documents.milwaukeetool.com/54-49-1605.pdf",
+    "sha256": "758ec3a3efe637504a990f94c01a672decf4ecc9e93cdd75a6e1dddca20f63fc",
+    "doc_type": "spec_sheet",
+    "fetched_at": "2026-08-24T11:23:27.773552Z",
+    "page_count": 9,
+    "revision_label": "Fri, 20 Feb 2026 15:38:23 GMT",
+    "supplier_id": null,
+    "license_note": "retrieved from documents.milwaukeetool.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
+    "parser": "pdfplumber",
+    "line_count": 253,
+    "table_count": 12,
+    "warnings": [],
+    "size_bytes": 3022377,
+    "storage_uri": "local://75/8e/758ec3a3efe637504a990f94c01a672decf4ecc9e93cdd75a6e1dddca20f63fc.pdf"
+  },
+  "pages": [
+    {
+      "number": 1,
+      "width": 612.0,
+      "height": 792.0,
+      "lines": [
+        {
+          "line_index": 0,
+          "text": "BULLETIN NO.",
+          "bbox": [
+            495.4524,
+            23.590299999999957,
+            565.4524,
+            33.59029999999996
+          ]
+        },
+        {
+          "line_index": 1,
+          "text": "SERVICE PARTS LIST 54-49-1605",
+          "bbox": [
+            251.1818,
+            34.65639999999996,
+            558.5702,
+            48.65639999999996
+          ]
+        },
+        {
+          "line_index": 2,
+          "text": "SPECIFY CATALOG NO. AND SERIAL NO. WHEN ORDERING PARTS REVISED BULLETIN DATE",
+          "bbox": [
+            174.3617,
+            56.13620000000003,
+            558.7756,
+            64.84720000000004
+          ]
+        },
+        {
+          "line_index": 3,
+          "text": "Sept. 2021",
+          "bbox": [
+            527.8067,
+            65.44219999999996,
+            571.3397,
+            74.44219999999996
+          ]
+        },
+        {
+          "line_index": 4,
+          "text": "BOLT CUTTERS",
+          "bbox": [
+            261.514,
+            70.50929999999994,
+            345.6376,
+            81.50929999999994
+          ]
+        },
+        {
+          "line_index": 5,
+          "text": "CATALOG NO.",
+          "bbox": [
+            163.7,
+            88.30529999999999,
+            232.21200000000002,
+            98.30529999999999
+          ]
+        },
+        {
+          "line_index": 6,
+          "text": "48-22-4014 14\" Standard Bolt Cutter Page 1 48-22-4114 14\" Premium Bolt Cutter Page 5",
+          "bbox": [
+            174.16,
+            99.91219999999998,
+            561.1103999999999,
+            108.64020000000005
+          ]
+        },
+        {
+          "line_index": 7,
+          "text": "48-22-4018 18\" Standard Bolt Cutter Page 2 48-22-4124 24\" Premium Bolt Cutter Page 6",
+          "bbox": [
+            174.16,
+            108.91219999999998,
+            561.544,
+            117.64020000000005
+          ]
+        },
+        {
+          "line_index": 8,
+          "text": "48-22-4024 24\" Standard Bolt Cutter Page 3 48-22-4218 18\" Non-Conductive Bolt Cutter Page 7",
+          "bbox": [
+            174.16,
+            117.91219999999998,
+            562.0772000000001,
+            126.64020000000005
+          ]
+        },
+        {
+          "line_index": 9,
+          "text": "48-22-4031 30\" Standard Bolt Cutter Page 4 48-22-4224 24\" Non-Conductive Bolt Cutter Page 8",
+          "bbox": [
+            174.16,
+            126.91219999999998,
+            561.4987,
+            135.64020000000005
+          ]
+        },
+        {
+          "line_index": 10,
+          "text": "SEE PAGE 9 FOR PROCEDURE",
+          "bbox": [
+            162.33,
+            152.05220000000008,
+            281.7588,
+            160.05220000000008
+          ]
+        },
+        {
+          "line_index": 11,
+          "text": "TO ADJUST THE JAW",
+          "bbox": [
+            162.33,
+            161.6522,
+            245.00679999999997,
+            169.6522
+          ]
+        },
+        {
+          "line_index": 12,
+          "text": "16 3 5",
+          "bbox": [
+            194.12364,
+            183.50554999999997,
+            228.692612,
+            199.89230999999995
+          ]
+        },
+        {
+          "line_index": 13,
+          "text": "10 11",
+          "bbox": [
+            209.0369,
+            192.935696,
+            231.149576,
+            201.77369599999997
+          ]
+        },
+        {
+          "line_index": 14,
+          "text": "5",
+          "bbox": [
+            288.258876,
+            212.21924059999992,
+            292.70137159999996,
+            220.2093405999999
+          ]
+        },
+        {
+          "line_index": 15,
+          "text": "(3x)",
+          "bbox": [
+            283.60064769999997,
+            220.2093405999999,
+            297.3595999,
+            228.1994405999999
+          ]
+        },
+        {
+          "line_index": 16,
+          "text": "EXAMPLE:",
+          "bbox": [
+            431.8077,
+            239.7822,
+            473.14369999999997,
+            247.7822
+          ]
+        },
+        {
+          "line_index": 17,
+          "text": "00",
+          "bbox": [
+            403.2486,
+            243.74699999999996,
+            415.2582,
+            255.74699999999996
+          ]
+        },
+        {
+          "line_index": 18,
+          "text": "0 Component Parts (Small #) Are Included",
+          "bbox": [
+            419.5168,
+            247.37419999999997,
+            574.9813,
+            257.17420000000004
+          ]
+        },
+        {
+          "line_index": 19,
+          "text": "1 When Ordering The Assembly (Large #).",
+          "bbox": [
+            63.8214,
+            255.37419999999997,
+            575.2741000000001,
+            265.0008825
+          ]
+        },
+        {
+          "line_index": 20,
+          "text": "14",
+          "bbox": [
+            330.047099,
+            314.4046294999999,
+            338.93209019999995,
+            322.3947294999999
+          ]
+        },
+        {
+          "line_index": 21,
+          "text": "11",
+          "bbox": [
+            306.86781890000003,
+            327.9798093999999,
+            315.1615427,
+            335.96990939999995
+          ]
+        },
+        {
+          "line_index": 22,
+          "text": "10",
+          "bbox": [
+            283.0972714,
+            341.55498929999993,
+            291.98226259999996,
+            349.5450893
+          ]
+        },
+        {
+          "line_index": 23,
+          "text": "4",
+          "bbox": [
+            226.2557,
+            374.57008249999996,
+            230.6981956,
+            382.5601825
+          ]
+        },
+        {
+          "line_index": 24,
+          "text": "3",
+          "bbox": [
+            201.5355,
+            389.4369825,
+            205.9779956,
+            397.42708250000004
+          ]
+        },
+        {
+          "line_index": 25,
+          "text": "(3x)",
+          "bbox": [
+            196.87727170000002,
+            397.4270825,
+            210.6362239,
+            405.4171825
+          ]
+        },
+        {
+          "line_index": 26,
+          "text": "14\" Standard Bolt Cutter No. 48-22-4014",
+          "bbox": [
+            307.08,
+            515.1052999999999,
+            499.09000000000003,
+            525.1052999999999
+          ]
+        },
+        {
+          "line_index": 27,
+          "text": "FIG. PART NO. DESCRIPTION OF PART NO. REQ.",
+          "bbox": [
+            307.224,
+            529.2172,
+            576.008,
+            537.2172
+          ]
+        },
+        {
+          "line_index": 28,
+          "text": "1 48-38-0014 14\" Cutter Blade Assembly (1)",
+          "bbox": [
+            312.7754,
+            537.8092,
+            562.8793999999999,
+            545.8092
+          ]
+        },
+        {
+          "line_index": 29,
+          "text": "3 --------------- Hex Nut (3)",
+          "bbox": [
+            312.776,
+            546.8092,
+            562.88,
+            554.8092
+          ]
+        },
+        {
+          "line_index": 30,
+          "text": "4 --------------- 14\" Handle Assembly-Left (1)",
+          "bbox": [
+            312.776,
+            555.8092,
+            562.88,
+            563.8092
+          ]
+        },
+        {
+          "line_index": 31,
+          "text": "5 --------------- Hinge Bolt (3)",
+          "bbox": [
+            312.776,
+            564.8092,
+            562.88,
+            572.8092
+          ]
+        },
+        {
+          "line_index": 32,
+          "text": "10 --------------- Adjustment Bolt (1)",
+          "bbox": [
+            310.552,
+            573.8092,
+            562.88,
+            581.8092
+          ]
+        },
+        {
+          "line_index": 33,
+          "text": "11 --------------- Adjustment Hex Nut (1)",
+          "bbox": [
+            310.848,
+            582.8092,
+            562.88,
+            590.8092
+          ]
+        },
+        {
+          "line_index": 34,
+          "text": "14 --------------- 14\" Handle Assembly-Right (1)",
+          "bbox": [
+            310.552,
+            591.8092,
+            562.88,
+            599.8092
+          ]
+        },
+        {
+          "line_index": 35,
+          "text": "16 14-46-2135 Hardware Kit (1)",
+          "bbox": [
+            310.552,
+            600.8092,
+            562.88,
+            608.8092
+          ]
+        },
+        {
+          "line_index": 36,
+          "text": "MILWAUKEE TOOL l www.milwaukeetool.com",
+          "bbox": [
+            379.3377,
+            745.7302,
+            576.6849,
+            754.8482
+          ]
+        },
+        {
+          "line_index": 37,
+          "text": "13135 W. LISBON RD., BROOKFIELD, WI 53005",
+          "bbox": [
+            378.6053,
+            756.1893,
+            576.6890000000001,
+            765.1893
+          ]
+        },
+        {
+          "line_index": 38,
+          "text": "Drwg. 4",
+          "bbox": [
+            556.0081,
+            765.4142,
+            576.6781000000001,
+            771.4142
+          ]
+        }
+      ],
+      "tables": [
+        {
+          "table_id": "t1",
+          "page": 1,
+          "row_count": 3,
+          "col_count": 3,
+          "bbox": [
+            172.36172513368984,
+            53.68166666666665,
+            575.07439,
+            137.26999999999998
+          ],
+          "rows": [
+            [
+              "SPECIFY CATALOG NO. AND SERIAL NO. WHEN ORDERING PARTS",
+              "REVISED BULLETIN",
+              "DATE\nSept. 2021"
+            ],
+            [
+              "BOLT CUTTERS",
+              "",
+              ""
+            ],
+            [
+              "ATALOG NO.\n48-22-4014 14\" Standard Bolt Cutter Page 1 48-22-4114 14\" Premium Bolt Cutter Page 5\n48-22-4018 18\" Standard Bolt Cutter Page 2 48-22-4124 24\" Premium Bolt Cutter Page 6\n48-22-4024 24\" Standard Bolt Cutter Page 3 48-22-4218 18\" Non-Conductive Bolt Cutter Page 7\n48-22-4031 30\" Standard Bolt Cutter Page 4 48-22-4224 24\" Non-Conductive Bolt Cutter Page 8",
+              "",
+              ""
+            ]
+          ],
+          "cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "SPECIFY CATALOG NO. AND SERIAL NO. WHEN ORDERING PARTS",
+              "bbox": [
+                172.36172513368984,
+                53.68166666666665,
+                448.6921333333333,
+                65.16499999999996
+              ]
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "REVISED BULLETIN",
+              "bbox": [
+                448.6921333333333,
+                53.68166666666665,
+                522.7419714285714,
+                81.20000000000005
+              ]
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "DATE\nSept. 2021",
+              "bbox": [
+                522.7419714285714,
+                53.68166666666665,
+                575.07439,
+                81.20000000000005
+              ]
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "BOLT CUTTERS",
+              "bbox": [
+                172.36172513368984,
+                65.16499999999996,
+                448.6921333333333,
+                81.20000000000005
+              ]
+            },
+            {
+              "row": 2,
+              "col": 0,
+              "text": "ATALOG NO.\n48-22-4014 14\" Standard Bolt Cutter Page 1 48-22-4114 14\" Premium Bolt Cutter Page 5\n48-22-4018 18\" Standard Bolt Cutter Page 2 48-22-4124 24\" Premium Bolt Cutter Page 6\n48-22-4024 24\" Standard Bolt Cutter Page 3 48-22-4218 18\" Non-Conductive Bolt Cutter Page 7\n48-22-4031 30\" Standard Bolt Cutter Page 4 48-22-4224 24\" Non-Conductive Bolt Cutter Page 8",
+              "bbox": [
+                172.36172513368984,
+                81.20000000000005,
+                575.07439,
+                137.26999999999998
+              ]
+            }
+          ]
+        },
+        {
+          "table_id": "t2",
+          "page": 1,
+          "row_count": 2,
+          "col_count": 1,
+          "bbox": [
+            205.95201379310345,
+            182.4112,
+            222.52097333333333,
+            200.04330000000004
+          ],
+          "rows": [
+            [
+              "3"
+            ],
+            [
+              "10"
+            ]
+          ],
+          "cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "3",
+              "bbox": [
+                205.95201379310345,
+                182.4112,
+                222.52097333333333,
+                190.40879999999999
+              ]
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "10",
+              "bbox": [
+                205.95201379310345,
+                190.40879999999999,
+                222.52097333333333,
+                200.04330000000004
+              ]
+            }
+          ]
+        },
+        {
+          "table_id": "t3",
+          "page": 1,
+          "row_count": 1,
+          "col_count": 2,
+          "bbox": [
+            404.67400333333336,
+            239.04999999999995,
+            430.7737302325582,
+            256.54999999999995
+          ],
+          "rows": [
+            [
+              "00",
+              "0"
+            ]
+          ],
+          "cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "00",
+              "bbox": [
+                404.67400333333336,
+                239.04999999999995,
+                418.76452,
+                256.54999999999995
+              ]
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "0",
+              "bbox": [
+                418.76452,
+                239.04999999999995,
+                430.7737302325582,
+                256.54999999999995
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "width": 612.0,
+      "height": 792.0,
+      "lines": [
+        {
+          "line_index": 0,
+          "text": "EXAMPLE:",
+          "bbox": [
+            407.1213,
+            98.43220000000008,
+            448.45730000000003,
+            106.43220000000008
+          ]
+        },
+        {
+          "line_index": 1,
+          "text": "00",
+          "bbox": [
+            378.5622,
+            102.39710000000002,
+            390.5718,
+            114.39710000000002
+          ]
+        },
+        {
+          "line_index": 2,
+          "text": "0 Component Parts (Small #) Are Included",
+          "bbox": [
+            394.8304,
+            106.02420000000006,
+            550.2949,
+            115.82420000000002
+          ]
+        },
+        {
+          "line_index": 3,
+          "text": "When Ordering The Assembly (Large #).",
+          "bbox": [
+            407.1213,
+            114.02420000000006,
+            550.5877,
+            122.02420000000006
+          ]
+        },
+        {
+          "line_index": 4,
+          "text": "SEE PAGE 9 FOR PROCEDURE 16 4 5",
+          "bbox": [
+            62.805,
+            120.51655999999991,
+            225.8687392,
+            134.71938839999996
+          ]
+        },
+        {
+          "line_index": 5,
+          "text": "6 8",
+          "bbox": [
+            210.6105424,
+            128.35735999999986,
+            225.8687392,
+            136.19815999999992
+          ]
+        },
+        {
+          "line_index": 6,
+          "text": "TO ADJUST THE JAW",
+          "bbox": [
+            62.805,
+            131.7622,
+            145.48179999999996,
+            139.7622
+          ]
+        },
+        {
+          "line_index": 7,
+          "text": "10",
+          "bbox": [
+            43.2649,
+            139.26476000000002,
+            51.983869600000006,
+            147.10556000000008
+          ]
+        },
+        {
+          "line_index": 8,
+          "text": "7",
+          "bbox": [
+            351.4575,
+            177.03886,
+            355.8169848,
+            184.87966000000006
+          ]
+        },
+        {
+          "line_index": 9,
+          "text": "8 4",
+          "bbox": [
+            219.6384,
+            221.99986,
+            285.8053848,
+            229.86856
+          ]
+        },
+        {
+          "line_index": 10,
+          "text": "(x3)",
+          "bbox": [
+            215.0672136,
+            229.8685599999999,
+            228.5690712,
+            237.70935999999995
+          ]
+        },
+        {
+          "line_index": 11,
+          "text": "5",
+          "bbox": [
+            267.5953,
+            234.76036,
+            271.9547848,
+            242.60116000000005
+          ]
+        },
+        {
+          "line_index": 12,
+          "text": "6",
+          "bbox": [
+            203.4662,
+            253.17656,
+            207.82568479999998,
+            261.01736000000005
+          ]
+        },
+        {
+          "line_index": 13,
+          "text": "(x3)",
+          "bbox": [
+            198.8950136,
+            261.01735999999994,
+            212.3968712,
+            268.85816
+          ]
+        },
+        {
+          "line_index": 14,
+          "text": "9",
+          "bbox": [
+            136.2786,
+            306.31726000000003,
+            140.6380848,
+            314.15806000000003
+          ]
+        },
+        {
+          "line_index": 15,
+          "text": "1",
+          "bbox": [
+            227.2183,
+            346.90236000000004,
+            231.5777848,
+            354.74316000000005
+          ]
+        },
+        {
+          "line_index": 16,
+          "text": "18\" Standard Bolt Cutter No. 48-22-4018",
+          "bbox": [
+            46.3204,
+            518.9403,
+            238.33040000000005,
+            528.9403
+          ]
+        },
+        {
+          "line_index": 17,
+          "text": "FIG. PART NO. DESCRIPTION OF PART NO. REQ.",
+          "bbox": [
+            44.544399999999996,
+            531.6922,
+            313.3284,
+            539.6922
+          ]
+        },
+        {
+          "line_index": 18,
+          "text": "1 --------------- Handle Assembly (2)",
+          "bbox": [
+            50.0964,
+            540.2842,
+            300.2004,
+            548.2842
+          ]
+        },
+        {
+          "line_index": 19,
+          "text": "4 --------------- Adjustment Hex Nut (1)",
+          "bbox": [
+            50.0964,
+            549.2842,
+            300.2004,
+            557.2842
+          ]
+        },
+        {
+          "line_index": 20,
+          "text": "5 --------------- Adjustment Bolt (1)",
+          "bbox": [
+            50.0964,
+            558.2842,
+            300.2004,
+            566.2842
+          ]
+        },
+        {
+          "line_index": 21,
+          "text": "6 --------------- Hinge Bolt (3)",
+          "bbox": [
+            50.0964,
+            567.2842,
+            300.2004,
+            575.2842
+          ]
+        },
+        {
+          "line_index": 22,
+          "text": "7 --------------- Right Bolt Cutter Pivot Assembly (1)",
+          "bbox": [
+            50.0964,
+            576.2842,
+            300.2004,
+            584.2842
+          ]
+        },
+        {
+          "line_index": 23,
+          "text": "8 --------------- Lock Nut (3)",
+          "bbox": [
+            50.0964,
+            585.2842,
+            300.2004,
+            593.2842
+          ]
+        },
+        {
+          "line_index": 24,
+          "text": "9 --------------- Left Bolt Cutter Pivot Assembly (1)",
+          "bbox": [
+            50.0964,
+            594.2842,
+            300.2004,
+            602.2842
+          ]
+        },
+        {
+          "line_index": 25,
+          "text": "10 48-38-0018 18\" Cutter Blade Assembly (1)",
+          "bbox": [
+            47.8712,
+            603.2842,
+            300.1992,
+            611.2842
+          ]
+        },
+        {
+          "line_index": 26,
+          "text": "16 14-46-2139 Hardware Kit (1)",
+          "bbox": [
+            47.8724,
+            612.2842,
+            300.2004,
+            620.2842
+          ]
+        }
+      ],
+      "tables": [
+        {
+          "table_id": "t4",
+          "page": 2,
+          "row_count": 2,
+          "col_count": 1,
+          "bbox": [
+            392.74458235294117,
+            97.70000000000005,
+            404.3721,
+            115.20000000000005
+          ],
+          "rows": [
+            [
+              ""
+            ],
+            [
+              "0"
+            ]
+          ],
+          "cells": [
+            {
+              "row": 1,
+              "col": 0,
+              "text": "0",
+              "bbox": [
+                392.74458235294117,
+                106.54999999999995,
+                404.3721,
+                115.20000000000005
+              ]
+            }
+          ]
+        },
+        {
+          "table_id": "t5",
+          "page": 2,
+          "row_count": 2,
+          "col_count": 2,
+          "bbox": [
+            189.98696842105264,
+            119.63360000000007,
+            218.2285,
+            134.63480000000004
+          ],
+          "rows": [
+            [
+              "16",
+              "4"
+            ],
+            [
+              "",
+              "6"
+            ]
+          ],
+          "cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "16",
+              "bbox": [
+                189.98696842105264,
+                119.63360000000007,
+                206.73125625,
+                134.63480000000004
+              ]
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "4",
+              "bbox": [
+                206.73125625,
+                119.63360000000007,
+                218.2285,
+                126.98540000000003
+              ]
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "6",
+              "bbox": [
+                206.73125625,
+                126.98540000000003,
+                218.2285,
+                134.63480000000004
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "width": 612.0,
+      "height": 792.0,
+      "lines": [
+        {
+          "line_index": 0,
+          "text": "16 3 5",
+          "bbox": [
+            189.928946,
+            30.46452750000003,
+            224.64878080000003,
+            46.92291149999994
+          ]
+        },
+        {
+          "line_index": 1,
+          "text": "10 11",
+          "bbox": [
+            204.907,
+            39.935966399999984,
+            227.11650340000003,
+            48.81266640000001
+          ]
+        },
+        {
+          "line_index": 2,
+          "text": "5",
+          "bbox": [
+            285.2855199,
+            46.42657699999995,
+            289.7474755,
+            54.451676999999904
+          ]
+        },
+        {
+          "line_index": 3,
+          "text": "(3x)",
+          "bbox": [
+            280.6068866,
+            54.451676999999904,
+            294.4261088,
+            62.476776999999856
+          ]
+        },
+        {
+          "line_index": 4,
+          "text": "1",
+          "bbox": [
+            68.6852,
+            107.55955749999998,
+            73.14715559999999,
+            115.58465749999993
+          ]
+        },
+        {
+          "line_index": 5,
+          "text": "14",
+          "bbox": [
+            298.0053034,
+            159.58048699999995,
+            306.9292146,
+            167.6055869999999
+          ]
+        },
+        {
+          "line_index": 6,
+          "text": "11",
+          "bbox": [
+            274.7244883,
+            173.21513189999996,
+            283.05454210000005,
+            181.2402318999999
+          ]
+        },
+        {
+          "line_index": 7,
+          "text": "3 10",
+          "bbox": [
+            68.6852,
+            186.84977679999997,
+            259.773727,
+            195.8356574999999
+          ]
+        },
+        {
+          "line_index": 8,
+          "text": "(3x)",
+          "bbox": [
+            64.0065667,
+            195.8356574999999,
+            77.82578889999999,
+            203.86075749999986
+          ]
+        },
+        {
+          "line_index": 9,
+          "text": "4",
+          "bbox": [
+            229.5191,
+            199.3448575,
+            233.98105560000002,
+            207.36995749999994
+          ]
+        },
+        {
+          "line_index": 10,
+          "text": "EXAMPLE:",
+          "bbox": [
+            432.9668,
+            277.35450000000003,
+            474.30279999999993,
+            285.3545
+          ]
+        },
+        {
+          "line_index": 11,
+          "text": "00",
+          "bbox": [
+            404.4077,
+            281.3193,
+            416.41729999999995,
+            293.3193
+          ]
+        },
+        {
+          "line_index": 12,
+          "text": "0 Component Parts (Small #) Are Included",
+          "bbox": [
+            420.6758,
+            284.9465,
+            576.1404,
+            294.7465
+          ]
+        },
+        {
+          "line_index": 13,
+          "text": "When Ordering The Assembly (Large #).",
+          "bbox": [
+            432.9668,
+            292.9465,
+            576.4332,
+            300.9465
+          ]
+        },
+        {
+          "line_index": 14,
+          "text": "SEE PAGE 9 FOR PROCEDURE",
+          "bbox": [
+            190.605,
+            319.44219999999996,
+            310.0338,
+            327.44219999999996
+          ]
+        },
+        {
+          "line_index": 15,
+          "text": "TO ADJUST THE JAW",
+          "bbox": [
+            190.605,
+            329.0422,
+            273.2818,
+            337.0422
+          ]
+        },
+        {
+          "line_index": 16,
+          "text": "24\" Standard Bolt Cutter No. 48-22-4024",
+          "bbox": [
+            309.05,
+            374.5525,
+            501.06000000000006,
+            384.5525
+          ]
+        },
+        {
+          "line_index": 17,
+          "text": "FIG. PART NO. DESCRIPTION OF PART NO. REQ.",
+          "bbox": [
+            307.274,
+            387.30449999999996,
+            576.058,
+            395.30449999999996
+          ]
+        },
+        {
+          "line_index": 18,
+          "text": "1 48-38-0024 24\" Cutter Blade Assembly (1)",
+          "bbox": [
+            312.8254,
+            395.8965,
+            562.9293999999999,
+            403.8965
+          ]
+        },
+        {
+          "line_index": 19,
+          "text": "3 --------------- Hex Nut (3)",
+          "bbox": [
+            312.826,
+            404.8965,
+            562.93,
+            412.8965
+          ]
+        },
+        {
+          "line_index": 20,
+          "text": "4 --------------- 24\" Handle Assembly-Left (1)",
+          "bbox": [
+            312.826,
+            413.8965,
+            562.93,
+            421.8965
+          ]
+        },
+        {
+          "line_index": 21,
+          "text": "5 --------------- Hinge Bolt (3)",
+          "bbox": [
+            312.826,
+            422.8965,
+            562.93,
+            430.8965
+          ]
+        },
+        {
+          "line_index": 22,
+          "text": "10 --------------- Adjustment Bolt (1)",
+          "bbox": [
+            310.60200000000003,
+            431.8965,
+            562.93,
+            439.8965
+          ]
+        },
+        {
+          "line_index": 23,
+          "text": "11 --------------- Adjustment Hex Nut (1)",
+          "bbox": [
+            310.898,
+            440.8965,
+            562.93,
+            448.8965
+          ]
+        },
+        {
+          "line_index": 24,
+          "text": "14 --------------- 24\" Handle Assembly-Right (1)",
+          "bbox": [
+            310.60200000000003,
+            449.8965,
+            562.93,
+            457.8965
+          ]
+        },
+        {
+          "line_index": 25,
+          "text": "16 14-46-2140 Hardware Kit (1)",
+          "bbox": [
+            310.60200000000003,
+            458.8965,
+            562.93,
+            466.8965
+          ]
+        }
+      ],
+      "tables": [
+        {
+          "table_id": "t6",
+          "page": 3,
+          "row_count": 1,
+          "col_count": 2,
+          "bbox": [
+            405.1782,
+            276.62200000000007,
+            429.876,
+            292.90245
+          ],
+          "rows": [
+            [
+              "00",
+              "0"
+            ]
+          ],
+          "cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "00",
+              "bbox": [
+                405.1782,
+                276.62200000000007,
+                416.23516666666666,
+                292.90245
+              ]
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "0",
+              "bbox": [
+                416.23516666666666,
+                276.62200000000007,
+                429.876,
+                292.90245
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "width": 612.0,
+      "height": 792.0,
+      "lines": [
+        {
+          "line_index": 0,
+          "text": "EXAMPLE:",
+          "bbox": [
+            419.3609,
+            69.71570000000008,
+            460.6969,
+            77.71570000000008
+          ]
+        },
+        {
+          "line_index": 1,
+          "text": "00",
+          "bbox": [
+            390.8018,
+            73.68049999999994,
+            402.8114,
+            85.68049999999994
+          ]
+        },
+        {
+          "line_index": 2,
+          "text": "0 Component Parts (Small #) Are Included",
+          "bbox": [
+            407.07,
+            77.30770000000007,
+            562.5345,
+            87.10770000000002
+          ]
+        },
+        {
+          "line_index": 3,
+          "text": "SEE PAGE 9 FOR PROCEDURE 16 4 5 When Ordering The Assembly (Large #).",
+          "bbox": [
+            77.285,
+            85.30770000000007,
+            562.8273,
+            100.75315999999998
+          ]
+        },
+        {
+          "line_index": 4,
+          "text": "6 8",
+          "bbox": [
+            226.82486,
+            94.32679999999993,
+            242.23718000000002,
+            102.2467999999999
+          ]
+        },
+        {
+          "line_index": 5,
+          "text": "TO ADJUST THE JAW",
+          "bbox": [
+            77.285,
+            97.92220000000009,
+            159.96179999999995,
+            105.92220000000009
+          ]
+        },
+        {
+          "line_index": 6,
+          "text": "10",
+          "bbox": [
+            57.7887,
+            105.34439999999995,
+            66.59574,
+            113.26439999999991
+          ]
+        },
+        {
+          "line_index": 7,
+          "text": "7",
+          "bbox": [
+            352.2644,
+            136.57000000000005,
+            356.66792000000004,
+            144.49
+          ]
+        },
+        {
+          "line_index": 8,
+          "text": "8 4",
+          "bbox": [
+            235.9438,
+            188.91520000000003,
+            302.77922,
+            196.86339999999996
+          ]
+        },
+        {
+          "line_index": 9,
+          "text": "(x3)",
+          "bbox": [
+            231.32644000000002,
+            196.86339999999996,
+            244.96468000000002,
+            204.78339999999992
+          ]
+        },
+        {
+          "line_index": 10,
+          "text": "5",
+          "bbox": [
+            284.3852,
+            201.80460000000005,
+            288.78872,
+            209.7246
+          ]
+        },
+        {
+          "line_index": 11,
+          "text": "6",
+          "bbox": [
+            219.6083,
+            220.4067,
+            224.01182,
+            228.32669999999996
+          ]
+        },
+        {
+          "line_index": 12,
+          "text": "(x3)",
+          "bbox": [
+            214.99094000000002,
+            228.32669999999996,
+            228.62918000000002,
+            236.24669999999992
+          ]
+        },
+        {
+          "line_index": 13,
+          "text": "9",
+          "bbox": [
+            151.742,
+            274.0842,
+            156.14551999999998,
+            282.0042
+          ]
+        },
+        {
+          "line_index": 14,
+          "text": "1",
+          "bbox": [
+            243.6004,
+            315.0794,
+            248.00392,
+            322.99940000000004
+          ]
+        },
+        {
+          "line_index": 15,
+          "text": "30\" Standard Bolt Cutter No. 48-22-4031",
+          "bbox": [
+            61.56,
+            490.2238,
+            253.57000000000005,
+            500.2238
+          ]
+        },
+        {
+          "line_index": 16,
+          "text": "FIG. PART NO. DESCRIPTION OF PART NO. REQ.",
+          "bbox": [
+            59.784,
+            502.97569999999996,
+            328.568,
+            510.97569999999996
+          ]
+        },
+        {
+          "line_index": 17,
+          "text": "1 --------------- Handle Assembly (2)",
+          "bbox": [
+            65.336,
+            511.5677,
+            315.44,
+            519.5677000000001
+          ]
+        },
+        {
+          "line_index": 18,
+          "text": "4 --------------- Adjustment Hex Nut (1)",
+          "bbox": [
+            65.336,
+            520.5677000000001,
+            315.44,
+            528.5677000000001
+          ]
+        },
+        {
+          "line_index": 19,
+          "text": "5 --------------- Adjustment Bolt (1)",
+          "bbox": [
+            65.336,
+            529.5677000000001,
+            315.44,
+            537.5677
+          ]
+        },
+        {
+          "line_index": 20,
+          "text": "6 --------------- Hinge Bolt (3)",
+          "bbox": [
+            65.336,
+            538.5677000000001,
+            315.44,
+            546.5677000000001
+          ]
+        },
+        {
+          "line_index": 21,
+          "text": "7 --------------- Right Bolt Cutter Pivot Assembly (1)",
+          "bbox": [
+            65.336,
+            547.5677000000001,
+            315.44,
+            555.5677000000001
+          ]
+        },
+        {
+          "line_index": 22,
+          "text": "8 --------------- Lock Nut (3)",
+          "bbox": [
+            65.336,
+            556.5677000000001,
+            315.44,
+            564.5677000000001
+          ]
+        },
+        {
+          "line_index": 23,
+          "text": "9 --------------- Left Bolt Cutter Pivot Assembly (1)",
+          "bbox": [
+            65.336,
+            565.5677000000001,
+            315.44,
+            573.5677000000001
+          ]
+        },
+        {
+          "line_index": 24,
+          "text": "10 48-38-0031 30\" Cutter Blade Assembly (1)",
+          "bbox": [
+            63.1108,
+            574.5677000000001,
+            315.4388,
+            582.5677000000001
+          ]
+        },
+        {
+          "line_index": 25,
+          "text": "16 14-46-2149 Hardware Kit (1)",
+          "bbox": [
+            63.112,
+            583.5677000000001,
+            315.44,
+            591.5677000000001
+          ]
+        }
+      ],
+      "tables": [
+        {
+          "table_id": "t7",
+          "page": 4,
+          "row_count": 2,
+          "col_count": 2,
+          "bbox": [
+            387.33925999999997,
+            68.98400000000004,
+            412.72144615384616,
+            85.89590000000004
+          ],
+          "rows": [
+            [
+              "00",
+              ""
+            ],
+            [
+              "",
+              "0"
+            ]
+          ],
+          "cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "00",
+              "bbox": [
+                387.33925999999997,
+                68.98400000000004,
+                403.22658181818184,
+                85.89590000000004
+              ]
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "0",
+              "bbox": [
+                403.22658181818184,
+                77.83349999999996,
+                412.72144615384616,
+                85.89590000000004
+              ]
+            }
+          ]
+        },
+        {
+          "table_id": "t8",
+          "page": 4,
+          "row_count": 2,
+          "col_count": 2,
+          "bbox": [
+            205.99288947368422,
+            85.89590000000004,
+            234.5197,
+            100.6676
+          ],
+          "rows": [
+            [
+              "16",
+              "4"
+            ],
+            [
+              "",
+              "6"
+            ]
+          ],
+          "cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "16",
+              "bbox": [
+                205.99288947368422,
+                85.89590000000004,
+                222.906325,
+                100.6676
+              ]
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "4",
+              "bbox": [
+                222.906325,
+                85.89590000000004,
+                234.5197,
+                92.94100000000003
+              ]
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "6",
+              "bbox": [
+                222.906325,
+                92.94100000000003,
+                234.5197,
+                100.6676
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "width": 612.0,
+      "height": 792.0,
+      "lines": [
+        {
+          "line_index": 0,
+          "text": "SEE PAGE 9 FOR PROCEDURE",
+          "bbox": [
+            137.235,
+            112.8239000000001,
+            256.6638,
+            120.8239000000001
+          ]
+        },
+        {
+          "line_index": 1,
+          "text": "TO ADJUST THE JAW",
+          "bbox": [
+            137.235,
+            122.4239,
+            219.9118,
+            130.4239
+          ]
+        },
+        {
+          "line_index": 2,
+          "text": "1 16 3 5 00 EXAMPLE:",
+          "bbox": [
+            174.0355,
+            138.9847000000001,
+            473.4951,
+            157.42952809999997
+          ]
+        },
+        {
+          "line_index": 3,
+          "text": "10 11 0 Component Parts (Small #) Are Included",
+          "bbox": [
+            319.6856,
+            148.54590000000007,
+            575.3327,
+            159.31340799999998
+          ]
+        },
+        {
+          "line_index": 4,
+          "text": "When Ordering The Assembly (Large #).",
+          "bbox": [
+            432.1591,
+            156.54590000000007,
+            575.6255000000001,
+            164.54590000000007
+          ]
+        },
+        {
+          "line_index": 5,
+          "text": "5",
+          "bbox": [
+            212.3555,
+            174.59270000000004,
+            216.8035,
+            182.59270000000004
+          ]
+        },
+        {
+          "line_index": 6,
+          "text": "(3x)",
+          "bbox": [
+            207.69150000000002,
+            182.59270000000004,
+            221.4675,
+            190.59270000000004
+          ]
+        },
+        {
+          "line_index": 7,
+          "text": "3",
+          "bbox": [
+            212.3555,
+            214.59270000000004,
+            216.8035,
+            222.59270000000004
+          ]
+        },
+        {
+          "line_index": 8,
+          "text": "(3x)",
+          "bbox": [
+            207.69150000000002,
+            222.59270000000004,
+            221.4675,
+            230.59270000000004
+          ]
+        },
+        {
+          "line_index": 9,
+          "text": "14",
+          "bbox": [
+            318.7635,
+            243.84070000000008,
+            327.6595,
+            251.84070000000008
+          ]
+        },
+        {
+          "line_index": 10,
+          "text": "4",
+          "bbox": [
+            212.3555,
+            254.59270000000004,
+            216.8035,
+            262.59270000000004
+          ]
+        },
+        {
+          "line_index": 11,
+          "text": "11",
+          "bbox": [
+            319.0595,
+            275.8407000000001,
+            327.3635,
+            283.8407000000001
+          ]
+        },
+        {
+          "line_index": 12,
+          "text": "10",
+          "bbox": [
+            318.7635,
+            307.8407000000001,
+            327.6595,
+            315.8407000000001
+          ]
+        },
+        {
+          "line_index": 13,
+          "text": "14\" Premium Bolt Cutter No. 48-22-4114",
+          "bbox": [
+            35.08,
+            494.412,
+            225.995,
+            504.412
+          ]
+        },
+        {
+          "line_index": 14,
+          "text": "FIG. PART NO. DESCRIPTION OF PART NO. REQ.",
+          "bbox": [
+            35.2227,
+            508.52389999999997,
+            304.00669999999997,
+            516.5238999999999
+          ]
+        },
+        {
+          "line_index": 15,
+          "text": "1 48-38-0014 14\" Cutter Blade Assembly (1)",
+          "bbox": [
+            40.7754,
+            517.7159,
+            290.8794,
+            525.7159
+          ]
+        },
+        {
+          "line_index": 16,
+          "text": "3 --------------- Hex Nut (3)",
+          "bbox": [
+            40.775999999999996,
+            527.3159,
+            290.88000000000005,
+            535.3159
+          ]
+        },
+        {
+          "line_index": 17,
+          "text": "4 --------------- 14\" Adjustable Handle Assembly-Left (1)",
+          "bbox": [
+            40.775999999999996,
+            536.9159,
+            290.88000000000005,
+            544.9159
+          ]
+        },
+        {
+          "line_index": 18,
+          "text": "5 --------------- Hinge Bolt (3)",
+          "bbox": [
+            40.775999999999996,
+            546.5159,
+            290.88000000000005,
+            554.5159
+          ]
+        },
+        {
+          "line_index": 19,
+          "text": "10 --------------- Adjustment Bolt (1)",
+          "bbox": [
+            38.552,
+            556.1159,
+            290.88000000000005,
+            564.1159
+          ]
+        },
+        {
+          "line_index": 20,
+          "text": "11 --------------- Adjustment Hex Nut (1)",
+          "bbox": [
+            38.848,
+            565.7159,
+            290.88000000000005,
+            573.7159
+          ]
+        },
+        {
+          "line_index": 21,
+          "text": "14 --------------- 14\" Adjustable Handle Assembly-Right (1)",
+          "bbox": [
+            38.552,
+            575.3159,
+            290.88000000000005,
+            583.3159
+          ]
+        },
+        {
+          "line_index": 22,
+          "text": "16 14-46-2135 Hardware Kit (1)",
+          "bbox": [
+            38.552,
+            584.9159,
+            290.88,
+            592.9159
+          ]
+        }
+      ],
+      "tables": [
+        {
+          "table_id": "t9",
+          "page": 5,
+          "row_count": 9,
+          "col_count": 3,
+          "bbox": [
+            35.2227,
+            508.52389999999997,
+            304.00669999999997,
+            592.9159
+          ],
+          "rows": [
+            [
+              "FIG. PART NO.",
+              "DESCRIPTION OF PART",
+              "NO. REQ."
+            ],
+            [
+              "1 48-38-0014",
+              "14\" Cutter Blade Assembly",
+              "(1)"
+            ],
+            [
+              "3 ---------------",
+              "Hex Nut",
+              "(3)"
+            ],
+            [
+              "4 ---------------",
+              "14\" Adjustable Handle Assembly-Left",
+              "(1)"
+            ],
+            [
+              "5 ---------------",
+              "Hinge Bolt",
+              "(3)"
+            ],
+            [
+              "10 ---------------",
+              "Adjustment Bolt",
+              "(1)"
+            ],
+            [
+              "11 ---------------",
+              "Adjustment Hex Nut",
+              "(1)"
+            ],
+            [
+              "14 ---------------",
+              "14\" Adjustable Handle Assembly-Right",
+              "(1)"
+            ],
+            [
+              "16 14-46-2135",
+              "Hardware Kit",
+              "(1)"
+            ]
+          ],
+          "cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "FIG. PART NO.",
+              "bbox": [
+                35.2227,
+                508.52389999999997,
+                95.56510000000002,
+                516.5238999999999
+              ]
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "DESCRIPTION OF PART",
+              "bbox": [
+                110.5027,
+                508.52389999999997,
+                201.91150000000002,
+                516.5238999999999
+              ]
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "NO. REQ.",
+              "bbox": [
+                267.9987,
+                508.52389999999997,
+                304.00669999999997,
+                516.5238999999999
+              ]
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "1 48-38-0014",
+              "bbox": [
+                40.7754,
+                517.7159,
+                97.1994,
+                525.7159
+              ]
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "14\" Cutter Blade Assembly",
+              "bbox": [
+                110.49539999999999,
+                517.7159,
+                205.3786,
+                525.7159
+              ]
+            },
+            {
+              "row": 1,
+              "col": 2,
+              "text": "(1)",
+              "bbox": [
+                281.10339999999997,
+                517.7159,
+                290.8794,
+                525.7159
+              ]
+            },
+            {
+              "row": 2,
+              "col": 0,
+              "text": "3 ---------------",
+              "bbox": [
+                40.775999999999996,
+                527.3159,
+                96.72800000000001,
+                535.3159
+              ]
+            },
+            {
+              "row": 2,
+              "col": 1,
+              "text": "Hex Nut",
+              "bbox": [
+                110.49600000000001,
+                527.3159,
+                139.392,
+                535.3159
+              ]
+            },
+            {
+              "row": 2,
+              "col": 2,
+              "text": "(3)",
+              "bbox": [
+                281.10400000000004,
+                527.3159,
+                290.88000000000005,
+                535.3159
+              ]
+            },
+            {
+              "row": 3,
+              "col": 0,
+              "text": "4 ---------------",
+              "bbox": [
+                40.775999999999996,
+                536.9159,
+                96.72800000000001,
+                544.9159
+              ]
+            },
+            {
+              "row": 3,
+              "col": 1,
+              "text": "14\" Adjustable Handle Assembly-Left",
+              "bbox": [
+                110.49600000000001,
+                536.9159,
+                241.4112,
+                544.9159
+              ]
+            },
+            {
+              "row": 3,
+              "col": 2,
+              "text": "(1)",
+              "bbox": [
+                281.10400000000004,
+                536.9159,
+                290.88000000000005,
+                544.9159
+              ]
+            },
+            {
+              "row": 4,
+              "col": 0,
+              "text": "5 ---------------",
+              "bbox": [
+                40.775999999999996,
+                546.5159,
+                96.72800000000001,
+                554.5159
+              ]
+            },
+            {
+              "row": 4,
+              "col": 1,
+              "text": "Hinge Bolt",
+              "bbox": [
+                110.49600000000001,
+                546.5159,
+                147.4,
+                554.5159
+              ]
+            },
+            {
+              "row": 4,
+              "col": 2,
+              "text": "(3)",
+              "bbox": [
+                281.10400000000004,
+                546.5159,
+                290.88000000000005,
+                554.5159
+              ]
+            },
+            {
+              "row": 5,
+              "col": 0,
+              "text": "10 ---------------",
+              "bbox": [
+                38.552,
+                556.1159,
+                96.72800000000001,
+                564.1159
+              ]
+            },
+            {
+              "row": 5,
+              "col": 1,
+              "text": "Adjustment Bolt",
+              "bbox": [
+                110.49600000000001,
+                556.1159,
+                166.52,
+                564.1159
+              ]
+            },
+            {
+              "row": 5,
+              "col": 2,
+              "text": "(1)",
+              "bbox": [
+                281.10400000000004,
+                556.1159,
+                290.88000000000005,
+                564.1159
+              ]
+            },
+            {
+              "row": 6,
+              "col": 0,
+              "text": "11 ---------------",
+              "bbox": [
+                38.848,
+                565.7159,
+                96.72800000000001,
+                573.7159
+              ]
+            },
+            {
+              "row": 6,
+              "col": 1,
+              "text": "Adjustment Hex Nut",
+              "bbox": [
+                110.49600000000001,
+                565.7159,
+                181.632,
+                573.7159
+              ]
+            },
+            {
+              "row": 6,
+              "col": 2,
+              "text": "(1)",
+              "bbox": [
+                281.10400000000004,
+                565.7159,
+                290.88000000000005,
+                573.7159
+              ]
+            },
+            {
+              "row": 7,
+              "col": 0,
+              "text": "14 ---------------",
+              "bbox": [
+                38.552,
+                575.3159,
+                96.72800000000001,
+                583.3159
+              ]
+            },
+            {
+              "row": 7,
+              "col": 1,
+              "text": "14\" Adjustable Handle Assembly-Right",
+              "bbox": [
+                110.49600000000001,
+                575.3159,
+                246.7392,
+                583.3159
+              ]
+            },
+            {
+              "row": 7,
+              "col": 2,
+              "text": "(1)",
+              "bbox": [
+                281.10400000000004,
+                575.3159,
+                290.88000000000005,
+                583.3159
+              ]
+            },
+            {
+              "row": 8,
+              "col": 0,
+              "text": "16 14-46-2135",
+              "bbox": [
+                38.552,
+                584.9159,
+                97.20000000000002,
+                592.9159
+              ]
+            },
+            {
+              "row": 8,
+              "col": 1,
+              "text": "Hardware Kit",
+              "bbox": [
+                110.496,
+                584.9159,
+                156.72799999999998,
+                592.9159
+              ]
+            },
+            {
+              "row": 8,
+              "col": 2,
+              "text": "(1)",
+              "bbox": [
+                281.104,
+                584.9159,
+                290.88,
+                592.9159
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "width": 612.0,
+      "height": 792.0,
+      "lines": [
+        {
+          "line_index": 0,
+          "text": "5",
+          "bbox": [
+            238.7388,
+            29.50357000000008,
+            243.1131856,
+            37.371170000000006
+          ]
+        },
+        {
+          "line_index": 1,
+          "text": "16 3 5 (3x)",
+          "bbox": [
+            102.92533479999999,
+            36.283612500000004,
+            247.69999640000003,
+            52.41895869999996
+          ]
+        },
+        {
+          "line_index": 2,
+          "text": "10 11",
+          "bbox": [
+            117.6104,
+            45.56917999999996,
+            139.38405500000002,
+            54.27167999999995
+          ]
+        },
+        {
+          "line_index": 3,
+          "text": "14",
+          "bbox": [
+            236.5516072,
+            68.84157000000016,
+            245.30037840000003,
+            76.70917000000009
+          ]
+        },
+        {
+          "line_index": 4,
+          "text": "3",
+          "bbox": [
+            137.7738892,
+            108.17957000000024,
+            142.14827480000002,
+            116.04717000000016
+          ]
+        },
+        {
+          "line_index": 5,
+          "text": "(3x)",
+          "bbox": [
+            133.18707840000002,
+            116.04717000000028,
+            146.73508560000005,
+            123.9147700000002
+          ]
+        },
+        {
+          "line_index": 6,
+          "text": "1",
+          "bbox": [
+            54.51107840000002,
+            127.51813080000034,
+            58.88546400000002,
+            135.38573080000026
+          ]
+        },
+        {
+          "line_index": 7,
+          "text": "10",
+          "bbox": [
+            236.5516072,
+            147.5175700000002,
+            245.30037840000003,
+            155.38517000000013
+          ]
+        },
+        {
+          "line_index": 8,
+          "text": "11",
+          "bbox": [
+            236.84270840000002,
+            178.98797000000025,
+            245.00927720000004,
+            186.85557000000017
+          ]
+        },
+        {
+          "line_index": 9,
+          "text": "4",
+          "bbox": [
+            159.40978920000003,
+            273.39917000000037,
+            163.78417480000005,
+            281.2667700000003
+          ]
+        },
+        {
+          "line_index": 10,
+          "text": "SEE PAGE 9 FOR PROCEDURE",
+          "bbox": [
+            347.925,
+            329.0322,
+            467.3538,
+            337.0322
+          ]
+        },
+        {
+          "line_index": 11,
+          "text": "TO ADJUST THE JAW",
+          "bbox": [
+            347.925,
+            338.63219999999995,
+            430.6018,
+            346.63219999999995
+          ]
+        },
+        {
+          "line_index": 12,
+          "text": "EXAMPLE:",
+          "bbox": [
+            69.9677,
+            427.43219999999997,
+            111.30369999999999,
+            435.43219999999997
+          ]
+        },
+        {
+          "line_index": 13,
+          "text": "00",
+          "bbox": [
+            41.4086,
+            431.39709999999997,
+            53.418200000000006,
+            443.39709999999997
+          ]
+        },
+        {
+          "line_index": 14,
+          "text": "0 Component Parts (Small #) Are Included",
+          "bbox": [
+            57.6768,
+            435.0242,
+            213.14130000000003,
+            444.8242
+          ]
+        },
+        {
+          "line_index": 15,
+          "text": "When Ordering The Assembly (Large #).",
+          "bbox": [
+            69.9677,
+            443.0242,
+            213.4341,
+            451.0242
+          ]
+        },
+        {
+          "line_index": 16,
+          "text": "24\" Premium Bolt Cutter No. 48-22-4124",
+          "bbox": [
+            40.1268,
+            482.6803,
+            231.58680000000004,
+            492.6803
+          ]
+        },
+        {
+          "line_index": 17,
+          "text": "FIG. PART NO. DESCRIPTION OF PART NO. REQ.",
+          "bbox": [
+            41.3508,
+            495.43219999999997,
+            310.1348,
+            503.43219999999997
+          ]
+        },
+        {
+          "line_index": 18,
+          "text": "1 48-38-0024 24\" Cutter Blade Assembly (1)",
+          "bbox": [
+            46.9022,
+            504.0242,
+            297.0062,
+            512.0242000000001
+          ]
+        },
+        {
+          "line_index": 19,
+          "text": "3 --------------- Hex Nut (3)",
+          "bbox": [
+            46.9028,
+            513.0242000000001,
+            297.00680000000006,
+            521.0242000000001
+          ]
+        },
+        {
+          "line_index": 20,
+          "text": "4 --------------- 24\" Adjustable Handle Assembly-Left (1)",
+          "bbox": [
+            46.9028,
+            522.0242000000001,
+            297.00680000000006,
+            530.0242000000001
+          ]
+        },
+        {
+          "line_index": 21,
+          "text": "5 --------------- Hinge Bolt (3)",
+          "bbox": [
+            46.9028,
+            531.0242000000001,
+            297.00680000000006,
+            539.0242000000001
+          ]
+        },
+        {
+          "line_index": 22,
+          "text": "10 --------------- Adjustment Bolt (1)",
+          "bbox": [
+            44.6788,
+            540.0242000000001,
+            297.00680000000006,
+            548.0242000000001
+          ]
+        },
+        {
+          "line_index": 23,
+          "text": "11 --------------- Adjustment Hex Nut (1)",
+          "bbox": [
+            44.9748,
+            549.0242000000001,
+            297.00680000000006,
+            557.0242000000001
+          ]
+        },
+        {
+          "line_index": 24,
+          "text": "14 --------------- 24\" Adjustable Handle Assembly-Right (1)",
+          "bbox": [
+            44.6788,
+            558.0242000000001,
+            297.00680000000006,
+            566.0242000000001
+          ]
+        },
+        {
+          "line_index": 25,
+          "text": "16 14-46-2140 Hardware Kit (1)",
+          "bbox": [
+            44.6788,
+            567.0242000000001,
+            297.0068,
+            575.0242000000001
+          ]
+        }
+      ],
+      "tables": [
+        {
+          "table_id": "t10",
+          "page": 6,
+          "row_count": 1,
+          "col_count": 2,
+          "bbox": [
+            40.377,
+            426.7,
+            68.78214615384616,
+            444.2
+          ],
+          "rows": [
+            [
+              "00",
+              "0"
+            ]
+          ],
+          "cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "00",
+              "bbox": [
+                40.377,
+                426.7,
+                59.5968875,
+                444.2
+              ]
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "0",
+              "bbox": [
+                59.5968875,
+                426.7,
+                68.78214615384616,
+                444.2
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "width": 612.0,
+      "height": 792.0,
+      "lines": [
+        {
+          "line_index": 0,
+          "text": "EXAMPLE:",
+          "bbox": [
+            405.1112,
+            70.3673,
+            446.44719999999995,
+            78.3673
+          ]
+        },
+        {
+          "line_index": 1,
+          "text": "00",
+          "bbox": [
+            376.5521,
+            74.332,
+            388.5617,
+            86.332
+          ]
+        },
+        {
+          "line_index": 2,
+          "text": "SEE PAGE 9 FOR PROCEDURE 0 Component Parts (Small #) Are Included",
+          "bbox": [
+            37.605,
+            77.5222,
+            548.2848,
+            87.75920000000008
+          ]
+        },
+        {
+          "line_index": 3,
+          "text": "TO ADJUST THE JAW When Ordering The Assembly (Large #).",
+          "bbox": [
+            37.605,
+            85.95929999999998,
+            548.5776000000001,
+            95.12220000000002
+          ]
+        },
+        {
+          "line_index": 4,
+          "text": "16 4 5",
+          "bbox": [
+            192.7324,
+            93.10344750000002,
+            225.10352319999998,
+            107.58329049999998
+          ]
+        },
+        {
+          "line_index": 5,
+          "text": "10 6 8",
+          "bbox": [
+            67.0552,
+            99.85054750000006,
+            225.10352319999998,
+            109.09204749999992
+          ]
+        },
+        {
+          "line_index": 6,
+          "text": "7",
+          "bbox": [
+            342.5117,
+            152.81404750000002,
+            346.9565308,
+            160.80834749999997
+          ]
+        },
+        {
+          "line_index": 7,
+          "text": "8",
+          "bbox": [
+            226.0648,
+            196.2081475,
+            230.5096308,
+            204.20244749999995
+          ]
+        },
+        {
+          "line_index": 8,
+          "text": "(x3)",
+          "bbox": [
+            221.4041231,
+            204.20244749999995,
+            235.1703077,
+            212.1967474999999
+          ]
+        },
+        {
+          "line_index": 9,
+          "text": "4",
+          "bbox": [
+            284.9465,
+            210.12804749999998,
+            289.3913308,
+            218.12234749999993
+          ]
+        },
+        {
+          "line_index": 10,
+          "text": "6",
+          "bbox": [
+            182.6682,
+            215.79004750000001,
+            187.11303080000002,
+            223.78434749999997
+          ]
+        },
+        {
+          "line_index": 11,
+          "text": "(x3) 5",
+          "bbox": [
+            178.00752310000001,
+            221.48424750000004,
+            273.91253079999996,
+            231.77864749999992
+          ]
+        },
+        {
+          "line_index": 12,
+          "text": "9",
+          "bbox": [
+            159.8899,
+            305.31944749999997,
+            164.33473080000002,
+            313.3137475
+          ]
+        },
+        {
+          "line_index": 13,
+          "text": "1",
+          "bbox": [
+            206.201,
+            327.5576475,
+            210.6458308,
+            335.5519475
+          ]
+        },
+        {
+          "line_index": 14,
+          "text": "18\" Non-Conductive Bolt Cutter No. 48-22-4218",
+          "bbox": [
+            56.7503,
+            490.8753,
+            282.6403,
+            500.8753
+          ]
+        },
+        {
+          "line_index": 15,
+          "text": "FIG. PART NO. DESCRIPTION OF PART NO. REQ.",
+          "bbox": [
+            54.9743,
+            503.62719999999996,
+            323.7583,
+            511.62719999999996
+          ]
+        },
+        {
+          "line_index": 16,
+          "text": "1 --------------- Handle Assembly (2)",
+          "bbox": [
+            60.526300000000006,
+            512.2192,
+            310.63030000000003,
+            520.2192
+          ]
+        },
+        {
+          "line_index": 17,
+          "text": "4 --------------- Adjustment Hex Nut (1)",
+          "bbox": [
+            60.526300000000006,
+            521.2192,
+            310.63030000000003,
+            529.2192
+          ]
+        },
+        {
+          "line_index": 18,
+          "text": "5 --------------- Adjustment Bolt (1)",
+          "bbox": [
+            60.526300000000006,
+            530.2192,
+            310.63030000000003,
+            538.2192
+          ]
+        },
+        {
+          "line_index": 19,
+          "text": "6 --------------- Hinge Bolt (3)",
+          "bbox": [
+            60.526300000000006,
+            539.2192,
+            310.63030000000003,
+            547.2192
+          ]
+        },
+        {
+          "line_index": 20,
+          "text": "7 --------------- Right Bolt Cutter Pivot Assembly (1)",
+          "bbox": [
+            60.526300000000006,
+            548.2192,
+            310.63030000000003,
+            556.2192
+          ]
+        },
+        {
+          "line_index": 21,
+          "text": "8 --------------- Lock Nut (3)",
+          "bbox": [
+            60.526300000000006,
+            557.2192,
+            310.63030000000003,
+            565.2192
+          ]
+        },
+        {
+          "line_index": 22,
+          "text": "9 --------------- Left Bolt Cutter Pivot Assembly (1)",
+          "bbox": [
+            60.526300000000006,
+            566.2192,
+            310.63030000000003,
+            574.2192
+          ]
+        },
+        {
+          "line_index": 23,
+          "text": "10 48-38-0018 18\" Cutter Blade Assembly (1)",
+          "bbox": [
+            58.3011,
+            575.2192,
+            310.6291,
+            583.2192
+          ]
+        },
+        {
+          "line_index": 24,
+          "text": "16 14-46-2139 Hardware Kit (1)",
+          "bbox": [
+            58.3023,
+            584.2192,
+            310.63030000000003,
+            592.2192
+          ]
+        }
+      ],
+      "tables": [
+        {
+          "table_id": "t11",
+          "page": 7,
+          "row_count": 2,
+          "col_count": 2,
+          "bbox": [
+            192.2503388888889,
+            93.59496666666662,
+            225.13688636363634,
+            107.49789999999996
+          ],
+          "rows": [
+            [
+              "16",
+              "4 5"
+            ],
+            [
+              "",
+              "6 8"
+            ]
+          ],
+          "cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "16",
+              "bbox": [
+                192.2503388888889,
+                93.59496666666662,
+                206.1433,
+                107.49789999999996
+              ]
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "4 5",
+              "bbox": [
+                206.1433,
+                93.59496666666662,
+                225.13688636363634,
+                99.69839999999999
+              ]
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "6 8",
+              "bbox": [
+                206.1433,
+                99.69839999999999,
+                225.13688636363634,
+                107.49789999999996
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 8,
+      "width": 612.0,
+      "height": 792.0,
+      "lines": [
+        {
+          "line_index": 0,
+          "text": "10",
+          "bbox": [
+            70.3172,
+            43.797287499999925,
+            78.907956,
+            51.522787499999936
+          ]
+        },
+        {
+          "line_index": 1,
+          "text": "16 4 5",
+          "bbox": [
+            151.6711,
+            50.13748750000002,
+            182.953612,
+            64.13140810000004
+          ]
+        },
+        {
+          "line_index": 2,
+          "text": "6 8",
+          "bbox": [
+            167.919789,
+            57.86298750000003,
+            182.953612,
+            65.58848750000004
+          ]
+        },
+        {
+          "line_index": 3,
+          "text": "EXAMPLE:",
+          "bbox": [
+            420.3962,
+            62.90219999999999,
+            461.73220000000003,
+            70.9022
+          ]
+        },
+        {
+          "line_index": 4,
+          "text": "00",
+          "bbox": [
+            391.8371,
+            66.86699999999996,
+            403.8467,
+            78.86699999999996
+          ]
+        },
+        {
+          "line_index": 5,
+          "text": "0 Component Parts (Small #) Are Included",
+          "bbox": [
+            408.1053,
+            70.49419999999998,
+            563.5698,
+            80.29420000000005
+          ]
+        },
+        {
+          "line_index": 6,
+          "text": "When Ordering The Assembly (Large #).",
+          "bbox": [
+            420.3962,
+            78.49419999999998,
+            563.8626,
+            86.49419999999998
+          ]
+        },
+        {
+          "line_index": 7,
+          "text": "6",
+          "bbox": [
+            182.1049,
+            91.39988749999998,
+            186.400278,
+            99.12538749999999
+          ]
+        },
+        {
+          "line_index": 8,
+          "text": "(x3)",
+          "bbox": [
+            177.6009335,
+            99.12538749999999,
+            190.90424449999998,
+            106.8508875
+          ]
+        },
+        {
+          "line_index": 9,
+          "text": "7",
+          "bbox": [
+            286.8423,
+            102.19898749999993,
+            291.13767800000005,
+            109.92448749999994
+          ]
+        },
+        {
+          "line_index": 10,
+          "text": "4",
+          "bbox": [
+            237.9844,
+            164.38138749999996,
+            242.279778,
+            172.10688749999997
+          ]
+        },
+        {
+          "line_index": 11,
+          "text": "5",
+          "bbox": [
+            218.7162,
+            178.2734875,
+            223.011578,
+            185.9989875
+          ]
+        },
+        {
+          "line_index": 12,
+          "text": "8",
+          "bbox": [
+            133.1952,
+            204.90918750000003,
+            137.490578,
+            212.63468750000004
+          ]
+        },
+        {
+          "line_index": 13,
+          "text": "(x3)",
+          "bbox": [
+            128.6912335,
+            212.63468750000004,
+            141.9945445,
+            220.36018750000005
+          ]
+        },
+        {
+          "line_index": 14,
+          "text": "9",
+          "bbox": [
+            169.6004,
+            225.33578750000004,
+            173.895778,
+            233.06128750000005
+          ]
+        },
+        {
+          "line_index": 15,
+          "text": "1",
+          "bbox": [
+            213.4272,
+            243.82998750000002,
+            217.722578,
+            251.55548750000003
+          ]
+        },
+        {
+          "line_index": 16,
+          "text": "SEE PAGE 9 FOR PROCEDURE",
+          "bbox": [
+            163.605,
+            314.0322,
+            283.0338,
+            322.0322
+          ]
+        },
+        {
+          "line_index": 17,
+          "text": "TO ADJUST THE JAW",
+          "bbox": [
+            163.605,
+            323.63219999999995,
+            246.28179999999995,
+            331.63219999999995
+          ]
+        },
+        {
+          "line_index": 18,
+          "text": "24\" Non-Conductive Bolt Cutter No. 48-22-4224",
+          "bbox": [
+            296.4794,
+            415.7603,
+            522.3694,
+            425.7603
+          ]
+        },
+        {
+          "line_index": 19,
+          "text": "FIG. PART NO. DESCRIPTION OF PART NO.",
+          "bbox": [
+            297.3934,
+            427.88219999999995,
+            555.2894,
+            435.88219999999995
+          ]
+        },
+        {
+          "line_index": 20,
+          "text": "REQ.",
+          "bbox": [
+            296.1694,
+            436.88219999999995,
+            315.7294,
+            444.88219999999995
+          ]
+        },
+        {
+          "line_index": 21,
+          "text": "1 --------------- Handle Assembly (2)",
+          "bbox": [
+            302.9454,
+            445.4742,
+            553.0494,
+            453.4742
+          ]
+        },
+        {
+          "line_index": 22,
+          "text": "4 --------------- Adjustment Hex Nut (1)",
+          "bbox": [
+            302.9454,
+            454.4742,
+            553.0494,
+            462.4742
+          ]
+        },
+        {
+          "line_index": 23,
+          "text": "5 --------------- Adjustment Bolt (1)",
+          "bbox": [
+            302.9454,
+            463.4742,
+            553.0494,
+            471.4742
+          ]
+        },
+        {
+          "line_index": 24,
+          "text": "6 --------------- Hinge Bolt (3)",
+          "bbox": [
+            302.9454,
+            472.4742,
+            553.0494,
+            480.4742
+          ]
+        },
+        {
+          "line_index": 25,
+          "text": "7 --------------- Right Bolt Cutter Pivot Assembly (1)",
+          "bbox": [
+            302.9454,
+            481.4742,
+            553.0494,
+            489.4742
+          ]
+        },
+        {
+          "line_index": 26,
+          "text": "8 --------------- Lock Nut (3)",
+          "bbox": [
+            302.9454,
+            490.4742,
+            553.0494,
+            498.4742
+          ]
+        },
+        {
+          "line_index": 27,
+          "text": "9 --------------- Left Bolt Cutter Pivot Assembly (1)",
+          "bbox": [
+            302.9454,
+            499.4742,
+            553.0494,
+            507.4742
+          ]
+        },
+        {
+          "line_index": 28,
+          "text": "10 48-38-0025 24\" Cutter Blade Assembly (1)",
+          "bbox": [
+            300.7202,
+            508.4742,
+            553.0481999999998,
+            516.4742
+          ]
+        },
+        {
+          "line_index": 29,
+          "text": "16 14-46-2141 Hardware Kit (1)",
+          "bbox": [
+            300.7214,
+            517.4742,
+            553.0494,
+            525.4742
+          ]
+        }
+      ],
+      "tables": [
+        {
+          "table_id": "t12",
+          "page": 8,
+          "row_count": 1,
+          "col_count": 2,
+          "bbox": [
+            387.8745777777778,
+            63.109399999999994,
+            416.42082777777773,
+            79.66999999999996
+          ],
+          "rows": [
+            [
+              "00",
+              "0"
+            ]
+          ],
+          "cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "00",
+              "bbox": [
+                387.8745777777778,
+                63.109399999999994,
+                402.54534,
+                79.66999999999996
+              ]
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "0",
+              "bbox": [
+                402.54534,
+                63.109399999999994,
+                416.42082777777773,
+                79.66999999999996
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 9,
+      "width": 612.0,
+      "height": 792.0,
+      "lines": [
+        {
+          "line_index": 0,
+          "text": "4 JAW ADJUSTMENT PROCEDURE",
+          "bbox": [
+            57.1497,
+            37.508616000000075,
+            451.68661027999997,
+            51.46735680000006
+          ]
+        },
+        {
+          "line_index": 1,
+          "text": "Bolts (in red) have non-concentric rings on shanks which allow",
+          "bbox": [
+            291.51765739999996,
+            49.07697780000001,
+            569.6114096000001,
+            59.14517779999994
+          ]
+        },
+        {
+          "line_index": 2,
+          "text": "3",
+          "bbox": [
+            57.801,
+            54.06595679999998,
+            64.5184808,
+            66.14775680000002
+          ]
+        },
+        {
+          "line_index": 3,
+          "text": "jaw adjustment. Use the following procedure to adjust jaws so",
+          "bbox": [
+            291.51765739999996,
+            61.15881779999995,
+            566.2687672,
+            71.22701779999989
+          ]
+        },
+        {
+          "line_index": 4,
+          "text": "cutting edges almost touch (parallel) and tips are even (aligned)",
+          "bbox": [
+            291.51765739999996,
+            73.2406577999999,
+            575.2294652,
+            83.30885779999983
+          ]
+        },
+        {
+          "line_index": 5,
+          "text": "as close as possible when handles are closed.",
+          "bbox": [
+            291.51765739999996,
+            85.32249779999984,
+            498.5701904,
+            95.39069779999977
+          ]
+        },
+        {
+          "line_index": 6,
+          "text": "1",
+          "bbox": [
+            57.625,
+            150.0255568,
+            64.3424808,
+            162.10735680000005
+          ]
+        },
+        {
+          "line_index": 7,
+          "text": "4",
+          "bbox": [
+            57.6792,
+            164.89385679999998,
+            64.3966808,
+            176.97565680000002
+          ]
+        },
+        {
+          "line_index": 8,
+          "text": "5 6 Parallel",
+          "bbox": [
+            252.1642,
+            233.84325679999995,
+            339.51353639999996,
+            245.9250568
+          ]
+        },
+        {
+          "line_index": 9,
+          "text": "Even (aligned)",
+          "bbox": [
+            377.70039499999996,
+            237.76417019999997,
+            429.6284012,
+            245.81877020000002
+          ]
+        },
+        {
+          "line_index": 10,
+          "text": "as close as",
+          "bbox": [
+            377.70039499999996,
+            245.81877020000002,
+            417.9895042,
+            253.87337020000007
+          ]
+        },
+        {
+          "line_index": 11,
+          "text": "Model 48-22-4114 Shown",
+          "bbox": [
+            35.71489999999997,
+            249.52477159999978,
+            150.26282504,
+            259.5929715999997
+          ]
+        },
+        {
+          "line_index": 12,
+          "text": "possible",
+          "bbox": [
+            377.70039499999996,
+            253.87337020000007,
+            407.24466779999995,
+            261.9279702000001
+          ]
+        },
+        {
+          "line_index": 13,
+          "text": "1. Loosen the nuts (in green), two places.",
+          "bbox": [
+            35.7149,
+            328.932665,
+            223.66805760000005,
+            339.000865
+          ]
+        },
+        {
+          "line_index": 14,
+          "text": "2. Close the handles completely.",
+          "bbox": [
+            35.7149,
+            353.096345,
+            183.75469233999993,
+            363.164545
+          ]
+        },
+        {
+          "line_index": 15,
+          "text": "3. Turn/index each bolt (in red) such that the cutting",
+          "bbox": [
+            35.7149,
+            377.260025,
+            268.61955014,
+            387.328225
+          ]
+        },
+        {
+          "line_index": 16,
+          "text": "edges of the blades are parallel and just touch, being",
+          "bbox": [
+            50.1829034,
+            389.341865,
+            286.36273900000003,
+            399.410065
+          ]
+        },
+        {
+          "line_index": 17,
+          "text": "sure the tips of the blades are also even. You may have to",
+          "bbox": [
+            50.1829034,
+            401.423705,
+            308.76549081999997,
+            411.491905
+          ]
+        },
+        {
+          "line_index": 18,
+          "text": "slightly open the handles to correctly position the jaws. 2",
+          "bbox": [
+            50.1829034,
+            412.58405680000004,
+            453.4499808,
+            424.66585680000003
+          ]
+        },
+        {
+          "line_index": 19,
+          "text": "7",
+          "bbox": [
+            447.0633,
+            429.28405680000003,
+            453.7807808,
+            441.3658568
+          ]
+        },
+        {
+          "line_index": 20,
+          "text": "4. Tighten the green nut while securing the red bolt, as to retain",
+          "bbox": [
+            35.7149,
+            437.669225,
+            320.69328735999994,
+            447.737425
+          ]
+        },
+        {
+          "line_index": 21,
+          "text": "its position, two places.",
+          "bbox": [
+            50.1829034,
+            449.751065,
+            153.70413579999996,
+            459.819265
+          ]
+        },
+        {
+          "line_index": 22,
+          "text": "5. Adjust the yellow bolt to provide mechanical stop consistant",
+          "bbox": [
+            35.7149,
+            473.914745,
+            315.4568165400001,
+            483.982945
+          ]
+        },
+        {
+          "line_index": 23,
+          "text": "with jaw touch.",
+          "bbox": [
+            50.1829034,
+            485.996585,
+            116.210159,
+            496.064785
+          ]
+        },
+        {
+          "line_index": 24,
+          "text": "6. Tighten yellow jam nut while securing yellow bolt to retain its",
+          "bbox": [
+            35.7149,
+            510.160265,
+            318.4198878000001,
+            520.2284649999999
+          ]
+        },
+        {
+          "line_index": 25,
+          "text": "position.",
+          "bbox": [
+            50.1829034,
+            522.242105,
+            87.6768802,
+            532.310305
+          ]
+        },
+        {
+          "line_index": 26,
+          "text": "7. Verify that yellow bolt provides mechanical stop consistant when",
+          "bbox": [
+            35.7149,
+            546.405785,
+            336.1530084600001,
+            556.473985
+          ]
+        },
+        {
+          "line_index": 27,
+          "text": "jaws touch. NOTE: It is desirable to provide a slight gap as",
+          "bbox": [
+            50.1829034,
+            558.487625,
+            311.50303440000005,
+            569.0693032
+          ]
+        },
+        {
+          "line_index": 28,
+          "text": "opposed to jaws compressing cutting edges which may result in",
+          "bbox": [
+            50.1829034,
+            570.569465,
+            333.91283395999994,
+            580.637665
+          ]
+        },
+        {
+          "line_index": 29,
+          "text": "damage to the jaws, etc. Bolt cutters may not be the ideal tool",
+          "bbox": [
+            50.1829034,
+            582.651305,
+            324.96421780000003,
+            592.719505
+          ]
+        },
+        {
+          "line_index": 30,
+          "text": "to cut razor wire and other thin material.",
+          "bbox": [
+            50.1829034,
+            594.733145,
+            227.56445100000002,
+            604.801345
+          ]
+        }
+      ],
+      "tables": []
+    }
+  ],
+  "class_definition": {
+    "code": "FST.GEN",
+    "name": "Fastener",
+    "version": "v1",
+    "schema_version": "FST.GEN@v1",
+    "item_type": "Fastener",
+    "reporting_path": [
+      "Fasteners",
+      "Fasteners",
+      "Nails & Screws"
+    ],
+    "browse_path": [
+      "Fasteners",
+      "Fasteners",
+      "Nails, Screws & Anchors"
+    ],
+    "mappings": {},
+    "required_codes": [
+      "fastener_type",
+      "fastener_length",
+      "shank_diameter",
+      "fastener_finish",
+      "case_quantity",
+      "selling_uom"
+    ],
+    "attributes": [
+      {
+        "code": "fastener_type",
+        "requirement": "required",
+        "weight": 3.0,
+        "name": "Fastener Type",
+        "datatype": "enum",
+        "description": "What kind of fastener it is. Determines the tool that drives it and the hole it needs, so it is the identity of the line rather than a descriptive detail: a screw and a nail of the same length and finish are not alternatives.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Nail (Collated)",
+          "Deck Screw",
+          "Wood Screw",
+          "Anchor"
+        ],
+        "allowed_values": [
+          {
+            "value": "Nail (Collated)",
+            "aliases": [
+              "collated nail",
+              "stick nail",
+              "coil nail",
+              "bb",
+              "paper tape nail",
+              "plastic collated"
+            ],
+            "note": null
+          },
+          {
+            "value": "Nail (Loose)",
+            "aliases": [
+              "nail",
+              "loose nail",
+              "hand drive nail",
+              "bulk nail"
+            ],
+            "note": null
+          },
+          {
+            "value": "Brad",
+            "aliases": [
+              "brad",
+              "brad nail",
+              "finish brad"
+            ],
+            "note": null
+          },
+          {
+            "value": "Staple",
+            "aliases": [
+              "staple",
+              "staples",
+              "crown staple"
+            ],
+            "note": null
+          },
+          {
+            "value": "Deck Screw",
+            "aliases": [
+              "deck screw",
+              "decking screw",
+              "composite screw"
+            ],
+            "note": null
+          },
+          {
+            "value": "Wood Screw",
+            "aliases": [
+              "wood screw",
+              "construction screw",
+              "multi-purpose screw"
+            ],
+            "note": null
+          },
+          {
+            "value": "Self-Drilling Screw",
+            "aliases": [
+              "self drilling",
+              "self-drilling",
+              "tek screw",
+              "metal screw"
+            ],
+            "note": null
+          },
+          {
+            "value": "Lag Screw",
+            "aliases": [
+              "lag",
+              "lag screw",
+              "lag bolt",
+              "structural screw"
+            ],
+            "note": null
+          },
+          {
+            "value": "Bolt",
+            "aliases": [
+              "bolt",
+              "hex bolt",
+              "carriage bolt",
+              "machine bolt"
+            ],
+            "note": null
+          },
+          {
+            "value": "Nut",
+            "aliases": [
+              "nut",
+              "hex nut",
+              "lock nut"
+            ],
+            "note": null
+          },
+          {
+            "value": "Washer",
+            "aliases": [
+              "washer",
+              "flat washer",
+              "lock washer"
+            ],
+            "note": null
+          },
+          {
+            "value": "Anchor",
+            "aliases": [
+              "anchor",
+              "concrete anchor",
+              "wedge anchor",
+              "sleeve anchor",
+              "drop-in anchor"
+            ],
+            "note": null
+          },
+          {
+            "value": "Rivet",
+            "aliases": [
+              "rivet",
+              "blind rivet",
+              "pop rivet"
+            ],
+            "note": null
+          },
+          {
+            "value": "Hidden Deck Fastener",
+            "aliases": [
+              "hidden fastener",
+              "hidden clip",
+              "deck clip",
+              "start clip"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "fastener_length",
+        "requirement": "required",
+        "weight": 3.0,
+        "name": "Length",
+        "datatype": "dimension",
+        "description": "Overall length of the fastener. The figure that decides whether it reaches the framing member, and the one a code inspector measures.\n",
+        "canonical_unit": "mm",
+        "display_preference": "imperial_fraction",
+        "quantity_kind": "length",
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "1-1/4\"",
+          "2-1/2\"",
+          "3\"",
+          "3-1/2\""
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          6.0,
+          400.0
+        ]
+      },
+      {
+        "code": "shank_diameter",
+        "requirement": "required",
+        "weight": 3.0,
+        "name": "Shank Diameter",
+        "datatype": "dimension",
+        "description": "Diameter of the fastener shank, written as a decimal inch on collated nails. Sets the holding power and the gun it fits, and is the reason two nails of identical length are not interchangeable.\n",
+        "canonical_unit": "mm",
+        "display_preference": "imperial_decimal",
+        "quantity_kind": "length",
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          ".113",
+          ".120",
+          ".131",
+          ".148"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          0.5,
+          12.0
+        ]
+      },
+      {
+        "code": "fastener_finish",
+        "requirement": "required",
+        "weight": 3.0,
+        "name": "Finish",
+        "datatype": "enum",
+        "description": "The corrosion protection on the fastener. A code and warranty matter rather than an appearance one: an electro-galvanised nail in treated lumber or in a coastal exposure fails early enough to void the deck's warranty, so this is never inferred.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Hot-Dip Galvanized",
+          "Stainless Steel 316",
+          "Bright / Plain"
+        ],
+        "allowed_values": [
+          {
+            "value": "Bright / Plain",
+            "aliases": [
+              "bright",
+              "plain",
+              "sm",
+              "smooth",
+              "uncoated",
+              "bare"
+            ],
+            "note": null
+          },
+          {
+            "value": "Electro-Galvanized",
+            "aliases": [
+              "eg",
+              "electro galvanized",
+              "electro-galvanised",
+              "zinc plated",
+              "zp"
+            ],
+            "note": null
+          },
+          {
+            "value": "Hot-Dip Galvanized",
+            "aliases": [
+              "hdg",
+              "hot dip",
+              "hot-dip galvanised",
+              "hot dipped"
+            ],
+            "note": null
+          },
+          {
+            "value": "Mechanically Galvanized",
+            "aliases": [
+              "mg",
+              "mechanically galvanized",
+              "mech galv"
+            ],
+            "note": null
+          },
+          {
+            "value": "Stainless Steel 304",
+            "aliases": [
+              "ss304",
+              "304 ss",
+              "304 stainless",
+              "type 304"
+            ],
+            "note": null
+          },
+          {
+            "value": "Stainless Steel 316",
+            "aliases": [
+              "ss316",
+              "316 ss",
+              "316 stainless",
+              "type 316",
+              "marine grade"
+            ],
+            "note": null
+          },
+          {
+            "value": "Polymer Coated",
+            "aliases": [
+              "polymer",
+              "epoxy coated",
+              "ceramic coated",
+              "coated",
+              "climatek"
+            ],
+            "note": null
+          },
+          {
+            "value": "Painted",
+            "aliases": [
+              "painted",
+              "color matched",
+              "colour matched"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "case_quantity",
+        "requirement": "required",
+        "weight": 3.0,
+        "name": "Carton Quantity",
+        "datatype": "integer",
+        "description": "Number of selling units per carton or master pack for this specific part number. Frequently varies by size within one series, so read the ordering-table row that matches the target SKU.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "6",
+          "12",
+          "24"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          1.0,
+          100000.0
+        ]
+      },
+      {
+        "code": "bit_tip_type",
+        "requirement": "optional",
+        "weight": 2.0,
+        "name": "Tip Type",
+        "datatype": "enum",
+        "description": "The recess a driver bit engages. The single most consequential field on a driver bit: a Phillips bit in a square recess destroys the fastener, and the two are visually similar enough at a glance that the listing has to be right.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Phillips",
+          "Square (Robertson)",
+          "Torx",
+          "Slotted"
+        ],
+        "allowed_values": [
+          {
+            "value": "Phillips",
+            "aliases": [
+              "ph",
+              "phillips",
+              "cross",
+              "ph2",
+              "crosshead"
+            ],
+            "note": null
+          },
+          {
+            "value": "Square (Robertson)",
+            "aliases": [
+              "sq",
+              "square",
+              "robertson",
+              "square drive",
+              "sq2"
+            ],
+            "note": null
+          },
+          {
+            "value": "Torx",
+            "aliases": [
+              "torx",
+              "star",
+              "t-star",
+              "6-lobe",
+              "trox",
+              "hexalobular"
+            ],
+            "note": null
+          },
+          {
+            "value": "Torx Plus",
+            "aliases": [
+              "torx plus",
+              "torxplus"
+            ],
+            "note": null
+          },
+          {
+            "value": "Slotted",
+            "aliases": [
+              "flat",
+              "flathead",
+              "slot",
+              "straight",
+              "sl"
+            ],
+            "note": null
+          },
+          {
+            "value": "Hex (Allen)",
+            "aliases": [
+              "hex",
+              "allen",
+              "hex key",
+              "internal hex"
+            ],
+            "note": null
+          },
+          {
+            "value": "Nut Setter",
+            "aliases": [
+              "nut setter",
+              "nut driver",
+              "magnetic nut setter"
+            ],
+            "note": null
+          },
+          {
+            "value": "Combination",
+            "aliases": [
+              "combo",
+              "double ended",
+              "double-ended",
+              "reversible"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "workpiece_material",
+        "requirement": "recommended",
+        "weight": 2.0,
+        "name": "Material Application",
+        "datatype": "multi_enum",
+        "description": "The materials the product is intended to be used on. Multivalued because a single wheel is commonly rated for several, and reporting only the first would understate what the buyer can do with it.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": true,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Metal",
+          "Stainless Steel",
+          "Concrete / Masonry",
+          "Wood"
+        ],
+        "allowed_values": [
+          {
+            "value": "Metal",
+            "aliases": [
+              "steel",
+              "ferrous",
+              "mild steel",
+              "iron",
+              "metal cutting",
+              "all metal"
+            ],
+            "note": null
+          },
+          {
+            "value": "Stainless Steel",
+            "aliases": [
+              "stainless",
+              "inox",
+              "ss",
+              "304",
+              "316"
+            ],
+            "note": null
+          },
+          {
+            "value": "Aluminum",
+            "aliases": [
+              "aluminium",
+              "non-ferrous",
+              "alum",
+              "soft metal"
+            ],
+            "note": null
+          },
+          {
+            "value": "Cast Iron",
+            "aliases": [
+              "cast",
+              "ductile iron"
+            ],
+            "note": null
+          },
+          {
+            "value": "Concrete / Masonry",
+            "aliases": [
+              "concrete",
+              "masonry",
+              "brick",
+              "block",
+              "stone",
+              "mortar"
+            ],
+            "note": null
+          },
+          {
+            "value": "Tile",
+            "aliases": [
+              "ceramic tile",
+              "porcelain",
+              "tile cutting"
+            ],
+            "note": null
+          },
+          {
+            "value": "Wood",
+            "aliases": [
+              "timber",
+              "lumber",
+              "softwood",
+              "hardwood",
+              "wood cutting"
+            ],
+            "note": null
+          },
+          {
+            "value": "Plastic",
+            "aliases": [
+              "pvc",
+              "acrylic",
+              "composite",
+              "plastics"
+            ],
+            "note": null
+          },
+          {
+            "value": "Drywall",
+            "aliases": [
+              "gypsum",
+              "plasterboard",
+              "wallboard"
+            ],
+            "note": null
+          },
+          {
+            "value": "Paint / Coating",
+            "aliases": [
+              "paint",
+              "coating",
+              "primer",
+              "finish",
+              "varnish"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "primary_material",
+        "requirement": "recommended",
+        "weight": 2.0,
+        "name": "Material",
+        "datatype": "string",
+        "description": "Principal material of the appliance's visible construction, most often the tub or body material for a major appliance. Becomes an enum when the LOV supplies the vocabulary; until then it is recorded as published so no value is snapped onto a wrong term.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Stainless Steel",
+          "Plastic",
+          "Porcelain Enamel"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "product_series",
+        "requirement": "recommended",
+        "weight": 2.0,
+        "name": "Product Series",
+        "datatype": "string",
+        "description": "Manufacturer's series or family designation only, without the word \"series\" and without the manufacturer name. The anchor for part-number grammar induction, because the positional encoding of a smart part number is defined per series rather than per manufacturer.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "BA-100",
+          "T-113",
+          "T-585"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "pack_quantity",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Pack Quantity",
+        "datatype": "integer",
+        "description": "Number of units in the consumer pack the part number sells as. Distinct from case_quantity, which counts packs in a shipping carton: a \"3pk\" of lamps is one sellable unit containing three lamps, and confusing the two misprices the line.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "1",
+          "2",
+          "3",
+          "6"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          1.0,
+          100.0
+        ]
+      },
+      {
+        "code": "selling_uom",
+        "requirement": "required",
+        "weight": 2.0,
+        "name": "Selling Unit of Measure",
+        "datatype": "enum",
+        "description": "The unit in which the product is sold, which is not necessarily the unit in which it is priced or stocked. Conflating the three is a classic source of order errors.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "Each",
+          "Case",
+          "Box"
+        ],
+        "allowed_values": [
+          {
+            "value": "Each",
+            "aliases": [
+              "ea",
+              "ea.",
+              "each",
+              "pc",
+              "piece",
+              "unit"
+            ],
+            "note": null
+          },
+          {
+            "value": "Box",
+            "aliases": [
+              "bx",
+              "box"
+            ],
+            "note": null
+          },
+          {
+            "value": "Case",
+            "aliases": [
+              "cs",
+              "case",
+              "carton",
+              "ctn"
+            ],
+            "note": null
+          },
+          {
+            "value": "Pair",
+            "aliases": [
+              "pr",
+              "pair"
+            ],
+            "note": null
+          },
+          {
+            "value": "Foot",
+            "aliases": [
+              "ft",
+              "per foot",
+              "lineal foot"
+            ],
+            "note": null
+          },
+          {
+            "value": "Roll",
+            "aliases": [
+              "rl",
+              "roll"
+            ],
+            "note": null
+          },
+          {
+            "value": "Bag",
+            "aliases": [
+              "bg",
+              "bag"
+            ],
+            "note": null
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "each_weight",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Weight (Each)",
+        "datatype": "quantity",
+        "description": "Shipping weight of a single unit. Distinguish carefully from carton weight; datasheets often place them in adjacent columns with similar headings.\n",
+        "canonical_unit": "kg",
+        "display_preference": null,
+        "quantity_kind": "mass",
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "0.75 lb",
+          "1.2 kg"
+        ],
+        "allowed_values": [],
+        "plausible_range": [
+          0.0001,
+          5000.0
+        ]
+      },
+      {
+        "code": "additional_information",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Additional Information",
+        "datatype": "string",
+        "description": "Comma-separated residual specifications the class has no dedicated attribute for, in the client's own overflow convention, e.g. \"240 kW-hr Annual Energy, 1 to 12 hr Delay Start Hours\". A holding pen, not a dumping ground: anything appearing here repeatedly across a category is a missing attribute and should be promoted to one.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "240 kW-hr Annual Energy, 1 to 12 hr Delay Start Hours",
+          "Folding Tines, Leak Detection System, Normal Cycle"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "approvals",
+        "requirement": "recommended",
+        "weight": 2.0,
+        "name": "Approvals and Listings",
+        "datatype": "multi_enum",
+        "description": "Third-party certifications, listings and approvals explicitly stated in the source. Record only what is stated. A listing number without a recognised mark is not an approval, and an approval for one size in a series does not extend to the others.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": true,
+        "compliance_claim": true,
+        "evidence_requirement": "strict",
+        "example_values": [
+          "UL, CSA, NSF-61",
+          "FM approved"
+        ],
+        "allowed_values": [
+          {
+            "value": "UL",
+            "aliases": [
+              "ul listed",
+              "underwriters laboratories",
+              "u.l."
+            ],
+            "note": null
+          },
+          {
+            "value": "CSA",
+            "aliases": [
+              "csa certified",
+              "canadian standards association"
+            ],
+            "note": null
+          },
+          {
+            "value": "ETL",
+            "aliases": [
+              "etl listed",
+              "intertek"
+            ],
+            "note": null
+          },
+          {
+            "value": "FM",
+            "aliases": [
+              "fm approved",
+              "factory mutual",
+              "fm global"
+            ],
+            "note": null
+          },
+          {
+            "value": "NSF-61",
+            "aliases": [
+              "nsf/ansi 61",
+              "nsf 61",
+              "nsf/ansi standard 61"
+            ],
+            "note": null
+          },
+          {
+            "value": "NSF-372",
+            "aliases": [
+              "nsf/ansi 372",
+              "nsf 372"
+            ],
+            "note": null
+          },
+          {
+            "value": "NSF-14",
+            "aliases": [
+              "nsf/ansi 14",
+              "nsf 14"
+            ],
+            "note": null
+          },
+          {
+            "value": "CRN",
+            "aliases": [
+              "canadian registration number"
+            ],
+            "note": null
+          },
+          {
+            "value": "ASME",
+            "aliases": [
+              "asme certified",
+              "asme b16"
+            ],
+            "note": null
+          },
+          {
+            "value": "MSS",
+            "aliases": [
+              "mss sp",
+              "manufacturers standardization society"
+            ],
+            "note": null
+          },
+          {
+            "value": "ATEX",
+            "aliases": [
+              "atex certified",
+              "atex marked"
+            ],
+            "note": null
+          },
+          {
+            "value": "IECEx",
+            "aliases": [
+              "iecex certified"
+            ],
+            "note": null
+          },
+          {
+            "value": "WRAS",
+            "aliases": [
+              "wras approved",
+              "water regulations advisory scheme"
+            ],
+            "note": null
+          },
+          {
+            "value": "cUL Listed",
+            "aliases": [
+              "cul",
+              "cul listed",
+              "c-ul",
+              "culus"
+            ],
+            "note": null
+          },
+          {
+            "value": "ENERGY STAR Certified",
+            "aliases": [
+              "energy star",
+              "energystar",
+              "energy star qualified",
+              "energy star certified"
+            ],
+            "note": null
+          },
+          {
+            "value": "NSF Certified",
+            "aliases": [],
+            "note": "Generic NSF mark with no standard named. Deliberately not aliased onto NSF-61: a potable-water claim needs the specific standard, and treating this as equivalent would let a cross-field rule pass on evidence that does not support it.\n"
+          },
+          {
+            "value": "ASSE 1006",
+            "aliases": [
+              "asse1006",
+              "asse 1006 listed"
+            ],
+            "note": null
+          },
+          {
+            "value": "CEE Tier 2 Qualified",
+            "aliases": [
+              "cee tier 2",
+              "cee tier2",
+              "cee tier 2 qualified"
+            ],
+            "note": null
+          },
+          {
+            "value": "AHAM Verified",
+            "aliases": [
+              "aham",
+              "aham verified"
+            ],
+            "note": null
+          },
+          {
+            "value": "WaterSense",
+            "aliases": [
+              "watersense",
+              "epa watersense"
+            ],
+            "note": null
+          },
+          {
+            "value": "ANSI Z87.1",
+            "aliases": [
+              "z87",
+              "z87.1",
+              "z87+",
+              "ansi z87",
+              "ansi z87.1",
+              "ansi/isea z87.1"
+            ],
+            "note": "eye and face protection impact rating"
+          },
+          {
+            "value": "ANSI/ISEA 105",
+            "aliases": [
+              "isea 105",
+              "ansi cut level",
+              "ansi/isea 105",
+              "a105"
+            ],
+            "note": "hand protection cut, abrasion and puncture rating"
+          },
+          {
+            "value": "EN 388",
+            "aliases": [
+              "en388",
+              "en 388 certified"
+            ],
+            "note": null
+          },
+          {
+            "value": "UL 217",
+            "aliases": [
+              "ul217",
+              "ul 217 listed"
+            ],
+            "note": "smoke alarm standard"
+          },
+          {
+            "value": "UL 2034",
+            "aliases": [
+              "ul2034",
+              "ul 2034 listed"
+            ],
+            "note": "carbon monoxide alarm standard"
+          },
+          {
+            "value": "UL 299",
+            "aliases": [
+              "ul299",
+              "ul 299 listed"
+            ],
+            "note": "portable fire extinguisher standard"
+          },
+          {
+            "value": "OSHA Compliant",
+            "aliases": [
+              "osha",
+              "osha compliant",
+              "meets osha"
+            ],
+            "note": null
+          },
+          {
+            "value": "ICC-ES Evaluated",
+            "aliases": [
+              "icc-es",
+              "icc es",
+              "icc evaluation report",
+              "esr"
+            ],
+            "note": "building-code evaluation report for a structural or envelope product"
+          },
+          {
+            "value": "ASTM D7032",
+            "aliases": [
+              "astm d7032",
+              "d7032"
+            ],
+            "note": "composite decking and railing performance standard"
+          },
+          {
+            "value": "FSC Certified",
+            "aliases": [
+              "fsc",
+              "fsc certified",
+              "forest stewardship council"
+            ],
+            "note": null
+          },
+          {
+            "value": "NFRC Certified",
+            "aliases": [
+              "nfrc",
+              "nfrc certified",
+              "nfrc rated"
+            ],
+            "note": "fenestration thermal performance rating"
+          }
+        ],
+        "plausible_range": null
+      },
+      {
+        "code": "country_of_origin",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "Country of Origin",
+        "datatype": "string",
+        "description": "Country where the product is manufactured, as stated by the manufacturer. Drives tariff treatment and trade-agreement eligibility, so a guess here has direct financial consequences.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": true,
+        "evidence_requirement": "strict",
+        "example_values": [
+          "United States",
+          "Taiwan",
+          "Italy",
+          "China"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "prop65_warning_required",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "California Prop 65 Warning Required",
+        "datatype": "boolean",
+        "description": "True when the source states that a California Proposition 65 warning applies. Absence of a statement is not evidence of absence of a requirement, so record a gap rather than false when the source is silent.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": true,
+        "evidence_requirement": "strict",
+        "example_values": [],
+        "allowed_values": [],
+        "plausible_range": null
+      },
+      {
+        "code": "gtin",
+        "requirement": "optional",
+        "weight": 1.0,
+        "name": "GTIN / UPC",
+        "datatype": "string",
+        "description": "Global Trade Item Number, 8, 12, 13 or 14 digits. The final digit is a modulo-10 check digit, which L0 validation verifies arithmetically \u2014 a transposed digit is therefore detectable without any external lookup.\n",
+        "canonical_unit": null,
+        "display_preference": null,
+        "quantity_kind": null,
+        "multivalued": false,
+        "compliance_claim": false,
+        "evidence_requirement": "standard",
+        "example_values": [
+          "012345678905",
+          "00012345678905"
+        ],
+        "allowed_values": [],
+        "plausible_range": null
+      }
+    ],
+    "cross_field_rules": [
+      {
+        "id": "R_SHANK_BELOW_LENGTH",
+        "expr": "shank_diameter < fastener_length",
+        "severity": "error",
+        "message": "Shank diameter is not below the overall length, so the pair was read in the wrong order. \".131x3\" states diameter then length, both as inch figures on the same line, and they are distinguished only by decimal form \u2014 which is a convention rather than anything the string declares.",
+        "references": [
+          "shank_diameter",
+          "fastener_length"
+        ]
+      },
+      {
+        "id": "R_COLLATED_NAIL_STATES_A_COUNT",
+        "expr": "fastener_type != 'Nail (Collated)' or case_quantity is not null",
+        "severity": "error",
+        "message": "A collated nail was captured with no box count. Collated nails are bought by the box \u2014 \"500CT\" \u2014 and the count is the quantity a price is quoted against, so a blank makes the line unquotable.",
+        "references": [
+          "fastener_type",
+          "case_quantity"
+        ]
+      },
+      {
+        "id": "R_TREATED_LUMBER_NEEDS_A_FINISH",
+        "expr": "fastener_finish is not null",
+        "severity": "error",
+        "message": "No corrosion finish was captured. This is a warranty and code matter rather than an appearance one: an electro-galvanised fastener in treated lumber or a coastal exposure corrodes fast enough to void a deck's warranty, and the finish is never safe to infer.",
+        "references": [
+          "fastener_finish"
+        ]
+      }
+    ],
+    "channel_profiles": [
+      {
+        "name": "unilog_delivery",
+        "title_template": "{brand} {product_series} {mpn} {class_name}",
+        "max_title_chars": 200,
+        "unit_system": "imperial_primary",
+        "required": [
+          "mpn"
+        ]
+      }
+    ]
+  },
+  "policy": {
+    "epsilon": 0.05,
+    "confidence_level": 0.95,
+    "threshold": 0.6853,
+    "coverage": 1.0,
+    "accepted": 220,
+    "accepted_errors": 1,
+    "observed_error_rate": 0.0045,
+    "error_upper_bound": 0.0201,
+    "calibration_size": 220,
+    "achievable": true,
+    "reason": "at threshold 0.685, 100.0% of values are publishable with an error rate of at most 2.0% at 95% confidence"
+  },
+  "calibrator": "untrained-heuristic"
+}

@@ -138,7 +138,8 @@ attributes:
     table_headers: ["grain", "abrasive", "abrasive grain", "mineral", "grain type"]
     allowed_values:
       - value: Aluminum Oxide
-        aliases: ["alox", "a/o", "aluminium oxide", "al2o3", "brown aluminum oxide"]
+        aliases: ["alox", "a/o", "aluminium oxide", "al2o3", "brown aluminum oxide",
+                  "blue-fired aluminum oxide", "blue-fired aluminium oxide"]
       - value: Zirconia Alumina
         aliases: ["zirconia", "zirc", "zirconium", "za"]
       - value: Ceramic Aluminum Oxide
@@ -271,6 +272,77 @@ attributes:
     interchange: functional
     substitution: at_least
 
+  - code: compatible_tool
+    name: Compatible Tool
+    datatype: string
+    description: >
+      The machine type and holder the abrasive is designed to fit, recorded as the manufacturer
+      states it. Kept as a string because the tool and holder designation form one compatibility
+      claim and neither part may be inferred from disc diameter.
+    example_values: ["Standard angle grinder with 22.23 mm holder"]
+    extraction_hints:
+      - keep the holder size with the machine type
+      - do not infer compatibility from diameter or maximum RPM
+    spec_labels: ["Tool Application", "Compatible Tool", "Machine", "Tool Compatibility"]
+    table_headers: ["tool application", "compatible tool", "machine", "tool compatibility"]
+    # Tool wording can overlap even when canonical fit facts agree. Hard mount incompatibilities
+    # belong in defining fields such as arbor_size, attachment_type and wheel_diameter; this
+    # free-text application claim still blocks a drop-in substitution without declaring the
+    # products physically impossible to connect.
+    interchange: critical
+
+  - code: disc_backing_type
+    name: Disc Backing Type
+    datatype: string
+    description: >
+      Structural support plate behind a flap disc, including layer count, material, profile and
+      dimensions when stated. This is distinct from the abrasive carrier that holds the grain.
+    example_values: ["8-layer fiberglass, T29 conical, 117 x 22 mm"]
+    extraction_hints:
+      - preserve T27 or T29 profile designations and every stated backing dimension
+      - do not map abrasive carrier material such as paper, cloth or net into this field
+    spec_labels: ["Disc Backing Type", "Backing Plate", "Support Plate"]
+    table_headers: ["disc backing type", "backing plate", "support plate"]
+    interchange: functional
+
+  - code: optimal_operating_speed
+    name: Optimal Speed (RPM)
+    datatype: string
+    description: >
+      Manufacturer-recommended operating-speed range in RPM, preserved as printed. It is separate
+      from the maximum safe speed and must never be substituted for that safety limit.
+    example_values: ["6000-7000"]
+    extraction_hints:
+      - preserve both bounds of the recommended range
+      - never infer it from maximum RPM or disc diameter
+    spec_labels: ["Optimal RPM", "Recommended RPM", "Optimal Speed"]
+    table_headers: ["optimal rpm", "recommended rpm", "optimal speed"]
+    interchange: functional
+
+  - code: abrasive_bond_material
+    name: Abrasive Bond Material
+    datatype: string
+    description: >
+      Resin or other binder attaching abrasive grain to its carrier, recorded as stated. This is
+      not the machine attachment method and must not be mapped to hook-and-loop or an arbor.
+    example_values: ["Mono component epoxy resin", "Resin over resin"]
+    extraction_hints:
+      - distinguish grain-to-carrier bond from product-to-tool attachment
+    spec_labels: ["Abrasive Attachment Material", "Bond Material", "Bonding", "Binder"]
+    table_headers: ["abrasive attachment material", "bond material", "bonding", "binder"]
+    interchange: functional
+
+  - code: abrasive_color
+    name: Color
+    datatype: string
+    description: >
+      Visible abrasive product color as named by the manufacturer. Cosmetic and never a substitute
+      for grain, grit or backing material.
+    example_values: ["Brown", "Maroon"]
+    spec_labels: ["Color", "Colour"]
+    table_headers: ["color", "colour"]
+    interchange: cosmetic
+
   - code: workpiece_material
     name: Material Application
     datatype: multi_enum
@@ -329,6 +401,7 @@ attributes:
       - '3M product names state it, e.g. "775L Stikit Film"'
       - a bonded wheel has no backing; leave this unset rather than guessing
     spec_labels: ["Backing", "Backing Material", "Substrate", "Backing Weight"]
+    table_headers: ["backing", "backing material", "substrate", "backing weight"]
     allowed_values:
       - value: Film
         aliases: ["polyester film", "pet film", "film backing"]
@@ -344,6 +417,31 @@ attributes:
         aliases: ["foam backing", "sponge", "foam pad"]
       - value: Non-Woven
         aliases: ["non woven", "nonwoven", "surface conditioning"]
+    interchange: functional
+
+  - code: abrasive_carrier_type
+    name: Abrasive Carrier Type
+    datatype: enum
+    description: >
+      Material carrying the abrasive grain before it is bonded to the disc support. This is distinct
+      from both the structural fiberglass backing plate and the product-to-tool attachment method.
+    example_values: ["Polyamide Mesh", "Paper", "Cloth"]
+    extraction_hints:
+      - PA means polyamide when the source states PA net
+      - do not map fiberglass backing-plate construction into this field
+    spec_labels: ["Abrasive Carrier Type", "Carrier Type", "Abrasive Carrier"]
+    table_headers: ["abrasive carrier type", "carrier type", "abrasive carrier"]
+    allowed_values:
+      - value: Polyamide Mesh
+        aliases: ["pa net", "pa mesh", "polyamide net", "polyamide mesh"]
+      - value: Paper
+        aliases: ["paper carrier", "paper"]
+      - value: Cloth
+        aliases: ["cloth carrier", "cloth", "fabric"]
+      - value: Film
+        aliases: ["film carrier", "polyester film", "film"]
+      - value: Fiber
+        aliases: ["fiber carrier", "fibre carrier", "fiber", "fibre"]
     interchange: functional
 
   - code: attachment_type

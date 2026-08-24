@@ -67,6 +67,9 @@ data/delivery/
 # with no reviewable content, and every one of them cost a real model call to produce.
 data/enrich/
 
+# --- generated tooling output ---
+semantic-review/
+
 # --- os / editor ---
 Thumbs.db
 Desktop.ini

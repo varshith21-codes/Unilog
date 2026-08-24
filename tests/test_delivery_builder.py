@@ -13,6 +13,7 @@ from pathlib import Path
 import pytest
 from axiom.core.evidence import BoundingBox, EvidenceSpan
 from axiom.core.product import Classification, ClassificationScheme, LifecycleStatus, ProductRecord
+from axiom.core.specifications import ManufacturerSpecification, specification_id
 from axiom.core.validation import ValidationLayer, ValidationResult
 from axiom.core.values import AttributeValue, DerivationMethod, Quantity, ValueStatus
 from axiom.delivery import (
@@ -63,16 +64,40 @@ def builder(fmt, registry):
     return DeliveryRowBuilder(fmt, registry)
 
 
-def span(quote: str, *, verified: bool = True) -> EvidenceSpan:
+def span(quote: str, *, verified: bool = True, document_sha256: str = SHA) -> EvidenceSpan:
     return EvidenceSpan(
-        span_id=f"sp-{abs(hash(quote)) % 9999}",
+        span_id=f"sp-{abs(hash((quote, document_sha256))) % 9999}",
         document_id="frigidaire-pdsh4816af",
-        document_sha256=SHA,
+        document_sha256=document_sha256,
         quote=quote,
         page=2,
         bbox=BoundingBox(x0=1, y0=1, x1=2, y1=2),
         quote_verified=verified,
         match_score=1.0 if verified else 0.4,
+    )
+
+
+def manufacturer_specification(
+    label: str,
+    value: str,
+    *,
+    mapped_attribute_code: str | None = None,
+    citable_as_manufacturer: bool = True,
+    document_sha256: str = SHA,
+) -> ManufacturerSpecification:
+    quote = f"{label} .................... {value}"
+    return ManufacturerSpecification(
+        specification_id=specification_id(document_sha256, label, value),
+        label_raw=label,
+        value_raw=value,
+        evidence=[span(quote, document_sha256=document_sha256)],
+        confidence=0.94,
+        method=DerivationMethod.DOCUMENT_EXTRACTION,
+        mapped_attribute_code=mapped_attribute_code,
+        citable_as_manufacturer=citable_as_manufacturer,
+        model_id="test-model",
+        prompt_version="extract.v3",
+        schema_version=f"{DISHWASHER}@v1",
     )
 
 
@@ -299,6 +324,195 @@ def test_grid_labels_stop_at_the_classes_binding_count(builder):
     assert built["ATTRIBUTE_LABEL 15"] != ""
     assert built["ATTRIBUTE_LABEL 16"] == ""
     assert built["ATTRIBUTE_LABEL 50"] == ""
+
+
+def test_unknown_manufacturer_specification_uses_a_residual_slot_with_provenance(builder):
+    label = "Ball / Stem"
+    displayed = "Chrome-plated brass / Brass"
+    quote = "Ball / Stem .................... Chrome-plated brass / Brass"
+    record = record_for(PDSH)
+    record.add_manufacturer_specification(
+        ManufacturerSpecification(
+            specification_id=specification_id(SHA, label, displayed),
+            label_raw=label,
+            value_raw=displayed,
+            evidence=[span(quote)],
+            confidence=0.94,
+            method=DerivationMethod.DOCUMENT_EXTRACTION,
+            mapped_attribute_code=None,
+            citable_as_manufacturer=True,
+            model_id="test-model",
+            prompt_version="extract.v3",
+            schema_version=f"{DISHWASHER}@v1",
+        )
+    )
+
+    row = builder.build(record, source=SupplierRow.parse(PDSH))
+    built = row.as_dict()
+    assert built["ATTRIBUTE_LABEL 15"] == "Additional Information"
+    assert built["ATTRIBUTE_LABEL 16"] == label
+    assert built["ATTRIBUTE_VALUE 16"] == displayed
+    assert row.cells["ATTRIBUTE_LABEL 16"].provenance is Provenance.EXTRACTED
+    assert row.cells["ATTRIBUTE_VALUE 16"].provenance is Provenance.EXTRACTED
+    assert row.cells["ATTRIBUTE_VALUE 16"].evidence == (
+        "frigidaire-pdsh4816af p.2",
+    )
+    assert row.sidecar()["manufacturer_specifications"] == [
+        {
+            "specification_id": specification_id(SHA, label, displayed),
+            "label": label,
+            "value": displayed,
+            "mapped_attribute_code": None,
+            "citable_as_manufacturer": True,
+            "confidence": 0.94,
+            "evidence": ["frigidaire-pdsh4816af p.2"],
+            "delivery_status": "emitted",
+        }
+    ]
+
+
+def test_untrusted_specification_stays_sidecar_only(builder):
+    record = record_for(PDSH)
+    record.add_manufacturer_specification(
+        manufacturer_specification(
+            "Finish", "Matte Black", citable_as_manufacturer=False
+        )
+    )
+
+    row = builder.build(record, source=SupplierRow.parse(PDSH))
+
+    assert row.as_dict()["ATTRIBUTE_LABEL 16"] == ""
+    assert row.sidecar()["manufacturer_specifications"][0]["delivery_status"] == (
+        "untrusted_source"
+    )
+    assert any("not verified as manufacturer-owned" in note for note in row.notes)
+
+
+def test_same_label_different_value_conflict_emits_neither(builder):
+    record = record_for(PDSH)
+    record.add_manufacturer_specification(
+        manufacturer_specification("Finish", "Matte Black")
+    )
+    record.add_manufacturer_specification(
+        manufacturer_specification("Finish", "Gloss Black")
+    )
+
+    row = builder.build(record, source=SupplierRow.parse(PDSH))
+    statuses = {
+        item["value"]: item["delivery_status"]
+        for item in row.sidecar()["manufacturer_specifications"]
+    }
+
+    assert row.as_dict()["ATTRIBUTE_LABEL 16"] == ""
+    assert statuses == {"Gloss Black": "conflict", "Matte Black": "conflict"}
+    assert sum("label conflict" in note for note in row.notes) == 1
+
+
+def test_duplicate_statement_emits_once_and_keeps_both_provenance_rows(builder):
+    record = record_for(PDSH)
+    record.add_manufacturer_specification(
+        manufacturer_specification(
+            "Finish", "Matte Black", document_sha256="a" * 64
+        )
+    )
+    record.add_manufacturer_specification(
+        manufacturer_specification(
+            "FINISH", "matte   black", document_sha256="c" * 64
+        )
+    )
+
+    row = builder.build(record, source=SupplierRow.parse(PDSH))
+    statuses = [
+        item["delivery_status"]
+        for item in row.sidecar()["manufacturer_specifications"]
+    ]
+
+    assert row.as_dict()["ATTRIBUTE_LABEL 16"] == "Finish"
+    assert statuses == ["emitted", "duplicate_statement"]
+
+
+def test_blank_mapping_metadata_normalizes_to_source_only_and_can_emit(builder):
+    specification = manufacturer_specification(
+        "Finish", "Matte Black", mapped_attribute_code="   "
+    )
+    record = record_for(PDSH)
+    record.add_manufacturer_specification(specification)
+
+    row = builder.build(record, source=SupplierRow.parse(PDSH))
+
+    assert specification.mapped_attribute_code is None
+    assert row.as_dict()["ATTRIBUTE_LABEL 16"] == "Finish"
+    assert row.sidecar()["manufacturer_specifications"][0]["delivery_status"] == "emitted"
+
+
+def test_mapped_raw_specification_cannot_bypass_typed_publication(builder):
+    record = record_for(PDSH)
+    record.add_manufacturer_specification(
+        manufacturer_specification(
+            "Material", "Stainless Steel", mapped_attribute_code="primary_material"
+        )
+    )
+
+    row = builder.build(record, source=SupplierRow.parse(PDSH))
+
+    assert row.as_dict()["ATTRIBUTE_LABEL 16"] == ""
+    assert row.sidecar()["manufacturer_specifications"][0]["delivery_status"] == (
+        "typed_mapped"
+    )
+
+
+def test_reversing_specification_insertion_keeps_residual_output_identical(builder):
+    specifications = [
+        manufacturer_specification("Zeta Field", "Second"),
+        manufacturer_specification("Alpha Field", "First"),
+    ]
+
+    records = [record_for(PDSH), record_for(PDSH)]
+    for specification in specifications:
+        records[0].add_manufacturer_specification(specification)
+    for specification in reversed(specifications):
+        records[1].add_manufacturer_specification(specification)
+
+    rows = [builder.build(record, source=SupplierRow.parse(PDSH)) for record in records]
+
+    assert rows[0].as_dict() == rows[1].as_dict()
+    assert (
+        rows[0].sidecar()["manufacturer_specifications"]
+        == rows[1].sidecar()["manufacturer_specifications"]
+    )
+    assert rows[0].as_dict()["ATTRIBUTE_LABEL 16"] == "Alpha Field"
+
+
+def test_residual_overflow_selection_is_deterministic_and_preserved(builder, fmt):
+    specifications = [
+        manufacturer_specification(f"Spec {index:02d}", f"Value {index:02d}")
+        for index in range(fmt.slots("attribute_grid", "label") + 2)
+    ]
+    records = [
+        record_for(PDSH, class_code=None),
+        record_for(PDSH, class_code=None),
+    ]
+    for specification in specifications:
+        records[0].add_manufacturer_specification(specification)
+    for specification in reversed(specifications):
+        records[1].add_manufacturer_specification(specification)
+
+    rows = [builder.build(record, source=SupplierRow.parse(PDSH)) for record in records]
+    sidecars = [row.sidecar()["manufacturer_specifications"] for row in rows]
+    capacity = fmt.slots("attribute_grid", "label")
+
+    assert rows[0].as_dict() == rows[1].as_dict()
+    assert sidecars[0] == sidecars[1]
+    assert len(sidecars[0]) == capacity + 2
+    assert [item["delivery_status"] for item in sidecars[0][:capacity]] == [
+        "emitted"
+    ] * capacity
+    assert [item["delivery_status"] for item in sidecars[0][capacity:]] == [
+        "capacity_overflow",
+        "capacity_overflow",
+    ]
+    assert rows[0].as_dict()["ATTRIBUTE_LABEL 1"] == "Spec 00"
+    assert rows[0].as_dict()[f"ATTRIBUTE_LABEL {capacity}"] == f"Spec {capacity - 1:02d}"
 
 
 def test_quantity_splits_into_value_and_uom(builder):

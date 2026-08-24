@@ -14,9 +14,15 @@ raw source text available for audit.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 
 from axiom.core.gaps import Gap, GapReason, RecommendedAction
+from axiom.core.specifications import (
+    ManufacturerSpecification,
+    quote_supports_specification,
+    specification_id,
+)
 from axiom.core.values import AttributeValue, DerivationMethod
 from axiom.docintel import ParsedDocument, SkuPresence, build_evidence_span, find_sku
 from axiom.extract.client import (
@@ -30,17 +36,29 @@ from axiom.extract.client import (
 from axiom.extract.contract import (
     ContractError,
     ContractItem,
+    ExtractionContract,
+    ManufacturerSpecificationContractItem,
     classify_abstention,
-    parse_contract,
+    parse_extraction_contract,
 )
 from axiom.extract.entailment import Support, check_entailment
-from axiom.schema import Requirement, SchemaRegistry, build_extraction_prompt
+from axiom.schema import (
+    Requirement,
+    SchemaRegistry,
+    build_extraction_prompt,
+    build_specification_extraction_prompt,
+)
 
 _ABSTENTION_REASONS = {
     "deferred": (GapReason.REFERRED_ELSEWHERE, RecommendedAction.REQUEST_FROM_SUPPLIER),
     "applicability": (GapReason.NOT_PRESENT_IN_ANY_SOURCE, RecommendedAction.HUMAN_RESEARCH),
     "absent": (GapReason.NOT_PRESENT_IN_ANY_SOURCE, RecommendedAction.REQUEST_FROM_SUPPLIER),
 }
+_LABEL_FOLD = re.compile(r"[^a-z0-9]+")
+
+
+def _fold_label(value: str) -> str:
+    return _LABEL_FOLD.sub("", value.casefold())
 
 
 @dataclass
@@ -48,11 +66,19 @@ class ExtractionResult:
     """Everything one extraction pass produced."""
 
     values: list[AttributeValue] = field(default_factory=list)
+    manufacturer_specifications: list[ManufacturerSpecification] = field(default_factory=list)
+    """Every verified source-native label/value pair, whether or not the class schema knows it."""
     gaps: list[Gap] = field(default_factory=list)
     rejected: list[ContractItem] = field(default_factory=list)
     """Claims discarded because their quote could not be located, or because the quote that was
     located does not support the value. Kept because a silent drop is untraceable, and a pattern
     of rejections is a signal about the source or the prompt rather than about one SKU."""
+    rejected_specifications: list[ManufacturerSpecificationContractItem] = field(
+        default_factory=list
+    )
+    """Open-ended rows discarded because their quote, label or value could not be verified."""
+    suppressed_specifications: list[ManufacturerSpecification] = field(default_factory=list)
+    """Verified source-native rows withheld from delivery because publisher authority was absent."""
 
     corrections: list[str] = field(default_factory=list)
     """Values rewritten to agree with their own citation — an under-read enum, or a list with an
@@ -101,8 +127,16 @@ class ExtractionResult:
         return {
             "requested": len(self.requested_codes),
             "values": len(self.values),
+            "manufacturer_specifications": len(self.manufacturer_specifications),
+            "manufacturer_specifications_unmapped": sum(
+                1
+                for specification in self.manufacturer_specifications
+                if specification.mapped_attribute_code is None
+            ),
             "gaps": len(self.gaps),
             "rejected_unverifiable": len(self.rejected),
+            "rejected_specifications": len(self.rejected_specifications),
+            "suppressed_untrusted_specifications": len(self.suppressed_specifications),
             "corrected_to_match_evidence": len(self.corrections),
             "citation_coverage": round(self.citation_coverage, 4),
             "input_tokens": self.usage.input_tokens,
@@ -126,7 +160,7 @@ class Extractor:
         cascade: ModelCascade,
         *,
         start_tier: str = "volume",
-        max_tokens: int = 4000,
+        max_tokens: int = 8000,
         quote_threshold: float = 0.90,
         enforce_evidence: bool = True,
         require_sku_in_document: bool = True,
@@ -147,14 +181,18 @@ class Extractor:
         self,
         parsed: ParsedDocument,
         *,
-        class_code: str,
+        class_code: str | None,
         target_sku: str,
         only_codes: tuple[str, ...] | None = None,
         include_recommended: bool = True,
         include_optional: bool = False,
         max_pages: int | None = None,
         sku_variants: set[str] | None = None,
+        manufacturer_source_verified: bool = False,
     ) -> ExtractionResult:
+        # Publisher authority is never inferred from URI shape. Local files are useful evidence,
+        # but they become manufacturer-citable only when their caller has established provenance.
+
         # Targeting gate, before any model call.
         #
         # Handed the wrong datasheet, the model will answer confidently from whatever product
@@ -196,15 +234,23 @@ class Extractor:
                 action=RecommendedAction.DELIST_PRODUCT,
             )
 
-        prompt = build_extraction_prompt(
-            self._registry,
-            class_code,
-            source_content=parsed.to_prompt_content(max_pages=max_pages),
-            target_sku=target_sku,
-            source_name=parsed.document.document_id,
-            include_recommended=include_recommended,
-            include_optional=include_optional,
-            only_codes=only_codes,
+        prompt = (
+            build_extraction_prompt(
+                self._registry,
+                class_code,
+                source_content=parsed.to_prompt_content(max_pages=max_pages),
+                target_sku=target_sku,
+                source_name=parsed.document.document_id,
+                include_recommended=include_recommended,
+                include_optional=include_optional,
+                only_codes=only_codes,
+            )
+            if class_code is not None
+            else build_specification_extraction_prompt(
+                source_content=parsed.to_prompt_content(max_pages=max_pages),
+                target_sku=target_sku,
+                source_name=parsed.document.document_id,
+            )
         )
 
         result = ExtractionResult(
@@ -213,11 +259,11 @@ class Extractor:
             requested_codes=prompt.attribute_codes,
         )
 
-        def validate(text: str) -> list[ContractItem]:
-            return parse_contract(text, expected_codes=prompt.attribute_codes)
+        def validate(text: str) -> ExtractionContract:
+            return parse_extraction_contract(text, expected_codes=prompt.attribute_codes)
 
         try:
-            response, items = invoke_with_cascade(
+            response, contract = invoke_with_cascade(
                 self._client,
                 self._cascade,
                 system=prompt.system,
@@ -246,7 +292,25 @@ class Extractor:
 
         result.response = response
         result.sku_presence = presence
-        self._materialise(result, items, parsed, class_code, prompt.attribute_codes)
+        self._materialise(
+            result, list(contract.attributes), parsed, class_code, prompt.attribute_codes
+        )
+        # Source-native pairs are manufacturer claims, not merely statements found on a page.
+        # Unknown web sources remain valid evidence for typed extraction, but source-native rows
+        # from them are retained only as non-citable provenance and never enter delivery cells.
+        specification_start = len(result.manufacturer_specifications)
+        self._materialise_specifications(
+            result,
+            list(contract.manufacturer_specifications),
+            parsed,
+            class_code,
+            start_index=len(prompt.attribute_codes),
+            citable_as_manufacturer=manufacturer_source_verified,
+        )
+        if not manufacturer_source_verified:
+            result.suppressed_specifications.extend(
+                result.manufacturer_specifications[specification_start:]
+            )
         return result
 
     # ------------------------------------------------------------------ internals
@@ -254,7 +318,7 @@ class Extractor:
     def _no_extraction_result(
         self,
         parsed: ParsedDocument,
-        class_code: str,
+        class_code: str | None,
         target_sku: str,
         presence,
         only_codes,
@@ -275,15 +339,23 @@ class Extractor:
 
         ``action`` carries which of those it was, because the remedies are not interchangeable.
         """
-        prompt = build_extraction_prompt(
-            self._registry,
-            class_code,
-            source_content="",
-            target_sku=target_sku,
-            source_name=parsed.document.document_id,
-            include_recommended=include_recommended,
-            include_optional=include_optional,
-            only_codes=only_codes,
+        prompt = (
+            build_extraction_prompt(
+                self._registry,
+                class_code,
+                source_content="",
+                target_sku=target_sku,
+                source_name=parsed.document.document_id,
+                include_recommended=include_recommended,
+                include_optional=include_optional,
+                only_codes=only_codes,
+            )
+            if class_code is not None
+            else build_specification_extraction_prompt(
+                source_content="",
+                target_sku=target_sku,
+                source_name=parsed.document.document_id,
+            )
         )
         result = ExtractionResult(
             prompt_version=prompt.prompt_version,
@@ -309,7 +381,7 @@ class Extractor:
         result: ExtractionResult,
         items: list[ContractItem],
         parsed: ParsedDocument,
-        class_code: str,
+        class_code: str | None,
         requested: tuple[str, ...],
     ) -> None:
         response = result.response
@@ -446,6 +518,82 @@ class Extractor:
                 )
             )
 
+    def _materialise_specifications(
+        self,
+        result: ExtractionResult,
+        items: list[ManufacturerSpecificationContractItem],
+        parsed: ParsedDocument,
+        class_code: str | None,
+        *,
+        start_index: int,
+        citable_as_manufacturer: bool,
+    ) -> None:
+        """Verify and retain arbitrary manufacturer label/value pairs.
+
+        Quote location alone is insufficient here: a genuine paragraph may be cited while the model
+        invents the label or value. Both raw strings must therefore be reproducible inside the
+        located quote before the observation enters the canonical record.
+        """
+        response = result.response
+        seen: set[tuple[str, str, str]] = set()
+        for offset, item in enumerate(items):
+            if not item.is_well_formed:
+                result.rejected_specifications.append(item)
+                continue
+
+            # Narrowed by is_well_formed; local names keep the verifier and constructor explicit.
+            label = item.label_raw or ""
+            value = item.value_raw or ""
+            quote = item.evidence_quote or ""
+            span = build_evidence_span(
+                quote,
+                parsed,
+                span_id=f"ms_{parsed.document.sha256[:8]}_{start_index + offset}",
+                page_hint=item.evidence_page,
+                threshold=self._quote_threshold,
+            )
+            supported = span.quote_verified and quote_supports_specification(
+                label, value, span.quote
+            )
+            if not supported:
+                result.rejected_specifications.append(item)
+                continue
+
+            specification = ManufacturerSpecification(
+                specification_id=specification_id(parsed.document.sha256, label, value),
+                label_raw=label,
+                value_raw=value,
+                evidence=[span],
+                confidence=item.certainty.provisional_confidence,
+                method=(
+                    DerivationMethod.TABLE_EXTRACTION
+                    if span.table_ref
+                    else DerivationMethod.DOCUMENT_EXTRACTION
+                ),
+                mapped_attribute_code=self._mapped_attribute_code(class_code, label),
+                citable_as_manufacturer=citable_as_manufacturer,
+                model_id=response.model_id if response else None,
+                model_tier=response.tier if response else None,
+                prompt_version=result.prompt_version,
+                schema_version=result.schema_version,
+            )
+            if specification.deduplication_key in seen:
+                continue
+            seen.add(specification.deduplication_key)
+            result.manufacturer_specifications.append(specification)
+
+    def _mapped_attribute_code(self, class_code: str | None, label: str) -> str | None:
+        if class_code is None:
+            return None
+        folded = _fold_label(label)
+        if not folded:
+            return None
+        for attribute in self._registry.attributes_for(class_code):
+            labels = (attribute.name, *attribute.spec_labels, *attribute.table_headers)
+            if any(_fold_label(candidate) == folded for candidate in labels):
+                return attribute.code
+        return None
+
     def _unevidenced_value(self, item, code: str, result, response) -> AttributeValue:
         """A value with no evidence at all. Reachable only with ``enforce_evidence=False``.
 
@@ -470,7 +618,7 @@ class Extractor:
     def _gap(
         self,
         code: str,
-        class_code: str,
+        class_code: str | None,
         parsed: ParsedDocument,
         reason: GapReason,
         *,
@@ -486,7 +634,9 @@ class Extractor:
             is_required=self._is_required(class_code, code),
         )
 
-    def _is_required(self, class_code: str, code: str) -> bool:
+    def _is_required(self, class_code: str | None, code: str) -> bool:
+        if class_code is None:
+            return False
         try:
             binding = self._registry.product_class(class_code).binding(code)
         except KeyError:

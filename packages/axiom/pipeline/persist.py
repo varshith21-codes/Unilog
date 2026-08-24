@@ -25,6 +25,7 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 from axiom.console import (
     build_bundle,
@@ -35,6 +36,7 @@ from axiom.console import (
     serialise_pages,
 )
 from axiom.core.naming import sku_slug
+from axiom.pipeline.source import ResolvedSource
 from axiom.pipeline.stages import PipelineRun
 from axiom.review import ReviewSession, build_session
 
@@ -77,7 +79,93 @@ def session_for(run: PipelineRun, parsed, registry) -> ReviewSession:
     )
 
 
-def bundle_payload(run: PipelineRun, *, parsed, artifact, registry) -> dict[str, Any]:
+def source_summaries(
+    source: ResolvedSource, retrieval, *, mpn: str
+) -> list[dict[str, Any]]:
+    """Project every source used or discovered by one enrichment for the console.
+
+    The primary source keeps the identity-aware authority decision made by ``enrich_one``. Secondary
+    retrieval entries are citable only when their manufacturer ID matches the resolved retrieval
+    manufacturer; a tier name alone is not publisher verification.
+    """
+    artifact = source.artifact
+    entries = {
+        entry.sha256: entry
+        for entry in (retrieval.entries if retrieval is not None else ())
+    }
+    expected_manufacturer_id = (
+        retrieval.manufacturer.id
+        if retrieval is not None and retrieval.manufacturer is not None
+        else None
+    )
+    ordered_hashes = [artifact.document.sha256, *entries]
+    sources: list[dict[str, Any]] = []
+    seen: set[str] = set()
+
+    for digest in ordered_hashes:
+        if digest in seen:
+            continue
+        seen.add(digest)
+        primary = digest == artifact.document.sha256
+        entry = entries.get(digest)
+        if entry is not None:
+            url = entry.source_uri
+            tier = source.source_tier if primary else entry.tier
+            citable = (
+                source.citable_as_manufacturer
+                if primary
+                else (
+                    entry.tier == "manufacturer"
+                    and entry.manufacturer_id is not None
+                    and expected_manufacturer_id is not None
+                    and entry.manufacturer_id == expected_manufacturer_id
+                )
+            )
+            sources.append(
+                {
+                    "document_id": entry.document_id,
+                    "url": url,
+                    "host": entry.host,
+                    "tier": tier,
+                    "doc_type": entry.doc_type,
+                    "sha256": entry.sha256,
+                    "covers_this_sku": entry.covers.get(mpn, "linked"),
+                    "citable_as_manufacturer": citable,
+                    "license_note": entry.license_note,
+                    "revision_label": entry.revision_label,
+                }
+            )
+            continue
+
+        document = artifact.document
+        url = document.uri
+        submission = url.startswith("submission:")
+        sources.append(
+            {
+                "document_id": document.document_id,
+                "url": url,
+                "host": urlparse(url).hostname or "",
+                "tier": source.source_tier,
+                "doc_type": document.doc_type.value,
+                "sha256": document.sha256,
+                "covers_this_sku": "submission" if submission else "document",
+                "citable_as_manufacturer": source.citable_as_manufacturer,
+                "license_note": document.license_note,
+                "revision_label": document.revision_label,
+            }
+        )
+
+    return sources
+
+
+def bundle_payload(
+    run: PipelineRun,
+    *,
+    parsed,
+    artifact,
+    registry,
+    sources: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
     """One SKU's console bundle, as a JSON-ready dict.
 
     The document and class definition travel with the bundle rather than being looked up by the API.
@@ -105,6 +193,7 @@ def bundle_payload(run: PipelineRun, *, parsed, artifact, registry) -> dict[str,
         decisions=run.decisions,
         certificate=run.certificate,
         exports=run.exports,
+        sources=sources,
     )
     return {
         "bundle": bundle,
@@ -126,6 +215,7 @@ def persist_run(
     registry,
     sessions_dir: Path | str,
     console_dir: Path | str,
+    sources: list[dict[str, Any]] | None = None,
 ) -> PersistedPaths:
     """Write the session and the console bundle. Returns where they went."""
     slug = sku_slug(run.record.sku)
@@ -136,7 +226,13 @@ def persist_run(
     bundle_path.parent.mkdir(parents=True, exist_ok=True)
     bundle_path.write_text(
         json.dumps(
-            bundle_payload(run, parsed=parsed, artifact=artifact, registry=registry),
+            bundle_payload(
+                run,
+                parsed=parsed,
+                artifact=artifact,
+                registry=registry,
+                sources=sources,
+            ),
             indent=2,
             default=str,
         ),
@@ -146,4 +242,10 @@ def persist_run(
     return PersistedPaths(slug=slug, session=session_path, bundle=bundle_path)
 
 
-__all__ = ["PersistedPaths", "bundle_payload", "persist_run", "session_for"]
+__all__ = [
+    "PersistedPaths",
+    "bundle_payload",
+    "persist_run",
+    "session_for",
+    "source_summaries",
+]
