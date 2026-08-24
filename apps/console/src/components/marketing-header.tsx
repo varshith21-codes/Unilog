@@ -16,11 +16,14 @@ export function MarketingHeader() {
         </Link>
 
         <div className="marketing-header-actions">
+          <Link href="/#evidence-chain" className="marketing-proof-link">
+            Evidence chain
+          </Link>
           <div className="marketing-theme-control">
             <ThemeToggle />
           </div>
           <Link href="/operations" className="btn btn-quiet">
-            Enter operations
+            Open operations
           </Link>
         </div>
       </div>

@@ -25,51 +25,132 @@ export default function LandingPage() {
 
       <main id="main">
         <section className="landing-hero" aria-labelledby="landing-title">
-          <div className="marketing-container landing-hero-grid">
-            <div>
-              <p className="landing-eyebrow">
-                Verifiable Product Intelligence for Industrial Commerce
-              </p>
-              <h1 id="landing-title" className="landing-title">
-                From sparse product data to trusted catalog intelligence.
-              </h1>
-              <p className="landing-intro">
-                AXIOM turns six-field inputs into evidence-backed, reviewable,
-                delivery-ready records—without guessing.
-              </p>
-              <div className="landing-actions">
-                <Link href="/operations" className="btn btn-primary">
-                  Enter operations
-                  <ArrowIcon />
-                </Link>
-                <Link href="/enrich" className="btn btn-quiet">
-                  Enrich a record
-                </Link>
+          <div className="marketing-container">
+            <div className="landing-hero-grid">
+              <div className="landing-hero-heading hero-entrance hero-entrance-1">
+                <p className="landing-eyebrow">
+                  Verifiable Product Intelligence for Industrial Commerce
+                </p>
+                <h1 id="landing-title" className="landing-title">
+                  From six supplier fields to a governed 252-column record.
+                </h1>
+              </div>
+
+              <aside
+                className="hero-trace hero-entrance hero-entrance-2"
+                aria-labelledby="hero-trace-title"
+              >
+                <header className="hero-trace-header">
+                  <div>
+                    <p id="hero-trace-title">Compilation trace</p>
+                    <p className="hero-trace-record">BA-100-025</p>
+                  </div>
+                  <span>Evidence gated</span>
+                </header>
+
+                <ol className="hero-trace-list">
+                  <li>
+                    <span className="hero-trace-index">01</span>
+                    <div>
+                      <small>Input</small>
+                      <strong>6 supplier fields</strong>
+                      <p>Sparse supplier record</p>
+                    </div>
+                  </li>
+                  <li>
+                    <span className="hero-trace-index">02</span>
+                    <div>
+                      <small>Exact verified span</small>
+                      <strong>Bronze C84400</strong>
+                      <p>Manufacturer PDF · page 1</p>
+                    </div>
+                  </li>
+                  <li>
+                    <span className="hero-trace-index">03</span>
+                    <div>
+                      <small>Governed result</small>
+                      <strong className="hero-trace-pass">Auto-accepted</strong>
+                      <p>Confidence 0.90 · evidence verified</p>
+                    </div>
+                  </li>
+                  <li>
+                    <span className="hero-trace-index">04</span>
+                    <div>
+                      <small>Contract output</small>
+                      <strong>252-column UniLog record</strong>
+                      <p>Provenance recorded per cell</p>
+                    </div>
+                  </li>
+                </ol>
+
+                <p className="hero-trace-rule">
+                  <span>Publication rule</span>
+                  No independent evidence → no automatic publication.
+                </p>
+              </aside>
+
+              <div className="landing-hero-support hero-entrance hero-entrance-3">
+                <p className="landing-intro">
+                  AXIOM retrieves source evidence, verifies each value, and records
+                  provenance for every populated or withheld UniLog cell—without guessing.
+                </p>
+                <div className="landing-actions">
+                  <Link href="/enrich" className="btn btn-primary">
+                    Enrich a product record
+                    <ArrowIcon />
+                  </Link>
+                  <Link href="#evidence-chain" className="landing-text-link">
+                    See the evidence chain
+                    <span aria-hidden="true">↓</span>
+                  </Link>
+                </div>
               </div>
             </div>
 
-            <aside className="landing-category" aria-label="Product definition and trust rule">
-              <p className="landing-category-label">Product category</p>
-              <strong>An evidence-gated compiler for product data.</strong>
-              <p className="landing-rule">
-                <span>Publication rule</span>
-                No independent evidence means no automatic publication.
-              </p>
-            </aside>
+            <dl
+              className="landing-outcome-rail hero-entrance hero-entrance-4"
+              aria-label="Compilation outcomes"
+            >
+              <div>
+                <dt>Input</dt>
+                <dd>
+                  <strong>6 fields in</strong>
+                  <span>Sparse supplier record</span>
+                </dd>
+              </div>
+              <div>
+                <dt>Evidence</dt>
+                <dd>
+                  <strong>Independently verified</strong>
+                  <span>Exact source spans retained</span>
+                </dd>
+              </div>
+              <div>
+                <dt>Delivery</dt>
+                <dd>
+                  <strong>252-column contract</strong>
+                  <span>Provenance for populated and withheld cells</span>
+                </dd>
+              </div>
+            </dl>
           </div>
         </section>
 
-        <section className="landing-proof-section" aria-labelledby="proof-title">
+        <section
+          id="evidence-chain"
+          className="landing-proof-section"
+          aria-labelledby="proof-title"
+        >
           <div className="marketing-container">
             <div className="landing-section-heading">
-              <h2 id="proof-title">Every published value arrives with its proof.</h2>
+              <h2 id="proof-title">One value. Every decision attached.</h2>
               <p>
-                AXIOM binds a normalized value to its exact source span, confidence,
-                validation state, and publication decision before delivery.
+                Follow BA-100-025 from its exact source span through normalization,
+                validation, publication policy, and UniLog delivery eligibility.
               </p>
             </div>
 
-            <article className="evidence-console reveal reveal-1" aria-label="Field-level evidence record">
+            <article className="evidence-console" aria-label="Field-level evidence record">
               <header className="evidence-console-header">
                 <p className="evidence-record-id">
                   <span>Console fixture</span>
@@ -154,17 +235,6 @@ export default function LandingPage() {
                 ))}
               </ol>
             </article>
-
-            <div className="landing-proof-line" aria-label="Delivery proof">
-              <div>
-                <strong>252 columns</strong>
-                <span>Exact UniLog delivery contract</span>
-              </div>
-              <div>
-                <strong>Per cell</strong>
-                <span>Provenance for populated and withheld output</span>
-              </div>
-            </div>
           </div>
         </section>
 
@@ -179,7 +249,7 @@ export default function LandingPage() {
             </div>
             <div className="landing-actions">
               <Link href="/operations" className="btn btn-primary">
-                Open AXIOM
+                Open operations workspace
                 <ArrowIcon />
               </Link>
             </div>
