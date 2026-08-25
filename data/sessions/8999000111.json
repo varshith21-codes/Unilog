@@ -1,0 +1,573 @@
+{
+  "sku": "8999000111",
+  "tenant_id": "demo",
+  "brand": null,
+  "class_code": "TOL.PWR.GEN",
+  "class_name": "Power Tool",
+  "category_path": [
+    "Tools & Consumables",
+    "Power Tools",
+    "Power Tools"
+  ],
+  "document_id": "8999000111@03e331a5",
+  "document_sha256": "03e331a5239ae7a7b2143b4e9fcb490aaaabc600ad26e01438b2050da92e6ce7",
+  "gaps": [
+    {
+      "code": "tool_configuration",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "8999000111@03e331a5"
+      ],
+      "required": true,
+      "detail": "The source content does not contain a configuration field (e.g., 'Bare', 'Kit', 'Set') for the target SKU 8999000111.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "power_source",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "8999000111@03e331a5"
+      ],
+      "required": true,
+      "detail": "The source content does not explicitly state the power source (e.g., 'Cordless', 'Corded') for the target SKU 8999000111.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "battery_platform",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "8999000111@03e331a5"
+      ],
+      "required": false,
+      "detail": "The source content does not list a battery platform name for the target SKU 8999000111.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "battery_voltage",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "8999000111@03e331a5"
+      ],
+      "required": false,
+      "detail": "The source content does not list a battery voltage for the target SKU 8999000111.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "drive_size",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "8999000111@03e331a5"
+      ],
+      "required": false,
+      "detail": "The source content does not list a drive size for the target SKU 8999000111.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "chuck_size",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "8999000111@03e331a5"
+      ],
+      "required": false,
+      "detail": "The source content does not list a chuck size for the target SKU 8999000111.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "blade_diameter",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "8999000111@03e331a5"
+      ],
+      "required": false,
+      "detail": "The source content does not list a blade diameter for the target SKU 8999000111.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "no_load_speed",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "8999000111@03e331a5"
+      ],
+      "required": false,
+      "detail": "The source content does not list a no-load speed for the target SKU 8999000111.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "amperage_rating",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "8999000111@03e331a5"
+      ],
+      "required": false,
+      "detail": "The source content does not list an amperage rating for the target SKU 8999000111.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "product_series",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "8999000111@03e331a5"
+      ],
+      "required": false,
+      "detail": "The source content does not list a product series for the target SKU 8999000111.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "model_number",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "8999000111@03e331a5"
+      ],
+      "required": false,
+      "detail": "The source content does not list a separate model number for the target SKU 8999000111.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "overall_size",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "8999000111@03e331a5"
+      ],
+      "required": false,
+      "detail": "The source content does not list an overall size for the target SKU 8999000111.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "each_weight",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "8999000111@03e331a5"
+      ],
+      "required": false,
+      "detail": "The source content does not list the weight for the target SKU 8999000111.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "sound_level",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "8999000111@03e331a5"
+      ],
+      "required": false,
+      "detail": "The source content does not list a sound level for the target SKU 8999000111.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "pack_quantity",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "8999000111@03e331a5"
+      ],
+      "required": false,
+      "detail": "The source content does not list a pack quantity for the target SKU 8999000111.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "selling_uom",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "8999000111@03e331a5"
+      ],
+      "required": false,
+      "detail": "The source content does not list a selling unit of measure for the target SKU 8999000111.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "warranty_terms",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "8999000111@03e331a5"
+      ],
+      "required": false,
+      "detail": "The source content does not list warranty terms for the target SKU 8999000111.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "included_technology",
+      "reason": "extracted_but_unverifiable",
+      "sources_searched": [
+        "8999000111@03e331a5"
+      ],
+      "required": false,
+      "detail": "citation does not support the value: quote 'The Push&Clean filter cleaning system enables a longer life time and better suction. This dust extractor is equipped with an AutoStart function that saves time and electricity for the user.' does not contain the literal 'Push&Clean filter cleaning system, AutoStart function'",
+      "recommended_action": "human_research"
+    },
+    {
+      "code": "approvals",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "8999000111@03e331a5"
+      ],
+      "required": false,
+      "detail": "The source content does not list any approvals or certifications for the target SKU 8999000111.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "country_of_origin",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "8999000111@03e331a5"
+      ],
+      "required": false,
+      "detail": "The source content does not list the country of origin for the target SKU 8999000111.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "prop65_warning_required",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "8999000111@03e331a5"
+      ],
+      "required": false,
+      "detail": "The source content does not state a California Proposition 65 warning for the target SKU 8999000111.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "gtin",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "8999000111@03e331a5"
+      ],
+      "required": false,
+      "detail": "The source content does not list a GTIN, UPC, EAN, or barcode for the target SKU 8999000111.",
+      "recommended_action": "request_from_supplier"
+    }
+  ],
+  "policy": {
+    "epsilon": 0.05,
+    "confidence_level": 0.95,
+    "threshold": 0.6853,
+    "coverage": 1.0,
+    "accepted": 220,
+    "accepted_errors": 1,
+    "observed_error_rate": 0.0045,
+    "error_upper_bound": 0.0201,
+    "calibration_size": 220,
+    "achievable": true,
+    "reason": "at threshold 0.685, 100.0% of values are publishable with an error rate of at most 2.0% at 95% confidence"
+  },
+  "quality": {
+    "completeness": 0.0,
+    "verifiability": 1.0,
+    "consistency": 1.0,
+    "richness": 0.75,
+    "self_declared": 0.0,
+    "corroborated": 0.0,
+    "composite": 0.625,
+    "measured_dimensions": [
+      "completeness",
+      "consistency",
+      "richness",
+      "verifiability"
+    ]
+  },
+  "created_at": "2026-08-25T04:45:05.462077+00:00",
+  "decisions": [],
+  "manufacturer_specifications": [
+    {
+      "specification_id": "ms_425654c931b1241f",
+      "label_raw": "SKU",
+      "value_raw": "8999000111",
+      "confidence": 0.9,
+      "method": "document_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": false,
+      "evidence": [
+        {
+          "document_id": "8999000111@03e331a5",
+          "quote": "SKU: 8999000111",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 3,
+          "line_index": 12,
+          "table_ref": null,
+          "method": "exact_multiline"
+        }
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "number": 1,
+      "lines": [
+        "Skip to the content",
+        "Free shipping for all orders over \u20ac50",
+        "Facebook",
+        "All Vendors",
+        "Search for products ",
+        " Search",
+        "(+356) 21487584",
+        "info@galdesandmamo.com",
+        "Log in",
+        " Open mini cart",
+        "Car care",
+        "Car plan",
+        "Shampoo and wax",
+        "Grease, oils and rust prevention",
+        "Aerosol and paint",
+        "Farecla G3",
+        "G3 Cutting compound",
+        "G Mops",
+        "G3 Premium",
+        "G3 Pro",
+        "Fidea thinners & solvents",
+        "Finishing cloth",
+        "Masking Tape",
+        "Mirka Abrasives",
+        "Painting stands",
+        "Spray Painting - Guns and Accessories",
+        "Boat care",
+        "Farecla profile",
+        "G Mop applicator pads",
+        "Mirka Abrasives",
+        "Polishing cloth",
+        "Spray Painting - Guns and Accessories",
+        "Vernilac Varnish",
+        "Power Tools",
+        "Mirka Power Tools",
+        "Mirka Abrasives",
+        "Power tools",
+        "Welding & Charging",
+        "Chargers",
+        "Gloves & Aprons",
+        "Plasma cutter",
+        "Welding",
+        "Wood care",
+        "Mirka Abrasives",
+        "Rustins",
+        "Wax and oils",
+        "Varnish and polish",
+        "Tetrosyl",
+        "Aerosol paints",
+        "Powder and ready mixed filler",
+        "Vernilac",
+        "Glue",
+        "Wood putty",
+        "Wood stain and preserver",
+        "Work shop tools",
+        "Drill Bits",
+        "Gloves & Aprons",
+        "Jacks and stands"
+      ]
+    },
+    {
+      "number": 2,
+      "lines": [
+        "Motorbike jacks and wheel support",
+        "Paint Brush, Roller and Plastic",
+        "Tools & Tool boxes",
+        "Valex",
+        "Need help?",
+        "(+356) 21487584",
+        "info@galdesandmamo.com",
+        "Car care",
+        "Car plan",
+        "Shampoo and wax",
+        "Grease, oils and rust prevention",
+        "Aerosol and paint",
+        "Farecla G3",
+        "G3 Cutting compound",
+        "G Mops",
+        "G3 Premium",
+        "G3 Pro",
+        "Fidea thinners & solvents",
+        "Finishing cloth",
+        "Masking Tape",
+        "Mirka Abrasives",
+        "Painting stands",
+        "Spray Painting - Guns and Accessories",
+        "Boat care",
+        "Farecla profile",
+        "G Mop applicator pads",
+        "Mirka Abrasives",
+        "Polishing cloth",
+        "Spray Painting - Guns and Accessories",
+        "Vernilac Varnish",
+        "Power Tools",
+        "Mirka Power Tools",
+        "Mirka Abrasives",
+        "Power tools",
+        "Welding & Charging",
+        "Chargers",
+        "Gloves & Aprons",
+        "Plasma cutter",
+        "Welding",
+        "Wood care",
+        "Mirka Abrasives",
+        "Rustins",
+        "Wax and oils",
+        "Varnish and polish",
+        "Tetrosyl",
+        "Aerosol paints",
+        "Powder and ready mixed filler",
+        "Vernilac",
+        "Glue",
+        "Wood putty",
+        "Wood stain and preserver",
+        "Work shop tools",
+        "Drill Bits",
+        "Gloves & Aprons",
+        "Jacks and stands",
+        "Motorbike jacks and wheel support",
+        "Paint Brush, Roller and Plastic",
+        "Tools & Tool boxes"
+      ]
+    },
+    {
+      "number": 3,
+      "lines": [
+        "Valex",
+        "Free shipping over \u20ac50",
+        "Warranty backed products",
+        "Industry leading quality",
+        "Secure payments",
+        "Home \u00bb Mirka Dust Extractor 1025 L PC 230V. Hose 27mm x 4m + Connector Included.",
+        "Skip to product information",
+        "Open media 1 in modal",
+        "Load image 1 in gallery view",
+        "Disclaimer: Actual product colors may vary slightly from the images shown due to different monitor settings and lighting conditions during photo shoots.",
+        "Mirka",
+        "Mirka Dust Extractor 1025 L PC 230V. Hose 27mm x 4m + Connector Included.",
+        "SKU:",
+        " 8999000111",
+        "(0)",
+        "Regular price ",
+        " \u20ac475,00",
+        "",
+        " ",
+        " inc. VAT",
+        "In stock",
+        "Usually ships within 24 hours",
+        "\u2212",
+        " Decrease quantity for Mirka Dust Extractor 1025 L PC 230V. Hose 27mm x 4m + Connector Included. Quantity ",
+        " +",
+        " Increase quantity for Mirka Dust Extractor 1025 L PC 230V. Hose 27mm x 4m + Connector Included. Add to cart",
+        "Got questions?",
+        "Feel free to get in touch",
+        "Share on Facebook",
+        "Description",
+        "Dust extractor 1025 L is a compact but still high performing L-class dust extractor, with proven performance for user protection and easy to move around. This dust extractor has a blow function, to blow off surfaces and to clean hard to reach areas. The container size is 25l and the dust extractor is equipped with a carrying handle. The 5m cord is also an optimal length for a compact dust extractor. The Push&Clean filter cleaning system enables a longer life time and better suction. This dust extractor is equipped with an AutoStart function that saves time and electricity for the user. Mirka\u00ae Dust Extractor 1025 L is suitable for both dry and wet applications (remove the dust bag before wet use and clean filter before and after wet use). This Mirka\u00ae Dust Extractor 1025 is designed for usage with Mirka\u00ae PowerTools, but do not have an antistatic feature. If antistatic ability is needed we recommend to use Mirka\u00ae Dust Extractor 1230 or 1242.",
+        "Shipping information",
+        "Delivery in Malta, over \u20ac50 free within 7 working days, under \u20ac50 a \u20ac12 fee will apply.",
+        "Delivery to Gozo, over \u20ac125.00 free within 7 working days, under \u20ac125.00 a \u20ac16 fee will apply.",
+        "Reviews",
+        "Free shipping",
+        "For all orders over \u20ac50",
+        "(+356) 21487584",
+        "info@galdesandmamo.com",
+        "Free returns",
+        "100's of Happy Customers",
+        "Our newsletter",
+        "Subscribe to our newsletter and receive special offers",
+        "Your email ",
+        " Subscribe",
+        "I agree to receive marketing emails and special deals.",
+        "Address: GM House, Msida Valley Road, B\u2019Kara, BKR 9025, Malta.",
+        "Tel: (+356) 21 487584",
+        "info@galdesandmamo.com",
+        "Company Reg. No. C450",
+        "VAT No. MT11780717",
+        "About Galdes & Mamo",
+        "About us",
+        "Contact us",
+        "Delivery Information",
+        "News",
+        "Privacy Policy",
+        "Terms of service"
+      ]
+    },
+    {
+      "number": 4,
+      "lines": [
+        "Cancel Contract",
+        "Useful Links",
+        "Car care",
+        "Boat care",
+        "Power Tools",
+        "Welding & Charging",
+        "Wood care",
+        "Work shop tools",
+        "Pay Securely",
+        "We prioritise your security and privacy. Credit or debit card details are never stored or retained after the transaction is processed.",
+        "Facebook",
+        "\u00a9 2026, Galdes & Mamo -",
+        " Powered by Shopify",
+        "Payment methods",
+        "Scroll to the top",
+        "Your cart",
+        "\u00d7",
+        "Your cart is empty",
+        "Open mini cart",
+        "Log in"
+      ]
+    }
+  ],
+  "items": [
+    {
+      "attribute_code": "voltage_rating",
+      "attribute_name": "Voltage Rating",
+      "datatype": "quantity",
+      "value_raw": "230 V",
+      "value_canonical": {
+        "magnitude": 230.0,
+        "unit": "V"
+      },
+      "value_display": "230 V",
+      "score": 0.7143,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.714 >= threshold 0.685",
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "8999000111@03e331a5",
+          "quote": "Mirka Dust Extractor 1025 L PC 230V",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 3,
+          "line_index": 5,
+          "table_ref": null,
+          "method": "exact_line"
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": "V"
+    },
+    {
+      "attribute_code": "additional_information",
+      "attribute_name": "Additional Information",
+      "datatype": "string",
+      "value_raw": "Hose 27mm x 4m + Connector Included",
+      "value_canonical": "Hose 27mm x 4m + Connector Included",
+      "value_display": "Hose 27mm x 4m + Connector Included",
+      "score": 0.7479,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.748 >= threshold 0.685",
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "8999000111@03e331a5",
+          "quote": "Mirka Dust Extractor 1025 L PC 230V. Hose 27mm x 4m + Connector Included.",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 3,
+          "line_index": 5,
+          "table_ref": null,
+          "method": "exact_line"
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": null
+    }
+  ],
+  "queue": []
+}

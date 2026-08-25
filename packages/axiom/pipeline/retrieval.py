@@ -44,7 +44,7 @@ fetch path of its own.
 from __future__ import annotations
 
 from collections.abc import Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 
 from axiom.docintel import ParsedDocument, extract_links
@@ -105,6 +105,13 @@ class RetrievalAttempt:
     mpn: str
     documents: tuple[ParsedDocument, ...] = ()
     entries: tuple[DocumentEntry, ...] = ()
+    supplementary: tuple[ParsedDocument, ...] = ()
+    """Manufacturer-owned documents worth reading that no body-text match covered.
+
+    Fetched during the run — a JavaScript product page whose part number renders client-side, a
+    datasheet PDF whose drawing carries no searchable token — and admitted on the maker's authority
+    rather than a located mention. Read alongside the primary and merged, never used to satisfy
+    coverage or to suppress escalation. Empty unless the maker is known."""
     manufacturer: Manufacturer | None = None
     from_library: bool = False
     """True when a stored document already covered this part, so no request was made at all."""
@@ -167,6 +174,75 @@ class RetrievalAttempt:
 
 
 def retrieve_documents(
+    mpn: str,
+    *,
+    store: LocalArtifactStore,
+    library_path: Path | str,
+    manufacturer: str | None = None,
+    vendor_code: str | None = None,
+    brand: str | None = None,
+    supplied: Sequence[str] = (),
+    policy: SourcePolicy | None = None,
+    search: SearchProvider | None = None,
+    renderer: RenderedFetcher | None = None,
+    fetcher=None,
+    max_fetches: int = MAX_FETCHES,
+    max_browser_pages: int = 2,
+    discover: bool = True,
+    refresh_sources: bool = False,
+    library: DocumentLibrary | None = None,
+) -> RetrievalAttempt:
+    """Find documents covering ``mpn``, then attach the manufacturer's own supplementary reading.
+
+    The search itself is :func:`_retrieve_documents`. This wrapper adds one thing on top: once the
+    search is over, it reads back the manufacturer-owned documents that were fetched but never
+    matched by body text — a JavaScript product page, a datasheet PDF — and hands them to the caller
+    as :attr:`RetrievalAttempt.supplementary`. Done here rather than inside the search so it cannot
+    disturb the escalation logic, which must keep asking the stricter body-text question.
+    """
+    library = (
+        library if library is not None else DocumentLibrary.load(store, Path(library_path))
+    )
+    attempt = _retrieve_documents(
+        mpn,
+        store=store,
+        library_path=library_path,
+        manufacturer=manufacturer,
+        vendor_code=vendor_code,
+        brand=brand,
+        supplied=supplied,
+        policy=policy,
+        search=search,
+        renderer=renderer,
+        fetcher=fetcher,
+        max_fetches=max_fetches,
+        max_browser_pages=max_browser_pages,
+        discover=discover,
+        refresh_sources=refresh_sources,
+        library=library,
+    )
+    maker = attempt.manufacturer
+    if maker is None or not maker.id:
+        return attempt
+
+    covered = {document.document.sha256 for document in attempt.documents}
+    # Only documents this run actually fetched for this part. Scoping to the run's own entries is
+    # what keeps authority from reaching across the library into the maker's unrelated catalogues.
+    fetched = {entry.sha256 for entry in attempt.entries}
+    supplementary_coverage = library.supplementary_for(
+        mpn, manufacturer_id=maker.id, among=fetched, exclude=covered
+    )
+    supplementary = tuple(
+        parsed
+        for coverage in supplementary_coverage
+        if (parsed := library.parsed(coverage.entry)) is not None
+    )
+    if not supplementary:
+        return attempt
+    return replace(attempt, supplementary=supplementary)
+
+
+def _retrieve_documents(
     mpn: str,
     *,
     store: LocalArtifactStore,

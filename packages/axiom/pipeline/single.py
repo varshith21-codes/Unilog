@@ -50,7 +50,8 @@ from axiom.ingest.fabric import IngestedArtifact
 from axiom.ingest.store import ArtifactStore
 from axiom.pipeline.retrieval import RetrievalAttempt, retrieve_documents
 from axiom.pipeline.source import ResolvedSource, ingest_submission, resolve_source
-from axiom.pipeline.stages import PipelineRun, run_stages
+from axiom.pipeline.stages import PipelineRun, SecondarySource, run_stages
+from axiom.retrieve.library import DocumentEntry
 from axiom.retrieve.policy import SourcePolicy, SourceTier
 from axiom.retrieve.policy import load_default as load_source_policy
 from axiom.review import queue_summary
@@ -127,6 +128,27 @@ def _source_authority(
     return verdict.tier.value, citable
 
 
+def _entry_citable_as_manufacturer(
+    entry: DocumentEntry | None, retrieval: RetrievalAttempt
+) -> bool:
+    """Whether one retrieved document may support manufacturer-named claims.
+
+    The same rule ``_source_authority`` applies to the primary, factored out so a secondary
+    document is judged on its own tier and manufacturer id rather than inheriting the primary's.
+    A manufacturer's own product page earns citable manufacturer specifications; a retailer listing
+    fetched in the same run does not, even when it is read in the same pass.
+    """
+    if entry is None:
+        return False
+    expected_id = retrieval.manufacturer.id if retrieval.manufacturer else None
+    return (
+        entry.tier == SourceTier.MANUFACTURER.value
+        and entry.manufacturer_id is not None
+        and expected_id is not None
+        and entry.manufacturer_id == expected_id
+    )
+
+
 class InsufficientInputError(ValueError):
     """The submission cannot produce anything worth paying for.
 
@@ -168,6 +190,17 @@ class EnrichmentRequest:
     """
     refresh_sources: bool = False
     """Bypass stored SKU coverage once to look for a richer live product source and datasheet."""
+
+    merge_sources: bool = True
+    """Read every retrieved document, not only the strongest one.
+
+    On by default: when retrieval returns a manufacturer product page, its datasheet PDF and a
+    third-party listing for the same part, the primary is only one vantage point, and the others
+    carry the "Technical details" and datasheet values a single source omits. Each secondary is
+    extracted on its own authority and merged as candidate values plus deduplicated manufacturer
+    specifications, so a conflict stays visible rather than being resolved by which source sorted
+    first. Turn it off for a strictly single-document run — the behaviour before this existed —
+    when reproducibility against one exact source matters more than coverage."""
 
     class_code: str | None = None
     """Forced class, bypassing classification. The fallback when classification abstains, too — the
@@ -430,6 +463,35 @@ def enrich_one(
         citable_as_manufacturer=citable_as_manufacturer,
     )
 
+    # The other retrieved documents, read alongside the primary rather than discarded. Two groups:
+    # the remaining coverage (documents[1:] — a second body-text source for the part), and the
+    # manufacturer's supplementary reading (its product page and datasheet, admitted on the maker's
+    # authority when the SKU renders client-side or lives in a drawing find_sku cannot see). Each is
+    # judged for manufacturer authority on its own entry, so a manufacturer page contributes citable
+    # specifications even when the primary is an untrusted listing. Skipped when merging is off or a
+    # URL was supplied by hand.
+    extra_documents: list[SecondarySource] = []
+    if retrieval is not None and request.merge_sources and source.from_url:
+        seen_sha = {source.artifact.document.sha256}
+        candidates = [*retrieval.documents, *retrieval.supplementary]
+        for document in candidates:
+            sha = document.document.sha256
+            if sha in seen_sha:
+                continue
+            seen_sha.add(sha)
+            entry = next(
+                (e for e in retrieval.entries if e.sha256 == sha), None
+            )
+            extra_documents.append(
+                SecondarySource(
+                    parsed=document,
+                    document_id=document.document.document_id,
+                    citable_as_manufacturer=_entry_citable_as_manufacturer(
+                        entry, retrieval
+                    ),
+                )
+            )
+
     # When a datasheet is the primary source, the typed fields are stored as a second document so a
     # description-derived value cites text that actually contains it. Free: the bytes are hashed and
     # deduplicated, and no model reads them.
@@ -506,6 +568,7 @@ def enrich_one(
             title_block(source.parsed) if source.from_url else None
         ),
         manufacturer_source_verified=source.citable_as_manufacturer,
+        extra_documents=extra_documents,
     )
 
     if manufacturer.looks_like_a_distributor:

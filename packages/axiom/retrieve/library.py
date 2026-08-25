@@ -129,11 +129,25 @@ class Coverage:
     entry: DocumentEntry
     mpn: str
     how: str
-    """``table`` or ``text``. See :attr:`DocumentEntry.covers`."""
+    """``table``, ``text`` or ``manufacturer``. See :attr:`DocumentEntry.covers`.
+
+    ``manufacturer`` is the one value not written into :attr:`DocumentEntry.covers`. It marks a
+    document admitted to coverage on *authority* rather than on a body-text match: the
+    manufacturer's own page or datasheet for this part, whose SKU lives in a JS-rendered tab or a
+    PDF drawing that ``find_sku`` cannot see. The bytes really are the manufacturer's statement
+    about this part, so withholding them would drop the richest source on the page — but the claim
+    is weaker than a located mention, so it sorts last and is never cached as a found mention.
+    """
 
     @property
     def is_ordering_row(self) -> bool:
         return self.how == "table"
+
+    @property
+    def is_body_match(self) -> bool:
+        """Whether ``find_sku`` located the part in this document's text, as opposed to admitting
+        it on manufacturer authority alone."""
+        return self.how in {"table", "text"}
 
 
 class DocumentLibrary:
@@ -316,6 +330,12 @@ class DocumentLibrary:
 
         Documents already known to lack the part are skipped without being re-parsed, and documents
         that *withdraw* it are not returned as coverage at all.
+
+        Coverage is a body-text question, deliberately: it gates retrieval's escalation to richer
+        PDFs and rendered pages, so a manufacturer's JavaScript shell that only *links* to the
+        datasheet must not count here or the search would stop before fetching it. Reading the
+        manufacturer's own page on authority alone is :meth:`supplementary_for`'s job, run after
+        the search is over.
         """
         found: list[Coverage] = []
         for entry in self._entries.values():
@@ -338,6 +358,64 @@ class DocumentLibrary:
             )
         )
         return found
+
+    def supplementary_for(
+        self,
+        mpn: str,
+        *,
+        manufacturer_id: str,
+        among: set[str],
+        exclude: set[str] | None = None,
+    ) -> list[Coverage]:
+        """Manufacturer-owned documents worth reading that no body-text match found.
+
+        The counterpart to :meth:`coverage_for`, kept separate on purpose. ``coverage_for`` answers
+        "which stored document *is* a source for this part", and its answer gates retrieval's
+        escalation to richer PDFs and rendered pages — so admitting a JavaScript shell there would
+        stop the search before it fetched the datasheet the shell only links to. That must stay a
+        body-text question.
+
+        This answers a different one: once the search is over, which of the documents already
+        fetched are the manufacturer's own statement about this part and therefore worth *reading*,
+        even though the part number lives in a tab or a drawing ``find_sku`` cannot see. Those are
+        read alongside the primary, never instead of it, so they enrich without suppressing.
+
+        ``among`` scopes the search to the shas fetched *for this part in this run*, and it is
+        required rather than optional. Without it the method would scan the whole library and pull
+        in the manufacturer's documents for unrelated parts — a catalogue for a different product
+        line shares the manufacturer id — which is exactly the misattribution the body-text gate in
+        ``coverage_for`` exists to prevent. Authority admits a document the search already tied to
+        this part; it does not go looking for new ones.
+
+        ``exclude`` drops shas already returned as coverage, so a document is never read twice.
+        """
+        expected = (manufacturer_id or "").strip()
+        if not expected or not among:
+            return []
+        skip = exclude or set()
+        supplementary: list[Coverage] = []
+        for sha in among:
+            if sha in skip:
+                continue
+            entry = self._entries.get(sha)
+            if entry is None:
+                continue
+            if mpn in entry.withdrawn or mpn in entry.covers:
+                continue
+            if (
+                entry.tier == SourceTier.MANUFACTURER.value
+                and entry.manufacturer_id is not None
+                and entry.manufacturer_id == expected
+            ):
+                supplementary.append(Coverage(entry=entry, mpn=mpn, how="manufacturer"))
+        supplementary.sort(
+            key=lambda c: (
+                # A datasheet before a product page: the technical values live in the PDF.
+                0 if c.entry.doc_type == "spec_sheet" else 1,
+                c.entry.sha256,
+            )
+        )
+        return supplementary
 
     def _check(
         self, entry: DocumentEntry, mpn: str, *, variants: set[str] | None = None

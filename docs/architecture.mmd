@@ -1,0 +1,90 @@
+flowchart LR
+    user["Operator<br/>Web browser"]
+
+    subgraph host["Single-host Docker Compose — current runtime"]
+        direction LR
+        caddy["Caddy 2<br/>TLS · Basic Auth · compression<br/>ports 80 / 443"]
+        next["Next.js 16 console<br/>React UI + Server Components<br/>Server Actions + file proxies<br/>internal port 3000"]
+        api["FastAPI / Uvicorn<br/>single process · synchronous work<br/>internal port 8000"]
+        tmp["Ephemeral /tmp<br/>512 MiB upload and parsing space"]
+
+        caddy -->|"all application routes"| next
+        caddy -->|"/api/artifact/:sha256 only"| api
+        next -->|"private BFF calls over AXIOM_API_URL"| api
+        api --> tmp
+    end
+
+    user -->|"HTTPS"| caddy
+
+    fixture["Console fixture JSON<br/>dataset fallback only"]
+    next -.->|"API unavailable"| fixture
+
+    subgraph core["Shared Python application and domain packages"]
+        direction TB
+        enrich["Single-SKU orchestration<br/>source resolution + enrich_one"]
+        retrieve["Retrieval and ingest<br/>library · manufacturer site · search<br/>policy / robots / SSRF controls"]
+        stages["Pipeline stage orchestrator<br/>classify → extract → normalize → record<br/>validate → confidence → syndicate<br/>optional copy / reasoning → certificate"]
+        delivery["Governed delivery pipeline<br/>offline batch + 252-column export"]
+        review["Review and console projections<br/>decisions · priors · dashboard overlays"]
+        schema["Governed YAML schemas<br/>product classes + delivery format"]
+
+        enrich --> retrieve
+        enrich --> stages
+        stages --> schema
+        stages --> review
+        delivery --> schema
+    end
+
+    api -->|"POST /api/enrich<br/>single-flight; 429 when busy"| enrich
+    api -->|"POST /api/delivery/export<br/>offline, no model calls"| delivery
+    api -->|"dataset, policy, sessions,<br/>decisions, downloads"| review
+
+    subgraph external["External runtime dependencies"]
+        direction TB
+        bedrock["AWS Bedrock Runtime<br/>classification · extraction<br/>optional copy / reasoning"]
+        web["Manufacturer websites<br/>Serper / DuckDuckGo / Bedrock search<br/>optional Playwright rendering"]
+    end
+
+    stages -->|"model calls"| bedrock
+    retrieve -->|"policy-gated HTTPS"| web
+
+    data[("Host bind mount: data/<br/>current system of record<br/><br/>sessions · console bundles<br/>content-addressed source artifacts<br/>document library index<br/>calibration / priors<br/>cross-source / equivalence overlays<br/>CSV / XLSX / provenance exports")]
+    api <-->|"atomic local-file reads and writes"| data
+    retrieve <-->|"artifact and library reuse"| data
+    review <-->|"persisted projections"| data
+    delivery -->|"persist enrichment outputs"| data
+
+    subgraph tools["Optional and operational entry points"]
+        direction TB
+        cli["Pipeline / delivery / backtest CLIs"]
+        mcp["Optional MCP catalogue server<br/>stdio or HTTP · not in Compose"]
+    end
+
+    cli -.->|"same shared stages"| stages
+    cli -.-> data
+    mcp -.->|"reads catalogue bundles"| data
+
+    subgraph future["AWS CDK storage foundation — provisioned, not wired to runtime"]
+        direction TB
+        landing[("Versioned S3<br/>landing bucket")]
+        artifacts[("S3<br/>derived artifacts")]
+        jobs[("DynamoDB<br/>jobs + idempotency")]
+        queue["SQS ingest queue"]
+        dlq["SQS dead-letter queue"]
+        absent["No Lambda or worker consumer<br/>implemented in this repository"]
+
+        queue -->|"failed messages"| dlq
+        queue -.-> absent
+    end
+
+    classDef runtime fill:#e8f1ff,stroke:#2563eb,color:#172554,stroke-width:1.5px;
+    classDef store fill:#ecfdf5,stroke:#059669,color:#064e3b,stroke-width:1.5px;
+    classDef externalSvc fill:#fff7ed,stroke:#ea580c,color:#7c2d12,stroke-width:1.5px;
+    classDef futureSvc fill:#f5f3ff,stroke:#7c3aed,color:#4c1d95,stroke-width:1.5px,stroke-dasharray:5 5;
+    classDef note fill:#f8fafc,stroke:#64748b,color:#334155,stroke-dasharray:4 4;
+
+    class caddy,next,api,enrich,retrieve,stages,delivery,review,schema runtime;
+    class data,landing,artifacts,jobs store;
+    class bedrock,web externalSvc;
+    class queue,dlq futureSvc;
+    class fixture,tmp,cli,mcp,absent note;

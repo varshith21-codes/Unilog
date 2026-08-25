@@ -129,7 +129,14 @@ def source_summaries(
                     "tier": tier,
                     "doc_type": entry.doc_type,
                     "sha256": entry.sha256,
-                    "covers_this_sku": entry.covers.get(mpn, "linked"),
+                    # "manufacturer" marks a source read on the maker's authority: find_sku could
+                    # not locate the part in its text (a JS tab, a datasheet drawing), but it is the
+                    # manufacturer's own page for this part and was extracted anyway. Distinct from
+                    # "linked", which is fetched-but-not-read, so the panel can tell a source that
+                    # contributed from one that was merely referenced.
+                    "covers_this_sku": entry.covers.get(
+                        mpn, "manufacturer" if (not primary and citable) else "linked"
+                    ),
                     "citable_as_manufacturer": citable,
                     "license_note": entry.license_note,
                     "revision_label": entry.revision_label,

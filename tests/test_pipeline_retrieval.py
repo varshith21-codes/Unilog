@@ -102,6 +102,70 @@ def test_static_shell_escalates_to_rendered_pdf_and_preserves_coverage(tmp_path)
     assert events.index(f"render:{product_url}") < events.index(f"fetch:{pdf_url}")
 
 
+def test_manufacturer_page_without_body_match_is_returned_as_supplementary(tmp_path):
+    """A manufacturer product page whose SKU renders client-side is read, not discarded.
+
+    The page's static bytes never name the part — the "Technical details" tab is JavaScript — so
+    ``find_sku`` cannot cover it and it must not gate escalation. But it links to the datasheet that
+    does cover the part, which becomes the primary. The product page is then the manufacturer's own
+    statement about this part, and retrieval hands it back as supplementary so the pipeline reads it
+    alongside the datasheet rather than throwing it away. This is the exact source the original bug
+    fetched and ignored.
+    """
+    product_url = "https://acme.example/product/opaque-slug"
+    pdf_url = "https://acme.example/docs/acme-backing-pad.pdf"
+
+    def search(query: str, *, limit: int):
+        return [product_url] if query.startswith("site:") else []
+
+    def fetch(url: str, *, timeout: float, max_bytes: int) -> FetchedResource:
+        if url == product_url:
+            # A real product page: names the part nowhere in its static shell (it renders in a
+            # JS tab), but links to the datasheet PDF.
+            return FetchedResource(
+                data=(
+                    b"<html><body><h1>Backing Pad</h1>"
+                    b"<a href='/docs/acme-backing-pad.pdf'>Technical data sheet</a>"
+                    b"</body></html>"
+                ),
+                url=url,
+                content_type="text/html",
+            )
+        if url == pdf_url:
+            return FetchedResource(
+                data=(
+                    b"ACME TECHNICAL DATA SHEET\n"
+                    b"Part Number      Pad Size      Thread\n"
+                    b"9190153001       127 mm        M14\n"
+                ),
+                url=url,
+                content_type="text/plain",
+            )
+        raise UrlFetchError(f"unexpected URL: {url}")
+
+    attempt = retrieve_documents(
+        "9190153001",
+        store=LocalArtifactStore(tmp_path / "store"),
+        library_path=tmp_path / "index.json",
+        manufacturer="Acme",
+        vendor_code="ACME",
+        policy=policy(tmp_path),
+        search=search,
+        fetcher=fetch,
+        discover=False,
+    )
+
+    # The datasheet body-matched and is the primary; the shell page did not and is not.
+    assert attempt.primary is not None
+    assert attempt.primary.document.uri == pdf_url
+    primary_shas = {document.document.sha256 for document in attempt.documents}
+    supplementary_uris = {document.document.uri for document in attempt.supplementary}
+    # The manufacturer product page is read alongside, not discarded, and not double-counted.
+    assert product_url in supplementary_uris
+    supplementary_shas = {document.document.sha256 for document in attempt.supplementary}
+    assert primary_shas.isdisjoint(supplementary_shas)
+
+
 def test_sitemap_failure_cannot_consume_the_reserved_search_budget(tmp_path):
     pdf_url = "https://acme.example/datasheet/sku-9.pdf"
     fetched: list[str] = []

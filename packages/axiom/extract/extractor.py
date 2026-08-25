@@ -260,7 +260,16 @@ class Extractor:
         )
 
         def validate(text: str) -> ExtractionContract:
-            return parse_extraction_contract(text, expected_codes=prompt.attribute_codes)
+            # A manufacturer-verified source is read for its full attribute list, so a response
+            # that states only specifications (the "Technical details" a product page publishes as
+            # source-native rows rather than schema-typed values) is a real answer and must not be
+            # escalated away. An unverified source keeps the stricter rule: it has no authority to
+            # contribute source-native rows, so a typed attribute is the only thing worth keeping.
+            return parse_extraction_contract(
+                text,
+                expected_codes=prompt.attribute_codes,
+                allow_specification_only=manufacturer_source_verified,
+            )
 
         try:
             response, contract = invoke_with_cascade(

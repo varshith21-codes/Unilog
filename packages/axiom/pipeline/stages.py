@@ -52,6 +52,24 @@ from axiom.syndicate import export_all
 from axiom.validate import ReasoningChecker, ReasoningConfig, Validator, guardrail_runtime
 
 
+@dataclass(frozen=True)
+class SecondarySource:
+    """An additional retrieved document to read alongside the primary.
+
+    The pipeline was single-document by construction, and for a datasheet that is correct: one file
+    describes one part. But a retrieved *set* — the manufacturer's product page, its datasheet PDF,
+    and a third-party listing — describes the same part from several vantage points, and reading
+    only the first discards the others. Each of those is a ``SecondarySource``: its own parsed
+    bytes, and its own authority to make manufacturer-named claims (a manufacturer page can, a
+    retailer page cannot), so the suppression decision is made per document rather than inherited
+    from whichever one happened to sort first.
+    """
+
+    parsed: Any
+    document_id: str
+    citable_as_manufacturer: bool = False
+
+
 @dataclass
 class PipelineRun:
     """Everything one run produced.
@@ -169,6 +187,7 @@ def run_stages(
     seed_values: Callable[[ProductRecord], Sequence[AttributeValue]] | None = None,
     classify_text: str | None = None,
     manufacturer_source_verified: bool = False,
+    extra_documents: Sequence[SecondarySource] = (),
 ) -> PipelineRun:
     """Run the pipeline over one parsed document.
 
@@ -252,6 +271,31 @@ def run_stages(
                 "source-native manufacturer specifications were retained instead"
             )
 
+    # --- stage 4b: read the other retrieved documents --------------------------
+    # The primary document is the strongest single source, but a retrieval set describes one part
+    # from several vantage points: the manufacturer's product page, its datasheet PDF, a listing.
+    # Reading only the first discards the "Technical details" tab and the datasheet, which is
+    # precisely where a manufacturer states the values a thin listing omits. Each secondary is
+    # extracted on its own authority — a manufacturer page may state citable specifications where a
+    # retailer page may not — and its results are merged below rather than overwriting the primary.
+    secondary_results: list[tuple[SecondarySource, ExtractionResult]] = []
+    for secondary in extra_documents:
+        if secondary.parsed.document.sha256 == parsed.document.sha256:
+            # The same bytes, admitted twice by two candidates. Reading it again would double every
+            # value it holds and bill for a second identical model call.
+            continue
+        if class_code is None and secondary.citable_as_manufacturer is False:
+            continue
+        secondary_extractor = Extractor(registry, client, cascade, start_tier=tier)
+        secondary_result = secondary_extractor.extract(
+            secondary.parsed,
+            class_code=class_code,
+            target_sku=sku,
+            include_optional=include_optional,
+            manufacturer_source_verified=secondary.citable_as_manufacturer,
+        )
+        secondary_results.append((secondary, secondary_result))
+
     # --- stage 5: normalize ----------------------------------------------------
     normalized, norm_issues = normalize_all(result.values, registry)
 
@@ -270,7 +314,12 @@ def run_stages(
         supplier_id=supplier_id,
         class_code=class_code,
         schema_version=result.schema_version,
-        source_document_ids=[artifact.document.document_id],
+        source_document_ids=[
+            artifact.document.document_id,
+            *dict.fromkeys(
+                secondary.document_id for secondary, _ in secondary_results
+            ),
+        ],
     )
     record.classifications.extend(classification.classifications)
 
@@ -288,6 +337,31 @@ def run_stages(
         record.add_manufacturer_specification(specification)
     for gap in result.gaps:
         record.add_gap(gap)
+
+    # Merge the secondary documents. Values enter as *candidates*, not supersessions: when the
+    # manufacturer page and the retailer listing each state a value, resolving the disagreement by
+    # arrival order would let whichever sorted first win silently. Accumulating them keeps the
+    # conflict visible for validation layer L4 to adjudicate, and lets a secondary source fill an
+    # attribute the primary never stated. Specifications dedup by their content key, so a spec the
+    # manufacturer page and its datasheet both print is one observation. Gaps are not carried from
+    # secondaries: a value one source omits is a gap only if *no* source stated it, which the
+    # primary's gap list already records and a secondary value now fills.
+    for _secondary, secondary_result in secondary_results:
+        secondary_normalized, secondary_issues = normalize_all(
+            secondary_result.values, registry
+        )
+        norm_issues = [*norm_issues, *secondary_issues]
+        for value in secondary_normalized:
+            record.add_candidate(value)
+        for specification in secondary_result.manufacturer_specifications:
+            record.add_manufacturer_specification(specification)
+
+    if secondary_results:
+        notes.append(
+            f"{len(secondary_results)} additional retrieved document(s) were read alongside the "
+            f"primary source; their values are held as candidates and their manufacturer "
+            f"specifications merged, deduplicated by content."
+        )
 
     report = Validator(registry).validate(record)
 
@@ -316,6 +390,8 @@ def run_stages(
     usage = UsageLedger()
     usage.merge(classification.usage)
     usage.merge(result.usage)
+    for _, secondary_result in secondary_results:
+        usage.merge(secondary_result.usage)
 
     prices = PriceTable.load()
     tier_prices = prices.tier_prices(cascade) if prices else None
@@ -426,4 +502,4 @@ def run_stages(
     )
 
 
-__all__ = ["PipelineRun", "load_calibration", "run_stages"]
+__all__ = ["PipelineRun", "SecondarySource", "load_calibration", "run_stages"]

@@ -105,7 +105,10 @@ def classify_abstention(reason: str | None) -> str:
 
 
 def parse_extraction_contract(
-    text: str, *, expected_codes: tuple[str, ...] | None = None
+    text: str,
+    *,
+    expected_codes: tuple[str, ...] | None = None,
+    allow_specification_only: bool = False,
 ) -> ExtractionContract:
     """Parse the complete two-channel extraction response.
 
@@ -113,6 +116,14 @@ def parse_extraction_contract(
     least one usable typed item is required so a specification-only answer cannot suppress cascade
     escalation. An explicitly empty ``expected_codes`` tuple denotes a specification-only pass,
     where even an empty two-channel object is a valid answer.
+
+    ``allow_specification_only`` relaxes the typed-attribute requirement for a classified pass when
+    the answer nonetheless carries usable manufacturer specifications. This is for a source read
+    *for* its full attribute list — a manufacturer's own product page, whose "Technical details"
+    are specifications rather than schema-typed values — where a spec-bearing response is a real
+    answer, not the empty one the escalation guard is meant to reject. The guard still fires for a
+    response that has neither a typed attribute nor a usable specification, so a genuinely empty
+    reply still escalates.
     """
     payload = _extract_json(text)
 
@@ -140,7 +151,14 @@ def parse_extraction_contract(
 
     attributes = _parse_attributes(attributes_raw, expected_codes=expected_codes)
     specifications = _parse_specifications(specifications_raw)
-    if expected_codes and not any(item.is_well_formed for item in attributes):
+    # A classified pass with no typed attribute normally escalates: a weak model that found nothing
+    # typed should hand off to a stronger one rather than have its silence accepted. But when the
+    # caller is reading a source for its specification list and the response did carry usable
+    # specifications, that silence is the answer, not a failure to try.
+    lacks_typed_attribute = expected_codes and not any(
+        item.is_well_formed for item in attributes
+    )
+    if lacks_typed_attribute and not (allow_specification_only and specifications):
         raise ContractError("response contained no usable typed attribute items")
     if expected_codes == () and specifications_raw and not specifications:
         raise ContractError(

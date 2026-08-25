@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-08-24T11:23:52.343120+00:00",
+  "generated_at": "2026-08-25T04:44:51.839025+00:00",
   "documents": [
     {
       "sha256": "01d4f6dc964504f330917a4a49354ee3b8a762ba3c3263192ad28c0a829ee248",
@@ -1044,6 +1044,26 @@
         "d10cnk",
         "e28cnkha"
       ],
+      "withdrawn": {}
+    },
+    {
+      "sha256": "03e331a5239ae7a7b2143b4e9fcb490aaaabc600ad26e01438b2050da92e6ce7",
+      "storage_uri": "local://03/e3/03e331a5239ae7a7b2143b4e9fcb490aaaabc600ad26e01438b2050da92e6ce7.html",
+      "document_id": "8999000111@03e331a5",
+      "source_uri": "https://galdesandmamo.com/products/8999000111",
+      "host": "galdesandmamo.com",
+      "tier": "unknown",
+      "manufacturer_id": null,
+      "doc_type": "web_page",
+      "filename": "8999000111.html",
+      "size_bytes": 260029,
+      "fetched_at": "2026-08-25T04:44:51.328514+00:00",
+      "revision_label": null,
+      "license_note": "retrieved from galdesandmamo.com (unknown tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {
+        "8999000111": "text"
+      },
+      "absent": [],
       "withdrawn": {}
     },
     {
@@ -3398,6 +3418,26 @@
       "withdrawn": {}
     },
     {
+      "sha256": "1f49efed2bbccfd13a02e98841611428a4bac5be004f7bcf1342e23e761a0b8b",
+      "storage_uri": "local://1f/49/1f49efed2bbccfd13a02e98841611428a4bac5be004f7bcf1342e23e761a0b8b.pdf",
+      "document_id": "Exploded_view_Mirka_DE_1025_L@1f49efed",
+      "source_uri": "https://cdn.brandfolder.io/FSMPOV8D/at/qhbs7rjjxpmgfgnrqgb8x7t/Exploded_view_Mirka_DE_1025_L.pdf",
+      "host": "cdn.brandfolder.io",
+      "tier": "unknown",
+      "manufacturer_id": null,
+      "doc_type": "spec_sheet",
+      "filename": "Exploded_view_Mirka_DE_1025_L.pdf",
+      "size_bytes": 676803,
+      "fetched_at": "2026-08-25T04:44:00.046832+00:00",
+      "revision_label": "Tue, 26 May 2026 04:54:51 GMT",
+      "license_note": "retrieved from cdn.brandfolder.io (unknown tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {},
+      "absent": [
+        "8999000111"
+      ],
+      "withdrawn": {}
+    },
+    {
       "sha256": "22f696264aaa06c5d563add45d9afc9ef1a2885139eb629ad3b200747d8eb361",
       "storage_uri": "local://22/f6/22f696264aaa06c5d563add45d9afc9ef1a2885139eb629ad3b200747d8eb361.html",
       "document_id": "everly-pendant-42200bk@22f69626",
@@ -5634,6 +5674,26 @@
         "XVP01Z",
         "d10cnk",
         "e28cnkha"
+      ],
+      "withdrawn": {}
+    },
+    {
+      "sha256": "2ba916074b7f8637fb0b112302f93ece30ab2a8b9bb6e454670be1b469318fb5",
+      "storage_uri": "local://2b/a9/2ba916074b7f8637fb0b112302f93ece30ab2a8b9bb6e454670be1b469318fb5.html",
+      "document_id": "8999000111@2ba91607",
+      "source_uri": "https://www.mirka.com/en/p/8999000111/",
+      "host": "www.mirka.com",
+      "tier": "manufacturer",
+      "manufacturer_id": "mirka",
+      "doc_type": "web_page",
+      "filename": "8999000111.html",
+      "size_bytes": 522327,
+      "fetched_at": "2026-08-25T04:43:58.959828+00:00",
+      "revision_label": null,
+      "license_note": "retrieved from www.mirka.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {},
+      "absent": [
+        "8999000111"
       ],
       "withdrawn": {}
     },
@@ -15882,6 +15942,26 @@
       "withdrawn": {}
     },
     {
+      "sha256": "574b3ad1035e8b457f9f037a23bfb75edd45517c8ca08fccc8397c5548d66cf8",
+      "storage_uri": "local://57/4b/574b3ad1035e8b457f9f037a23bfb75edd45517c8ca08fccc8397c5548d66cf8.html",
+      "document_id": "8999000111@574b3ad1",
+      "source_uri": "https://www.mirka.com/en-in/p/8999000111/",
+      "host": "www.mirka.com",
+      "tier": "manufacturer",
+      "manufacturer_id": "mirka",
+      "doc_type": "web_page",
+      "filename": "8999000111.html",
+      "size_bytes": 514062,
+      "fetched_at": "2026-08-25T04:44:49.581395+00:00",
+      "revision_label": null,
+      "license_note": "retrieved from www.mirka.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {},
+      "absent": [
+        "8999000111"
+      ],
+      "withdrawn": {}
+    },
+    {
       "sha256": "59198eefa4e756f2fcc899e90aaa545f4e79201f412da7f1e35a6fe98466f297",
       "storage_uri": "local://59/19/59198eefa4e756f2fcc899e90aaa545f4e79201f412da7f1e35a6fe98466f297.html",
       "document_id": "kavi-vanity-light-55211ni@59198eef",
@@ -20090,7 +20170,8 @@
         "49-94-1920": "text"
       },
       "absent": [
-        "48-22-4014"
+        "48-22-4014",
+        "8999000111"
       ],
       "withdrawn": {}
     },
@@ -20111,7 +20192,9 @@
       "covers": {
         "48-22-4014": "text"
       },
-      "absent": [],
+      "absent": [
+        "8999000111"
+      ],
       "withdrawn": {}
     },
     {
@@ -23509,7 +23592,9 @@
       "covers": {
         "48-22-4014": "table"
       },
-      "absent": [],
+      "absent": [
+        "8999000111"
+      ],
       "withdrawn": {}
     },
     {
@@ -26452,6 +26537,26 @@
         "XVP01Z",
         "d10cnk",
         "e28cnkha"
+      ],
+      "withdrawn": {}
+    },
+    {
+      "sha256": "8acaca26d436be9bbe90296dbef1813668ffc9f25fe4026ba07602350ffbff13",
+      "storage_uri": "local://8a/ca/8acaca26d436be9bbe90296dbef1813668ffc9f25fe4026ba07602350ffbff13.pdf",
+      "document_id": "Mirka_Dust_Extractor_1025L@8acaca26",
+      "source_uri": "https://cdn.brandfolder.io/FSMPOV8D/at/krffqfthvr23b3rgpzpztxgw/Mirka_Dust_Extractor_1025L.pdf",
+      "host": "cdn.brandfolder.io",
+      "tier": "unknown",
+      "manufacturer_id": null,
+      "doc_type": "spec_sheet",
+      "filename": "Mirka_Dust_Extractor_1025L.pdf",
+      "size_bytes": 3506468,
+      "fetched_at": "2026-08-25T04:44:02.848116+00:00",
+      "revision_label": "Fri, 07 Aug 2026 09:05:06 GMT",
+      "license_note": "retrieved from cdn.brandfolder.io (unknown tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {},
+      "absent": [
+        "8999000111"
       ],
       "withdrawn": {}
     },
@@ -36693,7 +36798,8 @@
       },
       "absent": [
         "48-22-4014",
-        "49-94-1920"
+        "49-94-1920",
+        "8999000111"
       ],
       "withdrawn": {}
     },

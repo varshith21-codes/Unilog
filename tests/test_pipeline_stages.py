@@ -162,6 +162,196 @@ def test_run_stages_produces_a_signed_certificate(
     assert "body_material" in {v.attribute_code for v in run.record.current_values()}
 
 
+def test_run_stages_reads_a_secondary_manufacturer_document_and_merges_its_specifications(
+    parsed_datasheet, source_document, registry, cascade, calibration, tmp_path
+):
+    """A manufacturer page read alongside the primary contributes citable specifications.
+
+    The motivating failure: retrieval fetched the manufacturer's product page and datasheet, but
+    only the thin third-party listing that sorted first was ever extracted, so the manufacturer's
+    "Technical details" never entered the record. Here the primary is the datasheet and a second
+    manufacturer document states a spec the primary omits; the merge must retain it, marked citable
+    because the secondary is manufacturer-owned, not suppressed as the primary's authority would
+    have it.
+    """
+    from axiom.docintel import parse_text
+    from axiom.ingest import ingest_bytes
+    from axiom.pipeline.stages import SecondarySource
+
+    store = LocalArtifactStore(tmp_path / "artifacts")
+    artifact = ingest_bytes(
+        parsed_datasheet.full_text.encode("utf-8"), store, filename="ba100.txt"
+    )
+
+    secondary_bytes = (
+        b"BA-100-075\nSeat Material .......... RPTFE\nNoise Level ................ 64 dB\n"
+    )
+    secondary_artifact = ingest_bytes(secondary_bytes, store, filename="mfr-page.txt")
+    secondary_parsed = parse_text(
+        secondary_bytes.decode("utf-8"), secondary_artifact.document
+    )
+
+    # Three payloads in consumption order: classify, primary extraction, secondary extraction.
+    client = stub(
+        json.dumps({"code": VALVE_CLASS, "confidence": 0.92, "rationale": "two-piece ball valve"}),
+        json.dumps(
+            [
+                contract_item(
+                    "body_material", value_raw="Bronze C84400", evidence_quote="Bronze C84400"
+                ),
+            ]
+        ),
+        json.dumps(
+            {
+                "attributes": [
+                    contract_item(
+                        "seat_material",
+                        value_raw="RPTFE",
+                        evidence_quote="Seat Material .......... RPTFE",
+                    ),
+                ],
+                "manufacturer_specifications": [
+                    {
+                        "label_raw": "Noise Level",
+                        "value_raw": "64 dB",
+                        "evidence_quote": "Noise Level ................ 64 dB",
+                        "evidence_page": 1,
+                        "certainty": "high",
+                    }
+                ],
+            }
+        ),
+    )
+
+    run = run_stages(
+        parsed_datasheet,
+        artifact,
+        registry=registry,
+        client=client,
+        cascade=cascade,
+        sku=SKU,
+        class_code_fallback=VALVE_CLASS,
+        calibration_dir=calibration,
+        # The primary is untrusted; the secondary is the manufacturer's own page.
+        manufacturer_source_verified=False,
+        extra_documents=[
+            SecondarySource(
+                parsed=secondary_parsed,
+                document_id=secondary_parsed.document.document_id,
+                citable_as_manufacturer=True,
+            )
+        ],
+    )
+
+    # The secondary's typed value merged into the record alongside the primary's.
+    codes = {v.attribute_code for v in run.record.current_values()}
+    assert {"body_material", "seat_material"} <= codes
+
+    specs = run.record.manufacturer_specifications
+    assert [s.label_raw for s in specs] == ["Noise Level"]
+    # Citable because it came from the manufacturer document, not suppressed by the primary's tier.
+    assert specs[0].citable_as_manufacturer is True
+    # The secondary document is recorded as a source that was read, not merely fetched.
+    assert secondary_parsed.document.document_id in run.record.source_document_ids
+    assert any("additional retrieved document" in note for note in run.notes)
+    # Two extraction calls plus classification: the secondary was genuinely read.
+    assert run.usage.calls >= 3
+
+
+def test_manufacturer_page_with_only_specifications_still_contributes_every_row(
+    parsed_datasheet, source_document, registry, cascade, calibration, tmp_path
+):
+    """A manufacturer page that lists only specifications contributes all of them.
+
+    This is the "always contribute" requirement: a product page whose "Technical details" are
+    source-native rows and carry no schema-typed attribute must not be discarded. Before, a
+    classified pass rejected a specification-only answer and escalated it away; now a
+    manufacturer-verified source keeps every well-formed row it stated, in a single call.
+    """
+    from axiom.docintel import parse_text
+    from axiom.ingest import ingest_bytes
+    from axiom.pipeline.stages import SecondarySource
+
+    store = LocalArtifactStore(tmp_path / "artifacts")
+    artifact = ingest_bytes(
+        parsed_datasheet.full_text.encode("utf-8"), store, filename="ba100.txt"
+    )
+
+    secondary_bytes = (
+        b"BA-100-075\n"
+        b"Cable Length ............ 7.5 m\n"
+        b"Dust Class .............. L\n"
+        b"Power Input ............. 1000 W\n"
+    )
+    secondary_artifact = ingest_bytes(secondary_bytes, store, filename="mfr-page.txt")
+    secondary_parsed = parse_text(secondary_bytes.decode("utf-8"), secondary_artifact.document)
+
+    client = stub(
+        json.dumps({"code": VALVE_CLASS, "confidence": 0.92, "rationale": "two-piece ball valve"}),
+        json.dumps(
+            [
+                contract_item(
+                    "body_material", value_raw="Bronze C84400", evidence_quote="Bronze C84400"
+                ),
+            ]
+        ),
+        # The manufacturer page: no typed attribute, three source-native specifications.
+        json.dumps(
+            {
+                "attributes": [],
+                "manufacturer_specifications": [
+                    {
+                        "label_raw": "Cable Length",
+                        "value_raw": "7.5 m",
+                        "evidence_quote": "Cable Length ............ 7.5 m",
+                        "evidence_page": 1,
+                        "certainty": "high",
+                    },
+                    {
+                        "label_raw": "Dust Class",
+                        "value_raw": "L",
+                        "evidence_quote": "Dust Class .............. L",
+                        "evidence_page": 1,
+                        "certainty": "high",
+                    },
+                    {
+                        "label_raw": "Power Input",
+                        "value_raw": "1000 W",
+                        "evidence_quote": "Power Input ............. 1000 W",
+                        "evidence_page": 1,
+                        "certainty": "high",
+                    },
+                ],
+            }
+        ),
+    )
+
+    run = run_stages(
+        parsed_datasheet,
+        artifact,
+        registry=registry,
+        client=client,
+        cascade=cascade,
+        sku=SKU,
+        class_code_fallback=VALVE_CLASS,
+        calibration_dir=calibration,
+        manufacturer_source_verified=False,
+        extra_documents=[
+            SecondarySource(
+                parsed=secondary_parsed,
+                document_id=secondary_parsed.document.document_id,
+                citable_as_manufacturer=True,
+            )
+        ],
+    )
+
+    labels = sorted(s.label_raw for s in run.record.manufacturer_specifications)
+    assert labels == ["Cable Length", "Dust Class", "Power Input"]
+    assert all(s.citable_as_manufacturer for s in run.record.manufacturer_specifications)
+    # One call each for classify, primary, secondary — the spec-only answer did not escalate.
+    assert run.usage.calls == 3
+
+
 def test_every_value_queues_when_no_policy_is_validated(
     parsed_datasheet, registry, cascade, calibration, tmp_path
 ):
