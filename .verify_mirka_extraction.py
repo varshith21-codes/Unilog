@@ -2,9 +2,10 @@ import logging
 import tempfile
 from pathlib import Path
 
-from apps.api import main
 from axiom.ingest import LocalArtifactStore
 from axiom.pipeline import EnrichmentRequest, enrich_one
+
+from apps.api import main
 
 logging.getLogger("pdfminer").setLevel(logging.ERROR)
 logging.getLogger("pdfplumber").setLevel(logging.ERROR)

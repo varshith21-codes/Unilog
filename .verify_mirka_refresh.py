@@ -4,12 +4,12 @@ import shutil
 import tempfile
 from pathlib import Path
 
-logging.getLogger("pdfminer").setLevel(logging.ERROR)
-logging.getLogger("pdfplumber").setLevel(logging.ERROR)
-
 from axiom.ingest import LocalArtifactStore
 from axiom.pipeline.retrieval import retrieve_documents
 from axiom.retrieve import SerperSearch
+
+logging.getLogger("pdfminer").setLevel(logging.ERROR)
+logging.getLogger("pdfplumber").setLevel(logging.ERROR)
 
 ROOT = Path(__file__).resolve().parent
 line = next(
@@ -47,6 +47,9 @@ print(f"primary_uri={attempt.primary.document.uri if attempt.primary else ''}")
 print(
     "tds_discovered="
     + str(
-        any("TDS_Abranet_Max_Flap_Disc.pdf" in document.document.uri for document in attempt.documents)
+        any(
+            "TDS_Abranet_Max_Flap_Disc.pdf" in document.document.uri
+            for document in attempt.documents
+        )
     ).lower()
 )
