@@ -408,13 +408,23 @@ def test_the_credentials_error_names_every_profile_and_whether_it_works(client, 
 
 def test_a_missing_credential_says_so_instead_of_raising(client, monkeypatch):
     """``ModelError`` reaching a browser as a traceback reads as a console bug. It is an operator
-    problem, and the message names the fix."""
+    problem, and the message names the fix.
+
+    The profile inventory is pinned rather than inherited, because ``_credentials_detail`` chooses
+    one of three hints from what actually resolves on the host. With a working profile present it
+    names ``AXIOM_AWS_PROFILE``; on a machine with no profiles configured at all it points at
+    ``aws configure`` instead and never mentions the variable. Reading the ambient inventory made
+    this assertion pass on any developer machine with credentials and fail on a clean CI runner,
+    for a reason that had nothing to do with the endpoint under test.
+    """
     from apps.api import main
 
     def no_credentials(profile=None):
         raise RuntimeError("Unable to locate credentials")
 
     monkeypatch.setattr(main, "model_client", no_credentials)
+    monkeypatch.setattr(main, "credential_profiles", lambda: {"axiom": True, "default": False})
+    monkeypatch.setattr(main, "resolve_profile", lambda: "axiom")
 
     response = submit(client)
 
