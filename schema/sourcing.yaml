@@ -525,6 +525,32 @@ manufacturers:
     vendor_codes: [MIRUS]
     vendors: ["mirka abrasives inc", mirka]
     brands: [mirka]
+    # The second verified pattern in this file, and verified the same way as Satco's: checked
+    # against real part numbers, not inferred from the shape of one URL.
+    #
+    # Confirmed 200 with the part number present *and* a specification table on the page:
+    # 8896700140, 8999000111, MIW9502022BA, MRP6002100.
+    #
+    # Confirmed 404: 5B-332-080, 5B-332-120, 9A-129-120, 9A-219-120RP, 9A-219-180, 9A-570-240,
+    # 9A-570-320, 24-35M-320, MID6630201US. Mirka addresses its machines and its consumables by
+    # different codes, and the item master's abrasive rows carry the distributor's code rather than
+    # one mirka.com routes. So this pattern covers the machine rows and not the abrasive rows, which
+    # is why the coverage is written down here instead of being discovered per run.
+    #
+    # Those 404s are harmless rather than tolerated. A pattern URL is arm 2 of
+    # `axiom.retrieve.resolver`: it becomes a ranked *candidate*, and a candidate that does not
+    # resolve to a page covering the part is rejected and the arms behind it — site search, then open
+    # web — still run. The cost of a miss is one request; the benefit of a hit is that the right page
+    # is fetched deterministically.
+    #
+    # That determinism is the whole reason this entry exists. Without it, reaching a Mirka product
+    # page depended on whatever the search provider happened to return, which is genuinely
+    # inconsistent: MIW9502022BA found `mirka.com/en/p/...` and 8999000111 did not, on the same
+    # configuration minutes apart. The 8999000111 run therefore read a 284-page catalogue and a
+    # French library PDF instead of the English product page, and shipped 10 specifications with
+    # French labels while the page states 12 in English. Same part, same code path, different answer
+    # — which is the failure mode a declared pattern removes.
+    patterns: ["https://www.mirka.com/en/p/{mpn}/"]
 
   - id: three_m
     name: 3M

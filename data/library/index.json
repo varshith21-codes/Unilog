@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-09-10T09:04:43.891585+00:00",
+  "generated_at": "2026-09-10T18:15:33.854728+00:00",
   "documents": [
     {
       "sha256": "01d4f6dc964504f330917a4a49354ee3b8a762ba3c3263192ad28c0a829ee248",
@@ -1064,7 +1064,28 @@
         "8999000111": "text"
       },
       "absent": [
+        "MIW9502022BA",
         "MRP6002100"
+      ],
+      "withdrawn": {}
+    },
+    {
+      "sha256": "06925a179e89bb795ca014257653e7088bdb9ee6cde93a7269a514b72155955a",
+      "storage_uri": "local://06/92/06925a179e89bb795ca014257653e7088bdb9ee6cde93a7269a514b72155955a.html",
+      "document_id": "Mirka-Dust-Extractor-1125-L@06925a17",
+      "source_uri": "https://www.mirka.com/en/p/Mirka-Dust-Extractor-1125-L/",
+      "host": "www.mirka.com",
+      "tier": "manufacturer",
+      "manufacturer_id": "mirka",
+      "doc_type": "web_page",
+      "filename": "Mirka-Dust-Extractor-1125-L.html",
+      "size_bytes": 560384,
+      "fetched_at": "2026-09-10T14:55:41.297144+00:00",
+      "revision_label": null,
+      "license_note": "retrieved from www.mirka.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {},
+      "absent": [
+        "8999000111"
       ],
       "withdrawn": {}
     },
@@ -2255,6 +2276,26 @@
       "withdrawn": {}
     },
     {
+      "sha256": "08d6bf36163d78c7adebb39d59b199e11eb5d6a0559bb361d37a78dbb5868a7e",
+      "storage_uri": "local://08/d6/08d6bf36163d78c7adebb39d59b199e11eb5d6a0559bb361d37a78dbb5868a7e.pdf",
+      "document_id": "Exploded_view_Mirka_DE_1230_L_PC@08d6bf36",
+      "source_uri": "https://cdn.brandfolder.io/FSMPOV8D/at/qjtmnkgn7sxsc8q43kwgwpt/Exploded_view_Mirka_DE_1230_L_PC.pdf",
+      "host": "cdn.brandfolder.io",
+      "tier": "unknown",
+      "manufacturer_id": null,
+      "doc_type": "spec_sheet",
+      "filename": "Exploded_view_Mirka_DE_1230_L_PC.pdf",
+      "size_bytes": 1336973,
+      "fetched_at": "2026-09-10T15:09:08.859195+00:00",
+      "revision_label": "Tue, 26 May 2026 05:51:32 GMT",
+      "license_note": "retrieved from cdn.brandfolder.io (unknown tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {},
+      "absent": [
+        "8999000111"
+      ],
+      "withdrawn": {}
+    },
+    {
       "sha256": "1862f51617271b71036a546fb58d4912c66e51ab203043f239f72d62a5094561",
       "storage_uri": "local://18/62/1862f51617271b71036a546fb58d4912c66e51ab203043f239f72d62a5094561.html",
       "document_id": "crosby-wall-sconce-45495bkclr@1862f516",
@@ -3436,7 +3477,28 @@
       "covers": {},
       "absent": [
         "8999000111",
+        "MIW9502022BA",
         "MRP6002100"
+      ],
+      "withdrawn": {}
+    },
+    {
+      "sha256": "22506d2e332ff1c3045c6b91b55dbf02270389fa406aebdc1a4888db3e8d88e1",
+      "storage_uri": "local://22/50/22506d2e332ff1c3045c6b91b55dbf02270389fa406aebdc1a4888db3e8d88e1.pdf",
+      "document_id": "DE_1125_L_230V_01-2023_web@22506d2e",
+      "source_uri": "https://cdn.brandfolder.io/FSMPOV8D/at/63ggvxw5q59shf3fb89qpskk/DE_1125_L_230V_01-2023_web.pdf",
+      "host": "cdn.brandfolder.io",
+      "tier": "unknown",
+      "manufacturer_id": null,
+      "doc_type": "spec_sheet",
+      "filename": "DE_1125_L_230V_01-2023_web.pdf",
+      "size_bytes": 3658895,
+      "fetched_at": "2026-09-10T14:55:46.990045+00:00",
+      "revision_label": "Fri, 07 Aug 2026 09:37:23 GMT",
+      "license_note": "retrieved from cdn.brandfolder.io (unknown tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {},
+      "absent": [
+        "8999000111"
       ],
       "withdrawn": {}
     },
@@ -5681,6 +5743,27 @@
       "withdrawn": {}
     },
     {
+      "sha256": "2ae5a103a949765da3f7ffe0e05f49fc17c7e929492ec27509838d1bd3a18a85",
+      "storage_uri": "local://2a/e5/2ae5a103a949765da3f7ffe0e05f49fc17c7e929492ec27509838d1bd3a18a85.pdf",
+      "document_id": "Mirka_LEROS_family_leaflet_A4_EN_03-2021_lowres@2ae5a103",
+      "source_uri": "https://cdn.brandfolder.io/3TVWCF1X/at/cjqs8prr28nx8jjm8k9hhs6h/Mirka_LEROS_family_leaflet_A4_EN_03-2021_lowres.pdf",
+      "host": "cdn.brandfolder.io",
+      "tier": "unknown",
+      "manufacturer_id": null,
+      "doc_type": "spec_sheet",
+      "filename": "Mirka_LEROS_family_leaflet_A4_EN_03-2021_lowres.pdf",
+      "size_bytes": 1494535,
+      "fetched_at": "2026-09-10T14:30:27.746796+00:00",
+      "revision_label": "Thu, 07 Dec 2023 14:58:18 GMT",
+      "license_note": "retrieved from cdn.brandfolder.io (unknown tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {},
+      "absent": [
+        "8999000111",
+        "MIW9502022BA"
+      ],
+      "withdrawn": {}
+    },
+    {
       "sha256": "2ba916074b7f8637fb0b112302f93ece30ab2a8b9bb6e454670be1b469318fb5",
       "storage_uri": "local://2b/a9/2ba916074b7f8637fb0b112302f93ece30ab2a8b9bb6e454670be1b469318fb5.html",
       "document_id": "8999000111@2ba91607",
@@ -5697,6 +5780,7 @@
       "covers": {},
       "absent": [
         "8999000111",
+        "MIW9502022BA",
         "MRP6002100"
       ],
       "withdrawn": {}
@@ -8014,6 +8098,8 @@
       "license_note": "retrieved from www.ach-shop.com (unknown tier) for product data enrichment; review the site's terms before republishing any asset from it",
       "covers": {},
       "absent": [
+        "8999000111",
+        "MIW9502022BA",
         "MRP6002100"
       ],
       "withdrawn": {}
@@ -8643,6 +8729,8 @@
       "license_note": "retrieved from www.mirka.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
       "covers": {},
       "absent": [
+        "8999000111",
+        "MIW9502022BA",
         "MRP6002100"
       ],
       "withdrawn": {}
@@ -12573,6 +12661,8 @@
       "license_note": "retrieved from cdn.brandfolder.io (unknown tier) for product data enrichment; review the site's terms before republishing any asset from it",
       "covers": {},
       "absent": [
+        "8999000111",
+        "MIW9502022BA",
         "MRP6002100"
       ],
       "withdrawn": {}
@@ -16006,6 +16096,26 @@
       "withdrawn": {}
     },
     {
+      "sha256": "55b97cb8857aed8dc071e469d8ff1a01e387d7279a6aa566bb53b45a5cb97d0f",
+      "storage_uri": "local://55/b9/55b97cb8857aed8dc071e469d8ff1a01e387d7279a6aa566bb53b45a5cb97d0f.html",
+      "document_id": "technical-documents@55b97cb8",
+      "source_uri": "https://www.mirka.com/en/support/downloads/technical-documents/",
+      "host": "www.mirka.com",
+      "tier": "manufacturer",
+      "manufacturer_id": "mirka",
+      "doc_type": "web_page",
+      "filename": "technical-documents.html",
+      "size_bytes": 437388,
+      "fetched_at": "2026-09-10T14:56:27.514525+00:00",
+      "revision_label": null,
+      "license_note": "retrieved from www.mirka.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {},
+      "absent": [
+        "8999000111"
+      ],
+      "withdrawn": {}
+    },
+    {
       "sha256": "574b3ad1035e8b457f9f037a23bfb75edd45517c8ca08fccc8397c5548d66cf8",
       "storage_uri": "local://57/4b/574b3ad1035e8b457f9f037a23bfb75edd45517c8ca08fccc8397c5548d66cf8.html",
       "document_id": "8999000111@574b3ad1",
@@ -16022,6 +16132,7 @@
       "covers": {},
       "absent": [
         "8999000111",
+        "MIW9502022BA",
         "MRP6002100"
       ],
       "withdrawn": {}
@@ -20237,6 +20348,7 @@
       "absent": [
         "48-22-4014",
         "8999000111",
+        "MIW9502022BA",
         "MRP6002100"
       ],
       "withdrawn": {}
@@ -20257,6 +20369,8 @@
       "license_note": "retrieved from cdn.brandfolder.io (unknown tier) for product data enrichment; review the site's terms before republishing any asset from it",
       "covers": {},
       "absent": [
+        "8999000111",
+        "MIW9502022BA",
         "MRP6002100"
       ],
       "withdrawn": {}
@@ -20280,6 +20394,7 @@
       },
       "absent": [
         "8999000111",
+        "MIW9502022BA",
         "MRP6002100"
       ],
       "withdrawn": {}
@@ -20903,6 +21018,26 @@
         "XVP01Z",
         "d10cnk",
         "e28cnkha"
+      ],
+      "withdrawn": {}
+    },
+    {
+      "sha256": "6ce94d560945b90b54b2e86d499ffb36a082741c0d42a1b0f1cb6f1fbee94bbb",
+      "storage_uri": "local://6c/e9/6ce94d560945b90b54b2e86d499ffb36a082741c0d42a1b0f1cb6f1fbee94bbb.pdf",
+      "document_id": "Mirka_Dust_Extractor_1230L_230V_manual_A5_09_2018_lres@6ce94d56",
+      "source_uri": "https://cdn.brandfolder.io/FSMPOV8D/at/vb7htvb7cqvts7xwtpgpcqbm/Mirka_Dust_Extractor_1230L_230V_manual_A5_09_2018_lres.pdf",
+      "host": "cdn.brandfolder.io",
+      "tier": "unknown",
+      "manufacturer_id": null,
+      "doc_type": "spec_sheet",
+      "filename": "Mirka_Dust_Extractor_1230L_230V_manual_A5_09_2018_lres.pdf",
+      "size_bytes": 3919083,
+      "fetched_at": "2026-09-10T15:09:14.703353+00:00",
+      "revision_label": "Fri, 07 Aug 2026 09:06:12 GMT",
+      "license_note": "retrieved from cdn.brandfolder.io (unknown tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {},
+      "absent": [
+        "8999000111"
       ],
       "withdrawn": {}
     },
@@ -22559,6 +22694,26 @@
       "withdrawn": {}
     },
     {
+      "sha256": "722a4a3ff2bdcca38eaddcfe5a2cd6b776cc3dc80e8be069355c86f1a8967599",
+      "storage_uri": "local://72/2a/722a4a3ff2bdcca38eaddcfe5a2cd6b776cc3dc80e8be069355c86f1a8967599.html",
+      "document_id": "Mirka-Dust-Extractor-1025-L@722a4a3f",
+      "source_uri": "https://www.mirka.com/en/p/Mirka-Dust-Extractor-1025-L/",
+      "host": "www.mirka.com",
+      "tier": "manufacturer",
+      "manufacturer_id": "mirka",
+      "doc_type": "web_page",
+      "filename": "Mirka-Dust-Extractor-1025-L.html",
+      "size_bytes": 529946,
+      "fetched_at": "2026-09-10T18:15:33.390988+00:00",
+      "revision_label": null,
+      "license_note": "retrieved from www.mirka.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {
+        "8999000111": "table"
+      },
+      "absent": [],
+      "withdrawn": {}
+    },
+    {
       "sha256": "730750aa3399c9060058dad808145d6c898fd4fa17e1e1e25f385cb027b5f976",
       "storage_uri": "local://73/07/730750aa3399c9060058dad808145d6c898fd4fa17e1e1e25f385cb027b5f976.html",
       "document_id": "product@730750aa",
@@ -23681,6 +23836,7 @@
       },
       "absent": [
         "8999000111",
+        "MIW9502022BA",
         "MRP6002100"
       ],
       "withdrawn": {}
@@ -24914,6 +25070,26 @@
       "withdrawn": {}
     },
     {
+      "sha256": "7c3fad95e0098442e0e64c28b9dc67c3c117828e10da33a2d0b272a658f1666e",
+      "storage_uri": "local://7c/3f/7c3fad95e0098442e0e64c28b9dc67c3c117828e10da33a2d0b272a658f1666e.pdf",
+      "document_id": "SafetyThroughDustControl_leaflet_210x297mm_EN@7c3fad95",
+      "source_uri": "https://cdn.brandfolder.io/3TVWCF1X/at/c335cxfgqk8qt6wpb74zj3/SafetyThroughDustControl_leaflet_210x297mm_EN.pdf",
+      "host": "cdn.brandfolder.io",
+      "tier": "unknown",
+      "manufacturer_id": null,
+      "doc_type": "spec_sheet",
+      "filename": "SafetyThroughDustControl_leaflet_210x297mm_EN.pdf",
+      "size_bytes": 159351,
+      "fetched_at": "2026-09-10T14:55:43.025742+00:00",
+      "revision_label": "Thu, 15 Jan 2026 13:43:10 GMT",
+      "license_note": "retrieved from cdn.brandfolder.io (unknown tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {},
+      "absent": [
+        "8999000111"
+      ],
+      "withdrawn": {}
+    },
+    {
       "sha256": "833b87a85d22e17ee1f2a651a3b9ed56f557c200dc053ae5228a51e61fd5db09",
       "storage_uri": "local://83/3b/833b87a85d22e17ee1f2a651a3b9ed56f557c200dc053ae5228a51e61fd5db09.html",
       "document_id": "fira-pendant-52476avi@833b87a8",
@@ -26052,6 +26228,28 @@
       "withdrawn": {}
     },
     {
+      "sha256": "87fa4fee74134a0bd3f2e0aeb500bfecd099627407ee318f6053d9cb934a1a87",
+      "storage_uri": "local://87/fa/87fa4fee74134a0bd3f2e0aeb500bfecd099627407ee318f6053d9cb934a1a87.html",
+      "document_id": "MIW9502022BA@87fa4fee",
+      "source_uri": "https://www.mirka.com/en/p/MIW9502022BA/",
+      "host": "www.mirka.com",
+      "tier": "manufacturer",
+      "manufacturer_id": "mirka",
+      "doc_type": "web_page",
+      "filename": "MIW9502022BA.html",
+      "size_bytes": 640405,
+      "fetched_at": "2026-09-10T14:30:31.703925+00:00",
+      "revision_label": null,
+      "license_note": "retrieved from www.mirka.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {
+        "MIW9502022BA": "table"
+      },
+      "absent": [
+        "8999000111"
+      ],
+      "withdrawn": {}
+    },
+    {
       "sha256": "8a9f3e82c9797b9b6e1a1ba2dac4efdc076fd325babd47a6f46f74f1ab604fe6",
       "storage_uri": "local://8a/9f/8a9f3e82c9797b9b6e1a1ba2dac4efdc076fd325babd47a6f46f74f1ab604fe6.html",
       "document_id": "kavi-wall-sconce-55209ni@8a9f3e82",
@@ -26645,6 +26843,7 @@
       "covers": {},
       "absent": [
         "8999000111",
+        "MIW9502022BA",
         "MRP6002100"
       ],
       "withdrawn": {}
@@ -31597,6 +31796,8 @@
       "license_note": "retrieved from cdn.brandfolder.io (unknown tier) for product data enrichment; review the site's terms before republishing any asset from it",
       "covers": {},
       "absent": [
+        "8999000111",
+        "MIW9502022BA",
         "MRP6002100"
       ],
       "withdrawn": {}
@@ -32955,6 +33156,28 @@
         "XVP01Z",
         "d10cnk",
         "e28cnkha"
+      ],
+      "withdrawn": {}
+    },
+    {
+      "sha256": "a2cdbba34ed6c3731b6386749d3ff40446f822a381a007a07df19d64e6dd72b1",
+      "storage_uri": "local://a2/cd/a2cdbba34ed6c3731b6386749d3ff40446f822a381a007a07df19d64e6dd72b1.html",
+      "document_id": "MIW9502022BA@a2cdbba3",
+      "source_uri": "https://www.mirka.com/de-de/p/MIW9502022BA/",
+      "host": "www.mirka.com",
+      "tier": "manufacturer",
+      "manufacturer_id": "mirka",
+      "doc_type": "web_page",
+      "filename": "MIW9502022BA.html",
+      "size_bytes": 600612,
+      "fetched_at": "2026-09-10T14:37:38.651559+00:00",
+      "revision_label": null,
+      "license_note": "retrieved from www.mirka.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {
+        "MIW9502022BA": "table"
+      },
+      "absent": [
+        "8999000111"
       ],
       "withdrawn": {}
     },
@@ -36904,6 +37127,7 @@
       "license_note": "retrieved from cms.mirka.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
       "covers": {
         "8896700140": "table",
+        "MIW9502022BA": "table",
         "MRP6002100": "table"
       },
       "absent": [
@@ -36911,6 +37135,26 @@
         "49-94-1920",
         "8999000111"
       ],
+      "withdrawn": {}
+    },
+    {
+      "sha256": "b660d7bfee873e395e618bfdfa48a95c662f524368b9a7ad3913577f82b30ccd",
+      "storage_uri": "local://b6/60/b660d7bfee873e395e618bfdfa48a95c662f524368b9a7ad3913577f82b30ccd.pdf",
+      "document_id": "extraction-de-la-poussiere@b660d7bf",
+      "source_uri": "https://cms.mirka.com/globalassets/fr/bibliotheque/extraction-de-la-poussiere.pdf",
+      "host": "cms.mirka.com",
+      "tier": "manufacturer",
+      "manufacturer_id": "mirka",
+      "doc_type": "spec_sheet",
+      "filename": "extraction-de-la-poussiere.pdf",
+      "size_bytes": 4282832,
+      "fetched_at": "2026-09-10T14:55:26.480400+00:00",
+      "revision_label": "Wed, 10 May 2023 12:58:54 GMT",
+      "license_note": "retrieved from cms.mirka.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {
+        "8999000111": "text"
+      },
+      "absent": [],
       "withdrawn": {}
     },
     {
@@ -37947,9 +38191,32 @@
       "fetched_at": "2026-09-10T09:03:36.669007+00:00",
       "revision_label": "Mon, 08 Dec 2025 13:42:42 GMT",
       "license_note": "retrieved from cms.mirka.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
-      "covers": {},
+      "covers": {
+        "8999000111": "table",
+        "MIW9502022BA": "table"
+      },
       "absent": [
         "MRP6002100"
+      ],
+      "withdrawn": {}
+    },
+    {
+      "sha256": "c1f893031677423a02ce53cb18264c687ee88ec4073bcf0edc78b5942e12c508",
+      "storage_uri": "local://c1/f8/c1f893031677423a02ce53cb18264c687ee88ec4073bcf0edc78b5942e12c508.pdf",
+      "document_id": "Exploded_view_Mirka_DE_1230_1242_L_AFC@c1f89303",
+      "source_uri": "https://cdn.brandfolder.io/FSMPOV8D/at/x6xwqjm8wpxwrgbmrnnbxwt/Exploded_view_Mirka_DE_1230_1242_L_AFC.pdf",
+      "host": "cdn.brandfolder.io",
+      "tier": "unknown",
+      "manufacturer_id": null,
+      "doc_type": "spec_sheet",
+      "filename": "Exploded_view_Mirka_DE_1230_1242_L_AFC.pdf",
+      "size_bytes": 1503986,
+      "fetched_at": "2026-09-10T15:09:12.122742+00:00",
+      "revision_label": "Tue, 26 May 2026 05:09:28 GMT",
+      "license_note": "retrieved from cdn.brandfolder.io (unknown tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {},
+      "absent": [
+        "8999000111"
       ],
       "withdrawn": {}
     },
@@ -39207,6 +39474,27 @@
         "XVP01Z",
         "d10cnk",
         "e28cnkha"
+      ],
+      "withdrawn": {}
+    },
+    {
+      "sha256": "c4af4cf9a6a7b38d888cb7b32ed059a0406f86ed22fad5ff6c719e08620273a4",
+      "storage_uri": "local://c4/af/c4af4cf9a6a7b38d888cb7b32ed059a0406f86ed22fad5ff6c719e08620273a4.html",
+      "document_id": "wall-sanders@c4af4cf9",
+      "source_uri": "https://www.mirka.com/en/products/power-tools/wall-sanders/",
+      "host": "www.mirka.com",
+      "tier": "manufacturer",
+      "manufacturer_id": "mirka",
+      "doc_type": "web_page",
+      "filename": "wall-sanders.html",
+      "size_bytes": 543944,
+      "fetched_at": "2026-09-10T14:30:25.421349+00:00",
+      "revision_label": null,
+      "license_note": "retrieved from www.mirka.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {},
+      "absent": [
+        "8999000111",
+        "MIW9502022BA"
       ],
       "withdrawn": {}
     },
@@ -46150,6 +46438,26 @@
       "withdrawn": {}
     },
     {
+      "sha256": "df878713b25f1561b87fe431eff0907df56253773a98c30e9ffbe8e1404e65a3",
+      "storage_uri": "local://df/87/df878713b25f1561b87fe431eff0907df56253773a98c30e9ffbe8e1404e65a3.html",
+      "document_id": "8999100111@df878713",
+      "source_uri": "https://www.mirka.com/en/p/8999100111/",
+      "host": "www.mirka.com",
+      "tier": "manufacturer",
+      "manufacturer_id": "mirka",
+      "doc_type": "web_page",
+      "filename": "8999100111.html",
+      "size_bytes": 519858,
+      "fetched_at": "2026-09-10T15:09:04.162873+00:00",
+      "revision_label": null,
+      "license_note": "retrieved from www.mirka.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {},
+      "absent": [
+        "8999000111"
+      ],
+      "withdrawn": {}
+    },
+    {
       "sha256": "e17988d9245330348237f958c2eddbe2db2082d244b45b71c2ccb9f47ac9f9db",
       "storage_uri": "local://e1/79/e17988d9245330348237f958c2eddbe2db2082d244b45b71c2ccb9f47ac9f9db.html",
       "document_id": "brix-outdoor-wall-light-59124bkt@e17988d9",
@@ -46590,6 +46898,68 @@
         "XVP01Z",
         "d10cnk",
         "e28cnkha"
+      ],
+      "withdrawn": {}
+    },
+    {
+      "sha256": "e1a0cc9f041a761c03be1c37c128ac433adb67e29fb3db99bcf30f08fafa34dd",
+      "storage_uri": "local://e1/a0/e1a0cc9f041a761c03be1c37c128ac433adb67e29fb3db99bcf30f08fafa34dd.pdf",
+      "document_id": "Exploded_view_Mirka_DE_1125_L@e1a0cc9f",
+      "source_uri": "https://cdn.brandfolder.io/FSMPOV8D/at/5ghzr6bxp7sxgpktwghg3s/Exploded_view_Mirka_DE_1125_L.pdf",
+      "host": "cdn.brandfolder.io",
+      "tier": "unknown",
+      "manufacturer_id": null,
+      "doc_type": "spec_sheet",
+      "filename": "Exploded_view_Mirka_DE_1125_L.pdf",
+      "size_bytes": 679952,
+      "fetched_at": "2026-09-10T14:55:48.332522+00:00",
+      "revision_label": "Tue, 26 May 2026 04:55:13 GMT",
+      "license_note": "retrieved from cdn.brandfolder.io (unknown tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {},
+      "absent": [
+        "8999000111"
+      ],
+      "withdrawn": {}
+    },
+    {
+      "sha256": "e40fc56e879b827d54496faeab9a02023cf83855c763e60f4be9423db2bc9e60",
+      "storage_uri": "local://e4/0f/e40fc56e879b827d54496faeab9a02023cf83855c763e60f4be9423db2bc9e60.pdf",
+      "document_id": "Exploded_view_Mirka_LEROS_225mm_220-240V@e40fc56e",
+      "source_uri": "https://cdn.brandfolder.io/FSMPOV8D/at/f97bqc38zmj6tvw28s5m5mc/Exploded_view_Mirka_LEROS_225mm_220-240V.pdf",
+      "host": "cdn.brandfolder.io",
+      "tier": "unknown",
+      "manufacturer_id": null,
+      "doc_type": "spec_sheet",
+      "filename": "Exploded_view_Mirka_LEROS_225mm_220-240V.pdf",
+      "size_bytes": 858472,
+      "fetched_at": "2026-09-10T14:30:33.560371+00:00",
+      "revision_label": "Tue, 30 Jun 2026 07:01:14 GMT",
+      "license_note": "retrieved from cdn.brandfolder.io (unknown tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {},
+      "absent": [
+        "8999000111",
+        "MIW9502022BA"
+      ],
+      "withdrawn": {}
+    },
+    {
+      "sha256": "e424fdd2cf23584f5843d13fd5935efc4d5b316252a4a8c5064359f6a361659d",
+      "storage_uri": "local://e4/24/e424fdd2cf23584f5843d13fd5935efc4d5b316252a4a8c5064359f6a361659d.pdf",
+      "document_id": "LEROS_230V_197768_10-2021_web@e424fdd2",
+      "source_uri": "https://cdn.brandfolder.io/FSMPOV8D/at/tn5x5js2rf92hbgfnvfghvz/LEROS_230V_197768_10-2021_web.pdf",
+      "host": "cdn.brandfolder.io",
+      "tier": "unknown",
+      "manufacturer_id": null,
+      "doc_type": "spec_sheet",
+      "filename": "LEROS_230V_197768_10-2021_web.pdf",
+      "size_bytes": 9339136,
+      "fetched_at": "2026-09-10T14:30:38.396955+00:00",
+      "revision_label": "Fri, 07 Aug 2026 08:42:02 GMT",
+      "license_note": "retrieved from cdn.brandfolder.io (unknown tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {},
+      "absent": [
+        "8999000111",
+        "MIW9502022BA"
       ],
       "withdrawn": {}
     },
@@ -49017,6 +49387,8 @@
       "license_note": "retrieved from www.mirka.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
       "covers": {},
       "absent": [
+        "8999000111",
+        "MIW9502022BA",
         "MRP6002100"
       ],
       "withdrawn": {}

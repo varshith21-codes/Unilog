@@ -1510,7 +1510,14 @@ def _run_enrichment(request: EnrichRequest) -> JSONResponse:
 
     slug = sku_slug(enrichment_request.clean_mpn)
     existing = SESSION_DIR / f"{slug}.json"
-    if existing.is_file() and not request.replace:
+    # Captured now, not read again later, and that is a correctness fix rather than a tidy-up.
+    # `persist_run` below writes to this exact path, so every `existing.is_file()` after it is
+    # trivially True — which made `replaced` in the response equal to `request.replace`, and had a
+    # first run of a brand-new part number reporting "saved run replaced" on the result screen. The
+    # bug was latent while `replace` was rare; it fires on every run now that the console defaults
+    # to re-running.
+    was_already_enriched = existing.is_file()
+    if was_already_enriched and not request.replace:
         # A re-run replaces the session a reviewer may already have worked, and the decisions on it.
         # `run_pipeline` refuses a combination that would blank a saved session for the same reason:
         # by the time a warning is read the data is already gone.
@@ -1656,7 +1663,7 @@ def _run_enrichment(request: EnrichRequest) -> JSONResponse:
     progress.complete(
         "persist",
         f"session, console bundle and delivery file written for {paths.slug}"
-        + (" (replaced the previous run)" if existing.is_file() and request.replace else ""),
+        + (" (replaced the previous run)" if was_already_enriched else ""),
     )
     progress.finish(
         f"{result.sku}: {result.run.certificate.summary.attributes_populated} attributes, "
@@ -1667,7 +1674,7 @@ def _run_enrichment(request: EnrichRequest) -> JSONResponse:
         {
             "sku": result.sku,
             "slug": paths.slug,
-            "replaced": existing.is_file() and request.replace,
+            "replaced": was_already_enriched,
             "summary": result.summary(),
             "queue": result.queue(registry),
             "bundle": backfill_provenance(normalise_quality_index(payload["bundle"])),

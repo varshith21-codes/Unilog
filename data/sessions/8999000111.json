@@ -1,7 +1,7 @@
 {
   "sku": "8999000111",
   "tenant_id": "demo",
-  "brand": null,
+  "brand": "Mirka",
   "class_code": "TOL.PWR.GEN",
   "class_name": "Power Tool",
   "category_path": [
@@ -19,18 +19,18 @@
         "8999000111@03e331a5"
       ],
       "required": true,
-      "detail": "The source content does not contain a configuration field (e.g., 'Bare', 'Kit', 'Set') for the target SKU 8999000111.",
+      "detail": "Source does not state configuration (e.g., Kit, Bare Tool, Set).",
       "recommended_action": "request_from_supplier"
     },
     {
       "code": "power_source",
-      "reason": "not_present_in_any_source",
+      "reason": "extracted_but_unverifiable",
       "sources_searched": [
         "8999000111@03e331a5"
       ],
       "required": true,
-      "detail": "The source content does not explicitly state the power source (e.g., 'Cordless', 'Corded') for the target SKU 8999000111.",
-      "recommended_action": "request_from_supplier"
+      "detail": "citation does not support the value: quote 'Mirka Dust Extractor 1025 L PC 230V' does not state 'Corded Electric' and names none of this attribute's allowed values",
+      "recommended_action": "human_research"
     },
     {
       "code": "battery_platform",
@@ -39,7 +39,7 @@
         "8999000111@03e331a5"
       ],
       "required": false,
-      "detail": "The source content does not list a battery platform name for the target SKU 8999000111.",
+      "detail": "Product is corded; no battery platform is applicable.",
       "recommended_action": "request_from_supplier"
     },
     {
@@ -49,7 +49,7 @@
         "8999000111@03e331a5"
       ],
       "required": false,
-      "detail": "The source content does not list a battery voltage for the target SKU 8999000111.",
+      "detail": "Product is corded; no battery voltage is applicable.",
       "recommended_action": "request_from_supplier"
     },
     {
@@ -59,7 +59,7 @@
         "8999000111@03e331a5"
       ],
       "required": false,
-      "detail": "The source content does not list a drive size for the target SKU 8999000111.",
+      "detail": "Not a powered driver, wrench, or ratchet; no drive size.",
       "recommended_action": "request_from_supplier"
     },
     {
@@ -69,7 +69,7 @@
         "8999000111@03e331a5"
       ],
       "required": false,
-      "detail": "The source content does not list a chuck size for the target SKU 8999000111.",
+      "detail": "Not a powered driver or drill; no chuck size.",
       "recommended_action": "request_from_supplier"
     },
     {
@@ -79,7 +79,7 @@
         "8999000111@03e331a5"
       ],
       "required": false,
-      "detail": "The source content does not list a blade diameter for the target SKU 8999000111.",
+      "detail": "Not a saw; no blade diameter.",
       "recommended_action": "request_from_supplier"
     },
     {
@@ -89,7 +89,7 @@
         "8999000111@03e331a5"
       ],
       "required": false,
-      "detail": "The source content does not list a no-load speed for the target SKU 8999000111.",
+      "detail": "Not a powered driver or saw; no no-load speed.",
       "recommended_action": "request_from_supplier"
     },
     {
@@ -99,7 +99,7 @@
         "8999000111@03e331a5"
       ],
       "required": false,
-      "detail": "The source content does not list an amperage rating for the target SKU 8999000111.",
+      "detail": "Source does not state amperage rating.",
       "recommended_action": "request_from_supplier"
     },
     {
@@ -109,7 +109,7 @@
         "8999000111@03e331a5"
       ],
       "required": false,
-      "detail": "The source content does not list a product series for the target SKU 8999000111.",
+      "detail": "Source does not state a product series.",
       "recommended_action": "request_from_supplier"
     },
     {
@@ -119,7 +119,7 @@
         "8999000111@03e331a5"
       ],
       "required": false,
-      "detail": "The source content does not list a separate model number for the target SKU 8999000111.",
+      "detail": "Source does not state a marketing model number.",
       "recommended_action": "request_from_supplier"
     },
     {
@@ -129,7 +129,7 @@
         "8999000111@03e331a5"
       ],
       "required": false,
-      "detail": "The source content does not list an overall size for the target SKU 8999000111.",
+      "detail": "Source does not state overall dimensions.",
       "recommended_action": "request_from_supplier"
     },
     {
@@ -139,7 +139,7 @@
         "8999000111@03e331a5"
       ],
       "required": false,
-      "detail": "The source content does not list the weight for the target SKU 8999000111.",
+      "detail": "Source does not state weight.",
       "recommended_action": "request_from_supplier"
     },
     {
@@ -149,7 +149,7 @@
         "8999000111@03e331a5"
       ],
       "required": false,
-      "detail": "The source content does not list a sound level for the target SKU 8999000111.",
+      "detail": "Source does not state sound level.",
       "recommended_action": "request_from_supplier"
     },
     {
@@ -159,7 +159,7 @@
         "8999000111@03e331a5"
       ],
       "required": false,
-      "detail": "The source content does not list a pack quantity for the target SKU 8999000111.",
+      "detail": "Source does not state pack quantity.",
       "recommended_action": "request_from_supplier"
     },
     {
@@ -169,8 +169,18 @@
         "8999000111@03e331a5"
       ],
       "required": false,
-      "detail": "The source content does not list a selling unit of measure for the target SKU 8999000111.",
+      "detail": "Source does not state selling unit of measure.",
       "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "additional_information",
+      "reason": "extracted_but_unverifiable",
+      "sources_searched": [
+        "8999000111@03e331a5"
+      ],
+      "required": false,
+      "detail": "quote 'Hose 27mm x 4m + Connector Included. The container size is 25l and the dust extractor is equipped with a carrying handle. The 5m cord is also an optimal length for a compact dust extractor. The Push&Clean filter cleaning system enables a longer life time and better suction. This dust extractor is equipped with an AutoStart function that saves time and electricity for the user. Mirka\u00ae Dust Extractor 1025 L is suitable for both dry and wet applications (remove the dust bag before wet use and clean filter before and after wet use). This Mirka\u00ae Dust Extractor 1025 is designed for usage with Mirka\u00ae PowerTools, but do not have an antistatic feature. If antistatic ability is needed we recommend to use Mirka\u00ae Dust Extractor 1230 or 1242.' could not be located in the source; value 'Hose 27mm x 4m + Connector Included, Container size 25l, 5m cord, Push&Clean filter cleaning system, AutoStart function, Suitable for both dry and wet applications, Designed for usage with Mirka PowerTools' discarded",
+      "recommended_action": "human_research"
     },
     {
       "code": "warranty_terms",
@@ -179,7 +189,7 @@
         "8999000111@03e331a5"
       ],
       "required": false,
-      "detail": "The source content does not list warranty terms for the target SKU 8999000111.",
+      "detail": "Source does not state warranty terms.",
       "recommended_action": "request_from_supplier"
     },
     {
@@ -199,7 +209,7 @@
         "8999000111@03e331a5"
       ],
       "required": false,
-      "detail": "The source content does not list any approvals or certifications for the target SKU 8999000111.",
+      "detail": "Source does not list any approvals or certifications.",
       "recommended_action": "request_from_supplier"
     },
     {
@@ -209,7 +219,7 @@
         "8999000111@03e331a5"
       ],
       "required": false,
-      "detail": "The source content does not list the country of origin for the target SKU 8999000111.",
+      "detail": "Source does not state country of origin.",
       "recommended_action": "request_from_supplier"
     },
     {
@@ -219,7 +229,7 @@
         "8999000111@03e331a5"
       ],
       "required": false,
-      "detail": "The source content does not state a California Proposition 65 warning for the target SKU 8999000111.",
+      "detail": "Source does not state a California Prop 65 warning.",
       "recommended_action": "request_from_supplier"
     },
     {
@@ -229,7 +239,7 @@
         "8999000111@03e331a5"
       ],
       "required": false,
-      "detail": "The source content does not list a GTIN, UPC, EAN, or barcode for the target SKU 8999000111.",
+      "detail": "Source does not state GTIN/UPC.",
       "recommended_action": "request_from_supplier"
     }
   ],
@@ -250,10 +260,10 @@
     "completeness": 0.0,
     "verifiability": 1.0,
     "consistency": 1.0,
-    "richness": 0.75,
+    "richness": 0.25,
     "self_declared": 0.0,
     "corroborated": 0.0,
-    "composite": 0.625,
+    "composite": 0.575,
     "measured_dimensions": [
       "completeness",
       "consistency",
@@ -261,9 +271,72 @@
       "verifiability"
     ]
   },
-  "created_at": "2026-08-25T04:45:05.462077+00:00",
+  "created_at": "2026-09-10T18:16:54.514903+00:00",
   "decisions": [],
   "manufacturer_specifications": [
+    {
+      "specification_id": "ms_2658b21214a356b4",
+      "label_raw": "Product",
+      "value_raw": "Mirka Dust Extractor 1025 L PC 230V. Hose 27mm x 4m + Connector Included.",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": false,
+      "evidence": [
+        {
+          "document_id": "8999000111@03e331a5",
+          "quote": "Product | Mirka Dust Extractor 1025 L PC 230V. Hose 27mm x 4m + Connector Included.",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": 5,
+          "table_ref": "t1:r3",
+          "method": "table_row"
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_844dd23e1419203b",
+      "label_raw": "Part Number",
+      "value_raw": "8999000111",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": false,
+      "evidence": [
+        {
+          "document_id": "8999000111@03e331a5",
+          "quote": "Part Number | 8999000111",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": 6,
+          "table_ref": "t1:r4",
+          "method": "table_row"
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_b4a678e2c357ff18",
+      "label_raw": "Description",
+      "value_raw": "Dust extractor 1025 L is a compact but still high performing L-class dust extractor, with proven performance for user protection and easy to move around. This dust extractor has a blow function, to blow off surfaces and to clean hard to reach areas. The container size is 25l and the dust extractor is equipped with a carrying handle. The 5m cord is also an optimal length for a compact dust extractor. The Push&Clean filter cleaning system enables a longer life time and better suction. This dust extractor is equipped with an AutoStart function that saves time and electricity for the user. Mirka\u00ae Dust Extractor 1025 L is suitable for both dry and wet applications (remove the dust bag before wet use and clean filter before and after wet use). This Mirka\u00ae Dust Extractor 1025 is designed for usage with Mirka\u00ae PowerTools, but do not have an antistatic feature. If antistatic ability is needed we recommend to use Mirka\u00ae Dust Extractor 1230 or 1242.",
+      "confidence": 0.9,
+      "method": "document_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": false,
+      "evidence": [
+        {
+          "document_id": "8999000111@03e331a5",
+          "quote": "Description | Dust extractor 1025 L is a compact but still high performing L-class dust extractor, with proven performance for user protection and easy to move around. This dust extractor has a blow function, to blow off surfaces and to clean hard to reach areas. The container size is 25l and the dust extractor is equipped with a carrying handle. The 5m cord is also an optimal length for a compact dust extractor. The Push&Clean filter cleaning system enables a longer life time and better suction. This dust extractor is equipped with an AutoStart function that saves time and electricity for the user. Mirka\u00ae Dust Extractor 1025 L is suitable for both dry and wet applications (remove the dust bag before wet use and clean filter before and after wet use). This Mirka\u00ae Dust Extractor 1025 is designed for usage with Mirka\u00ae PowerTools, but do not have an antistatic feature. If antistatic ability is needed we recommend to use Mirka\u00ae Dust Extractor 1230 or 1242.",
+          "verified": true,
+          "match_score": 0.9927,
+          "page": 3,
+          "line_index": 42,
+          "table_ref": null,
+          "method": "fuzzy_line"
+        }
+      ]
+    },
     {
       "specification_id": "ms_425654c931b1241f",
       "label_raw": "SKU",
@@ -279,9 +352,849 @@
           "verified": true,
           "match_score": 1.0,
           "page": 3,
-          "line_index": 12,
+          "line_index": 20,
           "table_ref": null,
           "method": "exact_multiline"
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_7368ccd550637038",
+      "label_raw": "Product",
+      "value_raw": "Mirka\u00ae Dust Extractor 1025 L - Mirka",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "Mirka-Dust-Extractor-1025-L@722a4a3f",
+          "quote": "Product     | Mirka\u00ae Dust Extractor 1025 L - Mirka",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": null,
+          "table_ref": "t1:r0",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_86dd4823a6a455f8",
+      "label_raw": "Description",
+      "value_raw": "L-class dust extractor with Push&Clean filter cleaning and AutoStart function.",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "Mirka-Dust-Extractor-1025-L@722a4a3f",
+          "quote": "Description | L-class dust extractor with Push&Clean filter cleaning and AutoStart function.",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": null,
+          "table_ref": "t1:r1",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_a7bca2d6844e5161",
+      "label_raw": "Part Number",
+      "value_raw": "8999000111",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "Mirka-Dust-Extractor-1025-L@722a4a3f",
+          "quote": "Part Number | 8999000111",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": 6,
+          "table_ref": "t1:r4",
+          "method": "table_row"
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_bf16e69058ca2360",
+      "label_raw": "Cable Length",
+      "value_raw": "7.5 m",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "Mirka-Dust-Extractor-1025-L@722a4a3f",
+          "quote": "Cable Length              | 7.5 m",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t2:r0",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_890a3b95c4b2de81",
+      "label_raw": "Dust Class",
+      "value_raw": "L",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "Mirka-Dust-Extractor-1025-L@722a4a3f",
+          "quote": "Dust Class                | L",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t2:r1",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_f1cdd7c351be7715",
+      "label_raw": "Dust Container Volume (l)",
+      "value_raw": "25.0 L",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "Mirka-Dust-Extractor-1025-L@722a4a3f",
+          "quote": "Dust Container Volume (l) | 25.0 L",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t2:r2",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_9a95776829b397b6",
+      "label_raw": "Height",
+      "value_raw": "530 mm",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "Mirka-Dust-Extractor-1025-L@722a4a3f",
+          "quote": "Height                    | 530 mm",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t2:r3",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_c2383a00e61df425",
+      "label_raw": "Length",
+      "value_raw": "375 mm",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "Mirka-Dust-Extractor-1025-L@722a4a3f",
+          "quote": "Length                    | 375 mm",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t2:r4",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_45122bc300ded6d3",
+      "label_raw": "Mains Frequency (Hz)",
+      "value_raw": "50/60 Hz",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "Mirka-Dust-Extractor-1025-L@722a4a3f",
+          "quote": "Mains Frequency (Hz)      | 50/60 Hz",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t2:r5",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_587620ccb0352190",
+      "label_raw": "Noise Level, LpA (dB)",
+      "value_raw": "64.0 dB",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "Mirka-Dust-Extractor-1025-L@722a4a3f",
+          "quote": "Noise Level, LpA (dB)     | 64.0 dB",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t2:r6",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_7c4e231b4e08c9ba",
+      "label_raw": "Power Input (W)",
+      "value_raw": "1000 W",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "Mirka-Dust-Extractor-1025-L@722a4a3f",
+          "quote": "Power Input (W)           | 1000 W",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t2:r7",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_3dae0be444352c0c",
+      "label_raw": "Vacuum (mbar)",
+      "value_raw": "210.0 mbar",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "Mirka-Dust-Extractor-1025-L@722a4a3f",
+          "quote": "Vacuum (mbar)             | 210.0 mbar",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t2:r8",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_4601d88513ea8dee",
+      "label_raw": "Air flow volume (l/min)",
+      "value_raw": "3600.0 l/min",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "Mirka-Dust-Extractor-1025-L@722a4a3f",
+          "quote": "Air flow volume (l/min)   | 3600.0 l/min",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t2:r9",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_0d9372ec5dedef62",
+      "label_raw": "Weight",
+      "value_raw": "8 kg",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "Mirka-Dust-Extractor-1025-L@722a4a3f",
+          "quote": "Weight                    | 8 kg",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t2:r10",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_a673ab0775fd2f6e",
+      "label_raw": "Width",
+      "value_raw": "395 mm",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "Mirka-Dust-Extractor-1025-L@722a4a3f",
+          "quote": "Width                     | 395 mm",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t2:r11",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_2cd0f85eddd375ab",
+      "label_raw": "Code produit",
+      "value_raw": "8999000111",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": false,
+      "evidence": [
+        {
+          "document_id": "extraction-de-la-poussiere@b660d7bf",
+          "quote": "Code produit | 8999000111",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 6,
+          "line_index": null,
+          "table_ref": "t7:r0",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_b5707255a51c3f9d",
+      "label_raw": "Tension alim. principale",
+      "value_raw": "220\u2013240 V~",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": false,
+      "evidence": [
+        {
+          "document_id": "extraction-de-la-poussiere@b660d7bf",
+          "quote": "Tension alim. principale | 220\u2013240 V~",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 6,
+          "line_index": null,
+          "table_ref": "t7:r1",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_42a362ebdac322ca",
+      "label_raw": "Fr\u00e9quence du r\u00e9seau \u00e9lectrique",
+      "value_raw": "50/60 Hz",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": false,
+      "evidence": [
+        {
+          "document_id": "extraction-de-la-poussiere@b660d7bf",
+          "quote": "Fr\u00e9quence du r\u00e9seau \u00e9lectrique | 50/60 Hz",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 6,
+          "line_index": null,
+          "table_ref": "t7:r2",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_10f3b18841a823be",
+      "label_raw": "Puissance",
+      "value_raw": "1 000 W",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": false,
+      "evidence": [
+        {
+          "document_id": "extraction-de-la-poussiere@b660d7bf",
+          "quote": "Puissance | 1 000 W",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 6,
+          "line_index": null,
+          "table_ref": "t7:r3",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_0eadfe3d7ce098e9",
+      "label_raw": "D\u00e9bit d\u2019air",
+      "value_raw": "3 600 l/min",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": false,
+      "evidence": [
+        {
+          "document_id": "extraction-de-la-poussiere@b660d7bf",
+          "quote": "D\u00e9bit d\u2019air | 3 600 l/min",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 6,
+          "line_index": null,
+          "table_ref": "t7:r4",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_64492f6831e38e50",
+      "label_raw": "Aspiration",
+      "value_raw": "210 mbar",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": false,
+      "evidence": [
+        {
+          "document_id": "extraction-de-la-poussiere@b660d7bf",
+          "quote": "Aspiration | 210 mbar",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 6,
+          "line_index": null,
+          "table_ref": "t7:r5",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_99d7cc4c15fc3f98",
+      "label_raw": "Niveau sonore, LpA",
+      "value_raw": "64 dB(A)",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": false,
+      "evidence": [
+        {
+          "document_id": "extraction-de-la-poussiere@b660d7bf",
+          "quote": "Niveau sonore, LpA | 64 dB(A)",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 6,
+          "line_index": null,
+          "table_ref": "t7:r6",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_21ae2d68caa53afc",
+      "label_raw": "Volume du r\u00e9servoir",
+      "value_raw": "25 l",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": false,
+      "evidence": [
+        {
+          "document_id": "extraction-de-la-poussiere@b660d7bf",
+          "quote": "Volume du r\u00e9servoir | 25 l",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 6,
+          "line_index": null,
+          "table_ref": "t7:r7",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_2e36107bb9598329",
+      "label_raw": "Dimension L \u00d7 P \u00d7 H",
+      "value_raw": "375 \u00d7 395 \u00d7 530 mm",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": false,
+      "evidence": [
+        {
+          "document_id": "extraction-de-la-poussiere@b660d7bf",
+          "quote": "Dimension L \u00d7 P \u00d7 H | 375 \u00d7 395 \u00d7 530 mm",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 6,
+          "line_index": null,
+          "table_ref": "t7:r8",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_fa2b8ebfe2ef23f5",
+      "label_raw": "Poids",
+      "value_raw": "8 kg",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": false,
+      "evidence": [
+        {
+          "document_id": "extraction-de-la-poussiere@b660d7bf",
+          "quote": "Poids | 8 kg",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 6,
+          "line_index": null,
+          "table_ref": "t7:r9",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_92501df5b5987e8c",
+      "label_raw": "Product",
+      "value_raw": "Mirka\u00ae Dust Extractor 1025 L - Mirka",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "8999000111@2ba91607",
+          "quote": "Product     | Mirka\u00ae Dust Extractor 1025 L - Mirka",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": null,
+          "table_ref": "t1:r0",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_f3e23affc0856b8b",
+      "label_raw": "Description",
+      "value_raw": "L-class dust extractor with Push&Clean filter cleaning and AutoStart function.",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "8999000111@2ba91607",
+          "quote": "Description | L-class dust extractor with Push&Clean filter cleaning and AutoStart function.",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": null,
+          "table_ref": "t1:r1",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_15115b229b43600f",
+      "label_raw": "Part Number",
+      "value_raw": "8999000111",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "8999000111@2ba91607",
+          "quote": "Part Number | 8999000111",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": 6,
+          "table_ref": "t1:r4",
+          "method": "table_row"
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_6b51b981f50258ea",
+      "label_raw": "Cable Length",
+      "value_raw": "7.5 m",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "8999000111@2ba91607",
+          "quote": "Cable Length | 7.5 m",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 4,
+          "line_index": null,
+          "table_ref": "t2:r0",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_1fbbee197e779c3c",
+      "label_raw": "Dust Class",
+      "value_raw": "L",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "8999000111@2ba91607",
+          "quote": "Dust Class   | L",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 4,
+          "line_index": null,
+          "table_ref": "t2:r1",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_59c64e8da98df816",
+      "label_raw": "Dust Container Volume (l)",
+      "value_raw": "25.0 L",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "8999000111@2ba91607",
+          "quote": "Dust Container Volume (l) | 25.0 L",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t3:r0",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_571d74bde6c37fec",
+      "label_raw": "Height",
+      "value_raw": "530 mm",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "8999000111@2ba91607",
+          "quote": "Height                    | 530 mm",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t3:r1",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_6ad224f554e2b234",
+      "label_raw": "Length",
+      "value_raw": "375 mm",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "8999000111@2ba91607",
+          "quote": "Length                    | 375 mm",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t3:r2",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_ca383601fd6e2de8",
+      "label_raw": "Mains Frequency (Hz)",
+      "value_raw": "50/60 Hz",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "8999000111@2ba91607",
+          "quote": "Mains Frequency (Hz)      | 50/60 Hz",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t3:r3",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_1e372cbcf4561fa3",
+      "label_raw": "Noise Level, LpA (dB)",
+      "value_raw": "64.0 dB",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "8999000111@2ba91607",
+          "quote": "Noise Level, LpA (dB)     | 64.0 dB",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t3:r4",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_36ec3fd0a6ea7df6",
+      "label_raw": "Power Input (W)",
+      "value_raw": "1000 W",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "8999000111@2ba91607",
+          "quote": "Power Input (W)           | 1000 W",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t3:r5",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_dd97a8fb3a4ba451",
+      "label_raw": "Vacuum (mbar)",
+      "value_raw": "210.0 mbar",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "8999000111@2ba91607",
+          "quote": "Vacuum (mbar)             | 210.0 mbar",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t3:r6",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_7f00b8960203061a",
+      "label_raw": "Air flow volume (l/min)",
+      "value_raw": "3600.0 l/min",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "8999000111@2ba91607",
+          "quote": "Air flow volume (l/min)   | 3600.0 l/min",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t3:r7",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_4a427f4832224bcd",
+      "label_raw": "Weight",
+      "value_raw": "8 kg",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "8999000111@2ba91607",
+          "quote": "Weight                    | 8 kg",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t3:r8",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_fbf8e86442705339",
+      "label_raw": "Width",
+      "value_raw": "395 mm",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "8999000111@2ba91607",
+          "quote": "Width                     | 395 mm",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t3:r9",
+          "method": null
         }
       ]
     }
@@ -290,6 +1203,14 @@
     {
       "number": 1,
       "lines": [
+        "Product      Mirka Dust Extractor 1025 L PC 230V. Hose 27mm x 4m + Connector Includ",
+        " \u2013 Galdes & Mamo",
+        "Description  Dust extractor 1025 L is a compact but still high performing L-class dust extractor, with proven performance for user protection and easy to move around. This dust extractor has a blow function, to blow off surfaces and to clean hard to reach areas. The container size is 25l and the dust extractor is equipped with a ca",
+        "Source URL   https://galdesandmamo.com/products/8999000111",
+        "Product      Mirka Dust Extractor 1025 L PC 230V. Hose 27mm x 4m + Connector Includ",
+        "Product      Mirka Dust Extractor 1025 L PC 230V. Hose 27mm x 4m + Connector Included.",
+        "Part Number  8999000111",
+        "",
         "Skip to the content",
         "Free shipping for all orders over \u20ac50",
         "Facebook",
@@ -339,7 +1260,12 @@
         "Varnish and polish",
         "Tetrosyl",
         "Aerosol paints",
-        "Powder and ready mixed filler",
+        "Powder and ready mixed filler"
+      ]
+    },
+    {
+      "number": 2,
+      "lines": [
         "Vernilac",
         "Glue",
         "Wood putty",
@@ -347,12 +1273,7 @@
         "Work shop tools",
         "Drill Bits",
         "Gloves & Aprons",
-        "Jacks and stands"
-      ]
-    },
-    {
-      "number": 2,
-      "lines": [
+        "Jacks and stands",
         "Motorbike jacks and wheel support",
         "Paint Brush, Roller and Plastic",
         "Tools & Tool boxes",
@@ -402,7 +1323,12 @@
         "Powder and ready mixed filler",
         "Vernilac",
         "Glue",
-        "Wood putty",
+        "Wood putty"
+      ]
+    },
+    {
+      "number": 3,
+      "lines": [
         "Wood stain and preserver",
         "Work shop tools",
         "Drill Bits",
@@ -410,12 +1336,7 @@
         "Jacks and stands",
         "Motorbike jacks and wheel support",
         "Paint Brush, Roller and Plastic",
-        "Tools & Tool boxes"
-      ]
-    },
-    {
-      "number": 3,
-      "lines": [
+        "Tools & Tool boxes",
         "Valex",
         "Free shipping over \u20ac50",
         "Warranty backed products",
@@ -431,6 +1352,7 @@
         "SKU:",
         " 8999000111",
         "(0)",
+        "",
         "Regular price ",
         " \u20ac475,00",
         "",
@@ -438,10 +1360,13 @@
         " inc. VAT",
         "In stock",
         "Usually ships within 24 hours",
+        "",
         "\u2212",
         " Decrease quantity for Mirka Dust Extractor 1025 L PC 230V. Hose 27mm x 4m + Connector Included. Quantity ",
         " +",
         " Increase quantity for Mirka Dust Extractor 1025 L PC 230V. Hose 27mm x 4m + Connector Included. Add to cart",
+        "Couldn't load pickup availability",
+        "Refresh",
         "Got questions?",
         "Feel free to get in touch",
         "Share on Facebook",
@@ -461,7 +1386,12 @@
         "Subscribe to our newsletter and receive special offers",
         "Your email ",
         " Subscribe",
-        "I agree to receive marketing emails and special deals.",
+        "I agree to receive marketing emails and special deals."
+      ]
+    },
+    {
+      "number": 4,
+      "lines": [
         "Address: GM House, Msida Valley Road, B\u2019Kara, BKR 9025, Malta.",
         "Tel: (+356) 21 487584",
         "info@galdesandmamo.com",
@@ -473,12 +1403,7 @@
         "Delivery Information",
         "News",
         "Privacy Policy",
-        "Terms of service"
-      ]
-    },
-    {
-      "number": 4,
-      "lines": [
+        "Terms of service",
         "Cancel Contract",
         "Useful Links",
         "Car care",
@@ -513,10 +1438,10 @@
         "unit": "V"
       },
       "value_display": "230 V",
-      "score": 0.7143,
+      "score": 0.75,
       "status": "auto_accepted",
       "reason_code": "auto_accepted",
-      "detail": "score 0.714 >= threshold 0.685",
+      "detail": "score 0.750 >= threshold 0.685",
       "method": "document_extraction",
       "model_tier": "volume",
       "is_required": false,
@@ -528,40 +1453,551 @@
           "verified": true,
           "match_score": 1.0,
           "page": 3,
-          "line_index": 5,
+          "line_index": 13,
           "table_ref": null,
           "method": "exact_line"
         }
       ],
-      "validations": [],
+      "validations": [
+        {
+          "layer": "L0",
+          "rule_id": "not_normalized",
+          "verdict": "warn",
+          "reason": "attribute 'voltage_rating' has no canonical value, so it cannot be compared, filtered or rule-checked",
+          "counterexample": null,
+          "suggested_fix": null,
+          "blocking": false
+        }
+      ],
       "allowed_values": [],
       "unit": "V"
     },
     {
-      "attribute_code": "additional_information",
-      "attribute_name": "Additional Information",
-      "datatype": "string",
-      "value_raw": "Hose 27mm x 4m + Connector Included",
-      "value_canonical": "Hose 27mm x 4m + Connector Included",
-      "value_display": "Hose 27mm x 4m + Connector Included",
-      "score": 0.7479,
+      "attribute_code": "each_weight",
+      "attribute_name": "Weight (Each)",
+      "datatype": "quantity",
+      "value_raw": "8",
+      "value_canonical": {
+        "magnitude": 3.628739,
+        "unit": "kg"
+      },
+      "value_display": "8 lb",
+      "score": 0.8058,
       "status": "auto_accepted",
       "reason_code": "auto_accepted",
-      "detail": "score 0.748 >= threshold 0.685",
+      "detail": "score 0.806 >= threshold 0.685",
+      "method": "table_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "Mirka-Dust-Extractor-1025-L@722a4a3f",
+          "quote": "Weight                    | 8 kg",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t2:r10",
+          "method": null
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": "kg"
+    },
+    {
+      "attribute_code": "sound_level",
+      "attribute_name": "Sound Level",
+      "datatype": "quantity",
+      "value_raw": "64.0",
+      "value_canonical": {
+        "magnitude": 64.0,
+        "unit": "dBA"
+      },
+      "value_display": "64 dBA",
+      "score": 0.7976,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.798 >= threshold 0.685",
+      "method": "table_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "Mirka-Dust-Extractor-1025-L@722a4a3f",
+          "quote": "Noise Level, LpA (dB)     | 64.0 dB",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t2:r6",
+          "method": null
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": "dBA"
+    },
+    {
+      "attribute_code": "warranty_terms",
+      "attribute_name": "Warranty",
+      "datatype": "string",
+      "value_raw": "2+1 years",
+      "value_canonical": "2+1 years",
+      "value_display": "2+1 years",
+      "score": 0.8,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.800 >= threshold 0.685",
       "method": "document_extraction",
       "model_tier": "volume",
       "is_required": false,
       "accepted": true,
       "evidence": [
         {
-          "document_id": "8999000111@03e331a5",
-          "quote": "Mirka Dust Extractor 1025 L PC 230V. Hose 27mm x 4m + Connector Included.",
+          "document_id": "Mirka-Dust-Extractor-1025-L@722a4a3f",
+          "quote": "Preventive Maintenance\n2+1 years",
           "verified": true,
           "match_score": 1.0,
           "page": 3,
-          "line_index": 5,
+          "line_index": null,
           "table_ref": null,
-          "method": "exact_line"
+          "method": null
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": null
+    },
+    {
+      "attribute_code": "voltage_rating",
+      "attribute_name": "Voltage Rating",
+      "datatype": "quantity",
+      "value_raw": "220\u2013240 V",
+      "value_canonical": {
+        "magnitude": 220.0,
+        "unit": "V"
+      },
+      "value_display": "220 V",
+      "score": 0.75,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.750 >= threshold 0.685",
+      "method": "table_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "extraction-de-la-poussiere@b660d7bf",
+          "quote": "Tension alim. principale | 220\u2013240 V~",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 6,
+          "line_index": null,
+          "table_ref": "t7:r1",
+          "method": null
+        }
+      ],
+      "validations": [
+        {
+          "layer": "L0",
+          "rule_id": "not_normalized",
+          "verdict": "warn",
+          "reason": "attribute 'voltage_rating' has no canonical value, so it cannot be compared, filtered or rule-checked",
+          "counterexample": null,
+          "suggested_fix": null,
+          "blocking": false
+        }
+      ],
+      "allowed_values": [],
+      "unit": "V"
+    },
+    {
+      "attribute_code": "overall_size",
+      "attribute_name": "Size",
+      "datatype": "string",
+      "value_raw": "375 \u00d7 395 \u00d7 530 mm",
+      "value_canonical": "375 \u00d7 395 \u00d7 530 mm",
+      "value_display": "375 \u00d7 395 \u00d7 530 mm",
+      "score": 0.95,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.950 >= threshold 0.685",
+      "method": "table_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "extraction-de-la-poussiere@b660d7bf",
+          "quote": "Dimension L \u00d7 P \u00d7 H | 375 \u00d7 395 \u00d7 530 mm",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 6,
+          "line_index": null,
+          "table_ref": "t7:r8",
+          "method": null
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": null
+    },
+    {
+      "attribute_code": "each_weight",
+      "attribute_name": "Weight (Each)",
+      "datatype": "quantity",
+      "value_raw": "8 kg",
+      "value_canonical": {
+        "magnitude": 8.0,
+        "unit": "kg"
+      },
+      "value_display": "8 kg",
+      "score": 0.8058,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.806 >= threshold 0.685",
+      "method": "table_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "extraction-de-la-poussiere@b660d7bf",
+          "quote": "Poids | 8 kg",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 6,
+          "line_index": null,
+          "table_ref": "t7:r9",
+          "method": null
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": "kg"
+    },
+    {
+      "attribute_code": "sound_level",
+      "attribute_name": "Sound Level",
+      "datatype": "quantity",
+      "value_raw": "64 dB(A)",
+      "value_canonical": {
+        "magnitude": 64.0,
+        "unit": "dBA"
+      },
+      "value_display": "64 dBA",
+      "score": 0.7976,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.798 >= threshold 0.685",
+      "method": "table_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "extraction-de-la-poussiere@b660d7bf",
+          "quote": "Niveau sonore, LpA | 64 dB(A)",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 6,
+          "line_index": null,
+          "table_ref": "t7:r6",
+          "method": null
+        }
+      ],
+      "validations": [
+        {
+          "layer": "L0",
+          "rule_id": "qualifiers_retained",
+          "verdict": "pass",
+          "reason": "value carries qualifiers preserved from the source",
+          "counterexample": null,
+          "suggested_fix": null,
+          "blocking": false
+        }
+      ],
+      "allowed_values": [],
+      "unit": "dBA"
+    },
+    {
+      "attribute_code": "voltage_rating",
+      "attribute_name": "Voltage Rating",
+      "datatype": "quantity",
+      "value_raw": "230 V",
+      "value_canonical": {
+        "magnitude": 230.0,
+        "unit": "V"
+      },
+      "value_display": "230 V",
+      "score": 0.75,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.750 >= threshold 0.685",
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "productcatalogue_2025-low-res-1-1@bd900f73",
+          "quote": "Mirka Dust Extractor 1025 L PC EU 230V 8999000111",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 194,
+          "line_index": null,
+          "table_ref": null,
+          "method": null
+        }
+      ],
+      "validations": [
+        {
+          "layer": "L0",
+          "rule_id": "not_normalized",
+          "verdict": "warn",
+          "reason": "attribute 'voltage_rating' has no canonical value, so it cannot be compared, filtered or rule-checked",
+          "counterexample": null,
+          "suggested_fix": null,
+          "blocking": false
+        }
+      ],
+      "allowed_values": [],
+      "unit": "V"
+    },
+    {
+      "attribute_code": "overall_size",
+      "attribute_name": "Size",
+      "datatype": "string",
+      "value_raw": "375 x 395 x 530",
+      "value_canonical": "375 x 395 x 530",
+      "value_display": "375 x 395 x 530",
+      "score": 0.95,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.950 >= threshold 0.685",
+      "method": "table_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "productcatalogue_2025-low-res-1-1@bd900f73",
+          "quote": "375 x 395 x 530",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 194,
+          "line_index": null,
+          "table_ref": "t557:r1:c1",
+          "method": null
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": null
+    },
+    {
+      "attribute_code": "sound_level",
+      "attribute_name": "Sound Level",
+      "datatype": "quantity",
+      "value_raw": "64",
+      "value_canonical": {
+        "magnitude": 64.0,
+        "unit": "dBA"
+      },
+      "value_display": "64 dBA",
+      "score": 0.7976,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.798 >= threshold 0.685",
+      "method": "table_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "productcatalogue_2025-low-res-1-1@bd900f73",
+          "quote": "64",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 195,
+          "line_index": null,
+          "table_ref": "t558:r1:c0",
+          "method": null
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": "dBA"
+    },
+    {
+      "attribute_code": "gtin",
+      "attribute_name": "GTIN / UPC",
+      "datatype": "string",
+      "value_raw": "6416868919288",
+      "value_canonical": "6416868919288",
+      "value_display": "6416868919288",
+      "score": 0.95,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.950 >= threshold 0.685",
+      "method": "table_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "productcatalogue_2025-low-res-1-1@bd900f73",
+          "quote": "6416868919288",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 194,
+          "line_index": null,
+          "table_ref": "t556:r1:c2",
+          "method": null
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": null
+    },
+    {
+      "attribute_code": "voltage_rating",
+      "attribute_name": "Voltage Rating",
+      "datatype": "quantity",
+      "value_raw": "1000 W",
+      "value_canonical": null,
+      "value_display": null,
+      "score": 0.75,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.750 >= threshold 0.685",
+      "method": "table_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "8999000111@2ba91607",
+          "quote": "Power Input (W) | 1000 W",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t3:r5",
+          "method": null
+        }
+      ],
+      "validations": [
+        {
+          "layer": "L0",
+          "rule_id": "not_normalized",
+          "verdict": "warn",
+          "reason": "attribute 'voltage_rating' has no canonical value, so it cannot be compared, filtered or rule-checked",
+          "counterexample": null,
+          "suggested_fix": null,
+          "blocking": false
+        }
+      ],
+      "allowed_values": [],
+      "unit": "V"
+    },
+    {
+      "attribute_code": "each_weight",
+      "attribute_name": "Weight (Each)",
+      "datatype": "quantity",
+      "value_raw": "8 kg",
+      "value_canonical": {
+        "magnitude": 8.0,
+        "unit": "kg"
+      },
+      "value_display": "8 kg",
+      "score": 0.8058,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.806 >= threshold 0.685",
+      "method": "table_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "8999000111@2ba91607",
+          "quote": "Weight | 8 kg",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t3:r8",
+          "method": null
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": "kg"
+    },
+    {
+      "attribute_code": "sound_level",
+      "attribute_name": "Sound Level",
+      "datatype": "quantity",
+      "value_raw": "64.0 dB",
+      "value_canonical": {
+        "magnitude": 64.0,
+        "unit": "dBA"
+      },
+      "value_display": "64 dBA",
+      "score": 0.7976,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.798 >= threshold 0.685",
+      "method": "table_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "8999000111@2ba91607",
+          "quote": "Noise Level, LpA (dB) | 64.0 dB",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t3:r4",
+          "method": null
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": "dBA"
+    },
+    {
+      "attribute_code": "warranty_terms",
+      "attribute_name": "Warranty",
+      "datatype": "string",
+      "value_raw": "2+1 years",
+      "value_canonical": "2+1 years",
+      "value_display": "2+1 years",
+      "score": 0.8,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.800 >= threshold 0.685",
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "8999000111@2ba91607",
+          "quote": "2+1 years",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 2,
+          "line_index": null,
+          "table_ref": null,
+          "method": null
         }
       ],
       "validations": [],

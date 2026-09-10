@@ -26,12 +26,14 @@
 
 import clsx from "clsx";
 import Link from "next/link";
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 
+import { EnrichSamples } from "@/components/enrich-samples";
 import { ManufacturerSpecifications } from "@/components/manufacturer-specifications";
 import { PipelineLive } from "@/components/pipeline-live";
 import { PipelineProgress } from "@/components/pipeline-progress";
 import { AlertIcon, CheckIcon, KeyValue, MinusIcon, Overline, Panel } from "@/components/primitives";
+import type { EnrichSample } from "@/data/enrich-samples";
 import { runEnrichment } from "@/lib/actions";
 // Types from `enrich`, which is erased at build time; the *function* from `enrich-request`, which is
 // pure. Importing `isSubmittable` from `enrich` would pull `data.ts` and `node:fs/promises` into the
@@ -123,6 +125,7 @@ export function EnrichForm({ limits }: { limits: EnrichLimits }) {
   const sourceHeadingId = `${ids}-source`;
   const sourceGuidanceId = `${ids}-source-guidance`;
   const gateId = `${ids}-gate`;
+  const submitId = `${ids}-submit`;
 
   const running = outcome.kind === "running";
   const input = {
@@ -177,8 +180,44 @@ export function EnrichForm({ limits }: { limits: EnrichLimits }) {
     }));
   }
 
+  /**
+   * Load a sample into the form. Fills, focuses, and stops there.
+   *
+   * Deliberately not "fill and run". Every press on this screen spends model calls, so a one-click
+   * run would move the cost figure to *after* the decision instead of before it. Focus lands on the
+   * submit control so the second press is one key away, with the call count under the cursor.
+   *
+   * The scope flags are left alone rather than reset. Somebody who narrowed the run and then picked a
+   * different part meant to keep the narrower run.
+   */
+  function pickSample(sample: EnrichSample) {
+    if (running) return;
+    setFields((current) => ({
+      ...current,
+      mpn: sample.mpn,
+      manufacturer: sample.manufacturer,
+      description: sample.description,
+      brand: sample.brand ?? "",
+      // Cleared, because a sample is defined by its part number and manufacturer. Carrying over a URL
+      // typed for a different product would silently make this run read the wrong document — and it
+      // would look like a retrieval bug rather than a stale field.
+      sourceUrl: "",
+    }));
+    setOutcome({ kind: "idle" });
+    setSubmitted(null);
+    focusById(submitId);
+  }
+
   return (
     <>
+      {/*
+        Above the form, because it is the shortcut *past* the form. Below it, a tester would have
+        already typed something by the time they found it.
+      */}
+      <div className="mb-8">
+        <EnrichSamples onPick={pickSample} disabled={running} activeMpn={fields.mpn} />
+      </div>
+
       <form
         onSubmit={(event) => {
           event.preventDefault();
@@ -445,6 +484,7 @@ export function EnrichForm({ limits }: { limits: EnrichLimits }) {
           <div className="p-5">
             <button
               type="submit"
+              id={submitId}
               disabled={running || !ready}
               aria-describedby={gateId}
               data-loading={running ? "true" : "false"}
@@ -460,6 +500,38 @@ export function EnrichForm({ limits }: { limits: EnrichLimits }) {
             >
               {statusLine(outcome, ready)}
             </p>
+            {/*
+              The way back to the results.
+
+              The results render below this form, and the run that produces them is long enough that
+              a viewer has usually scrolled somewhere else by the time they land — which is exactly
+              how somebody ends up asking where the output went while it sits under their scrollbar.
+              The screen scrolls itself once when the results arrive; this is the control for every
+              time after that, and it is the only affordance on the page that is *only* navigation.
+            */}
+            {outcome.kind === "complete" ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => focusById("enrich-result-heading")}
+                  className="btn btn-primary mt-3 min-h-11 w-full"
+                >
+                  View results for {outcome.data.sku}
+                </button>
+                {/*
+                  Only this one control, deliberately. It first carried shortcuts to Resolve and to
+                  the delivery download as well, which duplicated the two buttons the results panel
+                  already offers — and gave the page two links reading "Open in Resolve" pointing at
+                  the same place. For a screen reader navigating by link name that is a genuine
+                  ambiguity, not a cosmetic one, so the shortcut that had no equivalent stays and the
+                  duplicates went. The results are one press away and carry both actions.
+                */}
+                <p className="mt-2 text-center text-meta text-[var(--fg-quiet)]">
+                  Delivery files and the Resolve queue are in the results below.
+                </p>
+              </>
+            ) : null}
+
             {outcome.kind !== "idle" && !running ? (
               <button
                 type="button"
@@ -467,6 +539,7 @@ export function EnrichForm({ limits }: { limits: EnrichLimits }) {
                   setFields(EMPTY);
                   setOutcome({ kind: "idle" });
                   setSubmitted(null);
+                  focusById(mpnId);
                 }}
                 className="btn btn-quiet mt-3 min-h-11 w-full"
               >
@@ -501,6 +574,38 @@ export function EnrichForm({ limits }: { limits: EnrichLimits }) {
       {outcome.kind === "complete" ? <Result data={outcome.data} /> : null}
     </>
   );
+}
+
+// ------------------------------------------------------------------ navigation
+
+/**
+ * Scroll an element into view and give it focus.
+ *
+ * Both, in that order, and every call here needs both. Scrolling alone does nothing for a screen
+ * reader or for a keyboard user, whose next Tab would resume from wherever they were rather than from
+ * the thing that just appeared. Focus alone jumps without context.
+ *
+ * Every browser capability is feature-detected. `scrollIntoView` is absent in jsdom and `focus`
+ * options are not universal, and neither is worth a thrown exception: this is navigation convenience
+ * on a screen whose contents cost real money to produce, and a failed convenience call must never be
+ * able to unmount the results.
+ */
+function focusById(id: string): void {
+  if (typeof document === "undefined") return;
+  const element = document.getElementById(id);
+  if (element === null) return;
+
+  const reduced =
+    typeof window === "undefined" ||
+    typeof window.matchMedia !== "function" ||
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (typeof element.scrollIntoView === "function") {
+    element.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "center" });
+  }
+  if (typeof (element as HTMLElement).focus === "function") {
+    (element as HTMLElement).focus({ preventScroll: true });
+  }
 }
 
 // ------------------------------------------------------------------ copy
@@ -855,6 +960,28 @@ function Result({ data }: { data: EnrichResponse }) {
       ? derivedManufacturerSpecificationSummary
       : (summary.manufacturer_specifications ?? derivedManufacturerSpecificationSummary);
 
+  /**
+   * Take the reader to the results when they arrive.
+   *
+   * Not a flourish — it closes a genuine hole. The progress checklist is thirteen rows tall, so by
+   * the time a run finishes the viewport is a long way down it. The checklist then unmounts and this
+   * replaces it, which leaves the scroll offset pointing into the middle of a section that was not
+   * there a moment ago. The result was somebody watching a run complete and then asking where the
+   * output went, with the output directly under their scrollbar.
+   *
+   * Focus moves as well as scroll, and that ordering matters: scrolling alone does nothing for a
+   * screen reader or for a keyboard user, whose next Tab would otherwise resume from the submit
+   * button and walk back down through the form. `tabIndex={-1}` on the heading makes it a
+   * programmatic focus target without adding it to the tab order.
+   *
+   * Runs once, on mount. This component only ever mounts on a completed run, so there is no
+   * dependency worth re-firing on — and re-scrolling somebody who has deliberately scrolled away
+   * would be worse than not scrolling at all.
+   */
+  useEffect(() => {
+    focusById("enrich-result-heading");
+  }, []);
+
   return (
     <div className="animate-rise mt-10 flex flex-col gap-[var(--spacing-section)]">
       <section aria-labelledby="enrich-result-heading">
@@ -863,7 +990,8 @@ function Result({ data }: { data: EnrichResponse }) {
         </p>
         <h2
           id="enrich-result-heading"
-          className="mt-2 text-xl font-medium tracking-[var(--tracking-heading)]"
+          tabIndex={-1}
+          className="mt-2 text-xl font-medium tracking-[var(--tracking-heading)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent)]"
         >
           {data.sku}
           <span className="mono ml-3 text-base text-[var(--fg-tertiary)]">

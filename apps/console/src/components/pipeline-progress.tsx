@@ -164,6 +164,20 @@ export function PipelineProgress({
   const current = stages.find((stage) => stage.state === "running") ?? null;
   const failed = stages.find((stage) => stage.state === "failed") ?? null;
 
+  /**
+   * The pipeline is done but this component is still mounted.
+   *
+   * A real and initially confusing state, not an edge case. The API publishes `finish()` before it
+   * serialises the response, and the server action then revalidates seven routes — each of which
+   * re-reads every bundle in `data/console/` to recount the dashboards. On a thousand-SKU catalogue
+   * that is seconds of work *after* the last stage ticked green.
+   *
+   * Without saying so, the checklist sat at 13 of 13 with a spinner nowhere and nothing happening,
+   * which reads exactly like a run that finished and lost its result. So this is called out in words,
+   * the indeterminate motion stops, and the panel says what is still outstanding.
+   */
+  const settling = feed.kind === "live" && feed.snapshot.state === "complete";
+
   // The bar is a count, not a duration, and the label below it says so.
   const share = stages.length === 0 ? 0 : settled / stages.length;
   const runMs = now - startedAt.current;
@@ -185,11 +199,13 @@ export function PipelineProgress({
   const headline =
     failed !== null
       ? "The run stopped"
-      : current !== null
-        ? current.name
-        : feed.kind === "blind"
-          ? "Running — stage detail unavailable"
-          : "Starting the run";
+      : settling
+        ? "Pipeline finished"
+        : current !== null
+          ? current.name
+          : feed.kind === "blind"
+            ? "Running — stage detail unavailable"
+            : "Starting the run";
 
   return (
     <Panel
@@ -225,11 +241,15 @@ export function PipelineProgress({
         <p className="mt-3 max-w-prose text-body text-[var(--fg-secondary)]">
           {failed !== null
             ? (failed.detail ?? "The run failed. Nothing was published.")
-            : (current?.narration ??
-              (feed.kind === "blind"
-                ? "The run is still going — this console cannot read its stage detail right now, so " +
-                  "the checklist below has stopped updating rather than guess."
-                : "Validating the submission and opening the run."))}
+            : settling
+              ? "Every stage is done and the result is written to disk. Assembling the run summary " +
+                "and recounting the dashboards this SKU now appears on — a few seconds longer on a " +
+                "large catalogue. The results open below when it lands."
+              : (current?.narration ??
+                (feed.kind === "blind"
+                  ? "The run is still going — this console cannot read its stage detail right now, " +
+                    "so the checklist below has stopped updating rather than guess."
+                  : "Validating the submission and opening the run."))}
         </p>
 
         <div className="mt-5">
@@ -240,7 +260,7 @@ export function PipelineProgress({
           */}
           <div
             className="progress-track"
-            data-active={running && failed === null ? "true" : "false"}
+            data-active={running && failed === null && !settling ? "true" : "false"}
             role="progressbar"
             aria-valuemin={0}
             aria-valuemax={stages.length}
@@ -272,9 +292,11 @@ export function PipelineProgress({
       <p aria-live="polite" aria-atomic="true" className="sr-only">
         {failed !== null
           ? `The run stopped during ${failed.name}.`
-          : current !== null
-            ? `Stage ${settled + 1} of ${stages.length}: ${current.name}. ${current.narration}`
-            : `${settled} of ${stages.length} stages complete.`}
+          : settling
+            ? `All ${stages.length} stages complete. Assembling the results.`
+            : current !== null
+              ? `Stage ${settled + 1} of ${stages.length}: ${current.name}. ${current.narration}`
+              : `${settled} of ${stages.length} stages complete.`}
       </p>
 
       {/* ------------------------------------------------------------ the checklist */}

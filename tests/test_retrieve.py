@@ -774,6 +774,19 @@ VERIFIED_PATTERN_OWNERS = {
     # satco.com addresses product pages by the bare order code. See schema/sourcing.yaml for the
     # standing note that the site answers automated requests with HTTP 429.
     "satco",
+    # mirka.com/en/p/{mpn}/ — checked against all thirteen Mirka part numbers reachable from the
+    # item master and the corpus. Four resolve to a real product page carrying the part number and a
+    # specification table: 8896700140, 8999000111, MIW9502022BA, MRP6002100. Nine return 404,
+    # because Mirka addresses its machines and its consumables by different codes and the item
+    # master's abrasive rows carry the distributor's code: 5B-332-080, 5B-332-120, 9A-129-120,
+    # 9A-219-120RP, 9A-219-180, 9A-570-240, 9A-570-320, 24-35M-320, MID6630201US.
+    #
+    # A partial hit rate is the reason to declare it rather than a reason not to. A rejected
+    # candidate costs one request and the arms behind it still run, whereas without the pattern
+    # reaching a Mirka product page depended on what the search provider returned — and mirka.com
+    # publishes no usable GET search form, so `axiom.retrieve.discover` cannot search it at all and
+    # says so in a note that names this exact fix.
+    "mirka",
 }
 """Manufacturers permitted to declare a URL pattern, because someone verified theirs.
 

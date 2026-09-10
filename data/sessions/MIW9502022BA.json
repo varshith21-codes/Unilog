@@ -1,0 +1,1838 @@
+{
+  "sku": "MIW9502022BA",
+  "tenant_id": "demo",
+  "brand": null,
+  "class_code": "TOL.PWR.GEN",
+  "class_name": "Power Tool",
+  "category_path": [
+    "Tools & Consumables",
+    "Power Tools",
+    "Power Tools"
+  ],
+  "document_id": "MIW9502022BA@87fa4fee",
+  "document_sha256": "87fa4fee74134a0bd3f2e0aeb500bfecd099627407ee318f6053d9cb934a1a87",
+  "gaps": [
+    {
+      "code": "tool_configuration",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "MIW9502022BA@87fa4fee"
+      ],
+      "required": true,
+      "detail": "Source describes the product as a 'wall and ceiling sander' and 'sander' without listing configuration terms like 'Kit', 'Bare', or 'Set'.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "power_source",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "MIW9502022BA@87fa4fee"
+      ],
+      "required": true,
+      "detail": "Source does not explicitly state the power source (e.g., 'Corded', 'Cordless', 'Pneumatic').",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "battery_platform",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "MIW9502022BA@87fa4fee"
+      ],
+      "required": false,
+      "detail": "Source does not mention a battery platform (e.g., 'M18', '20V').",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "battery_voltage",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "MIW9502022BA@87fa4fee"
+      ],
+      "required": false,
+      "detail": "Source does not list a battery voltage.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "drive_size",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "MIW9502022BA@87fa4fee"
+      ],
+      "required": false,
+      "detail": "Source does not list a drive size (e.g., '1/2' square', '1/4' hex').",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "chuck_size",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "MIW9502022BA@87fa4fee"
+      ],
+      "required": false,
+      "detail": "Source does not list a chuck size.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "blade_diameter",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "MIW9502022BA@87fa4fee"
+      ],
+      "required": false,
+      "detail": "Source does not list a blade diameter.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "no_load_speed",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "MIW9502022BA@87fa4fee"
+      ],
+      "required": false,
+      "detail": "Source lists 'Max Speed' and 'Min Speed' but the attribute definition requires 'No-Load Speed' (RPM).",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "voltage_rating",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "MIW9502022BA@87fa4fee"
+      ],
+      "required": false,
+      "detail": "Source lists 'Voltage Supply' (220-240 VAC) which is the input voltage, not the 'Voltage Rating' of the appliance as defined in the prompt.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "amperage_rating",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "MIW9502022BA@87fa4fee"
+      ],
+      "required": false,
+      "detail": "Source does not list an amperage rating.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "product_series",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "MIW9502022BA@87fa4fee"
+      ],
+      "required": false,
+      "detail": "Source does not list a product series designation.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "model_number",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "MIW9502022BA@87fa4fee"
+      ],
+      "required": false,
+      "detail": "Source does not list a marketing model number separate from the part number.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "overall_size",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "MIW9502022BA@87fa4fee"
+      ],
+      "required": false,
+      "detail": "Source does not list an overall size statement.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "each_weight",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "MIW9502022BA@87fa4fee"
+      ],
+      "required": false,
+      "detail": "Source lists 'Weight' as 3.5 kg, but the attribute definition requires 'Weight (Each)' and distinguishes it from carton weight.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "sound_level",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "MIW9502022BA@87fa4fee"
+      ],
+      "required": false,
+      "detail": "Source lists 'Noise Level, LpA (dB)' as 73.0 dB, but the attribute definition requires 'Sound Level' (dBA).",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "pack_quantity",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "MIW9502022BA@87fa4fee"
+      ],
+      "required": false,
+      "detail": "Source does not list a pack quantity.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "selling_uom",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "MIW9502022BA@87fa4fee"
+      ],
+      "required": false,
+      "detail": "Source does not list a selling unit of measure.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "additional_information",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "MIW9502022BA@87fa4fee"
+      ],
+      "required": false,
+      "detail": "Source does not list additional information.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "warranty_terms",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "MIW9502022BA@87fa4fee"
+      ],
+      "required": false,
+      "detail": "Source lists '2+1 years' warranty but does not state the terms explicitly (e.g., '1 Year Manufacturer, 1 Year Labor and Parts').",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "included_technology",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "MIW9502022BA@87fa4fee"
+      ],
+      "required": false,
+      "detail": "Source does not list included technology.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "approvals",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "MIW9502022BA@87fa4fee"
+      ],
+      "required": false,
+      "detail": "Source does not list any approvals or certifications.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "country_of_origin",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "MIW9502022BA@87fa4fee"
+      ],
+      "required": false,
+      "detail": "Source does not list the country of origin.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "prop65_warning_required",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "MIW9502022BA@87fa4fee"
+      ],
+      "required": false,
+      "detail": "Source does not state a California Proposition 65 warning.",
+      "recommended_action": "request_from_supplier"
+    },
+    {
+      "code": "gtin",
+      "reason": "not_present_in_any_source",
+      "sources_searched": [
+        "MIW9502022BA@87fa4fee"
+      ],
+      "required": false,
+      "detail": "Source does not list a GTIN, UPC, or barcode.",
+      "recommended_action": "request_from_supplier"
+    }
+  ],
+  "policy": {
+    "epsilon": 0.05,
+    "confidence_level": 0.95,
+    "threshold": 0.6853,
+    "coverage": 1.0,
+    "accepted": 220,
+    "accepted_errors": 1,
+    "observed_error_rate": 0.0045,
+    "error_upper_bound": 0.0201,
+    "calibration_size": 220,
+    "achievable": true,
+    "reason": "at threshold 0.685, 100.0% of values are publishable with an error rate of at most 2.0% at 95% confidence"
+  },
+  "quality": {
+    "completeness": 0.0,
+    "verifiability": 1.0,
+    "consistency": 1.0,
+    "richness": 0.75,
+    "self_declared": 0.0,
+    "corroborated": 0.0,
+    "composite": 0.625,
+    "measured_dimensions": [
+      "completeness",
+      "consistency",
+      "richness",
+      "verifiability"
+    ]
+  },
+  "created_at": "2026-09-10T14:38:48.850991+00:00",
+  "decisions": [],
+  "manufacturer_specifications": [
+    {
+      "specification_id": "ms_d2015baf87cefc20",
+      "label_raw": "Product",
+      "value_raw": "Mirka\u00ae LEROS 950CV EU \u00d8 225 mm 5.0 mm orbit with bag - Mirka",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@87fa4fee",
+          "quote": "Product     | Mirka\u00ae LEROS 950CV EU \u00d8 225 mm 5.0 mm orbit with bag - Mirka",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": 0,
+          "table_ref": "t1:r0",
+          "method": "table_row"
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_a5a1ebaea58c5eb0",
+      "label_raw": "Description",
+      "value_raw": "Light-weight and flexible brushless wall and ceiling sander allowing an ergonomic working position.",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@87fa4fee",
+          "quote": "Description | Light-weight and flexible brushless wall and ceiling sander allowing an ergonomic working position.",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": 1,
+          "table_ref": "t1:r1",
+          "method": "table_row"
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_12baabb88237c163",
+      "label_raw": "Part Number",
+      "value_raw": "MIW9502022BA",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@87fa4fee",
+          "quote": "Part Number | MIW9502022BA",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": 4,
+          "table_ref": "t1:r4",
+          "method": "table_row"
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_64bdb706bae3056c",
+      "label_raw": "Dust System",
+      "value_raw": "Central vacuum ready",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@87fa4fee",
+          "quote": "Dust System            | Central vacuum ready",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": 3,
+          "table_ref": "t2:r0",
+          "method": "table_row"
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_8f20f13cb9f0c816",
+      "label_raw": "Max Speed (rpm)",
+      "value_raw": "8000 rpm",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@87fa4fee",
+          "quote": "Max Speed (rpm)        | 8000 rpm",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": 4,
+          "table_ref": "t2:r1",
+          "method": "table_row"
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_806cbd558bc8879e",
+      "label_raw": "Min Speed (rpm)",
+      "value_raw": "4000 rpm",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@87fa4fee",
+          "quote": "Min Speed (rpm)        | 4000 rpm",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": 5,
+          "table_ref": "t2:r2",
+          "method": "table_row"
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_d801ea641dc1b556",
+      "label_raw": "Noise Level, LpA (dB)",
+      "value_raw": "73.0 dB",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@87fa4fee",
+          "quote": "Noise Level, LpA (dB)  | 73.0 dB",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": 6,
+          "table_ref": "t2:r3",
+          "method": "table_row"
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_364c31d872db1d35",
+      "label_raw": "Orbit",
+      "value_raw": "5 mm",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@87fa4fee",
+          "quote": "Orbit                  | 5 mm",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": 7,
+          "table_ref": "t2:r4",
+          "method": "table_row"
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_8c81634c63a87ad9",
+      "label_raw": "Orbit Type",
+      "value_raw": "Random",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@87fa4fee",
+          "quote": "Orbit Type             | Random",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": 8,
+          "table_ref": "t2:r5",
+          "method": "table_row"
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_4063c60969ed9c78",
+      "label_raw": "Pad Diameter",
+      "value_raw": "225 mm",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@87fa4fee",
+          "quote": "Pad Diameter           | 225 mm",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": 9,
+          "table_ref": "t2:r6",
+          "method": "table_row"
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_4d694b65f42f92ca",
+      "label_raw": "Pad Included",
+      "value_raw": "MIW9514312",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@87fa4fee",
+          "quote": "Pad Included           | MIW9514312",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": 10,
+          "table_ref": "t2:r7",
+          "method": "table_row"
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_fa1e77e94a365254",
+      "label_raw": "Plug Type",
+      "value_raw": "EU",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@87fa4fee",
+          "quote": "Plug Type              | EU",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": 11,
+          "table_ref": "t2:r8",
+          "method": "table_row"
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_5dde3d25cd04561f",
+      "label_raw": "Power Input (W)",
+      "value_raw": "350 W",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@87fa4fee",
+          "quote": "Power Input (W)        | 350 W",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": 12,
+          "table_ref": "t2:r9",
+          "method": "table_row"
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_2ed7e3dc8b20f027",
+      "label_raw": "Vibration Level (m/s\u00b2)",
+      "value_raw": "2.5 m/s\u00b2",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@87fa4fee",
+          "quote": "Vibration Level (m/s\u00b2) | 2.5 m/s\u00b2",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": 13,
+          "table_ref": "t2:r10",
+          "method": "table_row"
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_7b673944e13593af",
+      "label_raw": "Voltage Supply (VAC)",
+      "value_raw": "220-240 VAC",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@87fa4fee",
+          "quote": "Voltage Supply (VAC)   | 220-240 VAC",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": 14,
+          "table_ref": "t2:r11",
+          "method": "table_row"
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_1b642025436a9368",
+      "label_raw": "Weight",
+      "value_raw": "3.5 kg",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@87fa4fee",
+          "quote": "Weight                 | 3.5 kg",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": 15,
+          "table_ref": "t2:r12",
+          "method": "table_row"
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_e1be8b77ecb31a26",
+      "label_raw": "Product",
+      "value_raw": "Mirka LEROS 950CV EU \u00d8 225 mm 5,0 mm Hub mit Tasche - Mirka",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@a2cdbba3",
+          "quote": "Product | Mirka LEROS 950CV EU \u00d8 225 mm 5,0 mm Hub mit Tasche - Mirka",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": null,
+          "table_ref": "t1:r0",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_5bc6cc752dde84d2",
+      "label_raw": "Description",
+      "value_raw": "Dieser einzigartige Wand- und Deckenschleifer \u00fcberzeugt mit nur 3,5 kg Gewicht und einem b\u00fcrstenlosen Motor. Das geringe Gewicht erm\u00f6glicht dem Anwender ein Schleifen \u00fcber l\u00e4ngere Zeitr\u00e4ume ohne den K\u00f6rper zu belasten. Ein weiterer Vorteil ist die 180 \u00b0 Flexibilit\u00e4t am Schleifkopf. Die Oberfl\u00e4che kann von einem besseren Winkel erreicht werden, dies erm\u00f6glicht dem Anwender eine ergonomische Position. Mirka\u00ae LEROS hat eine exzentrische Bewegung, dank welcher die Maschine genau auf die Bewegungen des Anwenders reagiert. Eine praktische Tragetasche ist im Lieferumfang enthalten.",
+      "confidence": 0.9,
+      "method": "document_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@a2cdbba3",
+          "quote": "Description | Dieser einzigartige Wand- und Deckenschleifer \u00fcberzeugt mit nur 3,5 kg Gewicht und einem b\u00fcrstenlosen Motor. Das geringe Gewicht erm\u00f6glicht dem Anwender ein Schleifen \u00fcber l\u00e4ngere Zeitr\u00e4ume ohne den K\u00f6rper zu belasten. Ein weiterer Vorteil ist die 180 \u00b0 Flexibilit\u00e4t am Schleifkopf. Die Oberfl\u00e4che kann von einem besseren Winkel erreicht werden, dies erm\u00f6glicht dem Anwender eine ergonomische Position. Mirka\u00ae LEROS hat eine exzentrische Bewegung, dank welcher die Maschine genau auf die Bewegungen des Anwenders reagiert. Eine praktische Tragetasche ist im Lieferumfang enthalten.",
+          "verified": true,
+          "match_score": 0.9881,
+          "page": 4,
+          "line_index": null,
+          "table_ref": null,
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_1cdb5b9e0a0bd348",
+      "label_raw": "Part Number",
+      "value_raw": "MIW9502022BA",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@a2cdbba3",
+          "quote": "Part Number | MIW9502022BA",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": 4,
+          "table_ref": "t1:r4",
+          "method": "table_row"
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_50405952ee224fba",
+      "label_raw": "Staubsystem",
+      "value_raw": "Zentralabsaugung",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@a2cdbba3",
+          "quote": "Staubsystem | Zentralabsaugung",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t2:r0",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_964d90ab93d74f84",
+      "label_raw": "H\u00f6chstgeschwindigkeit (U/min)",
+      "value_raw": "8000 rpm",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@a2cdbba3",
+          "quote": "H\u00f6chstgeschwindigkeit (U/min) | 8000 rpm",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t2:r1",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_8ac1ec2b362ab96a",
+      "label_raw": "Min. Geschwindigkeit (U/min)",
+      "value_raw": "4000 rpm",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@a2cdbba3",
+          "quote": "Min. Geschwindigkeit (U/min) | 4000 rpm",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t2:r2",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_34c6733ccf266a69",
+      "label_raw": "Ger\u00e4uschpegel, LpA (dB)",
+      "value_raw": "73.0 dB",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@a2cdbba3",
+          "quote": "Ger\u00e4uschpegel, LpA (dB) | 73.0 dB",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t2:r3",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_edde04d535555ca0",
+      "label_raw": "Orbit",
+      "value_raw": "5 mm",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@a2cdbba3",
+          "quote": "Orbit | 5 mm",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": 7,
+          "table_ref": "t2:r4",
+          "method": "table_row"
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_f774440a39c50baf",
+      "label_raw": "Orbit Typ",
+      "value_raw": "Random",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@a2cdbba3",
+          "quote": "Orbit Typ | Random",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": 8,
+          "table_ref": "t2:r5",
+          "method": "table_row"
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_885302560e12c8a1",
+      "label_raw": "Teller Durchmesser",
+      "value_raw": "225 mm",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@a2cdbba3",
+          "quote": "Teller Durchmesser | 225 mm",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t2:r6",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_9f2cce9007d3bab8",
+      "label_raw": "Teller enthalten",
+      "value_raw": "MIW9514312",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@a2cdbba3",
+          "quote": "Teller enthalten | MIW9514312",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t2:r7",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_ebffce9261dcebe4",
+      "label_raw": "Steckertyp",
+      "value_raw": "EU",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@a2cdbba3",
+          "quote": "Steckertyp | EU",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t2:r8",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_a19137f5baad4ae2",
+      "label_raw": "Leistungsaufnahme (W)",
+      "value_raw": "350 W",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@a2cdbba3",
+          "quote": "Leistungsaufnahme (W) | 350 W",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t2:r9",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_244874d1977b3fcd",
+      "label_raw": "Vibrationspegel (m/s\u00b2)",
+      "value_raw": "2.5 m/s\u00b2",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@a2cdbba3",
+          "quote": "Vibrationspegel (m/s\u00b2) | 2.5 m/s\u00b2",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t2:r10",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_6d042766d5dac218",
+      "label_raw": "Spannungsversorgung",
+      "value_raw": "220-240 VAC",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@a2cdbba3",
+          "quote": "Spannungsversorgung | 220-240 VAC",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t2:r11",
+          "method": null
+        }
+      ]
+    },
+    {
+      "specification_id": "ms_4a04d65b6adf2eb4",
+      "label_raw": "Gewicht",
+      "value_raw": "3.5 kg",
+      "confidence": 0.9,
+      "method": "table_extraction",
+      "mapped_attribute_code": null,
+      "citable_as_manufacturer": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@a2cdbba3",
+          "quote": "Gewicht | 3.5 kg",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t2:r12",
+          "method": null
+        }
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "number": 1,
+      "lines": [
+        "Product      Mirka\u00ae LEROS 950CV EU \u00d8 225 mm 5.0 mm orbit with bag - Mirka",
+        "Description  Light-weight and flexible brushless wall and ceiling sander allowing an ergonomic working position.",
+        "Product      Mirka\u00ae LEROS 950CV EU \u00d8 225 mm 5.0 mm orbit with bag",
+        "Source URL   https://www.mirka.com/en/p/MIW9502022BA/",
+        "Part Number  MIW9502022BA",
+        "",
+        "Skip to content",
+        "Find a reseller",
+        "Products",
+        "Abrasives and Compounds",
+        "Abrasives",
+        "Polishing Products",
+        "Cutting and Grinding",
+        "Other Abrasive Products",
+        "Sanding Belt Range",
+        "Robotics and Automation",
+        "Robotic Sanders and Polishers",
+        "Robotic Accessories",
+        "Robot Kits",
+        "Automatic Abrasive Changers",
+        "Turnkey Solutions",
+        "Precision Grinding",
+        "Bonded Abrasives",
+        "Superabrasive Wheels",
+        "Mounted Points",
+        "Power Tools",
+        "Electric Sanders",
+        "Wall Sanders",
+        "Cordless Tools",
+        "Dust Extractors",
+        "Electric Polishers",
+        "Pneumatic Polishers",
+        "Pneumatic Sanders",
+        "Accessories for Dust Extractors",
+        "Accessories for Power Tools",
+        "Spare Parts for Power Tools",
+        "Dust-Free Sanding",
+        "Net Abrasives",
+        "Accessories and Consumables",
+        "Backing Pads",
+        "Hand Sanding Tools",
+        "Hoses and Adapters",
+        "Masking and Tapes",
+        "Pad Savers and Interfaces",
+        "Paint Mixing",
+        "Personal Protection",
+        "Polishing Accessories",
+        "Storage and Transport",
+        "Other Accessories and Supplies",
+        "All Products",
+        "Top Brands",
+        "Mirka\u00ae Trolleys and Workstations",
+        "POLAROS RP 600",
+        "DEXOS\u00ae Dust Extractors",
+        "Mirka Iridium\u2122 Soft",
+        "Next Generation Mirka Power Tools",
+        "DEROS\u00ae RS Rotary Sander",
+        "All top brands"
+      ]
+    },
+    {
+      "number": 2,
+      "lines": [
+        "Know-how",
+        "Industries",
+        "Collision Repair",
+        "Wood",
+        "Construction, Renovation and Interior Finishing",
+        "Marine Surface Finishing",
+        "Tool Manufacturing",
+        "Automotive Industry",
+        "Aerospace",
+        "Composite",
+        "Mobile Screen Refurbishment",
+        "Powertrain",
+        "Wind Power",
+        "Applications",
+        "Plastic Repair",
+        "Automotive Paint Removal",
+        "Abrasives and Tools for Microcement Application",
+        "Build, Restore or Renovate With Mirka",
+        "Venetian Plaster",
+        "Solid Surface Sanding Finishing and Polishing",
+        "Wall and Ceiling Sanding and Preparation",
+        "Marine Propeller Finishing",
+        "Gelcoat Sanding and Polishing for Yachts and Boats",
+        "Automotive Finishing and Spot Repair",
+        "View all applications",
+        "Solutions",
+        "Precision Grinding Solutions",
+        "Dust-Free Sanding",
+        "Industrial Automation \u2013 Robotic polishing, sanding, and grinding",
+        "Marine: Pro Results Made Simple",
+        "Multifit\u00ae \u2013 Perforation Technology for Abrasives",
+        "OSP - Optimized Surface Preparation for Vehicle Repair",
+        "Mirka\u00ae STYRO Concept",
+        "Mirka Cutting and Grinding Wheels",
+        "Personal Protection",
+        "Remint\u2122 - Refurbishment of Screens for Smartphones",
+        "Glass Sanding and Polishing Glass",
+        "Electric Tools vs Pneumatic",
+        "Mirka\u00ae PRO Finishing Solution",
+        "Savings calculator for yacht surface finishing process",
+        "Save time and money in yacht surface finishing - Download Marine white paper",
+        "Save time and money in Interior Finishing - Download White Paper",
+        "Save time and money in Wood Sanding - Download White Paper",
+        "Support",
+        "Downloads",
+        "Brochures",
+        "Manuals",
+        "Exploded Views",
+        "Safety Data Sheets",
+        "Product Carbon Footprint",
+        "All Technical Documents",
+        "Warranty Terms",
+        "myMirka\u00ae App",
+        "Mirka Premium Service Plan",
+        "Customer Service",
+        "Report an Issue",
+        "Find a reseller",
+        "Help Center"
+      ]
+    },
+    {
+      "number": 3,
+      "lines": [
+        "Preventive Maintenance",
+        "2+1 years",
+        "Register Your Tool",
+        "All Mirka power tools have a standard two-year warranty. Get an additional 1 year of warranty free of charge by registering your tool within 30 days of purchase.",
+        "Warranty Registration",
+        "Company",
+        "Sustainability",
+        "Commitments & Transparency",
+        "Circularity",
+        "Social Impact",
+        "The Environment",
+        "Networks & Memberships",
+        "Compliance & Governance",
+        "Contact Us",
+        "Importers",
+        "Management",
+        "Newsletter",
+        "Our Subsidiaries",
+        "Sales & Corporate Management",
+        "About Us",
+        "Award-Winning Tools",
+        "History",
+        "Patents",
+        "Accessability",
+        "For Media",
+        "For Partners",
+        "Distributor application",
+        "For Suppliers",
+        "Career",
+        "News",
+        "Mirka Enables Body Shop Plastic Repairs",
+        "POLAROS\u00ae RP 600 Receives Red Dot Award for Product Design",
+        "Mirka Receives EcoVadis Bronze Medal 2026",
+        "The Untold Story of Abrasives' Environmental Impact",
+        "Find a reseller",
+        "Asia/Pacific",
+        "Australia",
+        "English",
+        "China",
+        "\u4e2d\u6587",
+        "India",
+        "English",
+        "Japan",
+        "\u65e5\u672c\u8a9e",
+        "Korea",
+        "\ud55c\uad6d\ub9d0/\ud55c\uad6d\uc5b4",
+        "Middle East",
+        "English",
+        "Singapore",
+        "English",
+        "Thailand",
+        "\u0e44\u0e17\u0e22",
+        "T\u00fcrkiye",
+        "T\u00fcrk\u00e7e",
+        "Europe",
+        "Belgium",
+        "Nederlands",
+        "Fran\u00e7ais"
+      ]
+    },
+    {
+      "number": 4,
+      "lines": [
+        "Czech Republic",
+        "\u010ce\u0161tina",
+        "Denmark",
+        "Dansk",
+        "Finland",
+        "Suomi",
+        "Svenska",
+        "France",
+        "Fran\u00e7ais",
+        "Germany",
+        "Deutsch",
+        "Hungary",
+        "Magyar",
+        "Italy",
+        "Italiano",
+        "Netherlands",
+        "Nederlands",
+        "Norway",
+        "Norsk",
+        "Poland",
+        "Polski",
+        "Portugal",
+        "Portugu\u00eas",
+        "Romania",
+        "Rom\u00e2n\u0103",
+        "Spain",
+        "Espa\u00f1ol",
+        "Sweden",
+        "Svenska",
+        "United Kingdom",
+        "English",
+        "North America",
+        "Canada",
+        "English",
+        "Fran\u00e7ais",
+        "Mexico",
+        "Espa\u00f1ol",
+        "United States",
+        "English",
+        "South America",
+        "Brazil",
+        "Portugu\u00eas",
+        "Global",
+        "Global Site",
+        "English",
+        "Global Site",
+        "Russian",
+        "Register and repair tools",
+        "Keep your tools in excellent shape on myMirka where you can register, manage and order repair for your tools.",
+        "Login to myMirka",
+        "Mirka partners",
+        "Replenish your stock, access marketing materials, view sales guides and read about upcoming product launches.",
+        "Login to Partner Portal",
+        "Home",
+        "Mirka\u00ae LEROS 950CV EU \u00d8 225 mm 5.0 mm orbit with bag",
+        "Mirka\u00ae LEROS 950CV EU \u00d8 225 mm 5.0 mm orbit with bag",
+        "Light-weight and flexible brushless wall and ceiling sander allowing an ergonomic working position.",
+        "Use for"
+      ]
+    },
+    {
+      "number": 5,
+      "lines": [
+        "Sanding",
+        "Unique brushless wall and ceiling sander. The light, under 3,5 kg weight means the sander can be used for longer periods in greater comfort. Mirka\u00ae LEROS is the first wall sander with 180\u00b0 flexibility on the sanding head, which helps the operator reach surfaces from a better angle and allows a more ergonomic working position. The random orbital movement gives precise responses to the operator\u2019s movements. The special sanding head and backing pad design make it possible to work very close to corners and edges. Furthermore, the fixation point of the sanding head is close to the surface, stabilizing the sanding process. Bluetooth connectivity offers additional features via the myMirka app, helping you to keep track of vibration, speed and usage data. ",
+        "A practical carrying bag is included in the package.",
+        "Dust System             Central vacuum ready",
+        "Max Speed (rpm)         8000 rpm",
+        "Min Speed (rpm)         4000 rpm",
+        "Noise Level, LpA (dB)   73.0 dB",
+        "Orbit                   5 mm",
+        "Orbit Type              Random",
+        "Pad Diameter            225 mm",
+        "Pad Included            MIW9514312",
+        "Plug Type               EU",
+        "Power Input (W)         350 W",
+        "Vibration Level (m/s\u00b2)  2.5 m/s\u00b2",
+        "Voltage Supply (VAC)    220-240 VAC",
+        "Weight                  3.5 kg",
+        "PDF",
+        "",
+        "Exploded View - Mirka\u00ae LEROS",
+        "Download",
+        "PDF",
+        "",
+        "Mirka\u00ae LEROS Leaflet",
+        "Download",
+        "PDF",
+        "",
+        "Manual - Mirka\u00ae LEROS-S 950CV",
+        "Download",
+        "Related products",
+        "Accessories",
+        "",
+        "Fastening Straps Kit 6/Pack",
+        "This hook and loop fastening strap kit enables attachment of the electrical cord to the\u2026",
+        "Use together",
+        "",
+        "Interface \u00d8 225 mm 25 Holes Grip",
+        "Interface for \u00d8 225 mm Backing Pads. Mirka's Interface pads are used for sanding rounded\u2026",
+        "Use together",
+        "",
+        "Hose and Connector \u00d8 27 mm / 32 mm",
+        "A flexible dust suction hose connecting the sander and the dust extractor.",
+        "Similar products",
+        "",
+        "Mirka LEROS-S 950CV Wall Sander 225mm 5,0",
+        "Ideal for sanding in smaller rooms like bathrooms and walk-in wardrobes.",
+        "Accessories",
+        "",
+        "Mirka\u00ae Sleeve + Cable CE 230V + Hose \u00d8 27 mm / 32 mm",
+        "Preassembled hose with connector and CE 230V cable in a durable sleeve.",
+        "Use together",
+        "",
+        "Rewireable Connector HP-9R",
+        "Rewireable connector. This connector fits all versions of cables for Mirka\u00ae DEROS, Mirka\u00ae DEOS and\u2026",
+        "Use together",
+        "",
+        "Mirka\u00ae Sleeve + Cable CE 230V + Hose \u00d8 27 mm / 32 mm",
+        "Preassembled hose with connector and CE 230V cable in a durable sleeve.",
+        "Accessories"
+      ]
+    },
+    {
+      "number": 6,
+      "lines": [
+        "",
+        "Extension shaft for Mirka LEROS",
+        "Extension shaft to increase your reach when sanding with the Mirka\u00ae LEROS wall sander.",
+        "Accessories",
+        "",
+        "Carry Bag for Mirka LEROS",
+        "A practical, protective bag with carrying strap for the Mirka\u00ae LEROS wall sander.",
+        "Use together",
+        "",
+        "Pad Saver 225mm 25H for Mirka LEROS, 1/Pack",
+        "Pad saver suitable for the Mirka\u00ae LEROS.",
+        "Use together",
+        "",
+        "Dual Vacuum Kit",
+        "Dual operator kit for two vacuum hoses.",
+        "Use together",
+        "",
+        "Backing Pad \u00d8 225 mm",
+        "Backing Pad \u00d8 225 mm for Mirka\u00ae LEROS and LEROS-S.",
+        "Use together",
+        "",
+        "Abranet\u00ae Yellow \u00d8 225 mm Grip",
+        "Mirka\u00ae Abranet Yellow \u2013 soft, net-based abrasives for efficient wall and ceiling sanding.",
+        "Use together",
+        "",
+        "DecoSander 80 x 230 mm / 225 mm with bag and hose",
+        "A manual pole sander designed for dust-free and precise sanding of walls and ceilings.",
+        "Welcome to the global Mirka website",
+        "To find out more about Mirka products and solutions available in your own region, please visit your local mirka.com website .",
+        "Contact us",
+        "Do you want to know more? Please get in touch and our expert support team will answer your questions.",
+        "Products",
+        "Abrasives and Compounds",
+        "Accessories and Consumables",
+        "All Products",
+        "Dust-Free Sanding",
+        "Power Tools",
+        "Robotics and Automation",
+        "Superabrasives",
+        "Top Brands",
+        "Know-how",
+        "Applications",
+        "Industries",
+        "Solutions",
+        "Support",
+        "Customer Service",
+        "Downloads",
+        "Help Center",
+        "Mirka Premium Service Plan",
+        "myMirka app",
+        "Preventive Maintenance",
+        "Warranty Terms",
+        "GARAN EU Legal Guarantee",
+        "Company",
+        "About Us",
+        "Career",
+        "Contact Us",
+        "For Media"
+      ]
+    },
+    {
+      "number": 7,
+      "lines": [
+        "For Partners",
+        "News",
+        "Newsletter",
+        "Find us",
+        "Mirka Ltd, 2026",
+        "Privacy policy Terms of Use Cookie preferences",
+        "India English"
+      ]
+    }
+  ],
+  "items": [
+    {
+      "attribute_code": "voltage_rating",
+      "attribute_name": "Voltage Rating",
+      "datatype": "quantity",
+      "value_raw": "220-240 VAC",
+      "value_canonical": {
+        "magnitude": 220.0,
+        "unit": "V"
+      },
+      "value_display": "220 V",
+      "score": 0.7385,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.739 >= threshold 0.685",
+      "method": "table_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@a2cdbba3",
+          "quote": "Spannungsversorgung | 220-240 VAC",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t2:r11",
+          "method": null
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": "V"
+    },
+    {
+      "attribute_code": "product_series",
+      "attribute_name": "Product Series",
+      "datatype": "string",
+      "value_raw": "LEROS 950CV",
+      "value_canonical": "LEROS 950CV",
+      "value_display": "LEROS 950CV",
+      "score": 0.95,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.950 >= threshold 0.685",
+      "method": "table_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@a2cdbba3",
+          "quote": "Mirka LEROS 950CV EU \u00d8 225 mm 5,0 mm Hub mit Tasche",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": null,
+          "table_ref": "t1:r2:c1",
+          "method": null
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": null
+    },
+    {
+      "attribute_code": "each_weight",
+      "attribute_name": "Weight (Each)",
+      "datatype": "quantity",
+      "value_raw": "3.5 kg",
+      "value_canonical": {
+        "magnitude": 3.5,
+        "unit": "kg"
+      },
+      "value_display": "3.5 kg",
+      "score": 0.925,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.925 >= threshold 0.685",
+      "method": "table_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@a2cdbba3",
+          "quote": "Gewicht | 3.5 kg",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t2:r12",
+          "method": null
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": "kg"
+    },
+    {
+      "attribute_code": "sound_level",
+      "attribute_name": "Sound Level",
+      "datatype": "quantity",
+      "value_raw": "73.0 dB",
+      "value_canonical": {
+        "magnitude": 73.0,
+        "unit": "dBA"
+      },
+      "value_display": "73 dBA",
+      "score": 0.95,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.950 >= threshold 0.685",
+      "method": "table_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@a2cdbba3",
+          "quote": "Ger\u00e4uschpegel, LpA (dB) | 73.0 dB",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 5,
+          "line_index": null,
+          "table_ref": "t2:r3",
+          "method": null
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": "dBA"
+    },
+    {
+      "attribute_code": "warranty_terms",
+      "attribute_name": "Warranty",
+      "datatype": "string",
+      "value_raw": "2+1 Jahre",
+      "value_canonical": "2+1 Jahre",
+      "value_display": "2+1 Jahre",
+      "score": 0.8,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.800 >= threshold 0.685",
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "MIW9502022BA@a2cdbba3",
+          "quote": "2+1 Jahre",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 2,
+          "line_index": null,
+          "table_ref": null,
+          "method": null
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": null
+    },
+    {
+      "attribute_code": "no_load_speed",
+      "attribute_name": "No-Load Speed (RPM)",
+      "datatype": "integer",
+      "value_raw": "8000",
+      "value_canonical": 8000,
+      "value_display": "8000",
+      "score": 0.8767,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.877 >= threshold 0.685",
+      "method": "table_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "urun-katalou-2026@b5039ff3",
+          "quote": "4000 - 8000/min",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 118,
+          "line_index": null,
+          "table_ref": "t341:r1:c8",
+          "method": null
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": null
+    },
+    {
+      "attribute_code": "voltage_rating",
+      "attribute_name": "Voltage Rating",
+      "datatype": "quantity",
+      "value_raw": "230 V",
+      "value_canonical": {
+        "magnitude": 230.0,
+        "unit": "V"
+      },
+      "value_display": "230 V",
+      "score": 0.7385,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.739 >= threshold 0.685",
+      "method": "document_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "urun-katalou-2026@b5039ff3",
+          "quote": "Kablo CE 230V",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 119,
+          "line_index": null,
+          "table_ref": null,
+          "method": null
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": "V"
+    },
+    {
+      "attribute_code": "product_series",
+      "attribute_name": "Product Series",
+      "datatype": "string",
+      "value_raw": "LEROS",
+      "value_canonical": "LEROS",
+      "value_display": "LEROS",
+      "score": 0.95,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.950 >= threshold 0.685",
+      "method": "table_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "urun-katalou-2026@b5039ff3",
+          "quote": "Mirka LEROS 950CV 225mm Duvar Z\u0131mpara Makinesi+ Vidalar Ta\u015f\u0131ma K\u0131l\u0131fl\u0131",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 118,
+          "line_index": null,
+          "table_ref": "t340:r1:c0",
+          "method": null
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": null
+    },
+    {
+      "attribute_code": "model_number",
+      "attribute_name": "Model",
+      "datatype": "string",
+      "value_raw": "950CV",
+      "value_canonical": "950CV",
+      "value_display": "950CV",
+      "score": 0.95,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.950 >= threshold 0.685",
+      "method": "table_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "urun-katalou-2026@b5039ff3",
+          "quote": "Mirka LEROS 950CV 225mm Duvar Z\u0131mpara Makinesi+ Vidalar Ta\u015f\u0131ma K\u0131l\u0131fl\u0131",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 118,
+          "line_index": null,
+          "table_ref": "t340:r1:c0",
+          "method": null
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": null
+    },
+    {
+      "attribute_code": "overall_size",
+      "attribute_name": "Size",
+      "datatype": "string",
+      "value_raw": "225mm",
+      "value_canonical": "225mm",
+      "value_display": "225mm",
+      "score": 0.8571,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.857 >= threshold 0.685",
+      "method": "table_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "urun-katalou-2026@b5039ff3",
+          "quote": "Mirka LEROS 950CV 225mm Duvar Z\u0131mpara Makinesi+ Vidalar Ta\u015f\u0131ma K\u0131l\u0131fl\u0131",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 118,
+          "line_index": null,
+          "table_ref": "t340:r1:c0",
+          "method": null
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": null
+    },
+    {
+      "attribute_code": "each_weight",
+      "attribute_name": "Weight (Each)",
+      "datatype": "quantity",
+      "value_raw": "3.5",
+      "value_canonical": {
+        "magnitude": 1.587573,
+        "unit": "kg"
+      },
+      "value_display": "3.5 lb",
+      "score": 0.925,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.925 >= threshold 0.685",
+      "method": "table_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "urun-katalou-2026@b5039ff3",
+          "quote": "3.50",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 118,
+          "line_index": null,
+          "table_ref": "t341:r1:c9",
+          "method": null
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": "kg"
+    },
+    {
+      "attribute_code": "sound_level",
+      "attribute_name": "Sound Level",
+      "datatype": "quantity",
+      "value_raw": "84",
+      "value_canonical": {
+        "magnitude": 84.0,
+        "unit": "dBA"
+      },
+      "value_display": "84 dBA",
+      "score": 0.95,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.950 >= threshold 0.685",
+      "method": "table_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "urun-katalou-2026@b5039ff3",
+          "quote": "84",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 118,
+          "line_index": null,
+          "table_ref": "t341:r1:c3",
+          "method": null
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": "dBA"
+    },
+    {
+      "attribute_code": "product_series",
+      "attribute_name": "Product Series",
+      "datatype": "string",
+      "value_raw": "LEROS",
+      "value_canonical": "LEROS",
+      "value_display": "LEROS",
+      "score": 0.95,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.950 >= threshold 0.685",
+      "method": "table_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "productcatalogue_2025-low-res-1-1@bd900f73",
+          "quote": "LEROS",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 1,
+          "line_index": 0,
+          "table_ref": "t546:r1:c0",
+          "method": "table_cell"
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": null
+    },
+    {
+      "attribute_code": "model_number",
+      "attribute_name": "Model",
+      "datatype": "string",
+      "value_raw": "Mirka LEROS 950CV EU",
+      "value_canonical": "Mirka LEROS 950CV EU",
+      "value_display": "Mirka LEROS 950CV EU",
+      "score": 0.95,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.950 >= threshold 0.685",
+      "method": "table_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "productcatalogue_2025-low-res-1-1@bd900f73",
+          "quote": "Mirka LEROS 950CV EU",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 192,
+          "line_index": null,
+          "table_ref": "t547:r1:c4",
+          "method": null
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": null
+    },
+    {
+      "attribute_code": "gtin",
+      "attribute_name": "GTIN / UPC",
+      "datatype": "string",
+      "value_raw": "6416868583816",
+      "value_canonical": "6416868583816",
+      "value_display": "6416868583816",
+      "score": 0.95,
+      "status": "auto_accepted",
+      "reason_code": "auto_accepted",
+      "detail": "score 0.950 >= threshold 0.685",
+      "method": "table_extraction",
+      "model_tier": "volume",
+      "is_required": false,
+      "accepted": true,
+      "evidence": [
+        {
+          "document_id": "productcatalogue_2025-low-res-1-1@bd900f73",
+          "quote": "6416868583816",
+          "verified": true,
+          "match_score": 1.0,
+          "page": 192,
+          "line_index": null,
+          "table_ref": "t546:r1:c1",
+          "method": null
+        }
+      ],
+      "validations": [],
+      "allowed_values": [],
+      "unit": null
+    }
+  ],
+  "queue": []
+}
