@@ -144,6 +144,21 @@
   --animate-rise: rise 300ms var(--ease-out-expo) both;
 
   /*
+   * Indeterminate motion, for the run screen only.
+   *
+   * The rest of this console animates state *changes* — something arrived, something moved. These
+   * two animate waiting, which is a different and more easily abused thing: a spinner that keeps
+   * turning after the work has stopped is a lie a viewer cannot detect. So both are applied only to
+   * the stage that a server snapshot currently reports as running, never to a container and never
+   * on a timer of the client's own.
+   *
+   * 900ms for the spin rather than the usual 600ms convention. It is on screen for tens of seconds
+   * at a stretch, and at 600ms a full rotation reads as urgency the run does not have.
+   */
+  --animate-spin-slow: spin 900ms linear infinite;
+  --animate-sweep: sweep 1600ms var(--ease-out-quart) infinite;
+
+  /*
    * Stagger step for first-paint reveals.
    *
    * 55ms between siblings, 6 steps maximum. Past six the delay is longer than the animation
@@ -1013,6 +1028,105 @@
     transition: opacity var(--duration-base) var(--ease-out-quart);
   }
 
+  /*
+   * ------------------------------------------------------------------ run progress
+   *
+   * The one screen in this console where something is genuinely happening while you watch. Every
+   * class below is driven by a stage state the API reported, never by a client-side timer — see
+   * `components/pipeline-progress.tsx`. That is the constraint that keeps this honest: indeterminate
+   * motion is the only kind of feedback a viewer cannot verify, so it is bound to the one thing that
+   * can be.
+   */
+
+  /* The ring on the stage that is executing. A ring rather than a dot so it reads as "in progress"
+     at a glance next to the checks above it, and `currentColor` so tone comes from the row. */
+  .task-spinner {
+    display: inline-block;
+    width: 0.875rem;
+    height: 0.875rem;
+    border: 1.5px solid color-mix(in oklab, currentColor 28%, transparent);
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: var(--animate-spin-slow);
+  }
+
+  /* Pending and skipped markers, sized to the spinner so the rail does not shift as rows resolve.
+     A shifting rail is the defect that makes a checklist look like a rendering bug. */
+  .task-dot {
+    display: inline-block;
+    width: 0.875rem;
+    height: 0.875rem;
+    border-radius: 50%;
+    border: 1.5px dashed var(--hairline-strong);
+  }
+
+  /*
+   * The vertical rail connecting the stage markers.
+   *
+   * Drawn on the row rather than as one element behind the list, because the last row must not
+   * trail a line into empty space — `:last-child` is the only cheap way to say that.
+   */
+  .task-rail {
+    position: relative;
+  }
+
+  .task-rail::before {
+    content: "";
+    position: absolute;
+    left: 0.4375rem;
+    top: 1.5rem;
+    bottom: -0.75rem;
+    width: 1px;
+    background: var(--hairline);
+  }
+
+  .task-rail:last-child::before {
+    display: none;
+  }
+
+  /* The travelled portion of the rail, so progress is legible from the gutter alone. */
+  .task-rail[data-settled="true"]::before {
+    background: color-mix(in oklab, var(--accent) 45%, var(--hairline));
+  }
+
+  /*
+   * Determinate progress. Width is transitioned rather than animated, so it can only ever move when
+   * the underlying count moves — a bar that eases forward on its own would be inventing progress.
+   */
+  .progress-track {
+    position: relative;
+    overflow: hidden;
+    height: 3px;
+    border-radius: 999px;
+    background: var(--hairline);
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--accent);
+    transition: width var(--duration-slow) var(--ease-out-expo);
+  }
+
+  /*
+   * The sweep over the *unfilled* remainder, which is the only indeterminate element here and the
+   * only place it is defensible: the bar's width is truthful and the sweep says "and something is
+   * happening beyond it", which is exactly the state. Removed the moment the run stops — the
+   * component drops the attribute rather than the stylesheet hiding it.
+   */
+  .progress-track[data-active="true"]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      color-mix(in oklab, var(--accent) 34%, transparent) 50%,
+      transparent 100%
+    );
+    animation: var(--animate-sweep);
+  }
+
   .hairline-b {
     border-bottom: 1px solid var(--hairline);
   }
@@ -1049,6 +1163,47 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/*
+ * Reduced motion, for the two indeterminate animations above.
+ *
+ * The base-layer rule near the top of this file already collapses durations globally, but these two
+ * are `infinite` — a collapsed duration makes an infinite animation run *faster*, not stop. So they
+ * are switched off by name.
+ *
+ * Nothing is lost. The running stage keeps its accent border, its narration line and its ticking
+ * elapsed figure, and the progress bar keeps its real width; only the turning and the sweeping go.
+ * The information was never in the motion.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .task-spinner {
+    animation: none;
+    /* Without the spin the ring needs to read as active on its own, so it becomes a solid mark
+       rather than a three-quarter outline that looks like a rendering artefact. */
+    border-color: currentColor;
+    border-style: solid;
+  }
+
+  .progress-track[data-active="true"]::after {
+    animation: none;
+    display: none;
   }
 }
 

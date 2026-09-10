@@ -269,16 +269,26 @@ describe("how the document was found", () => {
 });
 
 describe("the cost, before it is spent", () => {
-  it("is on the submit control", () => {
+  /**
+   * Three, not two, and that is the point of the assertion.
+   *
+   * The scope options all default on now, and copy generation is the one that costs an extra model
+   * call. A default that quietly added a third of the bill without the button saying so would be the
+   * exact failure this whole block exists to prevent — so the number on the control has to track the
+   * default, not a narrower run somebody would have had to opt out of.
+   */
+  it("is on the submit control, and counts the default scope", () => {
     form();
-    expect(screen.getByRole("button", { name: /2 model calls/i })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /3 model calls/i })).toBeTruthy();
   });
 
-  it("goes up when copy generation is enabled", () => {
+  it("falls when copy generation is turned off", () => {
     form();
+    // On by default, so clicking it turns it off. The cost has to follow the toggle in both
+    // directions: a figure that only ever went up would understate every narrowed run.
     fireEvent.click(screen.getByLabelText(/Generate and claim-check copy/i));
 
-    expect(screen.getByRole("button", { name: /3 model calls/i })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /2 model calls/i })).toBeTruthy();
   });
 
   it("says the deterministic alternative costs nothing", () => {
@@ -296,8 +306,24 @@ describe("submitting", () => {
       mpn: "PDSH4816AF",
       manufacturer: "Frigidaire",
       description: "24IN BUILT IN DISHWASHER",
-      replace: false,
+      // True on the first press, which is the behaviour change. It used to be a hard `false`, so an
+      // already-enriched part number always came back as a 409 and re-running one took a second press
+      // on the conflict panel. Re-running an existing SKU is the ordinary reason to be on this screen
+      // twice; the scope panel states that it replaces the stored run, and turning it off is one
+      // click away.
+      replace: true,
     });
+  });
+
+  it("stops replacing when the scope option is turned off", async () => {
+    await submitWith({ ok: true, data: enrichResponse() }, () => {
+      identify();
+      fireEvent.click(screen.getByLabelText(/Re-run part numbers already in the catalogue/i));
+    });
+
+    // Back to the guarded behaviour: an existing SKU is refused rather than overwritten, and the
+    // conflict panel offers the replace as a deliberate second press.
+    expect(runEnrichment.mock.calls[0]![0]).toMatchObject({ replace: false });
   });
 
   it("keeps a part number with a separator intact", async () => {
@@ -324,13 +350,53 @@ describe("submitting", () => {
     fireEvent.click(submitButton());
 
     await waitFor(() => expect(locked()).toBe(true));
-    expect(screen.getByText(/Classifying and extracting/i)).toBeTruthy();
+    // The status line no longer carries the narration — the stage checklist does, per stage, from the
+    // run itself. See `pipeline-progress.tsx`.
+    expect(screen.getByText(/Running\. The stages below report from the run itself\./i)).toBeTruthy();
 
     fireEvent.click(submitButton());
     expect(runEnrichment).toHaveBeenCalledTimes(1);
 
     release!({ ok: true, data: enrichResponse() });
     await resultRendered();
+  });
+
+  /**
+   * The progress panel is the answer to "what is it doing", so its absence is a regression worth a
+   * test of its own.
+   *
+   * Asserted at the level this suite can actually verify without a server: the checklist appears
+   * while the run is in flight, it is drawn from the plan the API served in `limits`, and it names the
+   * SKU being run. Whether the *states* advance is the API's contract, not this component's — polling
+   * is unavailable in jsdom, and `readProgress` degrades to the plan rather than throwing, which is
+   * exactly the path this exercises.
+   */
+  it("shows the stage checklist while the run is in flight, and drops it afterwards", async () => {
+    let release: ((result: EnrichResult) => void) | null = null;
+    runEnrichment.mockReturnValue(
+      new Promise<EnrichResult>((resolve) => {
+        release = resolve;
+      }),
+    );
+
+    form();
+    identify();
+    type(DESC, "24IN BUILT IN DISHWASHER");
+    fireEvent.click(submitButton());
+
+    const panel = await screen.findByRole("region", { name: /Pipeline run in progress/i });
+    expect(panel).toBeTruthy();
+    // From `limits.stages`, not hard-coded in the component.
+    expect(screen.getByRole("heading", { level: 3, name: /Classify/i })).toBeTruthy();
+    expect(screen.getByRole("progressbar")).toBeTruthy();
+
+    release!({ ok: true, data: enrichResponse() });
+    await resultRendered();
+
+    // Gone once the run has returned: the completed view makes the opposite claim about the same
+    // stages, and two panels asserting different things about one run is the confusion
+    // `pipeline-live.tsx` and `pipeline-replay.tsx` are kept apart to avoid.
+    expect(screen.queryByRole("region", { name: /Pipeline run in progress/i })).toBeNull();
   });
 });
 

@@ -48,6 +48,7 @@ from axiom.extract.description import AbbreviationTable, extract_from_descriptio
 from axiom.extract.description import to_attribute_values as description_values
 from axiom.ingest.fabric import IngestedArtifact
 from axiom.ingest.store import ArtifactStore
+from axiom.pipeline.progress import NO_PROGRESS
 from axiom.pipeline.retrieval import RetrievalAttempt, retrieve_documents
 from axiom.pipeline.source import ResolvedSource, ingest_submission, resolve_source
 from axiom.pipeline.stages import PipelineRun, SecondarySource, run_stages
@@ -56,6 +57,18 @@ from axiom.retrieve.policy import SourcePolicy, SourceTier
 from axiom.retrieve.policy import load_default as load_source_policy
 from axiom.review import queue_summary
 from axiom.schema import SchemaRegistry
+
+
+def _retrieved_from(retrieval: RetrievalAttempt) -> str:
+    """Where retrieval got the documents, for a progress line.
+
+    "the open web" rather than a blank when no manufacturer resolved, because the two are different
+    claims about the same result: a document from ``mirka.com`` carries authority a search hit does
+    not, and that distinction is the reason ``citable_as_manufacturer`` exists.
+    """
+    if retrieval.manufacturer is None:
+        return "the open web"
+    return retrieval.manufacturer.primary_domain
 
 
 def _artifact_for(parsed, retrieval: RetrievalAttempt) -> IngestedArtifact:
@@ -385,6 +398,7 @@ def enrich_one(
     source_policy=None,
     search=None,
     renderer=None,
+    progress=NO_PROGRESS,
 ) -> EnrichmentResult:
     """Enrich one SKU end to end. Makes real model calls through ``client``.
 
@@ -395,6 +409,11 @@ def enrich_one(
     routes to a document are a supplied URL and the submission itself, which is the behaviour before
     retrieval was wired in. ``search`` supplies the open-web arm; there is deliberately no default,
     because search is an external service with a key and a bill.
+
+    ``progress`` is the same injected no-op as everywhere else in this package and is forwarded to
+    :func:`~axiom.pipeline.stages.run_stages`. What is announced *here* rather than there is how the
+    document was found — retrieval, ingest, parse — which is the part a watcher waits longest on and
+    the part the stages never see. See :mod:`axiom.pipeline.progress`.
     """
     cascade = cascade or ModelCascade.load()
     mpn = request.clean_mpn
@@ -419,7 +438,13 @@ def enrich_one(
     retrieval: RetrievalAttempt | None = None
     source: ResolvedSource | None = None
 
+    if source_url:
+        # Named up front so the watcher is not left staring at "Find the document" while the answer
+        # was already supplied. The fetch itself is reported under `ingest`, which is what it is.
+        progress.skip("retrieve", "a manufacturer URL was supplied, so there was nowhere to look")
+
     if not source_url and request.retrieve and library_path is not None:
+        progress.begin("retrieve")
         retrieval = retrieve_documents(
             mpn,
             store=store,
@@ -434,6 +459,25 @@ def enrich_one(
             refresh_sources=request.refresh_sources,
             library=library,
         )
+        if retrieval.found:
+            progress.complete(
+                "retrieve",
+                (
+                    "reused a stored manufacturer document — no network request was needed"
+                    if retrieval.from_library
+                    else f"found {len(retrieval.documents)} document(s) from "
+                    f"{_retrieved_from(retrieval)} in "
+                    f"{retrieval.requests_made} request(s), no model call"
+                ),
+            )
+        else:
+            # Not a failure of the run. It changes what the values are worth, which is why it is
+            # stated rather than passed over: the typed fields become the source below.
+            progress.complete(
+                "retrieve",
+                "no manufacturer document was found, so the typed fields become the source",
+            )
+
         if retrieval.primary is not None:
             parsed = retrieval.primary
             source = ResolvedSource(
@@ -441,6 +485,8 @@ def enrich_one(
                 parsed=parsed,
                 from_url=True,
             )
+
+    progress.begin("ingest")
 
     if source is None:
         source = resolve_source(
@@ -453,6 +499,28 @@ def enrich_one(
             supplier_id=request.supplier_id,
             fetcher=fetcher,
         )
+
+    document = source.artifact.document
+    progress.complete(
+        "ingest",
+        (
+            f"{document.doc_type.value}, {source.artifact.size_bytes:,} bytes"
+            if source.from_url
+            else "your typed fields, hashed and stored as the source document"
+        )
+        + f" · sha256 {document.sha256[:12]}…"
+        + (" · already stored" if source.artifact.was_already_stored else ""),
+    )
+    # Parsing already happened — retrieval and `resolve_source` both hand back a `ParsedDocument`,
+    # because a document that cannot be parsed is not a usable source and finding that out later
+    # would be worse. So this row reports the parse rather than performing it, which is why it
+    # completes immediately after `ingest` instead of bracketing a call.
+    progress.begin("parse")
+    progress.complete(
+        "parse",
+        f"{source.parsed.page_count} page(s), {len(source.parsed.all_tables())} table(s), "
+        f"{len(source.parsed.full_text):,} characters of text",
+    )
 
     source_tier, citable_as_manufacturer = _source_authority(
         source, retrieval, source_policy, manufacturer, request.brand
@@ -569,6 +637,7 @@ def enrich_one(
         ),
         manufacturer_source_verified=source.citable_as_manufacturer,
         extra_documents=extra_documents,
+        progress=progress,
     )
 
     if manufacturer.looks_like_a_distributor:

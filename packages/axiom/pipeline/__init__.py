@@ -29,6 +29,14 @@ from __future__ import annotations
 
 from axiom.pipeline.delivery import EnrichmentDelivery, build_delivery
 from axiom.pipeline.persist import PersistedPaths, persist_run
+from axiom.pipeline.progress import (
+    NO_PROGRESS,
+    STAGE_PLAN,
+    PlannedStage,
+    ProgressRegistry,
+    RunProgress,
+    plan_stages,
+)
 from axiom.pipeline.retrieval import RetrievalAttempt, retrieve_documents
 from axiom.pipeline.single import (
     EnrichmentRequest,
@@ -40,18 +48,24 @@ from axiom.pipeline.source import ResolvedSource, resolve_source, submission_tex
 from axiom.pipeline.stages import PipelineRun, load_calibration, run_stages
 
 __all__ = [
+    "NO_PROGRESS",
+    "STAGE_PLAN",
     "EnrichmentDelivery",
     "EnrichmentRequest",
     "EnrichmentResult",
     "InsufficientInputError",
     "PersistedPaths",
     "PipelineRun",
+    "PlannedStage",
+    "ProgressRegistry",
     "ResolvedSource",
     "RetrievalAttempt",
+    "RunProgress",
     "build_delivery",
     "enrich_one",
     "load_calibration",
     "persist_run",
+    "plan_stages",
     "resolve_source",
     "retrieve_documents",
     "run_stages",

@@ -30,7 +30,8 @@ import { useId, useState } from "react";
 
 import { ManufacturerSpecifications } from "@/components/manufacturer-specifications";
 import { PipelineLive } from "@/components/pipeline-live";
-import { AlertIcon, KeyValue, Overline, Panel } from "@/components/primitives";
+import { PipelineProgress } from "@/components/pipeline-progress";
+import { AlertIcon, CheckIcon, KeyValue, MinusIcon, Overline, Panel } from "@/components/primitives";
 import { runEnrichment } from "@/lib/actions";
 // Types from `enrich`, which is erased at build time; the *function* from `enrich-request`, which is
 // pure. Importing `isSubmittable` from `enrich` would pull `data.ts` and `node:fs/promises` into the
@@ -38,6 +39,7 @@ import { runEnrichment } from "@/lib/actions";
 import type { EnrichFailure, EnrichLimits, EnrichResponse } from "@/lib/enrich";
 import { isSubmittable } from "@/lib/enrich-request";
 import { count, dateTime, percent, shortHash, usd } from "@/lib/format";
+import { optimisticPlan } from "@/lib/progress";
 import { certificateHref, reviewHref } from "@/lib/sku";
 import { pipelineStages } from "@/lib/stages";
 
@@ -57,24 +59,59 @@ interface Fields {
   generateCopy: boolean;
   retrieve: boolean;
   refreshSources: boolean;
+  /** Re-run a part number that has already been enriched, replacing the saved run. */
+  replaceExisting: boolean;
 }
 
+/**
+ * The full run, selected.
+ *
+ * Every scope option defaults **on**. This screen used to open with four unticked checkboxes, which
+ * made the default run the narrowest one available — retrieval only — and quietly put the burden of
+ * knowing what to tick on whoever happened to be filling the form in. The options were not
+ * capabilities somebody opts into; they were the pipeline, held back by default.
+ *
+ * So the default is now the whole thing, and the panel *states* what it will do instead of asking.
+ * Turning any of it off is still possible behind `Adjust`, because a narrower run is a legitimate
+ * thing to want — a strictly single-document run is reproducible against one exact source in a way a
+ * merged one is not.
+ *
+ * Two consequences worth being explicit about, because both cost something:
+ *
+ * *   `generateCopy` on means **three** model calls per run rather than two. The cost block and the
+ *     submit button both read from the same `calls` figure, so the number on the button is the number
+ *     that will be billed — it is not a default that hides a third of the bill.
+ * *   `refreshSources` on means a run may make network requests to look for a better document even
+ *     when a stored one already covers the part. No model call, and it is the difference between
+ *     re-reading last month's cached page and finding the datasheet the manufacturer published since.
+ *     That is the point of a re-run.
+ */
 const EMPTY: Fields = {
   mpn: "",
   manufacturer: "",
   description: "",
   sourceUrl: "",
   brand: "",
-  includeOptional: false,
-  generateCopy: false,
+  includeOptional: true,
+  generateCopy: true,
   // On, because it is what makes the two required fields sufficient.
   retrieve: true,
-  refreshSources: false,
+  refreshSources: true,
+  replaceExisting: true,
 };
 
 export function EnrichForm({ limits }: { limits: EnrichLimits }) {
   const [fields, setFields] = useState<Fields>(EMPTY);
   const [outcome, setOutcome] = useState<Outcome>({ kind: "idle" });
+  /**
+   * The part number the in-flight run was submitted with.
+   *
+   * Held separately from `fields.mpn` so the progress panel keeps naming the right SKU even if
+   * somebody edits the input while a run is going. The field is disabled during a run, so this is
+   * belt and braces — but the panel's heading is a claim about what is executing, and a claim that
+   * can be changed by typing is not one.
+   */
+  const [submitted, setSubmitted] = useState<{ mpn: string; hasUrl: boolean } | null>(null);
 
   const ids = useId();
   const mpnId = `${ids}-mpn`;
@@ -104,8 +141,23 @@ export function EnrichForm({ limits }: { limits: EnrichLimits }) {
     ? limits.model_calls_per_run.with_copy
     : limits.model_calls_per_run.without_copy;
 
-  async function submit(replace = false) {
+  /**
+   * The checklist to draw while waiting for the first progress poll.
+   *
+   * Every row `pending`, filtered by the two conditions the browser can know in advance. Replaced by
+   * the server's own plan as soon as a snapshot arrives — see `PipelineProgress`. Empty when the API
+   * predates `/api/enrich/limits` carrying a stage list, in which case the panel shows an in-flight
+   * state with no checklist rather than inventing one.
+   */
+  const plan = optimisticPlan(limits.stages ?? [], {
+    retrieve: fields.retrieve,
+    hasUrl: fields.sourceUrl.trim().length > 0,
+    generateCopy: fields.generateCopy,
+  });
+
+  async function submit(replace = fields.replaceExisting) {
     if (!ready || running) return;
+    setSubmitted({ mpn: fields.mpn.trim(), hasUrl: fields.sourceUrl.trim().length > 0 });
     setOutcome({ kind: "running" });
     const result = await runEnrichment({ ...input, replace });
     setOutcome(
@@ -130,7 +182,12 @@ export function EnrichForm({ limits }: { limits: EnrichLimits }) {
       <form
         onSubmit={(event) => {
           event.preventDefault();
-          void submit(false);
+          // No argument, so `submit` uses `fields.replaceExisting`. It used to pass a hard `false`
+          // here, which meant an already-enriched part number always came back as a 409 and the only
+          // way to re-run one was the second press on the conflict panel. That is the friction this
+          // screen was asked to lose: re-running an existing SKU is the ordinary reason to be here
+          // twice, and the scope panel above says out loud that it will replace the stored run.
+          void submit();
         }}
         aria-busy={running}
         className="publish-form grid items-start gap-8 lg:grid-cols-12 lg:gap-10"
@@ -269,39 +326,101 @@ export function EnrichForm({ limits }: { limits: EnrichLimits }) {
             </p>
           </header>
 
-          <fieldset
-            disabled={running}
-            className="border-b border-[var(--hairline)] p-5 disabled:opacity-60"
-          >
-            <legend className="overline">Scope</legend>
-            <div className="mt-2 flex flex-col">
-              <Toggle
-                checked={fields.includeOptional}
-                onChange={(value) => set("includeOptional", value)}
-                label="Also request optional attributes"
-                detail="A longer prompt and more tokens, for the attributes the class marks optional."
-              />
-              <Toggle
-                checked={fields.generateCopy}
-                onChange={(value) => set("generateCopy", value)}
-                label="Generate and claim-check copy"
-                detail="One extra model call. Copy that fails the check is reported, not published."
-              />
-              <Toggle
-                checked={fields.retrieve}
-                onChange={setRetrieval}
-                label="Find the manufacturer's document"
-                detail="The library first, then the manufacturer's own site. No model call, and it is what makes a part number and a manufacturer enough. Off requires a description or a URL."
-              />
-              <Toggle
-                checked={fields.refreshSources}
-                onChange={(value) => set("refreshSources", value)}
-                disabled={!fields.retrieve}
-                label="Refresh with richer live sources"
-                detail="Bypasses cached SKU coverage once to look for a product page or linked technical datasheet, while retaining the stored document as fallback. No model call, but it may make network requests."
-              />
+          {/*
+            Scope, stated rather than asked.
+            
+            This was four unticked checkboxes, which meant the default run was the narrowest one on
+            offer and the burden of knowing what to tick fell on whoever opened the page. These were
+            never opt-in capabilities — they are the pipeline, and holding three of them back by
+            default made the ordinary result thinner than the system can produce.
+
+            So the list is now a declaration of what will happen, with every item on, and `Adjust`
+            below it for the cases where a narrower run is genuinely what somebody wants. Read-only
+            text rather than four ticked boxes on purpose: a ticked checkbox invites a click, and
+            invites it in the direction of a worse run.
+          */}
+          <div className="border-b border-[var(--hairline)] p-5">
+            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+              <Overline>What will run</Overline>
+              <span className="pill pill-accent">Full run</span>
             </div>
-          </fieldset>
+
+            <ul className="mt-3 flex flex-col gap-2.5">
+              {scopeSummary(fields).map((item) => (
+                <li key={item.label} className="flex items-start gap-2.5 text-sm">
+                  <span
+                    className={clsx(
+                      "mt-0.5 shrink-0",
+                      item.on ? "text-[var(--pass)]" : "text-[var(--fg-quiet)]",
+                    )}
+                  >
+                    {item.on ? <CheckIcon /> : <MinusIcon />}
+                  </span>
+                  <span className="min-w-0">
+                    <span
+                      className={clsx(
+                        "block",
+                        item.on ? "text-[var(--fg-secondary)]" : "text-[var(--fg-quiet)] line-through",
+                      )}
+                    >
+                      {item.label}
+                    </span>
+                    {item.on ? null : (
+                      <span className="mt-0.5 block text-meta text-[var(--fg-quiet)]">
+                        Turned off · {item.off}
+                      </span>
+                    )}
+                  </span>
+                </li>
+              ))}
+            </ul>
+
+            <details className="hairline-t mt-4 pt-3.5">
+              <summary className="disclosure text-meta">Adjust what runs</summary>
+              <fieldset disabled={running} className="mt-1 disabled:opacity-60">
+                <legend className="sr-only">Scope</legend>
+                <div className="flex flex-col">
+                  <Toggle
+                    checked={fields.includeOptional}
+                    onChange={(value) => set("includeOptional", value)}
+                    label="Also request optional attributes"
+                    detail="A longer prompt and more tokens, for the attributes the class marks optional."
+                  />
+                  <Toggle
+                    checked={fields.generateCopy}
+                    onChange={(value) => set("generateCopy", value)}
+                    label="Generate and claim-check copy"
+                    detail="One extra model call. Copy that fails the check is reported, not published."
+                  />
+                  <Toggle
+                    checked={fields.retrieve}
+                    onChange={setRetrieval}
+                    label="Find the manufacturer's document"
+                    detail="The library first, then the manufacturer's own site. No model call, and it is what makes a part number and a manufacturer enough. Off requires a description or a URL."
+                  />
+                  <Toggle
+                    checked={fields.refreshSources}
+                    onChange={(value) => set("refreshSources", value)}
+                    disabled={!fields.retrieve}
+                    label="Refresh with richer live sources"
+                    detail="Bypasses cached SKU coverage to look for a product page or linked technical datasheet the stored copy predates, keeping the stored document as fallback. No model call, but it may make network requests."
+                  />
+                  {/*
+                    The one option with a destructive consequence, so it is the one whose detail line
+                    names it. On by default because re-running an already-enriched part number is the
+                    ordinary reason to be on this screen a second time — but what it discards is a
+                    reviewer's work, and that is not something to find out afterwards.
+                  */}
+                  <Toggle
+                    checked={fields.replaceExisting}
+                    onChange={(value) => set("replaceExisting", value)}
+                    label="Re-run part numbers already in the catalogue"
+                    detail="Replaces the stored run for this part number with the new one. Any review decisions recorded against the old session are discarded. Off refuses an existing SKU instead, and offers this as a second press."
+                  />
+                </div>
+              </fieldset>
+            </details>
+          </div>
 
           {/*
             What this will cost, before it is spent. The one number on this page that has to be read
@@ -347,6 +466,7 @@ export function EnrichForm({ limits }: { limits: EnrichLimits }) {
                 onClick={() => {
                   setFields(EMPTY);
                   setOutcome({ kind: "idle" });
+                  setSubmitted(null);
                 }}
                 className="btn btn-quiet mt-3 min-h-11 w-full"
               >
@@ -357,6 +477,24 @@ export function EnrichForm({ limits }: { limits: EnrichLimits }) {
         </aside>
       </form>
 
+      {/*
+        The run, while it runs. Outside the form so it is not dimmed by the disabled fieldsets, and
+        below it so a long checklist does not push the submit button off screen mid-run.
+
+        Every state in here comes from a snapshot the API published — see `pipeline-progress.tsx`,
+        whose docstring is mostly about why that constraint is not negotiable on this screen.
+      */}
+      {running && submitted !== null ? (
+        <div className="mt-10">
+          <PipelineProgress
+            plan={plan}
+            sku={submitted.mpn}
+            calls={calls}
+            running={running}
+          />
+        </div>
+      ) : null}
+
       {outcome.kind === "rejected" ? (
         <Rejection failure={outcome.failure} onReplace={() => void submit(true)} />
       ) : null}
@@ -366,6 +504,46 @@ export function EnrichForm({ limits }: { limits: EnrichLimits }) {
 }
 
 // ------------------------------------------------------------------ copy
+
+/**
+ * The scope panel's list: what this run will do, in the order it will do it.
+ *
+ * Ordered by the pipeline rather than by importance, so the list reads as a sequence and lines up
+ * with the checklist that replaces it once the run starts.
+ *
+ * `off` is the consequence of turning the item off, not a restatement of the label. It is only shown
+ * for the items that *are* off, which is the only time somebody needs to know what they gave up — and
+ * it is why this is a function rather than a constant.
+ */
+function scopeSummary(fields: Fields): { label: string; on: boolean; off: string }[] {
+  return [
+    {
+      label: "Find the manufacturer's own document",
+      on: fields.retrieve,
+      off: "the run reads only what you typed, or a URL you supply",
+    },
+    {
+      label: "Look past the cached copy for a newer product page or datasheet",
+      on: fields.retrieve && fields.refreshSources,
+      off: "a stored document is reused as-is, however old it is",
+    },
+    {
+      label: "Request the class's optional attributes as well as the required ones",
+      on: fields.includeOptional,
+      off: "required attributes only, so fewer columns come back populated",
+    },
+    {
+      label: "Generate marketing copy and claim-check every sentence",
+      on: fields.generateCopy,
+      off: "no copy is produced, and the run costs one model call less",
+    },
+    {
+      label: "Re-run part numbers already in the catalogue",
+      on: fields.replaceExisting,
+      off: "an already-enriched part number is refused rather than replaced",
+    },
+  ];
+}
 
 function gateMessage(fields: Fields, ready: boolean): string {
   if (!fields.mpn.trim()) return "A manufacturer part number is required.";
@@ -395,7 +573,10 @@ function gateMessage(fields: Fields, ready: boolean): string {
 function statusLine(outcome: Outcome, ready: boolean): string {
   switch (outcome.kind) {
     case "running":
-      return "Classifying and extracting. A model call takes a few seconds; an escalation to a larger model takes longer.";
+      // Deliberately short now. This used to carry the whole explanation of what a run is doing,
+      // because it was the only feedback there was; the stage checklist below says it per stage and
+      // says which one is actually happening, so repeating it here would be two narrations competing.
+      return "Running. The stages below report from the run itself.";
     case "complete":
       return `Run complete. ${outcome.data.sku} is now in the Resolve queue and the Audit list.`;
     case "rejected":

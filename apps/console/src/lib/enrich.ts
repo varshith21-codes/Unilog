@@ -50,6 +50,15 @@ export interface EnrichLimits {
   concurrent_runs: number;
   outputs: string[];
   model_calls_per_run: { without_copy: number; with_copy: number };
+  /**
+   * The stages a run goes through, so the form can draw the checklist before the first progress poll.
+   *
+   * Served rather than hard-coded for the same reason the caps are: a console holding its own copy of
+   * this list would eventually describe a pipeline the API no longer runs, and the drift would surface
+   * as a stage that never completes. Optional so a response from an API build that predates
+   * `/api/enrich/progress` still parses — the run screen degrades to a plain in-flight state.
+   */
+  stages?: { id: string; name: string; narration: string; model: boolean }[];
   notes: string[];
 }
 

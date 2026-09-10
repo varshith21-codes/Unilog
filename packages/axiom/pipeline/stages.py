@@ -48,6 +48,7 @@ from axiom.extract import Extractor, ModelCascade, PriceTable, UsageLedger
 from axiom.extract.extractor import ExtractionResult
 from axiom.generate import CopyGenerator, build_fact_sheet, load_policy
 from axiom.normalize import BrandMaster, clean_mpn, normalize_all
+from axiom.pipeline.progress import NO_PROGRESS
 from axiom.syndicate import export_all
 from axiom.validate import ReasoningChecker, ReasoningConfig, Validator, guardrail_runtime
 
@@ -188,12 +189,19 @@ def run_stages(
     classify_text: str | None = None,
     manufacturer_source_verified: bool = False,
     extra_documents: Sequence[SecondarySource] = (),
+    progress=NO_PROGRESS,
 ) -> PipelineRun:
     """Run the pipeline over one parsed document.
 
     ``client`` is injected rather than constructed here, which is what makes the whole path
     testable: a test passes :class:`~axiom.extract.StubModelClient` and exercises the same code the
     Bedrock path runs, instead of a parallel implementation that agrees with it by inspection.
+
+    ``progress`` is injected on the same principle and defaults to
+    :data:`~axiom.pipeline.progress.NO_PROGRESS`, whose methods do nothing. That keeps the promise
+    in this module's docstring — nothing here prints — while letting a caller that *is* watching,
+    like the console's run screen, see which stage is executing. The stages announce; they do not
+    decide where the announcement goes. See :mod:`axiom.pipeline.progress`.
 
     ``seed_values`` is the hook for a caller that has evidenced values of its own — a product
     description read deterministically, or a golden set. It is called once with the freshly built
@@ -203,6 +211,8 @@ def run_stages(
     so the weaker reading stays in history instead of colliding with the stronger one.
     """
     notes: list[str] = []
+
+    progress.begin("classify")
 
     # --- stage 3: classify -----------------------------------------------------
     # Runs before extraction because the class decides which attributes to ask for. When
@@ -245,6 +255,22 @@ def run_stages(
 
     class_code = classification.class_code or class_code_fallback
 
+    # Reported as the classifier's own answer, not as "the class we are using". A fallback that
+    # fires is the more interesting of the two outcomes and gets said out loud, because "classified
+    # as X" and "told to assume X" are different claims — the same distinction
+    # `class_code_from_fallback` exists for on the returned run.
+    if classification.abstained or classification.class_code is None:
+        progress.complete(
+            "classify",
+            f"abstained; using the supplied class {class_code}"
+            if class_code
+            else "abstained, and no fallback class was supplied",
+        )
+    else:
+        progress.complete("classify", f"{class_code} from the {classified_from}")
+
+    progress.begin("extract")
+
     # --- stage 4: extract ------------------------------------------------------
     # Typed extraction remains class-bound. When classification abstains, the independent
     # source-native channel still has a useful answer: exact manufacturer label/value pairs. An
@@ -255,6 +281,11 @@ def run_stages(
             "classification abstained and the source was not verified as manufacturer-owned, so "
             "there was neither a typed attribute list nor an authorized manufacturer "
             "specification pass to run"
+        )
+        progress.skip(
+            "extract",
+            "no class and an unverified source, so there was no attribute list to ask for and no "
+            "authority to record source-native specifications",
         )
     else:
         extractor = Extractor(registry, client, cascade, start_tier=tier)
@@ -270,6 +301,19 @@ def run_stages(
                 "classification abstained, so no typed attributes were requested; verified "
                 "source-native manufacturer specifications were retained instead"
             )
+        progress.complete(
+            "extract",
+            f"{len(result.values)} of {len(result.requested_codes)} attributes, "
+            f"{len(result.gaps)} gaps"
+            + (f", {len(result.rejected)} rejected as unverifiable" if result.rejected else "")
+            + (
+                f", escalated to a larger model {result.usage.escalations}×"
+                if result.usage.escalations
+                else ""
+            ),
+        )
+
+    progress.begin("merge")
 
     # --- stage 4b: read the other retrieved documents --------------------------
     # The primary document is the strongest single source, but a retrieval set describes one part
@@ -296,8 +340,35 @@ def run_stages(
         )
         secondary_results.append((secondary, secondary_result))
 
+    if secondary_results:
+        progress.complete(
+            "merge",
+            f"{len(secondary_results)} further document(s) read: "
+            + ", ".join(
+                f"{len(sec_result.values)} values"
+                for _, sec_result in secondary_results
+            ),
+        )
+    else:
+        # Stated rather than hidden. "No second source" is a finding about the retrieval, not an
+        # absence of one — it is the difference between a thin result because the manufacturer
+        # publishes little and a thin result because only one page was read.
+        progress.skip(
+            "merge",
+            "no second document to read: retrieval returned one usable source for this part",
+        )
+
+    progress.begin("normalize")
+
     # --- stage 5: normalize ----------------------------------------------------
     normalized, norm_issues = normalize_all(result.values, registry)
+
+    progress.complete(
+        "normalize",
+        f"{len(normalized)} values to canonical units"
+        + (f", {len(norm_issues)} unparsed" if norm_issues else ", none unparsed"),
+    )
+    progress.begin("validate")
 
     # --- stage 6: validate -----------------------------------------------------
     brands = brands if brands is not None else BrandMaster.load()
@@ -365,6 +436,13 @@ def run_stages(
 
     report = Validator(registry).validate(record)
 
+    progress.complete(
+        "validate",
+        f"{len(report.results)} checks, {len(report.failures)} failed, "
+        f"{len(report.warnings)} warnings",
+    )
+    progress.begin("decide")
+
     # --- stage 7: score and decide ---------------------------------------------
     # Validation results are attached to each value first, so the confidence features can see
     # them. Scoring before validating would ignore the strongest independent signal available.
@@ -383,6 +461,22 @@ def run_stages(
 
     decisions = apply_policy(record.current_values(), scores, policy)
 
+    # An unachievable policy is not a threshold of zero. It means no cutoff on the calibration set
+    # could hold the requested error budget at the requested confidence, so nothing was
+    # auto-accepted on a validated policy at all. Reporting the bare number here would read as
+    # "accept everything above 0.000", which is the exact opposite, so it gets its own words.
+    auto_accepted = sum(1 for decision in decisions if decision.accepted)
+    progress.complete(
+        "decide",
+        f"{auto_accepted} auto-accepted, {len(decisions) - auto_accepted} queued for review"
+        + (
+            f" at threshold {policy.threshold:.3f}"
+            if policy.achievable
+            else " — no threshold could hold the error budget, so nothing auto-accepted"
+        ),
+    )
+    progress.begin("export")
+
     # --- stage 8: certificate and channel exports ------------------------------
     # Cost covers classification *and* extraction. Classification is a real model call against
     # a real prompt, and reporting only extraction would understate the true cost per SKU by
@@ -399,11 +493,23 @@ def run_stages(
 
     exports = export_all(record, registry)
 
+    ready = sum(1 for export in exports.values() if export.published)
+    progress.complete(
+        "export",
+        f"{ready} of {len(exports)} channels ready"
+        + (
+            f" — {len(exports) - ready} held for a missing required field"
+            if ready < len(exports)
+            else ""
+        ),
+    )
+
     # --- stage 9: constrained copy generation ----------------------------------
     # Runs last, and only from values that already survived every earlier gate. Generating
     # before the acceptance decision would let a queued value into a product description.
     generated = None
     if generate_copy:
+        progress.begin("copy")
         sheet = build_fact_sheet(record, registry)
         generator = CopyGenerator(client, cascade, load_policy(), tier="mid")
         generated = generator.generate(sheet)
@@ -434,6 +540,19 @@ def run_stages(
                     reasoning_config,
                 )
                 generated.formal = checker.verify_copy(record, generated.fields())
+
+        check = generated.report
+        progress.complete(
+            "copy",
+            (
+                f"{len(check.supported)} of {len(check.claims)} claims supported — published"
+                if generated.published
+                else f"withheld: {len(check.unsupported)} unsupported and "
+                f"{len(check.banned)} banned claim(s)"
+            ),
+        )
+
+    progress.begin("certify")
 
     # --- stage 10: certificate -------------------------------------------------
     # Built last, after the exports and the copy exist, because the Quality Index's richness
@@ -470,6 +589,19 @@ def run_stages(
         wall_clock_seconds=round(usage.latency_ms / 1000, 2),
         exports=exports,
         copy=serialised,
+    )
+
+    # `verify_signature()` rather than a stored flag, for the same reason the console bundle and
+    # `EnrichmentResult.summary` both call it: the certificate is only worth anything if the
+    # signature is checked against the bytes, and a boolean written next to them proves nothing.
+    progress.complete(
+        "certify",
+        (
+            "signed and verified"
+            if certificate.verify_signature()
+            else "the signature did not verify"
+        )
+        + f", composite {certificate.summary.quality_index.composite:.2f}",
     )
 
     return PipelineRun(

@@ -63,11 +63,14 @@ from axiom.ingest import (
     sha256_bytes,
 )
 from axiom.pipeline import (
+    STAGE_PLAN,
     EnrichmentRequest,
     InsufficientInputError,
+    ProgressRegistry,
     build_delivery,
     enrich_one,
     persist_run,
+    plan_stages,
 )
 from axiom.pipeline.persist import bundle_payload, source_summaries
 from axiom.pipeline.source import SUBMISSION_MAX_BYTES
@@ -139,6 +142,19 @@ rather than a copy of it that can drift."""
 # many requests arrive, and the second caller's honest answer is "wait" rather than a slower run and
 # a doubled bill. A real deployment needs a work queue and auth; this is what bounds a laptop.
 _ENRICH_LOCK = threading.Lock()
+
+# Where the in-flight run publishes which stage it is on, for `GET /api/enrich/progress`.
+#
+# A single slot, which is not a simplification: the mutex above already guarantees one run at a time
+# per process, so this states the same invariant rather than a weaker one. A run id travels with the
+# snapshot so a watcher polling across a boundary can tell it is now reading a *different* run
+# instead of silently attributing new stages to the old one.
+#
+# This is why the enrichment route stays a `def` rather than an `async def`. FastAPI runs sync
+# handlers in a threadpool worker, so a 60-second run does not occupy the event loop and this GET is
+# served by another worker while it is still going. An `async def` there would block the loop and
+# make this endpoint unreachable for exactly as long as there was progress to report.
+_ENRICH_PROGRESS = ProgressRegistry()
 
 # ---------------------------------------------------------------------- upload limits
 #
@@ -1301,6 +1317,24 @@ def enrich_limits() -> dict:
         "concurrent_runs": 1,
         "outputs": ["csv", "xlsx"],
         "model_calls_per_run": {"without_copy": 2, "with_copy": 3},
+        # The stages a run goes through, so a caller can show the checklist the moment it submits
+        # rather than after the first progress poll returns. Served for the same reason the length
+        # caps are: a client that hard-coded this list would eventually describe a pipeline this API
+        # no longer runs, and the drift would show up as a stage that never completes.
+        #
+        # This is the *superset*. Which of these a given run reaches depends on the submission —
+        # `retrieve` is skipped when a URL was supplied, `copy` only runs when asked for — and the
+        # authority on that is `GET /api/enrich/progress`, which reports the plan the run actually
+        # started with. Anything drawn from this list before then is a plan, not a result.
+        "stages": [
+            {
+                "id": stage.id,
+                "name": stage.name,
+                "narration": stage.narration,
+                "model": stage.model,
+            }
+            for stage in STAGE_PLAN
+        ],
         "notes": [
             "Runs the online pipeline: classification and extraction are real Bedrock calls, so "
             "this endpoint needs credentials and costs money per submission.",
@@ -1311,6 +1345,37 @@ def enrich_limits() -> dict:
             "That is a real provenance claim and a weaker one than a datasheet.",
         ],
     }
+
+
+@app.get("/api/enrich/progress")
+def enrich_progress() -> JSONResponse:
+    """Which stage the in-flight run is on, for a caller watching it happen.
+
+    Polled rather than streamed, and that is a deliberate trade rather than a shortcut. An SSE route
+    would hold a connection per watcher and would have to invent a keepalive to survive the
+    forty-second gap a model escalation can open inside one stage; a poll is stateless, survives a
+    reload, and costs a dict read. The thing being reported changes maybe a dozen times per run, so
+    there is nothing here that a one-second poll misses.
+
+    **Read-only, and free.** This makes no model call and touches no disk. It exists because the
+    enrichment route is a single blocking request that can run for a minute: before this, a caller
+    had a spinner and no way to tell a working run from a hung one.
+
+    Returns ``state: "idle"`` rather than a 404 when no run has happened yet in this process,
+    because "nothing has run" is a real answer to this question and a watcher polling on an interval
+    should not have to treat the ordinary case as an error.
+
+    The last finished run is kept rather than cleared. The console polls on a timer, so the final
+    poll almost always lands after the response has already been returned; clearing on completion
+    would make the last thing a viewer saw the second-to-last stage.
+    """
+    snapshot = _ENRICH_PROGRESS.snapshot()
+    if snapshot is None:
+        return JSONResponse({"state": "idle", "stages": [], "total": 0, "completed": 0})
+    # Whether the mutex is held, which is the one fact the snapshot itself cannot know. A watcher
+    # reading `state: "running"` for a run whose lock has been released is looking at a stale
+    # snapshot from a process that died mid-run, and that is worth being able to tell apart.
+    return JSONResponse({**snapshot, "run_in_flight": _ENRICH_LOCK.locked()})
 
 
 @app.post("/api/enrich")
@@ -1470,9 +1535,28 @@ def _run_enrichment(request: EnrichRequest) -> JSONResponse:
     except Exception as exc:  # noqa: BLE001 - botocore raises several unrelated types here
         raise HTTPException(status_code=503, detail=_credentials_detail(exc)) from exc
 
+    # Progress starts here and not earlier, which matters. Everything above this line is a refusal
+    # path — an unknown class, an insecure URL, a submission with nothing to read, an
+    # already-enriched SKU without `replace` — and none of those runs anything. Publishing a
+    # "running" snapshot for a submission that was rejected in validation would leave a watcher
+    # animating a run that never started and never ends.
+    #
+    # The plan is derived from the request rather than fixed, so the checklist a viewer reads
+    # matches the stages this particular run can actually reach. `retrieve` is dropped when
+    # retrieval is off or a URL was supplied; `copy` is dropped unless it was asked for.
+    progress = _ENRICH_PROGRESS.start(
+        sku=enrichment_request.clean_mpn,
+        plan=plan_stages(
+            retrieve=enrichment_request.retrieve and not url,
+            generate_copy=enrichment_request.generate_copy,
+            merge_sources=enrichment_request.merge_sources,
+        ),
+    )
+
     try:
         result = enrich_one(
             enrichment_request,
+            progress=progress,
             registry=registry,
             client=client,
             store=LocalArtifactStore(ARTIFACT_DIR),
@@ -1488,6 +1572,12 @@ def _run_enrichment(request: EnrichRequest) -> JSONResponse:
     except (UrlFetchError, IngestError) as exc:
         # 502 rather than 400. The request was fine; the *upstream* document could not be retrieved,
         # and a caller staring at a link that works in their browser needs the fetch error verbatim.
+        #
+        # `progress.fail` before the raise, in every arm. The HTTP response carries the reason to
+        # whoever submitted; the snapshot carries it to whoever is *watching*, and those are not
+        # always the same tab. Without it a failed run's last published state stays "running" and
+        # the animation never resolves.
+        progress.fail(str(exc))
         raise HTTPException(
             status_code=502,
             detail={
@@ -1504,7 +1594,21 @@ def _run_enrichment(request: EnrichRequest) -> JSONResponse:
         # run is almost always a missing `AWS_PROFILE`. Unwrapped, either one reaches a
         # browser as a traceback and reads as a bug in the console rather than a
         # configuration problem.
+        progress.fail(str(exc))
         raise HTTPException(status_code=503, detail=_credentials_detail(exc)) from exc
+    except BaseException as exc:
+        # Everything else, re-raised unchanged.
+        #
+        # A bare `except` here is normally the wrong instinct, and it is right for exactly one
+        # reason: this is the only place that can close the progress snapshot. The two arms above
+        # cover the failures with a known HTTP shape; anything else — a bug in a stage, a
+        # `KeyboardInterrupt` during a demo — would otherwise leave the last published state saying
+        # "running" forever, and a watcher animating a run that ended. The exception itself is
+        # untouched and still becomes whatever it was going to become.
+        progress.fail(f"{type(exc).__name__}: {exc}")
+        raise
+
+    progress.begin("persist")
 
     sources = source_summaries(
         result.source,
@@ -1547,6 +1651,16 @@ def _run_enrichment(request: EnrichRequest) -> JSONResponse:
         artifact=result.source.artifact,
         registry=registry,
         sources=sources,
+    )
+
+    progress.complete(
+        "persist",
+        f"session, console bundle and delivery file written for {paths.slug}"
+        + (" (replaced the previous run)" if existing.is_file() and request.replace else ""),
+    )
+    progress.finish(
+        f"{result.sku}: {result.run.certificate.summary.attributes_populated} attributes, "
+        f"{delivery.summary()['populated']} delivery columns populated"
     )
 
     return JSONResponse(

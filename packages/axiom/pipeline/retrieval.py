@@ -90,6 +90,38 @@ newer and still no richer for one SKU, so it remains a candidate while focused p
 technical data sheets are preferred. The normal non-refresh path retains its existing ranking.
 """
 
+MAX_LINKED_PDFS = 3
+"""Datasheet PDFs fetched from one product page's own links.
+
+Two was one short of the observed shape. A manufacturer's Downloads tab publishes a *set* of
+documents that do not overlap: Mirka's POLAROS page links a manual, a leaflet and an exploded
+parts view, and the leaflet carries the specification table while the manual carries the approvals
+and the exploded view carries the spare-part numbers. Taking the top two by spec score dropped
+whichever ranked third for reasons unrelated to what it contained.
+
+Still bounded, and bounded twice over: this cap applies per page, and every fetch it authorises is
+counted against the session's own `MAX_FETCHES` ceiling, so a page advertising forty links cannot
+turn one submission into forty requests.
+"""
+
+BROAD_COVERAGE_PAGES = 40
+"""Above this page count, stored coverage is a catalogue mention rather than a source for one part.
+
+The library short-circuit exists because retrieval is a one-time cost per document rather than per
+part, and that argument is sound for a datasheet. It is not sound for a general catalogue.
+
+Measured on Mirka MRP6002100: the library held a 154-page, 31 MB seasonal catalogue that names the
+part in a single ordering row, so `coverage_for` reported coverage and retrieval returned it having
+made **zero requests**. The manufacturer's own product page for that part — with the complete
+specification table and three datasheet PDFs — was never fetched, and the catalogue's overwhelmingly
+abrasive body text then classified a rotary polisher as a coated abrasive. Four values were
+recovered where the product page states thirteen.
+
+So coverage that is *only* broad no longer suppresses the request. The stored catalogue is retained
+as a fallback exactly as an explicit refresh retains it, and a stored **focused** document still
+short-circuits with no request at all — which is the case the cost argument was really about.
+"""
+
 
 @dataclass(frozen=True)
 class RetrievalAttempt:
@@ -289,12 +321,19 @@ def _retrieve_documents(
     stored_documents: tuple[ParsedDocument, ...] = ()
     stored_entries: tuple[DocumentEntry, ...] = ()
     baseline_hashes: set[str] = set()
+    stored_only_broad = False
     if coverage:
         parsed = [library.parsed(c.entry) for c in coverage]
         stored_documents = tuple(p for p in parsed if p is not None)
         stored_entries = tuple(c.entry for c in coverage)
         baseline_hashes = {entry.sha256 for entry in stored_entries}
-        if stored_documents and not refresh_sources:
+        # Whether every stored document covering this part is a catalogue rather than a source for
+        # it. See BROAD_COVERAGE_PAGES: this is the condition under which the no-request
+        # short-circuit costs more in lost attributes than it saves in bandwidth.
+        stored_only_broad = bool(stored_documents) and all(
+            document.page_count > BROAD_COVERAGE_PAGES for document in stored_documents
+        )
+        if stored_documents and not refresh_sources and not stored_only_broad:
             how = "an ordering row" if coverage[0].is_ordering_row else "the document body"
             notes.append(
                 f"a stored document already covers {mpn} in {how}, so no request was made. "
@@ -308,12 +347,19 @@ def _retrieve_documents(
                 from_library=True,
                 notes=tuple(notes),
             )
-        if stored_documents:
+        if stored_documents and stored_only_broad and not refresh_sources:
+            notes.append(
+                f"stored coverage for {mpn} is a "
+                f"{max(d.page_count for d in stored_documents)}-page catalogue, which names the "
+                f"part without describing it, so a focused manufacturer source was searched for. "
+                f"The catalogue is retained as a fallback."
+            )
+        elif stored_documents:
             notes.append(
                 f"stored coverage for {mpn} was retained as a fallback while refresh searched "
                 "for a richer live manufacturer source."
             )
-        else:
+        elif not stored_documents:
             # Indexed but the bytes are gone: the store is gitignored, so a fresh clone hits this.
             notes.append(
                 "the library indexes a document covering this part but its bytes are not in the "
@@ -350,6 +396,12 @@ def _retrieve_documents(
     resolution: Resolution | None = None
     outcomes: list[FetchOutcome] = []
 
+    # An explicit refresh and broad-only stored coverage want identical behaviour from here on:
+    # rank a focused live source above the catalogue that is already stored, and keep the catalogue
+    # only as a fallback. The difference between them is upstream — one was asked for, the other was
+    # inferred — so it is collapsed here rather than threaded through three closures.
+    prefer_focused = refresh_sources or stored_only_broad
+
     def _is_refresh_upgrade(document: ParsedDocument) -> bool:
         """Whether a fresh source is focused enough to replace broad cached coverage."""
         return (
@@ -359,7 +411,7 @@ def _retrieve_documents(
 
     def _harvest() -> tuple[ParsedDocument, ...]:
         found = library.coverage_for(mpn)
-        if not refresh_sources:
+        if not prefer_focused:
             parsed = [library.parsed(c.entry) for c in found]
             return tuple(p for p in parsed if p is not None)
 
@@ -465,7 +517,7 @@ def _retrieve_documents(
             *,
             origin: str,
         ) -> None:
-            """Fetch up to two PDFs linked by a product page before accepting the thinner HTML."""
+            """Fetch the PDFs a product page links before accepting the thinner HTML."""
             if entry is None or session.exhausted:
                 return
             markup = library.text(entry)
@@ -477,7 +529,7 @@ def _retrieve_documents(
                 if link.is_pdf and policy.allows(link.url)
             ]
             links.sort(key=lambda link: -policy.spec_score(link.url))
-            for link in links[:2]:
+            for link in links[:MAX_LINKED_PDFS]:
                 if session.exhausted:
                     break
                 verdict = policy.classify(link.url)
@@ -538,9 +590,13 @@ def _retrieve_documents(
     if total_requests:
         library.save()
 
-    if refresh_sources and stored_documents:
+    if prefer_focused and stored_documents:
+        # Reached when nothing focused was found. The stored document is returned rather than
+        # discarded: bypassing the short-circuit was an attempt at something better, not a
+        # rejection of what we already had, and returning empty here would turn a catalogue-backed
+        # answer into no answer at all.
         notes.append(
-            "refresh found no richer exact-SKU source, so the previously stored document remains "
+            "no richer exact-SKU source was found, so the previously stored document remains "
             "the extraction source."
         )
         return RetrievalAttempt(
@@ -548,7 +604,7 @@ def _retrieve_documents(
             documents=stored_documents,
             entries=stored_entries,
             manufacturer=maker,
-            refresh_requested=True,
+            refresh_requested=refresh_sources,
             discovery=discovery,
             resolution=resolution,
             outcomes=tuple(outcomes),

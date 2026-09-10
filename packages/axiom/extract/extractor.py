@@ -56,6 +56,16 @@ _ABSTENTION_REASONS = {
 }
 _LABEL_FOLD = re.compile(r"[^a-z0-9]+")
 
+FOCUS_PAGE_THRESHOLD = 12
+"""Page count above which a document is focused on the pages naming the target part.
+
+Set above any plausible single-product datasheet and well below a catalogue. A twelve-page sheet is
+about one product, so every page of it is relevant context and truncating it would lose the
+footnotes a value depends on. A hundred-page catalogue is about several hundred products, and
+sending all of it asks the model to find one row in a haystack — which is measurably what it fails
+to do. See :meth:`ParsedDocument.to_prompt_content`, which declines to focus when the part is not
+localised, so this threshold cannot silently truncate a document it misjudges."""
+
 
 def _fold_label(value: str) -> str:
     return _LABEL_FOLD.sub("", value.casefold())
@@ -234,11 +244,19 @@ class Extractor:
                 action=RecommendedAction.DELIST_PRODUCT,
             )
 
+        # A broad catalogue is focused on the pages that name the part. See
+        # `ParsedDocument.to_prompt_content`: this is what stops a 154-page seasonal catalogue from
+        # arriving as 300,000 characters of unrelated products, which is how a document that plainly
+        # states the specifications returned none of them. A document small enough to send whole is
+        # sent whole, so a datasheet's cross-references and footnotes are unaffected.
+        focus_sku = target_sku if parsed.page_count > FOCUS_PAGE_THRESHOLD else None
+        source_content = parsed.to_prompt_content(max_pages=max_pages, focus_sku=focus_sku)
+
         prompt = (
             build_extraction_prompt(
                 self._registry,
                 class_code,
-                source_content=parsed.to_prompt_content(max_pages=max_pages),
+                source_content=source_content,
                 target_sku=target_sku,
                 source_name=parsed.document.document_id,
                 include_recommended=include_recommended,
@@ -247,7 +265,7 @@ class Extractor:
             )
             if class_code is not None
             else build_specification_extraction_prompt(
-                source_content=parsed.to_prompt_content(max_pages=max_pages),
+                source_content=source_content,
                 target_sku=target_sku,
                 source_name=parsed.document.document_id,
             )

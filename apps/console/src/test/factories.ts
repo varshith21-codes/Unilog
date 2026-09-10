@@ -551,6 +551,37 @@ export function enrichLimits(overrides: Partial<EnrichLimits> = {}): EnrichLimit
     concurrent_runs: 1,
     outputs: ["csv", "xlsx"],
     model_calls_per_run: { without_copy: 2, with_copy: 3 },
+    // A trimmed stand-in for `axiom.pipeline.progress.STAGE_PLAN`, which the API serves so the run
+    // screen can draw its checklist before the first progress poll returns. Four rows rather than
+    // thirteen: the form's behaviour depends on the *shape* — that a plan exists, and that `retrieve`
+    // and `copy` are the two rows dropped conditionally — not on the full list. `retrieve` and `copy`
+    // are both here precisely because they are the conditional ones.
+    stages: [
+      {
+        id: "retrieve",
+        name: "Find the document",
+        narration: "Looking for the manufacturer's own document.",
+        model: false,
+      },
+      {
+        id: "classify",
+        name: "Classify",
+        narration: "Asking the model which product class this is.",
+        model: true,
+      },
+      {
+        id: "extract",
+        name: "Extract",
+        narration: "Reading values out of the source, each with a verbatim quote.",
+        model: true,
+      },
+      {
+        id: "copy",
+        name: "Generate copy",
+        narration: "Generating copy and claim-checking every sentence.",
+        model: true,
+      },
+    ],
     notes: ["Runs the online pipeline, so this endpoint costs money per submission."],
     ...overrides,
   };

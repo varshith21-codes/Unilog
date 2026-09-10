@@ -223,16 +223,65 @@ class ParsedDocument:
                 return table
         return None
 
-    def to_prompt_content(self, *, max_pages: int | None = None) -> str:
-        """Render the whole document for an extraction prompt.
+    def to_prompt_content(
+        self, *, max_pages: int | None = None, focus_sku: str | None = None
+    ) -> str:
+        """Render the document for an extraction prompt.
 
         Page markers are emitted so the model can report a page number, which is what makes
         the returned citation resolvable back to a coordinate.
+
+        ``max_pages`` truncates from the front, which is right for a datasheet whose first pages are
+        the product and wrong for a catalogue whose relevant row is on page 96. ``focus_sku`` is the
+        catalogue answer: keep only the pages that name the part, plus one page either side for the
+        specification block a table's row refers to.
+
+        Measured on Mirka MRP6002100, whose stored coverage was a 154-page seasonal catalogue: the
+        whole document rendered to roughly 300,000 characters of mostly unrelated abrasives, and
+        extraction returned no specifications at all. Focusing recovers the two pages that describe
+        the part. Non-truncating by construction — when the SKU is absent or appears on most pages,
+        the full document is returned rather than a guess at which part of it matters.
         """
-        pages = self.pages if max_pages is None else self.pages[:max_pages]
+        pages = self.pages
+        if focus_sku:
+            pages = self._pages_near(focus_sku) or pages
+        if max_pages is not None:
+            pages = pages[:max_pages]
         blocks = []
         for page in pages:
             blocks.append(f'<page number="{page.number}">')
             blocks.append(page.to_prompt_text())
             blocks.append("</page>")
         return "\n".join(blocks)
+
+    def _pages_near(self, sku: str, *, window: int = 1) -> list:
+        """Pages naming ``sku``, widened by ``window`` on each side. Empty when focusing is unsafe.
+
+        Folded comparison, matching how the rest of the pipeline compares part numbers: a catalogue
+        prints ``49-94-0001`` where the item master holds ``4994000‌1``.
+        """
+        folded = "".join(ch for ch in sku.casefold() if ch.isalnum())
+        if len(folded) < 4:
+            # Too short to search for without matching arbitrary digits. Focusing on a false hit
+            # would hide the real pages, so decline and let the caller send everything.
+            return []
+
+        hits = {
+            index
+            for index, page in enumerate(self.pages)
+            if folded in "".join(ch for ch in page.text.casefold() if ch.isalnum())
+        }
+        if not hits:
+            return []
+        # A part named on most of the document is not localised, so there is nothing to focus on.
+        if len(hits) > max(1, len(self.pages) // 2):
+            return []
+
+        keep = sorted(
+            {
+                index
+                for hit in hits
+                for index in range(max(0, hit - window), min(len(self.pages), hit + window + 1))
+            }
+        )
+        return [self.pages[index] for index in keep]

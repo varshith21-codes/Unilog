@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-08-25T04:44:51.839025+00:00",
+  "generated_at": "2026-09-10T09:04:43.891585+00:00",
   "documents": [
     {
       "sha256": "01d4f6dc964504f330917a4a49354ee3b8a762ba3c3263192ad28c0a829ee248",
@@ -1063,7 +1063,9 @@
       "covers": {
         "8999000111": "text"
       },
-      "absent": [],
+      "absent": [
+        "MRP6002100"
+      ],
       "withdrawn": {}
     },
     {
@@ -3433,7 +3435,8 @@
       "license_note": "retrieved from cdn.brandfolder.io (unknown tier) for product data enrichment; review the site's terms before republishing any asset from it",
       "covers": {},
       "absent": [
-        "8999000111"
+        "8999000111",
+        "MRP6002100"
       ],
       "withdrawn": {}
     },
@@ -5693,7 +5696,8 @@
       "license_note": "retrieved from www.mirka.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
       "covers": {},
       "absent": [
-        "8999000111"
+        "8999000111",
+        "MRP6002100"
       ],
       "withdrawn": {}
     },
@@ -7995,6 +7999,26 @@
       "withdrawn": {}
     },
     {
+      "sha256": "31737c10991554166029fc0ee9a1013a62da762b2dff8185d8fdef9ac8dfb74e",
+      "storage_uri": "local://31/73/31737c10991554166029fc0ee9a1013a62da762b2dff8185d8fdef9ac8dfb74e.pdf",
+      "document_id": "Mirka_Polaros_Flyer_0725@31737c10",
+      "source_uri": "https://www.ach-shop.com/media/pdf/61/20/b8/Mirka_Polaros_Flyer_0725.pdf",
+      "host": "www.ach-shop.com",
+      "tier": "unknown",
+      "manufacturer_id": null,
+      "doc_type": "spec_sheet",
+      "filename": "Mirka_Polaros_Flyer_0725.pdf",
+      "size_bytes": 620022,
+      "fetched_at": "2026-09-10T09:04:43.724120+00:00",
+      "revision_label": "Wed, 24 Sep 2025 17:17:06 GMT",
+      "license_note": "retrieved from www.ach-shop.com (unknown tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {},
+      "absent": [
+        "MRP6002100"
+      ],
+      "withdrawn": {}
+    },
+    {
       "sha256": "31e386ab57d3d3598a57d6c5dbbfa6c3f6163ee9a6364fb16893eb902e13da1d",
       "storage_uri": "local://31/e3/31e386ab57d3d3598a57d6c5dbbfa6c3f6163ee9a6364fb16893eb902e13da1d.html",
       "document_id": "everly-pendant-42199bkcs@31e386ab",
@@ -8600,6 +8624,26 @@
         "XVP01Z",
         "d10cnk",
         "e28cnkha"
+      ],
+      "withdrawn": {}
+    },
+    {
+      "sha256": "331f17f4ab66788605351bc589910840645e577f8576c156e14720833e05e1fa",
+      "storage_uri": "local://33/1f/331f17f4ab66788605351bc589910840645e577f8576c156e14720833e05e1fa.html",
+      "document_id": "downloads@331f17f4",
+      "source_uri": "https://www.mirka.com/en/support/downloads/",
+      "host": "www.mirka.com",
+      "tier": "manufacturer",
+      "manufacturer_id": "mirka",
+      "doc_type": "web_page",
+      "filename": "downloads.html",
+      "size_bytes": 405311,
+      "fetched_at": "2026-09-10T09:04:30.841393+00:00",
+      "revision_label": null,
+      "license_note": "retrieved from www.mirka.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {},
+      "absent": [
+        "MRP6002100"
       ],
       "withdrawn": {}
     },
@@ -12514,6 +12558,26 @@
       "withdrawn": {}
     },
     {
+      "sha256": "46cbe0a3620377e02affc4ff8bbe2bf1605368032667d6b8c4796b09a9717705",
+      "storage_uri": "local://46/cb/46cbe0a3620377e02affc4ff8bbe2bf1605368032667d6b8c4796b09a9717705.pdf",
+      "document_id": "Mirka_Polaros_leaflet@46cbe0a3",
+      "source_uri": "https://cdn.brandfolder.io/3TVWCF1X/as/xkm67x4j3fc3hptx5ts3qjp/Mirka_Polaros_leaflet.pdf",
+      "host": "cdn.brandfolder.io",
+      "tier": "unknown",
+      "manufacturer_id": null,
+      "doc_type": "spec_sheet",
+      "filename": "Mirka_Polaros_leaflet.pdf",
+      "size_bytes": 566811,
+      "fetched_at": "2026-09-10T09:04:37.078009+00:00",
+      "revision_label": "Mon, 25 May 2026 13:45:27 GMT",
+      "license_note": "retrieved from cdn.brandfolder.io (unknown tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {},
+      "absent": [
+        "MRP6002100"
+      ],
+      "withdrawn": {}
+    },
+    {
       "sha256": "48f0cd2556e138302217db369efdb24bb6b92c7d20fb938807bf65c0ff027890",
       "storage_uri": "local://48/f0/48f0cd2556e138302217db369efdb24bb6b92c7d20fb938807bf65c0ff027890.html",
       "document_id": "vara-chandelier-44072dbk@48f0cd25",
@@ -15957,7 +16021,8 @@
       "license_note": "retrieved from www.mirka.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
       "covers": {},
       "absent": [
-        "8999000111"
+        "8999000111",
+        "MRP6002100"
       ],
       "withdrawn": {}
     },
@@ -20171,7 +20236,28 @@
       },
       "absent": [
         "48-22-4014",
-        "8999000111"
+        "8999000111",
+        "MRP6002100"
+      ],
+      "withdrawn": {}
+    },
+    {
+      "sha256": "620b88ee6f916ca6925d6381c60848429575e32977b55d8ce56e37936dfa73be",
+      "storage_uri": "local://62/0b/620b88ee6f916ca6925d6381c60848429575e32977b55d8ce56e37936dfa73be.pdf",
+      "document_id": "Legal_guarantee_notice_ENN@620b88ee",
+      "source_uri": "https://cdn.brandfolder.io/FSMPOV8D/at/jhcnwjgrw6fsxcsnf5fs882x/Legal_guarantee_notice_ENN.pdf",
+      "host": "cdn.brandfolder.io",
+      "tier": "unknown",
+      "manufacturer_id": null,
+      "doc_type": "spec_sheet",
+      "filename": "Legal_guarantee_notice_ENN.pdf",
+      "size_bytes": 221680,
+      "fetched_at": "2026-09-10T09:04:32.654313+00:00",
+      "revision_label": "Fri, 21 Aug 2026 08:08:44 GMT",
+      "license_note": "retrieved from cdn.brandfolder.io (unknown tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {},
+      "absent": [
+        "MRP6002100"
       ],
       "withdrawn": {}
     },
@@ -20193,7 +20279,8 @@
         "48-22-4014": "text"
       },
       "absent": [
-        "8999000111"
+        "8999000111",
+        "MRP6002100"
       ],
       "withdrawn": {}
     },
@@ -23593,7 +23680,8 @@
         "48-22-4014": "table"
       },
       "absent": [
-        "8999000111"
+        "8999000111",
+        "MRP6002100"
       ],
       "withdrawn": {}
     },
@@ -26556,7 +26644,8 @@
       "license_note": "retrieved from cdn.brandfolder.io (unknown tier) for product data enrichment; review the site's terms before republishing any asset from it",
       "covers": {},
       "absent": [
-        "8999000111"
+        "8999000111",
+        "MRP6002100"
       ],
       "withdrawn": {}
     },
@@ -31489,6 +31578,26 @@
         "XVP01Z",
         "d10cnk",
         "e28cnkha"
+      ],
+      "withdrawn": {}
+    },
+    {
+      "sha256": "9e18fd6295934b42906ba9238a88937a8b5b20c5b29e76fe164d886150056bd9",
+      "storage_uri": "local://9e/18/9e18fd6295934b42906ba9238a88937a8b5b20c5b29e76fe164d886150056bd9.pdf",
+      "document_id": "Polaros-Lightly_Scratched_Old_Clearcoat_process_09-2025_lowres@9e18fd62",
+      "source_uri": "https://cdn.brandfolder.io/3TVWCF1X/at/pzncwfmbmr43gktffhw49r/Polaros-Lightly_Scratched_Old_Clearcoat_process_09-2025_lowres.pdf",
+      "host": "cdn.brandfolder.io",
+      "tier": "unknown",
+      "manufacturer_id": null,
+      "doc_type": "spec_sheet",
+      "filename": "Polaros-Lightly_Scratched_Old_Clearcoat_process_09-2025_lowres.pdf",
+      "size_bytes": 585076,
+      "fetched_at": "2026-09-10T09:04:38.963226+00:00",
+      "revision_label": "Wed, 17 Sep 2025 08:15:45 GMT",
+      "license_note": "retrieved from cdn.brandfolder.io (unknown tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {},
+      "absent": [
+        "MRP6002100"
       ],
       "withdrawn": {}
     },
@@ -36794,7 +36903,8 @@
       "revision_label": "Wed, 21 Jan 2026 07:51:34 GMT",
       "license_note": "retrieved from cms.mirka.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
       "covers": {
-        "8896700140": "table"
+        "8896700140": "table",
+        "MRP6002100": "table"
       },
       "absent": [
         "48-22-4014",
@@ -37820,6 +37930,26 @@
         "XVP01Z",
         "d10cnk",
         "e28cnkha"
+      ],
+      "withdrawn": {}
+    },
+    {
+      "sha256": "bd900f73acab5982ef8c238aaa4aae111fe48f676f99c93847daed44c16fd1fa",
+      "storage_uri": "local://bd/90/bd900f73acab5982ef8c238aaa4aae111fe48f676f99c93847daed44c16fd1fa.pdf",
+      "document_id": "productcatalogue_2025-low-res-1-1@bd900f73",
+      "source_uri": "https://cms.mirka.com/globalassets/mpl/productcatalogue_2025-low-res-1-1.pdf",
+      "host": "cms.mirka.com",
+      "tier": "manufacturer",
+      "manufacturer_id": "mirka",
+      "doc_type": "spec_sheet",
+      "filename": "productcatalogue_2025-low-res-1-1.pdf",
+      "size_bytes": 13819260,
+      "fetched_at": "2026-09-10T09:03:36.669007+00:00",
+      "revision_label": "Mon, 08 Dec 2025 13:42:42 GMT",
+      "license_note": "retrieved from cms.mirka.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {},
+      "absent": [
+        "MRP6002100"
       ],
       "withdrawn": {}
     },
@@ -48868,6 +48998,26 @@
         "XVP01Z",
         "d10cnk",
         "e28cnkha"
+      ],
+      "withdrawn": {}
+    },
+    {
+      "sha256": "f2f470465720d83de3541127b145c1aba565b15eebdec869a162259cc8cc9283",
+      "storage_uri": "local://f2/f4/f2f470465720d83de3541127b145c1aba565b15eebdec869a162259cc8cc9283.html",
+      "document_id": "polaros@f2f47046",
+      "source_uri": "https://www.mirka.com/en/products/top-brands/polaros/",
+      "host": "www.mirka.com",
+      "tier": "manufacturer",
+      "manufacturer_id": "mirka",
+      "doc_type": "web_page",
+      "filename": "polaros.html",
+      "size_bytes": 442657,
+      "fetched_at": "2026-09-10T09:04:35.862139+00:00",
+      "revision_label": null,
+      "license_note": "retrieved from www.mirka.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {},
+      "absent": [
+        "MRP6002100"
       ],
       "withdrawn": {}
     },
