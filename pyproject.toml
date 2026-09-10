@@ -102,6 +102,17 @@ filterwarnings = [
     "error",
     # reportlab (test-only dependency) uses ast.NameConstant, removed in 3.14.
     "ignore:ast.NameConstant is deprecated:DeprecationWarning",
+    # Starlette's TestClient reaches `anyio.abc.BlockingPortal`, which newer anyio releases have
+    # moved to `anyio.from_thread`. Nothing in this repository imports anyio at all — the warning is
+    # raised entirely inside two of our dependencies talking to each other, so there is no call site
+    # here to correct and `error` turns it into a failure we cannot act on.
+    #
+    # It cost 74 errors and a failure on every CI run from the moment the runner picked up the newer
+    # anyio, while the same commits passed locally against an older pin — which is the specific way
+    # this bites: a green laptop and a red pipeline, for a line of code nobody wrote. Scoped to this
+    # one message rather than silencing DeprecationWarning as a class, because the reason `error` is
+    # the default here is that our *own* deprecations should still fail the build.
+    "ignore:The anyio.abc.BlockingPortal alias is deprecated:DeprecationWarning",
 ]
 
 [tool.ruff]
