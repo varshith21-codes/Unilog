@@ -1994,77 +1994,6 @@ input[type="radio"] {
   margin-block-start: var(--marketing-space-xl);
 }
 
-.landing-category {
-  align-self: end;
-  border-inline-start: var(--marketing-accent-rule-width) solid var(--accent);
-  padding-inline-start: var(--marketing-space-lg);
-}
-
-.landing-category-label {
-  color: var(--fg-quiet);
-  font-family: var(--font-mono);
-  font-size: var(--text-micro);
-  letter-spacing: var(--tracking-overline);
-  text-transform: uppercase;
-}
-
-.landing-category strong {
-  display: block;
-  max-width: 27ch;
-  margin-block-start: var(--marketing-space-md);
-  color: var(--fg);
-  font-size: var(--text-xl);
-  font-weight: 520;
-  line-height: 1.25;
-}
-
-.landing-rule {
-  max-width: 39ch;
-  margin-block-start: var(--marketing-space-xl);
-  border-block-start: var(--marketing-rule-width) solid var(--hairline-strong);
-  padding-block-start: var(--marketing-space-md);
-  color: var(--fg-secondary);
-  font-size: var(--text-sm);
-  line-height: 1.6;
-}
-
-.landing-rule span {
-  display: block;
-  margin-block-end: var(--marketing-space-xs);
-  color: var(--pass);
-  font-family: var(--font-mono);
-  font-size: var(--text-micro);
-  font-weight: 600;
-  letter-spacing: var(--tracking-overline);
-  text-transform: uppercase;
-}
-
-.landing-proof-section {
-  padding-block: var(--marketing-section-space);
-  border-block-start: var(--marketing-rule-width) solid var(--hairline);
-}
-
-.landing-section-heading {
-  display: grid;
-  gap: var(--marketing-space-md);
-  margin-block-end: var(--marketing-space-xl);
-}
-
-.landing-section-heading h2 {
-  max-width: 21ch;
-  font-size: var(--text-display);
-  font-weight: 540;
-  letter-spacing: var(--tracking-display);
-  line-height: var(--text-display--line-height);
-}
-
-.landing-section-heading p {
-  max-width: var(--marketing-copy-measure);
-  color: var(--fg-secondary);
-  font-size: var(--text-body);
-  line-height: var(--text-body--line-height);
-}
-
 .evidence-console {
   overflow: hidden;
   border: var(--marketing-rule-width) solid var(--hairline-strong);
@@ -2283,75 +2212,6 @@ input[type="radio"] {
   text-transform: uppercase;
 }
 
-.evidence-flow {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  border-block-start: var(--marketing-rule-width) solid var(--hairline-strong);
-  background: var(--surface-raised);
-}
-
-.evidence-flow li {
-  min-width: 0;
-  padding: var(--marketing-space-md) var(--marketing-space-lg);
-}
-
-.evidence-flow li:nth-child(even) {
-  border-inline-start: var(--marketing-rule-width) solid var(--hairline);
-}
-
-.evidence-flow li:nth-child(n + 3) {
-  border-block-start: var(--marketing-rule-width) solid var(--hairline);
-}
-
-.evidence-flow-index {
-  display: block;
-  color: var(--accent);
-  font-family: var(--font-mono);
-  font-size: var(--text-micro);
-}
-
-.evidence-flow strong {
-  display: block;
-  margin-block-start: var(--marketing-space-xs);
-  color: var(--fg);
-  font-size: var(--text-sm);
-  font-weight: 600;
-}
-
-.evidence-flow small {
-  display: block;
-  margin-block-start: var(--marketing-space-2xs);
-  color: var(--fg-quiet);
-  font-size: var(--text-micro);
-}
-
-.landing-proof-line {
-  display: grid;
-  gap: var(--marketing-space-lg);
-  margin-block-start: var(--marketing-space-xl);
-  border-block: var(--marketing-rule-width) solid var(--hairline-strong);
-  padding-block: var(--marketing-space-lg);
-}
-
-.landing-proof-line div {
-  display: flex;
-  min-width: 0;
-  align-items: baseline;
-  gap: var(--marketing-space-sm);
-}
-
-.landing-proof-line strong {
-  color: var(--fg);
-  font-family: var(--font-mono);
-  font-size: var(--text-lg);
-  font-weight: 500;
-}
-
-.landing-proof-line span {
-  color: var(--fg-secondary);
-  font-size: var(--text-sm);
-}
-
 .landing-closing {
   padding-block: var(--marketing-section-space);
   border-block-start: var(--marketing-rule-width) solid var(--hairline);
@@ -2407,35 +2267,8 @@ input[type="radio"] {
 }
 
 @media (min-width: 48rem) {
-  .landing-section-heading,
-  .landing-proof-line,
   .landing-closing-inner {
     grid-template-columns: minmax(0, 1fr) minmax(16rem, 0.65fr);
-  }
-
-  .landing-section-heading p {
-    justify-self: end;
-  }
-
-  .landing-proof-line {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .landing-proof-line div + div {
-    border-inline-start: var(--marketing-rule-width) solid var(--hairline);
-    padding-inline-start: var(--marketing-space-lg);
-  }
-
-  .evidence-flow {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
-  .evidence-flow li + li {
-    border-inline-start: var(--marketing-rule-width) solid var(--hairline);
-  }
-
-  .evidence-flow li:nth-child(n + 3) {
-    border-block-start: 0;
   }
 
   .landing-closing .landing-actions {
@@ -2528,19 +2361,6 @@ input[type="radio"] {
 .marketing-theme-control,
 .marketing-theme-control .btn {
   border-radius: var(--marketing-radius-round);
-}
-
-.marketing-proof-link {
-  display: none;
-  min-height: var(--control-height);
-  align-items: center;
-  color: var(--fg-secondary);
-  font-size: var(--text-sm);
-  font-weight: 500;
-}
-
-.marketing-proof-link:active {
-  transform: translateY(0) scale(0.99);
 }
 
 .landing-hero {
@@ -2720,64 +2540,6 @@ input[type="radio"] {
   text-transform: uppercase;
 }
 
-.landing-outcome-rail {
-  display: grid;
-  margin-block-start: var(--marketing-space-xl);
-  border-block: var(--marketing-rule-width) solid var(--hairline-strong);
-}
-
-.landing-outcome-rail > div {
-  display: grid;
-  min-width: 0;
-  grid-template-columns: var(--marketing-trace-index-width) minmax(0, 1fr);
-  gap: var(--marketing-space-md);
-  padding: var(--marketing-space-md) var(--marketing-space-lg);
-}
-
-.landing-outcome-rail > div + div {
-  border-block-start: var(--marketing-rule-width) solid var(--hairline);
-}
-
-.landing-outcome-rail dt {
-  color: var(--accent);
-  font-family: var(--font-mono);
-  font-size: var(--text-micro);
-  letter-spacing: var(--tracking-overline);
-  text-transform: uppercase;
-}
-
-.landing-outcome-rail dd {
-  min-width: 0;
-}
-
-.landing-outcome-rail strong,
-.landing-outcome-rail span {
-  display: block;
-  overflow-wrap: anywhere;
-}
-
-.landing-outcome-rail strong {
-  color: var(--fg);
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
-  font-weight: 500;
-}
-
-.landing-outcome-rail span {
-  margin-block-start: var(--marketing-space-2xs);
-  color: var(--fg-secondary);
-  font-size: var(--text-micro);
-  line-height: var(--text-sm--line-height);
-}
-
-.landing-proof-section {
-  scroll-margin-block-start: var(--marketing-header-height);
-}
-
-.landing-section-heading {
-  margin-block-end: var(--marketing-space-2xl);
-}
-
 .hero-entrance {
   animation: hero-entrance var(--duration-slow) var(--ease-out-expo) both;
 }
@@ -2810,10 +2572,6 @@ input[type="radio"] {
     --marketing-hero-size: clamp(3.25rem, 7vw, 4rem);
   }
 
-  .marketing-proof-link {
-    display: inline-flex;
-  }
-
   .landing-hero-grid {
     grid-template-areas:
       "heading trace"
@@ -2837,15 +2595,6 @@ input[type="radio"] {
   .hero-trace {
     grid-area: trace;
     align-self: center;
-  }
-
-  .landing-outcome-rail {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .landing-outcome-rail > div + div {
-    border-block-start: 0;
-    border-inline-start: var(--marketing-rule-width) solid var(--hairline);
   }
 }
 
@@ -2878,12 +2627,13 @@ input[type="radio"] {
 
   .hero-trace-header,
   .hero-trace-list li,
-  .hero-trace-rule,
-  .landing-outcome-rail > div {
+  .hero-trace-rule {
     padding-inline: var(--marketing-space-md);
   }
 
-  .hero-trace-list li:nth-child(2) {
+  /* Keyed to the highlighted row rather than to its position: the verified span moved from row
+     two to row three when the trace gained a retrieval step. */
+  .hero-trace-list li[data-highlight] {
     padding-inline-start: calc(var(--marketing-space-md) - var(--marketing-accent-rule-width));
   }
 
@@ -2910,14 +2660,12 @@ input[type="radio"] {
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .marketing-proof-link:hover,
-  .landing-text-link:hover {
-    color: var(--accent);
-    transform: translateY(var(--marketing-hover-lift));
-  }
-
+  /* Hover changes three properties at once — colour, border and a 1px lift. One property alone
+     registers as a state change; three register as a surface responding. */
   .landing-text-link:hover {
     border-color: var(--hairline-accent);
+    color: var(--accent);
+    transform: translateY(var(--marketing-hover-lift));
   }
 
   .landing-text-link:hover span {
@@ -2926,7 +2674,6 @@ input[type="radio"] {
 }
 
 @media (pointer: coarse) {
-  .marketing-proof-link,
   .landing-text-link {
     min-height: var(--control-height-touch);
   }
@@ -2938,9 +2685,1708 @@ input[type="radio"] {
     transform: none !important;
   }
 
-  .marketing-proof-link,
   .landing-text-link,
   .landing-text-link span {
     transform: none !important;
+  }
+}
+
+/* ==========================================================================
+ * AXIOM public landing — specification-sheet composition
+ * ==========================================================================
+ *
+ * Extends the Industrial Precision system rather than replacing it. Same canvas, same cobalt
+ * accent, same hairline hierarchy, same two families. What is added is scale contrast, vertical
+ * rhythm and a set of section shapes dense enough to carry the page's actual data volume.
+ *
+ * Everything below resolves to a token. The only new primitives are landing-scoped aliases
+ * declared on `.marketing-page`, so the workspace is untouched.
+ *
+ * Ordering note: this block is last in the file on purpose. The two earlier marketing blocks are
+ * kept intact because `not-found.tsx` renders against them, so the overrides here have to win on
+ * source order rather than on specificity.
+ * -------------------------------------------------------------------------- */
+
+.marketing-page {
+  /* Container widened a step: a 5-column spec table needs the room, and the reading measure is
+     held by `--marketing-copy-measure` rather than by the container. */
+  --marketing-container: 88rem;
+  --marketing-header-height: 3.875rem;
+
+  /* Vertical rhythm. The single highest-leverage change on the page: section padding that scales
+     with the viewport does more for perceived quality than any amount of decoration. */
+  --landing-section-space: clamp(4.25rem, 8vw, 8.5rem);
+  --landing-block-space: clamp(2rem, 3.4vw, 3.5rem);
+
+  --marketing-hero-space: clamp(3.25rem, 6vw, 6.5rem);
+  --marketing-hero-bottom-space: clamp(2.75rem, 4.5vw, 4.5rem);
+  --marketing-hero-size: clamp(2.5rem, 1.15rem + 5.4vw, 5.5rem);
+  --landing-h2-size: clamp(1.875rem, 1.1rem + 2.6vw, 3.125rem);
+  --landing-h3-size: clamp(1.0625rem, 1rem + 0.35vw, 1.25rem);
+  --landing-figure-size: clamp(1.75rem, 1.2rem + 1.9vw, 2.625rem);
+  --landing-ratio-size: clamp(2.25rem, 1.5rem + 2.6vw, 3.5rem);
+  --landing-band-figure-size: clamp(2.5rem, 1.4rem + 4vw, 5rem);
+
+  --marketing-copy-measure: 62ch;
+  --landing-tracking-display: -0.038em;
+
+  /* Band surface. Light mode steps down from the canvas; dark mode has to step *up*, which is
+     why this is a token rather than a literal `--surface-sunken` in every rule. */
+  --landing-band-surface: var(--surface-sunken);
+
+  --landing-mosaic-cell: 0.4375rem;
+  --landing-mosaic-gap: 0.1875rem;
+}
+
+.dark .marketing-page {
+  /* In dark mode `--surface-sunken` is ink-850, which is far too light for a full-width band —
+     it reads as a card the width of the viewport. `--surface` is one step off the canvas, which
+     is the amount of separation a band needs. */
+  --landing-band-surface: var(--surface);
+}
+
+/*
+ * Paper grain.
+ *
+ * The one texture on the page. A flat token-perfect surface reads as sterile at this scale, and
+ * a 3% noise overlay is the cheapest thing that makes it read as printed stock instead. Kept
+ * under `mix-blend-mode` so it modulates the surface rather than greying it, and scoped to the
+ * marketing page so the console's data density is never sitting on texture.
+ *
+ * `fixed` rather than scrolling: grain that moves with the content reads as a compression
+ * artefact.
+ */
+.marketing-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.028;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.dark .marketing-page::before {
+  opacity: 0.05;
+  mix-blend-mode: screen;
+}
+
+.marketing-page > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---------------------------------------------------------------- masthead */
+
+/*
+ * Sticky glass masthead.
+ *
+ * `backdrop-filter` is paired with a hairline, never used alone — a blur with no boundary reads
+ * as a rendering artefact rather than as a surface. The opaque background is the base and the
+ * translucent one is the enhancement, so a browser without `backdrop-filter` gets a solid bar
+ * instead of unreadable text over content.
+ */
+.marketing-header {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 40;
+  border-block-end: var(--marketing-rule-width) solid var(--hairline);
+  background: var(--canvas);
+}
+
+@supports (backdrop-filter: blur(1rem)) {
+  .marketing-header {
+    background: color-mix(in oklab, var(--canvas) 74%, transparent);
+    backdrop-filter: saturate(180%) blur(1.25rem);
+  }
+}
+
+.marketing-header-inner {
+  min-height: var(--marketing-header-height);
+  gap: var(--marketing-space-lg);
+}
+
+/*
+ * In-page index.
+ *
+ * Hidden below 64rem rather than collapsed into a menu. Seven anchors behind a disclosure
+ * button on a phone is a control nobody opens, and the page already reads top to bottom.
+ */
+.marketing-index {
+  display: none;
+  min-width: 0;
+}
+
+.marketing-index ul {
+  display: flex;
+  align-items: center;
+  gap: var(--marketing-space-xs);
+}
+
+.marketing-index a {
+  display: inline-flex;
+  min-height: 2rem;
+  align-items: center;
+  border-radius: var(--radius-sm);
+  padding-inline: var(--marketing-space-sm);
+  color: var(--fg-tertiary);
+  font-size: var(--text-meta);
+  font-weight: 520;
+  transition:
+    color var(--duration-fast) var(--ease-out-quart),
+    background-color var(--duration-fast) var(--ease-out-quart);
+}
+
+/* ---------------------------------------------------------------- type scale */
+
+.landing-title {
+  max-width: 20ch;
+  letter-spacing: var(--landing-tracking-display);
+  font-weight: 540;
+}
+
+.landing-h2 {
+  max-width: 26ch;
+  color: var(--fg);
+  font-size: var(--landing-h2-size);
+  font-weight: 540;
+  letter-spacing: var(--landing-tracking-display);
+  line-height: 1.04;
+  text-wrap: balance;
+}
+
+.landing-h3 {
+  color: var(--fg);
+  font-size: var(--landing-h3-size);
+  font-weight: 560;
+  letter-spacing: var(--tracking-heading);
+  line-height: 1.3;
+}
+
+.landing-lede {
+  max-width: var(--marketing-copy-measure);
+  color: var(--fg-secondary);
+  font-size: var(--text-body);
+  line-height: 1.62;
+}
+
+.landing-overline {
+  color: var(--fg-quiet);
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  font-weight: 500;
+  letter-spacing: var(--tracking-overline);
+  text-transform: uppercase;
+}
+
+.landing-muted {
+  color: var(--fg-tertiary);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+}
+
+.landing-sub {
+  display: block;
+  margin-block-start: var(--marketing-space-2xs);
+  color: var(--fg-quiet);
+  font-size: var(--text-micro);
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+/* Inline code voice, for an attribute code or a locator sitting inside a sentence. */
+.mono-inline {
+  font-family: var(--font-mono);
+  font-size: 0.925em;
+  color: var(--fg-secondary);
+}
+
+/* ---------------------------------------------------------------- section shell */
+
+.landing-section {
+  padding-block: var(--landing-section-space);
+  border-block-start: var(--marketing-rule-width) solid var(--hairline);
+  /*
+   * Clears the sticky masthead plus a gutter. Without the gutter an anchored heading lands
+   * flush against the glass edge, which reads as clipped rather than as positioned.
+   */
+  scroll-margin-block-start: calc(var(--marketing-header-height) + var(--marketing-space-lg));
+}
+
+.landing-section-sunken {
+  border-block-start-color: var(--hairline-strong);
+  background: var(--landing-band-surface);
+}
+
+/* Vertical rhythm inside a section: one token, applied between blocks, never per-component. */
+.landing-section .marketing-container > * + * {
+  margin-block-start: var(--landing-block-space);
+}
+
+/*
+ * Section opener.
+ *
+ * Asymmetric two-column at wide widths: the claim on the left at display scale, the paragraph
+ * that qualifies it on the right at body scale. A centred heading with the paragraph beneath it
+ * is the layout every page uses, and it wastes the one place where scale contrast is free.
+ */
+.landing-head {
+  display: grid;
+  gap: var(--marketing-space-lg);
+  margin-block-end: var(--landing-block-space);
+}
+
+.landing-head-copy,
+.landing-head-support {
+  min-width: 0;
+}
+
+.landing-head-support {
+  display: flex;
+  flex-direction: column;
+  gap: var(--marketing-space-lg);
+}
+
+.landing-head .landing-eyebrow {
+  margin-block-end: var(--marketing-space-md);
+}
+
+/* ---------------------------------------------------------------- hero */
+
+.landing-hero {
+  border-block-start: 0;
+}
+
+.landing-hero-band {
+  margin-block-start: var(--landing-block-space);
+}
+
+.landing-hero-band-note {
+  margin-block-start: var(--marketing-space-lg);
+  max-width: 84ch;
+  color: var(--fg-quiet);
+  font-size: var(--text-meta);
+  line-height: 1.6;
+}
+
+.hero-trace-list li[data-highlight] {
+  border-inline-start: var(--marketing-accent-rule-width) solid var(--accent);
+  padding-inline-start: calc(var(--marketing-space-lg) - var(--marketing-accent-rule-width));
+  background: var(--accent-quiet);
+}
+
+/*
+ * The second row no longer carries the accent — the verified span moved to row three when the
+ * trace gained a retrieval step. Resetting it explicitly because the earlier block styles
+ * `:nth-child(2)` directly and would otherwise highlight two rows.
+ */
+.hero-trace-list li:nth-child(2):not([data-highlight]) {
+  border-inline-start: 0;
+  padding-inline-start: var(--marketing-space-lg);
+  background: transparent;
+}
+
+/* ---------------------------------------------------------------- figure band */
+
+/*
+ * Rule-bounded band of headline figures.
+ *
+ * Vertical rules between columns rather than a card each. These figures share a subject and are
+ * read against each other, so boxing them would put three borders between numbers the reader is
+ * comparing. The rules also resolve an ambiguity that the gap alone does not: at four columns it
+ * was unclear whether a hint belonged to the figure above it or beside it.
+ */
+.landing-figure-band {
+  display: grid;
+  grid-template-columns: 1fr;
+  border-block: var(--marketing-rule-width) solid var(--hairline-strong);
+}
+
+.landing-figure {
+  min-width: 0;
+  padding: var(--marketing-space-lg) 0;
+}
+
+.landing-figure + .landing-figure {
+  border-block-start: var(--marketing-rule-width) solid var(--hairline);
+}
+
+.landing-figure dt {
+  color: var(--fg-quiet);
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  letter-spacing: var(--tracking-overline);
+  text-transform: uppercase;
+}
+
+.landing-figure dd {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--marketing-space-2xs);
+  margin-block-start: var(--marketing-space-sm);
+}
+
+.landing-figure strong {
+  color: var(--fg);
+  font-size: var(--landing-figure-size);
+  font-weight: 480;
+  letter-spacing: var(--tracking-display);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.landing-figure strong[data-tone="pass"] {
+  color: var(--pass);
+}
+
+.landing-figure strong[data-tone="warn"] {
+  color: var(--warn);
+}
+
+.landing-figure strong[data-tone="fail"] {
+  color: var(--fail);
+}
+
+.landing-figure-unit {
+  color: var(--fg-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  letter-spacing: var(--tracking-overline);
+  text-transform: uppercase;
+}
+
+.landing-figure-hint {
+  max-width: 34ch;
+  color: var(--fg-tertiary);
+  font-size: var(--text-meta);
+  line-height: 1.5;
+}
+
+/* ---------------------------------------------------------------- spec table */
+
+/*
+ * Dense specification table.
+ *
+ * A real `<table>`, because this is tabular data and a stack of divs strips the row and column
+ * relationships a screen reader needs. Hairline rows, no zebra striping, figures on tabular
+ * numerals so a column of scores aligns on the decimal.
+ */
+.landing-table-scroll {
+  overflow-x: auto;
+  border: var(--marketing-rule-width) solid var(--hairline-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  overscroll-behavior-x: contain;
+}
+
+.landing-table {
+  width: 100%;
+  min-width: 34rem;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+  text-align: start;
+}
+
+.landing-table thead th {
+  position: sticky;
+  inset-block-start: 0;
+  border-block-end: var(--marketing-rule-width) solid var(--hairline-strong);
+  background: var(--surface-raised);
+  padding: var(--marketing-space-sm) var(--marketing-space-md);
+  color: var(--fg-quiet);
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  font-weight: 500;
+  letter-spacing: var(--tracking-overline);
+  text-align: start;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.landing-table tbody tr + tr th,
+.landing-table tbody tr + tr td {
+  border-block-start: var(--marketing-rule-width) solid var(--hairline);
+}
+
+.landing-table tbody th {
+  color: var(--fg);
+  font-weight: 550;
+  text-align: start;
+}
+
+.landing-table :where(th, td) {
+  padding: var(--marketing-space-sm) var(--marketing-space-md);
+  vertical-align: baseline;
+}
+
+.landing-table td {
+  color: var(--fg-secondary);
+}
+
+.landing-table :where(th, td)[data-numeric] {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+  white-space: nowrap;
+}
+
+.landing-table tbody tr[data-emphasis] {
+  background: var(--accent-quiet);
+}
+
+.landing-table tbody tr[data-emphasis] th {
+  color: var(--fg);
+}
+
+.landing-table tbody tr[data-tone="warn"] th {
+  color: var(--warn);
+}
+
+.landing-table tbody tr[data-tone="quiet"] td {
+  color: var(--fg-tertiary);
+}
+
+.landing-table strong {
+  color: var(--fg);
+  font-weight: 550;
+}
+
+/* ---------------------------------------------------------------- note */
+
+/*
+ * Qualifying note.
+ *
+ * The page carries a lot of caveats — what a figure does not prove, why an unflattering result
+ * was left in — and they must not compete with the figures they qualify. An accent rule on the
+ * leading edge and one colour step down is enough to mark them as apparatus rather than content.
+ */
+.landing-note {
+  max-width: 78ch;
+  border-inline-start: var(--marketing-accent-rule-width) solid var(--hairline-strong);
+  padding-inline-start: var(--marketing-space-md);
+  color: var(--fg-tertiary);
+  font-size: var(--text-meta);
+  line-height: 1.6;
+}
+
+.landing-note[data-kind="pass"] {
+  border-inline-start-color: var(--pass);
+}
+
+.landing-note[data-kind="warn"] {
+  border-inline-start-color: var(--warn);
+}
+
+.landing-note + .landing-note {
+  margin-block-start: var(--marketing-space-md);
+}
+
+/* ---------------------------------------------------------------- split */
+
+.landing-split {
+  display: grid;
+  gap: var(--landing-block-space);
+  align-items: start;
+}
+
+.landing-split-main,
+.landing-split-side {
+  min-width: 0;
+}
+
+.landing-split-main > * + *,
+.landing-split-side > * + * {
+  margin-block-start: var(--marketing-space-lg);
+}
+
+.landing-split-side {
+  border-block-start: var(--marketing-rule-width) solid var(--hairline-strong);
+  padding-block-start: var(--marketing-space-lg);
+}
+
+/* Verbatim machine output. Set in mono because the exact string is the point. */
+.landing-quote {
+  max-width: 68ch;
+  border-inline-start: var(--marketing-accent-rule-width) solid var(--hairline-accent);
+  background: var(--surface-sunken);
+  padding: var(--marketing-space-sm) var(--marketing-space-md);
+  color: var(--fg-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  line-height: 1.6;
+}
+
+.landing-inline-spec {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--marketing-space-md) var(--marketing-space-lg);
+  border-block-start: var(--marketing-rule-width) solid var(--hairline);
+  padding-block-start: var(--marketing-space-lg);
+}
+
+.landing-inline-spec[data-stack] {
+  grid-template-columns: 1fr;
+  gap: 0;
+  border-block-start: 0;
+  padding-block-start: 0;
+}
+
+.landing-inline-spec[data-stack] > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--marketing-space-sm);
+  border-block-end: var(--marketing-rule-width) solid var(--hairline);
+  padding-block: var(--marketing-space-sm);
+}
+
+.landing-inline-spec > div {
+  min-width: 0;
+}
+
+.landing-inline-spec dt {
+  color: var(--fg-quiet);
+  font-size: var(--text-micro);
+  letter-spacing: var(--tracking-overline);
+  text-transform: uppercase;
+}
+
+.landing-inline-spec dd {
+  overflow-wrap: anywhere;
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  font-variant-numeric: tabular-nums;
+}
+
+.landing-inline-spec[data-stack] dd {
+  text-align: end;
+}
+
+.landing-inline-spec[data-stack] dt {
+  margin-block-start: 0;
+}
+
+.landing-inline-spec:not([data-stack]) dd {
+  margin-block-start: var(--marketing-space-2xs);
+}
+
+/* Quality index: a label with its weight, and the score it contributed. */
+.landing-qi > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--marketing-space-md);
+  border-block-end: var(--marketing-rule-width) solid var(--hairline);
+  padding-block: var(--marketing-space-sm);
+}
+
+.landing-qi dt {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.125rem;
+  color: var(--fg);
+  font-size: var(--text-sm);
+}
+
+.landing-qi dt span {
+  color: var(--fg-quiet);
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+}
+
+.landing-qi dd {
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------- ratio figure */
+
+.landing-ratio {
+  display: flex;
+  align-items: baseline;
+  gap: var(--marketing-space-sm);
+  border-block-start: var(--marketing-rule-width) solid var(--hairline-strong);
+  padding-block-start: var(--marketing-space-md);
+}
+
+.landing-ratio-value {
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: var(--landing-ratio-size);
+  font-weight: 500;
+  letter-spacing: var(--tracking-display);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.landing-ratio-value i {
+  color: var(--fg-quiet);
+  font-style: normal;
+  font-weight: 400;
+}
+
+.landing-ratio-label {
+  color: var(--fg-tertiary);
+  font-size: var(--text-meta);
+}
+
+/* ---------------------------------------------------------------- ladder */
+
+/*
+ * Numbered stage ladder.
+ *
+ * Two columns at wide widths, with the index set in mono at a size that lets the eye track the
+ * sequence without reading it. `data-model` marks the four stages that call a model, and it is
+ * marked with a pill as well as a border so the distinction is not carried by colour alone.
+ */
+.landing-ladder {
+  display: grid;
+  border-block-start: var(--marketing-rule-width) solid var(--hairline-strong);
+}
+
+.landing-ladder li {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: var(--marketing-trace-index-width) minmax(0, 1fr);
+  gap: var(--marketing-space-md);
+  border-block-end: var(--marketing-rule-width) solid var(--hairline);
+  padding-block: var(--marketing-space-md);
+}
+
+.landing-ladder li[data-model] {
+  border-inline-start: var(--marketing-accent-rule-width) solid var(--accent);
+  padding-inline-start: calc(var(--marketing-space-md) - var(--marketing-accent-rule-width));
+}
+
+.landing-ladder-index {
+  color: var(--fg-quiet);
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
+}
+
+.landing-ladder li[data-model] .landing-ladder-index {
+  color: var(--accent);
+}
+
+.landing-ladder-body {
+  min-width: 0;
+}
+
+.landing-ladder-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--marketing-space-xs) var(--marketing-space-sm);
+  color: var(--fg);
+  font-size: var(--text-body);
+  font-weight: 550;
+  letter-spacing: var(--tracking-heading);
+}
+
+.landing-ladder-id {
+  color: var(--fg-quiet);
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  font-weight: 400;
+}
+
+.landing-ladder-detail {
+  margin-block-start: var(--marketing-space-2xs);
+  max-width: 74ch;
+  color: var(--fg-tertiary);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+}
+
+/* ---------------------------------------------------------------- validation */
+
+.landing-layer-id {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  font-weight: 600;
+}
+
+/* A conditional layer reads as conditional: the state is in the word, not only in the colour. */
+.landing-conditional {
+  color: var(--warn);
+  font-weight: 550;
+}
+
+.landing-rule-grid {
+  display: grid;
+  gap: var(--landing-block-space);
+  align-items: start;
+}
+
+.landing-rule-grid-head {
+  min-width: 0;
+}
+
+.landing-rule-count {
+  margin-block: var(--marketing-space-sm) var(--marketing-space-md);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--marketing-space-sm);
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: var(--landing-ratio-size);
+  font-weight: 500;
+  letter-spacing: var(--tracking-display);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.landing-rule-count span {
+  color: var(--fg-tertiary);
+  font-family: var(--font-sans);
+  font-size: var(--text-meta);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.landing-rule-list {
+  display: grid;
+  min-width: 0;
+  border-block-start: var(--marketing-rule-width) solid var(--hairline-strong);
+}
+
+.landing-rule-list li {
+  min-width: 0;
+  border-block-end: var(--marketing-rule-width) solid var(--hairline);
+  padding-block: var(--marketing-space-sm);
+}
+
+.landing-rule-list li > p:first-child {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.landing-rule-list li > p:last-child {
+  margin-block-start: var(--marketing-space-2xs);
+  color: var(--fg-tertiary);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+}
+
+/* ---------------------------------------------------------------- mosaic */
+
+/*
+ * The 252-column contract, as a proportion.
+ *
+ * A mosaic rather than a bar because the unit is a column: 252 discrete cells, 79 of them
+ * filled. It is `role="img"` with a full text alternative, since the individual cells carry no
+ * information and announcing 252 empty spans would be hostile.
+ *
+ * Labelled proportional rather than positional in the markup, because it is not a claim about
+ * which 79.
+ */
+.landing-mosaic-block {
+  border: var(--marketing-rule-width) solid var(--hairline-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  padding: var(--marketing-space-lg);
+}
+
+.landing-mosaic {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--landing-mosaic-cell), 1fr));
+  gap: var(--landing-mosaic-gap);
+}
+
+.landing-mosaic span {
+  aspect-ratio: 1;
+  border: var(--marketing-rule-width) solid var(--hairline-strong);
+  border-radius: 0.0625rem;
+}
+
+.landing-mosaic span[data-filled] {
+  border-color: transparent;
+  background: var(--accent);
+}
+
+.landing-mosaic-legend {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--marketing-space-md) var(--marketing-space-lg);
+  margin-block-start: var(--marketing-space-lg);
+  border-block-start: var(--marketing-rule-width) solid var(--hairline);
+  padding-block-start: var(--marketing-space-lg);
+}
+
+.landing-mosaic-legend > div {
+  min-width: 0;
+}
+
+.landing-mosaic-legend dt {
+  display: flex;
+  align-items: center;
+  gap: var(--marketing-space-xs);
+  color: var(--fg-quiet);
+  font-size: var(--text-micro);
+  letter-spacing: var(--tracking-overline);
+  text-transform: uppercase;
+}
+
+.landing-mosaic-legend dt i {
+  width: 0.5rem;
+  height: 0.5rem;
+  flex: none;
+  border: var(--marketing-rule-width) solid var(--border-control);
+}
+
+.landing-mosaic-legend dt i[data-filled] {
+  border-color: transparent;
+  background: var(--accent);
+}
+
+.landing-mosaic-legend dd {
+  margin-block-start: var(--marketing-space-xs);
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.landing-mosaic-block .landing-note {
+  margin-block-start: var(--marketing-space-lg);
+}
+
+/* Provenance class, as a table cell. Never the only carrier of meaning — the word is the label. */
+.landing-provenance {
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  font-weight: 600;
+  letter-spacing: var(--tracking-overline);
+  text-transform: uppercase;
+  color: var(--fg-secondary);
+}
+
+.landing-provenance[data-class="extracted"] {
+  color: var(--accent);
+}
+
+.landing-provenance[data-class="unavailable"] {
+  color: var(--fg-quiet);
+}
+
+.landing-provenance[data-class="evidence"] {
+  color: var(--pass);
+}
+
+/* ---------------------------------------------------------------- bento */
+
+/*
+ * Provenance classes as an asymmetric grid.
+ *
+ * The `extracted` cell spans two columns because it is the one carrying the full gate, and a
+ * grid of five equal tiles would say the opposite. Emphasis by area rather than by colour.
+ */
+.landing-bento {
+  display: grid;
+  gap: var(--marketing-rule-width);
+  background: var(--hairline-strong);
+  border: var(--marketing-rule-width) solid var(--hairline-strong);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.landing-bento-head,
+.landing-bento-cell {
+  min-width: 0;
+  background: var(--surface);
+  padding: var(--marketing-space-lg);
+}
+
+.landing-bento-head > * + * {
+  margin-block-start: var(--marketing-space-sm);
+}
+
+.landing-bento-cell[data-emphasis] {
+  background: var(--surface-raised);
+}
+
+.landing-bento-id {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  font-weight: 600;
+  letter-spacing: var(--tracking-overline);
+  text-transform: uppercase;
+}
+
+.landing-bento-claim {
+  margin-block-start: var(--marketing-space-sm);
+  color: var(--fg);
+  font-size: var(--text-body);
+  font-weight: 540;
+  letter-spacing: var(--tracking-heading);
+  line-height: 1.35;
+}
+
+.landing-bento-gate {
+  margin-block-start: var(--marketing-space-xs);
+  color: var(--fg-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+}
+
+.landing-bento-cell[data-emphasis] .landing-bento-gate {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.landing-bento-detail {
+  margin-block-start: var(--marketing-space-md);
+  border-block-start: var(--marketing-rule-width) solid var(--hairline);
+  padding-block-start: var(--marketing-space-md);
+  color: var(--fg-tertiary);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+}
+
+/* ---------------------------------------------------------------- delta list */
+
+.landing-delta > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--marketing-space-md);
+  border-block-end: var(--marketing-rule-width) solid var(--hairline);
+  padding-block: var(--marketing-space-sm);
+}
+
+.landing-delta dt {
+  color: var(--fg-secondary);
+  font-size: var(--text-sm);
+}
+
+.landing-delta dd {
+  display: flex;
+  align-items: center;
+  gap: var(--marketing-space-xs);
+  color: var(--fg-quiet);
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  font-variant-numeric: tabular-nums;
+}
+
+.landing-delta dd strong {
+  color: var(--pass);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.landing-delta-before {
+  color: var(--fg-quiet);
+}
+
+/* ---------------------------------------------------------------- triptych */
+
+.landing-triptych {
+  display: grid;
+  gap: var(--marketing-rule-width);
+  border: var(--marketing-rule-width) solid var(--hairline-strong);
+  border-radius: var(--radius-md);
+  background: var(--hairline-strong);
+  overflow: hidden;
+}
+
+.landing-triptych > article {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--marketing-space-sm);
+  background: var(--surface);
+  padding: var(--marketing-space-lg);
+}
+
+.landing-triptych-figure {
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: var(--landing-figure-size);
+  font-weight: 500;
+  letter-spacing: var(--tracking-display);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.landing-triptych-label {
+  color: var(--fg-secondary);
+  font-size: var(--text-meta);
+}
+
+.landing-triptych-caveat {
+  margin-block-start: auto;
+  border-block-start: var(--marketing-rule-width) solid var(--hairline);
+  padding-block-start: var(--marketing-space-md);
+  color: var(--fg-quiet);
+  font-size: var(--text-micro);
+  line-height: 1.55;
+}
+
+.landing-method-split {
+  display: grid;
+  gap: 0;
+}
+
+.landing-method-split > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--marketing-space-sm);
+  border-block-end: var(--marketing-rule-width) solid var(--hairline);
+  padding-block: var(--marketing-space-xs);
+}
+
+.landing-method-split dt {
+  color: var(--fg-tertiary);
+  font-size: var(--text-meta);
+}
+
+.landing-method-split dd {
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------- full-bleed band */
+
+/*
+ * The adversarial band.
+ *
+ * A genuinely dark section in both themes, and the only one on the page. It re-declares the
+ * dark theme's own semantic mapping locally rather than inventing a palette, so every pair in
+ * here is already covered by the contrast script's dark-mode checks.
+ *
+ * In dark mode the canvas is already ink-1000, so the band steps *up* to `--surface` instead —
+ * otherwise it would be invisible.
+ */
+.landing-band {
+  --fg: var(--color-ink-100);
+  --fg-secondary: var(--color-ink-350);
+  --fg-tertiary: var(--color-ink-450);
+  --fg-quiet: var(--color-ink-475);
+  --accent: var(--color-accent-400);
+  --accent-quiet: oklch(0.652 0.148 255 / 0.16);
+  --pass: var(--color-pass-300);
+  --hairline: oklch(1 0 0 / 0.1);
+  --hairline-strong: oklch(1 0 0 / 0.2);
+
+  padding-block: var(--landing-section-space);
+  background: var(--color-ink-1000);
+  color: var(--fg);
+}
+
+.dark .landing-band {
+  background: var(--surface);
+}
+
+.landing-band-inner {
+  display: grid;
+  gap: var(--landing-block-space);
+  align-items: end;
+}
+
+.landing-band-copy {
+  min-width: 0;
+}
+
+.landing-band-title {
+  max-width: 24ch;
+  margin-block: var(--marketing-space-md) var(--marketing-space-lg);
+  color: var(--fg);
+  font-size: var(--landing-h2-size);
+  font-weight: 520;
+  letter-spacing: var(--landing-tracking-display);
+  line-height: 1.04;
+  text-wrap: balance;
+}
+
+.landing-band-figures {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--marketing-space-lg);
+  border-block-start: var(--marketing-rule-width) solid var(--hairline-strong);
+  padding-block-start: var(--marketing-space-lg);
+}
+
+.landing-band-figures > div {
+  min-width: 0;
+}
+
+.landing-band-figures dt {
+  color: var(--fg-quiet);
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  letter-spacing: var(--tracking-overline);
+  text-transform: uppercase;
+}
+
+.landing-band-figures dd {
+  margin-block-start: var(--marketing-space-xs);
+  color: var(--fg);
+  font-size: var(--landing-band-figure-size);
+  font-weight: 460;
+  letter-spacing: var(--tracking-display);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.landing-band-figures dd[data-tone="pass"] {
+  color: var(--pass);
+}
+
+.landing-case-list {
+  display: grid;
+  gap: var(--marketing-space-lg);
+  margin-block-start: var(--landing-block-space);
+  border-block-start: var(--marketing-rule-width) solid var(--hairline-strong);
+  padding-block-start: var(--landing-block-space);
+}
+
+.landing-case-list li {
+  min-width: 0;
+}
+
+.landing-case-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--marketing-space-xs);
+  color: var(--fg-secondary);
+  font-size: var(--text-meta);
+}
+
+.landing-case-figure {
+  margin-block: var(--marketing-space-xs) var(--marketing-space-sm);
+  color: var(--pass);
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  font-weight: 550;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------- refusals */
+
+.landing-refusals {
+  display: grid;
+  gap: var(--landing-block-space);
+  border-block-start: var(--marketing-rule-width) solid var(--hairline-strong);
+  padding-block-start: var(--landing-block-space);
+}
+
+.landing-refusals > article {
+  min-width: 0;
+}
+
+.landing-refusals > article > * + * {
+  margin-block-start: var(--marketing-space-sm);
+}
+
+.landing-refusal-figure {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--marketing-space-sm);
+  color: var(--fail);
+  font-family: var(--font-mono);
+  font-size: var(--landing-ratio-size);
+  font-weight: 500;
+  letter-spacing: var(--tracking-display);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.landing-refusal-figure span {
+  max-width: 24ch;
+  color: var(--fg-tertiary);
+  font-family: var(--font-sans);
+  font-size: var(--text-meta);
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.4;
+}
+
+/* ---------------------------------------------------------------- tag field */
+
+.landing-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--marketing-space-xs);
+}
+
+.landing-tag-list li {
+  border: var(--marketing-rule-width) solid var(--hairline-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  padding: 0.3125rem var(--marketing-space-sm);
+  color: var(--fg-secondary);
+  font-size: var(--text-meta);
+}
+
+.landing-tag-list-mono li {
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  letter-spacing: 0.02em;
+}
+
+/* The class the page traces. Marked with a border and a weight step, not colour alone. */
+.landing-tag-list li[data-active] {
+  border-color: var(--accent);
+  background: var(--accent-quiet);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ---------------------------------------------------------------- principles */
+
+.landing-principles {
+  display: grid;
+  border-block-start: var(--marketing-rule-width) solid var(--hairline-strong);
+}
+
+.landing-principles li {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: var(--marketing-trace-index-width) minmax(0, 1fr);
+  gap: var(--marketing-space-md);
+  border-block-end: var(--marketing-rule-width) solid var(--hairline);
+  padding-block: var(--marketing-space-lg);
+}
+
+.landing-principles li > div {
+  min-width: 0;
+  max-width: 78ch;
+}
+
+.landing-principles li > div > p {
+  margin-block-start: var(--marketing-space-xs);
+}
+
+.landing-principle-index {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.45;
+}
+
+/* ---------------------------------------------------------------- evidence console */
+
+.evidence-console-header .evidence-output-target {
+  font-family: var(--font-sans);
+}
+
+.evidence-span-table {
+  margin-block-start: var(--marketing-space-xl);
+  border-block-start: var(--marketing-rule-width) solid var(--hairline);
+  padding-block-start: var(--marketing-space-lg);
+}
+
+.evidence-span-table dl {
+  margin-block-start: var(--marketing-space-md);
+}
+
+.evidence-span-table > dl > div {
+  display: grid;
+  grid-template-columns: minmax(0, 9rem) minmax(0, 1fr);
+  gap: var(--marketing-space-sm);
+  border-block-end: var(--marketing-rule-width) solid var(--hairline);
+  padding-block: var(--marketing-space-xs);
+}
+
+.evidence-span-table dt {
+  color: var(--fg-quiet);
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+}
+
+.evidence-span-table dd {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--fg-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+}
+
+.evidence-span-table dd[data-tone="pass"] {
+  color: var(--pass);
+  font-weight: 600;
+}
+
+.evidence-siblings {
+  border-block-start: var(--marketing-rule-width) solid var(--hairline-strong);
+  padding: var(--marketing-space-lg);
+  background: var(--surface-sunken);
+}
+
+.evidence-siblings .landing-table-scroll {
+  background: var(--surface);
+}
+
+/* ---------------------------------------------------------------- closing */
+
+.landing-closing {
+  padding-block: var(--landing-section-space);
+  border-block-start: var(--marketing-rule-width) solid var(--hairline-strong);
+}
+
+.landing-closing h2 {
+  max-width: 22ch;
+  font-size: var(--landing-h2-size);
+  letter-spacing: var(--landing-tracking-display);
+}
+
+.landing-closing .landing-eyebrow {
+  margin-block-end: var(--marketing-space-md);
+}
+
+/* ==========================================================================
+ * Responsive composition
+ * Verified at 360px, 768px, 1280px and 1920px.
+ * ========================================================================== */
+
+@media (min-width: 30rem) {
+  .landing-figure-band[data-columns="2"],
+  .landing-figure-band[data-columns="4"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .landing-figure-band[data-columns="2"] .landing-figure,
+  .landing-figure-band[data-columns="4"] .landing-figure {
+    padding-inline: var(--marketing-space-lg);
+  }
+
+  /*
+   * Column rules, and the reason this is not a `first:` variant on one element: the padding has
+   * to drop to zero on whichever column starts a row, and which column that is changes with the
+   * breakpoint.
+   */
+  .landing-figure-band[data-columns="2"] .landing-figure:nth-child(odd),
+  .landing-figure-band[data-columns="4"] .landing-figure:nth-child(odd) {
+    padding-inline-start: 0;
+  }
+
+  .landing-figure-band[data-columns="2"] .landing-figure:nth-child(even),
+  .landing-figure-band[data-columns="4"] .landing-figure:nth-child(even) {
+    border-inline-start: var(--marketing-rule-width) solid var(--hairline);
+    padding-inline-end: 0;
+  }
+
+  .landing-figure-band[data-columns="2"] .landing-figure:nth-child(-n + 2),
+  .landing-figure-band[data-columns="4"] .landing-figure:nth-child(-n + 2) {
+    border-block-start: 0;
+  }
+}
+
+@media (min-width: 48rem) {
+  .marketing-page {
+    --marketing-hero-size: clamp(3rem, 5.6vw, 4rem);
+  }
+
+  .landing-head {
+    grid-template-columns: minmax(0, 1.05fr) minmax(18rem, 0.95fr);
+    gap: var(--marketing-space-2xl);
+    align-items: end;
+  }
+
+  .landing-figure-band[data-columns="3"] {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .landing-figure-band[data-columns="3"] .landing-figure {
+    padding-inline: var(--marketing-space-lg);
+  }
+
+  .landing-figure-band[data-columns="3"] .landing-figure:nth-child(3n + 1) {
+    padding-inline-start: 0;
+  }
+
+  .landing-figure-band[data-columns="3"] .landing-figure:not(:nth-child(3n + 1)) {
+    border-inline-start: var(--marketing-rule-width) solid var(--hairline);
+  }
+
+  .landing-figure-band[data-columns="3"] .landing-figure:nth-child(3n) {
+    padding-inline-end: 0;
+  }
+
+  .landing-figure-band[data-columns="3"] .landing-figure:nth-child(-n + 3) {
+    border-block-start: 0;
+  }
+
+  .landing-split,
+  .landing-rule-grid {
+    grid-template-columns: minmax(0, 1.6fr) minmax(16rem, 1fr);
+    gap: var(--marketing-space-2xl);
+  }
+
+  .landing-split-side {
+    border-block-start: 0;
+    border-inline-start: var(--marketing-rule-width) solid var(--hairline-strong);
+    padding-block-start: 0;
+    padding-inline-start: var(--marketing-space-xl);
+  }
+
+  .landing-triptych,
+  .landing-refusals {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .landing-refusals {
+    gap: var(--marketing-space-2xl);
+  }
+
+  .landing-refusals > article + article {
+    border-inline-start: var(--marketing-rule-width) solid var(--hairline);
+    padding-inline-start: var(--marketing-space-xl);
+  }
+
+  .landing-band-inner {
+    grid-template-columns: minmax(0, 1.4fr) minmax(18rem, 1fr);
+  }
+
+  .landing-case-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--marketing-space-2xl);
+  }
+
+  .landing-case-list li + li {
+    border-inline-start: var(--marketing-rule-width) solid var(--hairline);
+    padding-inline-start: var(--marketing-space-xl);
+  }
+
+  .landing-mosaic-legend {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .landing-bento {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  /* The head spans the row above; `extracted` takes two columns because it carries the gate. */
+  .landing-bento-head {
+    grid-column: 1 / -1;
+  }
+
+  .landing-bento-cell[data-emphasis] {
+    grid-column: span 2;
+  }
+
+  .evidence-siblings {
+    padding-inline: var(--marketing-space-xl);
+  }
+}
+
+@media (min-width: 64rem) {
+  .marketing-page {
+    --marketing-hero-size: clamp(3.25rem, 1.15rem + 4.6vw, 5.25rem);
+  }
+
+  .marketing-index {
+    display: block;
+  }
+
+  .landing-figure-band[data-columns="4"] {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .landing-figure-band[data-columns="4"] .landing-figure:nth-child(n) {
+    border-block-start: 0;
+    border-inline-start: var(--marketing-rule-width) solid var(--hairline);
+    padding-inline: var(--marketing-space-lg);
+  }
+
+  .landing-figure-band[data-columns="4"] .landing-figure:first-child {
+    border-inline-start: 0;
+    padding-inline-start: 0;
+  }
+
+  .landing-figure-band[data-columns="4"] .landing-figure:last-child {
+    padding-inline-end: 0;
+  }
+
+  .landing-ladder,
+  .landing-principles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--marketing-space-2xl);
+  }
+
+  /* At two columns the rule between them replaces the gap as the boundary. */
+  .landing-ladder li:nth-child(even),
+  .landing-principles li:nth-child(even) {
+    border-inline-start: var(--marketing-rule-width) solid var(--hairline);
+    padding-inline-start: var(--marketing-space-xl);
+  }
+
+  .landing-ladder li[data-model]:nth-child(even) {
+    padding-inline-start: calc(var(--marketing-space-xl) - var(--marketing-accent-rule-width));
+  }
+
+  .landing-band-figures {
+    gap: var(--marketing-space-xl);
+  }
+}
+
+@media (min-width: 90rem) {
+  .marketing-page {
+    /* One step of extra air at desktop width, where the container stops growing. */
+    --landing-section-space: clamp(6rem, 7vw, 9.5rem);
+  }
+
+  .landing-head {
+    grid-template-columns: minmax(0, 1.15fr) minmax(20rem, 0.85fr);
+  }
+}
+
+@media (max-width: 22.5rem) {
+  .marketing-page {
+    --landing-mosaic-cell: 0.375rem;
+    --landing-mosaic-gap: 0.125rem;
+  }
+
+  .landing-mosaic-block,
+  .landing-bento-head,
+  .landing-bento-cell,
+  .landing-triptych > article,
+  .evidence-siblings {
+    padding: var(--marketing-space-md);
+  }
+
+  .landing-inline-spec,
+  .landing-mosaic-legend {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-band-figures {
+    grid-template-columns: 1fr;
+    gap: var(--marketing-space-md);
+  }
+
+  .evidence-span-table > dl > div {
+    grid-template-columns: 1fr;
+    gap: var(--marketing-space-2xs);
+  }
+}
+
+/* ==========================================================================
+ * Interaction and motion
+ * ========================================================================== */
+
+@media (hover: hover) and (pointer: fine) {
+  .marketing-index a:hover {
+    background: var(--surface-hover);
+    color: var(--fg);
+  }
+
+  .landing-tag-list li:not([data-active]):hover {
+    border-color: var(--hairline-accent);
+    color: var(--fg);
+  }
+
+  /* One property is a state change; three make it feel like a surface responding. */
+  .landing-bento-cell:hover {
+    background: var(--surface-raised);
+  }
+}
+
+.marketing-index a:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/*
+ * Scroll-linked reveals.
+ *
+ * Pure CSS via `animation-timeline`, so there is no observer, no hydration dependency, and
+ * nothing to run on the main thread. Guarded by `@supports`, which means a browser without
+ * scroll-driven animations gets the content immediately rather than getting it never — the
+ * failure mode that makes JavaScript reveals a liability.
+ *
+ * Applied structurally to the direct children of each section container, so a new section is
+ * revealed correctly without remembering to add a class. Only `opacity` and `transform`
+ * animate.
+ */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .landing-section > .marketing-container > *,
+    .landing-band > .marketing-container > *,
+    .landing-closing > .marketing-container > * {
+      animation: landing-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 8% cover 30%;
+    }
+  }
+}
+
+@keyframes landing-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(1.125rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-section > .marketing-container > *,
+  .landing-band > .marketing-container > *,
+  .landing-closing > .marketing-container > *,
+  .marketing-index a,
+  .landing-tag-list li {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
+/*
+ * Print.
+ *
+ * A specification sheet that cannot be printed is not a specification sheet. Glass, grain and
+ * sticky positioning all become defects on paper.
+ */
+@media print {
+  .marketing-page::before,
+  .marketing-index,
+  .marketing-header-actions {
+    display: none;
+  }
+
+  .marketing-header {
+    position: static;
+    background: transparent;
+    backdrop-filter: none;
+  }
+
+  .landing-section,
+  .landing-band {
+    background: transparent;
+    break-inside: avoid;
+    padding-block: 1.5rem;
+  }
+
+  .landing-band {
+    --fg: var(--color-ink-950);
+    --fg-secondary: var(--color-ink-700);
+    --fg-tertiary: var(--color-ink-650);
+    --fg-quiet: var(--color-ink-600);
+  }
+
+  .landing-table-scroll {
+    overflow: visible;
   }
 }
