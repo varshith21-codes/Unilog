@@ -644,7 +644,7 @@ export const BACKTEST = {
   hallucinated: 0,
   source: "evals/baseline.json",
   figures: [
-    { label: "Precision", value: "0.991", hint: "222 correct, 2 wrong values", tone: "pass" as const },
+    { label: "Precision", value: "0.99", hint: "222 correct, 2 wrong values", tone: "pass" as const },
     { label: "Recall", value: "0.978", hint: "3 missed of 227 available", tone: "pass" as const },
     { label: "F1", value: "0.984", hint: "Harmonic mean of the two", tone: "pass" as const },
     { label: "Hallucination rate", value: "0.0", hint: "0 fabricated across 312 comparisons", tone: "pass" as const },
