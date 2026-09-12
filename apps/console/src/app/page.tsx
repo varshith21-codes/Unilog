@@ -30,8 +30,8 @@ import {
 export const metadata: Metadata = {
   title: "Verifiable Product Intelligence",
   description:
-    "AXIOM turns six supplier fields into an evidence-backed, reviewable, delivery-ready " +
-    "252-column record — and records provenance for every cell it withholds.",
+    "AI product enrichment that never guesses. Every value is traced to an exact quote in the " +
+    "manufacturer's own document, and anything that cannot be proven is recorded as a gap.",
 };
 
 /**
@@ -73,16 +73,14 @@ export default function LandingPage() {
                   Verifiable product intelligence for industrial commerce
                 </p>
                 <h1 id="landing-title" className="landing-title">
-                  Product specifications that can prove where they came from.
+                  AI product enrichment that never guesses.
                 </h1>
               </div>
 
               <div className="landing-hero-support hero-entrance hero-entrance-3">
                 <p className="landing-intro">
-                  AXIOM takes six supplier fields, retrieves the manufacturer's own document, and
-                  verifies every value against an exact quote inside it. Each of the 252 delivery
-                  cells then carries either its evidence or the recorded reason it was withheld.
-                  No evidence produces a typed gap, never a guess.
+                  Every value is traced to an exact quote in the manufacturer's own document.
+                  Anything that cannot be proven is recorded as a gap, not invented.
                 </p>
                 <div className="landing-actions">
                   <Link href="/enrich" className="btn btn-primary">
