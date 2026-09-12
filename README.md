@@ -33,6 +33,7 @@ The design blueprint is in [`docs/AXIOM-Product-Intelligence-Blueprint.md`](docs
 | **Working prototype** (live console) | https://axiom.vectoredu.online |
 | **Walkthrough video** | https://youtu.be/yRt9danXXc0?si=pbAx7Dpm3str6JV9 |
 | **Architecture diagram** | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
+| **Deployment runbook** | [`docs/DEPLOY.md`](docs/DEPLOY.md) |
 | **Wireframe atlas** (interactive) | [`docs/wireframes/unilog-wireframe-atlas.html`](docs/wireframes/unilog-wireframe-atlas.html) |
 | **Wireframe contact sheet** (SVG) | [`docs/wireframes/unilog-wireframes.svg`](docs/wireframes/unilog-wireframes.svg) |
 | **Design blueprint** | [`docs/AXIOM-Product-Intelligence-Blueprint.md`](docs/AXIOM-Product-Intelligence-Blueprint.md) |
