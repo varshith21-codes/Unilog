@@ -288,6 +288,20 @@ def fetch_url(
         raise UrlFetchError(f"could not reach {url}: {exc.reason}") from exc
     except TimeoutError as exc:
         raise UrlFetchError(f"{url} timed out after {timeout:g}s") from exc
+    except OSError as exc:
+        # A socket error raised *after* the connection succeeded, which urllib does not wrap.
+        # `URLError` covers failures to establish a connection; a peer that accepts the request and
+        # then drops it mid-body surfaces as a bare `ConnectionResetError` out of `response.read()`.
+        #
+        # Ordered last deliberately: `URLError` and `TimeoutError` are themselves `OSError`
+        # subclasses, so the specific clauses above still win and keep their better messages.
+        #
+        # Unwrapped, this ended a whole batch. `milwaukeetool.com` reset the connection on one
+        # candidate and the `ConnectionResetError` travelled up through `RetrievalSession.fetch`
+        # — which catches only `IngestError` — past `retrieve_documents` and out of
+        # `scripts/reenrich_corpus.py`, losing the run for every remaining SKU. A rude peer is an
+        # ordinary event on the open web and belongs in a `FetchOutcome`, not in a traceback.
+        raise UrlFetchError(f"could not read {url}: {type(exc).__name__}: {exc}") from exc
 
     # A redirect can leave the allowed-scheme set. The opener above checks each hop before following
     # it; re-checking the destination costs nothing and this is the value that becomes the citation.

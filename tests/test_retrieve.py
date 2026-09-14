@@ -946,3 +946,137 @@ def test_the_ambiguous_verdict_still_ranks_the_right_class_first(parsed_datashee
 
     result = Classifier(load_schema()).classify(parsed_datasheet.full_text, sku="BA-100-075")
     assert result.candidates[0].code == "PLB.VLV.BALL.2PC"
+
+
+# ------------------------------------------------ transport failures must not end a batch
+
+
+def test_a_connection_reset_becomes_a_failed_outcome_not_a_traceback(policy, tmp_path):
+    """One rude peer must not lose the run for every SKU queued behind it.
+
+    Measured: ``milwaukeetool.com`` accepted a request and dropped it mid-body. urllib wraps
+    failures to *establish* a connection in ``URLError``, but a reset during ``response.read()``
+    surfaces as a bare ``ConnectionResetError``, which travelled up through this method — it caught
+    only ``IngestError`` — past ``retrieve_documents`` and out of ``scripts/reenrich_corpus.py``.
+    A whole batch ended on a TCP reset.
+    """
+
+    def resetting_fetcher(url: str, *, timeout: float, max_bytes: int):
+        raise ConnectionResetError(10054, "An existing connection was forcibly closed")
+
+    session, _library, _slept, _clock = session_for(policy, tmp_path, resetting_fetcher)
+    outcome = session.fetch(candidate_for(policy, "https://acme.example/ab100.pdf"))
+
+    assert outcome.status is FetchStatus.FAILED
+    assert "ConnectionResetError" in outcome.detail
+    # Still counted, so the request ceiling cannot be evaded by failing.
+    assert session.requests_made == 1
+
+
+def test_an_arbitrary_fetcher_exception_is_also_contained(policy, tmp_path):
+    """``fetcher`` is injected caller code, so it can raise anything at all."""
+
+    def exploding_fetcher(url: str, *, timeout: float, max_bytes: int):
+        raise RuntimeError("something nobody anticipated")
+
+    session, _library, _slept, _clock = session_for(policy, tmp_path, exploding_fetcher)
+    outcome = session.fetch(candidate_for(policy, "https://acme.example/ab100.pdf"))
+
+    assert outcome.status is FetchStatus.FAILED
+    assert "RuntimeError" in outcome.detail
+
+
+# --------------------------------------------------- the part number in the URL is a signal
+
+
+def test_a_url_naming_the_part_outranks_a_category_listing(policy):
+    """The exact product page must not lose to the aisle it sits in.
+
+    Measured on DeWalt DCL183: ``/en-us/products/power-tools/lighting`` scored 47.0 against the
+    product page's 46.0, because ``spec_score`` rewards generic ``/products/`` fragments and nothing
+    rewarded the part number in the path. The listing was fetched first, it names DCL183 in its grid
+    of tiles so coverage accepted it, and retrieval stopped — extracting nothing from a page about
+    forty products while the real one went unread.
+    """
+
+    def search(query: str, *, limit: int):
+        return [
+            "https://www.dewalt.com/en-us/products/power-tools/lighting",
+            "https://www.dewalt.com/en-us/product/dcl183/rechargeable-led-flashlight",
+        ]
+
+    resolution = Resolver(policy, search=search).resolve("DCL183", brand="DEWALT")
+    assert resolution.candidates, "the search arm produced no candidates"
+    assert "dcl183" in resolution.candidates[0].url.casefold()
+
+
+def test_the_bonus_ignores_separators_and_case(policy):
+    """Part numbers appear in URLs with separators intact, stripped or replaced."""
+
+    def search(query: str, *, limit: int):
+        return [
+            "https://www.dewalt.com/en-us/products/power-tools/lighting",
+            "https://www.dewalt.com/en-us/product/52c3-5-8-upc/thing",
+        ]
+
+    resolution = Resolver(policy, search=search).resolve("52C3-5/8-UPC", brand="DEWALT")
+    assert "52c3-5-8-upc" in resolution.candidates[0].url
+
+
+def test_a_part_number_too_short_to_be_evidence_earns_nothing(policy):
+    """``20`` occurs in half the paths on any manufacturer's site."""
+
+    def search(query: str, *, limit: int):
+        return [
+            "https://www.dewalt.com/en-us/products/power-tools/lighting",
+            "https://www.dewalt.com/en-us/blog/2020/some-article",
+        ]
+
+    resolution = Resolver(policy, search=search).resolve("20", brand="DEWALT")
+    ranks = {c.url: c.rank for c in resolution.candidates}
+    assert len(set(ranks.values())) <= 2, "a two-character part number must not reorder anything"
+    assert all("2020" not in url or ranks[url] < 47.0 for url in ranks)
+
+
+def test_a_declared_pattern_still_outranks_a_search_hit_that_names_the_part(policy):
+    """The bonus applies to every arm, which is what keeps the arms in their intended order.
+
+    A declared pattern is verified and deterministic, so it must stay ahead of a search result no
+    matter how well that result scores. Both URLs here name the part, which is exactly the case
+    where a bonus applied to only one arm would have inverted them.
+    """
+
+    def search(query: str, *, limit: int):
+        return ["https://www.trex.com/products/select-1x6/overview"]
+
+    resolution = Resolver(policy, search=search).resolve("SELECT-1X6", brand="trex")
+    assert resolution.candidates[0].origin == "pattern"
+    assert resolution.candidates[0].url == "https://www.trex.com/products/select-1x6/spec"
+
+
+def test_a_query_string_variant_does_not_spend_a_second_candidate_slot(policy):
+    """Search engines return widget deep-links beside the page they belong to."""
+
+    def search(query: str, *, limit: int):
+        return [
+            "https://www.dewalt.com/en-us/product/dcl183/rechargeable-led-flashlight",
+            "https://www.dewalt.com/en-us/product/dcl183/rechargeable-led-flashlight?bv=1&x=2",
+        ]
+
+    resolution = Resolver(policy, search=search).resolve("DCL183", brand="DEWALT")
+    urls = [c.url for c in resolution.candidates]
+    assert urls == ["https://www.dewalt.com/en-us/product/dcl183/rechargeable-led-flashlight"]
+
+
+def test_a_load_bearing_query_string_survives_when_it_has_no_bare_twin(policy):
+    """Kichler serves its spec sheet from ``/api/spec-sheets?sku=...`` — stripping it loses it."""
+
+    def search(query: str, *, limit: int):
+        return [
+            "https://www.kichler.com/api/spec-sheets?sku=43911BK",
+            "https://www.kichler.com/products/indoor-lighting/pendants/avery-pendant-43911bk",
+        ]
+
+    resolution = Resolver(policy, search=search).resolve("43911BK", brand="KICHLER")
+    urls = [c.url for c in resolution.candidates]
+    assert "https://www.kichler.com/api/spec-sheets?sku=43911BK" in urls

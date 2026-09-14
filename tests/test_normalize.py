@@ -351,3 +351,53 @@ def test_realistic_datasheet_row():
     # and the values remain dimensionally distinguishable, which is what L1 relies on
     assert not registry.are_compatible(size.unit, pressure.unit)
     assert math.isclose(registry.convert(1, "in", "mm"), 25.4)
+
+
+# --------------------------------------------------------------- grouped thousands
+
+
+def test_space_grouped_thousands_is_one_number_not_two():
+    """A space is the SI thousands separator, and PDFs emit it as a non-breaking space.
+
+    Mirka's French datasheet states ``Débit d'air | 3 600 l/min``. The magnitude pattern matched the
+    leading ``3``, the unit resolved from the remainder anyway, and the pipeline published
+    **3 L/min** for a 3600 L/min extractor — a verified, auto-accepted value three orders of
+    magnitude out.
+    """
+    assert parse_quantity("3 600 l/min", unit_hint="L/min").magnitude == 3600.0
+    assert parse_quantity("1 000 W").magnitude == 1000.0
+    assert parse_quantity("10 000 kg").magnitude == 10000.0
+    # The forms a PDF actually produces: non-breaking and narrow no-break spaces.
+    assert parse_quantity("3\u00a0600 l/min", unit_hint="L/min").magnitude == 3600.0
+    assert parse_quantity("1\u202f000 W").magnitude == 1000.0
+    assert parse_quantity("1\u2009000 W").magnitude == 1000.0
+
+
+def test_grouped_thousands_does_not_swallow_a_mixed_number_or_a_dimension_set():
+    """The narrow reading is the whole safety argument; these are what it must not touch."""
+    # A mixed number: the group after the space is a fraction, not three digits.
+    assert parse_quantity("1 1/2 in").magnitude == 1.5
+    # Three separate dimensions with no separator. Fusing any pair would invent a number, and
+    # the second pair is the one a naive pattern reaches after refusing the first.
+    assert parse_quantity("375 395 530 mm").magnitude == 375.0
+    assert [d.canonical_magnitude for d in parse_dimension("375 x 395 x 530 mm")] == [
+        375.0,
+        395.0,
+        530.0,
+    ]
+    # Two separators, so out of scope by construction rather than by accident.
+    assert parse_quantity("1 000 000 W").magnitude == 1.0
+    # Still a leading-decimal thickness, not a thousands group.
+    assert parse_quantity(".045 in").magnitude == 0.045
+
+
+def test_grouped_thousands_is_applied_before_a_range_is_split():
+    """``_split_range`` looks for plain numbers around a dash, so it must see the joined form."""
+    ranged = parse_range("3 600-4 000 l/min")
+    assert (ranged.minimum, ranged.maximum) == (3600.0, 4000.0)
+    # Unchanged behaviour for the ordinary forms.
+    assert (parse_range("18-22 ft-lb").minimum, parse_range("18-22 ft-lb").maximum) == (
+        18.0,
+        22.0,
+    )
+    assert parse_range("1-1/4 in").magnitude == 1.25

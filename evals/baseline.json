@@ -13,36 +13,45 @@
     "  python scripts/check_regression.py evals/candidate.json --update",
     "",
     "`arm` must stay `axiom`. The `no-evidence-contract` arm is the ablation control group and is",
-    "deliberately worse; baselining against it would invert the gate."
+    "deliberately worse; baselining against it would invert the gate.",
+    "",
+    "ON `wrong_value`, WHICH THE GATE WILL KEEP ASKING YOU TO TIGHTEN TO 1. Do not, without",
+    "reading this. Measured over ten consecutive full runs on 2026-09-14, `wrong_value` came in at",
+    "0, 1, 1, 1, 2, 2, 2, 2, 2 and 3 — the model is sampled, so a count metric with a 0.0 tolerance",
+    "cannot be pinned to the best observation. Held at 2, the median and the level the extract.v2",
+    "baseline already carried, a real regression to 3+ still fails while ordinary sampling noise",
+    "does not. Held at 1, roughly half of all green runs would fail, and a gate that cries wolf is",
+    "a gate somebody disables inside a week.",
+    "",
+    "Recall varies too, 0.9427 to 0.9868 across those runs, which is wider than its own 0.02",
+    "tolerance. The durable fix for both is to make the candidate an average of several runs rather",
+    "than to widen tolerances; that is a change to the gate's contract and has been left alone."
   ],
-
-  "measured_at": "2026-08-05",
+  "measured_at": "2026-09-14",
+  "git_sha": "e1f7a47",
   "golden_set": "pvf_valves_v1",
   "arm": "axiom",
   "enforce_evidence": true,
-  "prompt_version": "extract.v2",
+  "prompt_version": "extract.v3",
   "model_ids": [
     "zai.glm-4.7-flash",
     "zai.glm-4.7",
     "zai.glm-5"
   ],
-
   "products": 15,
   "comparisons": 312,
-  "calibration_samples": 227,
+  "calibration_samples": 226,
   "model_calls": 15,
-
-  "correct": 222,
+  "correct": 224,
   "wrong_value": 2,
-  "missed": 3,
+  "missed": 1,
   "correctly_abstained": 85,
   "hallucinated": 0,
-
-  "precision": 0.991,
-  "recall": 0.978,
-  "f1": 0.984,
   "abstention_correctness": 1.0,
+  "citation_coverage": 1.0,
+  "exact_match_rate": 1.0,
+  "f1": 0.989,
   "hallucination_rate": 0.0,
-  "exact_match_rate": 0.9505,
-  "citation_coverage": 1.0
+  "precision": 0.9912,
+  "recall": 0.9868
 }

@@ -219,16 +219,65 @@ class DocumentLibrary:
         return sha256 in self._entries
 
     def seen_url(self, url: str) -> DocumentEntry | None:
-        """A document already fetched from this URL, if any.
+        """A document already fetched from this URL **whose bytes are still stored**.
 
         Checked before fetching, so a URL that several rows resolve to is requested once. Matched on
         the URL as recorded, which is the post-redirect one — the value that is actually the source.
+
+        The stored-bytes condition is not a detail; it is what stops this index from starving
+        retrieval. ``data/library/index.json`` is committed and ``data/cache/`` is gitignored, so a
+        fresh clone begins with 112 entries and no artifacts at all. An entry alone was enough to
+        answer "already have it", and reuse makes **no request** — so every candidate URL the index
+        had ever seen was refused a re-fetch while the bytes to reuse were gone. Retrieval then
+        found nothing, and the typed submission became the source.
+
+        Measured on Mirka 8999000111: the index holds ``mirka.com/en/p/Mirka-Dust-Extractor-1025-L``
+        at manufacturer tier, marked as covering the part. The declared pattern URL resolved, was
+        reported ``reused as 2ba916074b7f``, and the run made **zero requests** — shipping values
+        derived from the 40-character ERP description while the manufacturer's page states twelve
+        specifications. An index is a memo, not a cache: when it disagrees with the store, the store
+        is right.
         """
         key = url.rstrip("/")
         for entry in self._entries.values():
-            if entry.source_uri.rstrip("/") == key:
+            if entry.source_uri.rstrip("/") != key:
+                continue
+            if self._stored(entry):
                 return entry
+            # Indexed but unrecoverable. Fall through rather than return: another entry may
+            # record the same URL under different bytes, and one of those may still be present.
         return None
+
+    def _stored(self, entry: DocumentEntry) -> bool:
+        """Whether this entry's bytes can actually be served. A stat, not a read."""
+        if entry.sha256 in self._parsed:
+            return True
+        try:
+            return self._store.exists(entry.storage_uri)
+        except OSError:
+            return False
+
+    def reclassify(
+        self,
+        entry: DocumentEntry,
+        *,
+        host: str,
+        tier: str,
+        manufacturer_id: str | None,
+    ) -> DocumentEntry:
+        """Bring one entry's host, tier and manufacturer id up to date with the current policy.
+
+        The counterpart to ``register(..., reclassify=True)``, for the path where no registration
+        happens at all: a reused URL is answered from the index without a request, so without this
+        the only way to correct a stale tier would be to delete the index and re-fetch everything.
+
+        Coverage is untouched. What the bytes contain did not change; only what
+        ``schema/sourcing.yaml`` says about where they came from.
+        """
+        entry.host = host
+        entry.tier = tier
+        entry.manufacturer_id = manufacturer_id
+        return entry
 
     # ------------------------------------------------------------------ registration
 
@@ -239,15 +288,33 @@ class DocumentLibrary:
         host: str = "",
         tier: str = SourceTier.UNKNOWN.value,
         manufacturer_id: str | None = None,
+        reclassify: bool = False,
     ) -> DocumentEntry:
         """Record an ingested artifact, or return the entry already describing those bytes.
 
         Idempotent on the hash, which is what makes two rows resolving to the same PDF cost one
         entry. Coverage learned under the previous registration is preserved: the bytes have not
         changed, so what is inside them has not either.
+
+        ``reclassify`` updates the stored host, tier and manufacturer id on an entry that already
+        exists. Off by default because most callers have no opinion to offer: a local file passes
+        the default ``unknown`` to mean "no host to claim", and letting that overwrite a tier earned
+        from a declared domain would silently demote a manufacturer's own datasheet.
+
+        :class:`~axiom.retrieve.session.RetrievalSession` passes it, because it has just classified
+        the final URL under the current policy and that answer is newer than the stored one. Tier is
+        a fact about ``schema/sourcing.yaml``, not about the bytes, so it is the one field a
+        re-registration should be able to correct. Declaring a manufacturer's asset host is
+        otherwise a change that cannot take effect: the entry recorded before the declaration keeps
+        its ``unknown`` tier, ``supplementary_for`` keeps skipping it, and the datasheet stays
+        unread no matter how many times it is fetched again.
         """
         existing = self._entries.get(artifact.sha256)
         if existing is not None:
+            if reclassify:
+                existing.host = host
+                existing.tier = tier
+                existing.manufacturer_id = manufacturer_id
             return existing
 
         entry = DocumentEntry(

@@ -137,6 +137,14 @@ excluded:
       - abt.com
       - appliancesconnection.com
       - us-appliance.com
+      # Motion Industries — a national industrial distributor, and exactly the syndication risk the
+      # reason above describes. It reached the candidate list for Milwaukee 3033-20.
+      - motion.com
+      # A regional reseller, added because it was not merely present but *winning*: it was recorded
+      # in the document library as covering Mirka 8999000111, and a run that read it would have
+      # cited a Maltese shop listing as the source for a Mirka specification.
+      - galdesandmamo.com
+      - lightbulbs.com
 
   - category: aggregator
     reason: >
@@ -151,6 +159,14 @@ excluded:
       - datasheetarchive.com
       - manualslib.com
       - manualsonline.com
+      # The same kind of site as the two above and observed alongside them. Added because they were
+      # measurably expensive rather than merely undesirable: `max_candidates_per_sku` is 4, and on
+      # both Milwaukee 3033-20 and DeWalt DCL183 these mirrors took three of those four slots,
+      # leaving one fetch for the manufacturer's own page.
+      - manua.ls
+      - manuals.ca
+      - manualsfile.com
+      - e-catalog.com
       - arrow.com
       - digikey.com
       - mouser.com
@@ -551,6 +567,24 @@ manufacturers:
     # French labels while the page states 12 in English. Same part, same code path, different answer
     # — which is the failure mode a declared pattern removes.
     patterns: ["https://www.mirka.com/en/p/{mpn}/"]
+    # Mirka publishes every downloadable document through Brandfolder, a hosted asset manager, so
+    # the PDFs its own product pages link are not on a Mirka domain at all. Without these two
+    # prefixes the datasheet is fetched and then thrown away: `cdn.brandfolder.io` scores `unknown`,
+    # and `DocumentLibrary.supplementary_for` admits only manufacturer-tier documents, so the run
+    # extracts from the HTML shell and reports the rest as gaps.
+    #
+    # Measured on 8999000111: the product page links three PDFs, among them the 3.5 MB
+    # `Mirka_Dust_Extractor_1025L.pdf` carrying the specification table. All three were fetched, all
+    # three were discarded, and the delivery cited none of them.
+    #
+    # Scoped to the tenant path rather than the host, because Brandfolder is multi-tenant and
+    # `domains: [brandfolder.io]` would make every other brand's asset on that CDN read as Mirka's.
+    # Both account keys were confirmed by reading mirka.com itself, not inferred from a URL shape:
+    # FSMPOV8D is linked from `/en/p/8999000111/` and `/en/support/downloads/technical-documents/`,
+    # 3TVWCF1X from `/en/products/top-brands/polaros/`.
+    asset_urls:
+      - "https://cdn.brandfolder.io/FSMPOV8D/"
+      - "https://cdn.brandfolder.io/3TVWCF1X/"
 
   - id: three_m
     name: 3M

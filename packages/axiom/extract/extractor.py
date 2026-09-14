@@ -42,6 +42,8 @@ from axiom.extract.contract import (
     parse_extraction_contract,
 )
 from axiom.extract.entailment import Support, check_entailment
+from axiom.extract.structured import size_qualifier
+from axiom.extract.variants import _note_covers_size, is_size_scoped
 from axiom.schema import (
     Requirement,
     SchemaRegistry,
@@ -55,6 +57,14 @@ _ABSTENTION_REASONS = {
     "absent": (GapReason.NOT_PRESENT_IN_ANY_SOURCE, RecommendedAction.REQUEST_FROM_SUPPLIER),
 }
 _LABEL_FOLD = re.compile(r"[^a-z0-9]+")
+
+_SIZE_ANCHOR_CODES = ("nominal_size", "overall_size", "blade_diameter", "wheel_diameter")
+"""Attributes whose value states the size a size-scoped qualifier can be compared against.
+
+Ordered by how directly each *is* the product's size. ``nominal_size`` is the designation a PVF
+part is ordered by, which is the vocabulary ``_SIZE_TOKEN`` recognises; the rest are the nearest
+equivalent in the classes that have no nominal size. See :meth:`Extractor._withhold_size_scoped`.
+"""
 
 FOCUS_PAGE_THRESHOLD = 12
 """Page count above which a document is focused on the pages naming the target part.
@@ -322,6 +332,7 @@ class Extractor:
         self._materialise(
             result, list(contract.attributes), parsed, class_code, prompt.attribute_codes
         )
+        self._withhold_size_scoped(result, target_sku)
         # Source-native pairs are manufacturer claims, not merely statements found on a page.
         # Unknown web sources remain valid evidence for typed extraction, but source-native rows
         # from them are retained only as non-citable provenance and never enter delivery cells.
@@ -608,6 +619,81 @@ class Extractor:
                 continue
             seen.add(specification.deduplication_key)
             result.manufacturer_specifications.append(specification)
+
+    @staticmethod
+    def _size_scope_of(value: AttributeValue) -> str | None:
+        """The size qualifier scoping this value, read from the value *or* from its own citation.
+
+        Checking ``value_raw`` alone is not enough, and the golden set proved it twice over. The
+        model frequently returns the figure already tidied — ``18-22 ft-lb`` — while the line it
+        cited still reads ``Operating Torque ............... 18-22 ft-lb (1/2" size)``. The
+        qualifier is a property of the source statement, so the citation is the reliable place to
+        find it: it is lifted verbatim and cannot be normalised away.
+        """
+        if (note := is_size_scoped(value)) is not None:
+            return note
+        for span in value.evidence:
+            if (note := size_qualifier(span.quote or "")) is not None:
+                return note
+        return None
+
+    def _withhold_size_scoped(self, result: ExtractionResult, target_sku: str) -> None:
+        """Drop values the source qualified to a *different* size than the target part.
+
+        ``axiom.extract.variants`` already refuses to inherit a size-scoped value across a family,
+        and its docstring states exactly why: "attach a plausible, precisely-cited, wrong torque
+        figure to four other products". That guard only ran during variant *explosion*. Extraction
+        against a single target could still walk straight past the qualifier, and did.
+
+        Measured on the golden set, and it is the one comparison that made the backtest
+        intermittently non-zero on ``hallucinated``. ``data/samples/ba100.txt`` states::
+
+            Operating Torque ............... 18-22 ft-lb (1/2" size)
+
+        The parenthetical scopes it to ``BA-100-050``. Asked about ``BA-100-100`` — the 1" valve —
+        extraction returned 24.4–29.8 N.m for ``operating_torque`` with a **verified** citation at
+        0.72 confidence, because the quote genuinely is in the document. Quote verification proves
+        the text was not invented; it cannot prove the text is about this part. That gap is what
+        this closes, and it is why the golden set marks the attribute absent for that SKU rather
+        than merely unmeasured.
+
+        Anchored on the size this same pass extracted. Withheld when no size was established at
+        all: the source has said the figure belongs to one variant, so publishing it for a part
+        whose size is unknown is a guess wearing a citation. Both directions of that trade were
+        weighed in ``_SIZE_SCOPED``'s own comment — a false positive costs coverage, a false
+        negative ships a wrong specification — and this follows it.
+        """
+        scoped = [
+            (value, note)
+            for value in result.values
+            if (note := self._size_scope_of(value)) is not None
+        ]
+        if not scoped:
+            return
+
+        anchor = next(
+            (
+                value.value_raw
+                for value in result.values
+                if value.attribute_code in _SIZE_ANCHOR_CODES and value.value_raw
+            ),
+            None,
+        )
+        kept: list[AttributeValue] = []
+        for value in result.values:
+            note = next((n for v, n in scoped if v is value), None)
+            if note is None:
+                kept.append(value)
+                continue
+            if anchor and _note_covers_size(note, anchor):
+                kept.append(value)
+                continue
+            result.corrections.append(
+                f"{value.attribute_code} withheld: the source scopes it to {note!r}, which does "
+                f"not describe {target_sku}"
+                + (f" (size {anchor})" if anchor else " (no size was established for it)")
+            )
+        result.values = kept
 
     def _mapped_attribute_code(self, class_code: str | None, label: str) -> str | None:
         if class_code is None:

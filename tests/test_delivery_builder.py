@@ -446,7 +446,66 @@ def test_blank_mapping_metadata_normalizes_to_source_only_and_can_emit(builder):
 
 
 def test_mapped_raw_specification_cannot_bypass_typed_publication(builder):
+    """A typed value that landed owns its slot; the raw pair must not appear underneath it.
+
+    The typed value is what carries normalization, validation and the publication decision, so
+    emitting the source pair as well would both duplicate the fact and offer a second copy that
+    answered to none of those.
+    """
     record = record_for(PDSH)
+    record.add_value(extracted("primary_material", "Stainless Steel"))
+    record.add_manufacturer_specification(
+        manufacturer_specification(
+            "Material", "Stainless Steel", mapped_attribute_code="primary_material"
+        )
+    )
+
+    row = builder.build(record, source=SupplierRow.parse(PDSH))
+
+    assert row.as_dict()["ATTRIBUTE_LABEL 16"] == ""
+    assert row.sidecar()["manufacturer_specifications"][0]["delivery_status"] == (
+        "typed_mapped"
+    )
+
+
+def test_mapping_without_a_typed_value_still_emits_the_source_pair(builder):
+    """A mapping alone is not a publication decision, so it must not suppress the evidence.
+
+    The label matcher can claim a row for an attribute that extraction never produced — the class
+    binds it ``optional`` so the prompt never asked, or the model simply did not find it. Reading
+    the mapping as proof that a typed value exists deleted the fact from the grid: no typed cell,
+    no raw cell, and a verified manufacturer statement reachable only from the sidecar.
+
+    Found while giving ``each_weight`` the ``spec_labels`` that let it claim a source row headed
+    plainly "Weight". Mirka's page states ``Weight | 8 kg``; on the enrichment form's default
+    (``include_optional=False``) the attribute was not in the prompt, so the mapping matched, the
+    raw row was suppressed, and the delivery lost a weight it had cited.
+    """
+    record = record_for(PDSH)
+    record.add_manufacturer_specification(
+        manufacturer_specification(
+            "Material", "Stainless Steel", mapped_attribute_code="primary_material"
+        )
+    )
+
+    row = builder.build(record, source=SupplierRow.parse(PDSH))
+
+    assert row.as_dict()["ATTRIBUTE_LABEL 16"] == "Material"
+    assert row.as_dict()["ATTRIBUTE_VALUE 16"] == "Stainless Steel"
+    assert row.sidecar()["manufacturer_specifications"][0]["delivery_status"] == "emitted"
+
+
+def test_unpublishable_typed_value_still_suppresses_the_raw_pair(builder):
+    """The one case where suppression must survive a missing cell.
+
+    Here the typed value *did* land and was then withheld by the confidence policy. That is a
+    decision about this fact, and emitting the source pair beside it would be precisely the bypass
+    the rule exists to prevent — the raw copy would publish what the typed copy was refused.
+    """
+    record = record_for(PDSH)
+    record.add_value(
+        extracted("primary_material", "Stainless Steel", verified=False)
+    )
     record.add_manufacturer_specification(
         manufacturer_specification(
             "Material", "Stainless Steel", mapped_attribute_code="primary_material"

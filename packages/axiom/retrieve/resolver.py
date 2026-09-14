@@ -39,6 +39,35 @@ from axiom.retrieve.policy import Manufacturer, SourcePolicy, SourceTier, Source
 # a filter — the policy does the filtering — just a nudge at the one point where wording is free.
 SPEC_TERMS = ("specifications", "datasheet")
 
+MPN_IN_URL_BONUS = 6.0
+"""Added when the part number appears in the candidate's own URL.
+
+The strongest cheap signal that a page is *about this part* rather than merely reachable from a
+search for it, and until this existed nothing scored it at all — so a category listing could outrank
+the product page.
+
+Measured on DeWalt DCL183. ``dewalt.com/en-us/products/power-tools/lighting`` scored **47.0** and
+``dewalt.com/en-us/product/dcl183/rechargeable-led-flashlight`` scored **46.0**, because
+:meth:`SourcePolicy.spec_score` gave the category page +2 for generic ``/products/`` path fragments
+and the product page only +1. The listing was fetched first, it mentions ``DCL183`` in its grid of
+tiles so ``coverage_for`` accepted it as covering the part, and retrieval stopped there. The run
+extracted **nothing** from a page that describes forty products, while the real product page — with
+eleven specifications in schema.org ``additionalProperty`` — was never read.
+
+Sized deliberately between the two things it must not disturb: comfortably larger than any realistic
+``spec_score`` spread (a fragment is worth ±1–2), and far smaller than the 30-point gap between
+resolver arms, so a search hit still cannot outrank a supplied or declared-pattern URL. It applies
+to every arm uniformly, which is what keeps the *relative* order of the arms intact — a pattern URL
+built from the part number naturally earns the bonus too.
+"""
+
+MIN_MPN_LENGTH_FOR_URL_BONUS = 4
+"""Below this a part number is too short to be evidence when found in a URL.
+
+``20`` or ``4S`` occurs in half the paths on a manufacturer's site — a version number, a category
+id, a locale segment — and rewarding that would be noise rather than signal.
+"""
+
 NO_PROVIDER = (
     "no search provider is configured, so only supplied URLs and declared manufacturer patterns "
     "were tried. Pass a SearchProvider to reach the open web."
@@ -160,6 +189,10 @@ class Resolver:
         queries: list[str] = []
         notes: list[str] = []
 
+        def named(url: str) -> float:
+            """The part-number-in-URL bonus. See :data:`MPN_IN_URL_BONUS`."""
+            return MPN_IN_URL_BONUS if _mpn_in_url(mpn, url) else 0.0
+
         # --- arm 1: supplied -------------------------------------------------------
         for url in supplied:
             verdict = self._policy.classify(url)
@@ -172,7 +205,7 @@ class Resolver:
                     verdict=verdict,
                     origin="supplied",
                     # Above everything derived. Somebody knew the answer.
-                    rank=100.0 + self._policy.spec_score(url),
+                    rank=100.0 + self._policy.spec_score(url) + named(url),
                     manufacturer_id=verdict.manufacturer_id,
                 )
             )
@@ -189,7 +222,7 @@ class Resolver:
                         url=url,
                         verdict=verdict,
                         origin="pattern",
-                        rank=50.0 + self._policy.spec_score(url),
+                        rank=50.0 + self._policy.spec_score(url) + named(url),
                         manufacturer_id=maker.id,
                     )
                 )
@@ -230,7 +263,9 @@ class Resolver:
                             + self._policy.spec_score(url)
                             # A manufacturer-tier result outranks an unknown one even when the
                             # unknown one has a more spec-looking path.
-                            + (5.0 if verdict.tier is SourceTier.MANUFACTURER else 0.0),
+                            + (5.0 if verdict.tier is SourceTier.MANUFACTURER else 0.0)
+                            # A URL that names the part outranks one that merely mentions it.
+                            + named(url),
                             query=query,
                             manufacturer_id=verdict.manufacturer_id,
                         )
@@ -300,6 +335,26 @@ class Resolver:
         return plan
 
 
+def _mpn_in_url(mpn: str, url: str) -> bool:
+    """Whether the part number appears in this URL, ignoring separators and case.
+
+    Compared with every non-alphanumeric character removed from both sides, because a part number
+    is written in URLs with its separators intact, stripped, or replaced: ``52C3-5/8-UPC`` appears
+    as ``52c3-5-8-upc`` and ``8999000111`` as ``/en/p/8999000111/``. Matching the raw string would
+    miss most of them.
+
+    A substring test rather than a boundary test, deliberately. The failure it could cause is
+    promoting the page for a *related* part whose number contains this one, and that page is still
+    far closer to the target than the category listing this bonus exists to demote. The failure a
+    boundary test would cause is missing the correct page whenever a site joins the part number to
+    a slug — which is the common case.
+    """
+    folded = "".join(ch for ch in mpn if ch.isalnum()).casefold()
+    if len(folded) < MIN_MPN_LENGTH_FOR_URL_BONUS:
+        return False
+    return folded in "".join(ch for ch in url if ch.isalnum()).casefold()
+
+
 def _pattern_urls(maker: Manufacturer, mpn: str) -> list[str]:
     """Render a manufacturer's declared URL templates for one part number.
 
@@ -360,12 +415,30 @@ def _select_candidates(candidates: Sequence[Candidate], budget: int) -> list[Can
 
 
 def _dedupe(candidates: Sequence[Candidate]) -> list[Candidate]:
-    """One entry per URL, keeping the highest-ranked. Arms overlap by design."""
+    """One entry per URL, keeping the highest-ranked. Arms overlap by design.
+
+    A query string is also dropped when the same path is already a candidate without one. Search
+    engines return widget deep-links beside the page they belong to — Serper offered both
+    ``dewalt.com/en-us/product/dcl183/rechargeable-led-flashlight`` and the same URL with a
+    ``?bv…`` review-widget fragment — and fetching both spends two of the four candidate slots on
+    one document.
+
+    Only when the bare path is *also* present, which is what keeps a URL whose query string is
+    load-bearing. Kichler serves its spec sheet from ``/api/spec-sheets?sku=43911BK``; there is no
+    bare-path twin for that in the candidate set, so it survives untouched.
+    """
+    bare_paths = {
+        candidate.url.split("?", 1)[0].rstrip("/")
+        for candidate in candidates
+        if "?" not in candidate.url
+    }
     seen: set[str] = set()
     out: list[Candidate] = []
     for candidate in candidates:
         key = candidate.url.rstrip("/")
         if key in seen:
+            continue
+        if "?" in candidate.url and candidate.url.split("?", 1)[0].rstrip("/") in bare_paths:
             continue
         seen.add(key)
         out.append(candidate)

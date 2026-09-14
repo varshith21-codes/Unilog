@@ -156,6 +156,11 @@ _UNITS: tuple[UnitDef, ...] = (
         aliases=("lbf/in2", "psig", "psia", "pounds per square inch", "wog", "wsp"),
     ),
     UnitDef("bar", QuantityKind.PRESSURE, 100_000.0 / _PSI_TO_PA, aliases=("bars",)),
+    # The unit dust extractors and vacuum pumps state suction in. Mirka's DE 1025 L publishes
+    # "Vacuum (mbar) | 210.0 mbar", and without this the trailing `bar` matched instead, leaving
+    # a remainder of "210.0 m" that failed the magnitude guard — so the figure stayed an unsplit
+    # string and could not be normalised or compared.
+    UnitDef("mbar", QuantityKind.PRESSURE, 100.0 / _PSI_TO_PA, aliases=("mbars", "millibar")),
     UnitDef("kPa", QuantityKind.PRESSURE, 1_000.0 / _PSI_TO_PA, aliases=("kpa",)),
     UnitDef("MPa", QuantityKind.PRESSURE, 1_000_000.0 / _PSI_TO_PA, aliases=("mpa",)),
     UnitDef("Pa", QuantityKind.PRESSURE, 1.0 / _PSI_TO_PA, aliases=("pascal",)),

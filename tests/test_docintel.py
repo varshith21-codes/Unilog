@@ -671,3 +671,148 @@ def test_parse_artifact_routes_html_without_being_told(source_document: SourceDo
     assert parsed.parser == "html"
     assert "<td" not in parsed.full_text
     assert parsed.all_tables(), "the ordering table survived the round trip through dispatch"
+
+
+# ------------------------------------------------- schema.org additionalProperty specifications
+
+
+def _ld_page(payload: str, body: str = "<p>A product.</p>") -> str:
+    return (
+        "<html><head><title>Widget</title>"
+        f'<script type="application/ld+json">{payload}</script>'
+        f"</head><body>{body}</body></html>"
+    )
+
+
+def test_additional_property_specifications_are_rendered_as_text():
+    """``additionalProperty`` is the vocabulary this repo already *exports*; now it reads it too.
+
+    DeWalt's DCL183 states eleven specifications there and states them nowhere the renderer can
+    reach, so a page that published structured product data was parsed as though it had published
+    none.
+    """
+    text = html_to_text(
+        _ld_page(
+            """
+            {"@context":"https://schema.org","@type":"Product","sku":"DCL183",
+             "additionalProperty":[
+               {"@type":"PropertyValue","name":"Lumens","value":"1000"},
+               {"@type":"PropertyValue","name":"Power Source","value":"Integrated Batteries"}
+             ]}
+            """
+        )
+    )
+    assert "Lumens" in text
+    assert "1000" in text
+    assert "Power Source" in text
+    assert "Integrated Batteries" in text
+
+
+def test_specifications_become_a_real_table_not_loose_lines(source_document: SourceDocument):
+    """Rendered through ``_align`` so a value read from it earns a cell reference, not a line."""
+    parsed = parse_html(
+        _ld_page(
+            """
+            {"@type":"Product","sku":"DCL183",
+             "additionalProperty":[
+               {"@type":"PropertyValue","name":"Lumens","value":"1000"},
+               {"@type":"PropertyValue","name":"Assembled Product Weight","value":"0.8-lbs"}
+             ]}
+            """
+        ),
+        source_document,
+    )
+    assert parsed.all_tables(), "the specification block must reconstruct as a table"
+    joined = " ".join(
+        cell.text for table in parsed.all_tables() for cell in table.cells
+    )
+    assert "Lumens" in joined
+    assert "0.8-lbs" in joined
+
+
+def test_a_unit_system_is_not_mistaken_for_a_unit():
+    """Every dimensional entry on DeWalt's page carries ``unitText: "Imperial"``.
+
+    Appending it yields "2.56-in Imperial" — inches of imperial, a unit that does not exist — and
+    the bare number would have been better. Only a token the unit registry resolves is appended.
+    """
+    text = html_to_text(
+        _ld_page(
+            """
+            {"@type":"Product","sku":"DCL183","additionalProperty":[
+              {"@type":"PropertyValue","name":"Assembled Product Length",
+               "value":"2.56-in","unitText":"Imperial"},
+              {"@type":"PropertyValue","name":"Charge Time","value":"90","unitText":"min"}
+            ]}
+            """
+        )
+    )
+    assert "2.56-in" in text
+    assert "Imperial" not in text, "a unit system must never be appended as a unit"
+    assert "90 min" in text, "a token the registry does resolve is still appended"
+
+
+def test_a_label_with_conflicting_values_is_dropped_rather_than_guessed():
+    """One Kichler page serves a whole family, so it declares four finishes.
+
+    Only one is the finish of the SKU being enriched, and nothing in the block says which. Emitting
+    all four invites the extractor to choose, and a one-in-four chance of asserting the wrong
+    finish is worse than reporting a gap.
+    """
+    text = html_to_text(
+        _ld_page(
+            """
+            {"@type":"Product","sku":"43911BK","additionalProperty":[
+              {"@type":"PropertyValue","name":"finish","value":"Black"},
+              {"@type":"PropertyValue","name":"finish","value":"Brushed Nickel"},
+              {"@type":"PropertyValue","name":"finish","value":"Natural Brass"},
+              {"@type":"PropertyValue","name":"Diameter","value":"14.5"}
+            ]}
+            """
+        )
+    )
+    assert "Brushed Nickel" not in text
+    assert "Natural Brass" not in text
+    assert "Black" not in text
+    assert "Diameter" in text and "14.5" in text, "the unambiguous rows still come through"
+
+
+def test_a_label_that_names_no_property_is_dropped():
+    """Kichler publishes two entries both labelled "Attribute" — a facet value with no facet."""
+    text = html_to_text(
+        _ld_page(
+            """
+            {"@type":"Product","sku":"43911BK","additionalProperty":[
+              {"@type":"PropertyValue","name":"Attribute","value":"1-Light"},
+              {"@type":"PropertyValue","name":"Height","value":"14"}
+            ]}
+            """
+        )
+    )
+    assert "1-Light" not in text
+    assert "Height" in text
+
+
+def test_specifications_are_only_read_from_product_nodes():
+    """An Organization's own properties are not this product's specifications."""
+    text = html_to_text(
+        _ld_page(
+            """
+            [{"@type":"Organization","name":"DeWalt","additionalProperty":[
+               {"@type":"PropertyValue","name":"Employees","value":"13000"}]},
+             {"@type":"Product","sku":"DCL183","additionalProperty":[
+               {"@type":"PropertyValue","name":"Lumens","value":"1000"}]}]
+            """
+        )
+    )
+    assert "Lumens" in text
+    assert "Employees" not in text
+    assert "13000" not in text
+
+
+def test_a_malformed_ld_block_does_not_lose_the_visible_page():
+    """Real sites ship trailing commas. The body is unaffected and must survive."""
+    text = html_to_text(
+        _ld_page('{"@type":"Product","additionalProperty":[,]}', body="<p>Visible copy.</p>")
+    )
+    assert "Visible copy." in text

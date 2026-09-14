@@ -898,3 +898,93 @@ def test_prompt_actually_sent_contains_the_parsed_table(registry, cascade, parse
     assert '<table id="t1">' in sent
     assert "BA-100-075" in sent
     assert '<page number="1">' in sent
+
+
+# ------------------------------------------- a value scoped to another size is not this part's
+
+
+def test_a_value_scoped_to_another_size_is_withheld(registry, cascade, parsed_datasheet):
+    """Quote verification proves the text was not invented. It cannot prove it is about this part.
+
+    ``data/samples/ba100.txt`` states ``Operating Torque ... 18-22 ft-lb (1/2" size)``. Asked about
+    BA-100-100 — the 1" valve — extraction returned that torque with a *verified* citation at 0.72
+    confidence, and the backtest scored it as a hallucination on 2 of 3 runs. The guard already
+    existed in ``axiom.extract.variants`` for variant explosion; it never ran for extraction against
+    a single target.
+    """
+    payload = json.dumps(
+        [
+            item(
+                "nominal_size",
+                value_raw='1"',
+                evidence_quote='BA-100-100       1"          Lever        12',
+            ),
+            item(
+                "operating_torque",
+                value_raw='18-22 ft-lb (1/2" size)',
+                evidence_quote='Operating Torque ............... 18-22 ft-lb (1/2" size)',
+            ),
+        ]
+    )
+    result = _extractor(registry, cascade, [payload]).extract(
+        parsed_datasheet,
+        class_code=CLASS_CODE,
+        target_sku="BA-100-100",
+        only_codes=("nominal_size", "operating_torque"),
+    )
+
+    codes = {value.attribute_code for value in result.values}
+    assert "operating_torque" not in codes, 'a 1/2" figure must not be published for the 1" valve'
+    assert "nominal_size" in codes, "the unqualified value is unaffected"
+    assert any("operating_torque withheld" in note for note in result.corrections)
+
+
+def test_a_value_scoped_to_this_size_is_kept(registry, cascade, parsed_datasheet):
+    """The guard must not simply delete every qualified value — that would cost real coverage."""
+    payload = json.dumps(
+        [
+            item(
+                "nominal_size",
+                value_raw='1/2"',
+                evidence_quote='BA-100-050       1/2"        Lever        24',
+            ),
+            item(
+                "operating_torque",
+                value_raw='18-22 ft-lb (1/2" size)',
+                evidence_quote='Operating Torque ............... 18-22 ft-lb (1/2" size)',
+            ),
+        ]
+    )
+    result = _extractor(registry, cascade, [payload]).extract(
+        parsed_datasheet,
+        class_code=CLASS_CODE,
+        target_sku="BA-100-050",
+        only_codes=("nominal_size", "operating_torque"),
+    )
+
+    codes = {value.attribute_code for value in result.values}
+    assert "operating_torque" in codes, "the size the source names is the size that keeps it"
+
+
+def test_a_scoped_value_is_withheld_when_no_size_was_established(
+    registry, cascade, parsed_datasheet
+):
+    """The source said the figure belongs to one variant. Without a size, publishing is a guess."""
+    payload = json.dumps(
+        [
+            item(
+                "operating_torque",
+                value_raw='18-22 ft-lb (1/2" size)',
+                evidence_quote='Operating Torque ............... 18-22 ft-lb (1/2" size)',
+            )
+        ]
+    )
+    result = _extractor(registry, cascade, [payload]).extract(
+        parsed_datasheet,
+        class_code=CLASS_CODE,
+        target_sku="BA-100-100",
+        only_codes=("operating_torque",),
+    )
+
+    assert not result.values
+    assert any("no size was established" in note for note in result.corrections)

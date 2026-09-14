@@ -409,9 +409,11 @@ class DeliveryRowBuilder:
 
         Schema attributes keep their stable, published slot order. Manufacturer fields unknown
         to the schema are appended only after that contract, so discovering a new label enriches
-        the row without shifting any established column. Mapped source specifications are
-        omitted here: the typed value owns that slot and must not bypass its validation or
-        publication decision.
+        the row without shifting any established column. A source specification is omitted here
+        when a typed value for the attribute it maps to is present: that value owns the slot and
+        must not bypass its validation or publication decision. A mapping with **no** typed value
+        behind it suppresses nothing, because there is no decision to bypass — see the comment on
+        the eligibility loop below.
         """
         capacity = self._format.slots("attribute_grid", "label")
         bindings = []
@@ -490,11 +492,27 @@ class DeliveryRowBuilder:
         statuses: dict[str, str] = {}
         eligible = []
         for specification in record.manufacturer_specifications:
+            mapped_code = specification.mapped_attribute_code
+            # A mapping only earns the right to suppress this row if a typed value actually
+            # occupies the slot it points at. `record.get` returning None means the label matched a
+            # bound attribute that extraction never produced — the class binds it `optional` so the
+            # prompt never asked for it, or the model did not find it — and in that case the choice
+            # is not "typed value versus raw passthrough", it is "cited fact versus nothing".
+            #
+            # Measured while adding the dust-extraction attributes: declaring `spec_labels:
+            # [Weight]` on `each_weight` made "Weight | 8 kg" map, and because `each_weight` was not
+            # in the default prompt the row vanished from the grid instead of being typed. The
+            # suppression rule was reading the mapping as evidence that a typed value exists.
+            #
+            # A value that exists but is unpublishable is the opposite case and still suppresses:
+            # there the typed value did land and a publication decision was made about it, so
+            # emitting the raw pair underneath would be exactly the bypass this rule prevents.
+            typed = record.get(mapped_code) if mapped_code is not None else None
             if not specification.citable_as_manufacturer:
                 statuses[specification.specification_id] = "untrusted_source"
             elif not specification.has_verified_support:
                 statuses[specification.specification_id] = "unverified_pair"
-            elif specification.mapped_attribute_code is not None:
+            elif typed is not None:
                 statuses[specification.specification_id] = "typed_mapped"
             else:
                 eligible.append(specification)

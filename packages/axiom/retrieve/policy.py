@@ -130,6 +130,27 @@ class Manufacturer:
     the missing fact it is. Fill one in once it has been verified against a real part.
     """
 
+    asset_urls: tuple[str, ...] = ()
+    """URL **prefixes** on hosts this manufacturer does not own but publishes its documents through.
+
+    A domain rule cannot express this. Manufacturers increasingly serve their datasheets from a
+    hosted asset manager — Mirka's product pages link every PDF from ``cdn.brandfolder.io`` — and
+    those hosts are multi-tenant. Declaring ``brandfolder.io`` as Mirka's domain would hand Mirka's
+    identity to every other brand on that CDN, which is exactly the misattribution the module
+    docstring's registrable-domain argument exists to prevent. Declaring nothing leaves the maker's
+    own datasheet at ``unknown`` tier, and ``unknown`` is dropped from supplementary reading, so the
+    PDF is fetched and then discarded.
+
+    Measured on Mirka 8999000111: the product page was found and three PDFs were fetched from its
+    Downloads links, among them the 202-page ``Mirka_Dust_Extractor_1025L.pdf`` manual. All three
+    landed on ``cdn.brandfolder.io``, so all three scored ``unknown``, so ``supplementary_for``
+    admitted none of them and they were fetched and then dropped without being read.
+
+    So the unit of trust here is the **tenant path**, not the host: ``cdn.brandfolder.io/FSMPOV8D/``
+    is Mirka's account on a shared CDN. Matched on a path-segment boundary, so a neighbouring
+    account cannot borrow the prefix. See :func:`_match_asset`.
+    """
+
     @property
     def primary_domain(self) -> str:
         return self.domains[0]
@@ -265,6 +286,21 @@ class SourcePolicy:
                     matched_domain=matched,
                 )
 
+        # Declared asset prefixes, after every domain rule. Ordered last among the manufacturer
+        # checks so a host somebody actually owns always wins the attribution over a tenant path
+        # on somebody else's CDN.
+        for maker in self.manufacturers:
+            if matched := _match_asset(url, maker.asset_urls):
+                return SourceVerdict(
+                    url=url,
+                    host=host,
+                    tier=SourceTier.MANUFACTURER,
+                    reason=f"declared asset library of {maker.name}",
+                    category=maker.id,
+                    manufacturer_id=maker.id,
+                    matched_domain=matched,
+                )
+
         return SourceVerdict(
             url=url,
             host=host,
@@ -389,6 +425,41 @@ def _match(host: str, domains: tuple[str, ...] | frozenset[str]) -> str | None:
     return None
 
 
+def _match_asset(url: str, prefixes: tuple[str, ...]) -> str | None:
+    """The asset prefix covering ``url``, matched on a path-segment boundary.
+
+    The same correctness argument as :func:`_match`, one level down. A plain ``startswith`` on the
+    URL would let ``/FSMPOV8D2/`` inherit the trust granted to ``/FSMPOV8D/``, which is the string
+    bug the module docstring rejects for hosts, so the prefix's path is compared segment-wise:
+    ``/a/b`` covers ``/a/b`` and ``/a/b/c`` and never ``/a/bc``.
+
+    The host is compared with :func:`host_of`, so it is case- and port-insensitive and a trailing
+    dot cannot bypass it. The path is compared **case-sensitively**, because HTTP paths are: the
+    tenant key ``FSMPOV8D`` is a different resource from ``fsmpov8d``, and folding it would widen
+    the rule beyond what was declared.
+    """
+    target_host = host_of(url)
+    if not target_host:
+        return None
+    target_path = urlparse(url).path or "/"
+    target_segments = [segment for segment in target_path.split("/") if segment]
+
+    for prefix in prefixes:
+        rule = (prefix or "").strip()
+        if not rule:
+            continue
+        if host_of(rule) != target_host:
+            continue
+        rule_segments = [segment for segment in (urlparse(rule).path or "/").split("/") if segment]
+        # An empty rule path would mean the whole host, which is what `domains` is for. Refuse it
+        # here rather than silently granting a multi-tenant CDN to one maker.
+        if not rule_segments:
+            continue
+        if target_segments[: len(rule_segments)] == rule_segments:
+            return rule
+    return None
+
+
 def _fold(text: str) -> str:
     """Case- and punctuation-insensitive form, for matching messy vendor and brand strings.
 
@@ -411,6 +482,7 @@ def _manufacturer(entry: dict) -> Manufacturer:
         vendors=frozenset(_fold(str(v)) for v in entry.get("vendors") or []),
         brands=frozenset(_fold(str(b)) for b in entry.get("brands") or []),
         patterns=tuple(str(p) for p in entry.get("patterns") or []),
+        asset_urls=tuple(str(a).strip() for a in entry.get("asset_urls") or []),
     )
 
 

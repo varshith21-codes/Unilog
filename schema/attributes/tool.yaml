@@ -48,7 +48,11 @@ attributes:
     extraction_hints:
       - a battery platform name such as M18 or 20V implies Cordless
       - a bare voltage like 120V on a stationary machine implies Corded Electric
-    spec_labels: ["Power Source", "Power Type", "Power", "Drive Type"]
+    # "Cordless or Corded" is the retail feed spelling, and it is the label DeWalt publishes in
+    # schema.org `additionalProperty` — where its value is literally "Cordless", which the
+    # allowed_values aliases below already resolve.
+    spec_labels:
+      ["Power Source", "Power Type", "Power", "Drive Type", "Cordless or Corded", "Corded/Cordless"]
     allowed_values:
       - value: Cordless (Battery)
         aliases: ["cordless", "battery", "battery powered", "li-ion", "lithium"]
@@ -413,4 +417,300 @@ attributes:
         aliases: ["metric", "mm", "millimetre", "millimeter"]
       - value: Imperial and Metric
         aliases: ["dual", "both", "sae and metric", "metric and sae", "dual marked"]
+    interchange: critical
+
+  # ------------------------------------------------------------------ dust extraction
+  #
+  # WHY THESE EXIST. A dust extractor is classified TOL.PWR.GEN — `dust`, `vacuum` and `extractor`
+  # are identity terms of that class, deliberately — but the class described a tool by its chuck,
+  # its blade and its battery platform, and an extractor has none of those. So the twelve
+  # specifications Mirka publishes for the DE 1025 L all folded to labels no bound attribute
+  # declared, `mapped_attribute_code` came back null for every one, and they reached the client as
+  # untyped label/value passthrough: never normalised, never unit-converted, never validated,
+  # never comparable across two extractors.
+  #
+  # These are the four facts a buyer actually sizes a dust extractor on. Airflow and suction are a
+  # pair — a high vacuum with low flow clears a saw kerf, high flow with low vacuum clears a
+  # sanding hood — which is why neither is useful without the other.
+  - code: air_flow_volume
+    name: Airflow
+    datatype: quantity
+    quantity_kind: flow_volumetric
+    canonical_unit: L/min
+    display_preference: metric_primary
+    unit_hint: L/min
+    description: >
+      Maximum volume of air the tool moves per unit time, measured at the inlet with no hose.
+      Read together with suction_pressure: airflow carries the dust away once it is airborne,
+      suction is what lifts it. Manufacturers publish this in l/min, m3/h or cfm interchangeably,
+      so the figures are not comparable until converted.
+    example_values: ["3600 l/min", "216 m3/h", "130 cfm"]
+    extraction_hints:
+      - 'a bare number beside a label naming l/min, m3/h or cfm carries that unit'
+      - not the hose diameter and not the motor speed, both of which sit near it in spec tables
+    # Folding strips non-alphanumerics, so a parenthesised source spelling must appear verbatim:
+    # "Air flow volume (l/min)" folds to "airflowvolumelmin" and matches nothing shorter.
+    spec_labels:
+      [
+        "Air flow volume (l/min)",
+        "Air Flow Volume",
+        "Air Flow",
+        "Airflow",
+        "Air Volume",
+        "Max Air Flow",
+        "Maximum Air Flow",
+        "Suction Volume",
+        "Volume Flow",
+      ]
+    table_headers: ["air flow", "airflow", "air flow volume", "air volume"]
+    tolerance: 0.02
+    plausible_range: [10.0, 100000.0]
+    # More airflow is more capable extraction, so a larger figure substitutes for a smaller one.
+    interchange: functional
+    substitution: at_least
+
+  - code: suction_pressure
+    name: Vacuum
+    datatype: quantity
+    quantity_kind: pressure
+    canonical_unit: mbar
+    display_preference: metric_primary
+    unit_hint: mbar
+    description: >
+      Maximum negative pressure the tool develops with the inlet sealed, which sets how well it
+      lifts heavy debris and how far it tolerates a long or clogged hose. Published as "vacuum",
+      "suction" or a water-lift figure; all three describe the same quantity.
+    example_values: ["210 mbar", "21 kPa", "85 in H2O"]
+    extraction_hints:
+      - 'a suction figure in mbar, kPa or psi is this attribute, not the mains supply'
+    spec_labels:
+      [
+        "Vacuum (mbar)",
+        "Vacuum",
+        "Suction",
+        "Suction Power",
+        "Suction Pressure",
+        "Max Vacuum",
+        "Maximum Vacuum",
+        "Negative Pressure",
+      ]
+    table_headers: ["vacuum", "suction", "suction pressure"]
+    tolerance: 0.02
+    plausible_range: [1.0, 2000.0]
+    interchange: functional
+    substitution: at_least
+
+  - code: dust_container_volume
+    name: Dust Container Volume
+    datatype: quantity
+    quantity_kind: volume
+    canonical_unit: L
+    display_preference: metric_primary
+    unit_hint: L
+    description: >
+      Capacity of the collection container or bag, which decides how long the machine runs before
+      it is emptied. Distinct from each_weight and from the machine's overall size: a compact body
+      can carry a large tank.
+    example_values: ["25 L", "15 l", "8 gal"]
+    spec_labels:
+      [
+        "Dust Container Volume (l)",
+        "Dust Container Volume",
+        "Container Volume",
+        "Tank Capacity",
+        "Container Capacity",
+        "Dust Capacity",
+        "Bag Capacity",
+        "Capacity",
+      ]
+    table_headers: ["container volume", "tank capacity", "dust capacity"]
+    tolerance: 0.02
+    plausible_range: [0.1, 1000.0]
+    interchange: functional
+    substitution: at_least
+
+  - code: dust_class
+    name: Dust Class
+    datatype: enum
+    description: >
+      European filtration class under EN 60335-2-69, which is a legal fitness test rather than a
+      quality grade: L passes nuisance dust, M is required for wood and most construction dust,
+      and H is required for asbestos and carcinogens. Substituting downward is a compliance
+      failure, not a lesser specification, so this is never interchangeable.
+    example_values: ["L", "M", "H"]
+    extraction_hints:
+      - 'a lone "L", "M" or "H" beside a dust or filter class label is this attribute'
+      - 'an "L-class" or "M-class" phrase in prose states it too'
+    spec_labels: ["Dust Class", "Dust class", "Filter Class", "Filtration Class", "Class"]
+    table_headers: ["dust class", "filter class"]
+    allowed_values:
+      - value: L
+        aliases: ["l", "l-class", "l class", "class l", "low"]
+      - value: M
+        aliases: ["m", "m-class", "m class", "class m", "medium"]
+      - value: H
+        aliases: ["h", "h-class", "h class", "class h", "high"]
+    # Critical, not defining, and `abrasive_operation` is the precedent: that was demoted because
+    # "the danger is in the use, not the fit". Same shape here. An L-class and an H-class extractor
+    # take the same hoses and the same tools, so nothing refuses to connect — what differs is which
+    # jobs the machine is lawful on. Commercially it is the most consequential field on the row, and
+    # `defining` is reserved for impossibility rather than importance.
+    interchange: critical
+
+  # ------------------------------------------------------------------ corded electrical supply
+  #
+  # Every corded tool states these and the class had nowhere to put them. `voltage_rating` was the
+  # only electrical attribute bound, which is why extraction put Mirka's "Power Input (W) | 1000 W"
+  # into a column labelled "Supply Voltage" — watts published as volts, at 0.9 confidence. An
+  # attribute that names the quantity is the fix; the mis-mapping was a missing column, not a bad
+  # model.
+  - code: power_input
+    name: Power Input
+    datatype: quantity
+    quantity_kind: power
+    canonical_unit: W
+    display_preference: metric_primary
+    unit_hint: W
+    description: >
+      Electrical power the tool draws from the supply, in watts. This is consumption and not
+      output: a 1000 W motor does not deliver 1000 W of work. Never record a voltage or a current
+      here even when the spec table places them adjacent.
+    example_values: ["1000 W", "1.2 kW", "550 W"]
+    extraction_hints:
+      - 'a figure in W or kW is this attribute; a figure in V is voltage_rating'
+      - '"Power Input", "Power Consumption" and "Rated Power" all name it'
+    spec_labels:
+      [
+        "Power Input (W)",
+        "Power Input",
+        "Power Consumption",
+        "Rated Power",
+        "Input Power",
+        "Motor Power",
+        "Wattage",
+        # A bare "Power" is deliberately absent. `power_source` claims it too, and a spec row headed
+        # "Power" carries "Corded Electric" as often as it carries "1000 W" — so declaring it here
+        # made the label contested and left the deterministic binder with no way to choose. The
+        # unit-bearing spellings are unambiguous; that one is not.
+      ]
+    table_headers: ["power input", "power consumption", "wattage", "rated power"]
+    tolerance: 0.02
+    plausible_range: [1.0, 50000.0]
+    interchange: functional
+    substitution: at_least
+
+  - code: mains_frequency
+    name: Mains Frequency
+    # An enum, NOT a quantity, and the dual rating is the whole reason. Declared `quantity` first
+    # and Mirka's "50/60 Hz" normalised to **0.833333 Hz** — the slash read as division. It is not
+    # a magnitude at all: it says the machine accepts either supply, which is one fact about
+    # compatibility rather than a number to convert. `minimum_height` is the existing precedent for
+    # declaring a string where a source publishes a qualified measurement instead of a scalar.
+    #
+    # Three real-world values, so an enum also validates what a free string would not.
+    datatype: enum
+    description: >
+      Supply frequency the tool accepts. The dual "50/60 Hz" rating is the fact that decides
+      whether a 50 Hz machine can be sold into a 60 Hz market at all, so it is recorded as its own
+      value rather than reduced to one of the two figures.
+    example_values: ["50/60 Hz", "50 Hz", "60 Hz"]
+    extraction_hints:
+      - 'a dual "50/60 Hz" rating is one value and must be kept whole, never averaged or divided'
+    spec_labels:
+      ["Mains Frequency (Hz)", "Mains Frequency", "Frequency", "Supply Frequency", "Line Frequency"]
+    table_headers: ["frequency", "mains frequency", "supply frequency"]
+    allowed_values:
+      - value: 50/60 Hz
+        aliases:
+          ["50/60", "50/60hz", "50-60 hz", "50-60hz", "50 60 hz", "50 hz / 60 hz", "50hz/60hz"]
+      - value: 50 Hz
+        aliases: ["50", "50hz", "50 hz"]
+      - value: 60 Hz
+        aliases: ["60", "60hz", "60 hz"]
+    # A 50 Hz-only machine on a 60 Hz supply is a different product commercially, but the plug still
+    # fits, so this is critical rather than defining.
+    interchange: critical
+
+  - code: cable_length
+    name: Cable Length
+    datatype: quantity
+    quantity_kind: length
+    canonical_unit: mm
+    display_preference: metric_primary
+    unit_hint: m
+    description: >
+      Length of the fitted mains cable, which sets the working radius before an extension lead is
+      needed. Distinct from hose length on an extractor and from any overall dimension.
+    example_values: ["7.5 m", "5 m", "25 ft"]
+    extraction_hints:
+      - 'a bare number on a cable or cord label is metres on a metric datasheet'
+      - not the hose length and not the overall depth
+    spec_labels:
+      ["Cable Length", "Cord Length", "Mains Cable Length", "Power Cord Length", "Cable"]
+    table_headers: ["cable length", "cord length"]
+    tolerance: 0.02
+    plausible_range: [100.0, 100000.0]
+    interchange: functional
+    substitution: at_least
+
+  # ------------------------------------------------------------------ discrete dimensions
+  #
+  # `overall_size` already exists and stays: it holds the composite a datasheet prints as
+  # "375 x 395 x 530 mm". These three are for the layout Mirka's English page uses instead, where
+  # Height, Length and Width are separate rows. They must be separate attributes rather than three
+  # spec_labels on `overall_size`, because folding three labels onto one code marks all three
+  # `typed_mapped` and only one value can land — the other two facts would be dropped from the
+  # grid entirely. See `DeliveryBuilder._attribute_grid`.
+  - code: overall_height
+    name: Height
+    datatype: quantity
+    quantity_kind: length
+    canonical_unit: mm
+    display_preference: metric_primary
+    unit_hint: mm
+    description: >
+      Overall height of the product as it stands, excluding a detachable handle or hose. Recorded
+      separately from overall_size for the datasheets that tabulate each dimension on its own row.
+    example_values: ["530 mm", "21 in"]
+    # "Assembled Product ..." is the retail feed convention — Walmart, Home Depot and Lowe's all
+    # use it — so it is general vocabulary rather than one brand's spelling. DeWalt publishes all
+    # four dimensions under it in schema.org `additionalProperty`.
+    spec_labels: ["Height", "Overall Height", "Assembled Product Height", "Item Height", "H"]
+    table_headers: ["height", "overall height"]
+    tolerance: 0.02
+    plausible_range: [1.0, 100000.0]
+    interchange: critical
+
+  - code: overall_length
+    name: Length
+    datatype: quantity
+    quantity_kind: length
+    canonical_unit: mm
+    display_preference: metric_primary
+    unit_hint: mm
+    description: >
+      Overall length of the product along its longest horizontal axis. Recorded separately from
+      overall_size for the datasheets that tabulate each dimension on its own row.
+    example_values: ["375 mm", "14.8 in"]
+    spec_labels: ["Length", "Overall Length", "Assembled Product Length", "Item Length", "Depth", "L"]
+    table_headers: ["length", "overall length"]
+    tolerance: 0.02
+    plausible_range: [1.0, 100000.0]
+    interchange: critical
+
+  - code: overall_width
+    name: Width
+    datatype: quantity
+    quantity_kind: length
+    canonical_unit: mm
+    display_preference: metric_primary
+    unit_hint: mm
+    description: >
+      Overall width of the product across its shortest horizontal axis. Recorded separately from
+      overall_size for the datasheets that tabulate each dimension on its own row.
+    example_values: ["395 mm", "15.6 in"]
+    spec_labels: ["Width", "Overall Width", "Assembled Product Width", "Item Width", "W"]
+    table_headers: ["width", "overall width"]
+    tolerance: 0.02
+    plausible_range: [1.0, 100000.0]
     interchange: critical

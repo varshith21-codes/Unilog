@@ -245,6 +245,18 @@ class RetrievalSession:
         # 2. Already have it. Checked before robots, because reuse involves no request and a site's
         #    robots file cannot retroactively forbid bytes we already hold and have cited.
         if existing := self._library.seen_url(candidate.url):
+            # Re-answer the policy question on the way past. Reuse skips the request, so it would
+            # otherwise also skip the only opportunity to notice that the tier recorded when these
+            # bytes arrived no longer matches what the YAML now declares. Classified on the entry's
+            # own `source_uri` rather than the candidate URL, because that is the post-redirect
+            # address that actually is the source.
+            reused_verdict = self._policy.classify(existing.source_uri or candidate.url)
+            self._library.reclassify(
+                existing,
+                host=reused_verdict.host,
+                tier=reused_verdict.tier.value,
+                manufacturer_id=reused_verdict.manufacturer_id,
+            )
             return FetchOutcome(
                 candidate,
                 FetchStatus.REUSED,
@@ -290,6 +302,15 @@ class RetrievalSession:
             )
         except IngestError as exc:
             return FetchOutcome(candidate, FetchStatus.FAILED, str(exc))
+        except Exception as exc:  # noqa: BLE001 - one rude peer must not end a batch
+            # The same rule `fetch_transient` already applies, for the same reason and with more
+            # force: this is the main path. `ingest_url` normalises the transport errors it knows
+            # about into `IngestError`, but an injected fetcher is arbitrary caller code and a
+            # parser can fail on bytes no test anticipated. Neither is a reason to lose the run for
+            # every SKU still queued behind this one.
+            return FetchOutcome(
+                candidate, FetchStatus.FAILED, f"{type(exc).__name__}: {exc}"
+            )
         finally:
             self.requests_made += 1
 
@@ -310,6 +331,9 @@ class RetrievalSession:
             host=final_verdict.host,
             tier=final_verdict.tier.value,
             manufacturer_id=final_verdict.manufacturer_id,
+            # We just classified the final URL under the current policy, so this verdict is newer
+            # than whatever the index recorded when these bytes were first seen.
+            reclassify=True,
         )
         detail = (
             "identical bytes were already stored under a different URL"
@@ -406,6 +430,7 @@ class RetrievalSession:
                 host=verdict.host,
                 tier=verdict.tier.value,
                 manufacturer_id=verdict.manufacturer_id,
+                reclassify=True,
             )
             outcomes.append(
                 FetchOutcome(

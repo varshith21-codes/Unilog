@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-09-10T18:15:33.854728+00:00",
+  "generated_at": "2026-09-13T14:08:13.198898+00:00",
   "documents": [
     {
       "sha256": "01d4f6dc964504f330917a4a49354ee3b8a762ba3c3263192ad28c0a829ee248",
@@ -2276,6 +2276,29 @@
       "withdrawn": {}
     },
     {
+      "sha256": "07ca4942a686382c5aa3f51219e374d309e4d33cd9cae256aa627ba04af81687",
+      "storage_uri": "local://07/ca/07ca4942a686382c5aa3f51219e374d309e4d33cd9cae256aa627ba04af81687.html",
+      "document_id": "8999000111@07ca4942",
+      "source_uri": "https://www.mirka.com/en/p/8999000111/",
+      "host": "www.mirka.com",
+      "tier": "manufacturer",
+      "manufacturer_id": "mirka",
+      "doc_type": "web_page",
+      "filename": "8999000111.html",
+      "size_bytes": 115098,
+      "fetched_at": "2026-09-12T18:18:11.192296+00:00",
+      "revision_label": null,
+      "license_note": "rendered from www.mirka.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset",
+      "covers": {
+        "8999000111": "table"
+      },
+      "absent": [
+        "3033-20",
+        "DCL183"
+      ],
+      "withdrawn": {}
+    },
+    {
       "sha256": "08d6bf36163d78c7adebb39d59b199e11eb5d6a0559bb361d37a78dbb5868a7e",
       "storage_uri": "local://08/d6/08d6bf36163d78c7adebb39d59b199e11eb5d6a0559bb361d37a78dbb5868a7e.pdf",
       "document_id": "Exploded_view_Mirka_DE_1230_L_PC@08d6bf36",
@@ -3466,8 +3489,8 @@
       "document_id": "Exploded_view_Mirka_DE_1025_L@1f49efed",
       "source_uri": "https://cdn.brandfolder.io/FSMPOV8D/at/qhbs7rjjxpmgfgnrqgb8x7t/Exploded_view_Mirka_DE_1025_L.pdf",
       "host": "cdn.brandfolder.io",
-      "tier": "unknown",
-      "manufacturer_id": null,
+      "tier": "manufacturer",
+      "manufacturer_id": "mirka",
       "doc_type": "spec_sheet",
       "filename": "Exploded_view_Mirka_DE_1025_L.pdf",
       "size_bytes": 676803,
@@ -3476,7 +3499,9 @@
       "license_note": "retrieved from cdn.brandfolder.io (unknown tier) for product data enrichment; review the site's terms before republishing any asset from it",
       "covers": {},
       "absent": [
+        "3033-20",
         "8999000111",
+        "DCL183",
         "MIW9502022BA",
         "MRP6002100"
       ],
@@ -3488,8 +3513,8 @@
       "document_id": "DE_1125_L_230V_01-2023_web@22506d2e",
       "source_uri": "https://cdn.brandfolder.io/FSMPOV8D/at/63ggvxw5q59shf3fb89qpskk/DE_1125_L_230V_01-2023_web.pdf",
       "host": "cdn.brandfolder.io",
-      "tier": "unknown",
-      "manufacturer_id": null,
+      "tier": "manufacturer",
+      "manufacturer_id": "mirka",
       "doc_type": "spec_sheet",
       "filename": "DE_1125_L_230V_01-2023_web.pdf",
       "size_bytes": 3658895,
@@ -3498,7 +3523,9 @@
       "license_note": "retrieved from cdn.brandfolder.io (unknown tier) for product data enrichment; review the site's terms before republishing any asset from it",
       "covers": {},
       "absent": [
-        "8999000111"
+        "3033-20",
+        "8999000111",
+        "DCL183"
       ],
       "withdrawn": {}
     },
@@ -12646,6 +12673,52 @@
       "withdrawn": {}
     },
     {
+      "sha256": "437e2031e584ec866946f0dabbc620fee9780c998b2da9c4c862a51fce36d60a",
+      "storage_uri": "local://43/7e/437e2031e584ec866946f0dabbc620fee9780c998b2da9c4c862a51fce36d60a.html",
+      "document_id": "3033-20@437e2031",
+      "source_uri": "https://www.milwaukeetool.com/products/details/m18-fuel-24-hedge-trimmer/3033-20",
+      "host": "www.milwaukeetool.com",
+      "tier": "manufacturer",
+      "manufacturer_id": "milwaukee_tool",
+      "doc_type": "web_page",
+      "filename": "3033-20.html",
+      "size_bytes": 684002,
+      "fetched_at": "2026-09-12T14:27:45.100162+00:00",
+      "revision_label": null,
+      "license_note": "retrieved from www.milwaukeetool.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {
+        "3033-20": "table"
+      },
+      "absent": [
+        "8999000111",
+        "DCL183"
+      ],
+      "withdrawn": {}
+    },
+    {
+      "sha256": "46900ddb40003f2be421ce0f2579e994ba601267ec3edde28429a88258fa36ff",
+      "storage_uri": "local://46/90/46900ddb40003f2be421ce0f2579e994ba601267ec3edde28429a88258fa36ff.html",
+      "document_id": "8999000111@46900ddb",
+      "source_uri": "https://www.mirka.com/en-in/p/8999000111/",
+      "host": "www.mirka.com",
+      "tier": "manufacturer",
+      "manufacturer_id": "mirka",
+      "doc_type": "web_page",
+      "filename": "8999000111.html",
+      "size_bytes": 514059,
+      "fetched_at": "2026-09-12T13:58:27.834383+00:00",
+      "revision_label": null,
+      "license_note": "retrieved from www.mirka.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {
+        "8999000111": "table"
+      },
+      "absent": [
+        "3033-20",
+        "DCL183"
+      ],
+      "withdrawn": {}
+    },
+    {
       "sha256": "46cbe0a3620377e02affc4ff8bbe2bf1605368032667d6b8c4796b09a9717705",
       "storage_uri": "local://46/cb/46cbe0a3620377e02affc4ff8bbe2bf1605368032667d6b8c4796b09a9717705.pdf",
       "document_id": "Mirka_Polaros_leaflet@46cbe0a3",
@@ -20329,6 +20402,28 @@
       "withdrawn": {}
     },
     {
+      "sha256": "606de9380cc2b4fccb749f7bd3aec365fba6ea7273d70d416b71907b5e16b882",
+      "storage_uri": "local://60/6d/606de9380cc2b4fccb749f7bd3aec365fba6ea7273d70d416b71907b5e16b882.html",
+      "document_id": "Mirka-Dust-Extractor-1125-L@606de938",
+      "source_uri": "https://www.mirka.com/en/p/Mirka-Dust-Extractor-1125-L/",
+      "host": "www.mirka.com",
+      "tier": "manufacturer",
+      "manufacturer_id": "mirka",
+      "doc_type": "web_page",
+      "filename": "Mirka-Dust-Extractor-1125-L.html",
+      "size_bytes": 560344,
+      "fetched_at": "2026-09-12T13:54:10.961077+00:00",
+      "revision_label": null,
+      "license_note": "retrieved from www.mirka.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {},
+      "absent": [
+        "3033-20",
+        "8999000111",
+        "DCL183"
+      ],
+      "withdrawn": {}
+    },
+    {
       "sha256": "6160f24b864b8cb8158186d87d69e9cbcfda70c0ab6f303a4e8c2c2a0ad5cdd9",
       "storage_uri": "local://61/60/6160f24b864b8cb8158186d87d69e9cbcfda70c0ab6f303a4e8c2c2a0ad5cdd9.html",
       "document_id": "49-94-1920@6160f24b",
@@ -20359,8 +20454,8 @@
       "document_id": "Legal_guarantee_notice_ENN@620b88ee",
       "source_uri": "https://cdn.brandfolder.io/FSMPOV8D/at/jhcnwjgrw6fsxcsnf5fs882x/Legal_guarantee_notice_ENN.pdf",
       "host": "cdn.brandfolder.io",
-      "tier": "unknown",
-      "manufacturer_id": null,
+      "tier": "manufacturer",
+      "manufacturer_id": "mirka",
       "doc_type": "spec_sheet",
       "filename": "Legal_guarantee_notice_ENN.pdf",
       "size_bytes": 221680,
@@ -20369,7 +20464,9 @@
       "license_note": "retrieved from cdn.brandfolder.io (unknown tier) for product data enrichment; review the site's terms before republishing any asset from it",
       "covers": {},
       "absent": [
+        "3033-20",
         "8999000111",
+        "DCL183",
         "MIW9502022BA",
         "MRP6002100"
       ],
@@ -25075,8 +25172,8 @@
       "document_id": "SafetyThroughDustControl_leaflet_210x297mm_EN@7c3fad95",
       "source_uri": "https://cdn.brandfolder.io/3TVWCF1X/at/c335cxfgqk8qt6wpb74zj3/SafetyThroughDustControl_leaflet_210x297mm_EN.pdf",
       "host": "cdn.brandfolder.io",
-      "tier": "unknown",
-      "manufacturer_id": null,
+      "tier": "manufacturer",
+      "manufacturer_id": "mirka",
       "doc_type": "spec_sheet",
       "filename": "SafetyThroughDustControl_leaflet_210x297mm_EN.pdf",
       "size_bytes": 159351,
@@ -25085,7 +25182,9 @@
       "license_note": "retrieved from cdn.brandfolder.io (unknown tier) for product data enrichment; review the site's terms before republishing any asset from it",
       "covers": {},
       "absent": [
-        "8999000111"
+        "3033-20",
+        "8999000111",
+        "DCL183"
       ],
       "withdrawn": {}
     },
@@ -26832,8 +26931,8 @@
       "document_id": "Mirka_Dust_Extractor_1025L@8acaca26",
       "source_uri": "https://cdn.brandfolder.io/FSMPOV8D/at/krffqfthvr23b3rgpzpztxgw/Mirka_Dust_Extractor_1025L.pdf",
       "host": "cdn.brandfolder.io",
-      "tier": "unknown",
-      "manufacturer_id": null,
+      "tier": "manufacturer",
+      "manufacturer_id": "mirka",
       "doc_type": "spec_sheet",
       "filename": "Mirka_Dust_Extractor_1025L.pdf",
       "size_bytes": 3506468,
@@ -26842,7 +26941,9 @@
       "license_note": "retrieved from cdn.brandfolder.io (unknown tier) for product data enrichment; review the site's terms before republishing any asset from it",
       "covers": {},
       "absent": [
+        "3033-20",
         "8999000111",
+        "DCL183",
         "MIW9502022BA",
         "MRP6002100"
       ],
@@ -37154,7 +37255,33 @@
       "covers": {
         "8999000111": "text"
       },
-      "absent": [],
+      "absent": [
+        "3033-20",
+        "DCL183"
+      ],
+      "withdrawn": {}
+    },
+    {
+      "sha256": "b7954158bdd5a1dd70f1b6d9a122b471ab9a0137e4dfb9551b370f1c6af56eb8",
+      "storage_uri": "local://b7/95/b7954158bdd5a1dd70f1b6d9a122b471ab9a0137e4dfb9551b370f1c6af56eb8.html",
+      "document_id": "8999000111@b7954158",
+      "source_uri": "https://www.mirka.com/en/p/8999000111/",
+      "host": "www.mirka.com",
+      "tier": "manufacturer",
+      "manufacturer_id": "mirka",
+      "doc_type": "web_page",
+      "filename": "8999000111.html",
+      "size_bytes": 526624,
+      "fetched_at": "2026-09-12T13:08:31.422193+00:00",
+      "revision_label": null,
+      "license_note": "retrieved from www.mirka.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {
+        "8999000111": "table"
+      },
+      "absent": [
+        "3033-20",
+        "DCL183"
+      ],
       "withdrawn": {}
     },
     {
@@ -38197,6 +38324,49 @@
       },
       "absent": [
         "MRP6002100"
+      ],
+      "withdrawn": {}
+    },
+    {
+      "sha256": "be42a667ae2e78fc92ed6e8d157b5ba067b3d14b5c37a00a0ebed7e8851c5feb",
+      "storage_uri": "local://be/42/be42a667ae2e78fc92ed6e8d157b5ba067b3d14b5c37a00a0ebed7e8851c5feb.html",
+      "document_id": "8999000111@be42a667",
+      "source_uri": "https://www.mirka.com/en/p/8999000111/",
+      "host": "www.mirka.com",
+      "tier": "manufacturer",
+      "manufacturer_id": "mirka",
+      "doc_type": "web_page",
+      "filename": "8999000111.html",
+      "size_bytes": 115098,
+      "fetched_at": "2026-09-13T14:08:13.060984+00:00",
+      "revision_label": null,
+      "license_note": "rendered from www.mirka.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset",
+      "covers": {
+        "8999000111": "table"
+      },
+      "absent": [],
+      "withdrawn": {}
+    },
+    {
+      "sha256": "be863bbf1f608e55e4a754016eda3a54a60464a27f309125cdc4053aa6eca248",
+      "storage_uri": "local://be/86/be863bbf1f608e55e4a754016eda3a54a60464a27f309125cdc4053aa6eca248.html",
+      "document_id": "Mirka-Dust-Extractor-1025-L@be863bbf",
+      "source_uri": "https://www.mirka.com/en/p/Mirka-Dust-Extractor-1025-L/",
+      "host": "www.mirka.com",
+      "tier": "manufacturer",
+      "manufacturer_id": "mirka",
+      "doc_type": "web_page",
+      "filename": "Mirka-Dust-Extractor-1025-L.html",
+      "size_bytes": 529906,
+      "fetched_at": "2026-09-12T14:13:00.385357+00:00",
+      "revision_label": null,
+      "license_note": "retrieved from www.mirka.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {
+        "8999000111": "table"
+      },
+      "absent": [
+        "3033-20",
+        "DCL183"
       ],
       "withdrawn": {}
     },
@@ -43492,6 +43662,51 @@
       "withdrawn": {}
     },
     {
+      "sha256": "ce357d8e419cb34ee6fc9c4d308b44e4658db4e7c4f11d8187517366c710956c",
+      "storage_uri": "local://ce/35/ce357d8e419cb34ee6fc9c4d308b44e4658db4e7c4f11d8187517366c710956c.pdf",
+      "document_id": "58-14-0318@ce357d8e",
+      "source_uri": "https://documents.milwaukeetool.com/58-14-0318.pdf",
+      "host": "documents.milwaukeetool.com",
+      "tier": "manufacturer",
+      "manufacturer_id": "milwaukee_tool",
+      "doc_type": "spec_sheet",
+      "filename": "58-14-0318.pdf",
+      "size_bytes": 11510438,
+      "fetched_at": "2026-09-12T18:32:08.430697+00:00",
+      "revision_label": "Sat, 25 Jul 2026 02:01:21 GMT",
+      "license_note": "retrieved from documents.milwaukeetool.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {
+        "3033-20": "text"
+      },
+      "absent": [
+        "8999000111",
+        "DCL183"
+      ],
+      "withdrawn": {}
+    },
+    {
+      "sha256": "d20f76057b3d0d5b99458b4e863f9455dec26e9dcee6349d1688921c863c1775",
+      "storage_uri": "local://d2/0f/d20f76057b3d0d5b99458b4e863f9455dec26e9dcee6349d1688921c863c1775.html",
+      "document_id": "technical-documents@d20f7605",
+      "source_uri": "https://www.mirka.com/en/support/downloads/technical-documents/",
+      "host": "www.mirka.com",
+      "tier": "manufacturer",
+      "manufacturer_id": "mirka",
+      "doc_type": "web_page",
+      "filename": "technical-documents.html",
+      "size_bytes": 437388,
+      "fetched_at": "2026-09-12T13:54:23.655604+00:00",
+      "revision_label": null,
+      "license_note": "retrieved from www.mirka.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {},
+      "absent": [
+        "3033-20",
+        "8999000111",
+        "DCL183"
+      ],
+      "withdrawn": {}
+    },
+    {
       "sha256": "d466ca05ef92e71521c9ebf2a662c24ec5874b4910cb6430c17892edcd90222e",
       "storage_uri": "local://d4/66/d466ca05ef92e71521c9ebf2a662c24ec5874b4910cb6430c17892edcd90222e.html",
       "document_id": "4-in-1-lithium-jump-starter-and-portable-power-pack-1000-peak-amp-12v-with-wireless-charging@d466ca05",
@@ -46907,8 +47122,8 @@
       "document_id": "Exploded_view_Mirka_DE_1125_L@e1a0cc9f",
       "source_uri": "https://cdn.brandfolder.io/FSMPOV8D/at/5ghzr6bxp7sxgpktwghg3s/Exploded_view_Mirka_DE_1125_L.pdf",
       "host": "cdn.brandfolder.io",
-      "tier": "unknown",
-      "manufacturer_id": null,
+      "tier": "manufacturer",
+      "manufacturer_id": "mirka",
       "doc_type": "spec_sheet",
       "filename": "Exploded_view_Mirka_DE_1125_L.pdf",
       "size_bytes": 679952,
@@ -46917,7 +47132,9 @@
       "license_note": "retrieved from cdn.brandfolder.io (unknown tier) for product data enrichment; review the site's terms before republishing any asset from it",
       "covers": {},
       "absent": [
-        "8999000111"
+        "3033-20",
+        "8999000111",
+        "DCL183"
       ],
       "withdrawn": {}
     },
@@ -48187,6 +48404,28 @@
       "withdrawn": {}
     },
     {
+      "sha256": "e95db309734b469dfea4e8ddfa8240a71f972602a5e0ca2d953932fe2d610d69",
+      "storage_uri": "local://e9/5d/e95db309734b469dfea4e8ddfa8240a71f972602a5e0ca2d953932fe2d610d69.html",
+      "document_id": "lighting@e95db309",
+      "source_uri": "https://www.dewalt.com/en-us/products/power-tools/lighting",
+      "host": "www.dewalt.com",
+      "tier": "manufacturer",
+      "manufacturer_id": "dewalt",
+      "doc_type": "web_page",
+      "filename": "lighting.html",
+      "size_bytes": 758408,
+      "fetched_at": "2026-09-13T04:50:03.090606+00:00",
+      "revision_label": null,
+      "license_note": "retrieved from www.dewalt.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {
+        "DCL183": "text"
+      },
+      "absent": [
+        "8999000111"
+      ],
+      "withdrawn": {}
+    },
+    {
       "sha256": "eccc5b1c7d4bbc3bc2f8067ac27432b9b64865f352398e026260c23e42bbf78b",
       "storage_uri": "local://ec/cc/eccc5b1c7d4bbc3bc2f8067ac27432b9b64865f352398e026260c23e42bbf78b.html",
       "document_id": "madden-14-2-light-vanity-black-55184BK@eccc5b1c",
@@ -49368,6 +49607,28 @@
         "XVP01Z",
         "d10cnk",
         "e28cnkha"
+      ],
+      "withdrawn": {}
+    },
+    {
+      "sha256": "ef28f9750cbc717b540f01d88cb082ad86fd7e5cab8290d2acd8fd4c38a450f3",
+      "storage_uri": "local://ef/28/ef28f9750cbc717b540f01d88cb082ad86fd7e5cab8290d2acd8fd4c38a450f3.pdf",
+      "document_id": "NA240898_DCL183_NA@ef28f975",
+      "source_uri": "https://assets.dewalt.com/GLOBALBOM/QU/DCL183/1/Instruction_Manual/EN/NA240898_DCL183_NA.pdf",
+      "host": "assets.dewalt.com",
+      "tier": "manufacturer",
+      "manufacturer_id": "dewalt",
+      "doc_type": "spec_sheet",
+      "filename": "NA240898_DCL183_NA.pdf",
+      "size_bytes": 1775276,
+      "fetched_at": "2026-09-13T05:10:02.205680+00:00",
+      "revision_label": "Fri, 06 Jan 2023 08:36:35 GMT",
+      "license_note": "retrieved from assets.dewalt.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {
+        "DCL183": "text"
+      },
+      "absent": [
+        "8999000111"
       ],
       "withdrawn": {}
     },
@@ -51012,6 +51273,51 @@
         "XVP01Z",
         "d10cnk",
         "e28cnkha"
+      ],
+      "withdrawn": {}
+    },
+    {
+      "sha256": "f593afa144a7e325982af8be18414d6c253d7a50755144ff633674c0f1d3af70",
+      "storage_uri": "local://f5/93/f593afa144a7e325982af8be18414d6c253d7a50755144ff633674c0f1d3af70.pdf",
+      "document_id": "54-49-2720@f593afa1",
+      "source_uri": "https://documents.milwaukeetool.com/54-49-2720.pdf",
+      "host": "documents.milwaukeetool.com",
+      "tier": "manufacturer",
+      "manufacturer_id": "milwaukee_tool",
+      "doc_type": "spec_sheet",
+      "filename": "54-49-2720.pdf",
+      "size_bytes": 10991311,
+      "fetched_at": "2026-09-12T14:27:59.159307+00:00",
+      "revision_label": "Fri, 20 Feb 2026 15:38:29 GMT",
+      "license_note": "retrieved from documents.milwaukeetool.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {
+        "3033-20": "table"
+      },
+      "absent": [
+        "8999000111",
+        "DCL183"
+      ],
+      "withdrawn": {}
+    },
+    {
+      "sha256": "f8bc3dec8a9084562bffb7354c463c14731edba7774fe1408debd0b0c823c0f7",
+      "storage_uri": "local://f8/bc/f8bc3dec8a9084562bffb7354c463c14731edba7774fe1408debd0b0c823c0f7.html",
+      "document_id": "rechargeable-led-flashlight@f8bc3dec",
+      "source_uri": "https://www.dewalt.com/en-us/product/dcl183/rechargeable-led-flashlight",
+      "host": "www.dewalt.com",
+      "tier": "manufacturer",
+      "manufacturer_id": "dewalt",
+      "doc_type": "web_page",
+      "filename": "rechargeable-led-flashlight.html",
+      "size_bytes": 798046,
+      "fetched_at": "2026-09-13T05:09:56.140222+00:00",
+      "revision_label": null,
+      "license_note": "retrieved from www.dewalt.com (manufacturer tier) for product data enrichment; review the site's terms before republishing any asset from it",
+      "covers": {
+        "DCL183": "text"
+      },
+      "absent": [
+        "8999000111"
       ],
       "withdrawn": {}
     },

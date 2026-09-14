@@ -79,6 +79,25 @@ attributes:
     extraction_hints:
       - a headline marketing number for dishwashers, often on the first page
       - may be labelled "Sound Rating", "Noise Level" or "dBA Rating"
+    # The labels the extraction hints above already describe, declared so the label matcher can
+    # see them: without these, a source row headed "Noise Level, LpA (dB)" folded to a string no
+    # bound attribute claimed and was delivered a second time as untyped passthrough beside the
+    # typed value.
+    #
+    # `LpA` is by definition the A-weighted level, so these spellings are this attribute even
+    # though the unit is printed "dB". That reading belongs to the label, not to the unit
+    # registry — which still refuses a bare `dB`, for the reason set out in `normalize.units`.
+    spec_labels:
+      [
+        "Noise Level, LpA (dB)",
+        "Noise Level LpA",
+        "Noise Level",
+        "Sound Level",
+        "Sound Rating",
+        "Sound Power Level",
+        "LpA",
+      ]
+    table_headers: ["noise level", "sound level", "sound rating"]
     tolerance: 0.0
     plausible_range: [20.0, 110.0]
     # Quieter is better and a buyer filtering on it wants "at most this loud", so a candidate

@@ -18,6 +18,7 @@ problem, and guessing at it would invent one.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from fractions import Fraction
 
@@ -65,6 +66,11 @@ def normalize_value(
             ],
             normalized=False,
         )
+
+    # The unit the source actually printed outranks the unit the schema assumes. See
+    # `_unit_from_evidence`: this only fires when the extracted value is a bare magnitude, and it
+    # is the difference between 8 kg and 8 lb on a value whose own citation reads "Weight | 8 kg".
+    definition = _prefer_evidence_unit(value, definition)
 
     handler = _HANDLERS.get(definition.datatype, _normalize_string)
     canonical, display, issues = handler(str(raw), definition)
@@ -122,6 +128,65 @@ def _fail(code: str, message: str, *, rule: str) -> list[ValidationResult]:
             ValidationLayer.L0_TYPE_FORMAT, rule, f"attribute '{code}': {message}"
         )
     ]
+
+
+# A number immediately followed by a unit-looking token, which is the shape a unit appears in when
+# it sits beside its magnitude rather than in the row label.
+_QUOTED_UNIT_RE = re.compile(r"(?<![\w.])\d+(?:[.,]\d+)?\s*([A-Za-z][A-Za-z0-9°.\"'/()·]*)")
+
+
+def _unit_from_evidence(
+    value: AttributeValue, definition: AttributeDefinition
+) -> str | None:
+    """The unit this value's own citation states, when the extracted magnitude arrived bare.
+
+    ``unit_hint`` means "assume this unit when the source states none", and that is a sound default
+    only while the premise holds. Extraction frequently returns a bare number because the *label*
+    carried the unit — "Power Input (W) | 1000 W" comes back as ``1000`` — and for most attributes
+    the hint then supplies the right answer by luck of agreement.
+
+    ``each_weight`` is where the luck runs out. Its hint is ``lb``, which is right for the US
+    datasheets it was written for, and Mirka's page states ``Weight | 8 kg``. The bare ``8`` was
+    read as eight pounds and published as 3.63 kg: a real product weight, wrong by a factor of 2.2,
+    carrying a verified quote that says "kg" three characters from the number it contradicts.
+
+    So when the raw value names no unit and the citation does, the citation wins. Two guards keep
+    that from becoming a different kind of guess:
+
+    * The candidate must belong to the kind the attribute declares, so a hose diameter in the same
+      quote cannot become a weight.
+    * Exactly one distinct candidate. A dual-unit source — ``17.6 lb (8 kg)`` — offers two equally
+      valid answers and no basis for choosing, so the declared hint stands.
+    """
+    if not definition.quantity_kind or not value.evidence:
+        return None
+    raw = str(value.value_raw or "")
+    bare = parse_quantity(raw)
+    # Only when extraction dropped the unit. A raw value that names its own unit is already
+    # authoritative and must not be second-guessed from surrounding prose.
+    if bare.magnitude is None or bare.unit is not None:
+        return None
+
+    found: set[str] = set()
+    for span in value.evidence:
+        for token in _QUOTED_UNIT_RE.findall(span.quote or ""):
+            resolved = registry.resolve(token.strip(" .()"))
+            if resolved is not None and resolved.kind.value == definition.quantity_kind:
+                found.add(resolved.code)
+    if len(found) != 1:
+        return None
+    unit = found.pop()
+    return None if unit == definition.unit_hint else unit
+
+
+def _prefer_evidence_unit(
+    value: AttributeValue, definition: AttributeDefinition
+) -> AttributeDefinition:
+    """``definition`` with its ``unit_hint`` replaced by the one the citation states, if any."""
+    unit = _unit_from_evidence(value, definition)
+    if unit is None:
+        return definition
+    return definition.model_copy(update={"unit_hint": unit})
 
 
 def _normalize_quantity(raw: str, definition: AttributeDefinition):

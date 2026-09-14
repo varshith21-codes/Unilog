@@ -82,6 +82,46 @@ _MIXED = rf"\d+\s*[{_DASHES}\s]\s*{_FRACTION}"
 # number instead of matching `1` and leaving `-1/2` behind.
 _MAGNITUDE_RE = re.compile(rf"(?P<mag>{_MIXED}|{_FRACTION}|{_NUMBER})")
 
+# Spaces used as a thousands separator, which is the SI and European convention and what PDFs
+# actually emit — usually as a non-breaking or narrow no-break space rather than a plain one.
+#
+# Same failure as the leading-dot case above and the same severity, in the other direction. Mirka's
+# French datasheet states `Débit d'air | 3 600 l/min` and `Puissance | 1 000 W`; `_MAGNITUDE_RE`
+# matched the leading `3`, left `600 l/min` as the remainder, resolved the unit from it anyway and
+# published **3 L/min** for a 3600 L/min extractor and **1 W** for a 1000 W motor. Both carried a
+# verified quote, both were auto-accepted at 0.9 confidence, and both are three orders of magnitude
+# out — a value that wrong is worse than a gap, because a gap is visible.
+#
+# Deliberately narrow, because a space between digits is ambiguous and guessing wrong the other way
+# would fuse genuinely separate numbers:
+#
+# * Exactly one separator. `1 000 000` is therefore left alone and still parses as 1 — wrong, but
+#   safely wrong, and a million of anything is not a figure this catalogue carries.
+# * The group after the separator must be exactly three digits, so the mixed number `1 1/2` and the
+#   dimension set `2 x 4 x 6` are untouched.
+# * Neither side may be part of a longer run. That is what protects `375 395 530`, the unseparated
+#   dimension triple on the same French page: without the lookbehind, the regex would skip the
+#   refused first pair and fuse the second into `375 395530`.
+_GROUPED_THOUSANDS_SPACES = "\u0020\u00a0\u202f\u2009"
+_GROUPED_THOUSANDS_RE = re.compile(
+    rf"(?<![\d.])(?<!\d[{_GROUPED_THOUSANDS_SPACES}])"
+    rf"(\d{{1,3}})[{_GROUPED_THOUSANDS_SPACES}](\d{{3}})"
+    rf"(?!\d)(?![{_GROUPED_THOUSANDS_SPACES}]\d{{3}})"
+)
+
+
+def _join_grouped_thousands(text: str) -> str:
+    """Close up a single space-grouped thousands separator. See :data:`_GROUPED_THOUSANDS_RE`.
+
+    >>> _join_grouped_thousands("3 600 l/min")
+    '3600 l/min'
+    >>> _join_grouped_thousands("1 1/2 in")          # mixed number, not a separator
+    '1 1/2 in'
+    >>> _join_grouped_thousands("375 395 530 mm")    # three dimensions, not one number
+    '375 395 530 mm'
+    """
+    return _GROUPED_THOUSANDS_RE.sub(r"\1\2", text)
+
 
 @dataclass(frozen=True)
 class ParsedValue:
@@ -325,6 +365,10 @@ def parse_quantity(text: str, *, unit_hint: str | None = None) -> ParsedValue:
     if designated_unit is not None:
         unit_hint = designated_unit
 
+    # After the qualifiers are off and before any digit is read, so `parse_range` and
+    # `parse_dimension` inherit it by delegation rather than each repeating it.
+    working = _join_grouped_thousands(working)
+
     match = _MAGNITUDE_RE.search(working)
     if match is None:
         return ParsedValue(
@@ -385,6 +429,12 @@ def parse_range(text: str, *, unit_hint: str | None = None) -> ParsedValue:
     reference, working = _extract_reference_condition(text)
     note, working = _extract_parenthetical(working)
     rating, working = _extract_rating_class(working)
+
+    # Before the split, not after. `_split_range` looks for two plain numbers around a dash, so on
+    # "3 600-4 000 l/min" it would take the bound to be 600 rather than 3600 — and because each side
+    # is then handed to `parse_quantity` separately, that function's own normalisation arrives too
+    # late to correct a bound the split already got wrong.
+    working = _join_grouped_thousands(working)
 
     left, right = _split_range(working)
     if left is None or right is None:

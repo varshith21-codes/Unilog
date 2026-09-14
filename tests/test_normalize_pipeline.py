@@ -546,3 +546,82 @@ def test_dn_table_is_declarative():
     table = RuleConstants.load().tables["DN_TO_NPS_INCHES"]
     assert table["15"] == pytest.approx(0.5)
     assert table["50"] == pytest.approx(2.0)
+
+
+# ------------------------------------------------------- cited unit beats the schema hint
+
+
+def _cited(code: str, raw: str, quote: str) -> AttributeValue:
+    from axiom.core.evidence import BoundingBox, EvidenceSpan
+
+    return AttributeValue(
+        attribute_code=code,
+        value_raw=raw,
+        method=DerivationMethod.TABLE_EXTRACTION,
+        confidence=0.9,
+        evidence=[
+            EvidenceSpan(
+                span_id="sp-1",
+                document_id="doc",
+                document_sha256="a" * 64,
+                quote=quote,
+                page=1,
+                bbox=BoundingBox(x0=0, y0=0, x1=1, y1=1),
+                quote_verified=True,
+                match_score=1.0,
+            )
+        ],
+    )
+
+
+def test_a_bare_magnitude_takes_its_unit_from_its_own_citation(registry):
+    """``unit_hint`` is a default for a source that states no unit, not an override of one.
+
+    Extraction returns a bare number whenever the *label* carried the unit, and for most attributes
+    the hint then happens to agree. ``each_weight``'s hint is ``lb`` — correct for the US datasheets
+    it was written for — and Mirka's page states ``Weight | 8 kg``. The bare ``8`` was published as
+    3.63 kg: a plausible weight, wrong by 2.2x, contradicted by its own quote three characters away.
+    """
+    out = normalize_value(
+        _cited("each_weight", "8", "Weight | 8 kg"), registry.attribute("each_weight")
+    )
+    assert out.value.value_canonical == Quantity(magnitude=8.0, unit="kg")
+
+
+def test_the_hint_still_applies_when_the_citation_states_no_unit(registry):
+    """The default has to keep working, or every bare US weight breaks instead."""
+    out = normalize_value(
+        _cited("each_weight", "8", "Weight | 8"), registry.attribute("each_weight")
+    )
+    assert out.value.value_canonical == Quantity(magnitude=3.628739, unit="kg")
+
+
+def test_a_raw_value_that_names_its_own_unit_is_not_second_guessed(registry):
+    """Only a *bare* magnitude is eligible; an explicit raw unit is already authoritative."""
+    out = normalize_value(
+        _cited("each_weight", "8 kg", "Weight | 8 kg"), registry.attribute("each_weight")
+    )
+    assert out.value.value_canonical == Quantity(magnitude=8.0, unit="kg")
+
+
+def test_a_dual_unit_citation_is_ambiguous_so_the_hint_stands(registry):
+    """``17.6 lb (8 kg)`` offers two right answers and no basis for choosing between them."""
+    out = normalize_value(
+        _cited("each_weight", "17.6", "Weight | 17.6 lb (8 kg)"),
+        registry.attribute("each_weight"),
+    )
+    assert out.value.value_canonical.unit == "kg"
+    assert out.value.value_canonical.magnitude == pytest.approx(7.9832, rel=1e-4)
+
+
+def test_an_unresolvable_cited_unit_leaves_the_hint_in_place(registry):
+    """Plain ``dB`` is deliberately not in the registry, so an LpA row must fall back to dBA.
+
+    This is the case that proves the guard is a *kind* check and not a string check: the quote does
+    carry a unit-looking token, and refusing to resolve it is the unit registry working as designed.
+    """
+    out = normalize_value(
+        _cited("sound_level", "64", "Noise Level, LpA (dB) | 64.0 dB"),
+        registry.attribute("sound_level"),
+    )
+    assert out.value.value_canonical == Quantity(magnitude=64.0, unit="dBA")

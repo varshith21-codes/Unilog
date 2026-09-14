@@ -82,11 +82,50 @@ class:
     - { code: product_series,        requirement: recommended, weight: 2.0, label: Series }
     - { code: model_number,          requirement: optional,    weight: 1.0 }
     - { code: overall_size,          requirement: optional,    weight: 1.0, label: Size }
-    - { code: each_weight,           requirement: optional,    weight: 1.0 }
-    - { code: sound_level,           requirement: optional,    weight: 1.0 }
+    # Promoted from `optional` together with the `spec_labels` that now let the label matcher claim
+    # "Weight" and "Noise Level, LpA (dB)". An attribute whose vocabulary can claim a source row
+    # has to be reachable in the default prompt, or the mapping is the only thing that happens: the
+    # raw row is recognised and no typed value replaces it. The builder now refuses to suppress on
+    # a mapping alone, so this is the second half of the same fix rather than a substitute for it.
+    - { code: each_weight,           requirement: recommended, weight: 1.0 }
+    - { code: sound_level,           requirement: recommended, weight: 1.0 }
     - { code: pack_quantity,         requirement: optional,    weight: 1.0, label: Piece Count }
     - { code: selling_uom,           requirement: recommended, weight: 2.0 }
     - { code: additional_information, requirement: optional,   weight: 1.0 }
+
+    # --- appended, never inserted -------------------------------------------------------------
+    #
+    # `slot_bindings()` returns declared order and that order IS the published column order, so
+    # anything added mid-list silently renumbers every ATTRIBUTE_LABEL after it in a format the
+    # client already imports. These go at the end of the numbered grid instead.
+    #
+    # `recommended` rather than `optional` because the extraction prompt is built from REQUIRED +
+    # RECOMMENDED unless a caller opts into optionals, and `include_optional` is False on the
+    # enrichment form. An optional binding here would be a column that exists and is never asked
+    # for.
+    #
+    # These are extractor and corded-tool facts, so they are empty on the 97 of 99 power-tool rows
+    # that are drills and saws — exactly as `chuck_size` is empty on an extractor. The grid writes
+    # the label either way and holds 50 slots against these 34 bindings.
+    - { code: power_input,           requirement: recommended, weight: 2.0 }
+    - { code: mains_frequency,       requirement: recommended, weight: 1.0 }
+    - { code: cable_length,          requirement: recommended, weight: 1.0 }
+    - { code: air_flow_volume,       requirement: recommended, weight: 2.0, label: Airflow }
+    - { code: suction_pressure,      requirement: recommended, weight: 2.0, label: Vacuum }
+    - { code: dust_container_volume, requirement: recommended, weight: 2.0 }
+    - { code: dust_class,            requirement: recommended, weight: 2.0 }
+    - { code: overall_height,        requirement: recommended, weight: 1.0 }
+    - { code: overall_length,        requirement: recommended, weight: 1.0 }
+    - { code: overall_width,         requirement: recommended, weight: 1.0 }
+    # `lumen_output` was bound here for a moment and is deliberately NOT, which is worth recording
+    # because the reasoning looked sound: DeWalt's DCL183 is a work light, and `blower`/`vacuum`
+    # already set the precedent that this class holds more than cutting and driving.
+    #
+    # Two things refuted it. `test_no_label_is_contested_in_the_shipped_schema` failed — the
+    # attribute's `table_headers` claim the bare header "output", and `drive_size` claims it too, so
+    # binding both made one of them unreachable on every ordering table in this class. And the
+    # premise was wrong anyway: DCL183 classifies as `LGT.LMP.GEN`, which binds `lumen_output`
+    # already and reported 1000 lm from it without any change here.
 
     # --- named delivery columns; must stay last ----------------------------------------------
     - { code: warranty_terms,        requirement: recommended, weight: 2.0 }
@@ -94,7 +133,13 @@ class:
     - { code: approvals,             requirement: recommended, weight: 2.0 }
     - { code: country_of_origin,     requirement: optional,    weight: 1.0 }
     - { code: prop65_warning_required, requirement: recommended, weight: 2.0 }
-    - { code: gtin,                  requirement: optional,    weight: 1.0 }
+    # Promoted with the `spec_labels` that let the matcher claim a row headed "Barcode" or "UPC".
+    # An attribute whose vocabulary can claim a source row has to be reachable in the default
+    # prompt, or the mapping is the only thing that happens. It matters more here than elsewhere:
+    # `gtin` has its own named delivery column rather than a grid slot, so a raw "Barcode" row can
+    # never fill it — only the typed value can, and only the typed value gets its check digit
+    # verified arithmetically.
+    - { code: gtin,                  requirement: recommended, weight: 1.0 }
 
   cross_field_rules:
     - id: R_CORDLESS_STATES_A_PLATFORM

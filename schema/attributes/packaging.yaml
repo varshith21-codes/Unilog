@@ -18,6 +18,12 @@ attributes:
     extraction_hints:
       - may be labelled UPC, EAN, GTIN or barcode
       - strip spaces and hyphens before recording
+    # The labels the hint above already describes, declared so the label matcher can see them too.
+    # DeWalt publishes the UPC as `Barcode` in schema.org `additionalProperty`; without this the
+    # identifier was read as prose and never reached the GTIN column, where the check digit is
+    # verified arithmetically.
+    spec_labels: ["Barcode", "UPC", "GTIN", "EAN", "UPC Code", "Bar Code"]
+    table_headers: ["upc", "gtin", "ean", "barcode"]
     # Two different products necessarily have different GTINs, so comparing them would make every
     # candidate differ on identity and say nothing about whether it fits.
     interchange: cosmetic
@@ -32,6 +38,24 @@ attributes:
       Shipping weight of a single unit. Distinguish carefully from carton weight; datasheets
       often place them in adjacent columns with similar headings.
     example_values: ["0.75 lb", "1.2 kg"]
+    # The name folds to "weighteach", so a source row headed plainly "Weight" matched nothing and
+    # the same fact was delivered twice: once typed here, once as untyped passthrough. Declaring
+    # the bare spellings collapses the pair. "Carton Weight" and "Case Weight" are deliberately
+    # absent — they are `case_weight`, and the docstring above is the reason to keep them apart.
+    spec_labels:
+      [
+        "Weight",
+        "Net Weight",
+        "Unit Weight",
+        "Product Weight",
+        "Machine Weight",
+        # The retail feed convention, which is what manufacturers publish in schema.org
+        # `additionalProperty`. "Assembled" distinguishes the built product from its shipping
+        # carton, so it is this attribute and not `case_weight`.
+        "Assembled Product Weight",
+        "Item Weight",
+      ]
+    table_headers: ["weight", "net weight", "unit weight"]
     tolerance: 0.02
     plausible_range: [0.0001, 5000.0]
     # Affects freight, not fit.

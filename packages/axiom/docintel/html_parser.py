@@ -192,6 +192,43 @@ _MAX_IDENTITY_ROWS = 40
 """A ProductGroup legitimately declares a handful of variant SKUs. Beyond this the page is a
 category listing and its identity block would be a catalogue of unrelated parts."""
 
+# ---------------------------------------------------------------- schema.org specifications
+#
+# WHY SPECIFICATIONS ARE READ FROM JSON-LD AS WELL AS FROM THE VISIBLE PAGE.
+#
+# `additionalProperty` is the schema.org vocabulary for a typed product specification, and this
+# repository already *writes* it — `axiom.syndicate.exporters.SchemaOrgExporter` emits exactly this
+# shape, for the reason given in its own docstring: "prose is invisible to an agent that needs to
+# compare a pressure rating". Until now nothing *read* it, so a manufacturer publishing the same
+# structured block we publish was parsed as though it had published nothing.
+#
+# Measured across five manufacturer product pages:
+#
+#   * DeWalt DCL183 publishes **11** entries — power source, lumens, assembled length/width/height,
+#     weight, barcode — and its visible page states them nowhere this parser could reach.
+#   * Kichler 43911BK publishes **8**.
+#   * Mirka and Milwaukee publish none: Mirka's live in the HTML table the renderer already reads,
+#     Milwaukee's in a React payload inside `<script>`, which is not this function's business.
+#
+# Rendered as ordinary aligned text, exactly like the identity block above and for the same reason:
+# one contract instead of three. `find_sku` searches the same text, a quote citing a value verifies
+# because the text really is in the document, and the value gets a real cell reference.
+_LD_SPEC_KEY = "additionalproperty"
+
+_LD_SPEC_SKIP_LABELS = frozenset({"attribute", "attributes", "variant", "variants", "value", ""})
+"""Labels that name no property.
+
+Kichler publishes two entries both labelled `Attribute` — "1-Light" and "Clear Glass" — which are
+facet values with the facet omitted. A row whose label is the word "attribute" tells a reader
+nothing, and worse, two of them collide into a label conflict that suppresses both.
+"""
+
+_MAX_SPEC_VALUE_CHARS = 120
+"""A specification is a measurement or a short designation, never a paragraph."""
+
+_MAX_SPEC_ROWS = 60
+"""Generous for one product, and a ceiling on a page that lists a whole category."""
+
 
 def _tag_attrs(tag: str) -> dict[str, str]:
     """Attribute map for one start tag, lowercased keys, entity-decoded values."""
@@ -247,6 +284,100 @@ def _walk_ld(node, into: list[tuple[str, str]]) -> None:
     elif isinstance(node, list):
         for item in node:
             _walk_ld(item, into)
+
+
+def _spec_unit(entry: dict) -> str:
+    """The unit named by a ``PropertyValue``, but only when it really is a unit.
+
+    ``unitText`` is routinely a unit *system* rather than a unit: every dimensional entry on
+    DeWalt's DCL183 carries ``"unitText": "Imperial"`` beside a value of ``"2.56-in"`` that already
+    states its own. Appending that blindly produces ``2.56-in Imperial``, which parses to a length
+    in *inches of imperial* — a unit that does not exist — and would be worse than the bare number.
+
+    So the token is resolved against the real unit registry and dropped when it does not resolve.
+    Imported lazily for the same reason ``delivery.render`` does it: to keep the document layer from
+    depending on the normalization layer at import time.
+    """
+    from axiom.normalize.units import registry as unit_registry
+
+    for key in ("unitText", "unitCode"):
+        token = str(entry.get(key) or "").strip()
+        if not token:
+            continue
+        if unit_registry.resolve(token) is not None:
+            return token
+    return ""
+
+
+def _walk_ld_specs(node, into: list[tuple[str, str]]) -> None:
+    """Collect ``additionalProperty`` pairs from the Product nodes of a JSON-LD tree."""
+    if isinstance(node, dict):
+        raw_type = node.get("@type") or ""
+        types = raw_type if isinstance(raw_type, list) else [raw_type]
+        is_product = any(str(t).strip().casefold() in _LD_PRODUCT_TYPES for t in types)
+        for key, value in node.items():
+            folded = key.casefold()
+            if folded == _LD_SPEC_KEY and is_product:
+                entries = value if isinstance(value, list) else [value]
+                for entry in entries:
+                    if not isinstance(entry, dict):
+                        continue
+                    label = str(entry.get("name") or "").strip()
+                    raw = entry.get("value")
+                    if raw is None or isinstance(raw, dict | list):
+                        continue
+                    text = str(raw).strip()
+                    if not label or not text:
+                        continue
+                    if label.casefold() in _LD_SPEC_SKIP_LABELS:
+                        continue
+                    if unit := _spec_unit(entry):
+                        text = f"{text} {unit}"
+                    into.append((label, text))
+                continue
+            if isinstance(value, dict | list) and folded not in _LD_SKIP_KEYS:
+                _walk_ld_specs(value, into)
+    elif isinstance(node, list):
+        for item in node:
+            _walk_ld_specs(item, into)
+
+
+def specification_rows(html: str) -> list[tuple[str, str]]:
+    """``(label, value)`` specification pairs from schema.org ``additionalProperty`` blocks.
+
+    A label that appears twice with **different** values is dropped rather than guessed at. That is
+    not tidiness: Kichler's 43911BK page declares four ``finish`` entries — Black, Brushed Nickel,
+    Natural Brass, Olde Bronze — because one page serves the whole family, and only one of them is
+    the finish of the SKU being enriched. Emitting all four invites the extractor to pick one, and a
+    one-in-four chance of asserting the wrong finish is worse than reporting a gap. The same rule
+    the delivery builder applies to conflicting manufacturer specifications, applied earlier.
+    """
+    rows: list[tuple[str, str]] = []
+    for block in _LDJSON.findall(html):
+        try:
+            data = json.loads(block.strip())
+        except (ValueError, TypeError):
+            continue
+        _walk_ld_specs(data, rows)
+
+    values_by_label: dict[str, set[str]] = {}
+    for label, value in rows:
+        values_by_label.setdefault(label.casefold(), set()).add(value.casefold())
+    contested = {label for label, values in values_by_label.items() if len(values) > 1}
+
+    seen: set[tuple[str, str]] = set()
+    unique: list[tuple[str, str]] = []
+    for label, value in rows:
+        if label.casefold() in contested or len(value) > _MAX_SPEC_VALUE_CHARS:
+            continue
+        key = (label.casefold(), value.casefold())
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append((label, value))
+        if len(unique) >= _MAX_SPEC_ROWS:
+            break
+    return unique
 
 
 def identity_rows(html: str) -> list[tuple[str, str]]:
@@ -611,21 +742,27 @@ def html_to_text(html: str) -> str:
 
     The document's own identity statement leads, because it is the part of a product page that
     decides whether the page is evidence about this part at all. See the note above
-    :func:`identity_rows`.
+    :func:`identity_rows`. Machine-readable specifications follow it, then the visible body.
+
+    Both metadata blocks go through ``_align`` like any other two-column block, so the text parser
+    reconstructs them as tables and a value read from either gets a real cell reference rather than
+    a line offset.
     """
     renderer = _Renderer()
     renderer.feed(html)
     renderer.close()
     body = renderer.finish()
 
-    rows = identity_rows(html)
-    if not rows:
+    blocks: list[str] = []
+    if rows := identity_rows(html):
+        blocks.extend(_align([[label, value] for label, value in rows]))
+    if specs := specification_rows(html):
+        if blocks:
+            blocks.append("")
+        blocks.extend(_align([[label, value] for label, value in specs]))
+    if not blocks:
         return body
-
-    # Rendered through `_align` like any other two-column block, so the text parser reconstructs it
-    # as a table and a value read from it gets a real cell reference rather than a line offset.
-    header = _align([[label, value] for label, value in rows])
-    return "\n".join([*header, "", body]).strip("\n") if body else "\n".join(header)
+    return "\n".join([*blocks, "", body]).strip("\n") if body else "\n".join(blocks)
 
 
 def looks_like_html(data: bytes) -> bool:
