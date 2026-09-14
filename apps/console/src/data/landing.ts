@@ -19,9 +19,18 @@
  *    friendlier number is how a spec sheet becomes a brochure.
  *
  * 3. **The unflattering figures stay.** Offline coverage of 50.7%, one wrong cell in the
- *    supplied-document arm, an untrained calibrator on the recorded bundle, and 3,377 gaps
- *    against 2,156 values are all on the page. A proof page that shows only clean output is
+ *    supplied-document arm, an untrained calibrator on the recorded bundle, and 3,433 gaps
+ *    against 2,185 values are all on the page. A proof page that shows only clean output is
  *    an advertisement.
+ *
+ * What is and is not guarded. `landing.test.ts` holds the eval figures and the recorded-corpus
+ * aggregate to their sources on every push. `TAXONOMY` is **not** guarded: its counts come from
+ * YAML, and the console has no YAML parser, so adding a dependency to check six numbers was not
+ * worth it. Recompute them by hand after a schema change — the class and attribute totals move
+ * whenever `schema/attributes/*.yaml` or a class binding does:
+ *
+ *     python -c "from axiom.schema import load_default; r = load_default(); \
+ *       print(len(r.attribute_codes), len(r.class_codes))"
  *
  * Verified against disk on write, which changed two things the previous version of this page
  * showed:
@@ -225,24 +234,24 @@ export const SIBLING_VALUES = [
 /**
  * Aggregate over every bundle checked into `data/console/`.
  *
- * The headline is not the volume, it is the last pair: 3,377 gaps recorded against 2,156
+ * The headline is not the volume, it is the last pair: 3,433 gaps recorded against 2,185
  * values. A system that reports more of what it could not establish than what it did is
  * either broken or honest, and 1,007 of 1,007 certificates verifying settles which.
  */
 export const CORPUS = {
   records: "1,007",
-  values: "2,156",
-  publishable: "265",
-  needingReview: "75",
-  gaps: "3,377",
-  gapsRequired: "3,269",
+  values: "2,185",
+  publishable: "288",
+  needingReview: "81",
+  gaps: "3,433",
+  gapsRequired: "3,268",
   certificatesVerified: "1,007 / 1,007",
   documents: "1,007",
-  modelCalls: "29",
-  escalations: "0",
-  inputTokens: "324,414",
-  outputTokens: "37,924",
-  totalCost: "$0.043455",
+  modelCalls: "35",
+  escalations: "1",
+  inputTokens: "394,720",
+  outputTokens: "78,628",
+  totalCost: "$0.072713",
   source: "data/console/*.bundle.json — aggregate over 1,007 recorded runs",
 } as const satisfies Cited & Record<string, unknown>;
 
@@ -288,8 +297,8 @@ export const HEADLINE_FIGURES = [
   },
   {
     label: "Recorded gaps",
-    value: "3,377",
-    unit: "against 2,156 values",
+    value: "3,433",
+    unit: "against 2,185 values",
     hint: "What could not be established is a record, not a silence",
   },
 ] as const;
@@ -629,27 +638,38 @@ export const DELIVERY_SCORE = {
 
 // ---------------------------------------------------------------- measurements
 
-/** The extraction backtest: a golden set, a pinned prompt version, named models. */
+/**
+ * The extraction backtest: a golden set, a pinned prompt version, named models.
+ *
+ * Re-measured on 2026-09-14 under `extract.v3`, at commit e1f7a47. The previous figures on this
+ * page described `extract.v2` and were three weeks stale — `landing.test.ts` failed the build on
+ * five of them, which is the entire reason that test exists.
+ *
+ * `wrongValue` is held at 2 rather than the 1 some runs produce, and the baseline explains why:
+ * across ten consecutive runs the count landed anywhere from 0 to 3, because the model is sampled.
+ * Pinning a count metric to its best observation makes a gate that fails about half the time it
+ * should pass.
+ */
 export const BACKTEST = {
   goldenSet: "pvf_valves_v1",
-  measuredAt: "2026-08-05",
-  promptVersion: "extract.v2",
+  measuredAt: "2026-09-14",
+  promptVersion: "extract.v3",
   products: 15,
   comparisons: 312,
-  calibrationSamples: 227,
-  correct: 222,
+  calibrationSamples: 226,
+  correct: 224,
   wrongValue: 2,
-  missed: 3,
+  missed: 1,
   correctlyAbstained: 85,
   hallucinated: 0,
   source: "evals/baseline.json",
   figures: [
-    { label: "Precision", value: "0.991", hint: "222 correct, 2 wrong values", tone: "pass" as const },
-    { label: "Recall", value: "0.978", hint: "3 missed of 227 available", tone: "pass" as const },
-    { label: "F1", value: "0.984", hint: "Harmonic mean of the two", tone: "pass" as const },
+    { label: "Precision", value: "0.9912", hint: "224 correct, 2 wrong values", tone: "pass" as const },
+    { label: "Recall", value: "0.9868", hint: "1 missed of 226 available", tone: "pass" as const },
+    { label: "F1", value: "0.989", hint: "Harmonic mean of the two", tone: "pass" as const },
     { label: "Hallucination rate", value: "0.0", hint: "0 fabricated across 312 comparisons", tone: "pass" as const },
     { label: "Abstention correctness", value: "1.0", hint: "85 of 85 refusals were correct", tone: "pass" as const },
-    { label: "Exact match", value: "0.9505", hint: "String-identical to ground truth", tone: "pass" as const },
+    { label: "Exact match", value: "1.0", hint: "Every published value string-identical to ground truth", tone: "pass" as const },
   ],
 } as const satisfies Cited & Record<string, unknown>;
 
@@ -823,9 +843,9 @@ export const SOURCING = {
 export const TAXONOMY = {
   source: "schema/attributes/*.yaml, schema/classes/*.yaml",
   classes: 32,
-  attributes: 126,
-  bindings: 565,
-  meanPerClass: "17.7",
+  attributes: 136,
+  bindings: 575,
+  meanPerClass: "18.0",
   dictionaryFiles: 11,
   rules: 67,
   classCodes: [
@@ -918,12 +938,12 @@ export const ECONOMICS = {
   pricedModels: 5,
   priceAge: "1.9 days",
   stale: false,
-  corpusTotal: "$0.043455",
+  corpusTotal: "$0.072713",
   corpusRecords: "1,007",
-  corpusCalls: "29",
+  corpusCalls: "35",
   note:
     "Most of the recorded corpus answered from the description alone, offline, with no model " +
-    "call at all — which is why 1,007 records cost under five cents in total. The per-record " +
+    "call at all — which is why 1,007 records cost under eight cents in total. The per-record " +
     "figure is a full document run, which is the honest number to quote.",
 } as const satisfies Cited & Record<string, unknown>;
 

@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -9,7 +9,10 @@ import {
   BACKTEST,
   CLASSIFICATION,
   COHORT,
+  CORPUS,
   DELIVERY_SCORE,
+  ECONOMICS,
+  HEADLINE_FIGURES,
   OFFLINE_EXTRACTION,
 } from "@/data/landing";
 
@@ -113,14 +116,113 @@ describe("the extraction backtest figures match evals/baseline.json", () => {
     expect(shown.get("Exact match")).toBe(baseline.exact_match_rate);
   });
 
-  it("does not round a rate up in the display string", () => {
-    // The guard on the guard: `figure()` parses what is rendered, so a value written as "0.99"
-    // would fail the comparison above. This asserts the digits survived transcription, which is
-    // what stops 0.9505 from becoming a tidier 0.95.
-    const written = new Map(BACKTEST.figures.map((f) => [f.label, f.value]));
+  it("keeps the counts quoted in the hint text true", () => {
+    // The hints carry the raw numbers in prose — "224 correct, 2 wrong values". Prose rots more
+    // quietly than a figure does, because nobody rereads a caption, so it is checked as data.
+    const hint = (label: string) =>
+      String(BACKTEST.figures.find((f) => f.label === label)?.hint ?? "");
 
-    expect(written.get("Precision")).toBe(String(baseline.precision));
-    expect(written.get("Exact match")).toBe(String(baseline.exact_match_rate));
+    expect(hint("Precision")).toContain(`${baseline.correct} correct`);
+    expect(hint("Precision")).toContain(`${baseline.wrong_value} wrong`);
+    expect(hint("Recall")).toContain(`${baseline.missed} missed`);
+    expect(hint("Recall")).toContain(`${baseline.calibration_samples} available`);
+    expect(hint("Hallucination rate")).toContain(`${baseline.hallucinated} fabricated`);
+    expect(hint("Hallucination rate")).toContain(`${baseline.comparisons} comparisons`);
+    expect(hint("Abstention correctness")).toContain(
+      `${baseline.correctly_abstained} of ${baseline.correctly_abstained}`,
+    );
+  });
+});
+
+describe("the recorded corpus figures match the bundles on disk", () => {
+  /**
+   * Aggregate `data/console/*.bundle.json` the way the page claims to have aggregated it.
+   *
+   * Added after this exact drift shipped unnoticed: a pipeline change rewrote three bundles, and
+   * every corpus figure on the page — values, gaps, tokens, cost — moved without a single test
+   * objecting. The eval guards above only cover `evals/*.json`, so the largest set of numbers on
+   * the page was the least protected.
+   *
+   * Note the nesting: per-run figures live under `bundle`, while `policy` sits at the top level.
+   */
+  const dir = join(REPO_ROOT, "data", "console");
+  const totals = {
+    records: 0,
+    values: 0,
+    publishable: 0,
+    needingReview: 0,
+    gaps: 0,
+    gapsRequired: 0,
+    verified: 0,
+    calls: 0,
+    escalations: 0,
+    inputTokens: 0,
+    outputTokens: 0,
+    cost: 0,
+  };
+
+  for (const name of readdirSync(dir).filter((f) => f.endsWith(".bundle.json"))) {
+    const bundle = (JSON.parse(readFileSync(join(dir, name), "utf8")) as { bundle?: Record<string, any> })
+      .bundle;
+    if (!bundle) continue;
+    const metrics = bundle.metrics ?? {};
+    const cost = bundle.cost ?? {};
+    totals.records += 1;
+    totals.values += metrics.values_total ?? 0;
+    totals.publishable += metrics.values_publishable ?? 0;
+    totals.needingReview += metrics.values_needing_review ?? 0;
+    totals.gaps += metrics.gaps_total ?? 0;
+    totals.gapsRequired += metrics.gaps_required ?? 0;
+    totals.calls += cost.calls ?? 0;
+    totals.escalations += cost.escalations ?? 0;
+    totals.inputTokens += cost.input_tokens ?? 0;
+    totals.outputTokens += cost.output_tokens ?? 0;
+    totals.cost += cost.cost_usd ?? 0;
+    if (bundle.certificate?.signature_verified) totals.verified += 1;
+  }
+
+  it("counts every recorded run", () => {
+    expect(figure(CORPUS.records)).toBe(totals.records);
+    expect(figure(CORPUS.documents)).toBe(totals.records);
+    expect(CORPUS.certificatesVerified).toBe(
+      `${totals.verified.toLocaleString("en-US")} / ${totals.records.toLocaleString("en-US")}`,
+    );
+  });
+
+  it("reports values and gaps as recorded", () => {
+    expect(figure(CORPUS.values)).toBe(totals.values);
+    expect(figure(CORPUS.publishable)).toBe(totals.publishable);
+    expect(figure(CORPUS.needingReview)).toBe(totals.needingReview);
+    expect(figure(CORPUS.gaps)).toBe(totals.gaps);
+    expect(figure(CORPUS.gapsRequired)).toBe(totals.gapsRequired);
+  });
+
+  it("still records more gaps than values, which is the claim being made", () => {
+    // The section's argument, not decoration: a system filing more of what it could not establish
+    // than what it did is either broken or honest. If this ever inverts, the copy needs rewriting
+    // rather than the number nudging.
+    expect(totals.gaps).toBeGreaterThan(totals.values);
+  });
+
+  it("reports model usage and cost as metered", () => {
+    expect(figure(CORPUS.modelCalls)).toBe(totals.calls);
+    expect(figure(CORPUS.escalations)).toBe(totals.escalations);
+    expect(figure(CORPUS.inputTokens)).toBe(totals.inputTokens);
+    expect(figure(CORPUS.outputTokens)).toBe(totals.outputTokens);
+    expect(CORPUS.totalCost).toBe(`$${totals.cost.toFixed(6)}`);
+  });
+
+  it("agrees with the economics section on the same corpus", () => {
+    expect(ECONOMICS.corpusTotal).toBe(CORPUS.totalCost);
+    expect(ECONOMICS.corpusCalls).toBe(CORPUS.modelCalls);
+    expect(ECONOMICS.corpusRecords).toBe(CORPUS.records);
+  });
+
+  it("keeps the hero band consistent with the corpus", () => {
+    const gaps = HEADLINE_FIGURES.find((f) => f.label === "Recorded gaps");
+
+    expect(figure(gaps!.value)).toBe(totals.gaps);
+    expect(gaps!.unit).toBe(`against ${totals.values.toLocaleString("en-US")} values`);
   });
 });
 
